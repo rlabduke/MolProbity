@@ -75,7 +75,7 @@ function mpStartSession($createIfNeeded = false)
     session_set_save_handler ("mpSessOpen", "mpSessClose", "mpSessRead", "mpSessWrite", "mpSessDestroy", "mpSessGC");
     
     // Restore the session data
-    session_start();
+    @session_start(); // we get meaningless error msgs when used from a script env.
     mpCheckSessionID(session_id()); // just in case
     
     // Check to make sure we have a working directory for this user.

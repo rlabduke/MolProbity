@@ -277,12 +277,21 @@ function linkModelKin($model, $suffix)
 }
 #}}}########################################################################
 
-#{{{ a_function_definition - sumary_statement_goes_here
+#{{{ makeZipForModel - packages all model files as a ZIP archive
 ############################################################################
 /**
-* Documentation for this function.
+* Creates a ZIP archive file containing all the current files in the model.
+* The archive is created as a temporary file and should be unlinked afterwards.
+* The name of the temporary file is returned.
 */
-//function someFunctionName() {}
+function makeZipForModel($modelID)
+{
+    $inpath = $_SESSION['models'][$modelID]['dir'];
+    $outpath = tempnam($_SESSION['dataDir'], "tmp_zip_");
+    // must compress to stdout b/c otherwise zip wants a .zip ending
+    exec("zip -qrj - $inpath > $outpath");
+    return $outpath;
+}
 #}}}########################################################################
 
 #{{{ a_function_definition - sumary_statement_goes_here

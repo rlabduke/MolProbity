@@ -20,8 +20,8 @@
     File upload should provide pdbstat-style summary
     Implement file retrieval from PDB and NDB (if possible)
   + Add Ramalyze to the analysis script
-    Refactor files in jobs/ where necessary to allow script-driven operation
     MolProbity as a SOAP/CORBA/RPC service?
+    Create a removeModel() function
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -40,6 +40,10 @@
 - modified multicriterion kin to separate mc-mc and sc-x dots
 - replaced findOutliers() with 4 separate functions
 - analysis display page now adapts to the presence / absence of various criteria
+- refactored jobs/addmodel.php into lib/model.php:addModel()
+- refactored jobs/analyze.php into lib/analyze.php:runAnalysis()
+- created a proof-of-concept cmd-line-driven script to use MP functions
+- added machinery to create a ZIP archive of all a model's files
 
 ### 3pre10 ###
 - really reworked page header/footer/styling. Style sheet hasn't been finished yet.
