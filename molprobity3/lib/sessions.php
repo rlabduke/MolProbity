@@ -258,32 +258,6 @@ function mpSessSizeOnDisk($id)
 }
 #}}}########################################################################
 
-#{{{ formatTTL - displays time-to-live as "days, hours"
-############################################################################
-function formatTTL($secs)
-{
-    $one_hour   = 60*60;
-    $one_day    = $one_hour*24;
-
-    $days = floor($secs / $one_day);
-    if($days >= 2)
-        $msg = "$days days and ";
-    elseif($days >= 1)
-        $msg = "$days day and ";
-    
-    $secs -= $days * $one_day;
-    $hours = floor($secs / $one_hour);
-    if($hours >= 2)
-        $msg .= "$hours hours";
-    elseif($hours >= 1)
-        $msg .= "$hours hour";
-    else
-        $msg .= "less than an hour";
-        
-    return $msg;
-}
-#}}}########################################################################
-
 #{{{ mpEnumerateSessions - collect data on all current sessions
 ############################################################################
 /**
