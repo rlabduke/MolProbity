@@ -66,6 +66,13 @@
 ### 3beta7 ###
 - added forms for ED map and het dictionary upload
 - moved session, errors, lifetime, labbook, progress to system/ folder.
+- fixed admin/show_sessions.php to work with the new MVC/event model.
+  (It didn't require changes for "session" moving. Yay for encapsulation!)
+- removed dependency on event_page.php from sessions.php
+  The MVC/event model should be a purely optional layer on top of the session
+  functions; the session functions should be usable with the rest of it.
+- made a really nice file view/download page with collapsible folders
+- D&amp;J decided on a file-type-based folder system for organizing user files
 
 ### 3beta6 ###
 - created MVC/delegate architecture in public_thml/index.php

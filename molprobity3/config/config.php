@@ -55,9 +55,9 @@ define("MP_SESSION_MAX_SIZE", 200*1024*1024); // 200 Mb
 
 // Alternating colors for striped tables
 define("MP_TABLE_ALT1", "#ffffff");
-define("MP_TABLE_ALT2", "#e8e8e8");
+define("MP_TABLE_ALT2", "#f0f0f0");
 // Highlight color for striped tables
-define("MP_TABLE_HIGHLIGHT", "#ffff99");
+define("MP_TABLE_HIGHLIGHT", "#cc9999");
 
 //============================================================================
 //===  PLEASE DON'T CHANGE THINGS BELOW THIS LINE  ===========================

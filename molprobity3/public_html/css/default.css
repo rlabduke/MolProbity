@@ -5,7 +5,9 @@ body {
 	font-family : Helvetica, Arial, sans-serif ;
 }
 
-img { border : none ; }
+img {
+    border : none ;
+}
 
 /* Order that these appear in is important to Safari, apparently. */
 a {	text-decoration : none ; }
@@ -22,10 +24,10 @@ div.pageheader h1 {
 }
 
 div.leftnav {
+    font-size : smaller ;
 }
 
 span.minornav {
-    font-size : smaller ;
     margin-left: 1.0em ;
 }
 
