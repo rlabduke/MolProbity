@@ -17,6 +17,9 @@ INPUTS (via Get or Post):
 OUTPUTS (via $_SESSION['bgjob']):
     tmpPdb          the (temporary) file where the upload is stored.
     origName        the name of the file on the user's system.
+    pdbCode         the PDB or NDB code for the molecule
+    (EITHER pdbCode OR tmpPdb and origName will be set)
+    
     isCnsFormat     true if the user thinks he has CNS atom names
     ignoreSegID     true if the user wants to never map segIDs to chainIDs
 
@@ -49,9 +52,15 @@ function failMsg($msg)
 
 # MAIN - the beginning of execution for this page
 ############################################################################
-if($_REQUEST['cmd'] == "Upload this file")
+if($_REQUEST['pdbCode'] != '')                  $mode = "pdb/ndb";
+elseif($_FILES['uploadFile']['size'] > 0)       $mode = "upload";
+elseif($_REQUEST['cmd'] == "Get this file" )    $mode = "pdb/ndb";
+elseif($_REQUEST['cmd'] == "Upload this file")  $mode = "upload";
+
+
+if($mode == "upload")
 {
-    $tmpfile = tempnam($_SESSION['dataDir'], "tmp_pdb_");
+    $tmpfile = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
     if( !$_FILES['uploadFile']['error'] && $_FILES['uploadFile']['size'] > 0
     &&  move_uploaded_file($_FILES['uploadFile']['tmp_name'], $tmpfile))
     {
@@ -75,9 +84,19 @@ if($_REQUEST['cmd'] == "Upload this file")
         failMsg("File upload failed for unknown reason; error code $_FILES[uploadFile][error].");
     }
 }
-elseif($_REQUEST['cmd'] == "Get this file")
+elseif($mode == "pdb/ndb")
 {
-    failMsg("Get from PDB isn't supported.");
+    unset($_SESSION['bgjob']); // Clean up any old data
+    $_SESSION['bgjob']['pdbCode']       = $_REQUEST['pdbCode'];
+    $_SESSION['bgjob']['isCnsFormat']   = false;
+    $_SESSION['bgjob']['ignoreSegID']   = false;
+    
+    // launch background job
+    launchBackground(MP_BASE_DIR."/jobs/addmodel.php", "upload_pdb_done.php?$_SESSION[sessTag]", 3);
+    
+    // include() status monitoring page
+    include(MP_BASE_DIR."/public_html/job_progress.php");
+    die();
 }
 else
     failMsg("What did you want to do?");

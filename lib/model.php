@@ -40,7 +40,7 @@ function addModel($tmpPdb, $origName, $isCnsFormat = false, $ignoreSegID = false
     $infile     = $tmpPdb;
     $outname    = $id.'mp.pdb'; // don't confuse user by re-using exact original PDB name
     $outpath    = $modelDir.'/'.$outname;
-    preparePDB($infile, $outpath, $isCnsFormat, $ignoreSegID);
+    $stats = preparePDB($infile, $outpath, $isCnsFormat, $ignoreSegID);
     
     // Create the model entry
     $_SESSION['models'][$id] = array(
@@ -49,7 +49,7 @@ function addModel($tmpPdb, $origName, $isCnsFormat = false, $ignoreSegID = false
         'url'       => $modelURL,
         'prefix'    => $id.'-',
         'pdb'       => $outname,
-        'stats'     => pdbstat($outpath),
+        'stats'     => $stats,
         'history'   => 'Original file uploaded by user'
     );
     
@@ -94,13 +94,15 @@ function removeModel($modelID)
 *               false if we should auto-detect CNS headers and/or atom names.
 * $ignoreSegID  true if we should never use segIDs to create new chain IDs.
 *               false if we should convert automatically, as needed.
+*
+* Returns the statistics from pdbstat() for the fully prepared model.
 */
 function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
 {
     // If no session is started, this should eval to NULL or '',
     // which will specify the system tmp directory.
-    $tmp1   = tempnam($_SESSION['dataDir'], "tmp_pdb_");
-    $tmp2   = tempnam($_SESSION['dataDir'], "tmp_pdb_");
+    $tmp1   = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
+    $tmp2   = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
     
     // List of tasks for running as a background job
     $tasks['scrublines'] = "Convert linefeeds to UNIX standard (\\n)";
@@ -108,6 +110,7 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
     $tasks['pdbstat'] = "Analyze contents of PDB file";
     $tasks['segmap'] = "Convert segment IDs to chain IDs (if needed)";
     $tasks['cnsnames'] = "Convert CNS atom names to PDB standard (if needed)";
+    $tasks['pdbstat2'] = "Re-analyze contents of final PDB file";
     
     // Process file - this is the part that matters
     // Convert linefeeds to UNIX standard (\n):
@@ -169,7 +172,10 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
     unlink($tmp1);
     unlink($tmp2);
 
+    setProgress($tasks, 'pdbstat2'); // updates the progress display if running as a background job
+    $stats = pdbstat($outpath);
     setProgress($tasks, null); // all done
+    return $stats;
 }
 #}}}########################################################################
 
@@ -392,12 +398,118 @@ function decodeReduceUsermods($file)
 }
 #}}}########################################################################
 
-#{{{ a_function_definition - sumary_statement_goes_here
+#{{{ getPdbModel - retrieves a model from the Protein Data Bank
 ############################################################################
 /**
-* Documentation for this function.
+* Retrieves the PDB file with the given code from www.rcsb.org
+*   pdbcode     the 4-character code identifying the model
+* Returns the name of a temporary file, or null if download failed.
 */
-//function someFunctionName() {}
+function getPdbModel($pdbcode)
+{
+    // I think the PDB website is picky about case
+    $pdbcode = strtoupper($pdbcode);
+
+    // Copy in the newly uploaded file:
+    $src = fopen("http://www.rcsb.org/pdb/cgi/export.cgi/$pdbcode.pdb?format=PDB&pdbId=$pdbcode&compression=None", "rb");
+    if($src)
+    {
+        $outpath = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
+        $dst = fopen($outpath, "wb");
+
+        for($buf = fread($src, 8192); !feof($src); $buf = fread($src, 8192))
+        {
+            fwrite($dst, $buf);
+        }
+        if(strlen($buf) > 0) { fwrite($dst, $buf); }
+
+        fclose($src);
+        fclose($dst);
+
+        if( filesize($outpath) > 1000 ) return $outpath;
+        else
+        {
+            if(file_exists($outpath)) unlink($outpath);
+            return null;
+        }
+    }
+    else return null;
+}
+#}}}########################################################################
+
+#{{{ getNdbModel - retrieves a model from the Nucleic Acid Data Bank
+############################################################################
+/**
+* Retrieves the PDB file with the given code from www.rcsb.org
+*   pdbcode     the 4-character code identifying the model
+* Returns the name of a temporary file, or null if download failed.
+*/
+function getNdbModel($code)
+{
+    // I think the NDB website is picky about case
+    $code = strtoupper($code);
+    
+    // Fake POST a user query to the NDB homepage
+    $ch = curl_init('http://ndbserver.rutgers.edu/servlet/IDSearch.NDBSearch1');
+    $webpage = tempnam(MP_BASE_DIR."/tmp", "tmp_html_");
+    $fp = fopen($webpage, "wb");
+    
+    curl_setopt($ch, CURLOPT_FILE, $fp);    // output to specified file
+    curl_setopt($ch, CURLOPT_HEADER, 0);    // no header in output
+    curl_setopt($ch, CURLOPT_POST, 1);      // perform HTTP POST operation
+    curl_setopt($ch, CURLOPT_POSTFIELDS, "id=$code&Submit=Search&radiobutton=ndbid&site=production");
+    
+    curl_exec($ch); // download file
+    curl_close($ch);
+    fclose($fp);
+    
+    // Grep for this pattern:
+    //<a href="ftp://ndbserver.rutgers.edu/NDB/coordinates/na-chiral-correct/pdb401d.ent.Z">Asymmetric Unit coordinates (pdb format
+    $lines = file($webpage);
+    foreach($lines as $line)
+    {
+        if(preg_match('/<a href="([^"]+)">Asymmetric Unit coordinates \(pdb format/', $line, $m))
+        {
+            $url = $m[1];
+            break;
+        }
+    }
+    unlink($webpage);
+    if(!isset($url)) return null;
+    
+    // Download file...
+    $src = fopen($url, "rb");
+    if(! $src) return null;
+
+    $Zfile = tempnam(MP_BASE_DIR."/tmp", "tmp_pdbZ_");
+    $dst = fopen($Zfile, "wb");
+    for($buf = fread($src, 8192); !feof($src); $buf = fread($src, 8192))
+    {
+        fwrite($dst, $buf);
+    }
+    if(strlen($buf) > 0) { fwrite($dst, $buf); }
+    fclose($src);
+    fclose($dst);
+
+    if( filesize($Zfile) < 1000 )
+    {
+        if(file_exists($Zfile)) unlink($Zfile);
+        return null;
+    }
+    
+    // Use gunzip to decompress it
+    // -S forces gunzip to recognize file by magic number rather than .Z ending
+    $outpath = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
+    exec("gunzip -c -S '' $Zfile > $outpath");
+    unlink($Zfile);
+    
+    if( filesize($outpath) > 1000 ) return $outpath;
+    else
+    {
+        if(file_exists($outpath)) unlink($outpath);
+        return null;
+    }
+}
 #}}}########################################################################
 
 #{{{ a_function_definition - sumary_statement_goes_here

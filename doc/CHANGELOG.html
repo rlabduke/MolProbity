@@ -2,7 +2,7 @@
 ==============================================================================
 ===  TO DO  ==================================================================
 ==============================================================================
-    {{{ Ideas, long-term goals, etc.
+{{{ Ideas, long-term goals, etc.
     Could make it a web service with XML-RPC (SOAP, CORBA too complex)
     should session lifetime be from start, or from last use?
     document PHP version needed (which is...? >=4.1:superglobals >=4.3:CLI)
@@ -11,19 +11,28 @@
     user should get partial results as big job is running ?
     Should analysis of worst residues ignore water or treat it separately?
     ZIP download should include a static view of the lab notebook?
-    }}}
+    For installation, note that public_html/data/ and tmp/ must be 777
+    Retrieve maps from the EDS and allow map upload
+}}}
     Allow simple comparison of bad residues in two models; see jobs/analyze.php
     Add text at top of multicrit kinemage
     Create multicrit chart
     Coloring on download table is sometimes off
     Put icons on analysis results page to identify the most-used kins
-    Implement file retrieval from PDB and NDB (if possible)
     Make automatic entries including protocols and references in notebook
   * Insert calls to logging functions (where?)
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
+
+### 3pre13 ###
+- created a tmp/ directory just for use by MolProbity (file uploads, ZIPs, etc)
+- allowed user to pull files from PDB
+- reworked pdbstat() to be slightly more efficient (still takes ~15 sec on 1JJ2)
+- upload page can deal with failed PDB/NDB upload in a basic way
+- download from NDB works but is slow...
+- connection to NDB FTP server takes ~30 seconds -- this is why so slow!
 
 ### 3pre12 ###
 - updated program requirements to list "zip"

@@ -364,6 +364,7 @@ function runRotamer($infile, $outfile)
 function loadRotamer($datafile)
 {
     $data = array_slice(file($datafile), 1); // drop first line
+    $ret = array();
     foreach($data as $line)
     {
         $line = explode(':', rtrim($line));
@@ -436,6 +437,7 @@ function runRamachandran($infile, $outfile)
 function loadRamachandran($datafile)
 {
     $data = array_slice(file($datafile), 1); // drop first line
+    $ret = array();
     foreach($data as $line)
     {
         $line = explode(':', rtrim($line));

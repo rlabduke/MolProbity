@@ -37,56 +37,66 @@ $modelID = $_SESSION['bgjob']['newModel'];
 $model = $_SESSION['models'][$modelID];
 $pdbstats = $model['stats'];
 
-// Start the page: produces <HTML>, <HEAD>, <BODY> tags
-echo mpPageHeader("Model $modelID added", "upload");
-
 ############################################################################
-
-$compnd = trim($pdbstats['compnd']);
-if($compnd != "")
+if($model == null)
 {
-    echo "This compound is identified as the following:<br><b>$compnd</b>\n<p>";
+    // Start the page: produces <HTML>, <HEAD>, <BODY> tags
+    echo mpPageHeader("Model retrieval failed", "upload");
+    echo "For some reason, your file code not be uploaded or pulled from the network.\n";
+    echo "Please check the PDB/NDB identifier code and try again.\n";
 }
+else // upload was OK
+{
+    // Start the page: produces <HTML>, <HEAD>, <BODY> tags
+    echo mpPageHeader("Model $modelID added", "upload");
 
-echo "<ul>\n";
-
-// # of models, if any
-if($pdbstats['models'] > 1) echo "<li>This is an multi-model structure, probably from NMR, with <b>".$pdbstats['models']." distinct models</b> present.</li>\n";
-elseif(isset($pdbstats['resolution'])) echo "<li>This is a crystal structure at ".$pdbstats['resolution']." A resolution.</li>\n";
-
-// # of chains and residues
-echo "<li>".$pdbstats['chains']." chain(s) is/are present [".$pdbstats['unique_chains']." unique chain(s)]</li>\n";
-echo "<li>A total of ".$pdbstats['residues']." residues are present.</li>\n";
-
-// CA, sidechains, and H
-if($pdbstats['hbetas'] > 0 and $pdbstats['sidechains'] > 0) echo "<li>Mainchain, sidechains, and hydrogens are present.</li>\n";
-elseif($pdbstats['sidechains'] > 0) echo "<li>Mainchain and sidechains are present, but not hydrogens.</li>\n";
-elseif($pdbstats['nucacids'] == 0) echo "<li><b>Only C-alphas</b> are present.</li>\n";
-
-// RNA / DNA
-if($pdbstats['nucacids'] > 0) echo "<li>".$pdbstats['nucacids']." nucleic acid residues are present.\n";
-
-// Hets and waters
-if($pdbstats['hets'] > 0) echo "<li>".$pdbstats['hets']." hetero group(s) is/are present.</li>\n";
-
-echo "</ul>\n";
+    $compnd = trim($pdbstats['compnd']);
+    if($compnd != "")
+    {
+        echo "This compound is identified as the following:<br><b>$compnd</b>\n<p>";
+    }
+    
+    echo "<ul>\n";
+    
+    // # of models, if any
+    if($pdbstats['models'] > 1) echo "<li>This is an multi-model structure, probably from NMR, with <b>".$pdbstats['models']." distinct models</b> present.</li>\n";
+    elseif(isset($pdbstats['resolution'])) echo "<li>This is a crystal structure at ".$pdbstats['resolution']." A resolution.</li>\n";
+    
+    // # of chains and residues
+    echo "<li>".$pdbstats['chains']." chain(s) is/are present [".$pdbstats['unique_chains']." unique chain(s)]</li>\n";
+    echo "<li>A total of ".$pdbstats['residues']." residues are present.</li>\n";
+    
+    // CA, sidechains, and H
+    if($pdbstats['hbetas'] > 0 and $pdbstats['sidechains'] > 0) echo "<li>Mainchain, sidechains, and hydrogens are present.</li>\n";
+    elseif($pdbstats['sidechains'] > 0) echo "<li>Mainchain and sidechains are present, but not hydrogens.</li>\n";
+    elseif($pdbstats['nucacids'] == 0) echo "<li><b>Only C-alphas</b> are present.</li>\n";
+    
+    // RNA / DNA
+    if($pdbstats['nucacids'] > 0) echo "<li>".$pdbstats['nucacids']." nucleic acid residues are present.\n";
+    
+    // Hets and waters
+    if($pdbstats['hets'] > 0) echo "<li>".$pdbstats['hets']." hetero group(s) is/are present.</li>\n";
+    
+    echo "</ul>\n";
+    ?>
+    
+    <p><table border='0' width='100%'><tr valign='top'>
+    <td width='50%'>
+        <b><?php echo "<a href='analyze_setup.php?$_SESSION[sessTag]&model=$modelID'>"; ?>Analyze this model as-is</a></b>
+        <br><small>This will give an accurate picture of the current status of this model,
+        but will not take advantage of MolProbity's expert systems for automatically correcting common errors.
+        For some types of analysis, missing hydrogens will have to be added,
+        but H-bond networks will not be optimized and existing atoms will not be moved.
+        You can always optimize this model later and then repeat the analysis.
+        </small>
+    </td><td width='50%'>
+        <b><a href='improve_tab.php?<?php echo $_SESSION['sessTag']; ?>'>Optimize this model before analyzing it</a></b>
+        <br><small>This will apply our expert-system tools to automatically correcting any common errors in this model.
+        Afterwards, you may apply the analysis tools to assess the model quality and identify remaining problems.
+        </small>
+    <td>
+    </tr></table></p>
+<?php
+}
+echo mpPageFooter();
 ?>
-
-<p><table border='0' width='100%'><tr valign='top'>
-<td width='50%'>
-    <b><?php echo "<a href='analyze_setup.php?$_SESSION[sessTag]&model=$modelID'>"; ?>Analyze this model as-is</a></b>
-    <br><small>This will give an accurate picture of the current status of this model,
-    but will not take advantage of MolProbity's expert systems for automatically correcting common errors.
-    For some types of analysis, missing hydrogens will have to be added,
-    but H-bond networks will not be optimized and existing atoms will not be moved.
-    You can always optimize this model later and then repeat the analysis.
-    </small>
-</td><td width='50%'>
-    <b><a href='improve_tab.php?<?php echo $_SESSION['sessTag']; ?>'>Optimize this model before analyzing it</a></b>
-    <br><small>This will apply our expert-system tools to automatically correcting any common errors in this model.
-    Afterwards, you may apply the analysis tools to assess the model quality and identify remaining problems.
-    </small>
-<td>
-</tr></table></p>
-
-<?php echo mpPageFooter(); ?>
