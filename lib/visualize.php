@@ -199,7 +199,7 @@ function makeBadRotamerKin($infile, $outfile, $rota, $color = 'sea', $cutoff = 1
     foreach($rota as $res)
     {
         if($res['scorePct'] <= $cutoff)
-        $worst[] = $res['resName'];
+            $worst[] = $res['resName'];
     }
     $sc = resGroupsForPrekin(groupAdjacentRes($worst));
     
@@ -207,7 +207,7 @@ function makeBadRotamerKin($infile, $outfile, $rota, $color = 'sea', $cutoff = 1
     fwrite($h, "@group {bad rotamers} dominant\n");
     fclose($h);
     foreach($sc as $scRange)
-        exec("prekin -quiet -append -nogroup -bval s-scope $scRange -show 'sc($color)' $infile >> $outfile");
+        exec("prekin -quiet -append -nogroup -bval -scope $scRange -show 'sc($color)' $infile >> $outfile");
 }
 #}}}########################################################################
 

@@ -19,19 +19,24 @@
     Create scripts for generating usage stats from molprobity.log
 }}}
     Allow simple comparison of bad residues in two models; see jobs/analyze.php
- ** Make automatic entries including protocols and references in notebook
+  * Make automatic entries including protocols and references in notebook
         Allow users to annotate them: notebook_edit should be able to save
     Rama outliers in multicrit kin don't look so hot (Ca-Ca, yellow?)
     Waters are dots instead of balls??
-    No sc master on rotamers
+    No sc master on rotamers (how?)
     Develop multi-model version of the multicrit kin
     ORACLE output for TN Bhat
     Add documentation to the analysis results page (how to interpret)
- ** rotamer display broken in multi-crit kin
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
+
+### 3beta1 ###
+### 3beta1 ###
+- first beta release for testing inside the Richardson lab
+- rotamers weren't showing up in multi-crit kin due to a stray "s" before -scope
+  Thus the error msg "Prekin can't open s-scope". Probably due to jEdit save bug
 
 ### 3pre17 ###
 - decided all logging calls should be from public_html/* pages b/c we want to
