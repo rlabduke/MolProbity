@@ -50,12 +50,15 @@ for($c = 0; $c < $n; $c++)
 }
 
 if($didnt_solve)
-    echo "<b>Some H-bonding cliques were too complex to optimize.</b>\n<p>\n";
+    echo '<p><center><div class="alert">Some H-bonding networks ("cliques") were too complex to optimize.
+If this is a problem, please download Reduce and run it with a higher -limit.</div></center>
+<p>
+';
     
 if(modelDataExists($model, "flipnq.kin") && modelDataExists($model, "fliphis.kin"))
 {
     echo "These <code>flipkin</code> kinemages illustrate the changes Reduce made.\n";
-    echo "Residues that were flipped are marked with star (*) in the Views menu.\n";
+    echo "Residues that were flipped are marked with stars (*) in the Views menu.\n";
     echo "<ul>\n";
     echo "<li>" . linkModelKin($model, "flipnq.kin") . "</li>\n";
     echo "<li>" . linkModelKin($model, "fliphis.kin") . "</li>\n";
@@ -72,7 +75,7 @@ if(modelDataExists($model, "flipnq.kin") && modelDataExists($model, "fliphis.kin
     echo "<input type='hidden' name='model' value='$id'>\n";
 ?>
 Below is a list of changes made while adding hydrogens.
-Please select (or leave selected) the residues you would like to flip, and
+Please leave selected the residues you would like to flip, and
 unselect those you wish not to flip.
 <?php
     if($showAllNQH) echo "(<a href='improve_reduce_choose.php?$_SESSION[sessTag]&showAllNQH=0'>Show flipped Asn/Gln/His only</a>)";

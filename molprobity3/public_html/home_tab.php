@@ -28,6 +28,25 @@ if(isset($_REQUEST['moreOpts_all']))
     echo mpPageHeader("MolProbity Home", "home");
 ?>
 
+<p><center><div class="alert">
+This version of MolProbity is still undergoing rapid development
+and is currently available for beta-testing ONLY.
+For production work, please use the stable version at http://kinemage.biochem.duke.edu
+</div></center>
+
+<p>Welcome to MolProbity, a tool for assessing and improving the quality of macromolecular models.
+<a href="upload_tab.php?<?php echo $_SESSION['sessTag']; ?>">Get started</a> by uploading a coordinate file,
+or read below to learn more.
+
+<p><small>
+<a href="#flowchart">MolProbity flowchart</a> |
+<!-- <a href="#info">How it works</a> | -->
+<a href="#citation">Citation reference</a>
+</small>
+
+<hr>
+<a name="flowchart"></a>
+Click on a step in the flowchart to be taken there:
 <p>
 <map name="GraffleExport">
 	<area shape=poly coords="65,15,128,15,141,33,128,51,65,51,51,33,65,15" href="upload_tab.php?<?php echo $_SESSION['sessTag']; ?>">
@@ -43,25 +62,38 @@ if(isset($_REQUEST['moreOpts_all']))
 </map>
 <image src="img/flowchart.gif" usemap="#GraffleExport">
 
-<!-- Control for global "verbosity" of options in forms -->
-<hr>
-<?php
-if(!$_SESSION['moreOpts']['all'])
-    echo "<br><a href='home_tab.php?$_SESSION[sessTag]&moreOpts_all=1'>Always show all available options</a>\n";
-else
-    echo "<br><a href='home_tab.php?$_SESSION[sessTag]&moreOpts_all=0'>Hide extra options by default</a>\n";
-?>
 
-
-<hr><p>Things that should go on this page:
+<!-- <hr><p>Things that should go on this page:
 <ul>
 <li>User manual</li>
 <li>Tutorials</li>
 <li>Link for sending email (Feedback)</li>
 <li>Links to download Mage / Java</li>
-<li>Disk space available</li>
 <li>Java version detector?</li>
-<li>Better flowchart describing how to use MolProbity</li>
+<li><?php
+if(!$_SESSION['moreOpts']['all'])
+    echo "<br><a href='home_tab.php?$_SESSION[sessTag]&moreOpts_all=1'>Always show all available options</a>\n";
+else
+    echo "<br><a href='home_tab.php?$_SESSION[sessTag]&moreOpts_all=0'>Hide extra options by default</a>\n";
+?></li>
+</ul> -->
+
+
+<hr>
+<a name="citation"></a>
+<b>Please cite:</b>
+<p>
+Simon C. Lovell, Ian W. Davis, W. Bryan Arendall III, Paul I. W. de Bakker, J. Michael Word,
+Michael G. Prisant, Jane S. Richardson, David C. Richardson (2003)
+<a href="http://kinemage.biochem.duke.edu/validation/valid.html" target=_blank>
+Structure validation by C-alpha geometry: phi, psi, and C-beta deviation.</a>
+Proteins: Structure, Function, and Genetics. <u>50</u>: 437-450.
+
+<p><b>Grants supporting this work:</b>
+<ul>
+<li>NIH Grant GM-15000, funding Richardson Lab research for over 34 years</li>
+<li>NIH Grant GM-61302, funding RLab for over 3 years</li>
+<li>A <a href="http://www.hhmi.org/" target=_blank>HHMI</a> Predoctoral Fellowship to IWD</li>
 </ul>
 
 <?php echo mpPageFooter(); ?>

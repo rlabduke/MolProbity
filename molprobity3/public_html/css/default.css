@@ -1,8 +1,6 @@
 /* (jEdit options) :folding=explicit:collapseFolds=1: */
 body {
     color : #000000 ;
-    /*background-color : #f0f0ff ;*/
-    /*background-color : #F4EFE7 ;*/
     background-color : #cccc99 ;
 	font-family : Helvetica, Arial, sans-serif ;
 }
@@ -27,13 +25,21 @@ div.leftnav {
 }
 
 div.pagecontent {
-    background : #ffffff ;
+    background-color : #ffffff ;
     border : 1px solid #666666 ;
-    padding : 0.4em;
+    padding : 0.4em ;
 }
 
 div.pagefooter {
     font-size : smaller ;
     text-align : right ;
     margin-top : 0.5em ;
+}
+
+div.alert {
+    background-color : #ff9999 ;
+    color : #330000 ;
+    text-align : justify ;
+    border : 1px solid #330000 ;
+    padding : 0.4em ;
 }

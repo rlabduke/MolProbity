@@ -22,15 +22,12 @@
     Allow simple comparison of bad residues in two models; see jobs/analyze.php
     Add text at top of multicrit kinemage
     Create multicrit chart
-    Coloring on download table is sometimes off
     Improved file download page to package all files for one model?
     Put icons on analysis results page to identify the most-used kins
     Make automatic entries including protocols and references in notebook
     Insert calls to logging functions (where?)
-    Change makelinks.sh into a generic setup script that also sets permissions, creates molprobity.log (666), etc.
     Rama outliers in multicrit kin don't look so hot (Ca-Ca, yellow?)
     Waters are dots instead of balls??
-    Get new Prekin, Reduce
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -41,6 +38,21 @@
   Still needs some work to really be clean.
 - added listDir() to core.php
 - used listDir() to clean up the weird problems with oneline-batch.php -reduce
+- got new Prekin, Reduce
+- learned the hard way to not do Subversion work inside sym link directories.
+  I could recover by doing dump/load and a clean checkout, but scary...
+- got new Reduce, Prekin binaries for the Mac
+- makelinks.sh now also creates molprobity.log and sets its permissions
+- still seems to work on OS X (whew...)
+- changed limit for Reduce to 100,000
+- added notification of disk space used
+- fixed coloring issue for download table
+- added robot-exclustion META to header
+- cleaned up home_tab for public viewing
+- added ALERT divs to home_tab and improve_reduce_choose
+- commented out non-functioning placeholders in upload_tab
+- dropped Reduce -limit to 10,000 b/c now 1SBP flipkins take a LONG time
+- background jobs now record their PID and user can abort them (POSIX only)
   
 ### 3pre14 ###
 - refactored multicriterion kin creation into makeMulticritKin()

@@ -36,23 +36,23 @@
         // Alternate row colors:
         $c == MP_TABLE_ALT1 ? $c = MP_TABLE_ALT2 : $c = MP_TABLE_ALT1;
         echo " <tr bgcolor='$c' align='center'>\n";
-        echo "  <td><b>$id</b></td>\n";
+        echo "  <td align='left'><b>$id</b></td>\n";
         if($model['isBuilt']) echo "  <td><span class='inactive'>already Reduced</span></td>\n";
         else echo "  <td><a href='improve_reduce_setup.php?$_SESSION[sessTag]&model=$id'>Reduce -build</a></td>\n";
-        echo "  <td><span class='inactive'>SSWING</span></td>\n";
         echo " </tr>\n";
         echo " <tr bgcolor='$c'>\n";
-        echo "  <td colspan='6'><i>$model[history]</i></td>\n";
+        echo "  <td colspan='2'><small>$model[history]</small></td>\n";
         echo " </tr>\n";
     }
 ?>
 </table>
-<hr>
+<!-- <hr>
 <h3>Reduce -build</h3>
 Details about what Reduce -build does should go here.
 <hr>
 <h3>SSWING</h3>
 Details about what SSWING does should go here.
+-->
 <?php }
 else echo "No models have been provided yet. Please <a href='upload_tab.php?$_SESSION[sessTag]'>get input models</a> first.";
 ?>

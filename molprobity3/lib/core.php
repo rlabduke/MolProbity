@@ -37,6 +37,7 @@ function mpPageHeader($title, $active = "none", $refresh = "")
     <title>MolProbity - '.$title.'</title>
     <link rel="StyleSheet" href="css/default.css" TYPE="text/css">
     <link rel="shortcut icon" href="favicon.ico">
+    <meta name="ROBOTS" content="NOINDEX, NOFOLLOW">
 ';
     
     if($refresh != "")
@@ -93,6 +94,8 @@ function mpNavigationBar($active)
     $s .= mpNavBar_format('notebook_tab.php', 'Lab notebook', ($active == 'notebook'));
     $s .= mpNavBar_format('', 'Set preferences', ($active == 'preferences'));
     $s .= mpNavBar_format('finish_tab.php', 'Save session', ($active == 'savesession'));
+    $s .= "<br />\n";
+    $s .= "<br /><small>You are using ".round(100*mpSessSizeOnDisk(session_id())/MP_SESSION_MAX_SIZE)."% of your available disk space.</small>";
     return $s;
 }
 
@@ -125,23 +128,6 @@ About <a href="">MolProbity</a>
 </body>
 </html>
 ';
-/*
-    <i>This page "generated" by:</i>
-    <ul>
-    <li>NIH Grant GM-15000, funding Richardson Lab research for over 34 years;</li>
-    <li>NIH Grant GM-61302, funding RLab for over 3 years; and</li>
-    <li>a <a href="http://www.hhmi.org/" target=_blank>HHMI</a> Predoctoral Fellowship to IWD.</li>
-    </ul>
-    <p><i>Please cite:</i>
-    <br><div class="foot_cite">
-        Simon C. Lovell, Ian W. Davis, W. Bryan Arendall III, Paul I. W. de Bakker, J. Michael Word,
-        Michael G. Prisant, Jane S. Richardson, David C. Richardson (2003)
-        <a href="http://kinemage.biochem.duke.edu/validation/valid.html" target=_blank>
-        Structure validation by C-alpha geometry: phi, psi, and C-beta deviation.</a>
-        Proteins: Structure, Function, and Genetics. <u>50</u>: 437-450.
-    </div>
-    <p><a href="help/credits.html" target=_blank>Software authors and other credits...</a>
-*/
 }
 #}}}########################################################################
 
@@ -175,6 +161,7 @@ function launchBackground($script, $whereNext, $delay = 5)
     $progress = "$_SESSION[dataDir]/progress";
     if(file_exists($progress)) unlink($progress);
     
+    unset($_SESSION['bgjob']['processID']);
     $_SESSION['bgjob']['isRunning']     = true;
     $_SESSION['bgjob']['startTime']     = time();
     $_SESSION['bgjob']['refreshRate']   = $delay;

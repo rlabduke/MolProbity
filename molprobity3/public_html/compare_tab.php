@@ -24,12 +24,14 @@
 ?>
 
 
+<p>Sorry -- model comparison has not yet been implemented. Please check back later.
+<!--
 <p>Things that should go on this page:
 <ul>
 <li>List of models that have already been run through analysis</li>
 <li>Options for comparing them</li>
 </ul>
-
+-->
 
 
 <?php echo mpPageFooter(); ?>

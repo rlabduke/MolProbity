@@ -26,6 +26,9 @@ OUTPUTS (via $_SESSION['bgjob']):
     #mpSessReadOnly();
 // 5. Set up reasonable values to emulate CLI behavior if we're CGI
     set_time_limit(0); // don't want to bail after 30 sec!
+// 6. Record this PHP script's PID in case it needs to be killed.
+    $_SESSION['bgjob']['processID'] = posix_getpid();
+    mpSaveSession();
 
 #{{{ a_function_definition - sumary_statement_goes_here
 ############################################################################
@@ -63,6 +66,7 @@ This would lend itself nicely to a tabular format...
 *********************/
 ############################################################################
 // Clean up and go home
+unset($_SESSION['bgjob']['processID']);
 $_SESSION['models'][$modelID]['isAnalyzed'] = true;
 $_SESSION['bgjob']['endTime']   = time();
 $_SESSION['bgjob']['isRunning'] = false;
