@@ -35,6 +35,9 @@ function display($context)
     echo "<li>Check for Asn, Gln, His flips.</li>\n";
     echo "</ul>\n";
 
+    echo "<h3><a href='".makeEventURL("onRefitSC")."'>Refit sidechains</a></h3>\n<ul>\n";
+    echo "</ul>\n";
+
     echo "<hr>\n";
 
     echo "<h3><a href='".makeEventURL("onNavBarGoto", "file_browser.php")."'>View & download files</a></h3>\n<ul>\n";
@@ -69,7 +72,7 @@ function display($context)
 }
 #}}}########################################################################
 
-#{{{ onUploadPDBs, onUploadOther, onAddH
+#{{{ onUploadPDBs, onUploadOther, onAddH, onRefitSC
 ############################################################################
 function onUploadPDBs($arg, $req)
 {
@@ -84,6 +87,11 @@ function onUploadOther($arg, $req)
 function onAddH($arg, $req)
 {
     pageCall("reduce_setup.php");
+}
+
+function onRefitSC($arg, $req)
+{
+    pageCall("sswing_setup1.php");
 }
 #}}}########################################################################
 

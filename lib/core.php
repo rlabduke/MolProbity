@@ -91,6 +91,7 @@ function mpNavigationBar($active)
     $s .= mpNavBar_call('upload_pdb_setup.php', 'Input PDB files');
     $s .= mpNavBar_call('upload_other_setup.php', 'Input other files');
     $s .= mpNavBar_call('reduce_setup.php', 'Add hydrogens');
+    $s .= mpNavBar_call('sswing_setup1.php', 'Refit sidechains');
     $s .= "<br />\n";
     $s .= mpNavBar_goto('file_browser.php', 'View &amp; download files', ($active == 'files'));
     $s .= mpNavBar_goto('notebook_main.php', 'Lab notebook', ($active == 'notebook'));
