@@ -45,13 +45,27 @@
     Add coloring type drop box for -lots kins
     Create Xray / NMR / Student Helper pages with suggested protocols
     Write command line scripts for common actions; remove junk from cmdline/
-    Produce multi-model multicrit kinemages
+    Produce multi-model multicrit kinemages from the GUI
     Give NMR models a linking ID somehow
+    Remove dump of $_SESSION from sitemap
+    Note on sitemap: this for knowledgable users; other pgs for beginners
 }}}
-
+    overall title like "macromolecular structure validation"?
+    add "(optional)" after Input other files
+    "All-atom contacts" and "Geometry" as separate pictures/categories
+    
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
+
+### 3beta13 ###
+- added check in index.php that a delegate page is actually specified
+- simplified AAC/geom interface based on feedback from JSR
+- made generation of B-ribbons, alt confs optional in multikin
+- replaced B-ribbons with B- and Q-color scale renderings plus rainbow ribbons
+- made summary stats optional
+- color-coded summary stats results as good/fair/poor (traffic light)
+- swapped positions of AAC/geom and SSWING icons on sitemap at Jane's request
 
 ### 3beta12 ###
 - created command line scripts: reduce-build, reduce-nobuild, split-models

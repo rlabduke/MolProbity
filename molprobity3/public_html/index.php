@@ -24,6 +24,7 @@
 
 // Process submitted event /////////////////////////////////////////////////////
 $page = end($_SESSION['pages']);                    // not a ref; read only
+if(! $page['delegate']) die("No page delegate defined for events"); // else cryptic error from require_once()
 // FUNKY: Must use require_once() b/c UI delegate (below) may be the same,
 // or may be different, and we can't redefine classes or functions.
 require_once(MP_BASE_DIR."/pages/$page[delegate]"); // defines $delegate
@@ -66,6 +67,7 @@ clearEventHandlers();   // events defined by previous display() are not valid
 
 // Display user interface //////////////////////////////////////////////////////
 $page = end($_SESSION['pages']);                    // not a ref; read only
+if(! $page['delegate']) die("No page delegate defined for display"); // else cryptic error from require_once()
 // Can't call mpSessReadOnly() or we won't be able to create events.
 // Other than events, display() shouldn't write to the session though.
 // FUNKY: Must use require_once() b/c event delegate (above) may be the same,

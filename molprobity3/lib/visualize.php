@@ -58,7 +58,9 @@ function makeCbetaDevPlot($infile, $outfile)
 * $infiles is an array of one or more PDB files to process
 * $outfile will be overwritten.
 * $opt controls what will be output. Each key below maps to a boolean:
-*   Bribbons            ribbons colored by B-factor
+*   Bscale              color scale by B-factor
+*   Qscale              color scale by occupancy
+*   ribbons             ribbons rainbow colored N to C
 *   altconf             alternate conformations
 *   rama                Ramachandran outliers
 *   rota                rotamer outliers
@@ -85,11 +87,13 @@ function makeMulticritKin($infiles, $outfile, $opt, $nmrConstraints = null)
     {
         exec("prekin -quiet -mchb -lots -append -animate -onegroup -show 'mc(white),sc(blue)' $infile >> $outfile");
         
-        if($opt['Bribbons'])        makeBfactorRibbons($infile, $outfile);
+        if($opt['ribbons'])         makeRainbowRibbons($infile, $outfile);
         if($opt['altconf'])         makeAltConfKin($infile, $outfile);
         if($opt['rama'])            makeBadRamachandranKin($infile, $outfile);
         if($opt['rota'])            makeBadRotamerKin($infile, $outfile);
         if($opt['cbdev'])           makeBadCbetaBalls($infile, $outfile);
+        if($opt['Bscale'])          makeBfactorScale($infile, $outfile);
+        if($opt['Qscale'])          makeOccupancyScale($infile, $outfile);
         if($opt['dots'])            makeProbeDots($infile, $outfile, $opt['hbdots'], $opt['vdwdots']);
         if($nmrConstraints)
             exec("noe-display -cv -s viol -ds+ -fs -k $infile $nmrConstraints < /dev/null >> $outfile");
@@ -99,13 +103,15 @@ function makeMulticritKin($infiles, $outfile, $opt, $nmrConstraints = null)
     $h = fopen($outfile, 'a');
     fwrite($h, "@master {mainchain} off\n");
     fwrite($h, "@master {H's} off\n");
-    fwrite($h, "@master {ribbon} off\n");
     fwrite($h, "@master {water} off\n");
     fwrite($h, "@master {Calphas} on\n");
-    fwrite($h, "@master {wide contact} off\n");
-    fwrite($h, "@master {close contact} off\n");
-    fwrite($h, "@master {small overlap} off\n");
-    fwrite($h, "@master {H-bonds} off\n");
+    if($opt['ribbons'])     fwrite($h, "@master {ribbon} off\n");
+    if($opt['dots'])        fwrite($h, "@master {wide contact} off\n");
+    if($opt['dots'])        fwrite($h, "@master {close contact} off\n");
+    if($opt['dots'])        fwrite($h, "@master {small overlap} off\n");
+    if($opt['dots'])        fwrite($h, "@master {H-bonds} off\n");
+    if($opt['Bscale'])      fwrite($h, "@master {B factors} off\n");
+    if($opt['Qscale'])      fwrite($h, "@master {occupancy} off\n");
     fclose($h);
 }
 #}}}########################################################################
@@ -254,84 +260,41 @@ function makeProbeDots($infile, $outfile, $hbDots = false, $vdwDots = false)
 }
 #}}}########################################################################
 
-#{{{ makeBfactorRibbons - make ribbon kin color-coded by C-alpha temp. factor
+#{{{ makeRainbowRibbons - make ribbon kin color-coded by C-alpha temp. factor
 ############################################################################
 /**
-* Create a ribbon colored by B-value, using a black-body radiation scale.
-*
-* The mode==1 block extracts CA B-values from a PDB file
-* The mode==2 block reads kinemage lines,
-*   looks up the B-value of a given residue CA,
-*   compares it to the rest of the structure to determine a color,
-*   inserts the color name and writes the modified line.
-*
+* Create a ribbon colored from N to C with varying hues
 * Output will be appended onto outfile.
 */
-function makeBfactorRibbons($infile, $outfile)
+function makeRainbowRibbons($infile, $outfile)
 {
-    $bbB_ribbon_script =
-'BEGIN { mode = 0; }
-FNR == 1 {
-    mode += 1;
-    if(mode == 2) {
-        # Correct for multiple atoms
-        for(res in bvals)
-        {
-            if(atomcnt[res] > 0)
-                bvals[res] = bvals[res] / atomcnt[res];
-        }
-        # Sort and determine threshholds
-        size = asort(bvals, sortedbs);
-        b1 = int((10 * size) / 100);
-        b1 = sortedbs[b1];
-        b2 = int((20 * size) / 100);
-        b2 = sortedbs[b2];
-        b3 = int((30 * size) / 100);
-        b3 = sortedbs[b3];
-        b4 = int((40 * size) / 100);
-        b4 = sortedbs[b4];
-        b5 = int((50 * size) / 100);
-        b5 = sortedbs[b5];
-        b6 = int((60 * size) / 100);
-        b6 = sortedbs[b6];
-        b7 = int((70 * size) / 100);
-        b7 = sortedbs[b7];
-        b8 = int((80 * size) / 100);
-        b8 = sortedbs[b8];
-        b9 = int((90 * size) / 100);
-        b9 = sortedbs[b9];
-        b10 = int((95 * size) / 100);
-        b10 = sortedbs[b10];
-    }
+    exec("prekin -quiet -append -nogroup -colornc -bestribbon $infile >> $outfile");
 }
-mode==1 && match($0, /ATOM  ...... (N |CA|C |O )  (...) (.)(....)(.)/, frag) {
-    resno = frag[4] + 0;
-    reslbl = tolower( frag[2] " " frag[3] " " resno frag[5] );
-    bvals[reslbl] += substr($0, 61, 6) + 0;
-    atomcnt[reslbl] += 1;
-}
-mode==2 && match($0, /(^\{ *[^ ]+ ([^}]+))(\} *[PL] )(.+$)/, frag) {
-    reslbl = frag[2];
-    bval = bvals[reslbl];
-    if(bval >= b10) color = "white";
-    else if(bval >= b9) color = "yellowtint";
-    else if(bval >= b8) color = "yellow";
-    else if(bval >= b7) color = "gold";
-    else if(bval >= b6) color = "orange";
-    else if(bval >= b5) color = "red";
-    else if(bval >= b4) color = "hotpink";
-    else if(bval >= b3) color = "magenta";
-    else if(bval >= b2) color = "purple";
-    else if(bval >= b1) color = "blue";
-    else color = "gray";
-    $0 = frag[1] " B" bval frag[3] color " " frag[4];
-}
-mode==2 { print $0; }';
+#}}}########################################################################
 
-    $tmp = tempnam(MP_BASE_DIR."/tmp", "tmp_kin_");
-    exec("prekin -append -bestribbon -nogroup $infile > $tmp");
-    exec("gawk '$bbB_ribbon_script' $infile $tmp >> $outfile");
-    unlink($tmp);
+#{{{ makeBfactorScale - mc,sc colored by B-factor
+############################################################################
+/**
+* Create a kinemage colored by B-value, using a black-body radiation scale.
+* Output will be appended onto outfile.
+*/
+function makeBfactorScale($infile, $outfile)
+{
+    $colors = "-colorscale 'blue,5,purple,10,magenta,15,hotpink,20,red,30,orange,40,gold,50,yellow,60,yellowtint,80,white'";
+    exec("prekin -quiet -append -nogroup -listmaster 'B factors' -bval -scope -show 'mc,sc' -bcol $colors $infile >> $outfile");
+}
+#}}}########################################################################
+
+#{{{ makeOccupancyScale - mc,sc colored by occupancy
+############################################################################
+/**
+* Create a kinemage colored by occupancy, using a mostly purple color scale.
+* Output will be appended onto outfile.
+*/
+function makeOccupancyScale($infile, $outfile)
+{
+    $colors = "-colorscale 'white,0.02,lilactint,0.33,lilac,0.66,purple,0.99,gray'";
+    exec("prekin -quiet -append -nogroup -listmaster 'occupancy' -bval -scope -show 'mc,sc' -ocol $colors $infile >> $outfile");
 }
 #}}}########################################################################
 
