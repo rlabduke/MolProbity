@@ -26,7 +26,7 @@
 if(isset($_REQUEST['moreOpts_all']))
     $_SESSION['moreOpts']['all'] = $_REQUEST['moreOpts_all'];
 
-    echo mpPageHeader("Home page", "home");
+    echo mpPageHeader("MolProbity Home", "home");
 ?>
 
 <p>An outline for how MolProbity 3 works:

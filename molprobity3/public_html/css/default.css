@@ -2,9 +2,12 @@
 body {
     color : #000000 ;
     /*background-color : #f0f0ff ;*/
-    background-color : #F4EFE7 ;
+    /*background-color : #F4EFE7 ;*/
+    background-color : #cccc99 ;
+	font-family : Helvetica, Arial, sans-serif ;
 }
 
+a {	text-decoration : none ; }
 a:link { color : #000099 ; }
 a:active { color : #0000cc ; }
 a:visited { color : #000099 ; }
@@ -25,8 +28,7 @@ div.leftnav {
 
 div.pagecontent {
     background : #ffffff ;
-    /*border : 1px solid #000066 ;*/
-    border : 1px solid #666461 ;
+    border : 1px solid #666666 ;
     padding : 0.4em;
 }
 
