@@ -71,13 +71,14 @@ $clash  = loadClashlist("$model[dir]/$model[prefix]clash.data");
 
 // Print them out
 echo "<pre>\n";     // fixed-width text that doesn't collapse spaces
-print_r($model['badRes']);
+//print_r($model['badRes']);
 //print_r($cbdev);    // print Recursive (prints array, and arrays in it, etc)
 //print_r($rota);
 //print_r($rama);
 //print_r($clash);
 echo "\n</pre>\n";
 
+echo "<p><a href='files_tab.php?$_SESSION[sessTag]'>Show me the files</a>";
 // sessTag is what carries our session ID.
 // Do a print_r($_SESSION) to see what's in there.
 echo "<p><a href='analyze_tab.php?$_SESSION[sessTag]'>Done</a>";
