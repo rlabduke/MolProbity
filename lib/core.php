@@ -177,12 +177,12 @@ function launchBackground($script, $whereNext, $delay = 5)
 }
 #}}}########################################################################
 
-#{{{ a_function_definition - sumary_statement_goes_here
+#{{{ startsWith - tests whether haystack starts with needle
 ############################################################################
-/**
-* Documentation for this function.
-*/
-//function someFunctionName() {}
+function startsWith($haystack, $needle)
+{
+    return (strncmp($haystack, $needle, strlen($needle)) == 0);
+}
 #}}}########################################################################
 
 #{{{ a_function_definition - sumary_statement_goes_here

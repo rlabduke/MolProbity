@@ -27,20 +27,24 @@ function runCbetaDev($infile, $outfile)
 */
 function loadCbetaDev($datafile)
 {
-    $data = array_slice(file($datafile), 1, -1); // drop first and last lines
+    $data = file($datafile);
     foreach($data as $line)
     {
-        $line = explode(':', trim($line));
-        $ret[] = array(
-            'altConf'   => strtoupper($line[1]),
-            'resType'   => strtoupper($line[2]),
-            'chainID'   => strtoupper($line[3]),
-            'resNum'    => trim(substr($line[4], 0, -1)) + 0,
-            'insCode'   => substr($line[4], -1),
-            'dev'       => $line[5] + 0,
-            'dihedral'  => $line[6] + 0,
-            'occ'       => $line[7] + 0
-        );
+        $line = trim($line);
+        if($line != "" && !startsWith($line, 'pdb:alt:res:'))
+        {
+            $line = explode(':', $line);
+            $ret[] = array(
+                'altConf'   => strtoupper($line[1]),
+                'resType'   => strtoupper($line[2]),
+                'chainID'   => strtoupper($line[3]),
+                'resNum'    => trim(substr($line[4], 0, -1)) + 0,
+                'insCode'   => substr($line[4], -1),
+                'dev'       => $line[5] + 0,
+                'dihedral'  => $line[6] + 0,
+                'occ'       => $line[7] + 0
+            );
+        }
     }
     return $ret;
 }
