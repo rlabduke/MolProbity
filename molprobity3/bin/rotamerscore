@@ -43,15 +43,15 @@
 
    #run script file and produce rotamer map
    my $rotamerMap=$name.".map_rotamer";
-   my $rotamerScr="./"."$rotamerRotscr>$rotamerMap";
+   my $rotamerScr="./$rotamerRotscr>$rotamerMap";
    system ($rotamerScr);
 
    my $output=$name.".out";
-   my $result="result $rotamerMap $ARGV[2] $ARGV[1] > $output";
+   my $result="./result $rotamerMap $ARGV[2] $ARGV[1] > $output";
    system ($result);
 
-   unlink ("./".$outputRotscr);
-   unlink ("./".$rotamerMap);
-   unlink ("./".$rotamerScr);
-   unlink ("./".$ARGV[3]);
-   unlink ("./".$rotamerRotscr);
+   unlink ($outputRotscr);
+   unlink ($rotamerMap);
+   unlink ($rotamerScr);
+   unlink ($ARGV[3]);
+   unlink ($rotamerRotscr);

@@ -60,7 +60,7 @@ function runSswing($pdbfile, $mapfile, $workdir, $cnit)
     //echo($out."\n\n"); //XXX-TMP
     
     $swap = array();
-    $h = fopen('idealPDB.pdb', 'rb');
+    $h = fopen('sidechainPDB.pdb', 'rb');
     if($h)
     {
         while(!feof($h))
@@ -74,9 +74,9 @@ function runSswing($pdbfile, $mapfile, $workdir, $cnit)
             }
         }
         fclose($h);
-        unlink('idealPDB.pdb');
+        unlink('sidechainPDB.pdb');
     }
-    else echo "*** Unable to open idealPDB.pdb from SSWING run\n";
+    else echo "*** Unable to open sidechainPDB.pdb from SSWING run\n";
     
     chdir($oldwd);
     return $swap;
