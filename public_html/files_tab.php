@@ -42,14 +42,14 @@ function makeFileList($list, $basePath, $baseURL, $depth = 0)
         {
             $s .= "<tr bgcolor='".MP_TABLE_HIGHLIGHT."'><td>";
             for($i = 0; $i < $depth; $i++) $s .= '&nbsp;&nbsp;&nbsp;&nbsp;';
-            $s .= "<b>$dir/</b></td><td colspan='2'></td></tr>\n";
+            $s .= "<b>$dir/</b></td><td colspan='4'></td></tr>\n";
             $s .= makeFileList($file, "$basePath/$dir", "$baseURL/$dir", $depth+1);
         }
         else
         {
             $s .= "<tr bgcolor='$fileListColor'><td>";
             for($i = 0; $i < $depth; $i++) $s .= '&nbsp;&nbsp;&nbsp;&nbsp;';
-            $s .= "$file</td>".makeFileCommands("$basePath/$file", "$baseURL/$file")."</tr>\n";
+            $s .= "<small>$file</small></td>".makeFileCommands("$basePath/$file", "$baseURL/$file")."</tr>\n";
             $fileListColor == MP_TABLE_ALT1 ? $fileListColor = MP_TABLE_ALT2 : $fileListColor = MP_TABLE_ALT1;
         }
     }
@@ -62,8 +62,16 @@ function makeFileList($list, $basePath, $baseURL, $depth = 0)
 function makeFileCommands($path, $url)
 {
     $s = '';
-    $s .= "<td>".formatFilesize(filesize($path))."</td>";
-    $s .= "<td><a href='$url'>Download</a></td>";
+    $s .= "<td><small>".formatFilesize(filesize($path))."</small></td>";
+    if(endsWith($path, ".kin"))
+    {
+        $s .= "<td><a href='viewkin2html.php?$_SESSION[sessTag]&file=$path' target='_blank'>Syntax highlighted</a></td>";
+    }
+    else
+    {
+        $s .= "<td></td>";
+    }
+    $s .= "<td><small><a href='$url'>Download</a></small></td>";
     return $s;
 }
 #}}}########################################################################
@@ -95,7 +103,7 @@ if($_REQUEST['showAll'])
 {
     echo "<table width='100%' border='0' cellspacing='0'>\n";
     $list = listRecursive($_SESSION['dataDir']);
-    sortFilesAlpha($list);
+    $list = sortFilesAlpha($list);
     echo makeFileList($list, $_SESSION['dataDir'], $_SESSION['dataURL']);
     echo "</table>\n";
     echo "<p><a href='files_tab.php?$_SESSION[sessTag]&showAll=0'>Show models only</a></p>\n";

@@ -1,9 +1,9 @@
 <?php # (jEdit options) :folding=explicit:collapseFolds=1:
 /*****************************************************************************
-    Launches a page to view HTML fragments.
+    Launches a page to view a syntax-highlighted kinemage as HTML.
 
 INPUTS (via Get or Post):
-    file            absolute path of the HTML fragment to load
+    file            absolute path of the kinemage file to load
 
 *****************************************************************************/
 // EVERY *top-level* page must start this way:
@@ -33,7 +33,6 @@ INPUTS (via Get or Post):
 $file = $_REQUEST['file'];
 $name = basename($file);
 echo mpPageHeader("Viewing $name");
-@readfile($file);
-echo "\n<hr>\n<p><i>Hint: use your browser's File | Save As... function to save a copy of this information.</i></p>\n";
+passthru("java -cp ".MP_BASE_DIR."/public_html/king.jar king.core.KinfileTokenizer -css < $file");
 echo mpPageFooter();
 ?>
