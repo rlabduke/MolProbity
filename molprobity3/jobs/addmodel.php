@@ -51,6 +51,7 @@ OUTPUTS (via $_SESSION['bgjob']):
 ############################################################################
 if(isset($_SESSION['bgjob']['pdbCode']))
 {
+    // Better upper case it to make sure we find the file in the database
     $code = strtoupper($_SESSION['bgjob']['pdbCode']);
     
     if(preg_match('/^[0-9A-Z]{4}$/i', $code))
@@ -74,7 +75,7 @@ if(isset($_SESSION['bgjob']['pdbCode']))
     else
     {
         $id = addModel($tmpfile,
-            "$code.pdb",
+            strtolower("$code.pdb"), // lower case is nicer for readability
             $_SESSION['bgjob']['isCnsFormat'],
             $_SESSION['bgjob']['ignoreSegID']);
         
