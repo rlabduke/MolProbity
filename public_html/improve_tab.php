@@ -39,9 +39,10 @@
         echo "  <td align='left'><b>$id</b></td>\n";
         if($model['isBuilt']) echo "  <td><span class='inactive'>already Reduced</span></td>\n";
         else echo "  <td><a href='improve_reduce_setup.php?$_SESSION[sessTag]&model=$id'>Reduce -build</a></td>\n";
+        echo "<td><a href='improve_sswing_setup.php?$_SESSION[sessTag]&model=$id'>SSWING</a></td>\n";
         echo " </tr>\n";
         echo " <tr bgcolor='$c'>\n";
-        echo "  <td colspan='2'><small>$model[history]</small></td>\n";
+        echo "  <td colspan='3'><small>$model[history]</small></td>\n";
         echo " </tr>\n";
     }
 ?>

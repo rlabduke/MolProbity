@@ -570,12 +570,4 @@ function getNdbModel($code)
 */
 //function someFunctionName() {}
 #}}}########################################################################
-
-#{{{ a_function_definition - sumary_statement_goes_here
-############################################################################
-/**
-* Documentation for this function.
-*/
-//function someFunctionName() {}
-#}}}########################################################################
 ?>

@@ -19,8 +19,6 @@
     Create scripts for generating usage stats from molprobity.log
 }}}
     Allow simple comparison of bad residues in two models; see jobs/analyze.php
-    Improved file download page to package all files for one model?
-    Put icons on analysis results page to identify the most-used kins
     Make automatic entries including protocols and references in notebook
     Insert calls to logging functions (where?)
     Rama outliers in multicrit kin don't look so hot (Ca-Ca, yellow?)
@@ -48,6 +46,11 @@
 - added electron density map upload
 - improved the analysis results page to make it more usable.
 - added PDBSTAT text to the multicrit text window
+- added makeZipForSession() to core.php
+- file download page can now package things into ZIPs
+- started building in mechanisms for running SSWING
+- Subversion repository got screwed again!!
+- upgraded to svn 1.1.0-rc1 and rebuilt repos with "fsfs" filesystem
 
 ### 3pre15 ###
 - elaborated oneline-batch to handle running Reduce -nobuild too
