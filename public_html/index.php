@@ -19,6 +19,8 @@
 // 3. Restore session data. If you don't want to access the session
 // data for some reason, you must call mpInitEnvirons() instead.
     $isNewSess = mpStartSession(true);
+// New sessions must define where they start!
+    if($isNewSess) pageGoto("sitemap.php");
 
 // Process submitted event /////////////////////////////////////////////////////
 $page = end($_SESSION['pages']);                    // not a ref; read only

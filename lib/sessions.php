@@ -4,7 +4,6 @@
 *****************************************************************************/
 // Someone else MUST have defined this before including us!
 if(!defined('MP_BASE_DIR')) die("MP_BASE_DIR is not defined.");
-require_once(MP_BASE_DIR.'/lib/event_page.php');
 
 #{{{ mpInitEnvirons - sets environment variables, etc.
 ############################################################################
@@ -95,20 +94,22 @@ function mpStartSession($createIfNeeded = false)
             mpSessGC(MP_SESSION_LIFETIME);
             
             mkdir($dataDir, 0777); // Default mode; is modified by UMASK too.
+            mkdir("$dataDir/charts", 0777);
+            mkdir("$dataDir/expmtl_data", 0777);
+            mkdir("$dataDir/kinemages", 0777);
+            mkdir("$dataDir/models", 0777);
+            mkdir("$dataDir/raw_data", 0777);
             mkdir("$dataDir/system", 0777);
 
             // Set up some session variables. See docs for explanation.
-            $_SESSION['dataDir']    = $dataDir;
-            $_SESSION['dataURL']    = "data/".session_id();
-            $_SESSION['models']     = array(); // no models to start with
-            $_SESSION['sessTag']    = session_name() . "=" . session_id();
-            $_SESSION['userIP']     = getVisitorIP();
-            $_SESSION['timeZone']   = MP_DEFAULT_TIMEZONE;
-            $_SESSION['kingSize']   = "default";
-            $_SESSION['currEventID']= 1;
-            
-            // Set the starting page delegate:
-            pageGoto("sitemap.php");
+            $_SESSION['dataDir']        = $dataDir;
+            $_SESSION['dataURL']        = "data/".session_id();
+            $_SESSION['models']         = array(); // no models to start with
+            $_SESSION['sessTag']        = session_name() . "=" . session_id();
+            $_SESSION['userIP']         = getVisitorIP();
+            $_SESSION['timeZone']       = MP_DEFAULT_TIMEZONE;
+            $_SESSION['kingSize']       = "default";
+            $_SESSION['currEventID']    = 1; // used by (optional) MVC/event architecture
             
             // TODO: perform other tasks to start a session
             // Create databases, etc, etc.

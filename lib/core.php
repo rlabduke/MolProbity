@@ -90,6 +90,7 @@ function mpNavigationBar($active)
     $s .= mpNavBar_goto('sitemap.php', 'Site map', ($active == 'sitemap'));
     $s .= mpNavBar_call('upload_setup.php', 'Upload / fetch files');
     $s .= "<br />\n";
+    $s .= mpNavBar_goto('file_browser.php', 'View &amp; download files', ($active == 'files'));
     $s .= mpNavBar_goto('notebook_main.php', 'Lab notebook', ($active == 'notebook'));
     //$s .= mpNavBar_goto('', 'Set preferences', ($active == 'preferences'));
     //$s .= mpNavBar_goto('feedback_tab.php', 'Feedback &amp; Bugs', ($active == 'feedback'));
@@ -97,7 +98,8 @@ function mpNavigationBar($active)
     //$s .= mpNavBar_goto('finish_tab.php', 'Log out', ($active == 'logout'));
     //$s .= mpNavBar_goto('savesess_tab.php', 'Save session', ($active == 'savesession'));
     $s .= "<br />\n";
-    $s .= "<br /><small>You are using ".round(100*mpSessSizeOnDisk(session_id())/MP_SESSION_MAX_SIZE)."% of your available disk space.</small>";
+    $s .= "<br />You are using ".round(100*mpSessSizeOnDisk(session_id())/MP_SESSION_MAX_SIZE);
+    $s .= "% of your ".formatFilesize(MP_SESSION_MAX_SIZE)." of disk space.";
     return $s;
 }
 
