@@ -128,11 +128,12 @@ function makeEventURL($funcName, $funcArg = null)
 *   <input type='hidden' name='session' value='123ABC'>
 *   <input type='hidden' name='eventID' value='456789'>
 */
-function makeEventForm($funcName, $funcArg = null, $hasFileUpload = false)
+function makeEventForm($funcName, $funcArg = null, $hasFileUpload = false, $onSubmit = null)
 {
     $id = addEventHandler($funcName, $funcArg);
     $s = "<form method='post' ";
-    if($hasFileUpload) $s .= "enctype='multipart/form-data' ";
+    if($hasFileUpload)  $s .= "enctype='multipart/form-data' ";
+    if($onSubmit)       $s .= "onsubmit='return $onSubmit' ";
     // What's the difference b/t this and $_SERVER[SCRIPT_NAME] ?
     $s .= "action='$_SERVER[PHP_SELF]'>\n";
     $s .= postSessionID();

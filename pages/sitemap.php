@@ -15,7 +15,29 @@ class SitemapDelegate extends BasicDelegate {
 function display($context)
 {
     echo mpPageHeader("Site map", "sitemap");
-    echo "<i>Features in italics have not yet been implemented.</i>\n";
+    
+    $td = "td";
+    echo "<table border='0' cellpadding='8' cellspacing='0'>\n";
+    echo "<tr align='center' valign='middle'>\n";
+    echo "<$td><a href='".makeEventURL("onNavBarCall", "upload_pdb_setup.php")."'><img src='img/pdb_upload.jpg' alt='Upload/Fetch PDB files' border='0'></a></td>\n";
+    echo "<$td><a href='".makeEventURL("onNavBarCall", "upload_other_setup.php")."'><img src='img/eds_upload.jpg' alt='Upload/Fetch other files' border='0'></a></td>\n";
+    echo "<$td>?</td>\n";
+    echo "<$td>?</td>\n";
+    echo "<$td>?</td>\n";
+    echo "</tr>\n<tr align='center' valign='middle'>\n";
+    echo "<$td><a href='".makeEventURL("onNavBarCall", "reduce_setup.php")."'><img src='img/add_h.jpg' alt='Add hydrogens' border='0'></a></td>\n";
+    echo "<$td><a href='".makeEventURL("onNavBarCall", "sswing_setup1.php")."'><img src='img/sswing.jpg' alt='Refit sidechains' border='0'></a></td>\n";
+    echo "<$td>?</td>\n";
+    echo "<$td>?</td>\n";
+    echo "<$td>?</td>\n";
+    echo "</tr>\n<tr align='center' valign='middle'>\n";
+    echo "<$td><a href='".makeEventURL("onNavBarCall", "aacgeom_setup.php")."'><img src='img/aac_geom.jpg' alt='All-atom contacts and geometry' border='0'></a></td>\n";
+    echo "<$td><img src='img/compare_multi.jpg' alt='Compare multiple models' border='0'></td>\n";
+    echo "<$td><a href='".makeEventURL("onNavBarCall", "interface_setup1.php")."'><img src='img/interface.jpg' alt='Interface contacts' border='0'></a></td>\n";
+    echo "<$td><a href='".makeEventURL("onNavBarCall", "makekin_setup.php")."'><img src='img/make_kins.jpg' alt='Make kinemages' border='0'></a></td>\n";
+    echo "<$td>?</td>\n";
+    echo "</tr>\n";
+    echo "</table>\n";
     
     if(count($_SESSION['models']) > 0)
     {
@@ -33,6 +55,8 @@ function display($context)
         echo "</table></p>\n";
     }
 
+    echo "<p><i>Features in italics have not yet been implemented.</i></p>\n";
+    
     echo "<h3><a href='".makeEventURL("onNavBarCall", "upload_pdb_setup.php")."'>Input PDB files</a></h3>\n<ul>\n";
     echo "<li>Upload PDB files from local disk.</li>\n";
     echo "<li>Retrieve PDB files from the PDB or NDB.</li>\n";
@@ -103,9 +127,9 @@ function display($context)
     echo "<li>Free up disk space for other users. (Thanks!)</li>\n";
     echo "</ul>\n";
     
-    echo "<hr><pre>\$_SESSION = ";
-    print_r($_SESSION);
-    echo "</pre>";
+    //echo "<hr><pre>\$_SESSION = ";
+    //print_r($_SESSION);
+    //echo "</pre>";
 
     echo mpPageFooter();
 }

@@ -22,7 +22,7 @@ function display($context)
 <!--
 function warnNoH(obj)
 {
-    if(!window.confirm("The file you choose does not appear to have all its H atoms added."+
+    if(!window.confirm("The file you chose may not have all its H atoms added."+
     " All-atom contacts requires all H atoms to function properly."))
     {
         obj.checked = false

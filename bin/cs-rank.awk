@@ -30,7 +30,11 @@ BEGIN {
     nSamples = 0
     nWorse   = 0
     nWorse40 = 0
-    if(res - windowHalfWidth < 0.65) {
+    if(res + 0 == 0) {
+        # Resol. not defined -- e.g. NMR structures. Compare to full DB.
+        minres = 0
+        maxres = 9999
+    } else if(res - windowHalfWidth < 0.65) {
         minres = 0
         maxres = max(0.65, res) + windowHalfWidth
     } else if(res + windowHalfWidth > 3.25) {
