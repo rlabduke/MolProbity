@@ -3,7 +3,7 @@
     Provides functions for manipulating models.
 *****************************************************************************/
 
-#{{{ preparePDB - cleans up a user PDB before use (adds H, fixes names, etc)
+#{{{ preparePDB - cleans up a user PDB before use (fixes names, etc)
 ############################################################################
 /**
 * This function reworks a PDB to standardize it before MolProbity uses it.
@@ -13,7 +13,6 @@
 *   CNS atom names are auto-detected
 *   SEG IDs without chain IDs are auto-detected
 *   CNS atom names and SEG IDs are repaired by pdbcns
-*   Missing hydrogens are added by Reduce; no flips are made
 *
 * $inpath       the full filename for the PDB file to be processed
 * $outpath      the full filename for the destination PDB. Will be overwritten.
@@ -77,15 +76,49 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
         $tmp1 = $tmp2;
         $tmp2 = $t;
     }
-    // Add missing H's without trying to optimize or fix anything
-    $segmap = ($segToChainMapping == "" ? "" : "-segidmap '$segToChainMapping'");
-    exec("reduce -quiet -limit".MP_REDUCE_LIMIT." $segmap -keep -noadjust -his -allalt $tmp1 > $tmp2");
     // Copy to output pdb
-    copy($tmp2, $outpath);
+    copy($tmp1, $outpath);
 
     // Clean up temp files
     unlink($tmp1);
     unlink($tmp2);
+}
+#}}}########################################################################
+
+#{{{ reduceNoBuild - adds missing H without changing existing atoms
+############################################################################
+/**
+* This is the "least invasive" way of adding required hydrogens for AAC.
+* The input file or its ancestor should have already been passed thru preparePDB().
+*
+* $inpath       the full filename for the PDB file to be processed
+* $outpath      the full filename for the destination PDB. Will be overwritten.
+* $ignoreSegID  true if we should never use segIDs to create new chain IDs.
+*               false if we should convert automatically, as needed.
+*/
+function reduceNoBuild($inpath, $outpath, $ignoreSegID = false)
+{
+    // Try to determine if we need to make chain IDs from segment IDs
+    $segToChainMapping = trim(`cksegid.pl $inpath`);
+    // Old Reduce used segID for 'new ' flag for H's.
+    if($ignoreSegID) $segToChainMapping = "";
+    if($segToChainMapping == "")
+    {
+        // Don't need to do anything
+    }
+    elseif(preg_match("/ OK\$/", $segToChainMapping))
+    {
+        $parts = preg_split("/\\s+/", $segToChainMapping);
+        $segToChainMapping = $parts[0];
+    }
+    else
+    {
+        echo "*** Unable to automagically correct XPLOR/CNS segIDs";
+        $segToChainMapping = "";
+    }
+    // Add missing H's without trying to optimize or fix anything
+    $segmap = ($segToChainMapping == "" ? "" : "-segidmap '$segToChainMapping'");
+    exec("reduce -quiet -limit".MP_REDUCE_LIMIT." $segmap -keep -noadjust -his -allalt $inpath > $outpath");
 }
 #}}}########################################################################
 

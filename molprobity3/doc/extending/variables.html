@@ -1,8 +1,8 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-  <meta http-equiv="content-type"
- content="text/html; charset=ISO-8859-1">
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
   <title>MolProbity variables</title>
 </head>
 <body>
@@ -103,8 +103,15 @@ model representing the results of <span style="font-family: monospace;">reduce
 PDB. This key is not set for models supplied by the user.</li>
   <li><span style="font-weight: bold; font-family: monospace;">history</span>:
 human-readable one-line statement about where this model came from.</li>
+  <li><span style="font-family: monospace; font-weight: bold;">isReduced</span>:
+true if the PDB file has been processed by Reduce, so we know at a
+minimum that all hydrogens are present. This is a heritable property.<br>
+  </li>
   <li><span style="font-weight: bold; font-family: monospace;">isAnalyzed</span>:
-true if the analysis task has already been run on this model.<br>
+true if the analysis task has already been run on this model.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">badRes</span>:
+the cached results of findOutliers() from the last analysis run (if
+any).<br>
   </li>
 </ul>
 <h2>Contents of $_SESSION['bgjob']:</h2>
@@ -151,9 +158,14 @@ by file name.<br>
   <li>clash.data</li>
   <li>rama.data</li>
   <li>rota.data</li>
-  <li><span style="font-weight: bold; font-family: monospace;">rama.kin.1.eps
-- rama.kin.5.eps</span>: PostScript renderings of the Ramachandran
-kinemage<br>
+  <li><span style="font-weight: bold; font-family: monospace;">aac-mc.kin</span>
+&amp; <span style="font-weight: bold; font-family: monospace;">aac-sc.kin</span>:
+all-atom contacts (dot kins) split up according to mainchain vs.
+sidechain<br>
+  </li>
+  <li><span style="font-weight: bold; font-family: monospace;">rama.kin.1.eps</span>
+- <span style="font-weight: bold; font-family: monospace;">rama.kin.5.eps</span>:
+PostScript renderings of the Ramachandran kinemage<br>
   </li>
   <li>rama.jpg</li>
   <li><span style="font-weight: bold; font-family: monospace;">cb3d.kin</span>:
@@ -169,5 +181,6 @@ the "multi-criterion" kinemage with all validation data at once<br>
 </ul>
 <br>
 end<br>
+<br>
 </body>
 </html>

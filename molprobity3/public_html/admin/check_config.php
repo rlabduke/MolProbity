@@ -118,7 +118,7 @@ $ok = true;
 
 <hr><h2>External programs required by MolProbity:</h2>
     <?php $ok &= testForProgs(array("which", "php", "rm", "du", "awk", "gawk", "java",
-        "reduce", "prekin", "probe", "mage", "flipkin", "clashlist", "cluster",
+        "reduce", "prekin", "probe", "flipkin", "clashlist", "cluster",
         "pdbcns", "dang", "scrublines", "cksegid.pl")); ?>
 
 </body>

@@ -9,8 +9,9 @@
 #   unique_chains   number of unique (not duplicated) chains
 #   residues        total number of residues (in 1st model)
 #   sidechains      are sidechains present? (0/>0)
-#   hbetas          are non-polar hydrogens present? (0/>0)
-#   hydrogens       are hydrogens present? (0/>0)
+#   nucacids        are nucleic acids present? (0/>0)
+#   hnonpolar       are non-polar hydrogens present? (0/>0)
+#   hydrogens       are hydrogens of any kind present? (0/>0)
 #   hets            number of non-water heterogens
 #   fromcns         headers look like CNS output? (0 < n < 7)
 #
@@ -30,7 +31,8 @@ function pdbstat($pdbfilename)
     $residues = 0;          # number of distinct residues (changes of res. ID)
     $rescode = "";          # current res. ID
     $cbetas = 0;            # number of C-betas (for sidechains)
-    $hbetas = 0;            # number of HB (non-polar)
+    $nucacids = 0;          # number of nucleic acids
+    $hnonpolar = 0;         # number of non-polar Hs
     $hydrogens = 0;         # number of hydrogens (possibly polar)
     $hets = 0;              # number of non-water hets
     $hetcode = "";          # current het ID
@@ -86,8 +88,12 @@ function pdbstat($pdbfilename)
                 
                 # Atom name == CB?
                 if(preg_match("/ CB [ A1]/", $atom)) { $cbetas++; }
-                # Atom is a beta hydrogen?
-                elseif(preg_match("/[ 1-9][HDTZ]B [ A1]/", $atom)) { $hbetas++; }
+                # Atom name == C5' or C5* ?
+                elseif(preg_match("/ C5[*'][ A1]/", $atom)) { $nucacids++; }
+                # Atom is a beta hydrogen? Good flag for nonpolar H in proteins.
+                elseif(preg_match("/[ 1-9][HDTZ]B [ A1]/", $atom)) { $hnonpolar++; }
+                # Atom is a C5' hydrogen in RNA/DNA? Good flag for nonpolar H in nucleic acids.
+                elseif(preg_match("/[ 1-9][HDTZ]5[*'][ A1]/", $atom)) { $hnonpolar++; }
                 # Atom is a hydrogen?
                 elseif(preg_match("/[ 1-9][HDTZ][ A-Z][ 1-9][ A1]/", $atom)) { $hydrogens++; }
             }
@@ -130,7 +136,8 @@ function pdbstat($pdbfilename)
     $ret['unique_chains']   = $unique_chains;
     $ret['residues']        = $residues;
     $ret['sidechains']      = $cbetas;
-    $ret['hbetas']          = $hbetas;
+    $ret['nucacids']        = $nucacids;
+    $ret['hnonpolar']       = $hnonpolar;
     $ret['hydrogens']       = $hydrogens;
     $ret['hets']            = $hets;
     $ret['fromcns']         = $fromCNS;
