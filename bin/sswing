@@ -60,8 +60,8 @@
 
 
 
-# usage: genContour PDBfile inputMAPfile outputMAPfile seqID AminoAcidType  PDBfile(idealized) scorefile resultFile [ChainID]
-#                     0        1             2          3        4             5                  6          7        8
+# usage: genContour PDBfile inputMAPfile outputMAPfile seqID   PDBfile(idealized) scorefile resultFile [ChainID]
+#                     0        1             2          3            4                  5       6        7
 
    my $prekin="";
 
@@ -96,7 +96,7 @@
 #   system($kin3Dcont);
 
    unlink ($outputMAPfile);
-   ### We need this for MolProbity, which removes it later ### unlink ($PDBfile_ideal);
+   unlink ($PDBfile_ideal);
    unlink ($scoreOutput);
    
    # Changes by IWD 8/3/04 for MolProbity
