@@ -21,15 +21,17 @@ require_once(MP_BASE_DIR.'/lib/visualize.php'); // for making kinemages
 * This only makes sense in terms of an active session.
 *   modelID             ID code for model to process
 *   opts                has the following keys mapped to boolean flags:
-*       doClashlist     run clashlist and get clashscore
-*       doContactDots   run Probe to make dot kins (part of multicrit kin)
+*       doAAC           run clashlist and get clashscore
+*                       run Probe to make dot kins (part of multicrit kin)
 *       showHbonds      whether to make H-bond dots
 *       showContacts    whether to make vdW dots
 *       doRama          run Rama eval and make plots
 *       doRota          run rotamer eval and make (list?)
 *       doCbDev         calc Cbeta deviations and make kins
 *       doBaseP         calc base-phosphate perpendiculars and make (chart?)
+*       doSummaryStats  make table of summary statistics
 *       doMultiKin      make multicrit kinemage
+*       multiKinExtras  include ribbons, B's and Q's, and alt confs
 *       doMultiChart    make multicrit chart
 *       multiChartSort  how to sort the chart [ see makeMulticritChart() ]
 *       
@@ -56,7 +58,8 @@ function runAnalysis($modelID, $opts)
     
     if($opts['doBaseP'])        $tasks['base-phos'] = "<i>Base-phosphate perpendicular analysis is not implemented</i>";
     
-    if($opts['doClashlist'])    $tasks['clashlist'] = "Run <code>clashlist</code> to find bad clashes and clashscore";
+    $runClashlist = $opts['doAAC'] && ($opts['doSummaryStats'] || $opts['doMultiChart']);
+    if($runClashlist)           $tasks['clashlist'] = "Run <code>clashlist</code> to find bad clashes and clashscore";
     if($opts['doMultiChart'])   $tasks['multichart'] = "Create multi-criterion chart";
     if($opts['doMultiKin'])     $tasks['multikin'] = "Create multi-criterion kinemage";
     //}}} Set up file/directory vars and the task list
@@ -117,7 +120,7 @@ function runAnalysis($modelID, $opts)
     
     //{{{ Run all-atom contact programs and offer kins to user
     // Clashes
-    if($opts['doClashlist'])
+    if($runClashlist)
     {
         setProgress($tasks, 'clashlist'); // updates the progress display if running as a background job
         $outfile = "$chartDir/$model[prefix]clashlist.txt";
@@ -142,12 +145,14 @@ function runAnalysis($modelID, $opts)
     {
         setProgress($tasks, 'multikin'); // updates the progress display if running as a background job
         $mcKinOpts = array(
-            'Bribbons'  =>  true,
-            'altconf'   =>  true,
+            'ribbons'   =>  $opts['multiKinExtras'],
+            'Bscale'    =>  $opts['multiKinExtras'],
+            'Qscale'    =>  $opts['multiKinExtras'],
+            'altconf'   =>  $opts['multiKinExtras'],
             'rama'      =>  isset($rama),
             'rota'      =>  isset($rota),
             'cbdev'     =>  isset($cbdev),
-            'dots'      =>  $opts['doContactDots'],
+            'dots'      =>  $opts['doAAC'],
             'hbdots'    =>  $opts['showHbonds'],
             'vdwdots'   =>  $opts['showContacts']
         );
@@ -158,69 +163,97 @@ function runAnalysis($modelID, $opts)
     
     //{{{ Create lab notebook entry: summary stats table
     $entry = "";
-    $entry .= "<h3>Summary statistics</h3>\n";
-    $entry .= "<p><table border='1' width='100%'>\n";
-    if(isset($clash))
+    if($opts['doSummaryStats'])
     {
-        $entry .= "<tr><td rowspan='2' align='center'>All-Atom<br>Contacts</td>\n";
-        $entry .= "<td>Clashscore, all atoms:</td><td>$clash[scoreAll]</td>\n";
-        $entry .= "<td>$clashPct[pct_rank]<sup>".ordinalSuffix($clashPct['pct_rank'])."</sup> percentile<sup>*</sup> (N=$clashPct[n_samples])</td></tr>\n";
-        $entry .= "<tr><td>Clashscore, B&lt;40:</td><td>$clash[scoreBlt40]</td>\n";
-        $entry .= "<td>$clashPct[pct_rank40]<sup>".ordinalSuffix($clashPct['pct_rank40'])."</sup> percentile<sup>*</sup> (N=$clashPct[n_samples])</td></tr>\n";
-    }
-    $proteinRows = 0;
-    if(isset($rama))    $proteinRows += 2;
-    if(isset($rota))    $proteinRows += 1;
-    if(isset($cbdev))   $proteinRows += 1;
-    if($proteinRows > 0)
-    {
-        $entry .= "<tr><td rowspan='$proteinRows' align='center'>Protein<br>Geometry</td>\n";
-        $firstRow = true;
-        if(isset($rama))
+        $bgPoor = '#ff9999';
+        $bgFair = '#ffff99';
+        $bgGood = '#99ff99';
+        
+        $entry .= "<h3>Summary statistics</h3>\n";
+        $entry .= "<p><table border='1' width='100%'>\n";
+        if(isset($clash))
         {
-            $ramaOut = count(findRamaOutliers($rama));
-            foreach($rama as $r) { if($r['eval'] == "Favored") $ramaFav++; }
-            $ramaTot = count($rama);
-            $ramaOutPct = sprintf("%.2f", 100.0 * $ramaOut / $ramaTot);
-            $ramaFavPct = sprintf("%.2f", 100.0 * $ramaFav / $ramaTot);
+            if($clashPct['pct_rank'] <= 33)     $bg = $bgPoor;
+            elseif($clashPct['pct_rank'] <= 66) $bg = $bgFair;
+            else                                $bg = $bgGood;
+            $entry .= "<tr><td rowspan='2' align='center'>All-Atom<br>Contacts</td>\n";
+            $entry .= "<td>Clashscore, all atoms:</td><td bgcolor='$bg'>$clash[scoreAll]</td>\n";
+            $entry .= "<td>$clashPct[pct_rank]<sup>".ordinalSuffix($clashPct['pct_rank'])."</sup> percentile<sup>*</sup> (N=$clashPct[n_samples])</td></tr>\n";
             
-            if($firstRow) $firstRow = false;
-            else $entry .= "<tr>";
-            $entry .= "<td>Ramachandran outliers</td><td>$ramaOutPct%</td>\n";
-            $entry .= "<td>Goal: &lt;0.05%</td></tr>\n";
-            $entry .= "<tr><td>Ramachandran favored</td><td>$ramaFavPct%</td>\n";
-            $entry .= "<td>Goal: &gt;98%</td></tr>\n";
+            if($clashPct['pct_rank40'] <= 33)       $bg = $bgPoor;
+            elseif($clashPct['pct_rank40'] <= 66)   $bg = $bgFair;
+            else                                    $bg = $bgGood;
+            $entry .= "<tr><td>Clashscore, B&lt;40:</td><td bgcolor='$bg'>$clash[scoreBlt40]</td>\n";
+            $entry .= "<td>$clashPct[pct_rank40]<sup>".ordinalSuffix($clashPct['pct_rank40'])."</sup> percentile<sup>*</sup> (N=$clashPct[n_samples])</td></tr>\n";
         }
-        if(isset($rota))
+        $proteinRows = 0;
+        if(isset($rama))    $proteinRows += 2;
+        if(isset($rota))    $proteinRows += 1;
+        if(isset($cbdev))   $proteinRows += 1;
+        if($proteinRows > 0)
         {
-            $rotaOut = count(findRotaOutliers($rota));
-            $rotaTot = count($rota);
-            $rotaOutPct = sprintf("%.2f", 100.0 * $rotaOut / $rotaTot);
-            
-            if($firstRow) $firstRow = false;
-            else $entry .= "<tr>";
-            $entry .= "<td>Rotamer outliers</td><td>$rotaOutPct%</td>\n";
-            $entry .= "<td>Goal: &lt;1%</td></tr>\n";
-        }
-        if(isset($cbdev))
+            $entry .= "<tr><td rowspan='$proteinRows' align='center'>Protein<br>Geometry</td>\n";
+            $firstRow = true;
+            if(isset($rama))
+            {
+                $ramaOut = count(findRamaOutliers($rama));
+                foreach($rama as $r) { if($r['eval'] == "Favored") $ramaFav++; }
+                $ramaTot = count($rama);
+                $ramaOutPct = sprintf("%.2f", 100.0 * $ramaOut / $ramaTot);
+                $ramaFavPct = sprintf("%.2f", 100.0 * $ramaFav / $ramaTot);
+                
+                if($firstRow) $firstRow = false;
+                else $entry .= "<tr>";
+
+                if($ramaOut == 0) $bg = $bgGood;
+                elseif($ramaOut == 1 || $ramaOutPct+0 <= 0.5) $bg = $bgFair;
+                else $bg = $bgPoor;
+                $entry .= "<td>Ramachandran outliers</td><td bgcolor='$bg'>$ramaOutPct%</td>\n";
+                $entry .= "<td>Goal: &lt;0.05%</td></tr>\n";
+                if($ramaFavPct+0 >= 98)     $bg = $bgGood;
+                elseif($ramaFavPct+0 >= 95) $bg = $bgFair;
+                else                        $bg = $bgPoor;
+                $entry .= "<tr><td>Ramachandran favored</td><td bgcolor='$bg'>$ramaFavPct%</td>\n";
+                $entry .= "<td>Goal: &gt;98%</td></tr>\n";
+            }
+            if(isset($rota))
+            {
+                $rotaOut = count(findRotaOutliers($rota));
+                $rotaTot = count($rota);
+                $rotaOutPct = sprintf("%.2f", 100.0 * $rotaOut / $rotaTot);
+                
+                if($firstRow) $firstRow = false;
+                else $entry .= "<tr>";
+                
+                if($rotaOutPct+0 <= 1)      $bg = $bgGood;
+                elseif($rotaOutPct+0 <= 5)  $bg = $bgFair;
+                else                        $bg = $bgPoor;
+                $entry .= "<td>Rotamer outliers</td><td bgcolor='$bg'>$rotaOutPct%</td>\n";
+                $entry .= "<td>Goal: &lt;1%</td></tr>\n";
+            }
+            if(isset($cbdev))
+            {
+                $cbOut = count(findCbetaOutliers($cbdev));
+                if($firstRow) $firstRow = false;
+                else $entry .= "<tr>";
+                
+                if($cbOut == 0) $bg = $bgGood;
+                else            $bg = $bgFair;
+                $entry .= "<td>C&beta; deviations &gt;0.25&Aring;</td><td bgcolor='$bg'>$cbOut</td>\n";
+                $entry .= "<td>Goal: 0</td></tr>\n";
+            }
+        }// end of protein-specific stats
+        if($opts['doBaseP'])
         {
-            $cbOut = count(findCbetaOutliers($cbdev));
-            if($firstRow) $firstRow = false;
-            else $entry .= "<tr>";
-            $entry .= "<td>C&beta; deviations &gt;0.25&Aring;</td><td>$cbOut</td>\n";
-            $entry .= "<td>Goal: 0</td></tr>\n";
+            // TODO: Nucleic acid summary stats here
+            $entry .= "<tr><td rowspan='1' align='center'>Nucleic Acid<br>Geometry</td>\n";
+            $entry .= "<td colspan='3'><i>No nucleic acid geometry info implemented</i></td>\n";
+            $entry .= "</tr>\n";
         }
-    }// end of protein-specific stats
-    if($opts['doBaseP'])
-    {
-        // TODO: Nucleic acid summary stats here
-        $entry .= "<tr><td rowspan='1' align='center'>Nucleic Acid<br>Geometry</td>\n";
-        $entry .= "<td colspan='3'><i>No nucleic acid geometry info implemented</i></td>\n";
-        $entry .= "</tr>\n";
+        $entry .= "</table>\n";
+        if(isset($clash)) $entry .= "<small>* 0<sup>th</sup> percentile is the worst among structures between $clashPct[minresol]&Aring; and $clashPct[maxresol]&Aring;; 100<sup>th</sup> percentile is the best.</small>\n";
+        $entry .= "</p>\n"; // end of summary stats table
     }
-    $entry .= "</table>\n";
-    if(isset($clash)) $entry .= "<small>* 0<sup>th</sup> percentile is the worst among structures between $clashPct[minresol]&Aring; and $clashPct[maxresol]&Aring;; 100<sup>th</sup> percentile is the best.</small>\n";
-    $entry .= "</p>\n"; // end of summary stats table
     //}}} Create lab notebook entry: summary stats table
     
     //{{{ Create lab notebook entry: multi-crit and individual kins, charts
@@ -235,7 +268,7 @@ function runAnalysis($modelID, $opts)
     
     $entry .= "<h3>Single-criterion visualizations</h3>";
     $entry .= "<ul>\n";
-    if($opts['doClashlist'])
+    if($runClashlist)
         $entry .= "<li><a href='viewtext.php?$_SESSION[sessTag]&file=$chartDir/$model[prefix]clashlist.txt&mode=plain' target='_blank'>Clash list</a></li>\n";
     if($opts['doRama'])
     {

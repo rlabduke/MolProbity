@@ -51,7 +51,7 @@ define("MP_DEFAULT_TIMEZONE", 'EST');
 define("MP_SESSION_LIFETIME", 60*60*24*14); // 14 days
 
 // How large a session can grow, in bytes
-define("MP_SESSION_MAX_SIZE", 200*1024*1024); // 200 Mb
+define("MP_SESSION_MAX_SIZE", 200*1000*1000); // 200 Mb
 
 // Alternating colors for striped tables
 define("MP_TABLE_ALT1", "#ffffff");
@@ -84,6 +84,6 @@ define("MP_EMAIL_AUTHOR", "moler@kinemage.biochem.duke.edu,iwd@duke.edu");
 define("MP_SESSION_NAME", "MolProbSID");
 
 // Current "internal reference" version number. Please DO NOT change.
-define("MP_VERSION", "3beta12");
+define("MP_VERSION", "3beta13");
 
 ?>
