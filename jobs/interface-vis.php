@@ -99,6 +99,7 @@ if(  $opt['show_mc'])       $flags .= " -mc";
 if(! $opt['show_hets'])     $flags .= " -nohets";
 if(! $opt['show_wat'])      $flags .= " -nowaters";
 if(  $opt['wat2wat'])       $flags .= " -wat2wat";
+if(  $opt['drop_flag'])     $flags .= " -drop";
 if(  $opt['elem_masters'])  $flags .= " -elem";
 
 // Set mode of action:
@@ -120,9 +121,9 @@ else                                $targ_chains = "";
 // Calculate both patterns with respect to protein/water/hets
 $allowedGroups = array('protein', 'dna', 'rna', 'water', 'het');
 $src_groups = implode(',', array_intersect($allowedGroups, explode(',', implode(',', 
-    array($opt['src_nonhets'], $opt['src_waters'], $opt['src_hets'])))));
+    array($opt['src_prot'], $opt['src_nucacid'], $opt['src_waters'], $opt['src_hets'])))));
 $targ_groups = implode(',', array_intersect($allowedGroups, explode(',', implode(',', 
-    array($opt['targ_nonhets'], $opt['targ_waters'], $opt['targ_hets'])))));
+    array($opt['targ_prot'], $opt['targ_nucacid'], $opt['targ_waters'], $opt['targ_hets'])))));
 
 // Set source pattern
 $flags .= " '(".$src_chains.") (".$src_groups.") ".$pat_suffix."'";
@@ -144,9 +145,9 @@ $tasks['dots'] = "Calculate contact dots using Probe";
 $tasks['notebook'] = "Make lab notebook entry";
 
 setProgress($tasks, 'kin'); // updates the progress display if running as a background job
-//exec($prekin_cmd1);
+exec($prekin_cmd1);
 setProgress($tasks, 'dots'); // updates the progress display if running as a background job
-//exec($probe_cmd1);
+exec($probe_cmd1);
 setProgress($tasks, 'notebook'); // updates the progress display if running as a background job
 
 // Lab notebook entry / results page

@@ -34,7 +34,7 @@ function describePdbStats($pdbstats, $useHTML = true)
     $details[] = "A total of ".$pdbstats['residues']." residues are present.";
     
     // CA, sidechains, and H
-    if($pdbstats['hbetas'] > 0 and $pdbstats['sidechains'] > 0) $details[] = "Mainchain, sidechains, and hydrogens are present.";
+    if($pdbstats['hydrogens'] > 0 and $pdbstats['sidechains'] > 0) $details[] = "Mainchain, sidechains, and hydrogens are present.";
     elseif($pdbstats['sidechains'] > 0) $details[] = "Mainchain and sidechains are present, but not hydrogens.";
     elseif($pdbstats['nucacids'] == 0) $details[] = "{$b}Only C-alphas{$unb} are present.";
     

@@ -2,6 +2,14 @@
 ==============================================================================
 ===  TO DO  ==================================================================
 ==============================================================================
+{{{ Other people's bugs
+    Weird intra-sidechain clashes for 1BKR
+    Prekin: All balls are marked alt B (even those for alt A)
+    Changes still made by Reduce -nobuild:
+        Existing protonation state for His
+        Existing Met CH3 and Lys NH3 orientation (don't want -norotnh3 and -norotmet)
+    Probe: -NOVDWout switch missing from docs, duplicated ONLYBADOUT
+}}}
 {{{ Ideas, long-term goals, etc.
     User manual
     Tutorial / walk-thru
@@ -10,7 +18,7 @@
     should session lifetime be from start, or from last use?
     document PHP version needed (which is...? >=4.1:superglobals >=4.3:CLI)
         4.1.0 doesn't work on kinemage: cmd line can't load 'session mm'
-        4.1.2 seems to work on glass
+        4.1.2 seems to work on arachne
     Should analysis of worst residues ignore water or treat it separately?
     ZIP download should include a static view of the lab notebook?
     Allow "hidden" user files; default download doesn't include these?
@@ -36,18 +44,9 @@
     Add coloring type drop box for -lots kins
     Create SiteMap graphic
     Download ZIP archives of session files
-}}}
-    Weird intra-sidechain clashes for 1BKR
-    Prekin: All balls are marked alt B (even those for alt A)
     Write command line scripts for common actions; remove junk from cmdline/
+}}}
     How to deal with clashscore stats for NMR models / no resol?
-    Changes still made by Reduce -nobuild:
-        Existing protonation state for His
-        Existing Met CH3 and Lys NH3 orientation (don't want -norotnh3 and -norotmet)
-    Probe: -NOVDWout switch missing from docs, duplicated ONLYBADOUT
-    Separate boxes for protein vs. DNA/RNA in interface contacts
-    Add -drop flag option for interfaces
-    Set Probe commands to actually run and produce kins!
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -62,6 +61,10 @@
 - sitemap now lists available models
 - imported complex Probe runs (interface visualization) from MolProbity2
 - actually moved MolProbity repository to new cluster
+- enabled Probe commands for interface contacts
+- split "Protein,DNA,RNA" selection into protein vs. nucleic acids
+- added -DROP option for interface contacts
+- fixed bug in describePdbStats() that never saw hydrogens
 
 ### 3beta11 ###
 - moved timezone setting to top of lab notebook page
