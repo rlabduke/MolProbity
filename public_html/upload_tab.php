@@ -99,6 +99,19 @@ echo mpPageHeader("Get input files", "upload");
 </form>
 </p>
 
+<!-- Upload custom het dictionaries -->
+<hr>
+<p>
+<form method="post" enctype="multipart/form-data" action="upload_hetdict_done.php">
+<?php echo postSessionID(); ?>
+<h3>Upload custom heterogen dictionary</h3>
+<label>Dictionary file: <input type="file" name="uploadFile"></label>
+<br><small>Must be in <a href='http://deposit.pdb.org/het_dictionary.txt' target='_blank'>PDB format</a>.
+Will be combined with standard dictionary.</small>
+<br><input type="submit" name="cmd" value="Upload this file">
+</form>
+</p>
+
 <!-- List of current models available -->
 <!--
 <?php if(count($_SESSION['models']) > 0) { ?>

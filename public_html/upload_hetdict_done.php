@@ -23,23 +23,30 @@ INPUTS (via Get or Post):
 
 # MAIN - the beginning of execution for this page
 ############################################################################
-$mapName = censorFileName($_FILES['uploadFile']['name']); // make sure no spaces, etc.
-$mapPath = "$_SESSION[dataDir]/$mapName";
+// Remove the old het dictionary:
+if(isset($_SESSION['hetdict']))
+{
+    unlink($_SESSION['hetdict']);
+    unset($_SESSION['hetdict']);
+}
+
+$dictName = "user_het_dict.txt";
+$dictPath = "$_SESSION[dataDir]/$dictName";
 if( !$_FILES['uploadFile']['error'] && $_FILES['uploadFile']['size'] > 0
-&& !file_exists($mapPath) && move_uploaded_file($_FILES['uploadFile']['tmp_name'], $mapPath))
+&& move_uploaded_file($_FILES['uploadFile']['tmp_name'], $dictPath))
 {
     // Uploaded file probably has restrictive permissions
-    chmod($mapPath, (0666 & ~MP_UMASK));
-    $_SESSION['edmaps'][$mapName] = $mapName;
-    mpLog("edmap-upload:User uploaded an electron density map file");
+    chmod($dictPath, (0666 & ~MP_UMASK));
+    exec("echo >> $dictPath"); // adds a blank line
+    exec("cat ".MP_REDUCE_HET_DICT." >> $dictPath"); // appends the std dict
+    $_SESSION['hetdict'] = $dictName;
+    mpLog("hetdict-upload:User uploaded an custom het dictionary file");
 }
 else
 {
     echo mpPageHeader("Sorry!");
     if($_FILES['uploadFile']['error'])
         echo("File upload failed with error code {$_FILES[uploadFile][error]}.");
-    elseif(file_exists($mapPath))
-        echo("File upload failed because another file of the same name already exists.");
     elseif($_FILES['uploadFile']['size'] <= 0)
         echo("File upload failed because of zero file size (no contents).");
     else
@@ -50,15 +57,8 @@ else
 }
 
 // Reach this point only if the map was uploaded successfully.
-echo mpPageHeader("Map $mapName added", "upload");
-echo "<p>The following electron density maps are now available:\n";
-echo "<ul>\n";
-foreach($_SESSION['edmaps'] as $map)
-{
-    $mapPath = "$_SESSION[dataDir]/$map";
-    echo "<li><b>$map</b> (".formatFilesize(filesize($mapPath)).")</li>\n";
-}
-echo "</ul>\n</p>\n";
+echo mpPageHeader("Custom het dictionary added", "upload");
+echo "<p>Your custom heterogen dictionary will be used for all future work in this session.</p>\n";
 echo "\n<p><a href='upload_tab.php?$_SESSION[sessTag]'>Upload more files</a></p>\n";
 ############################################################################
 ?>

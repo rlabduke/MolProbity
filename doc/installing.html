@@ -28,6 +28,13 @@ It's also important to be sure the programs in the <span
  style="font-family: monospace;">bin/</span> directory have their
 execute bit set for the web server pseudo-user.<br>
 <br>
+It's critical that the absolute path to the directory where MolProbity
+is installed not have any spaces or other funky characters in it.
+Alphanumerics, underscores, dashes, and dots are OK. Everything else is
+off limits. Those weird characters interfere both with passing paths in
+URLs (they have to be encoded and decoded) and with UNIX command line
+programs (all paths have to be enclosed in extra quote marks).<br>
+<br>
 <h2>Required software on the server</h2>
 <ul>
   <li>rm</li>
