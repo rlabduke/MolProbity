@@ -47,3 +47,17 @@ div.alert {
     border : 1px solid #330000 ;
     padding : 0.4em ;
 }
+
+/* For syntax highlighting kinemage file produced by king.core.KinfileTokenizer */
+div.kin2html { font-family : monospace ; }
+div.kin2html span.nil-type { color : #ff0099 ; font-weight : bold ; }
+div.kin2html span.identifier { color : #330099 ; }
+div.kin2html span.comment { color : #666666 ; font-style : italic ; }
+div.kin2html span.aspect { color : #00cc00 ; }
+div.kin2html span.s-quote { color : #009900 ; }
+div.kin2html span.d-quote { color : #ff0099 ; font-weight : bold ; }
+div.kin2html span.keyword { color : #cc0000 ; font-weight : bold ; }
+div.kin2html span.property { color : #0000cc ; font-weight : bold ; }
+div.kin2html span.integer { color : #003366 ; }
+div.kin2html span.number { color : #003366 ; }
+div.kin2html span.literal { color : #000000 ; }

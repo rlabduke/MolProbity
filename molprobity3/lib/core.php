@@ -291,16 +291,35 @@ function listRecursive($dir)
 
 #{{{ sortFilesAlpha - sorts results of listRecursive() by name
 ############################################################################
+/**
+* The original $list is not modified.
+* Directories and files are sorted separately -- directories always come first.
+*/
 function sortFilesAlpha($list)
 {
-    foreach($list as $el)
+    $d = array(); // dirs
+    $f = array(); // files
+    foreach($list as $key => $val)
+    {
+        if(is_array($val))
+            $d[$key] = sortFilesAlpha($val);
+        else
+            $f[$key] = $val;
+    }
+    ksort($d);
+    ksort($f);
+    
+    return array_merge($d, $f);
+    
+    // This version mixes files and directories
+    /*foreach($list as $el)
     {
         if(is_array($el))
             $el = sortFilesAlpha($el);
     }
     ksort($list);
     
-    return $list;
+    return $list;*/
 }
 #}}}########################################################################
 
