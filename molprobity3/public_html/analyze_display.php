@@ -72,7 +72,7 @@ allowing you to identify clusters of problems in the structure.
     <?php } ?>
 </li>
 <li>
-    <?php if(modelDataExists($model, "multi.html")) { ?>
+    <?php if(modelDataExists($model, "multi.chart")) { ?>
         <a href=''>A link to the multicrit chart</a>
         <br /><i>TODO: Jeremy Block is supposed to develop this chart.
         A brief summary of the number of outliers and percentages should appear here.
@@ -82,6 +82,8 @@ allowing you to identify clusters of problems in the structure.
     <?php } ?>
 </li>
 </ul></p>
+
+<?php if(modelDataExists($model, "multi.chart")) readfile("$model[dir]/$model[prefix]multi.chart"); ?>
 
 <hr />
 The multi-criterion display presents results of all of the validation tests.

@@ -111,7 +111,8 @@ function runAnalysis($modelID, $opts)
     if($opts['doAll'] || $opts['doMultiChart'])
     {
         setProgress($tasks, 'mcchart'); // updates the progress display if running as a background job
-        // TODO: Integrate outlier information from above analyses into a chart
+        $outfile = "$model[dir]/$model[prefix]multi.chart";
+        makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev);
     }
     
     ////////////////////////////////////////////////////////////////////////////

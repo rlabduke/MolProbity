@@ -92,8 +92,9 @@ function mpNavigationBar($active)
     $s .= mpNavBar_format('finish_tab.php', 'Log out', ($active == 'logout'));
     $s .= "<br />\n";
     $s .= mpNavBar_format('notebook_tab.php', 'Lab notebook', ($active == 'notebook'));
-    $s .= mpNavBar_format('', 'Set preferences', ($active == 'preferences'));
-    $s .= mpNavBar_format('finish_tab.php', 'Save session', ($active == 'savesession'));
+    //$s .= mpNavBar_format('', 'Set preferences', ($active == 'preferences'));
+    $s .= mpNavBar_format('feedback_tab.php', 'Feedback &amp; Bugs', ($active == 'feedback'));
+    $s .= mpNavBar_format('savesess_tab.php', 'Save session', ($active == 'savesession'));
     $s .= "<br />\n";
     $s .= "<br /><small>You are using ".round(100*mpSessSizeOnDisk(session_id())/MP_SESSION_MAX_SIZE)."% of your available disk space.</small>";
     return $s;

@@ -91,7 +91,7 @@ else // upload was OK
     
     <p><table border='0' width='100%'><tr valign='top'>
     <td width='50%'>
-        <b><?php echo "<a href='analyze_setup.php?$_SESSION[sessTag]&model=$modelID'>"; ?>Analyze this model as-is</a></b>
+        <b><?php echo "<a href='analyze_setup.php?$_SESSION[sessTag]&model=$modelID'>"; ?>Analyze <?php echo $modelID; ?> as-is</a></b>
         <br><small>This will give an accurate picture of the current status of this model,
         but will not take advantage of MolProbity's expert systems for automatically correcting common errors.
         For some types of analysis, missing hydrogens will have to be added,
@@ -99,7 +99,7 @@ else // upload was OK
         You can always optimize this model later and then repeat the analysis.
         </small>
     </td><td width='50%'>
-        <b><a href='improve_tab.php?<?php echo $_SESSION['sessTag']; ?>'>Optimize this model before analyzing it</a></b>
+        <b><a href='improve_tab.php?<?php echo $_SESSION['sessTag']; ?>'>Optimize <?php echo $modelID; ?> before analyzing it</a></b>
         <br><small>This will apply our expert-system tools to automatically correcting any common errors in this model.
         Afterwards, you may apply the analysis tools to assess the model quality and identify remaining problems.
         </small>

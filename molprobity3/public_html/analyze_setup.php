@@ -70,7 +70,20 @@ if(isset($_REQUEST['moreOpts_analyze']))
 ############################################################################
 ?>
 
-<p>Description of what is done...
+<p>MolProbity's model-quality analysis is built on four pillars:
+<a href='http://kinemage.biochem.duke.edu/research/aac.php' target='_blank'>all-atom contacts</a>,
+<a href='http://kinemage.biochem.duke.edu/validation/model.html' target='_blank'>Ramachandran plots</a>,
+<a href='http://kinemage.biochem.duke.edu/databases/rotamer.php' target='_blank'>rotamer analysis</a>,
+and <a href='http://kinemage.biochem.duke.edu/' target='_blank'>C-beta deviations</a>.
+
+<p>All-atom contact analysis shows the steric interactions within and between any molecules, including proteins, DNA, and RNA.
+The 3-D dot-surface displays make it easy to see good packing (blue and green) and hydrogen bonding (pale green lens).
+They also make it easy to identify regions of the model that are physically impossible,
+where two or more atoms are occupying substantially the same space (pink spikes).</p>
+
+<p>The remaining tools evaluate the covalent geometry of a protein model to find specific distortions that may indicate a misfitting.
+Combining all of this information into a "multi-criterion" chart or kinemage often shows clusters of problems,
+which are almost certainly indicitive of a local problem with the model.</p>
 
 <p>All-atom contact analysis relies on the presence of explicit hydrogen atoms in the model.
 <?php if($model['isReduced']) { ?>
@@ -89,15 +102,15 @@ if(isset($_REQUEST['moreOpts_analyze']))
 <?php if($_SESSION['moreOpts']['analyze'] || $_SESSION['moreOpts']['all']) { ?>
     <p><table border='0' width='100%'>
     <tr><td>
-        <h3>Don't need H</h3>
-        <input type='checkbox' name='opts[doRama]' value='1'>Ramachandran plots <small>(protein backbone)</small>
-        <br><input type='checkbox' name='opts[doRota]' value='1'>Rotamer analysis <small>(protein sidechain)</small>
-        <br><input type='checkbox' name='opts[doCbeta]' value='1'>C-beta deviation <small>(protein sidechain)</small>
-    </td><td>
         <h3>Do need H</h3>
         <input type='checkbox' name='opts[doAAC]' value='1'>All-atom contacts <small>(any macromolecule)</small>
         <br><input type='checkbox' name='opts[doMultiKin]' value='1'>Multi-criterion kinemage <small>(protein)</small>
         <br><input type='checkbox' name='opts[doMultiChart]' value='1'>Multi-criterion chart <small>(protein)</small>
+    </td><td>
+        <h3>Don't need H</h3>
+        <input type='checkbox' name='opts[doRama]' value='1'>Ramachandran plots <small>(protein backbone)</small>
+        <br><input type='checkbox' name='opts[doRota]' value='1'>Rotamer analysis <small>(protein sidechain)</small>
+        <br><input type='checkbox' name='opts[doCbeta]' value='1'>C-beta deviation <small>(protein sidechain)</small>
     </td></tr>
     <tr><td colspan='2' align='center'>
         <input type='checkbox' name='opts[doAll]' value='1'>Do all of the above
@@ -114,7 +127,7 @@ if(!$_SESSION['moreOpts']['all'])
         echo "<p><a href='analyze_setup.php?$_SESSION[sessTag]&model=$modelID&moreOpts_analyze=1'>More options</a>\n";
 }
 ?>
-<p><input type='submit' name='cmd' value='Start analysis'>
+<p><input type='submit' name='cmd' value='Start analysis'></p>
 </form>
 
 <?php echo mpPageFooter(); ?>

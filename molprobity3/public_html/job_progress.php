@@ -49,7 +49,7 @@ if($_SESSION['bgjob']['isRunning'])
     echo "</td></tr></table></center>\n";
     $ellapsed = time() - $_SESSION['bgjob']['startTime'];
     echo "<p><small>Your job has been running for $ellapsed seconds.</small>\n";
-    echo "<br><small>If nothing happens for $rate seconds, <a href='$url'>click here</a>.</small>\n";
+    echo "<br><small>If this page doesn't update after $rate seconds, <a href='$url'>click here</a>.</small>\n";
     //if($ellapsed > 60 && isset($_SESSION['bgjob']['processID']))
     if(isset($_SESSION['bgjob']['processID']))
         echo "<br><small>If needed, you can <a href='$url&abort={$_SESSION[bgjob][processID]}'>abort this job</a>.\n";
@@ -58,7 +58,7 @@ if($_SESSION['bgjob']['isRunning'])
 else
 {
     $url        = $_SESSION['bgjob']['whereNext'];
-    $refresh    = "2; $url";
+    $refresh    = "3; $url";
       echo mpPageHeader("Job is finished", "none", $refresh);
     //echo mpPageHeader("Job is finished");
     echo "<p><center>Your job ran for ".($_SESSION['bgjob']['endTime'] - $_SESSION['bgjob']['startTime'])." seconds.\n";
