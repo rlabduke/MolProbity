@@ -102,6 +102,7 @@ function mpStartSession($createIfNeeded = false)
             $_SESSION['sessTag']    = session_name() . "=" . session_id();
             $_SESSION['userIP']     = getVisitorIP();
             $_SESSION['timeZone']   = MP_DEFAULT_TIMEZONE;
+            $_SESSION['kingSize']   = "default";
             
             // TODO: perform other tasks to start a session
             // Create databases, etc, etc.

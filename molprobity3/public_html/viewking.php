@@ -30,15 +30,28 @@ INPUTS (via Get or Post):
 
 # MAIN - the beginning of execution for this page
 ############################################################################
-// Start the page: produces <HTML>, <HEAD>, <BODY> tags
+if(isset($_REQUEST['size']))
+{
+    // I can't remember why I was thinking this page could interfere with
+    // background jobs, but I think (at the moment) that this should be safe:
+    mpSessReadOnly(false);
+    // (Note that changing size breaks the "Close" button, at least in Safari)
+    $_SESSION['kingSize'] = $_REQUEST['size'];
+}
+if($_SESSION['kingSize']        == "tiny")  $size = "width=600 height=400"; //  640 x 480
+elseif($_SESSION['kingSize']    == "small") $size = "width=700 height=500"; //  800 x 600
+elseif($_SESSION['kingSize']    == "large") $size = "width=950 height=650"; // 1024 x 768
+else                                        $size = "width=750 height=600"; // Good for most people
+
 $url = $_REQUEST['url'];
 $file = basename($url);
+// Start the page: produces <HTML>, <HEAD>, <BODY> tags
 echo mpPageHeader("KiNG - $file");
 
 ############################################################################
 ?>
 <center>
-<applet code="king/Kinglet.class" archive="king.jar" width=750 height=600>
+<applet code="king/Kinglet.class" archive="king.jar" <?php echo $size; ?>>
 <param name="mode" value="flat">
 <?php
     echo "    <param name='kinSource' value='$url'>\n";
@@ -58,5 +71,31 @@ echo mpPageHeader("KiNG - $file");
     }
 ?>
 </applet>
+
+<br><form>
+<table border='0' width='100%'><tr>
+<td align='left'>
+When finished, you should close this window:
+<input type="button" value="Close"
+language="JavaScript" onclick="self.close();">
+</td><td align='right'>
+<?php
+if($_SESSION['kingSize'] == "tiny") echo "tiny";
+else echo "<a href='viewking.php?$_SESSION[sessTag]&url=$url&size=tiny'>tiny</a>";
+echo " | ";
+if($_SESSION['kingSize'] == "small") echo "small";
+else echo "<a href='viewking.php?$_SESSION[sessTag]&url=$url&size=small'>small</a>";
+echo " | ";
+if($_SESSION['kingSize'] == "default") echo "default";
+else echo "<a href='viewking.php?$_SESSION[sessTag]&url=$url&size=default'>default</a>";
+echo " | ";
+if($_SESSION['kingSize'] == "large") echo "large";
+else echo "<a href='viewking.php?$_SESSION[sessTag]&url=$url&size=large'>large</a>";
+?>
+</td>
+</tr></table>
+</form>
+
+
 </center>
 <?php echo mpPageFooter(); ?>
