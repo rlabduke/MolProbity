@@ -14,27 +14,9 @@
 // Someone else MUST have defined this before including us!
 if(!defined('MP_BASE_DIR')) die("MP_BASE_DIR is not defined.");
     
-// Import all the constants we use
-require_once(MP_BASE_DIR.'/config/config.php');
-
-// Session handling functions
-require_once(MP_BASE_DIR.'/lib/sessions.php');
-
-#{{{ formatFilesize - human-readable file size with at least 2 sig. digits.
-############################################################################
-function formatFilesize($size)
-{
-        if( $size >= 10000000000 ) $size = round($size/1000000000, 0) . " Gb";
-    elseif( $size >= 1000000000 )  $size = round($size/1000000000, 1) . " Gb";
-    elseif( $size >= 10000000 )    $size = round($size/1000000, 0) . " Mb";
-    elseif( $size >= 1000000 )     $size = round($size/1000000, 1) . " Mb";
-    elseif( $size >= 10000 )       $size = round($size/1000, 0) . " Kb";
-    elseif( $size >= 1000 )        $size = round($size/1000, 1) . " Kb";
-    else $size = $size . " bytes";
-
-    return $size;
-}
-#}}}########################################################################
+require_once(MP_BASE_DIR.'/config/config.php'); // Import all the constants we use
+require_once(MP_BASE_DIR.'/lib/strings.php');
+require_once(MP_BASE_DIR.'/lib/sessions.php');  // Session handling functions
 
 #{{{ mpPageHeader - creates the first part of a standard MolProbity page
 ############################################################################
@@ -174,14 +156,6 @@ function launchBackground($script, $whereNext, $delay = 5)
     
     // Restore the current dir
     chdir($pwd);
-}
-#}}}########################################################################
-
-#{{{ startsWith - tests whether haystack starts with needle
-############################################################################
-function startsWith($haystack, $needle)
-{
-    return (strncmp($haystack, $needle, strlen($needle)) == 0);
 }
 #}}}########################################################################
 

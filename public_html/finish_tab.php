@@ -28,7 +28,7 @@
 ?>
 
 <p>You can bookmark this page and come back later!
-<br>Data good until: <?php echo formatLabbookTime( time() + mpSessTimeToLive(session_id()) ); ?>
+<br>Data good until: <?php echo formatDayTime( time() + mpSessTimeToLive(session_id()) ); ?>
 
 <form method="post" action="finish_destroy.php">
 <?php echo postSessionID(); ?>

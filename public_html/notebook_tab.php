@@ -28,7 +28,7 @@ function printTOC($book)
     {
         $title = $entry['title'];
         if($title == "") $title = "(no title)";
-        echo "<li><a href='#entry$num'>$title</a> [".formatLabbookTime($entry['modtime'])."]</li>\n";
+        echo "<li><a href='#entry$num'>$title</a> [".formatDayTime($entry['modtime'])."]</li>\n";
     }
     echo "</ul>\n";
 }
@@ -84,7 +84,7 @@ echo mpTabBar("notebook");
 <div class="sidebar">
     <?php
         echo postSessionID();
-        echo "Now: " . formatLabbookTime(time());
+        echo "Now: " . formatTime(time());
         echo "<br>\n";
         echo timeZonePicker('timezone', $_SESSION['timeZone']);
     ?>

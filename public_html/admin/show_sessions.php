@@ -35,6 +35,7 @@ if($_REQUEST['cmd'] == "Destroy")
 <table width=100%>
 <tr>
 <td><b>Session ID</b></td>
+<td><b>Last touched</b></td>
 <td><b>Time-to-live</b></td>
 <td><b>Size on disk</b></td>
 <td><!-- space for "Enter" cmd --></td>
@@ -46,7 +47,8 @@ if($_REQUEST['cmd'] == "Destroy")
     {
         echo "<tr>\n";
         echo "<td>$sess[id]</td>\n";
-        echo "<td>".formatTTL($sess['ttl'])."</td>\n";
+        echo "<td>".formatMinutesElapsed(MP_SESSION_LIFETIME - $sess['ttl'])." ago</td>\n";
+        echo "<td>".formatHoursElapsed($sess['ttl'])."</td>\n";
         echo "<td>".formatFilesize($sess['size'])."</td>\n";
         echo "<td><a href='../home_tab.php?".MP_SESSION_NAME."=$sess[id]'>Enter</a></td>\n";
         echo "<td><a href='$_SERVER[PHP_SELF]?cmd=Destroy&target=$sess[id]'>Destroy</a></td>\n";

@@ -17,6 +17,7 @@
     
 *****************************************************************************/
 require_once(MP_BASE_DIR.'/lib/timezones.php');
+require_once(MP_BASE_DIR.'/lib/strings.php');
 
 #{{{ openLabbook - loads labbook from disk and returns array
 ############################################################################
@@ -55,17 +56,6 @@ function saveLabbook($bookData)
 }
 #}}}########################################################################
 
-#{{{ formatLabbookTime - formats the 'time' entry from a labbook
-############################################################################
-function formatLabbookTime($time)
-{
-    global $TIME_ZONES;
-    $zone_abbrev    = $TIME_ZONES[ $_SESSION['timeZone'] ]['abbrev'];
-    $offset_sec     = $TIME_ZONES[ $_SESSION['timeZone'] ]['seconds'];
-    return gmdate("j M Y \\a\\t g:ia", ($time+$offset_sec)) . " $zone_abbrev";
-}
-#}}}########################################################################
-
 #{{{ newLabbookEntry - creates a new entry
 ############################################################################
 function newLabbookEntry($model = "", $keywords = "")
@@ -92,8 +82,8 @@ function formatLabbookEntry($entry)
     $s = "";
     $s .= "<b>".$entry['title']."</b>\n";
     $s .= "<br><table border=0 cellpadding=0 cellspacing=3>\n";
-    $s .= "<tr align=left valign=top><td>Entry begun:</td><td>".formatLabbookTime($entry['ctime'])."</td></tr>\n";
-    $s .= "<tr align=left valign=top><td>Last modified:</td><td>".formatLabbookTime($entry['modtime'])."</td></tr>\n";
+    $s .= "<tr align=left valign=top><td>Entry begun:</td><td>".formatDayTime($entry['ctime'])."</td></tr>\n";
+    $s .= "<tr align=left valign=top><td>Last modified:</td><td>".formatDayTime($entry['modtime'])."</td></tr>\n";
     $s .= "</table>";
     if($entry['model'] != "")
         $s .= "<br>Model: ".$entry['model']."\n";
@@ -129,8 +119,8 @@ function formEditLabbook($entry, $width = 90, $height = 30)
     $s .= "<input type='hidden' name='labbookEntry[keywords]' value='$entry[keywords]'>\n";
     
     $s .= "<br><table border=0 cellpadding=0 cellspacing=3>\n";
-    $s .= "<tr align=left valign=top><td>Entry begun:</td><td>".formatLabbookTime($entry['ctime'])."</td></tr>\n";
-    $s .= "<tr align=left valign=top><td>Last modified:</td><td>".formatLabbookTime($entry['modtime'])."</td></tr>\n";
+    $s .= "<tr align=left valign=top><td>Entry begun:</td><td>".formatDayTime($entry['ctime'])."</td></tr>\n";
+    $s .= "<tr align=left valign=top><td>Last modified:</td><td>".formatDayTime($entry['modtime'])."</td></tr>\n";
     $s .= "</table>";
     
     if($entry['model'] != "")
