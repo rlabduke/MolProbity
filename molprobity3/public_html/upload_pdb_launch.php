@@ -69,6 +69,8 @@ if($mode == "upload")
         $_SESSION['bgjob']['isCnsFormat']   = $_REQUEST['isCnsFormat'];
         $_SESSION['bgjob']['ignoreSegID']   = $_REQUEST['ignoreSegID'];
         
+        mpLog("pdb-upload:User uploaded a PDB file model from local disk");
+        
         // launch background job
         launchBackground(MP_BASE_DIR."/jobs/addmodel.php", "upload_pdb_done.php?$_SESSION[sessTag]", 3);
         
@@ -89,6 +91,8 @@ elseif($mode == "pdb/ndb")
     $_SESSION['bgjob']['pdbCode']       = $_REQUEST['pdbCode'];
     $_SESSION['bgjob']['isCnsFormat']   = false;
     $_SESSION['bgjob']['ignoreSegID']   = false;
+    
+    mpLog("pdb-fetch:User requested file ".$_REQUEST['pdbCode']." from PDB/NDB");
     
     // launch background job
     launchBackground(MP_BASE_DIR."/jobs/addmodel.php", "upload_pdb_done.php?$_SESSION[sessTag]", 3);

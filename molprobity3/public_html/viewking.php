@@ -18,6 +18,7 @@ INPUTS (via Get or Post):
 // 4. For pages that want to see the session but not change it, such as
 // pages that are refreshing periodically to monitor a background job.
     mpSessReadOnly();
+    mpLog("king:User opened a kinemage file in KiNG");
 
 #{{{ a_function_definition - sumary_statement_goes_here
 ############################################################################

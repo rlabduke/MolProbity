@@ -29,7 +29,10 @@ $mapPath = "$_SESSION[dataDir]/$mapName";
 if( !$_FILES['uploadFile']['error'] && $_FILES['uploadFile']['size'] > 0
 &&  move_uploaded_file($_FILES['uploadFile']['tmp_name'], $mapPath))
 {
+    // Uploaded file probably has restrictive permissions
+    chmod($mapPath, (0666 & ~MP_UMASK));
     $_SESSION['edmaps'][$mapName] = $mapName;
+    mpLog("edmap-upload:User uploaded an electron density map file");
 }
 else
 {

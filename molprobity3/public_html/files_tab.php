@@ -89,6 +89,8 @@ function makeFileCommands($path, $url)
 // Start the page: produces <HTML>, <HEAD>, <BODY> tags
 echo mpPageHeader("File management", "files");
 
+echo "<p><b><a href='files_archive.php?$_SESSION[sessTag]&target=session'>Download all files from this session as a ZIP archive</a></b></p>\n";
+
 if($_REQUEST['showAll'])
 {
     echo "<table width='100%' border='0' cellspacing='0'>\n";
@@ -100,7 +102,6 @@ if($_REQUEST['showAll'])
 }
 elseif(count($_SESSION['models']) > 0)
 {
-    echo "<p><b><a href='files_archive.php?$_SESSION[sessTag]&target=session'>Download all files from this session as a ZIP archive</a></b></p>\n";
     echo "<p><table width='100%' border='0' cellspacing='0' cellpadding='2'>\n";
     $c = MP_TABLE_ALT1;
     foreach($_SESSION['models'] as $id => $model)

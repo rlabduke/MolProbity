@@ -67,12 +67,13 @@ define("MP_TABLE_HIGHLIGHT", "#ffff99");
 //  The email address of the (current) author and maintainer
 //  of the MolProbity source code. Please DO NOT modify this
 //  entry; this is how we get feedback about bugs, etc.
+//  Change MP_EMAIL_WEBMASTER instead.
 define("MP_EMAIL_AUTHOR", "moler@kinemage.biochem.duke.edu,iwd@duke.edu");
 
 // Don't change this! It will break user bookmarks.
 define("MP_SESSION_NAME", "MolProbSID");
 
 // Current "internal reference" version number. Please DO NOT change.
-define("MP_VERSION", "3pre16");
+define("MP_VERSION", "3pre17");
 
 ?>

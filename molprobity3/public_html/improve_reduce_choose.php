@@ -86,7 +86,7 @@ unselect those you wish not to flip.
 ?>
     Reduce didn't flip any groups while adding hydrogens to your file.
     This <b>may</b> indicate that all of the Asn's, Gln's, and His's
-    in your structure are correctly assigned.
+    in your structure are oriented correctly.
 <?php } else { ?>
     <table border='0' cellspacing='0' width='100%'>
     <?php echo "<tr bgcolor='".MP_TABLE_HIGHLIGHT."'>"; ?>

@@ -17,6 +17,7 @@ INPUTS (via Get or Post):
 // 3. Restore session data. If you don't want to access the session
 // data for some reason, you must call mpInitEnvirons() instead.
     mpStartSession();
+    mpLog("notebook-view:User visited Lab Notebook page");
 
 #{{{ printTOC - prints a HTML table-of-contents for the lab notebook
 ############################################################################
@@ -64,6 +65,7 @@ function printEntry($num, $entry)
 if($_REQUEST['cmd'] == "Set time zone" && isset($_REQUEST['timezone']))
 {
     $_SESSION['timeZone'] = $_REQUEST['timezone'];
+    mpLog("timezone:User specified timezone as ".$_REQUEST['timezone']);
 }
 
 // Load lab notebook data
@@ -73,9 +75,15 @@ $labbook = openLabbook();
 if($_REQUEST['cmd'] == "Save")
 {
     if(isset($_REQUEST['entryNumber'])) // Replace an old entry
+    {
         $labbook[  $_REQUEST['entryNumber']  ] = $_REQUEST['labbookEntry'];
+        mpLog("notebook-edit:User modified existing lab notebook entry");
+    }
     else // Append the new entry
+    {
         $labbook[] = $_REQUEST['labbookEntry'];
+        mpLog("notebook-add:User added a new entry to the lab notebook");
+    }
     saveLabbook($labbook);
 }
 

@@ -11,7 +11,7 @@
     require_once(MP_BASE_DIR.'/lib/core.php');
 // 3. Restore session data. If you don't want to access the session
 // data for some reason, you must call mpInitEnvirons() instead.
-    mpStartSession(true);
+    if(mpStartSession(true)) mpLog("new-session:New interactive user session started on the web");
 
 #{{{ a_function_definition - sumary_statement_goes_here
 ############################################################################

@@ -1,12 +1,16 @@
 <?php # (jEdit options) :folding=explicit:collapseFolds=1:
 /*****************************************************************************
-    Dummy page!
+    Launches SSWING in the background.
     
 INPUTS (via Get or Post):
-    paramName       description of parameter
+    model           ID code for model to process
+    edmap           the map file name
+    cnit            a set of CNIT codes for residues to process
 
-OUTPUTS (via Post):
-    paramName       description of parameter
+OUTPUTS (via $_SESSION['bgjob'])
+    model           ID code for model to process
+    edmap           the map file name
+    cnit            a set of CNIT codes for residues to process
 
 *****************************************************************************/
 // EVERY *top-level* page must start this way:
@@ -30,40 +34,21 @@ OUTPUTS (via Post):
 //function someFunctionName() {}
 #}}}########################################################################
 
-#{{{ a_function_definition - sumary_statement_goes_here
-############################################################################
-/**
-* Documentation for this function.
-*/
-//function someFunctionName() {}
-#}}}########################################################################
-
-#{{{ a_function_definition - sumary_statement_goes_here
-############################################################################
-/**
-* Documentation for this function.
-*/
-//function someFunctionName() {}
-#}}}########################################################################
-
-#{{{ a_function_definition - sumary_statement_goes_here
-############################################################################
-/**
-* Documentation for this function.
-*/
-//function someFunctionName() {}
-#}}}########################################################################
-
 # MAIN - the beginning of execution for this page
 ############################################################################
-// Start the page: produces <HTML>, <HEAD>, <BODY> tags
-echo mpPageHeader("Thanks!");
-echo "<pre>";
-print_r($_REQUEST['cnit']);
-echo "</pre>";
+unset($_SESSION['bgjob']); // Clean up any old data
+$_SESSION['bgjob']['model']         = $_REQUEST['model'];
+$_SESSION['bgjob']['edmap']         = $_REQUEST['edmap'];
+$_SESSION['bgjob']['cnit']          = $_REQUEST['cnit'];
+
+mpLog("sswing:Launched SSWING to refit ".count($_REQUEST['cnit'])." residue(s)");
+
+// launch background job
+launchBackground(MP_BASE_DIR."/jobs/sswing.php", "improve_sswing_choose.php?$_SESSION[sessTag]", 5);
+
+// include() status monitoring page
+include(MP_BASE_DIR."/public_html/job_progress.php");
+die();
 ############################################################################
 ?>
 
-<!-- HTML code may want to go here... -->
-
-<?php echo mpPageFooter(); ?>
