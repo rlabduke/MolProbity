@@ -30,10 +30,13 @@ INPUTS (via Get or Post):
 
 # MAIN - the beginning of execution for this page
 ############################################################################
-if(isset($_REQUEST['size']))
+// I can't remember why I was thinking this page could interfere with
+// background jobs, but I think (at the moment) that this should be safe.
+//
+// You could get in trouble if a background job was running (hence the check here)
+// or if you somehow hit the size-change link while another page was loading (unlikely).
+if(isset($_REQUEST['size']) && !$_SESSION['bgjob']['isRunning'])
 {
-    // I can't remember why I was thinking this page could interfere with
-    // background jobs, but I think (at the moment) that this should be safe:
     mpSessReadOnly(false);
     // (Note that changing size breaks the "Close" button, at least in Safari)
     $_SESSION['kingSize'] = $_REQUEST['size'];
