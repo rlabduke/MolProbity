@@ -88,13 +88,14 @@ function mpNavigationBar($active)
     //$s .= mpNavBar_call('', 'Crystallography');
     //$s .= "<br />\n";
     $s .= mpNavBar_goto('sitemap.php', 'Site map', ($active == 'sitemap'));
-    $s .= mpNavBar_call('upload_setup.php', 'Upload / fetch files');
+    $s .= mpNavBar_call('upload_pdb_setup.php', 'Input PDB files');
+    $s .= mpNavBar_call('upload_other_setup.php', 'Input other files');
     $s .= mpNavBar_call('reduce_setup.php', 'Add hydrogens');
     $s .= "<br />\n";
     $s .= mpNavBar_goto('file_browser.php', 'View &amp; download files', ($active == 'files'));
     $s .= mpNavBar_goto('notebook_main.php', 'Lab notebook', ($active == 'notebook'));
     //$s .= mpNavBar_goto('', 'Set preferences', ($active == 'preferences'));
-    $s .= mpNavBar_goto('feedback_setup.php', 'Feedback &amp; Bugs');
+    $s .= mpNavBar_goto('feedback_setup.php', 'Feedback &amp; bugs', ($active == 'feedback'));
     $s .= mpNavBar_goto('save_session.php', 'Save session', ($active == 'savesession'));
     $s .= "<br />\n";
     $s .= mpNavBar_goto('logout.php', 'Log out', ($active == 'logout'));

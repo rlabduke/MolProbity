@@ -72,9 +72,9 @@ function display($context)
     }
     else
     {
-        echo "No models are available. Please <a href='".makeEventURL("onNavBarCall", "upload_setup.php")."'>upload or fetch a PDB file</a> in order to continue.\n";
+        echo "No models are available. Please <a href='".makeEventURL("onNavBarCall", "upload_pdb_setup.php")."'>upload or fetch a PDB file</a> in order to continue.\n";
         echo makeEventForm("onReturn");
-        echo "<input type='submit' name='cmd' value='&lt; Cancel adding H'></form>\n";
+        echo "<p><input type='submit' name='cmd' value='Cancel'></p></form>\n";
         
     }
     

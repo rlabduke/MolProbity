@@ -26,16 +26,30 @@ function display($context)
         echo "<p>" . makeEventForm("onTryAgain");
         echo "<table border='0' width='100%'><tr>\n";
         echo "<td align='left'><input type='submit' name='cmd' value='&lt; Try again'></td>\n";
-        echo "<td align='right'><input type='submit' name='cmd' value='Cancel upload &gt;'></td>\n";
+        echo "<td align='right'><input type='submit' name='cmd' value='Cancel'></td>\n";
         echo "</tr></table>\n</form></p>\n";
         echo mpPageFooter();
     }
     else // upload was OK
     {
         $type = $context['type'];
-        if($type == 'map')          $this->displayMap($context);
+        if($type == 'kin')          $this->displayKin($context);
+        elseif($type == 'map')      $this->displayMap($context);
         elseif($type == 'hetdict')  $this->displayHetDict($context);
     }
+}
+#}}}########################################################################
+
+#{{{ displayKin
+############################################################################
+function displayKin($context)
+{
+    echo mpPageHeader("Kinemage $context[kinName] added");
+    echo "Your kinemage has been uploaded. You may now view it in KiNG:\n";
+    echo "<ul><li>".linkKinemage($context['kinName'])."</li></ul>\n";
+    echo "<p>" . makeEventForm("onReturn");
+    echo "<input type='submit' name='cmd' value='Continue &gt;'>\n</form></p>\n";
+    echo mpPageFooter();
 }
 #}}}########################################################################
 
@@ -89,7 +103,7 @@ function onReturn($arg, $req)
 function onTryAgain($arg, $req)
 {
     if($req['cmd'] == '< Try again')
-        pageGoto("upload_setup.php");
+        pageGoto("upload_other_setup.php");
     else
         pageReturn();
 }
