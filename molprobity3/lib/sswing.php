@@ -47,16 +47,20 @@ function pdbSwapCoords($inpath, $outpath, $swap)
 * mapfile       a CCP4-format electron density map file
 * workdir       the directory to work in, where tmp files are created
 * cnit          the CNNNNITTT code of the residue to try refitting
+* goFast        true if we want to do the fast(er) search
 */
-function runSswing($pdbfile, $mapfile, $workdir, $cnit)
+function runSswing($pdbfile, $mapfile, $workdir, $cnit, $goFast = true)
 {
     $oldwd = getcwd();
     chdir($workdir);
     
-    $cmd = "sswing -f -s";
+    $cmd = "sswing -s";
+    if($goFast) $cmd .= " -f";
+    //$cmd .= " -d"; // for debugging
     if(substr($cnit,0,1) != ' ') $cmd .= " -c ".substr($cnit,0,1);
     $cmd .= " $pdbfile ".trim(substr($cnit,1,4))." ".trim(substr($cnit,6,3))." $mapfile";
-    //echo("\n\n".$cmd."\n\n"); //XXX-TMP
+    $cmd .= " >> sswing.err.log 2>&1";
+    echo($cmd."\n"); // for debugging
     exec($cmd);
     
     $swap = array();

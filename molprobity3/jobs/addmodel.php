@@ -107,6 +107,9 @@ if($_SESSION['bgjob']['newModel'])
 {
     $id = $_SESSION['bgjob']['newModel'];
     $model = $_SESSION['models'][ $id ];
+    $tasks = getProgressTasks();
+    $tasks['thumbnail'] = "Make a thumbnail kinemage using <code>prekin -cass -colornc</code>";
+    setProgress($tasks, "thumbnail");
     
     // Make a thumbnail kin for the lab notebook
     $modelDir = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
@@ -143,6 +146,8 @@ if($_SESSION['bgjob']['newModel'])
         $id,
         "auto"
     );
+    
+    setProgress($tasks, null);
 }
 
 ############################################################################

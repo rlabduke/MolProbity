@@ -213,6 +213,7 @@ $__progress_tasks__ = array();
 */
 function setProgress($tasks, $active)
 {
+    global $__progress_tasks__;
     $__progress_tasks__ = $tasks; // make a record for later
     $f = fopen("$_SESSION[dataDir]/".MP_DIR_SYSTEM."/progress", "wb");
     $foundActive = false;
@@ -236,6 +237,7 @@ function setProgress($tasks, $active)
 */
 function getProgressTasks()
 {
+    global $__progress_tasks__;
     return $__progress_tasks__;
 }    
 #}}}########################################################################
