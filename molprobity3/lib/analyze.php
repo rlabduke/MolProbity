@@ -56,7 +56,8 @@ function runAnalysis($modelID, $opts)
     if($opts['doRota'])         $tasks['rota'] = "Do rotamer analysis";
     if($opts['doCbDev'])        $tasks['cbeta'] = "Do C&beta; deviation analysis and make kins";
     
-    if($opts['doBaseP'])        $tasks['base-phos'] = "<i>Base-phosphate perpendicular analysis is not implemented</i>";
+    $runBaseP = $opts['doBaseP'] && ($opts['doSummaryStats'] || $opts['doMultiChart']);
+    if($runBaseP)               $tasks['base-phos'] = "Do base-phosphate perpendicular analysis";
     
     $runClashlist = $opts['doAAC'] && ($opts['doSummaryStats'] || $opts['doMultiChart']);
     if($runClashlist)           $tasks['clashlist'] = "Run <code>clashlist</code> to find bad clashes and clashscore";
@@ -99,22 +100,19 @@ function runAnalysis($modelID, $opts)
         $cbdev = loadCbetaDev($outfile);
         
         makeCbetaDevPlot($infile, "$kinDir/$model[prefix]cb2d.kin");
-        $tasks['cbeta'] .= " - preview <a href='viewking.php?$_SESSION[sessTag]&url=$kinURL/$model[prefix]cb2d.kin' target='_blank'>2D</a>";
-        setProgress($tasks, 'cbeta'); // so the preview link is visible
-        
-        $outfile = "$kinDir/$model[prefix]cb3d.kin";
-        exec("prekin -lots $infile > $outfile");
-        makeCbetaDevBalls($infile, $outfile);
-        $tasks['cbeta'] .= " | <a href='viewking.php?$_SESSION[sessTag]&url=$kinURL/$model[prefix]cb3d.kin' target='_blank'>3D</a>";
+        $tasks['cbeta'] .= " - <a href='viewking.php?$_SESSION[sessTag]&url=$kinURL/$model[prefix]cb2d.kin' target='_blank'>preview</a>";
         setProgress($tasks, 'cbeta'); // so the preview link is visible
     }
     //}}} Run programs and offer kins to user
     
     //{{{ Run nucleic acid geometry programs and offer kins to user
     // Base-phosphate perpendiculars
-    if($opts['doBaseP'])
+    if($runBaseP)
     {
         setProgress($tasks, 'base-phos'); // updates the progress display if running as a background job
+        $outfile = "$rawDir/$model[prefix]pperp.data";
+        runBasePhosPerp($infile, $outfile);
+        $pperp = loadBasePhosPerp($outfile);
     }
     //}}} Run nucleic acid geometry programs and offer kins to user
     
@@ -137,7 +135,7 @@ function runAnalysis($modelID, $opts)
     {
         setProgress($tasks, 'multichart'); // updates the progress display if running as a background job
         $outfile = "$chartDir/$model[prefix]multi.chart";
-        makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $opts['multiChartSort']);
+        makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pperp, $opts['multiChartSort']);
         $tasks['multichart'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=html' target='_blank'>preview</a>\n";
         setProgress($tasks, 'multichart'); // so the preview link is visible
     }
@@ -152,6 +150,7 @@ function runAnalysis($modelID, $opts)
             'rama'      =>  isset($rama),
             'rota'      =>  isset($rota),
             'cbdev'     =>  isset($cbdev),
+            'pperp'     =>  $opts['doBaseP'],
             'dots'      =>  $opts['doAAC'],
             'hbdots'    =>  $opts['showHbonds'],
             'vdwdots'   =>  $opts['showContacts']
@@ -243,11 +242,15 @@ function runAnalysis($modelID, $opts)
                 $entry .= "<td>Goal: 0</td></tr>\n";
             }
         }// end of protein-specific stats
-        if($opts['doBaseP'])
+        if(isset($pperp))
         {
-            // TODO: Nucleic acid summary stats here
+            $pperpOut = count(findBasePhosPerpOutliers($pperp));
+            $pperpTot = count($pperp);
+            if($pperpOut == 0)  $bg = $bgGood;
+            else                $bg = $bgFair;
             $entry .= "<tr><td rowspan='1' align='center'>Nucleic Acid<br>Geometry</td>\n";
-            $entry .= "<td colspan='3'><i>No nucleic acid geometry info implemented</i></td>\n";
+            $entry .= "<td>Base-P dist./pucker disagreement:</td><td bgcolor='$bg'>$pperpOut</td>\n";
+            $entry .= "<td>Goal: 0</td></tr>\n";
             $entry .= "</tr>\n";
         }
         $entry .= "</table>\n";
@@ -278,15 +281,89 @@ function runAnalysis($modelID, $opts)
     if($opts['doCbDev'])
     {
         $entry .= "<li>".linkKinemage("$model[prefix]cb2d.kin", "C&beta; deviation scatter plot (2D)")."</li>\n";
-        $entry .= "<li>".linkKinemage("$model[prefix]cb3d.kin", "C&beta; deviations marked on structure (3D)")."</li>\n";
     }
-    if($opts['doBaseP'])
-        $entry .= "<li><i>Base-phosphate distance analysis not yet implemented</i></li>\n";
     $entry .= "</ul>\n";
     //}}} Create lab notebook entry: multi-crit and individual kins, charts
     
     setProgress($tasks, null); // everything is finished
     return $entry;
+}
+#}}}########################################################################
+
+#{{{ runBasePhosPerp - generate tab file of base-phos perp distances
+############################################################################
+function runBasePhosPerp($infile, $outfile)
+{
+    exec("prekin -pperpdump $infile > $outfile");
+}
+#}}}########################################################################
+
+#{{{ loadBasePhosPerp - load base-phos perp data into an array
+############################################################################
+/**
+* Returns an array of entries, one per residue. Their keys:
+*   resName         a formatted name for the residue: 'cnnnnittt'
+*                       c: Chain ID, space for none
+*                       n: sequence number, right justified, space padded
+*                       i: insertion code, space for none
+*                       t: residue type (ALA, LYS, etc.), all caps,
+*                          left justified, space padded
+*   resType         3-letter residue code (e.g. ALA)
+*   chainID         1-letter chain ID or ' '
+*   resNum          residue number
+*   insCode         insertion code or ' '
+*   5Pdist          distance from the base to the 5' phosphate (?)
+*   3Pdist          distance from the base to the 3' phosphate (?)
+*   delta           delta angle of the sugar ring
+*   outlier         true if the sugar pucker (delta) doesn't match P dist
+*/
+function loadBasePhosPerp($datafile)
+{
+    $data = file($datafile);
+    foreach($data as $line)
+    {
+        $line = trim($line);
+        if($line != "" && !startsWith($line, ':pdb:res:'))
+        {
+            $line = explode(':', $line);
+            $entry = array(
+                'resType'   => strtoupper(substr($line[2],1,-1)),
+                'chainID'   => strtoupper(substr($line[3],1,-1)),
+                'resNum'    => trim(substr($line[4], 0, -1)) + 0,
+                'insCode'   => substr($line[4], -1),
+                '5Pdist'    => $line[5] + 0,
+                '3Pdist'    => $line[6] + 0,
+                'delta'     => $line[7] + 0,
+                'outlier'   => (trim($line[8]) ? true : false)
+            );
+            $entry['resName']   = $entry['chainID']
+                                . str_pad($entry['resNum'], 4, ' ', STR_PAD_LEFT)
+                                . $entry['insCode']
+                                . str_pad($entry['resType'], 3, ' ', STR_PAD_RIGHT);
+            $ret[] = $entry;
+        }
+    }
+    return $ret;
+}
+#}}}########################################################################
+
+#{{{ findBasePhosPerpOutliers - evaluates residues for bad score
+############################################################################
+/**
+* Returns an array of 9-char residue names for residues that
+* fall outside the allowed boundaries for this criteria.
+* Inputs are from appropriate loadXXX() function above.
+*/
+function findBasePhosPerpOutliers($input)
+{
+    $worst = array();
+    if(is_array($input)) foreach($input as $res)
+    {
+        if($res['outlier'])
+            $worst[$res['resName']] = $res['resName'];
+    }
+    ksort($worst); // Put the residues into a sensible order
+    return $worst;
 }
 #}}}########################################################################
 

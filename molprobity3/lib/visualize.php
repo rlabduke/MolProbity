@@ -36,14 +36,6 @@ function convertKinToPostscript($infile)
 */
 #}}}########################################################################
 
-#{{{ makeCbetaDevBalls - plots CB dev in 3-D, appending to the given file
-############################################################################
-function makeCbetaDevBalls($infile, $outfile)
-{
-    exec("prekin -append -cbetadev $infile >> $outfile");
-}
-#}}}########################################################################
-
 #{{{ makeCbetaDevPlot - creates a 2-D kinemage scatter plot
 ############################################################################
 function makeCbetaDevPlot($infile, $outfile)
@@ -65,6 +57,7 @@ function makeCbetaDevPlot($infile, $outfile)
 *   rama                Ramachandran outliers
 *   rota                rotamer outliers
 *   cbdev               C-beta deviations greater than 0.25A
+*   pperp               phosphate-base perpendicular outliers
 *   dots                all-atom contacts dots
 *       hbdots          H-bond dots
 *       vdwdots         van der Waals (contact) dots
@@ -92,6 +85,7 @@ function makeMulticritKin($infiles, $outfile, $opt, $nmrConstraints = null)
         if($opt['rama'])            makeBadRamachandranKin($infile, $outfile);
         if($opt['rota'])            makeBadRotamerKin($infile, $outfile);
         if($opt['cbdev'])           makeBadCbetaBalls($infile, $outfile);
+        if($opt['pperp'])           makeBadPPerpKin($infile, $outfile);
         if($opt['Bscale'])          makeBfactorScale($infile, $outfile);
         if($opt['Qscale'])          makeOccupancyScale($infile, $outfile);
         if($opt['dots'])            makeProbeDots($infile, $outfile, $opt['hbdots'], $opt['vdwdots']);
@@ -245,6 +239,18 @@ doprint && bigbeta';
 }
 #}}}########################################################################
 
+#{{{ makeBadPPerpKin - plots phosphate-base perpendicular outliers on kin
+############################################################################
+function makeBadPPerpKin($infile, $outfile)
+{
+    $h = fopen($outfile, 'a');
+    fwrite($h, "@subgroup {base-phos perp} dominant master={base-P outliers}\n");
+    fclose($h);
+    
+    exec("prekin -quiet -append -nogroup -pperpoutliers $infile >> $outfile");
+}
+#}}}########################################################################
+
 #{{{ makeProbeDots - appends mc and sc Probe dots
 ############################################################################
 /**
@@ -319,10 +325,11 @@ function makeFlipkin($inpath, $outpathAsnGln, $outpathHis)
 * $rama     is the data structure from loadRamachandran()
 * $rota     is the data structure from loadRotamer()
 * $cbdev    is the data structure from loadCbetaDev()
+* $pperp    is the data structure from loadBasePhosPerp()
 * $sortBy   can be 'natural', 'bad', 'clash', 'rama', 'rota', 'cbdev'
 * Any of them can be set to null if the data is unavailable.
 */
-function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $sortBy = 'natural')
+function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pperp, $sortBy = 'natural')
 {
     // Make sure all residues are represented, and in the right order.
     $res = listResidues($infile);
@@ -379,6 +386,18 @@ function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $so
                 $res[$item['resName']]['cbdev'] = "<td>$item[dev]&Aring;</small></td>";
         }
     }
+    if(is_array($pperp))
+    {
+        foreach($pperp as $item)
+        {
+            if($item['outlier'])
+            {
+                $res[$item['resName']]['pperp_val'] = 1; // no way to quantify this
+                $res[$item['resName']]['pperp'] = "<td bgcolor='#ff6699'>wrong pucker?</td>";
+                $res[$item['resName']]['isbad'] = true;
+            }
+        }
+    }
     
     // Sort into user-defined order
     if($sortBy == 'natural')        {} // don't change order
@@ -396,6 +415,7 @@ function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $so
     if(is_array($rama))   fwrite($out, "<td><b>Ramachandran</b></td>\n");
     if(is_array($rota))   fwrite($out, "<td><b>Rotamer</b></td>\n");
     if(is_array($cbdev))  fwrite($out, "<td><b>C&beta; deviation</b></td>\n");
+    if(is_array($pperp))  fwrite($out, "<td><b>Base-P perp. dist.</b></td>\n");
     fwrite($out, "</tr>\n");
     
     $color = MP_TABLE_ALT1;
@@ -421,6 +441,11 @@ function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $so
         if(is_array($cbdev))
         {
             if(isset($eval['cbdev']))   fwrite($out, $eval['cbdev']);
+            else                        fwrite($out, "<td>-</td>");
+        }
+        if(is_array($pperp))
+        {
+            if(isset($eval['pperp']))   fwrite($out, $eval['pperp']);
             else                        fwrite($out, "<td>-</td>");
         }
         fwrite($out, "</tr>\n");
