@@ -1,0 +1,507 @@
+#!/usr/bin/perl -w
+
+# name: flipkin
+# date created: awk version Fall 99
+# author: J. Michael Word, Richardson Lab, Duke University
+# purpose: reduce (i.e., add hydrogens to) a file with all
+#          the asn and gln or his residues flipped relative
+#          to the orientation from a previous run of reduce
+#          and build a kinemage to show this
+#
+# usage: flipkin inputH.pdb >outputH.nqFlip.kin
+#
+#        flipkin -h inputH.pdb >outputH.hisFlip.kin
+#
+#   (where inputH.pdb has been reduced already. This program reads
+#    the header of inputH.pdb to gather the list of N&Q or H residues
+#    and forces reduce to place these residues in a contrary
+#    orientation to what was used in inputH.pdb. Finally, a kinemage
+#    is made and output to standard output)
+#
+# installation: You will probably need to change the location of the perl
+#               on the first line to reflect your site's configuration
+#               Requires prekin, probe and reduce (+ mage to view).
+#
+# revision history:
+#   5/ 8/2001 - JM Word - v2.0 - first perl cut
+#   5/10/2001 - JM Word - v2.1 - eliminated several masters
+#   5/31/2001 - JM Word - v2.2 - added Bvalue to atom id and
+#                                -limit, -fix, -v flags
+#   6/ 1/2001 - JM Word - v2.3 - added error checking for abandoned opt.
+#   7/19/2001 - JM Word - v2.4 - added -db flag to pass reduce het dict
+
+   use strict;
+
+   my $isHis = 0;
+   my $extraFixFile = '';
+   my $dbFile = '';
+   my $limitFlag = '';
+   my $verb = '-quiet';
+   while(defined($ARGV[0]) && $ARGV[0] =~ /^-/) {
+      $_ = shift;
+      if    (/^-[Hh]$/) { $isHis = 1; }                         # -h
+      elsif (/^-[Vv]$/) { $verb = ''; }                         # -v
+      elsif (/^-[Ll][Ii][Mm][Ii][Tt]\d+$/) { $limitFlag = $_; } # -limit#
+      elsif (/^-[Ff][Ii][Xx]$/) {                               # -fix file
+         if (defined($ARGV[0])) {
+            $extraFixFile = shift;
+	 }
+         else {
+            die "No filename after flag: $_\n";
+         }
+      }
+      elsif (/^-[Dd][Bb]$/) {                                   # -db file
+         if (defined($ARGV[0])) {
+            my $dbfn = shift;
+            $dbFile = "-db $dbfn";
+	 }
+         else {
+            die "No filename after flag: $_\n";
+         }
+      }
+      else {
+         die "unknown parameter: $_\n";
+      }
+   }
+
+   my $redpdb; # the reduce-processed pdb file we will process
+   
+   if ($#ARGV == 0 && defined($ARGV[0])) {
+      $redpdb = shift;
+      die "can not read input file: $redpdb\n" unless (-r $redpdb);
+   }
+   else {
+      warn "Usage: $0 [-flags] pdbH > flip.kin\n";
+      warn "   generates animated kinemage of ASN/GLN flips\n";
+      warn "   unless -h flag is used, then generates HIS flip kin\n";
+      warn "   other flags:\n";
+      warn "      -v          verbose; watch reduce run\n";
+      warn "      -fix file   uses records from file to fix orientatons\n";
+      warn "      -db file    uses het dict in file\n";
+      warn "      -limit#     limits number of permutations reduce searches\n";
+      die "command line parameter error, stopped";
+   }
+
+   # -----------------------------------------------------------
+   
+   # temp file names
+
+   my @now = localtime(time);
+   my $year = $now[5];
+   my $mon  = $now[4];
+   my $day  = $now[3];
+   my $uniquid = "${$}${year}${mon}${day}";
+
+   my $fixFile = "/tmp/flipF${uniquid}.txt";
+   my $flipdb  = "/tmp/flipH${uniquid}.pdb";
+   my $kintmp  = "/tmp/flipK${uniquid}.kin";
+
+   unlink($fixFile); # remove any existing copy of these files
+   unlink($flipdb);
+   unlink($kintmp);
+
+   # -----------------------------------------------------------
+   
+   # make temp file to force reduce to build alternate orientations
+
+   my $respattern = ($isHis) ? 'HIS' : 'ASN|GLN';
+
+   my $rec = '';
+   my $flipInSet = '';
+   my @setsToProcess;
+   my %setProcessRecs;
+   my $setID = '';
+   my $subset = '';
+
+   open(FIX, ">$fixFile") || die "Can't create fix file: $!\n";
+   if ($extraFixFile) {
+      open(XF, $extraFixFile) || die "Can't open fix file: $!\n";
+      while (<XF>) {
+         print FIX;
+      }
+      close XF;
+   }
+
+   open(PDBH, $redpdb)    || die "Can't process pdbH file: $!\n";
+   while (<PDBH>) {
+      chop;
+      $rec = $_;
+      if ($rec =~ /^USER  MOD S|^USER  MOD F/) {
+         my ($class, $funcGroup, $prevAction) = split(':', $rec, 4);
+         $funcGroup =~ tr/a-z/A-Z/;
+         my $matchpat = ($funcGroup =~ /${respattern}/) ? 1 : 0;
+
+         # this first case is the essential step in reading header recs
+         # where we look for either N/Q or H residues using a pattern
+         # and fix its orientation opposite to what it was before
+         if ($matchpat && !($prevAction =~ /NH3\+/)) { # leave NH3+ for later
+
+            my $opposite = 'f';
+            printf FIX "%1.1s:%s:first pass %s\n",
+                        $opposite, $funcGroup, $prevAction;
+
+            # if this residue is in a set we need to remove the set from
+            # the list of sets which will have their orientation fixed
+            if ($class =~ /^USER  MOD Set\s+(\d+).(\d+)/) {
+
+               $flipInSet = "set$1"; # also used by set case lower down
+
+               if (grep(/${flipInSet}$/, @setsToProcess)) {
+                  @setsToProcess = grep(!/${flipInSet}$/, @setsToProcess);
+               }
+            }
+         }
+         # singletons which do not need contrary orientation
+         elsif ($class =~ /^USER  MOD Single/) {
+
+            if ($prevAction =~ /(rot|methyl|NH3\+)\s+([+-]?\d+)/) {
+               my $angle = $2;
+               printf FIX "r%s:%s:first pass %s\n",
+                        $angle, $funcGroup, $prevAction;
+            }
+            elsif ($funcGroup =~ /ASN|GLN|HIS/) {
+               my $action = 'o';
+               printf FIX "%1.1s:%s:first pass %s\n",
+                           $action, $funcGroup, $prevAction;
+            }
+         }
+         # sets - basic info collect for later action unless item flipped above
+         elsif ($class =~ /^USER  MOD Set\s+(\d+).(\d+)/) {
+            $setID = "set$1";
+            $subset = "$2";
+            if ($setID ne $flipInSet) { # build up record of set action
+               push(@setsToProcess, $setID)
+                       unless grep(/$setID$/, @setsToProcess);
+               $setProcessRecs{"$setID ssList"} .= "$subset ";
+               $setProcessRecs{"$setID $subset"} = "$funcGroup:$prevAction";
+            }
+         }
+      }
+      elsif ($rec =~ /^ATOM  /) { last; } # no more USER__MOD records
+   }
+
+   # process sets
+   foreach $setID (@setsToProcess) {
+      my @subsetlist = split(' ', $setProcessRecs{"$setID ssList"});
+      foreach $subset (@subsetlist) {
+         my $item = $setProcessRecs{"$setID $subset"};
+         my ($funcGroup,$prevAction) = split(':', $item);
+         if ($prevAction =~ /(rot|methyl|NH3)\s+([+-]?\d+)/) {
+            my $angle = $2;
+            printf FIX "r %s:%s:first pass %s - %s.%s\n",
+                     $angle, $funcGroup, $prevAction, $setID, $subset;
+         }
+         elsif ($funcGroup =~ /ASN|GLN|HIS/) {
+            my $action = 'o';
+            printf FIX "%1.1s:%s:first pass %s - %s.%s\n",
+                     $action, $funcGroup, $prevAction, $setID, $subset;
+         }
+
+      }
+   }
+   close PDBH;
+   close FIX;
+
+   # build the new pdb file with opposite (some) orientations
+
+   my $runReduce = "reduce -quiet -trim $redpdb | " .
+                   "reduce $verb $limitFlag $dbFile -build -fix $fixFile - > $flipdb";
+   my $rc = system($runReduce);
+
+   unlink($fixFile); # remove temp file used to fix orientations
+
+   # -----------------------------------------------------------
+   
+   # output kin file header, including views
+
+   my %altname;
+   my %flips;
+   my $initial = 1;
+   my $vid = 0;
+   
+   $altname{'1'} = 'A';
+   $altname{'2'} = 'B';
+   $altname{'3'} = 'C';
+   if ($isHis) {
+      $altname{'HIS'} = 'H';
+   }
+   else {
+      $altname{'ASN'} = 'N';
+      $altname{'GLN'} = 'Q';
+   }
+
+
+   print "\@text\n";
+   print " coordinates from file: ${redpdb}\n";
+   if ($rc) { # inspect return code from reduce run
+      print "WARNING: Problems encountered during processing.\n";
+      if ($rc == 256) {
+         my %probres;
+         print "         Optimization of one or more groups abandoned\n";
+         print "         because too many permutations were required.\n";
+         print "         The following groups may be affected:\n";
+         open(FPDB, $flipdb)    || die "Can't read flipped pdbH header: $!\n";
+         while (<FPDB>) {
+            chop;
+	    if (/^USER  MOD (.+)\:sc\=\-9\.9e\+99/) {
+               my ($class, $restype, $action) = split(/:/, $_, 5);
+               $probres{$restype} = $action;
+	    }
+            last if /^ATOM|^atom|^HETA|^heta/;
+         }
+	 close FPDB;
+	 my $combo = join(',', sort keys(%probres));
+	 $combo =~ s/  +/ /g;
+         $combo =~ s/ +$//;
+	 $combo =~ s/^ +//;
+	 $combo =~ s/ +,/,/g;
+	 $combo =~ s/,  +/, /g;
+         print " > $combo\n\n";
+      }
+   }
+
+   open(PDBH, $redpdb)    || die "Can't process pdbH file: $!\n";
+   while (<PDBH>) {
+      chop;
+      print $_,"\n" if $initial && /^USER  MOD|^HEADER|^TITLE|^KEYWDS|^AUTHOR/;
+
+      if ($initial && /^ATOM|^atom|^HETA|^heta/) {
+         $initial = 0;
+         print "\@kinemage 1\n";
+         print "\@caption\n";
+         print "from file: ${redpdb}\n";
+         print " views marked with \* are for groups flipped by reduce\n";
+      }
+      if (/^USER  MOD S/) {
+         my ($class, $restype, $action) = split(/:/, $_, 5);
+
+         if ($restype =~ /${respattern}/ && $action =~ /FLIP/) {
+            $flips{substr($restype, 0, 9)} = $action;
+         }
+      }
+      if (/^ATOM|^atom/) {
+         my $card    = $_; $card =~ tr/a-z/A-Z/;
+         my $res     = substr($card, 17, 3);
+         my $resid   = substr($card, 22, 4);
+         my $inscode = substr($card, 26, 1);
+         my $chain   = substr($card, 21, 1);
+
+         my $ics = ($chain eq ' ') ? '' : $inscode;
+
+         if ($res =~ /${respattern}/) {
+	    # only select these two residues
+	    my $atom    = substr($card, 12, 4);
+	    my $dist    = substr($atom, 2, 1);
+	    my $altConf = substr($card, 16, 1);
+	    if (defined $altname{$altConf}) {
+		$altConf = $altname{$altConf};
+	    }
+
+	    if (($res eq 'GLN' && $dist eq 'D') || 
+	        ($res eq 'ASN' && $dist eq 'G') ||
+	        ($res eq 'HIS' && $dist eq 'G')) {
+		# amide carbon or ring CG
+
+               if ($altConf eq ' ' || $altConf eq 'A') {
+                  my $rchar = $altname{$res};
+
+                  my $X = substr($card, 30, 8);
+                  my $Y = substr($card, 38, 8);
+                  my $z = substr($card, 46, 8);
+
+                  my $descr = sprintf('%1.1s%4s%1.1s%-3s',
+                                   $chain, $resid, $inscode, $res);
+                  my $fflag = (defined $flips{$descr}) ? '*' : ' ';
+
+                  my $vs = '';
+                  if (++$vid > 1) { $vs = $vid . ''; }
+
+                  my $LCaltConf = $altConf; $LCaltConf =~ tr/A-Z/a-z/;
+
+                  printf "\@%sviewid {%s%s%d%s%s%s}\n", 
+		       $vs, $fflag, $rchar, $resid,
+                       $ics, $LCaltConf, $chain;
+                  printf "\@%sspan 12\n", $vs;
+                  printf "\@%szslab 100\n", $vs;
+                  printf "\@%scenter %s %s %s\n", $vs, $X, $Y, $z;
+               }
+            }
+         }
+      }
+   }
+   close PDBH;
+
+   printf "\@master \{mainchain\}\n";
+   printf "\@master \{sidechain\}\n";
+   printf "\@master \{H's\}\n";
+   printf "\@master \{hets\}\n";
+   printf "\@master \{water\}\n";
+
+   # -----------------------------------------------------------
+   
+   # molecule: group 1 constant stuff
+
+   my $fileID = $redpdb;
+   $fileID =~ s#\.\w+$##;
+   $fileID =~ s#^.*[\\/]##g;
+   print "\@group \{$fileID\} dominant\n";
+
+   my $pkin; # repeated first part of the prekin command
+
+   unlink($kintmp);
+   $pkin = "prekin -append -in $redpdb -out $kintmp -scope -bval";
+   system("$pkin -show \"mc(white),hy(gray)\"");
+   system("$pkin -show \"sc(cyan),hy(gray)\" " .
+                "-excludesc \"asn,gln,cys,ser,thr,his,lys,met,tyr\"");
+   system("$pkin -show \"ht(orange)\"");
+   system("$pkin -show \"wa(pink),ba(pink)\"");
+
+   &reformatConstantOutput;
+
+   # -----------------------------------------------------------
+
+   # molecule animation: group 2 reduce picked orientation
+
+   my $selSC  = ($isHis) ? "his" : "asn,gln";
+   my $nselSC = ($isHis) ? "asn,gln" : "his";
+   my $prbSC  = ($isHis) ? "H" : "N,Q";
+
+   print "\@group \{reduce\} animate\n";
+
+   unlink($kintmp);
+
+   $pkin = "prekin -append -in $redpdb -out $kintmp -scope -bval";
+
+   system("echo \"\@group \{selected\}\" >> $kintmp");
+   system("$pkin -show \"sc(sea),hy(gray),atom_markers\" -sc \"${selSC}\"");
+   system("echo \"\@group \{movable\}\" >> $kintmp");
+   system("$pkin -show \"sc(cyan),hy(gray)\" -sc \"cys,ser,thr,${nselSC},lys,met,tyr\"");
+   system("echo \"\@group \{contacts\}\" >> $kintmp");
+   system("probe -dens12 -lens -nogroup -3 -q -wat -het -both " .
+         "\"${prbSC} sc alta ogt1 not (beta,atom1HG_,atom2HG_,atom3HG_)\" " .
+         "\"not water alta ogt1 | water alta blt40 ogt66\" $redpdb >> $kintmp");
+
+   &reformatAnimatedOutput;
+
+   # -----------------------------------------------------------
+   
+   # molecule animation: group 3 opposite orientation
+
+   if ($isHis) {
+      print "\@group \{flipH\} animate\n";
+   }
+   else {
+      print "\@group \{flipNQ\} animate\n";
+   }
+
+   unlink($kintmp);
+
+   $pkin = "prekin -append -in $flipdb -out $kintmp -scope -bval";
+
+   system("echo \"\@group \{selected\}\" >> $kintmp");
+   system("$pkin -show \"sc(pink),hy(gray),atom_markers\" -sc \"${selSC}\"");
+   system("echo \"\@group \{movable\}\" >> $kintmp");
+   system("$pkin -show \"sc(cyan),hy(gray)\" -sc \"cys,ser,thr,${nselSC},lys,met,tyr\"");
+   system("echo \"\@group \{contacts\}\" >> $kintmp");
+   system("probe -dens12 -lens -nogroup -3 -q -wat -het -both " .
+         "\"${prbSC} sc alta ogt1 not (beta,atom1HG_,atom2HG_,atom3HG_)\" " .
+         "\"not water alta ogt1 | water alta blt40 ogt66\" $flipdb >> $kintmp");
+
+   &reformatAnimatedOutput;
+
+   # -----------------------------------------------------------
+   # remove the temp files
+
+   unlink($kintmp);
+   unlink($flipdb);
+
+   # $fixFile removed earlier
+
+   # -----------------------------------------------------------
+   sub reformatConstantOutput {
+
+      open(PKC, $kintmp) || die "Can't process prekin output 1: $!\n";
+
+      my ($keyword, $rest, $label);
+      my $chainID = '';
+
+PKCRECORD:
+      while (<PKC>) {
+         chop;
+
+         ($keyword, $rest) = split(' ', $_, 2);
+         if (! defined($keyword)) { next PKCRECORD; }
+         $label = '';
+         if ($keyword =~ /^\@/ && defined($rest)) {
+            $label = $1 if /^[^\=]*\{([^\{\}]*)\}/;
+         }
+
+         if ($keyword =~ /^\@pdbfile/) { next PKCRECORD; }
+         if ($keyword =~ /^\@group/)   {
+            $chainID = $label;
+            next PKCRECORD;
+         }
+         if ($keyword =~ /^\@subgroup/ && $label =~ /mainchain|sidechain/) {
+	   s/mainchain/mc $chainID/ || s/sidechain/sc $chainID/;
+	   s/master\s*\=\s*\{subunit\s*\S+\}//;
+         }
+         if ($keyword =~ /^\@subgroup/ && $_ !~ /dominant/) {
+	   $_ = $_ . ' dominant';
+         }
+         if ($keyword =~ /^\@vector/ && $label =~ /water/) {
+	   $_ = $_ . ' off';
+         }
+         if ($keyword =~ /^\@/ && $_ =~ /color\w*\=/ && $label =~ /water/) {
+	   s/red/pink/g;
+         }
+         printf "%s\n", $_;
+      }
+      close PKC;
+   }
+   # -----------------------------------------------------------
+   sub reformatAnimatedOutput {
+      my $sgns = 0; # number of side-chanin subgroups
+
+      open(PKA, $kintmp) || die "Can't process prekin output 1: $!\n";
+
+      my ($keyword, $rest, $label);
+      my $grouptype = '';
+
+PKARECORD:
+      while (<PKA>) {
+         chop;   # strip record separator
+
+         ($keyword, $rest) = split(' ', $_, 2);
+         if (! defined($keyword)) { next PKARECORD; }
+         $label = '';
+         if ($keyword =~ /^\@/ && defined($rest)) {
+            $label = $1 if /^[^\=]*\{([^\{\}]*)\}/;
+         }
+
+         if ($keyword =~ /^\@pdbfile/) { next PKARECORD; }
+         if ($keyword =~ /^\@group/)   {
+            $grouptype = $label if ($label =~ /selected|movable|contacts/);
+            next PKARECORD;
+         }
+         if ($keyword =~ /^\@subgroup/ && $label =~ /sidechain/) {
+            # group types are passed in with echo before each prekin pass
+	    if ($grouptype =~ /movable|selected/) {
+               $_ = $_ . ' nobutton';
+	    }
+         }
+         if ($keyword =~ /^\@balllist/ && $_ =~ /atoms/) {
+	   s/master\s*\=\s*\{atoms\}//;
+         }
+         if ($keyword =~ /^\@subgroup/ && $_ !~ /dominant/) {
+            $_ = $_ . ' dominant';
+         }
+         if ($keyword =~ /^\@balllist/ && $_ =~ /color\w*\=/ && $label =~ /sc N/) {
+            s/cyan/sky/g;
+         }
+         if ($keyword =~ /^\@balllist/ && $_ =~ /radius\w*\=/) {
+            s/0.2/0.1/g;
+         }
+         printf "%s\n", $_;
+      }
+      close PKA;
+   }
