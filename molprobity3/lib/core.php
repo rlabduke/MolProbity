@@ -85,7 +85,7 @@ function mpNavigationBar($active)
 {
     $s = "";
     $s .= mpNavBar_goto('welcome.php', 'Welcome', ($active == 'welcome'));
-    $s .= "<span class='minornav'>".mpNavBar_goto('', 'Evaluate X-ray')."</span>";
+    $s .= "<span class='minornav'>".mpNavBar_goto('helper_xray.php', 'Evaluate X-ray', ($active == 'helper_xray'))."</span>";
     $s .= "<span class='minornav'>".mpNavBar_goto('', 'Evaluate NMR')."</span>";
     $s .= "<span class='minornav'>".mpNavBar_goto('', 'Fix up structure')."</span>";
     $s .= "<span class='minornav'>".mpNavBar_goto('', 'Work with kins')."</span>";

@@ -170,8 +170,16 @@ function onRerunReduce($arg, $req)
     $userflip .= "</ul>\n</p>\n";
     $userkeep .= "</ul>\n</p>\n";
     
+    $hcount = countReduceChanges($pdb);
+    
     $parent = $_SESSION['models'][ $model['parent'] ];
     $entry = "Reduce was run on $parent[pdb] to add and optimize hydrogens, and optimize Asn, Gln, and His flips, yielding $model[pdb].\n";
+    if($hcount)
+    {
+        $entry .= "$hcount[found] hydrogens were found in the original model, and $hcount[add] hydrogens were added.\n";
+        if($hcount['std']) $entry .= "$hcount[std] H were repositioned to standardize bond lengths.\n";
+        if($hcount['adj']) $entry .= "The positions of $hcount[adj] hydrogens were adjusted to optimize H-bonding.\n";
+    }
     $entry .= "<p>You can now <a href='$url'>download the optimized and annotated PDB file</a> (".formatFilesize(filesize($pdb)).").</p>\n";
     if(strpos($autoflip, "<li>") !== false) $entry .= $autoflip;
     if(strpos($userflip, "<li>") !== false) $entry .= $userflip;

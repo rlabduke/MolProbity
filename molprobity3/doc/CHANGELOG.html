@@ -3,12 +3,17 @@
 ===  TO DO  ==================================================================
 ==============================================================================
 {{{ Other people's bugs
-    Weird intra-sidechain clashes for 1BKR
+    Weird intra-sidechain clashes for 1BKR (low occ atoms in-chain)
     Prekin: All balls are marked alt B (even those for alt A)
     Changes still made by Reduce -nobuild:
         Existing protonation state for His
         Existing Met CH3 and Lys NH3 orientation (don't want -norotnh3 and -norotmet)
     Probe: -NOVDWout switch missing from docs, duplicated ONLYBADOUT
+    Prekin: doesn't mark pointmasters on the start of vectors (those flagged P)
+    Reduce -nobuild: wrong protonation for 1gca His 152
+        Wrong placement for het O3 H wrt R141 and D215 in 2DRI
+    Prekin: excess rota/rama outliers from too-long -range statement (?)
+        test cases: 1FFY, 1XFH, 3AL1 (used to; doesn't any more)
 }}}
 {{{ Ideas, long-term goals, etc.
     User manual (do we need this in addition to page-by-page help?)
@@ -25,7 +30,6 @@
     Download ZIP archives of session files
     Allow "hidden" user files; default download doesn't include these?
     Retrieve maps from the EDS
-    Add ribbons or something else colored by (absolute) occupancy
     Multicrit: views for trouble spots sorted by severity (also hypertext?)
     Create scripts for generating usage stats from molprobity.log
     Estimate time for e.g. analysis jobs?
@@ -51,11 +55,14 @@
     Allow "live" sorting of finished multi-chart
 }}}
     Develop "helper" pages; mark optional steps clearly
+    Pick lowest resolution number mentioned in file; allow override?
+    Doc note: disable E_NOTICE or your screen will be flooded...
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
 
+### 3beta13 ###
 ### 3beta13 ###
 - added check in index.php that a delegate page is actually specified
 - simplified AAC/geom interface based on feedback from JSR
@@ -71,6 +78,13 @@
 - added Welcome page (mostly without working links); made index.php start there.
 - reorganized formatting of side links in lib/core.php
 - added extra citation (NAR) to help/about
+- report # H added/deleted/adjusted when running Reduce (build or nobuild)
+- excess rota/rama multicrit outliers traced to Prekin (1FFY, 1XFH, 3AL1)
+- changed preferred fonts to Arial and Optima
+- created draft version of x-ray helper page
+- can't catch back-button event to warn user not to...
+- added color code for occupancy greater than 1.00
+- turn on masters for alpha/beta/coil
 
 ### 3beta12 ###
 - created command line scripts: reduce-build, reduce-nobuild, split-models

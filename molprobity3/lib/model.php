@@ -517,6 +517,39 @@ function decodeReduceUsermods($file)
 }
 #}}}########################################################################
 
+#{{{ countReduceChanges - counts H found/std/added/removed/adjusted by Reduce
+############################################################################
+/**
+* Returns an array with the following keys, or null if no USER MOD found.
+*   found       number of H found in starting model (?)
+*   std         number of existing bond lengths standardized (?)
+*   add         number of H added to model in this pass (?)
+*   rem         number of H removed from model in this pass (?)
+*   adj         number of H repositioned by optimizations in this pass (?)
+*/
+function countReduceChanges($pdbfile)
+{
+    $in = fopen($pdbfile, 'rb');
+    if($in) while(!feof($in))
+    {
+        $s = fgets($in, 1024);
+        if(preg_match('/^USER  MOD +reduce.+?found=(\d+).+?std=(\d+).+?add=(\d+).+?rem=(\d+).+?adj=(\d+)/', $s, $fields))
+        {
+            $ret = array(
+                'found' => $fields[1],
+                'std'   => $fields[2],
+                'add'   => $fields[3],
+                'rem'   => $fields[4],
+                'adj'   => $fields[5]
+            );
+            break;
+        }
+    }
+    fclose($in);
+    return $ret;
+}
+#}}}########################################################################
+
 #{{{ getPdbModel - retrieves a model from the Protein Data Bank
 ############################################################################
 /**
