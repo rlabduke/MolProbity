@@ -35,11 +35,15 @@ function display($context)
     echo "<li>Check for Asn, Gln, His flips.</li>\n";
     echo "</ul>\n";
 
+    echo "<h3><a href='".makeEventURL("onNavBarCall", "aacgeom_setup.php")."'>All-atom contact and geometric analyses</a></h3>\n<ul>\n";
+    echo "<li><i>TODO: List things here</i></li>\n";
+    echo "</ul>\n";
+
     echo "<h3><a href='".makeEventURL("onNavBarCall", "sswing_setup1.php")."'>Refit sidechains</a></h3>\n<ul>\n";
     echo "<li>Automatically refit sidechains based on electron density and all-atom contacts.</li>\n";
     echo "</ul>\n";
 
-    echo "<h3><a href='".makeEventURL("onNavBarCall", "aacgeom_setup.php")."'>All-atom contact and geometric analyses</a></h3>\n<ul>\n";
+    echo "<h3><a href='".makeEventURL("onNavBarCall", "makekin_setup.php")."'>Make simple kinemages</a></h3>\n<ul>\n";
     echo "<li><i>TODO: List things here</i></li>\n";
     echo "</ul>\n";
 

@@ -58,7 +58,7 @@ function display($context)
         echo "<p><center>\n";
         //echo "<img src='img/pbar-anim.gif'><br>\n";
         echo "<table border='0'><tr><td>\n";
-        echo "<img src='img/1ubq-spin.gif'></td><td>\n";
+        echo "<img src='img/2sod-anim.gif'></td><td>\n";
         @readfile("$_SESSION[dataDir]/".MP_DIR_SYSTEM."/progress");
         echo "</td></tr></table></center>\n";
         echo "<p><small>Your job has been running for ".$this->fmtTime($ellapsed).".</small>\n";

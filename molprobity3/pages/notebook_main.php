@@ -21,6 +21,15 @@ function display($context)
     $labbook = openLabbook();
     echo mpPageHeader("Lab notebook", "notebook");
     
+    // Set time zone form
+    echo makeEventForm("onSetTimezone");
+    echo "Now: " . formatTime(time());
+    echo "\n";
+    echo timeZonePicker('timezone', $_SESSION['timeZone']);
+    echo "<input type='submit' name='cmd' value='Set time zone'>\n";
+    echo "</form>\n";
+    echo "<hr />\n";
+    
     // Notebook table of contents
     echo "<a name='top'>\n";
     $this->printTOC($labbook);
@@ -32,15 +41,6 @@ function display($context)
     {
         $this->printEntry($num, $entry);
     }
-    
-    // Set time zone form
-    echo "<hr />\n";
-    echo makeEventForm("onSetTimezone");
-    echo "Now: " . formatTime(time());
-    echo "\n";
-    echo timeZonePicker('timezone', $_SESSION['timeZone']);
-    echo "<input type='submit' name='cmd' value='Set time zone'>\n";
-    echo "</form>\n";
 
     echo mpPageFooter();
 }// end of display

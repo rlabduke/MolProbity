@@ -38,6 +38,9 @@ function describePdbStats($pdbstats, $useHTML = true)
     elseif($pdbstats['sidechains'] > 0) $details[] = "Mainchain and sidechains are present, but not hydrogens.";
     elseif($pdbstats['nucacids'] == 0) $details[] = "{$b}Only C-alphas{$unb} are present.";
     
+    // Alt confs
+    if($pdbstats['all_alts'] > 0) $details[] = $pdbstats['all_alts']." residues have alternate conformations (".$pdbstats['mc_alts']." in protein mc/CB).";
+    
     // RNA / DNA
     if($pdbstats['nucacids'] > 0) $details[] = "".$pdbstats['nucacids']." nucleic acid residues are present.";
     
@@ -71,6 +74,8 @@ function describePdbStats($pdbstats, $useHTML = true)
 #   unique_chains   number of unique (not duplicated) chains
 #   residues        total number of residues in 1st model (but not all-HETATM)
 #   sidechains      are sidechains present? (0/>0)
+#   all_alts        total number of residues with alt conf defined
+#   mc_alts         number of protein residues with mc/CB alts
 #   nucacids        are nucleic acids present? (0/>0)
 #   hnonpolar       are non-polar hydrogens present? (0/>0)
 #   hydrogens       are hydrogens of any kind present? (0/>0)
@@ -101,6 +106,8 @@ function pdbstat($pdbfilename)
     $hets = 0;              # number of non-water hets
     $hetcode = "";          # current het ID
     $fromCNS = 0;           # counter for CNS-style header records
+    $mcAlts = array();      # mainchain/CB alternates (set of res)
+    $allAlts = array();     # total number of alternates (set of res)
     
     $file = fopen($pdbfilename, "r");
     while(!feof($file))
@@ -168,6 +175,14 @@ function pdbstat($pdbfilename)
                 elseif(preg_match("/[ 1-9][HDTZ]5[*'][ A1]/", $atom)) { $hnonpolar++; }
                 # Atom is a hydrogen?
                 elseif(preg_match("/[ 1-9][HDTZ][ A-Z][ 1-9][ A1]/", $atom)) { $hydrogens++; }
+                
+                # Does this residue have alternate conformations?
+                # TODO: This is still very protein-centric
+                if($atom{4} != ' ')
+                {
+                    $allAlts[$id] = $id;
+                    if(preg_match("/( N  | CA  | C  | O  | CB )./", $atom)) $mcAlts[$id] = $id;
+                }
             }
             elseif(startsWith($s, "HETATM"))
             {
@@ -213,6 +228,8 @@ function pdbstat($pdbfilename)
     $ret['hydrogens']       = $hydrogens;
     $ret['hets']            = $hets;
     $ret['fromcns']         = $fromCNS;
+    $ret['all_alts']        = count($allAlts);
+    $ret['mc_alts']         = count($mcAlts);
 
     if(isset($resolution))  $ret['resolution']  = $resolution;
     if(isset($refiProg))    $ret['refiprog']    = $refiProg;
