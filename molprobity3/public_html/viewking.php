@@ -1,9 +1,9 @@
 <?php # (jEdit options) :folding=explicit:collapseFolds=1:
 /*****************************************************************************
-    This page should display the results of our analysis to the user.
+    Launches a page with an embedded KiNG instance to view a kinemage.
 
 INPUTS (via Get or Post):
-    model           ID code for model to process
+    url             URL of the kinemage to load
 
 *****************************************************************************/
 // EVERY *top-level* page must start this way:
@@ -13,37 +13,12 @@ INPUTS (via Get or Post):
     if(!defined('MP_BASE_DIR')) define('MP_BASE_DIR', realpath(getcwd().'/..'));
 // 2. Include core functionality - defines constants, etc.
     require_once(MP_BASE_DIR.'/lib/core.php');
-    require_once(MP_BASE_DIR.'/lib/analyze.php');
 // 3. Restore session data. If you don't want to access the session
 // data for some reason, you must call mpInitEnvirons() instead.
     mpStartSession();
 // 4. For pages that want to see the session but not change it, such as
 // pages that are refreshing periodically to monitor a background job.
-    #mpSessReadOnly();
-
-#{{{ a_function_definition - sumary_statement_goes_here
-############################################################################
-/**
-* Documentation for this function.
-*/
-//function someFunctionName() {}
-#}}}########################################################################
-
-#{{{ a_function_definition - sumary_statement_goes_here
-############################################################################
-/**
-* Documentation for this function.
-*/
-//function someFunctionName() {}
-#}}}########################################################################
-
-#{{{ a_function_definition - sumary_statement_goes_here
-############################################################################
-/**
-* Documentation for this function.
-*/
-//function someFunctionName() {}
-#}}}########################################################################
+    mpSessReadOnly();
 
 #{{{ a_function_definition - sumary_statement_goes_here
 ############################################################################
@@ -56,15 +31,32 @@ INPUTS (via Get or Post):
 # MAIN - the beginning of execution for this page
 ############################################################################
 // Start the page: produces <HTML>, <HEAD>, <BODY> tags
-echo mpPageHeader("Analysis results");
-
-echo "<p><a href='analyze_tab.php?$_SESSION[sessTag]'>Done</a>";
-
-echo "<p>" . linkModelKin($model, "multi.kin") . "\n";
+$url = $_REQUEST['url'];
+$file = basename($url);
+echo mpPageHeader("KiNG - $file");
 
 ############################################################################
 ?>
-
-<!-- HTML code may want to go here... -->
-
+<center>
+<applet code="king/Kinglet.class" archive="king.jar" width=750 height=600>
+<param name="mode" value="flat">
+<?php
+    echo "    <param name='kinSource' value='$url'>\n";
+    // For supporting electron density maps:
+    /*if(isset($edmap_list))
+    {
+        foreach($edmap_list as $edmap)
+        {
+            if(isset($ed_param))    $ed_param .= " ".$edmap;
+            else                    $ed_param = $edmap;
+        }
+        if(isset($ed_param))
+        {
+            echo "<param name=\"edmapBase\" value=\"$web_dir\">\n";
+            echo "<param name=\"edmapList\" value=\"$ed_param\">\n";
+        }
+    }*/
+?>
+</applet>
+</center>
 <?php echo mpPageFooter(); ?>

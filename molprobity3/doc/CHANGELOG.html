@@ -10,12 +10,12 @@
     create logging functions
     add H and analyze should be able to run in same script (wait once)
     user should get partial results as big job is running
-    Provide URL prefix for each model, too
     Allow simple comparison of bad residues in two different models;
         see jobs/analyze.php for ideas
     Should analysis of worst residues ignore water or treat it separately?
     Add text at top of multicrit kinemage
     Allow user to retrieve PDB by id code
+    Coloring on download table is sometimes off
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -25,6 +25,11 @@
 - really reworked page header/footer/styling. Style sheet hasn't been written yet.
 - removed all tab bar images and templates
 - came up with a pretty decent "look" for the site; may change colors to match kinemage site
+- rearranged upload page
+- allowed user to revisit previously generated analysis
+- each model now has its own download URL too
+- implemented function to generate kinemage-viewing links
+- added embedded KiNG page for kinemage viewing
 
 ### 3pre9 ###
 - added 'ignoreSegID' option to handle old Reduce'd files with 'new' in segID field

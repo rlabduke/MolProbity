@@ -1,8 +1,8 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-  <meta content="text/html; charset=ISO-8859-1"
- http-equiv="content-type">
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
   <title>MolProbity variables</title>
 </head>
 <body>
@@ -71,7 +71,10 @@ above.</li>
   <li><span style="font-weight: bold; font-family: monospace;">dir</span>:
 the absolute path to the directory where files for this model are kept.
 Typically a directory with the same name as the model ID, located in <span
- style="font-family: monospace;">$_SESSION['dataDir']</span>.<br>
+ style="font-family: monospace;">$_SESSION['dataDir']</span>.</li>
+  <li><span style="font-family: monospace; font-weight: bold;">url</span>:
+the relative URL to the directory where files for this model are kept.
+URL is relative to <span style="font-family: monospace;">public_html</span>.<br>
   </li>
   <li><span style="font-weight: bold; font-family: monospace;">prefix</span>:
 a string to be prepended to file names for generated files. Usually
@@ -99,7 +102,9 @@ model representing the results of <span style="font-family: monospace;">reduce
 -build</span> might point back to the file pulled directly from the
 PDB. This key is not set for models supplied by the user.</li>
   <li><span style="font-weight: bold; font-family: monospace;">history</span>:
-human-readable one-line statement about where this model came from.<br>
+human-readable one-line statement about where this model came from.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">isAnalyzed</span>:
+true if the analysis task has already been run on this model.<br>
   </li>
 </ul>
 <h2>Contents of $_SESSION['bgjob']:</h2>
