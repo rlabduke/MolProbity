@@ -12,7 +12,6 @@ chmod 777 tmp/
 
 # Create symlinks for executables
 cd bin
-ln -s linux-rh73 linux
 ln -s pdbcns.010504.pl pdbcns
 cd macosx/
 ln -s dang.1.8.020529 dang
@@ -22,7 +21,8 @@ ln -s prekin.6.25.030309.macOSX prekin
 ln -s probe.2.9.030123.macosx probe
 ln -s reduce.2.21.030604 reduce
 cd ..
-cd linux-rh73/
-ln -s prekin.6.33.031124.linux.i386.RH90.static prekin
+cd linux/
+ln -s prekin.6.36.040609.linux.i386.RH90.static prekin
+ln -s reduce.2.21.mod040509dcr.linux.RH9 reduce
 cd ..
 cd ..
