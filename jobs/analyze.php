@@ -7,7 +7,8 @@ INPUTS (via $_SESSION['bgjob']):
     opts[]          the set of flags for lib/analyze.php:runAnalysis()
 
 OUTPUTS (via $_SESSION['bgjob']):
-    paramName       description of parameter
+    Can't use this because our destination, analyze_display.php, may also get
+    called later on, when $_SESSION['bgjob'] may have been overwritten!
 
 *****************************************************************************/
 // EVERY *top-level* page must start this way:
@@ -17,6 +18,7 @@ OUTPUTS (via $_SESSION['bgjob']):
 // 2. Include core functionality - defines constants, etc.
     require_once(MP_BASE_DIR.'/lib/core.php');
     require_once(MP_BASE_DIR.'/lib/analyze.php');
+    require_once(MP_BASE_DIR.'/lib/labbook.php');
 // 3. Restore session data. If you don't want to access the session
 // data for some reason, you must call mpInitEnvirons() instead.
     session_id( $_SERVER['argv'][1] );
@@ -43,7 +45,14 @@ OUTPUTS (via $_SESSION['bgjob']):
 $modelID = $_SESSION['bgjob']['model'];
 $opts = $_SESSION['bgjob']['opts'];
 
-runAnalysis($modelID, $opts);
+$labbookEntry = runAnalysis($modelID, $opts);
+
+$_SESSION['models'][$modelID]['entry_analysis'] = addLabbookEntry(
+    "Quality analysis &amp; validation: $modelID",
+    $labbookEntry,
+    $modelID,
+    "auto"
+);
 
 /*********************
 To compare:
