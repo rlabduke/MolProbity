@@ -19,6 +19,7 @@
     'entry'     the user's comments, with HTML formatting
     
 *****************************************************************************/
+require_once(MP_BASE_DIR.'/lib/core.php');
 require_once(MP_BASE_DIR.'/lib/timezones.php');
 require_once(MP_BASE_DIR.'/lib/strings.php');
 
@@ -52,14 +53,54 @@ function openLabbook()
 */
 function saveLabbook($bookData)
 {
-    $file = $_SESSION['dataDir']."/".MP_DIR_SYSTEM."/labbook";
-
+    saveLabbookHTML($bookData);
+    
     // Write the notebook data
+    $file = $_SESSION['dataDir']."/".MP_DIR_SYSTEM."/labbook";
     if($fp = @fopen($file, "wb"))
     {
         $r = fwrite($fp, serialize($bookData));
         @fclose($fp);
         return $r;
+    }
+    else return false;
+}
+#}}}########################################################################
+
+#{{{ saveLabbookHTML - writes human-readable labbook data to disk
+############################################################################
+/**
+* This function is called automatically by saveLabbook().
+* The output won't be ideal, because paths to linked items will be broken.
+*/
+function saveLabbookHTML($bookData)
+{
+    $file = $_SESSION['dataDir']."/".MP_DIR_SYSTEM."/labbook.html";
+
+    // Write the notebook data
+    if($fp = @fopen($file, "wb"))
+    {
+        fwrite($fp, mpPageHeader("Lab notebook"));
+        fwrite($fp, "<a name='top'>\n<ul>\n");
+        foreach($bookData as $num => $entry)
+        {
+            $title = $entry['title'];
+            if($title == "") $title = "(no title)";
+            fwrite($fp, "<li><a href='#entry$num'>$title</a> [".formatDayTime($entry['modtime'])."]</li>\n");
+        }
+        fwrite($fp, "</ul>\n<br clear='all' />\n");
+        foreach($bookData as $num => $entry)
+        {
+            fwrite($fp, "<hr>\n");
+            fwrite($fp, "<a name='entry$num'>\n");
+            fwrite($fp, formatLabbookEntry($entry));
+            fwrite($fp, "</a>\n");
+            fwrite($fp, "<p><a href='#top'>Top</a>\n");
+        }
+        fwrite($fp, mpPageFooter());
+
+        @fclose($fp);
+        return true;
     }
     else return false;
 }

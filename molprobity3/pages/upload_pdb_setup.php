@@ -41,7 +41,7 @@ function display($context)
 <label>PDB / NDB ID code:
 <input type="text" name="pdbCode" size="6" maxlength="10"></label>
 <br><table border='0' width='100%'><tr>
-<td><input type="submit" name="cmd" value="Upload this file &gt;"></td>
+<td><input type="submit" name="cmd" value="Retrieve this file &gt;"></td>
 <td align='right'><input type="submit" name="cmd" value="Cancel"></td>
 </tr></table>
 </form>

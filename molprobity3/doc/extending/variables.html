@@ -20,7 +20,9 @@ stored in.</li>
   <li><span style="font-weight: bold; font-family: monospace;">dataURL</span>:
 the (relative) URL for accessing user data. (Only correct for scripts
 in <span style="font-family: monospace;">public_html</span>, not its
-subdirectories.)</li>
+subdirectories. This will work for delegates in <span
+ style="font-family: monospace;">pages</span> because they appear to be
+    <span style="font-family: monospace;">public_html/index.php</span>.)</li>
   <li><span style="font-weight: bold; font-family: monospace;">pages</span>:
 a stack of information about delegate pages in <span
  style="font-family: monospace;">pages/</span>. This is the mechanism
@@ -39,6 +41,15 @@ zone.</li>
   <li><span style="font-weight: bold; font-family: monospace;">models</span>:
 an array of model-information entries (which are themselves arrays), as
 described below.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">lastUsedModelID</span>:
+the ID of the last model used for any operation (may be null). Helps
+provide defaults for the user as they work through the MolProbity flow.
+This is usually used in the <span style="font-family: monospace;">display()</span>
+method of <span style="font-family: monospace;">xxx_setup.php</span>
+pages. The preferred place to set it is in the event handling methods
+of those same pages, but it may sometimes be more appropriate to do
+that from a background script.<br>
+  </li>
   <li><span style="font-weight: bold; font-family: monospace;">edmaps</span>:
 an array of file names for electron density maps, which are stored in <span
  style="font-weight: bold; font-family: monospace;">dataDir/MP_DIR_EDMAPS</span>.</li>

@@ -27,13 +27,13 @@ function display($context)
 </tr><tr>
     <td align='right'>My comment regards</td>
     <td align='left'><select name='inRegardTo'>
-        <option selected value="Bug Report">a bug or error in MolProbity</option>
+        <option selected value="Bug report">a bug or error in MolProbity</option>
         <option value="Suggestion">a suggestion on how to improve MolProbity</option>
-        <option value="KiNG">the KiNG applet</option>
-        <option value="JavaMage">the JavaMage applet</option>
+        <option value="KiNG">the KiNG graphics applet</option>
         <option value="Tutorial">the online tutorial</option>
-        <option value="User Manual">the other online documentation</option>
-        <option value="General Feedback">(none of the above)</option>
+        <option value="Documentation">the other online documentation</option>
+        <option value="Local server setup">installing or configuring a local copy of MolProbity</option>
+        <option value="General feedback">(none of the above)</option>
     </select></td>
 </tr><tr>
     <td align='left' colspan='2'>

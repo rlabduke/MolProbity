@@ -83,6 +83,11 @@ function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
 
     if(count($_SESSION['models']) > 0)
     {
+        // Choose a default model to select
+        $lastUsedID = $context['modelID'];
+        if(!$lastUsedID) $lastUsedID = $_SESSION['lastUsedModelID'];
+        
+        $jsOnLoad = "syncSubcontrols()"; // cmd to run on page load -- may be changed below
         echo makeEventForm("onRunAnalysis");
         echo "<h3>Select a model to work with:</h3>";
         echo "<p><table width='100%' border='0' cellspacing='0' cellpadding='2'>\n";
@@ -101,11 +106,12 @@ function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
             // Alternate row colors:
             $c == MP_TABLE_ALT1 ? $c = MP_TABLE_ALT2 : $c = MP_TABLE_ALT1;
             echo " <tr bgcolor='$c'>\n";
-            $checked = ($context['modelID'] == $id ? "checked" : "");
+            $checked = ($lastUsedID == $id ? "checked" : "");
             echo "  <td><input type='radio' name='modelID' value='$id' onclick='setAnalyses($doAAC, $hasProtein, $hasNucAcid, $isBig)' $checked></td>\n";
             echo "  <td><b>$model[pdb]</b></td>\n";
             echo "  <td><small>$model[history]</small></td>\n";
             echo " </tr>\n";
+            if($checked) $jsOnLoad = "setAnalyses($doAAC, $hasProtein, $hasNucAcid, $isBig)";
         }
         echo "</table></p>\n";
 
@@ -153,13 +159,9 @@ function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
         echo "<td><input type='submit' name='cmd' value='Run programs to perform these analyses &gt;'></td>\n";
         echo "<td align='right'><input type='submit' name='cmd' value='Cancel'></td>\n";
         echo "</tr></table></p></form>\n";
+        // Rather than trying to put this in onload(), we'll do it after the form is defined.
+        echo "<script language='JavaScript'>\n<!--\n$jsOnLoad\n// -->\n</script>\n";
 ?>
-<script language="JavaScript">
-<!--
-// Rather than trying to put this in onload(), we'll do it after the form is defined.
-syncSubcontrols()
-// -->
-</script>
 <hr>
 <div class='help_info'>
 <h4>All-atom contact and geometric analyses</h4>
@@ -206,6 +208,7 @@ function onRunAnalysis($arg, $req)
     // Otherwise, moving forward:
     if(isset($req['modelID']))
     {
+        $_SESSION['lastUsedModelID'] = $req['modelID']; // this is now the current model
         unset($_SESSION['bgjob']); // Clean up any old data
         $_SESSION['bgjob'] = $req;
         

@@ -6,22 +6,6 @@
 require_once(MP_BASE_DIR.'/lib/pdbstat.php');
 require_once(MP_BASE_DIR.'/lib/analyze.php');
 
-#{{{ [DEP?] makeSidechainDots - appends sc Probe dots
-############################################################################
-function makeSidechainDots($infile, $outfile)
-{
-    exec("probe -quiet -noticks -name 'sc-x dots' -self 'alta' $infile >> $outfile");
-}
-#}}}########################################################################
-
-#{{{ [DEP?] makeMainchainDots - appends mc Probe dots
-############################################################################
-function makeMainchainDots($infile, $outfile)
-{
-    exec("probe -quiet -noticks -name 'mc-mc dots' -mc -self 'mc alta' $infile >> $outfile");
-}
-#}}}########################################################################
-
 #{{{ makeRamachandranKin - creates a kinemage-format Ramachandran plot
 ############################################################################
 function makeRamachandranKin($infile, $outfile)
@@ -201,9 +185,6 @@ function makeBadRamachandranKin($infile, $outfile, $rama = null, $color = 'red')
     }
     $mc = resGroupsForPrekin(groupAdjacentRes($worst));
     
-    $h = fopen($outfile, 'a');
-    fwrite($h, "@subgroup {Rama outliers} dominant\n");
-    fclose($h);
     foreach($mc as $mcRange)
         exec("prekin -append -nogroup -listmaster 'Rama Outliers' -scope $mcRange -show 'mc($color)' $infile >> $outfile");
 }
@@ -232,9 +213,6 @@ function makeBadRotamerKin($infile, $outfile, $rota = null, $color = 'orange', $
     }
     $sc = resGroupsForPrekin(groupAdjacentRes($worst));
     
-    $h = fopen($outfile, 'a');
-    fwrite($h, "@subgroup {bad rotamers} dominant\n");
-    fclose($h);
     foreach($sc as $scRange)
         exec("prekin -quiet -append -nogroup -listmaster 'rotamer outliers' -bval -scope $scRange -show 'sc($color)' $infile >> $outfile");
 }
@@ -244,38 +222,20 @@ function makeBadRotamerKin($infile, $outfile, $rota = null, $color = 'orange', $
 ############################################################################
 function makeBadCbetaBalls($infile, $outfile)
 {
+    $h = fopen($outfile, 'a');
+    fwrite($h, "@subgroup {CB dev} dominant\n");
+    fclose($h);
+    
     // C-beta deviation balls >= 0.25A
     $cbeta_dev_script = 
 'BEGIN { doprint = 0; bigbeta = 0; }
 $0 ~ /^@/ { doprint = 0; }
 $0 ~ /^@(point)?master/ { print $0 }
-$0 ~ /^@balllist/ { doprint = 1; print $0; }
+$0 ~ /^@balllist/ { doprint = 1; print $0 " master= {Cbeta dev}"; }
 match($0, /^\{ cb .+ r=([0-9]\.[0-9]+) /, frag) { gsub(/gold|pink/, "magenta"); bigbeta = (frag[1]+0 >= 0.25); }
 doprint && bigbeta';
     
     exec("prekin -append -quiet -cbetadev $infile | gawk '$cbeta_dev_script' >> $outfile");
-}
-#}}}########################################################################
-
-#{{{ [DEP] makeBadDotsVisible - appends Probe dots with only bad clashes visible
-############################################################################
-/**
-* Documentation for this function.
-*/
-function makeBadDotsVisible($infile, $outfile, $hbDots = false, $vdwDots = false)
-{
-    $options = "";
-    if(!$hbDots)    $options .= " -nohbout";
-    if(!$vdwDots)   $options .= " -novdwout";
-    
-    $dots_off_script =
-'$0 ~ /^@(dot|vector)list .* master=\{wide contact\}/ { $0 = $0 " off" }
-$0 ~ /^@(dot|vector)list .* master=\{close contact\}/ { $0 = $0 " off" }
-$0 ~ /^@(dot|vector)list .* master=\{small overlap\}/ { $0 = $0 " off" }
-$0 ~ /^@(dot|vector)list .* master=\{H-bonds\}/ { $0 = $0 " off" }
-{print $0}';
-
-    exec("probe $options -4H -quiet -noticks -nogroup -mc -self 'alta' $infile | gawk '$dots_off_script' >> $outfile");
 }
 #}}}########################################################################
 

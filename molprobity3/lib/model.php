@@ -302,7 +302,7 @@ function reduceNoBuild($inpath, $outpath)
     // Add missing H's without trying to optimize or fix anything
     // $_SESSION[hetdict] is used to set REDUCE_HET_DICT environment variable,
     // so it doesn't need to appear on the command line here.
-    exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -keep -his -allalt $inpath > $outpath");
+    exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -build -pen9999 -keep -allalt $inpath > $outpath");
 }
 #}}}########################################################################
 
