@@ -115,7 +115,11 @@ function mpStartSession($createIfNeeded = false)
             //mpLog("new-session:New user session started");
             $sessionCreated = true;
         }
-        else die("Specified session '".session_id()."' does not exist.");
+        else
+        {
+            mpLog("badsession:Unknown session with ID '".session_id()."'");
+            die("Specified session '".session_id()."' does not exist.");
+        }
     }
     else $sessionCreated = false;
     

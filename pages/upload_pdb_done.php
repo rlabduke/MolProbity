@@ -21,7 +21,6 @@ function display($context)
 {
     $modelID = $context['newModel'];
     $model = $_SESSION['models'][$modelID];
-    $pdbstats = $model['stats'];
     $labbook = openLabbook();
     
     if($model == null)

@@ -34,7 +34,8 @@ function display($context)
             echo " <tr bgcolor='$c'>\n";
             if($model['isReduced'])
             {
-                echo "  <td><span class='inactive'><b>$id</b></span></td>\n";
+                $checked = ($context['modelID'] == $id ? "checked" : "");
+                echo "  <td><span class='inactive'><input type='radio' name='modelID' value='$id' $checked> <b>$id</b></span></td>\n";
                 echo "  <td><span class='inactive'><small>$model[history]</small></span></td>\n";
             }
             else
@@ -59,18 +60,21 @@ function display($context)
         echo "<label><input type='checkbox' name='makeFlipkin' value='1' checked>\n";
         echo "Make Flipkin kinemages illustrating any Asn, Gln, or His flips</label></div>\n";
         echo "</small></td></tr>\n";
-        echo "<tr valign='top'><td><input type='radio' name='method' value='build' $check2> <b>Add missing ONLY</b><td>";
+        echo "<tr valign='top'><td><input type='radio' name='method' value='nobuild' $check2> <b>Add missing ONLY</b><td>";
         echo "<td><small>Add missing H only, leave all other atoms alone (<code>Reduce -keep -noadjust -his</code>)</small></td></tr>\n";
         echo "</table></p>\n";
 
         echo "<p><table width='100%' border='0'><tr>\n";
         echo "<td><input type='submit' name='cmd' value='&lt; Cancel adding H'></td>\n";
         echo "<td align='right'><input type='submit' name='cmd' value='Start adding H &gt;'></td>\n";
-        echo "</tr></table></p>\n";
+        echo "</tr></table></p></form>\n";
     }
     else
     {
-        // no models available
+        echo "No models are available. Please <a href='".makeEventURL("onNavBarCall", "upload_setup.php")."'>upload or fetch a PDB file</a> in order to continue.\n";
+        echo makeEventForm("onReturn");
+        echo "<input type='submit' name='cmd' value='&lt; Cancel adding H'></form>\n";
+        
     }
     
     echo mpPageFooter();
@@ -104,6 +108,24 @@ function onAddH($arg, $req)
     // Otherwise, moving forward:
     if(isset($req['modelID']) && isset($req['method']))
     {
+        unset($_SESSION['bgjob']); // Clean up any old data
+        $_SESSION['bgjob']['modelID']       = $req['modelID'];
+        $_SESSION['bgjob']['makeFlipkin']   = $req['makeFlipkin'];
+        
+        if($req['method'] == 'build')
+        {
+            mpLog("reduce-build:User ran default Reduce -build job; flipkins=".$_REQUEST['makeFlipkin']);
+            // launch background job
+            pageGoto("job_progress.php");
+            launchBackground(MP_BASE_DIR."/jobs/reduce-build.php", "reduce_choose.php", 5);
+        }
+        elseif($req['method'] == 'nobuild')
+        {
+            mpLog("reduce-nobuild:User ran Reduce without -build flag");
+            // launch background job
+            pageGoto("job_progress.php");
+            launchBackground(MP_BASE_DIR."/jobs/reduce-nobuild.php", "reduce_done.php", 5);
+        }
     }
     else
     {

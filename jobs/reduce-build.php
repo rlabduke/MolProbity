@@ -4,7 +4,7 @@
     model in this session and creates a new model entry for the Reduced file.
     
 INPUTS (via $_SESSION['bgjob']):
-    model           ID code for model to process
+    modelID         ID code for model to process
     makeFlipkin     true if the user wants a Flipkin made
 
 OUTPUTS (via $_SESSION['bgjob']):
@@ -43,9 +43,9 @@ OUTPUTS (via $_SESSION['bgjob']):
 
 # MAIN - the beginning of execution for this page
 ############################################################################
-$modelID = $_SESSION['bgjob']['model'];
+$modelID = $_SESSION['bgjob']['modelID'];
 $model = $_SESSION['models'][$modelID];
-$pdb = "$model[dir]/$model[pdb]";
+$pdb = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$model['pdb'];
 
 // Set up progress message
 $tasks['create'] = "Create a new model entry";
@@ -65,6 +65,11 @@ if($_SESSION['bgjob']['makeFlipkin'])
     makeFlipkin("$model[dir]/$model[pdb]",
         "$model[dir]/$model[prefix]flipnq.kin",
         "$model[dir]/$model[prefix]fliphis.kin");
+    $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_KINS;
+    if(!file_exists($outpath)) mkdir($outpath, 0777);
+    makeFlipkin($_SESSION['dataDir'].'/'.MP_DIR_MODELS."/$model[pdb]",
+        "$outpath/$model[prefix]flipnq.kin",
+        "$outpath/$model[prefix]fliphis.kin");
 }
 
 setProgress($tasks, null);

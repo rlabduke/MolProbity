@@ -55,10 +55,12 @@
     Display comparison to run-of-PDB for clash score
     Specify what a CB outlier is
     Explain 2d and 3d CB kins
-    Make sure Reduce doesn't shrink the PDB file (lost atoms, etc)
+    Make sure Reduce doesn't shrink the PDB file (lost atoms/models, etc)
     Add session resume link to preformatted email
     Make clashscore a choice during analysis
   x duplicateModel(), used by SSWING, is broken right now.
+  ? even reduce -nobuild should create a new model entry, so we don't choke
+  * finish feedback; feedback form needs a Cancel btn?
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -66,6 +68,13 @@
 
 ### 3beta8 ###
 - started work on the Reduce pathway; got the setup page done.
+- swapped "Close" btn to left side of viewtext.php
+- got reduce-build and reduce-nobuild jobs running, but no results page yet
+- wrote save_kinemage.php that works with KiNG to allow user to save kins online
+- changed reduce_setup so it's still possible to re-Reduce files with Hs
+- added "choose" and "done" pages to Reduce cycle; still needs polishing
+- I think the Reduce cycle is finally finished...
+- started on feedback system
 
 ### 3beta7 ###
 - added forms for ED map and het dictionary upload

@@ -94,7 +94,7 @@ function mpNavigationBar($active)
     $s .= mpNavBar_goto('file_browser.php', 'View &amp; download files', ($active == 'files'));
     $s .= mpNavBar_goto('notebook_main.php', 'Lab notebook', ($active == 'notebook'));
     //$s .= mpNavBar_goto('', 'Set preferences', ($active == 'preferences'));
-    //$s .= mpNavBar_goto('feedback_tab.php', 'Feedback &amp; Bugs', ($active == 'feedback'));
+    $s .= mpNavBar_call('feedback_setup.php', 'Feedback &amp; Bugs');
     $s .= mpNavBar_goto('save_session.php', 'Save session', ($active == 'savesession'));
     $s .= "<br />\n";
     $s .= mpNavBar_goto('logout.php', 'Log out', ($active == 'logout'));
@@ -360,6 +360,25 @@ function linkModelKin($model, $suffix, $name = null)
     $fname = "$model[prefix]$suffix";
     $file = "$model[dir]/$fname";
     $link = "$model[url]/$fname";
+    if($name == null) $name = $fname;
+    $s = "";
+    $s .= "<b>$name</b> (" . formatFilesize(filesize($file)) . "): ";
+    $s .= "<a href='viewking.php?$_SESSION[sessTag]&url=$link' target='_blank'>View in KiNG</a> | ";
+    $s .= "<a href='$link'>Download</a>";
+    return $s;
+}
+#}}}########################################################################
+
+#{{{ linkKinemage - creates a kinemage open/download link tailored to this session
+############################################################################
+/**
+* $fname    the kinemage filename, relative to MP_DIR_KINS
+* $name     an optional name to use in place of the filename
+*/
+function linkKinemage($fname, $name = null)
+{
+    $file = $_SESSION['dataDir'].'/'.MP_DIR_KINS.'/'.$fname;
+    $link = $_SESSION['dataURL'].'/'.MP_DIR_KINS.'/'.$fname;
     if($name == null) $name = $fname;
     $s = "";
     $s .= "<b>$name</b> (" . formatFilesize(filesize($file)) . "): ";

@@ -64,6 +64,7 @@ define("MP_DIR_SYSTEM", "system");              // Session data, lab notebook, e
 define("MP_DIR_MODELS", "coordinates");         // PDB files
 define("MP_DIR_EDMAPS", "electron_density");    // electron density
 define("MP_DIR_TOPPAR", "dictionaries");        // het dicts, etc. (named for CNS TOPology and PARameter)
+define("MP_DIR_KINS", "kinemages");             // kinemage visualizations
 
 //============================================================================
 //===  PLEASE DON'T CHANGE THINGS BELOW THIS LINE  ===========================

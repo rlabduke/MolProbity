@@ -240,7 +240,7 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
 * $inpath       the full filename for the PDB file to be processed
 * $outpath      the full filename for the destination PDB. Will be overwritten.
 */
-function reduceNoBuild($inpath, $outpath, $ignoreSegID = false)
+function reduceNoBuild($inpath, $outpath)
 {
     // Add missing H's without trying to optimize or fix anything
     exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -keep -noadjust -his -allalt $inpath > $outpath");
@@ -264,25 +264,22 @@ function reduceBuild($inModelID, $inpath)
     $id = $inModelID."H";
     
     // Make sure this is a unique name
-    while( isset($_SESSION['models'][$id.$serial]) )
-        $serial++;
+    // FUNKY: Be careful here b/c HFS on OS X is not case-sensitive.
+    // (It's case-PRESERVING.) This could screw up file naming.
+    foreach($_SESSION['models'] as $k => $v) $lowercaseIDs[strtolower($k)] = $k;
+    while(isset($lowercaseIDs[strtolower($id.$serial)])) $serial++;
     $id .= $serial;
-    
-    // Create directory
-    $modelDir = $_SESSION['dataDir'].'/'.$id;
-    mkdir($modelDir, 0777);
-    $modelURL = $_SESSION['dataURL'].'/'.$id;
     
     // Process file - this is the part that matters
     $outname    = $id.'.pdb';
-    $outpath    = $modelDir.'/'.$outname;
+    $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
+    if(!file_exists($outpath)) mkdir($outpath, 0777); // shouldn't ever happen, but might...
+    $outpath .= '/'.$outname;
     exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -build -allalt $inpath > $outpath");
     
     // Create the model entry
     $_SESSION['models'][$id] = array(
         'id'        => $id,
-        'dir'       => $modelDir,
-        'url'       => $modelURL,
         'prefix'    => $id.'-',
         'pdb'       => $outname,
         'stats'     => pdbstat($outpath),
