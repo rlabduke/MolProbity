@@ -28,7 +28,6 @@
     Allow uploads of tarballs of NMR models?
     On upload of alt conf model, do table to choose which ones to use
     "nice" large jobs such as multi-model NMR runs
-    Write command line scripts for common actions
     Write management and monitoring scripts for administrators
     Allow simple comparison of bad residues in two models; see jobs/aacgeom.php
     Rama outliers in multicrit kin don't look so hot (Ca-Ca, yellow?)
@@ -43,10 +42,22 @@
 }}}
     Weird intra-sidechain clashes for 1BKR
     Prekin: All balls are marked alt B (even those for alt A)
+    Write command line scripts for common actions; remove junk from cmdline/
+    List available models on sitemap page
+    How to deal with clashscore stats for NMR models / no resol?
+    Changes still made by Reduce -nobuild:
+        Existing protonation state for His
+        Existing Met CH3 and Lys NH3 orientation (don't want -norotnh3 and -norotmet)
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
+
+### 3beta12 ###
+- created command line scripts: reduce-build, reduce-nobuild, split-models
+- explicit resolution range used for clashscore pct on analysis results page
+- use "-nobuild" in descriptions even though it doesn't exist (yet)
+- converted oneline-batch.php into oneline-analysis script for modifed sess structure
 
 ### 3beta11 ###
 - moved timezone setting to top of lab notebook page
@@ -72,6 +83,7 @@
 - fixed subgroups in multicriterion kinemage
 - added @onewidth to flipkin
 - updated help pages to match site style sheet
+- wrote "reduce-build" and "reduce-nobuild" command line scripts
 
 ### 3beta10 ###
 - continued work on aac/geom analysis, rendering results as a notebook entry

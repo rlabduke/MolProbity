@@ -66,7 +66,7 @@ function display($context)
         echo "Make Flipkin kinemages illustrating any Asn, Gln, or His flips</label></div>\n";
         echo "</small></td></tr>\n";
         echo "<tr valign='top'><td><input type='radio' name='method' value='nobuild' $check2> <b>Add missing ONLY</b><td>";
-        echo "<td><small>Add missing H only, leave all other atoms alone (<code>Reduce -build -pen9999 -keep</code>)</small></td></tr>\n";
+        echo "<td><small>Add missing H only, leave all other atoms alone (<code>Reduce -nobuild</code>)</small></td></tr>\n";
         echo "</table></p>\n";
 
         echo "<p><table width='100%' border='0'><tr>\n";

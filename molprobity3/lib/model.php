@@ -154,8 +154,6 @@ function addModel($tmpPdb, $origName, $isCnsFormat = false, $ignoreSegID = false
 */
 function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
 {
-    // If no session is started, this should eval to NULL or '',
-    // which will specify the system tmp directory.
     $tmp1   = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
     $tmp2   = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
     
@@ -302,7 +300,9 @@ function reduceNoBuild($inpath, $outpath)
     // Add missing H's without trying to optimize or fix anything
     // $_SESSION[hetdict] is used to set REDUCE_HET_DICT environment variable,
     // so it doesn't need to appear on the command line here.
-    exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -build -pen9999 -keep -allalt $inpath > $outpath");
+    // High penalty means no flips happen, but they must be considered to get networks right.
+    // "-build" is these 3 plus -rotexoh:         /------------\
+    exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -oh -his -flip -pen9999 -keep -allalt $inpath > $outpath");
 }
 #}}}########################################################################
 
