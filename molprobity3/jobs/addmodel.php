@@ -108,8 +108,22 @@ if($_SESSION['bgjob']['newModel'])
     $id = $_SESSION['bgjob']['newModel'];
     $model = $_SESSION['models'][ $id ];
     
-    $s = "Your file from $fileSource was uploaded as $model[pdb]\n";
+    // Make a thumbnail kin for the lab notebook
+    $modelDir = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
+    $kinDir = $_SESSION['dataDir'].'/'.MP_DIR_KINS;
+    $kinURL = $_SESSION['dataURL'].'/'.MP_DIR_KINS;
+    if(!file_exists($kinDir)) mkdir($kinDir, 0777);
+    exec("prekin -cass -colornc $modelDir/$model[pdb] > $kinDir/$model[prefix]thumbnail.kin");
     
+    $s = "";
+    $s .= "<div class='side_options'>\n";
+    $s .= "<applet code='Magelet.class' archive='magejava.jar' width='150' height='150'>\n";
+    $s .= "  <param name='kinemage' value='$kinURL/$model[prefix]thumbnail.kin'>\n";
+    $s .= "  <param name='buttonpanel' value='no'>\n";
+    $s .= "</applet>\n";
+    $s .= "</div>\n";
+
+    $s .= "Your file from $fileSource was uploaded as $model[pdb]\n";
     $details = describePdbStats($model['stats'], true);
     $s .= "<ul>\n";
     foreach($details as $detail) $s .= "<li>$detail</li>\n";

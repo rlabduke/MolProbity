@@ -43,7 +43,7 @@ function display($context)
         echo "<p>" . makeEventForm("onTryAgain");
         echo "<table border='0' width='100%'><tr>\n";
         echo "<td align='left'><input type='submit' name='cmd' value='&lt; Try again'></td>\n";
-        echo "<td align='right'><input type='submit' name='cmd' value='Cancel upload &gt;'></td>\n";
+        echo "<td align='right'><input type='submit' name='cmd' value='Cancel'></td>\n";
         echo "</tr></table>\n</form></p>\n";
     }
     else // upload was OK
