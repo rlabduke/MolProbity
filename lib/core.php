@@ -168,7 +168,12 @@ function launchBackground($script, $whereNext, $delay = 5)
     if($_SESSION['bgjob']['isRunning']) return false;
     
     // No! Caller probably put some data in there already for this new job!
+    // This has to be done in the xxx_launch() scripts instead.
     #unset($_SESSION['bgjob']); // Clean up any old data
+    
+    // Remove old progress file
+    $progress = "$_SESSION[dataDir]/progress";
+    if(file_exists($progress)) unlink($progress);
     
     $_SESSION['bgjob']['isRunning']     = true;
     $_SESSION['bgjob']['startTime']     = time();
@@ -191,6 +196,35 @@ function launchBackground($script, $whereNext, $delay = 5)
     
     // Restore the current dir
     chdir($pwd);
+}
+#}}}########################################################################
+
+#{{{ setProgress - generate the job status report for background jobs
+############################################################################
+/**
+* Generates a listing of all the current tasks, indicating which ones
+* are complete, which one is in progress, and which remain to be done.
+*   tasks       the list of tasks being performed, in order
+*   active      the index (string or numeric, depending on tasks) of the active task.
+*               Setting this to null will result in all tasks being marked complete.
+*/
+function setProgress($tasks, $active)
+{
+    $f = fopen("$_SESSION[dataDir]/progress", "wb");
+    $foundActive = false;
+    if(is_array($tasks)) foreach($tasks as $index => $task)
+    {
+        if($index == $active)
+        {
+            fwrite($f, "<br><img src='img/recycle.png' width='16' height='16'> $task\n");
+            $foundActive = true;
+        }
+        elseif($foundActive)
+            fwrite($f, "<br><img src='img/blank16.png' width='16' height='16'> $task\n");
+        else
+            fwrite($f, "<br><img src='img/checkmark.png' width='16' height='16'> $task\n");
+    }
+    fclose($f);
 }
 #}}}########################################################################
 

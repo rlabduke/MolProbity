@@ -102,15 +102,26 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
     $tmp1   = tempnam($_SESSION['dataDir'], "tmp_pdb_");
     $tmp2   = tempnam($_SESSION['dataDir'], "tmp_pdb_");
     
+    // List of tasks for running as a background job
+    $tasks['scrublines'] = "Convert linefeeds to UNIX standard (\\n)";
+    $tasks['stripusermod'] = "Strip out old USER MOD records from <code>reduce</code>";
+    $tasks['pdbstat'] = "Analyze contents of PDB file";
+    $tasks['segmap'] = "Convert segment IDs to chain IDs (if needed)";
+    $tasks['cnsnames'] = "Convert CNS atom names to PDB standard (if needed)";
+    
     // Process file - this is the part that matters
     // Convert linefeeds to UNIX standard (\n):
+    setProgress($tasks, 'scrublines'); // updates the progress display if running as a background job
     exec("scrublines < $inpath > $tmp1");
     // Remove stale USER MOD records that will confuse us later
     // We won't know which flips are old and which are new!
+    setProgress($tasks, 'stripusermod'); // updates the progress display if running as a background job
     exec("awk '\$0 !~ /^USER  MOD (Set|Single|Fix|Limit)/' $tmp1 > $tmp2");
     // Get PDB statistics so we know if we have CNS atom names
+    setProgress($tasks, 'pdbstat'); // updates the progress display if running as a background job
     $stats = pdbstat($tmp2);
     // Try to determine if we need to make chain IDs from segment IDs
+    setProgress($tasks, 'segmap'); // updates the progress display if running as a background job
     $segToChainMapping = trim(`cksegid.pl $tmp2`);
     // Old Reduce used segID for 'new ' flag for H's.
     if($ignoreSegID) $segToChainMapping = "";
@@ -132,6 +143,7 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
     // - if we have CNS-style atom names
     // - if we have CNS-style records in the header (3 or more)
     // - if the user told us these were CNS coordinates
+    setProgress($tasks, 'cnsnames'); // updates the progress display if running as a background job
     if(/*has CNS atom names or*/ $stats['fromcns'] >= 3 || $isCNS)
     {
         if($segToChainMapping == "")
@@ -156,6 +168,8 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
     // Clean up temp files
     unlink($tmp1);
     unlink($tmp2);
+
+    setProgress($tasks, null); // all done
 }
 #}}}########################################################################
 
@@ -217,12 +231,18 @@ function reduceBuild($inModelID, $inpath)
         $serial++;
     $id .= $serial;
     
+    // Set up progress message
+    $tasks['create'] = "Create a new model entry named '$id'";
+    $tasks['reduce'] = "Add H with <code>reduce -build</code>";
+    setProgress($tasks, 'create');
+    
     // Create directory
     $modelDir = $_SESSION['dataDir'].'/'.$id;
     mkdir($modelDir, 0777);
     $modelURL = $_SESSION['dataURL'].'/'.$id;
     
     // Process file - this is the part that matters
+    setProgress($tasks, 'reduce');
     $outname    = $id.'.pdb';
     $outpath    = $modelDir.'/'.$outname;
     exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -build -allalt $inpath > $outpath");
@@ -240,6 +260,7 @@ function reduceBuild($inModelID, $inpath)
         'isReduced' => true
     );
     
+    setProgress($tasks, null); // all done!
     return $id;
 }
 #}}}########################################################################
