@@ -11,9 +11,7 @@
         t: residue type (ALA, LYS, etc.), all caps, left justified, space padded
 *****************************************************************************/
 require_once(MP_BASE_DIR.'/lib/strings.php');
-require_once(MP_BASE_DIR.'/lib/model.php');     // for running Reduce as needed
 require_once(MP_BASE_DIR.'/lib/visualize.php'); // for making kinemages
-require_once(MP_BASE_DIR.'/lib/labbook.php');
 
 #{{{ runAnalysis - generate (a subset of) all the validation criteria
 ############################################################################
@@ -22,153 +20,221 @@ require_once(MP_BASE_DIR.'/lib/labbook.php');
 * It is suited for use from either the web or command line interface.
 * This only makes sense in terms of an active session.
 *   modelID             ID code for model to process
-*   opts[doRama]        a flag to create Ramachandran plots
-*   opts[doRota]        a flag to find bad rotamers
-*   opts[doCbeta]       a flag to make 2- and 3-D Cbeta deviation plots
-*   opts[doAAC]         a flag to make all-atom contact kinemages
-*   opts[doMultiKin]    a flag to make the multi-criterion kinemage
-*   opts[doMultiChart]  a flag to make the multi-criterion chart
-*   opts[doAll]         a flag to do all of the above
-* If opts is not set, nothing will be done!
-*
+*   opts                has the following keys mapped to boolean flags:
+*       doClashlist     run clashlist and get clashscore
+*       doContactDots   run Probe to make dot kins (part of multicrit kin)
+*       showHbonds      whether to make H-bond dots
+*       showContacts    whether to make vdW dots
+*       doRama          run Rama eval and make plots
+*       doRota          run rotamer eval and make (list?)
+*       doCbDev         calc Cbeta deviations and make kins
+*       doBaseP         calc base-phosphate perpendiculars and make (chart?)
+*       doMultiKin      make multicrit kinemage
+*       
 * This function returns some HTML suitable for using in a lab notebook entry.
 */
 function runAnalysis($modelID, $opts)
 {
-    $model  = $_SESSION['models'][$modelID];
-    $infile = "$model[dir]/$model[pdb]";
-    $entry = "Model $modelID was analyzed, yielding these results:\n<ul>\n"; // lab notebook entry
+    //{{{ Set up file/directory vars and the task list
+    $model      = $_SESSION['models'][$modelID];
+    $modelDir   = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
+    $kinDir     = $_SESSION['dataDir'].'/'.MP_DIR_KINS;
+    $kinURL     = $_SESSION['dataURL'].'/'.MP_DIR_KINS;
+        if(!file_exists($kinDir)) mkdir($kinDir, 0777);
+    $rawDir     = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA;
+        if(!file_exists($rawDir)) mkdir($rawDir, 0777);
+    $chartDir   = $_SESSION['dataDir'].'/'.MP_DIR_CHARTS;
+    $chartURL   = $_SESSION['dataURL'].'/'.MP_DIR_CHARTS;
+        if(!file_exists($chartDir)) mkdir($chartDir, 0777);
+    $infile     = "$modelDir/$model[pdb]";
     
-    // The same conditionals cut and pasted from below, used to determine ahead of time what we're going to do
-    if(($opts['doAll'] || $opts['doAAC'] || $opts['doMultiChart'] || $opts['doMultiKin']) && (! $model['isReduced'])) $tasks['reduce'] = "Add H with <code>reduce -keep -his</code>";
-    if($opts['doAll'] || $opts['doRama']) $tasks['ramaplot'] = "Create Ramachandran plots";
-    if($opts['doAll'] || $opts['doCbeta']) $tasks['cbkin'] = "Create C-beta deviation kinemages";
-    if($opts['doAll'] || $opts['doAAC']) $tasks['aackin'] = "Create all-atom contacts kinemage";
-    if($opts['doAll'] || $opts['doCbeta'] || $opts['doMultiChart']) $tasks['cbdata'] = "Do C-beta analysis";
-    if($opts['doAll'] || $opts['doRota'] || $opts['doMultiChart'] || $opts['doMultiKin']) $tasks['rotadata'] = "Do rotamer analysis";
-    if($opts['doAll'] || $opts['doRama'] || $opts['doMultiChart'] || $opts['doMultiKin']) $tasks['ramadata'] = "Do Ramachandran analysis";
-    if($opts['doAll'] || $opts['doAAC'] || $opts['doMultiChart']) $tasks['clashlist'] = "Do clash analysis with <code>clashlist</code>";
-    if($opts['doAll'] || $opts['doMultiChart']) $tasks['mcchart'] = "Create multi-criteria chart";
-    if($opts['doAll'] || $opts['doMultiKin']) $tasks['mckin'] = "Create multi-criteria kinemage";
-
-    ////////////////////////////////////////////////////////////////////////////
-    // Check for hydrogens and add them if needed.
-    if(($opts['doAll'] || $opts['doAAC'] || $opts['doMultiChart'] || $opts['doMultiKin']) && (! $model['isReduced']))
+    if($opts['doRama'])         $tasks['rama'] = "Do Ramachandran analysis and make plots";
+    if($opts['doRota'])         $tasks['rota'] = "Do rotamer analysis";
+    if($opts['doCbDev'])        $tasks['cbeta'] = "Do C&beta; deviation analysis and make kins";
+    
+    if($opts['doBaseP'])        $tasks['base-phos'] = "<i>Base-phosphate perpendicular analysis is not implemented</i>";
+    
+    if($opts['doClashlist'])    $tasks['clashlist'] = "Run <code>clashlist</code> to find bad clashes and clashscore";
+    if($opts['doMultiKin'])     $tasks['multikin'] = "Create multi-criterion kinemage";
+    //}}} Set up file/directory vars and the task list
+    
+    //{{{ Run protein geometry programs and offer kins to user
+    // Ramachandran
+    if($opts['doRama'])
     {
-        setProgress($tasks, 'reduce'); // updates the progress display if running as a background job
-        $outfile = $model['id']."nbH.pdb";
-        $outpath = "$model[dir]/$outfile";
-        reduceNoBuild($infile, $outpath);
-        $_SESSION['models'][$modelID]['pdb'] = $outfile;
-        $_SESSION['models'][$modelID]['isReduced'] = true;
+        setProgress($tasks, 'rama'); // updates the progress display if running as a background job
+        $outfile = "$rawDir/$model[prefix]rama.data";
+        runRamachandran($infile, $outfile);
+        $rama = loadRamachandran($outfile);
         
-        $model  = $_SESSION['models'][$modelID];
-        $infile = "$model[dir]/$model[pdb]";
-        
-        $entry .= "<li>Added missing hydrogens, if any, using <code>reduce -keep -his -allalt</code></li>\n";
-    }
-    
-    ////////////////////////////////////////////////////////////////////////////
-    // Kinemages and other visualizations that don't use multicrit data
-    // These are done first to give the user something to look at!
-    
-    // Ramachandran plots
-    if($opts['doAll'] || $opts['doRama'])
-    {
-        setProgress($tasks, 'ramaplot'); // updates the progress display if running as a background job
-        makeRamachandranKin($infile, "$model[dir]/$model[prefix]rama.kin");
-        makeRamachandranPDF($infile, "$model[dir]/$model[prefix]rama.pdf");
-        //makeRamachandranImage($infile, "$model[dir]/$model[prefix]rama.jpg");
-        //convertKinToPostscript("$model[dir]/$model[prefix]rama.kin");
-        $outurl = "$model[url]/$model[prefix]rama.kin";
-        $tasks['ramaplot'] .= " - <a href='viewking.php?$_SESSION[sessTag]&url=$outurl' target='_blank'>preview</a>\n";
-    }
-    
-    // C-beta deviations
-    // In the future, we might use a custom lots kin here (e.g. with half-bond colors)
-    if($opts['doAll'] || $opts['doCbeta'])
-    {
-        setProgress($tasks, 'cbkin'); // updates the progress display if running as a background job
-        $outfile = "$model[dir]/$model[prefix]cb3d.kin";
-        exec("prekin -lots $infile > $outfile");
-        makeCbetaDevBalls($infile, $outfile);
-        makeCbetaDevPlot($infile, "$model[dir]/$model[prefix]cb2d.kin");
-        $outurl = "$model[url]/$model[prefix]cb2d.kin";
-        $tasks['cbkin'] .= " - <a href='viewking.php?$_SESSION[sessTag]&url=$outurl' target='_blank'>preview</a>\n";
-    }
-    
-    // All-atom contacts
-    // We might also want to not calculate H-bonds or VDW dots
-    // In the future, we might use a custom lots kin here (e.g. with half-bond colors)
-    if($opts['doAll'] || $opts['doAAC'])
-    {
-        setProgress($tasks, 'aackin'); // updates the progress display if running as a background job
-        $outfile = "$model[dir]/$model[prefix]aac.kin";
-        $outurl = "$model[url]/$model[prefix]aac.kin";
-        exec("prekin -lots $infile > $outfile");
-        makeSidechainDots($infile, $outfile);
-        //$outfile = "$model[dir]/$model[prefix]aac-mc.kin";
-        //exec("prekin -lots $infile > $outfile");
-        makeMainchainDots($infile, $outfile);
-        $tasks['aackin'] .= " - <a href='viewking.php?$_SESSION[sessTag]&url=$outurl' target='_blank'>preview</a>\n";
-    }
-    
-    ////////////////////////////////////////////////////////////////////////////
-    // Data collection for multi-crit chart, etc.
-    
-    // C-betas
-    if($opts['doAll'] || $opts['doCbeta'] || $opts['doMultiChart'])
-    {
-        setProgress($tasks, 'cbdata'); // updates the progress display if running as a background job
-        $outfile = "$model[dir]/$model[prefix]cbdev.data";
-        runCbetaDev($infile, $outfile);
-        $cbdev = loadCbetaDev($outfile);
-        $tasks['cbdata'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=plain' target='_blank'>preview</a>\n";
-        
-        $cbout = count(findCbetaOutliers($cbdev));
-        $entry .= "<li>Found $cbout residues with C&beta; deviations &gt; 0.25&Aring;</li>\n";
+        makeRamachandranKin($infile, "$kinDir/$model[prefix]rama.kin");
+        $tasks['rama'] .= " - preview <a href='viewking.php?$_SESSION[sessTag]&url=$kinURL/$model[prefix]rama.kin' target='_blank'>kinemage</a>";
+        setProgress($tasks, 'rama'); // so the preview link is visible
+        makeRamachandranPDF($infile, "$chartDir/$model[prefix]rama.pdf");
+        $tasks['rama'] .= " | <a href='$chartURL/$model[prefix]rama.pdf' target='_blank'>PDF</a>\n";
+        setProgress($tasks, 'rama'); // so the preview link is visible
     }
     
     // Rotamers
-    if($opts['doAll'] || $opts['doRota'] || $opts['doMultiChart'] || $opts['doMultiKin'])
+    if($opts['doRota'])
     {
-        setProgress($tasks, 'rotadata'); // updates the progress display if running as a background job
-        $outfile = "$model[dir]/$model[prefix]rota.data";
+        setProgress($tasks, 'rota'); // updates the progress display if running as a background job
+        $outfile = "$rawDir/$model[prefix]rota.data";
         runRotamer($infile, $outfile);
         $rota = loadRotamer($outfile);
-        $tasks['rotadata'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=plain' target='_blank'>preview</a>\n";
-        
-        $rotaout = count(findRotaOutliers($rota));
-        $entry .= "<li>Found $rotaout sidechains with rotamer scores &lt; 1%</li>\n";
     }
     
-    // Ramachandran
-    if($opts['doAll'] || $opts['doRama'] || $opts['doMultiChart'] || $opts['doMultiKin'])
+    // C-beta deviations
+    if($opts['doCbDev'])
     {
-        setProgress($tasks, 'ramadata'); // updates the progress display if running as a background job
-        $outfile = "$model[dir]/$model[prefix]rama.data";
-        runRamachandran($infile, $outfile);
-        $rama = loadRamachandran($outfile);
-        $tasks['ramadata'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=plain' target='_blank'>preview</a>\n";
+        setProgress($tasks, 'cbeta'); // updates the progress display if running as a background job
+        $outfile = "$rawDir/$model[prefix]cbdev.data";
+        runCbetaDev($infile, $outfile);
+        $cbdev = loadCbetaDev($outfile);
         
-        $ramaout = count(findRamaOutliers($rama));
-        $entry .= "<li>Found $ramaout residues that are Ramachandran outliers</li>\n";
+        makeCbetaDevPlot($infile, "$kinDir/$model[prefix]cb2d.kin");
+        $tasks['cbeta'] .= " - preview <a href='viewking.php?$_SESSION[sessTag]&url=$kinURL/$model[prefix]cb2d.kin' target='_blank'>2D</a>";
+        setProgress($tasks, 'cbeta'); // so the preview link is visible
+        
+        $outfile = "$kinDir/$model[prefix]cb3d.kin";
+        exec("prekin -lots $infile > $outfile");
+        makeCbetaDevBalls($infile, $outfile);
+        $tasks['cbeta'] .= " | <a href='viewking.php?$_SESSION[sessTag]&url=$kinURL/$model[prefix]cb3d.kin' target='_blank'>3D</a>";
+        setProgress($tasks, 'cbeta'); // so the preview link is visible
     }
+    //}}} Run programs and offer kins to user
     
+    //{{{ Run nucleic acid geometry programs and offer kins to user
+    // Base-phosphate perpendiculars
+    if($opts['doBaseP'])
+    {
+        setProgress($tasks, 'base-phos'); // updates the progress display if running as a background job
+    }
+    //}}} Run nucleic acid geometry programs and offer kins to user
+    
+    //{{{ Run all-atom contact programs and offer kins to user
     // Clashes
-    if($opts['doAll'] || $opts['doAAC'] || $opts['doMultiChart'])
+    if($opts['doClashlist'])
     {
         setProgress($tasks, 'clashlist'); // updates the progress display if running as a background job
-        $outfile = "$model[dir]/$model[prefix]clash.data";
+        $outfile = "$chartDir/$model[prefix]clashlist.txt";
         runClashlist($infile, $outfile);
         $clash = loadClashlist($outfile);
         $tasks['clashlist'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=plain' target='_blank'>preview</a>\n";
-        
-        $clashout = count(findClashOutliers($clash));
-        $entry .= "<li>Found $clashout residues with serious steric clashes (&gt; 0.4&Aring; overlap)</li>\n";
-        $entry .= "<li>Overall clashscore for all atoms was $clash[scoreAll], or $clash[scoreBlt40] for atoms with B-factors &lt; 40</li>\n";
+        setProgress($tasks, 'clashlist'); // so the preview link is visible
     }
+    //}}} Run all-atom contact programs and offer kins to user
     
+    //{{{ Build multi-criterion chart, kinemage
+    if($opts['doMultiKin'])
+    {
+        setProgress($tasks, 'clashlist'); // updates the progress display if running as a background job
+        $mcKinOpts = array(
+            'Bribbons'  =>  true,
+            'altconf'   =>  true,
+            'rama'      =>  isset($rama),
+            'rota'      =>  isset($rota),
+            'cbdev'     =>  isset($cbdev),
+            'dots'      =>  $opts['doContactDots'],
+            'hbdots'    =>  $opts['showHbonds'],
+            'vdwdots'   =>  $opts['showContacts']
+        );
+        $outfile = "$kinDir/$model[prefix]multi.kin";
+        makeMulticritKin(array($infile), $outfile, $mcKinOpts);
+    }
+    //}}} Build multi-criterion chart, kinemage
+    
+    //{{{ Create lab notebook entry: summary stats table
+    $entry = "";
+    $entry .= "<h3>Summary statistics</h3>\n";
+    $entry .= "<p><table border='1' width='100%'>\n";
+    if(isset($clash))
+    {
+        $entry .= "<tr><td rowspan='2' align='center'>All-Atom<br>Contacts</td>\n";
+        $entry .= "<td>Clashscore, all atoms:</td><td>$clash[scoreAll]</td>\n";
+        $entry .= "<td>XX<sup>th</sup> percentile</td></tr>\n";
+        $entry .= "<tr><td>Clashscore, B&lt;40:</td><td>$clash[scoreBlt40]</td>\n";
+        $entry .= "<td>XX<sup>th</sup> percentile</td></tr>\n";
+    }
+    $proteinRows = 0;
+    if(isset($rama))    $proteinRows += 2;
+    if(isset($rota))    $proteinRows += 1;
+    if(isset($cbdev))   $proteinRows += 1;
+    if($proteinRows > 0)
+    {
+        $entry .= "<tr><td rowspan='$proteinRows' align='center'>Protein<br>Geometry</td>\n";
+        $firstRow = true;
+        if(isset($rama))
+        {
+            $ramaOut = count(findRamaOutliers($rama));
+            foreach($rama as $r) { if($r['eval'] == "Favored") $ramaFav++; }
+            $ramaTot = count($rama);
+            $ramaOutPct = sprintf("%.2f", 100.0 * $ramaOut / $ramaTot);
+            $ramaFavPct = sprintf("%.2f", 100.0 * $ramaFav / $ramaTot);
+            
+            if($firstRow) $firstRow = false;
+            else $entry .= "<tr>";
+            $entry .= "<td>Ramachandran outliers</td><td>$ramaOutPct%</td>\n";
+            $entry .= "<td>Goal: &lt;0.05%</td></tr>\n";
+            $entry .= "<tr><td>Ramachandran favored</td><td>$ramaFavPct%</td>\n";
+            $entry .= "<td>Goal: &gt;98%</td></tr>\n";
+        }
+        if(isset($rota))
+        {
+            $rotaOut = count(findRotaOutliers($rota));
+            $rotaTot = count($rota);
+            $rotaOutPct = sprintf("%.2f", 100.0 * $rotaOut / $rotaTot);
+            
+            if($firstRow) $firstRow = false;
+            else $entry .= "<tr>";
+            $entry .= "<td>Rotamer outliers</td><td>$rotaOutPct%</td>\n";
+            $entry .= "<td>Goal: &lt;1%</td></tr>\n";
+        }
+        if(isset($cbdev))
+        {
+            $cbOut = count(findCbetaOutliers($cbdev));
+            if($firstRow) $firstRow = false;
+            else $entry .= "<tr>";
+            $entry .= "<td>C&beta; deviations &gt;0.25&Aring;</td><td>$cbOut</td>\n";
+            $entry .= "<td>Goal: 0</td></tr>\n";
+        }
+    }// end of protein-specific stats
+    if($opts['doBaseP'])
+    {
+        // TODO: Nucleic acid summary stats here
+        $entry .= "<tr><td rowspan='1' align='center'>Nucleic Acid<br>Geometry</td>\n";
+        $entry .= "<td colspan='3'><i>No nucleic acid geometry info implemented</i></td>\n";
+        $entry .= "</tr>\n";
+    }
+    $entry .= "</table></p>\n"; // end of summary stats table
+    //}}} Create lab notebook entry: summary stats table
+    
+    //{{{ Create lab notebook entry: multi-crit and individual kins, charts
+    $entry .= "<h3>Multi-criterion visualizations</h3>\n";
+    if($opts['doMultiKin'])
+        $entry .= "<p>".linkKinemage("$model[prefix]multi.kin", "Multi-criterion kinemage")."</p>\n";
+    $entry .= "<p><i>Multi-criterion chart has not been implemented yet.</i></p>\n";
+    
+    $entry .= "<h3>Single-criterion visualizations</h3>";
+    $entry .= "<ul>\n";
+    if($opts['doClashlist'])
+        $entry .= "<li><a href='viewtext.php?$_SESSION[sessTag]&file=$chartDir/$model[prefix]clashlist.txt&mode=plain' target='_blank'>Clash list</a></li>\n";
+    if($opts['doRama'])
+    {
+        $entry .= "<li>".linkKinemage("$model[prefix]rama.kin", "Ramachandran plot kinemage")."</li>\n";
+        $entry .= "<li><a href='$chartURL/$model[prefix]rama.pdf' target='_blank'>Ramachandran plot PDF</a></li>\n";
+    }
+    if($opts['doCbDev'])
+    {
+        $entry .= "<li>".linkKinemage("$model[prefix]cb2d.kin", "C&beta; deviation scatter plot (2D)")."</li>\n";
+        $entry .= "<li>".linkKinemage("$model[prefix]cb3d.kin", "C&beta; deviations marked on structure (3D)")."</li>\n";
+    }
+    if($opts['doBaseP'])
+        $entry .= "<li><i>Base-phosphate distance analysis not yet implemented</i></li>\n";
+    $entry .= "</ul>\n";
+    //}}} Create lab notebook entry: multi-crit and individual kins, charts
+    
+    /*    
     ////////////////////////////////////////////////////////////////////////////
     // Multi-criterion chart and kinemage, built from the data above.
 
@@ -187,19 +253,8 @@ function runAnalysis($modelID, $opts)
         makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, true);
         //$tasks['mcchart'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=html' target='_blank'>preview all</a>\n";
     }
-    
-    // Multi-criterion kinemage
-    if($opts['doAll'] || $opts['doMultiKin'])
-    {
-        setProgress($tasks, 'mckin'); // updates the progress display if running as a background job
-        $outfile = "$model[dir]/$model[prefix]multi.kin";
-        $outurl = "$model[url]/$model[prefix]multi.kin";
-        makeMulticritKin($infile, $outfile, $rama, $rota);
-        $tasks['mckin'] .= " - <a href='viewking.php?$_SESSION[sessTag]&url=$outurl' target='_blank'>preview</a>\n";
-    }
+    */
     setProgress($tasks, null); // everything is finished
-
-    $entry .= "</ul>\n";    
     return $entry;
 }
 #}}}########################################################################

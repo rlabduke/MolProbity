@@ -66,6 +66,8 @@ define("MP_DIR_MODELS", "coordinates");         // PDB files
 define("MP_DIR_EDMAPS", "electron_density");    // electron density
 define("MP_DIR_TOPPAR", "dictionaries");        // het dicts, etc. (named for CNS TOPology and PARameter)
 define("MP_DIR_KINS", "kinemages");             // kinemage visualizations
+define("MP_DIR_RAWDATA", "raw_data");           // raw (text) data like .tab files
+define("MP_DIR_CHARTS", "charts");              // CSV files for HTML/Excel tables, PDFs, etc
 
 //============================================================================
 //===  PLEASE DON'T CHANGE THINGS BELOW THIS LINE  ===========================
@@ -82,6 +84,6 @@ define("MP_EMAIL_AUTHOR", "moler@kinemage.biochem.duke.edu,iwd@duke.edu");
 define("MP_SESSION_NAME", "MolProbSID");
 
 // Current "internal reference" version number. Please DO NOT change.
-define("MP_VERSION", "3beta9");
+define("MP_VERSION", "3beta10");
 
 ?>

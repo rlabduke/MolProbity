@@ -65,21 +65,22 @@ function display($context)
     
     echo makeEventForm("onRerunReduce");
     echo "<input type='hidden' name='modelID' value='$id'>\n";
-    echo "Below is a list of changes made while adding hydrogens.\n";
-    echo "Please leave selected the residues you would like to flip, and unselect those you wish not to flip.\n";
-    
-    if($context['showAllNQH'])  echo "(<a href='".makeEventURL("onShowAllNQH", false)."'>Show flipped Asn/Gln/His only</a>)";
-    else                        echo "(<a href='".makeEventURL("onShowAllNQH", true)."'>Show all Asn/Gln/His</a>)";
-    
-    echo "<p>\n";
     if(! $did_flip && ! $context['showAllNQH'])
     {
         echo "Reduce didn't flip any groups while adding hydrogens to your file.\n";
         echo "This <b>may</b> indicate that all of the Asn's, Gln's, and His's in your structure are oriented correctly.\n";
+        echo "(<a href='".makeEventURL("onShowAllNQH", true)."'>Show all Asn/Gln/His</a>)";
+    
+        echo "<p><input type='submit' name='cmd' value='Continue &gt;'>\n";
     }
     else
     {
-        echo "<table border='0' cellspacing='0' width='100%'>\n";
+        echo "Below is a list of changes made while adding hydrogens.\n";
+        echo "Please leave selected the residues you would like to flip, and unselect those you wish not to flip.\n";
+        if($context['showAllNQH'])  echo "(<a href='".makeEventURL("onShowAllNQH", false)."'>Show flipped Asn/Gln/His only</a>)";
+        else                        echo "(<a href='".makeEventURL("onShowAllNQH", true)."'>Show all Asn/Gln/His</a>)";
+    
+        echo "<p><table border='0' cellspacing='0' width='100%'>\n";
         echo "<tr bgcolor='".MP_TABLE_HIGHLIGHT."'>";
         echo "<td align='center'><b>Flip?</b></td>\n";
         echo "<td align='center'><b>Chain</b></td>\n";
@@ -116,9 +117,9 @@ function display($context)
         echo "</table>\n";
         echo "<p><input type='submit' name='cmd' value='Regenerate H, applying only selected flips &gt;'>\n";
         echo "<br><small>(If you didn't make any changes, we won't recalculate.)</small>\n";
-        echo "</form>\n";
     }
     
+    echo "</form>\n";
     echo mpPageFooter();
 }
 #}}}########################################################################
