@@ -3,11 +3,16 @@
     Defines string-handling and common formatting functions.
 *****************************************************************************/
 
-#{{{ startsWith - tests whether haystack starts with needle
+#{{{ startsWith, endsWith - tests whether haystack starts/ends with needle
 ############################################################################
 function startsWith($haystack, $needle)
 {
-    return (strncmp($haystack, $needle, strlen($needle)) == 0);
+    //return (strncmp($haystack, $needle, strlen($needle)) == 0);
+    return $needle == substr($haystack, 0, strlen($needle));
+}
+function endsWith($haystack, $needle)
+{
+    return $needle == substr($haystack, -strlen($needle));
 }
 #}}}########################################################################
 

@@ -10,6 +10,11 @@ if(!defined('MP_BASE_DIR')) die("MP_BASE_DIR is not defined.");
 /** Does not need to be called if mpStartSession is called. */
 function mpInitEnvirons()
 {
+    // Die if disk is at least 98% full, in order to protect the server.
+    $df = shell_exec("df '".MP_BASE_DIR."'");
+    $i = strrpos($df, "%");
+    if(trim(substr($df, $i-2, 2)) >= 98) die("Server disk is more than 98% full.");
+    
     // Configure some PHP options for our use
     set_magic_quotes_runtime(0); // off
     
@@ -99,6 +104,8 @@ function mpStartSession($createIfNeeded = false)
             
             // TODO: perform other tasks to start a session
             // Create databases, etc, etc.
+            
+            mpLog("new-session:New user session started");
         }
         else die("Specified session '".session_id()."' does not exist.");
     }
@@ -291,6 +298,28 @@ function mpEnumerateSessions()
 }
 #}}}########################################################################
 
+#{{{ mpLog - records a system log message
+############################################################################
+/**
+* Writes the message, along with IP number, session ID, and current time.
+* Fields are colon-delimited, so the recommended format is a short identifying string
+* followed by a colon and a longer, more human-readable description.
+*/
+function mpLog($msg)
+{
+    $f = fopen(MP_BASE_DIR."/public_html/data/molprobity.log", "a");
+
+    $sess = session_id();
+    $ip = getVisitorIP();
+    $time = time(); // seconds since the Epoch (1 Jan 1970 midnight GMT)
+
+    fwrite($f, "$ip:$sess:$time:$msg");
+    if(! endsWith($msg, "\n")) fwrite($f, "\n");
+
+    fclose($f);
+}
+#}}}########################################################################
+
 #{{{ postSessionID - makes a hidden <INPUT> for forms
 ############################################################################
 function postSessionID()
@@ -386,5 +415,9 @@ function getVisitorIP()
 
 #{{{ a_function_definition - sumary_statement_goes_here
 ############################################################################
+/**
+* Documentation for this function.
+*/
+//function someFunctionName() {}
 #}}}########################################################################
 ?>

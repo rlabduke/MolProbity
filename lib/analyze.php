@@ -131,6 +131,7 @@ function runAnalysis($modelID, $opts)
     if($opts['doAll'] || $opts['doRama'])
     {
         makeRamachandranKin($infile, "$model[dir]/$model[prefix]rama.kin");
+        makeRamachandranPDF($infile, "$model[dir]/$model[prefix]rama.pdf");
         //makeRamachandranImage($infile, "$model[dir]/$model[prefix]rama.jpg");
         //convertKinToPostscript("$model[dir]/$model[prefix]rama.kin");
     }

@@ -13,7 +13,7 @@
 *****************************************************************************/
 // Someone else MUST have defined this before including us!
 if(!defined('MP_BASE_DIR')) die("MP_BASE_DIR is not defined.");
-    
+
 require_once(MP_BASE_DIR.'/config/config.php'); // Import all the constants we use
 require_once(MP_BASE_DIR.'/lib/strings.php');
 require_once(MP_BASE_DIR.'/lib/sessions.php');  // Session handling functions
@@ -85,8 +85,8 @@ function mpNavigationBar($active)
     $s .= mpNavBar_format('home_tab.php', 'Intro & Help', ($active == 'home'));
     $s .= mpNavBar_format('upload_tab.php', 'Get input models', ($active == 'upload'));
     $s .= mpNavBar_format('analyze_tab.php', 'Analyze quality', ($active == 'analyze'));
-    $s .= mpNavBar_format('', 'Improve models', ($active == 'improve'));
-    $s .= mpNavBar_format('', 'Compare models', ($active == 'compare'));
+    $s .= mpNavBar_format('improve_tab.php', 'Improve models', ($active == 'improve'));
+    $s .= mpNavBar_format('compare_tab.php', 'Compare models', ($active == 'compare'));
     $s .= mpNavBar_format('files_tab.php', 'Download files', ($active == 'files'));
     $s .= mpNavBar_format('finish_tab.php', 'Log out', ($active == 'logout'));
     $s .= "<br />\n";
@@ -272,6 +272,24 @@ function linkModelKin($model, $suffix)
     $s = "";
     $s .= "<b>$name</b> (" . formatFilesize(filesize($file)) . "): ";
     $s .= "<a href='viewking.php?$_SESSION[sessTag]&url=$link' target='_blank'>View in KiNG</a> | ";
+    $s .= "<a href='$link'>Download</a>";
+    return $s;
+}
+#}}}########################################################################
+
+#{{{ linkModelDownload - creates a file-download link tailored to this session
+############################################################################
+/**
+* $model    a standard data structure describing the model from $_SESSION['model'][MODEL_ID]
+* $suffix   the file name, without the model prefix, but with the .foo ending
+*/
+function linkModelDownload($model, $suffix)
+{
+    $name = "$model[prefix]$suffix";
+    $file = "$model[dir]/$name";
+    $link = "$model[url]/$name";
+    $s = "";
+    $s .= "<b>$name</b> (" . formatFilesize(filesize($file)) . "): ";
     $s .= "<a href='$link'>Download</a>";
     return $s;
 }

@@ -112,7 +112,7 @@ The Ramachandran plot identifies protein residues in illegal backbone conformati
 based on the phi and psi dihedral angles.
 TODO: link to more info about Ramachandran plots.
 <p><ul>
-<?php if(modelDataExists($model, "rama.kin") /*&& modelDataExists($model, "rama.pdf")*/) { ?>
+<?php if(modelDataExists($model, "rama.kin") && modelDataExists($model, "rama.pdf")) { ?>
     <li>
         <b><?php echo $rama_outliers; ?> outliers</b>
     </li>
@@ -123,9 +123,9 @@ TODO: link to more info about Ramachandran plots.
         </i>
     </li>
     <li>
-        <b>PDF</b>:
-        <br /><i>Coming soon.
-        Use Mage or KiNG to generate customized PostScript or PDF renderings of the Ramachandran kinemage.
+        <?php echo linkModelDownload($model, "rama.pdf"); ?>
+        <br /><i>You can also use Mage or KiNG to generate customized PostScript
+        or PDF renderings of the Ramachandran kinemage.
         </i>
     </li>
 <?php } else { ?>

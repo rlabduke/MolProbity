@@ -29,8 +29,15 @@ if(isset($_REQUEST['moreOpts_all']))
     echo mpPageHeader("MolProbity Home", "home");
 ?>
 
-<p>An outline for how MolProbity 3 works:
-<br><img src="img/flowchart.gif">
+<p>
+<map name="GraffleExport">
+	<area shape=poly coords="65,15,128,15,141,33,128,51,65,51,51,33,65,15" href="upload_tab.php?<?php echo $_SESSION['sessTag']; ?>">
+	<area shape=poly coords="218,15,281,15,294,33,281,51,218,51,204,33,218,15" href="upload_tab.php?<?php echo $_SESSION['sessTag']; ?>">
+	<area shape=rect coords="24,150,141,276" href="analyze_tab.php?<?php echo $_SESSION['sessTag']; ?>">
+	<area shape=rect coords="24,303,141,339" href="compare_tab.php?<?php echo $_SESSION['sessTag']; ?>">
+	<area shape=rect coords="357,305,443,333" href="notebook_tab.php?<?php echo $_SESSION['sessTag']; ?>">
+</map>
+<image src="img/flowchart.jpg" usemap="#GraffleExport">
 
 <!-- Control for global "verbosity" of options in forms -->
 <hr>

@@ -28,6 +28,14 @@ function makeRamachandranKin($infile, $outfile)
 }
 #}}}########################################################################
 
+#{{{ makeRamachandranPDF - creates a multi-page PDF-format Ramachandran plot
+############################################################################
+function makeRamachandranPDF($infile, $outfile)
+{
+    exec("java -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -pdf $infile $outfile");
+}
+#}}}########################################################################
+
 #{{{ [NOT SUPPORTED] convertKinToPostscript - uses Mage to do EPS output
 ############################################################################
 // Would have to add Mage to bin/ for this to work again.
@@ -200,7 +208,7 @@ $0 ~ /^@(dot|vector)list .* master=\{H-bonds\}/ { $0 = $0 " off" }
 
     //exec("probe $options -quiet -noticks -mc -self 'alta' $infile | gawk '$dots_off_script' >> $outfile");
     exec("probe $options -quiet -noticks -name 'sc-x dots' -self 'alta' $infile | gawk '$dots_off_script' >> $outfile");
-    exec("probe $options -quiet -noticks -name 'mc-mc dots' -mc -self 'alta' $infile | gawk '$dots_off_script' >> $outfile");
+    exec("probe $options -quiet -noticks -name 'mc-mc dots' -mc -self 'mc alta' $infile | gawk '$dots_off_script' >> $outfile");
 }
 #}}}########################################################################
 

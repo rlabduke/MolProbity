@@ -7,13 +7,7 @@ INPUTS (via Get or Post):
 
 OUTPUTS (via Post):
     model           ID code for model to process
-    opts[doRama]        a flag to create Ramachandran plots
-    opts[doRota]        a flag to find bad rotamers
-    opts[doCbeta]       a flag to make 2- and 3-D Cbeta deviation plots
-    opts[doAAC]         a flag to make all-atom contact kinemages
-    opts[doMultiKin]    a flag to make the multi-criterion kinemage
-    opts[doMultiChart]  a flag to make the multi-criterion chart
-    opts[doAll]         a flag to do all of the above
+    opts[]          an array of options for the background job
 
 *****************************************************************************/
 // EVERY *top-level* page must start this way:
