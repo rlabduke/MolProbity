@@ -45,7 +45,9 @@ function display($context)
         // is a "unique" page...
         $count      = $_REQUEST['count']+1;
         $ellapsed   = time() - $_SESSION['bgjob']['startTime'];
-        $url        = "$_SERVER[PHP_SELF]?$_SESSION[sessTag]&count=$count";
+        // We use basename() to get "index.php" instead of the full path,
+        // which is subject to corruption with URL forwarding thru kinemage.
+        $url        = basename($_SERVER['PHP_SELF'])."?$_SESSION[sessTag]&count=$count";
         // Refresh once quickly to get list of tasks displayed, then at given rate
         $rate       = ($count == 1 ? 2 : $_SESSION['bgjob']['refreshRate']);
         // Slow down if this is a long job

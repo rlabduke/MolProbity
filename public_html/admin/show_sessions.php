@@ -50,7 +50,9 @@ if($_REQUEST['cmd'] == "Destroy")
         echo "<td>".formatHoursElapsed($sess['ttl'])."</td>\n";
         echo "<td>".formatFilesize($sess['size'])."</td>\n";
         echo "<td><a href='../index.php?".MP_SESSION_NAME."=$sess[id]'>Enter</a></td>\n";
-        echo "<td><a href='$_SERVER[PHP_SELF]?cmd=Destroy&target=$sess[id]'>Destroy</a></td>\n";
+        // We use basename() to get "index.php" instead of the full path,
+        // which is subject to corruption with URL forwarding thru kinemage.
+        echo "<td><a href='".basename($_SERVER['PHP_SELF'])."?cmd=Destroy&target=$sess[id]'>Destroy</a></td>\n";
         echo "</tr>\n";
     }
 ?>

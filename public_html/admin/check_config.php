@@ -90,7 +90,8 @@ $ok = true;
 <hr><h2>Server information:</h2>
 <ul>
 <?php
-    echo "<li>PHP version: ".PHP_VERSION."</li>\n";
+    echo "<li>Current URL: http://$_SERVER[SERVER_NAME]$_SERVER[PHP_SELF]</li>\n";
+    echo "<li>PHP version (webserver): ".PHP_VERSION."</li>\n";
     echo "<li>Operating system: ".PHP_OS."</li>\n";
     
     $magic = get_magic_quotes_gpc();
@@ -141,8 +142,13 @@ $ok = true;
 <hr><h2>Version numbers for external programs:</h2>
 <ul>
 <?php
+    // Reduce writes help on stderr
+    $reduce_help = explode("\n", shell_exec("reduce -help 2>&1"));
+    $php_help = explode("\n", shell_exec("php -v"));
+
+    echo "<li><b>PHP (cmd line):</b> $php_help[0]</li>\n";
     echo "<li><b>Prekin:</b> ".exec("prekin -help")."</li>\n";
-    echo "<li><b>Reduce:</b> ".exec("reduce -help")."</li>\n";
+    echo "<li><b>Reduce:</b> $reduce_help[0]</li>\n";
     echo "<li><b>Probe:</b> ".exec("probe -version")."</li>\n";
 ?>
 </ul>
