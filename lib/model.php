@@ -333,7 +333,8 @@ function decodeReduceUsermods($file)
     while( !feof($fp) and ($s = fgets($fp, 200)) and !eregi("^ATOM  ", $s) )
     {
         // Look for Asn, Gln, and His marked by Reduce
-        if( eregi("^USER  MOD........:......(ASN|GLN|HIS)", $s) )
+        #if( eregi("^USER  MOD........:......(ASN|GLN|HIS)", $s) )
+        if(preg_match('/^USER  MOD (Set|Single).*?:.{6}(ASN|GLN|HIS)/i', $s))
         {
             // Break it down into colon-delimited fields.
             // There are four fields - Single/Set/Fix : Group ID : (FLIP) group : scores
@@ -341,6 +342,7 @@ function decodeReduceUsermods($file)
 
             // Most values can be done without knowing whether or not this is a flip.
             $changes[0][$c] = $field[1];
+            /** Original, highly inefficient code! * /
             $changes[1][$c] = trim(eregi_replace("^(.).*$", "\\1", $field[1]));
             $changes[2][$c] = trim(eregi_replace("^.(....).*$", "\\1", $field[1]));
             $changes[3][$c] = trim(eregi_replace("^.....(....).*$", "\\1", $field[1]));
@@ -352,7 +354,40 @@ function decodeReduceUsermods($file)
             $changes[10][$c] = trim(eregi_replace("^sc=......... ..o=([^!]+)(!?),f=([^!\)]+)(!?).*$", "\\3", $field[3]));
             $changes[11][$c] = trim(eregi_replace("^sc=......... ..o=([^!]+)(!?),f=([^!]+)(!?).*$", "\\4", $field[3]));
             $changes[12][$c] = trim(eregi_replace("^sc=......... ([FXCK]).*$", "\\1", $field[3]));
-
+            /** Original, highly inefficient code! */
+            preg_match('/^(.)(....)(....)/', $field[1], $f1);
+            $changes[1][$c] = trim($f1[1]);
+            $changes[2][$c] = trim($f1[2]);
+            $changes[3][$c] = trim($f1[3]);
+            // skip 4 and 5 for now
+            if(preg_match('/^sc=(........\d?)([! ]) +?([FXCK]?)\(o=([^!]+)(!?),f=([^!\)]+)(!?)\)?/', $field[3], $f3))
+            {
+                $changes[6][$c] = trim($f3[1]);
+                $changes[7][$c] = trim($f3[2]);
+                $changes[8][$c] = trim($f3[4]);
+                $changes[9][$c] = trim($f3[5]);
+                $changes[10][$c] = trim($f3[6]);
+                $changes[11][$c] = trim($f3[7]);
+                $changes[12][$c] = trim($f3[3]);
+            }
+            // For things who's score doesn't change when flipped (???)
+            elseif(preg_match('/^sc=(........\d?)([! ]) +?([FXCK]?)\(180deg=([^!\)]+)(!?)\)?/', $field[3], $f3))
+            {
+                $changes[6][$c] = trim($f3[1]);
+                $changes[7][$c] = trim($f3[2]);
+                $changes[8][$c] = trim($f3[4]);
+                $changes[9][$c] = trim($f3[5]);
+                $changes[10][$c] = trim($f3[4]);
+                $changes[11][$c] = trim($f3[5]);
+                $changes[12][$c] = 'X';
+            }
+            else
+            {
+                echo "*** decodeReduceUsermods(): Couldn't process USER MOD correctly:\n";
+                echo $s;
+                continue;
+            }
+            
             // Set this flag so we can determine 4 and 5
             $didflip = eregi("^FLIP", $field[2]);
 
@@ -388,6 +423,7 @@ function decodeReduceUsermods($file)
                 default:
                     // This occurs for a rare bug in Reduce as of 11.14.01
                     // sc= field may be too wide and displace this character.
+                    // 5/7/04: This should never occur any more.
                     $changes[4][$c] = "???";
                     $changes[5][$c] = "Inconsistency in USER MOD records.";
             }

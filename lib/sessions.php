@@ -41,7 +41,7 @@ function mpGetPath()
     if(preg_match("/(darwin|os ?x|mac)/i", PHP_OS))
         $mpPath .= ":".MP_BASE_DIR."/bin/macosx";
     elseif(preg_match("/(linux)/i", PHP_OS))
-        $mpPath .= ":".MP_BASE_DIR."/bin/linux-rh73";
+        $mpPath .= ":".MP_BASE_DIR."/bin/linux";
         
     if(MP_BIN_PATH != "")
         $mpPath = MP_BIN_PATH.":$mpPath";

@@ -241,11 +241,11 @@ function findCbetaOutliers($cbdev)
 }
 #}}}########################################################################
 
-#{{{ calcCbetaStats - calculates min, max, mean, median, and std. deviation
+#{{{ calcCbetaStats - calculates max, mean, and median deviation
 ############################################################################
 /**
 * Accepts the data structure created by loadCbetaDev()
-* Returns an array with the keys 'min', 'max', 'mean', 'median', 'stddev'
+* Returns an array with the keys 'max', 'mean', 'median'
 */
 function calcCbetaStats($cbdev)
 {
@@ -259,17 +259,12 @@ function calcCbetaStats($cbdev)
     sort($dev);
     
     $len = count($dev);
-    $s['min']   = $dev[0];
     $s['max']   = $dev[ $len-1 ];
     $s['mean']  = $mean = $sum / $len;
     
     $half = intval($len/2);
     if($len % 2 == 0)   $s['median'] = ($dev[$half] + $dev[$half-1]) / 2;
     else                $s['median'] = $dev[$half];
-    
-    foreach($dev as $d)
-        $sumSquareDev += ($d - $mean)*($d-$mean);
-    $s['stddev'] = sqrt($sumSquareDev);
     
     return $s;
 }

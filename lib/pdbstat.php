@@ -64,10 +64,10 @@ function pdbstat($pdbfilename)
         elseif(startsWith($s, "REMARK"))
         {
             if(startsWith($s, 'REMARK   3   PROGRAM')) { $refiProg = trim(substr($s, 26, 44)); }
-            elseif(!isset($rValue) && preg_match('/^REMARK   3   R VALUE .+? +(0?\.\d+)/', $s, $match)) { $rValue = $match[1]; }
-            elseif(!isset($rFree) && preg_match('/^REMARK   3   FREE R VALUE .+?: +(0?\.\d+)/', $s, $match)) { $rFree = $match[1]; }
+            elseif(!isset($rValue) && preg_match('/^REMARK   3   R VALUE.*?[ :](0?\.\d+)/', $s, $match)) { $rValue = $match[1]; }
+            elseif(!isset($rFree) && preg_match('/^REMARK   3   FREE R VALUE .+?: *(0?\.\d+)/', $s, $match)) { $rFree = $match[1]; }
             elseif(preg_match('/^REMARK 200  TEMPERATURE           \(KELVIN\) : +(\d+\.\d+)/', $s, $match)) { $refiTemp = $match[1]; }
-            elseif(!isset($resolution) && preg_match("/^REMARK   2/", $s) && preg_match("/ (\\d+\\.\\d+)/", substr($s,10,60), $match)) { $resolution = $match[1]; }
+            elseif(!isset($resolution) && preg_match("/^REMARK   2/", $s) && preg_match('/ (\d+\.\d*|0?\.\d+)/', substr($s,10,60), $match)) { $resolution = $match[1]; }
             # Alternative location for resolution info:
             elseif(!isset($resolution) && preg_match('/^REMARK   3   RESOLUTION RANGE HIGH .+?: +(\d+\.\d+)/', $s, $match)) { $resolution = $match[1]; }
             # CNS-style resolution record:

@@ -70,7 +70,7 @@ else
     $tasks['reduce'] = "Add H with user-selected Asn/Gln/His flips using <code>reduce -fix</code>";
     setProgress($tasks, 'reduce');
     
-    $outname = "$model[id]fixH.pdb";
+    $outname = "$model[id]fix.pdb";
     $outpath = "$model[dir]/$outname";
     
     // input should be from parent model or we'll be double flipped!

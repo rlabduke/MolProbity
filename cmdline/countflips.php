@@ -1,9 +1,9 @@
 <?php # (jEdit options) :folding=explicit:collapseFolds=1:
 /*****************************************************************************
     Processes a directory full of PDB files non-recursively and outputs
-    a one-line validation summary for each of them.
+    a one-line summary of how many Asn/Gln/His flips there were
     
- -> We assume all files already have H's added! <-
+ -> We assume all files have already been processed with Reduce -build or -fix <-
 
 INPUTS (via $_SERVER['argv']):
     the path to a directory; *.pdb will be processed
@@ -52,8 +52,7 @@ elseif(! is_dir($pdbFolder))
 mpStartSession(true); // create a new session
 
 // Describe the output of this script
-echo "#pdbFileName:chains:residues:nucacids:resolution:rvalue:rfree:clashscore:clashscoreB<40";
-echo ":cbeta>0.25:numCbeta:maxCbeta:medianCbeta:meanCbeta:rota<1%:numRota:ramaOutlier:ramaAllowed:ramaFavored\n";
+echo "#pdbFileName:nqhTotalFlipped:nqhTotalKept:nqhClashFlipped:nqhClashKept:nqhError\n";
 
 // Loop through all PDBs in the provided directory
 $h = opendir($pdbFolder);
@@ -62,47 +61,18 @@ while(($infile = readdir($h)) !== false)
     $infile = "$pdbFolder/$infile";
     if(is_file($infile) && endsWith($infile, ".pdb"))
     {
-        // Add model
         $filename = basename($infile);
-        $modelID = addModel($infile, $filename);
-        $model =& $_SESSION['models'][$modelID];
-        $pdbstats = $model['stats'];
         echo $filename;
-        echo ":$pdbstats[chains]:$pdbstats[residues]:$pdbstats[nucacids]:$pdbstats[resolution]:$pdbstats[rvalue]:$pdbstats[rfree]";
         
         // Run analysis; load data
-        //runAnalysis($modelID, array('doAll' => true)); // easy but wasteful!
-        $pdbfile = "$model[dir]/$model[pdb]";
-        runClashlist($pdbfile, "$model[dir]/$model[prefix]clash.data");
-        $clash = loadClashlist("$model[dir]/$model[prefix]clash.data");
-        runCbetaDev($pdbfile, "$model[dir]/$model[prefix]cbdev.data");
-        $cbdev = loadCbetaDev("$model[dir]/$model[prefix]cbdev.data");
-        $badCbeta = findCbetaOutliers($cbdev);
-        $cbStats = calcCbetaStats($cbdev);
-        runRotamer($pdbfile, "$model[dir]/$model[prefix]rota.data");
-        $rota = loadRotamer("$model[dir]/$model[prefix]rota.data");
-        $badRota = findRotaOutliers($rota);
-        runRamachandran($pdbfile, "$model[dir]/$model[prefix]rama.data");
-        $rama = loadRamachandran("$model[dir]/$model[prefix]rama.data");
+        $nqh = decodeReduceUsermods($infile);
         
-        // Clash scores
-        echo ":" . $clash['scoreAll'] . ":" . $clash['scoreBlt40'];
-        
-        // Cbetas
-        echo ":" . count($badCbeta) . ":" . count($cbdev);
-        echo ":$cbStats[max]:$cbStats[median]:$cbStats[mean]";
-        
-        // Rotamers
-        echo ":" . count($badRota) . ":" . count($rota);
-        
-        // Rama outliers - count each type
-        unset($ramaScore); // or else we will accumulate the counts for each model!
-        foreach($rama as $r)
-            $ramaScore[ $r['eval'] ] += 1;
-        echo ":" . ($ramaScore['OUTLIER']+0) . ":" . ($ramaScore['Allowed']+0) . ":" . ($ramaScore['Favored']+0);
-        
+        unset($cnt);
+        if(is_array($nqh)) foreach($nqh[4] as $label)
+            $cnt[$label]++;
+        echo ":".(0+$cnt['FLIP']+$cnt['CLS-FL']).":".(0+$cnt['KEEP']+$cnt['CLS-KP']+$cnt['UNSURE']).":".(0+$cnt['CLS-FL']).":".(0+$cnt['CLS-KP']).":".(0+$cnt['???']);
+
         echo "\n"; // end of this line
-        removeModel($modelID);
     }
 }
 closedir($h);
