@@ -323,12 +323,14 @@ function modelDataExists($model, $suffix)
 /**
 * $model    a standard data structure describing the model from $_SESSION['model'][MODEL_ID]
 * $suffix   the kinemage name, without the model prefix, but with the .kin ending
+* $name     an optional name to use in place of the filename
 */
-function linkModelKin($model, $suffix)
+function linkModelKin($model, $suffix, $name = null)
 {
-    $name = "$model[prefix]$suffix";
-    $file = "$model[dir]/$name";
-    $link = "$model[url]/$name";
+    $fname = "$model[prefix]$suffix";
+    $file = "$model[dir]/$fname";
+    $link = "$model[url]/$fname";
+    if($name == null) $name = $fname;
     $s = "";
     $s .= "<b>$name</b> (" . formatFilesize(filesize($file)) . "): ";
     $s .= "<a href='viewking.php?$_SESSION[sessTag]&url=$link' target='_blank'>View in KiNG</a> | ";
@@ -342,12 +344,14 @@ function linkModelKin($model, $suffix)
 /**
 * $model    a standard data structure describing the model from $_SESSION['model'][MODEL_ID]
 * $suffix   the file name, without the model prefix, but with the .foo ending
+* $name     an optional name to use in place of the filename
 */
-function linkModelDownload($model, $suffix)
+function linkModelDownload($model, $suffix, $name = null)
 {
-    $name = "$model[prefix]$suffix";
-    $file = "$model[dir]/$name";
-    $link = "$model[url]/$name";
+    $fname = "$model[prefix]$suffix";
+    $file = "$model[dir]/$fname";
+    $link = "$model[url]/$fname";
+    if($name == null) $name = $fname;
     $s = "";
     $s .= "<b>$name</b> (" . formatFilesize(filesize($file)) . "): ";
     $s .= "<a href='$link'>Download</a>";

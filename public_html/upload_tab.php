@@ -86,8 +86,17 @@ echo mpPageHeader("Get input models", "upload");
 </p>
 
 
-<!-- <hr>Upload electron density maps and NOE tables? -->
-
+<!-- Upload electron density maps and NOE tables? -->
+<hr>
+<p>
+<form method="post" enctype="multipart/form-data" action="upload_edmap_done.php">
+<?php echo postSessionID(); ?>
+<h3>Upload electron density map</h3>
+<label>Map file: <input type="file" name="uploadFile"></label>
+<br><small>"O" (BRIX or DSN6), XPLOR, or CCP4 format accepted.</small>
+<br><input type="submit" name="cmd" value="Upload this file">
+</form>
+</p>
 
 <!-- List of current models available -->
 <!--

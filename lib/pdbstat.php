@@ -1,6 +1,66 @@
 <?php
 require_once(MP_BASE_DIR.'/lib/strings.php');
 
+#{{{ describePdbStats - human-readable list of derived properties
+############################################################################
+/**
+* Takes the output of pdbstat() and formats it in a useful way.
+* An array of human-readable descriptive strings are returned.
+*/
+function describePdbStats($pdbstats, $useHTML = true)
+{
+    $details = array();
+    if($useHTML)
+    {
+        $b = "<b>";
+        $unb = "</b>";
+    }
+    else
+    {
+        $b = "**";
+        $unb = "**";
+    }
+    
+    $compnd = trim($pdbstats['compnd']);
+    if($compnd != "")
+        $details[] = "This compound is identified as $b$compnd$unb";
+    
+    // # of models, if any
+    if($pdbstats['models'] > 1) $details[] = "This is an multi-model structure, probably from NMR, with $b".$pdbstats['models']." distinct models$unb present.";
+    if(isset($pdbstats['resolution'])) $details[] = "This is a crystal structure at ".$pdbstats['resolution']." A resolution.";
+    
+    // # of chains and residues
+    $details[] = $pdbstats['chains']." chain(s) is/are present [".$pdbstats['unique_chains']." unique chain(s)]";
+    $details[] = "A total of ".$pdbstats['residues']." residues are present.";
+    
+    // CA, sidechains, and H
+    if($pdbstats['hbetas'] > 0 and $pdbstats['sidechains'] > 0) $details[] = "Mainchain, sidechains, and hydrogens are present.";
+    elseif($pdbstats['sidechains'] > 0) $details[] = "Mainchain and sidechains are present, but not hydrogens.";
+    elseif($pdbstats['nucacids'] == 0) $details[] = "{$b}Only C-alphas{$unb} are present.";
+    
+    // RNA / DNA
+    if($pdbstats['nucacids'] > 0) $details[] = "".$pdbstats['nucacids']." nucleic acid residues are present.";
+    
+    // Hets and waters
+    if($pdbstats['hets'] > 0) $details[] = "".$pdbstats['hets']." hetero group(s) is/are present.";
+    
+    // Crystallographic information
+    if(isset($pdbstats['refiprog'])) $details[] = "Refinement was carried out in $pdbstats[refiprog].";
+    if(isset($pdbstats['refitemp'])) $details[] = "Data was collected at $pdbstats[refitemp] K.";
+    if(isset($pdbstats['rvalue']))
+    {
+        $note = "R = $pdbstats[rvalue]";
+        if(isset($pdbstats['rfree'])) $note .= "; Rfree = $pdbstats[rfree]";
+        $details[] = $note;
+    }
+    
+    return $details;
+    
+}
+#}}}########################################################################
+
+#{{{ pdbstat - a script to document the contents of a PDB file
+############################################################################
 # pdbstat - a script to document the contents of a PDB file
 #
 # Output: an associative array describing the model
@@ -161,4 +221,6 @@ function pdbstat($pdbfilename)
     
     return $ret;
 }
+#}}}########################################################################
+
 ?>
