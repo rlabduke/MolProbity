@@ -3,6 +3,7 @@
 #author: Mike Word
 #date written: 6/6/99
 #modified 8/15/02 by JSR to leave out -3 flag for probe
+#modified 5/5/04 by IWD to avoid divide-by-zero when no atoms have B < 40
 #purpose: generate tables of clusters of large bumps with a summary line
 # parameters: input.pdb identifier
 # format-
@@ -82,8 +83,10 @@ END {
  }
  printf("#summary:%s:%d atoms:%d atoms B<%g:%d potential dots:%.1f A^2:%d bumps:%d bumps B<%g:%.4g score\n",
    name, natoms, nabcut, bcut, pd, pa, bumpcount, cutbumpcount, bcut, totalScore)
+ clashscore = (natoms > 0 ? (bumpcount*1000/natoms) : -1)
+ scoreBcut  = (nabcut > 0 ? (cutbumpcount*1000/nabcut) : -1)
  printf("#sum2 :%s:%.2f clashscore : %.2f clashscore B<%g \n",
-   name,  (bumpcount*1000/natoms), (cutbumpcount*1000/nabcut),bcut)
+   name,  clashscore, scoreBcut,bcut)
 
 
 }' name=$2 bcut=$bcutval nabcut="$bcna" $tmpfile - > $tmpf2

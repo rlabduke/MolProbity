@@ -7,8 +7,12 @@
 # Set world-writable permisions on data/
 chmod 777 public_html/data
 
+# Set world-writable permisions on tmp/
+chmod 777 tmp/
+
 # Create symlinks for executables
 cd bin
+ln -s linux-rh73 linux
 ln -s pdbcns.010504.pl pdbcns
 cd macosx/
 ln -s dang.1.8.020529 dang
