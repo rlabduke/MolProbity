@@ -81,6 +81,9 @@ function removeModel($modelID)
 ############################################################################
 /**
 * This function reworks a PDB to standardize it before MolProbity uses it.
+* Because so many actions are taken, this function handles its own
+* progress reporting via the setProgress() function.
+*
 * The following actions are taken, in order:
 *   Linefeeds are converted to Unix (\n)
 *   Old USER MOD records are removed (only the detailed ones from Reduce)
@@ -237,18 +240,12 @@ function reduceBuild($inModelID, $inpath)
         $serial++;
     $id .= $serial;
     
-    // Set up progress message
-    $tasks['create'] = "Create a new model entry named '$id'";
-    $tasks['reduce'] = "Add H with <code>reduce -build</code>";
-    setProgress($tasks, 'create');
-    
     // Create directory
     $modelDir = $_SESSION['dataDir'].'/'.$id;
     mkdir($modelDir, 0777);
     $modelURL = $_SESSION['dataURL'].'/'.$id;
     
     // Process file - this is the part that matters
-    setProgress($tasks, 'reduce');
     $outname    = $id.'.pdb';
     $outpath    = $modelDir.'/'.$outname;
     exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -build -allalt $inpath > $outpath");
@@ -266,8 +263,25 @@ function reduceBuild($inModelID, $inpath)
         'isReduced' => true
     );
     
-    setProgress($tasks, null); // all done!
     return $id;
+}
+#}}}########################################################################
+
+#{{{ reduceFix - adds H with user-selected Asn/Gln/His flip states
+############################################################################
+/**
+* This is the user-customized way of adding required hydrogens for AAC.
+* The input file or its ancestor should have already been passed thru preparePDB(),
+* and it may or may not have hydrogens added.
+*
+* $inpath       the full filename for the PDB file to be processed
+* $outpath      the full filename for the destination PDB. Will be overwritten.
+* $flippath     the file listing residues to fix and their orientations, in
+*               the appropriate format for Reduce's -fix option
+*/
+function reduceFix($inpath, $outpath, $flippath)
+{
+    exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -build -fix $flippath -allalt $inpath > $outpath");
 }
 #}}}########################################################################
 

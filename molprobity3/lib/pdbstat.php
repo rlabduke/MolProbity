@@ -21,6 +21,8 @@ require_once(MP_BASE_DIR.'/lib/strings.php');
 #   resolution      the crystallographic resolution
 #   refiprog        the refinement program
 #   refitemp        the data-collection temperature
+#   rvalue          the crystallographic R-value
+#   rfree           the crystallographic Rfree value
 #
 # IWD 1/28/03
 #   adapted from IWD's pdbstat.pl
@@ -61,8 +63,11 @@ function pdbstat($pdbfilename)
         elseif(startsWith($s, "COMPND") && !$hadtitle) { $compnd  .= " " . trim(substr($s,10,60)); }
         elseif(startsWith($s, "REMARK"))
         {
-            if(preg_match('/^REMARK   3   PROGRAM     : (.+)$/', $s, $match)) { $refiProg = $match[1]; }
-            elseif(preg_match('/^REMARK 200  TEMPERATURE           (KELVIN) : (.+)$/', $s, $match)) { $refiTemp = $match[1]; }
+            if(startsWith($s, 'REMARK   3   PROGRAM')) { $refiProg = trim(substr($s, 26, 50)); }
+            elseif(preg_match('/^REMARK   3   R VALUE            \(WORKING SET\) : ([^ ]+)$/', $s, $match)) { $rValue = $match[1]; }
+            elseif(startsWith($s, 'REMARK   3   R VALUE')) { $rValue = trim(substr($s, 26, 50)); }
+            elseif(preg_match('/^REMARK   3   FREE R VALUE                     : ([^ ]+)$/', $s, $match)) { $rFree = $match[1]; }
+            elseif(preg_match('/^REMARK 200  TEMPERATURE           \(KELVIN\) : ([^ ]+)$/', $s, $match)) { $refiTemp = $match[1]; }
             elseif(preg_match("/^REMARK   2/", $s) && preg_match("/ (\\d+\\.\\d+)/", substr($s,10,60), $match)) { $resolution = $match[1]; }
             # CNS-style resolution record:
             elseif(preg_match("/^REMARK refinement resolution: \\d+\\.\\d+ - (\\d+\\.\\d+) A/", $s, $match))
@@ -150,6 +155,8 @@ function pdbstat($pdbfilename)
     if(isset($resolution))  $ret['resolution']  = $resolution;
     if(isset($refiProg))    $ret['refiprog']    = $refiProg;
     if(isset($refiTemp))    $ret['refitemp']    = $refiTemp;
+    if(isset($rValue))      $ret['rvalue']      = $rValue;
+    if(isset($rFree))       $ret['rfree']       = $rFree;
     
     return $ret;
 }

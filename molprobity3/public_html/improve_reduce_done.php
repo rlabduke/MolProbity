@@ -1,15 +1,11 @@
 <?php # (jEdit options) :folding=explicit:collapseFolds=1:
 /*****************************************************************************
-    This file runs the standard Reduce -build command on an existing
-    model in this session and creates a new model entry for the Reduced file.
+    Allows user to make some choices about how to run the analysis.
     
 INPUTS (via $_SESSION['bgjob']):
-    model           ID code for model to process
-    makeFlipkin     true if the user wants a Flipkin made
+    model           ID code for model that was process
 
-OUTPUTS (via $_SESSION['bgjob']):
-    Adds a new entry to $_SESSION['models'].
-    newModel        the ID of the model just added
+OUTPUTS (via Post):
 
 *****************************************************************************/
 // EVERY *top-level* page must start this way:
@@ -19,18 +15,37 @@ OUTPUTS (via $_SESSION['bgjob']):
     if(!defined('MP_BASE_DIR')) define('MP_BASE_DIR', realpath(getcwd().'/..'));
 // 2. Include core functionality - defines constants, etc.
     require_once(MP_BASE_DIR.'/lib/core.php');
-    require_once(MP_BASE_DIR.'/lib/model.php');
-    require_once(MP_BASE_DIR.'/lib/visualize.php');
 // 3. Restore session data. If you don't want to access the session
 // data for some reason, you must call mpInitEnvirons() instead.
-    session_id( $_SERVER['argv'][1] );
     mpStartSession();
 // 4. For pages that want to see the session but not change it, such as
 // pages that are refreshing periodically to monitor a background job.
     #mpSessReadOnly();
-// 5. Set up reasonable values to emulate CLI behavior if we're CGI
-    set_time_limit(0); // don't want to bail after 30 sec!
-    
+
+#{{{ a_function_definition - sumary_statement_goes_here
+############################################################################
+/**
+* Documentation for this function.
+*/
+//function someFunctionName() {}
+#}}}########################################################################
+
+#{{{ a_function_definition - sumary_statement_goes_here
+############################################################################
+/**
+* Documentation for this function.
+*/
+//function someFunctionName() {}
+#}}}########################################################################
+
+#{{{ a_function_definition - sumary_statement_goes_here
+############################################################################
+/**
+* Documentation for this function.
+*/
+//function someFunctionName() {}
+#}}}########################################################################
+
 #{{{ a_function_definition - sumary_statement_goes_here
 ############################################################################
 /**
@@ -41,33 +56,11 @@ OUTPUTS (via $_SESSION['bgjob']):
 
 # MAIN - the beginning of execution for this page
 ############################################################################
-$modelID = $_SESSION['bgjob']['model'];
-$model = $_SESSION['models'][$modelID];
-$pdb = "$model[dir]/$model[pdb]";
+// Start the page: produces <HTML>, <HEAD>, <BODY> tags
+echo mpPageHeader("Add H with Reduce -build", "improve");
 
-// Set up progress message
-$tasks['create'] = "Create a new model entry";
-$tasks['reduce'] = "Add H with <code>reduce -build</code>";
-if($_SESSION['bgjob']['makeFlipkin']) $tasks['flipkin'] = "Create Asn/Gln and His <code>flipkin</code> kinemages";
-
-setProgress($tasks, 'reduce');
-$id = reduceBuild($modelID, $pdb);
-
-$_SESSION['bgjob']['newModel'] = $id;
-
-if($_SESSION['bgjob']['makeFlipkin'])
-{
-    setProgress($tasks, 'flipkin');
-    $model = $_SESSION['models'][$id];
-    makeFlipkin("$model[dir]/$model[pdb]",
-        "$model[dir]/$model[prefix]flipnq.kin",
-        "$model[dir]/$model[prefix]fliphis.kin");
-}
-
-setProgress($tasks, null);
-
+$model = $_REQUEST['model'];
 ############################################################################
-// Clean up and go home
-$_SESSION['bgjob']['endTime']   = time();
-$_SESSION['bgjob']['isRunning'] = false;
 ?>
+Done!
+<?php echo mpPageFooter(); ?>

@@ -77,6 +77,16 @@ else // upload was OK
     // Hets and waters
     if($pdbstats['hets'] > 0) echo "<li>".$pdbstats['hets']." hetero group(s) is/are present.</li>\n";
     
+    // Crystallographic information
+    if(isset($pdbstats['refiprog'])) echo "<li>Refinement was carried out in $pdbstats[refiprog].</li>\n";
+    if(isset($pdbstats['refitemp'])) echo "<li>Data was collected at $pdbstats[refitemp] K.</li>\n";
+    if(isset($pdbstats['rvalue']))
+    {
+        echo "<li>R = $pdbstats[rvalue]";
+        if(isset($pdbstats['rfree'])) echo "; R<sub>free</sub> = $pdbstats[rfree]";
+        echo "</li>\n";
+    }
+    
     echo "</ul>\n";
     ?>
     

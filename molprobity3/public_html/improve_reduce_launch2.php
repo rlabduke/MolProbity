@@ -4,11 +4,13 @@
     
 INPUTS (via Get or Post):
     model           ID code for model to process
-    makeFlipkin     true if the user wants a Flipkin made
+    doflip[]        an array of booleans, where the keys match the second index
+                    in the data structure from decodeReduceUsermods()
 
 OUTPUTS (via $_SESSION['bgjob'])
     model           ID code for model to process
-    makeFlipkin     true if the user wants a Flipkin made
+    doflip[]        an array of booleans, where the keys match the second index
+                    in the data structure from decodeReduceUsermods()
 
 *****************************************************************************/
 // EVERY *top-level* page must start this way:
@@ -28,11 +30,11 @@ OUTPUTS (via $_SESSION['bgjob'])
 # MAIN - the beginning of execution for this page
 ############################################################################
 unset($_SESSION['bgjob']); // Clean up any old data
-$_SESSION['bgjob']['model']         = $_REQUEST['model'];
-$_SESSION['bgjob']['makeFlipkin']   = $_REQUEST['makeFlipkin'];
+$_SESSION['bgjob']['model']     = $_REQUEST['model'];
+$_SESSION['bgjob']['doflip']    = $_REQUEST['doflip'];
 
 // launch background job
-launchBackground(MP_BASE_DIR."/jobs/reduce-build.php", "improve_reduce_choose.php?$_SESSION[sessTag]", 5);
+launchBackground(MP_BASE_DIR."/jobs/reduce-fix.php", "improve_reduce_done.php?$_SESSION[sessTag]", 5);
 
 // include() status monitoring page
 include(MP_BASE_DIR."/public_html/job_progress.php");
