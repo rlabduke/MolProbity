@@ -40,12 +40,12 @@
     Make sure Reduce doesn't shrink the PDB file (lost atoms/models, etc)
   > Every time lab notebook is saved, create a HTML snapshot of it
     Keep track of "last used" model and make it the default
-    Get groups turned off properly in multi-crit kinemage
   * Weird intra-sidechain clashes for 1BKR
     Use Reduce -build w/ high penalty for "no build" runs?
     Missing masters for CB dev in multicrit kin (not in Prekin output)
     Only deviant CB balls appear in kin; smaller ones are missing!
     No explicit subgroup for Rota, Rama, but needed for CB balls
+    @onewidth and messed up balls for Flipkins (these are flipkin/XXX bugs)
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -60,6 +60,8 @@
 - added count of mc/sc alternates in pdbstat
 - added note about percentile ranking for clashscores in multi-output
 - changed sc alts to cyan to complement the blue normal sc
+- added @onewidth to multikins; turned stuff off/on with masters
+- updated KiNG to support new on/off (point)masters
 
 ### 3beta10 ###
 - continued work on aac/geom analysis, rendering results as a notebook entry
