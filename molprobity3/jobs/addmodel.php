@@ -89,7 +89,7 @@ else
 {
     // Remove illegal chars from the upload file name
     $origName = censorFileName($_SESSION['bgjob']['origName']);
-    $fileSource = "local disk: ".$_SESSION['bgjob']['origName'];
+    $fileSource = "local disk";
     
     $id = addModel($_SESSION['bgjob']['tmpPdb'],
         $origName,
@@ -108,7 +108,7 @@ if($_SESSION['bgjob']['newModel'])
     $id = $_SESSION['bgjob']['newModel'];
     $model = $_SESSION['models'][ $id ];
     
-    $s = "The new model, $id, came from $fileSource\n";
+    $s = "Your file from $fileSource was uploaded as $model[pdb]\n";
     
     $details = describePdbStats($model['stats'], true);
     $s .= "<ul>\n";
@@ -120,11 +120,11 @@ if($_SESSION['bgjob']['newModel'])
         $s .= "<p><div class='alert'>Because this model had more segment IDs than chainIDs,\n";
         $s .= "the segment IDs were automagically turned into new chain IDs for this model.\n";
         $s .= "If you would prefer the original chain IDs, please check the <b>Ignore segID field</b>\n";
-        $s .= "under <b>More options</b> on the file upload page.</div></p>";
+        $s .= "on the file upload page.</div></p>";
     }
     
     $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
-        "Model added: $id",
+        "$model[pdb] added",
         $s,
         $id,
         "auto"

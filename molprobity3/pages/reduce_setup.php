@@ -34,14 +34,15 @@ function display($context)
             echo " <tr bgcolor='$c'>\n";
             if($model['isReduced'])
             {
-                $checked = ($context['modelID'] == $id ? "checked" : "");
-                echo "  <td><span class='inactive'><input type='radio' name='modelID' value='$id' $checked> <b>$id</b></span></td>\n";
+                echo "  <td></td>\n";
+                echo "  <td><span class='inactive' title='Already has H added'><b>$model[pdb]</b></span></td>\n";
                 echo "  <td><span class='inactive'><small>$model[history]</small></span></td>\n";
             }
             else
             {
                 $checked = ($context['modelID'] == $id ? "checked" : "");
-                echo "  <td><input type='radio' name='modelID' value='$id' $checked> <b>$id</b></td>\n";
+                echo "  <td><input type='radio' name='modelID' value='$id' $checked></td>\n";
+                echo "  <td><b>$model[pdb]</b></td>\n";
                 echo "  <td><small>$model[history]</small></td>\n";
             }
             echo " </tr>\n";
@@ -65,8 +66,8 @@ function display($context)
         echo "</table></p>\n";
 
         echo "<p><table width='100%' border='0'><tr>\n";
-        echo "<td><input type='submit' name='cmd' value='&lt; Cancel adding H'></td>\n";
-        echo "<td align='right'><input type='submit' name='cmd' value='Start adding H &gt;'></td>\n";
+        echo "<td><input type='submit' name='cmd' value='Start adding H &gt;'></td>\n";
+        echo "<td align='right'><input type='submit' name='cmd' value='Cancel'></td>\n";
         echo "</tr></table></p></form>\n";
     }
     else
@@ -99,7 +100,7 @@ function onReturn($arg, $req)
 */
 function onAddH($arg, $req)
 {
-    if($req['cmd'] == '< Cancel adding H')
+    if($req['cmd'] == 'Cancel')
     {
         pageReturn();
         return;

@@ -9,7 +9,7 @@ INPUTS (via $_SESSION['bgjob']):
 
 OUTPUTS (via $_SESSION['bgjob']):
     Adds a new entry to $_SESSION['models'].
-    newModel        the ID of the model just added
+    modelID         the ID of the model just added
 
 *****************************************************************************/
 // EVERY *top-level* page must start this way:
@@ -48,28 +48,33 @@ $model = $_SESSION['models'][$modelID];
 $pdb = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$model['pdb'];
 
 // Set up progress message
-$tasks['create'] = "Create a new model entry";
 $tasks['reduce'] = "Add H with <code>reduce -build</code>";
 if($_SESSION['bgjob']['makeFlipkin']) $tasks['flipkin'] = "Create Asn/Gln and His <code>flipkin</code> kinemages";
 
 setProgress($tasks, 'reduce');
-$id = reduceBuild($modelID, $pdb);
+$newModel = createModel($modelID."H");
+$outname = $newModel['pdb'];
+$outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
+if(!file_exists($outpath)) mkdir($outpath, 0777); // shouldn't ever happen, but might...
+$outpath .= '/'.$outname;
+reduceBuild($pdb, $outpath);
 
-$_SESSION['bgjob']['newModel'] = $id;
-$tasks['create'] .= " ($id)"; // shows ID of new model in progress info
+$newModel['stats']      = pdbstat($outpath);
+$newModel['parent']     = $modelID;
+$newModel['history']    = "Derived from $model[pdb] by Reduce -build";
+$newModel['isReduced']  = true;
+$newModel['isBuilt']    = true;
+$_SESSION['models'][ $newModel['id'] ] = $newModel;
+$_SESSION['bgjob']['modelID'] = $newModel['id'];
 
 if($_SESSION['bgjob']['makeFlipkin'])
 {
     setProgress($tasks, 'flipkin');
-    $model = $_SESSION['models'][$id];
-    makeFlipkin("$model[dir]/$model[pdb]",
-        "$model[dir]/$model[prefix]flipnq.kin",
-        "$model[dir]/$model[prefix]fliphis.kin");
     $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_KINS;
     if(!file_exists($outpath)) mkdir($outpath, 0777);
-    makeFlipkin($_SESSION['dataDir'].'/'.MP_DIR_MODELS."/$model[pdb]",
-        "$outpath/$model[prefix]flipnq.kin",
-        "$outpath/$model[prefix]fliphis.kin");
+    makeFlipkin($_SESSION['dataDir'].'/'.MP_DIR_MODELS."/$newModel[pdb]",
+        "$outpath/$newModel[prefix]flipnq.kin",
+        "$outpath/$newModel[prefix]fliphis.kin");
 }
 
 setProgress($tasks, null);

@@ -73,7 +73,7 @@ else
     $tasks['reduce'] = "Add H with user-selected Asn/Gln/His flips using <code>reduce -fix</code>";
     setProgress($tasks, 'reduce');
     
-    $outname = $model['id']."_fix.pdb"; // "H" already added to model ID
+    $outname    = $model['pdb']; // Just overwrite the default Reduce -build one
     $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
     if(!file_exists($outpath)) mkdir($outpath, 0777); // shouldn't ever happen, but might...
     $outpath .= '/'.$outname;
@@ -85,8 +85,6 @@ else
     if(file_exists($parentPDB))
     {
         reduceFix($parentPDB, $outpath, $flipfile);
-        // new PDB is part of same model entry, like for Reduce no-build.
-        if(filesize($outpath) > 0) $_SESSION['models'][$modelID]['pdb'] = $outname;
     }
     
     setProgress($tasks, null); // all done
