@@ -9,7 +9,7 @@ require_once(MP_BASE_DIR.'/lib/labbook.php');
 // This variable must be defined for index.php to work! Must match class below.
 $delegate = new NotebookEditDelegate();
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
-class NotebookEditDelegate {
+class NotebookEditDelegate extends BasicDelegate {
     
 #{{{ display - creates the UI for this page
 ############################################################################
@@ -40,7 +40,7 @@ function display($context)
     echo mpPageHeader("Edit notebook entry");
     
     // Make the form
-    echo makeEventForm("returnFromPage");
+    echo makeEventForm("onSaveEntry");
     echo "<p>" . formEditLabbook($entry);
     if(isset($context['entryNumber']))
     {
@@ -58,12 +58,12 @@ function display($context)
 }// end of display
 #}}}########################################################################
 
-#{{{ returnFromPage
+#{{{ onSaveEntry
 ############################################################################
 /**
 * If the user requested to save changes, make sure we do that before returning.
 */
-function returnFromPage($arg, $req)
+function onSaveEntry($arg, $req)
 {
     // Did we get an edit request?
     if($req['labbookEditCmd'] == "Save")

@@ -149,6 +149,7 @@ $__mpsess_readonly__ = false;
 
 function mpSessReadOnly($b = true)
 {
+    global $__mpsess_readonly__;
     $__mpsess_readonly__ = $b;
 }
 #}}}########################################################################
@@ -212,6 +213,7 @@ function mpSessRead($id)
 function mpSessWrite($id, $sessData)
 {
     // Don't do anything if we've been marked read-only
+    global $__mpsess_readonly__;
     if($__mpsess_readonly__) return false;
     
     mpCheckSessionID($id); // just in case something nasty is in there

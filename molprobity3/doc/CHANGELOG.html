@@ -58,7 +58,6 @@
   * Make sure Reduce doesn't shrink the PDB file (lost atoms, etc)
     Add session resume link to preformatted email
     Make clashscore a choice during analysis
-    remove labbook/openWithEdit()
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -70,6 +69,15 @@
 - added clearstatcache() to session read, just in case (ala lab notebook)
 - created "site map" page based on the MVC/events model
 - ported notebook view/edit pages to MVC/events model
+- remodeled core.php:mpNavigationBar() to work with MVC/events
+- added base class for all MVC/events delegate classes (works w/ nav bar)
+*******************************************************************************
+* NON-MVC MOLPROBITY3 IS NOW OFFICIALLY BROKEN. FURTHER WORK MUST USE MVC!    *
+*******************************************************************************
+- BUGFIX: mpSessReadOnly() did nothing b/c variable was not marked "global"
+- background event launching has been converted to MVC/event system.
+  This is untested thus far but appears to be working.
+- removed lib/labbook.php:openWithEdit() because old pages are broken anyway.
   
 ### 3beta5 ###
 - traced mysterious labbook load/save bug from beta3 to missing clearstatcache()

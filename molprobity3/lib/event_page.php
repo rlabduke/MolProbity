@@ -168,4 +168,21 @@ function clearEventHandlers()
 */
 //function someFunctionName() {}
 #}}}########################################################################
+
+
+// This is the base class that all delegate classes should extend.
+// It implements certain common event handlers that work with core/mpNavBar().
+#{{{ class BasicDelegate
+############################################################################
+class BasicDelegate {
+    /**
+    * $arg is the name of the page to go to.
+    * The context for the goto is assumed to be null.
+    */
+    function onNavBarGoto($arg, $req)
+    {
+        pageGoto($arg);
+    }
+}
+#}}}########################################################################
 ?>
