@@ -85,7 +85,7 @@ $clash = loadClashlist($outfile);
 
 // Find all residues on the naughty list
 // First index is 9-char residue name
-// Second index is 'cbdev', 'rota', 'rama', 
+// Second index is 'cbdev', 'rota', 'rama', or 'clash'
 $worst = array();
 foreach($cbdev as $res)
 {
@@ -101,6 +101,11 @@ foreach($rama as $res)
 {
     if($res['eval'] == 'OUTLIER')
         $worst[$res['resName']]['rama'] = $res['eval'];
+}
+foreach($clash['clashes'] as $res => $dist)
+{
+    if($dist >= 0.4)
+        $worst[$res]['clash'] = $dist;
 }
 
 /*********************

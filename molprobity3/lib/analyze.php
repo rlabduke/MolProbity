@@ -75,6 +75,10 @@ function runClashlist($infile, $outfile)
 * Returns an array with the following keys:
 *   scoreAll        the overall clashscore
 *   scoreBlt40      the score for atoms with B < 40
+*   clashes         an array with 'cnnnnittt' residue names as keys
+*                   (see loadCbetaDev() for explanation of naming)
+*                   and maximum clashes as values (positive Angstroms).
+*                   NB: only clashes >= 0.40A are currently listed.
 */
 function loadClashlist($datafile)
 {
@@ -83,6 +87,25 @@ function loadClashlist($datafile)
     $scores = explode(':', $sum[0]);
     $ret['scoreAll']    = $scores[2] + 0;
     $ret['scoreBlt40']  = $scores[3] + 0;
+    
+    // Parse data about individual clashes
+    foreach($data as $datum)
+    {
+        // Ignore blank lines and #sum... lines
+        // That leaves lines starting with colons.
+        if($datum{0} == ':')
+        {
+            $line = explode(':', $datum);
+            $res1 = substr($line[2], 0, 9);
+            $res2 = substr($line[3], 0, 9);
+            $dist = abs(trim($line[4])+0);
+            if(!isset($clashes[$res1]) || $clashes[$res1] < $dist)
+                $clashes[$res1] = $dist;
+            if(!isset($clashes[$res2]) || $clashes[$res2] < $dist)
+                $clashes[$res2] = $dist;
+        }
+    }
+    $ret['clashes'] = $clashes;
     
     return $ret;
 }

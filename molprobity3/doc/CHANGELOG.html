@@ -13,7 +13,7 @@
     Provide URL prefix for each model, too
   * Allow simple comparison of bad residues in two different models;
         see jobs/analyze.php for ideas
- ** Pull more info out of clashlist; add that to badRes analysis
+    Should analysis of worst residues ignore water or treat it separately?
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -23,6 +23,8 @@
 - added 'ignoreSegID' option to handle old Reduce'd files with 'new' in segID field
 - loadRamachandran() and loadRotamer() now decompose residue names into parts
 - loadCbetaDev() now synthesizes a residue name from the parts
+- loadClashlist() now picks up worst clash per residue
+- badRes now markes residues with clashes >= 0.40 A
 
 ### 3pre8 ###
 - brought the whole project under Subversion version control
