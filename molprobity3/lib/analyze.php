@@ -78,6 +78,7 @@ function runAnalysis($modelID, $opts)
         $outfile = "$model[dir]/$model[prefix]cbdev.data";
         runCbetaDev($infile, $outfile);
         $cbdev = loadCbetaDev($outfile);
+        $tasks['cbdata'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=plain' target='_blank'>preview</a>\n";
         
         $cbout = count(findCbetaOutliers($cbdev));
         $entry .= "<li>Found $cbout residues with C&beta; deviations &gt; 0.25&Aring;</li>\n";
@@ -90,6 +91,7 @@ function runAnalysis($modelID, $opts)
         $outfile = "$model[dir]/$model[prefix]rota.data";
         runRotamer($infile, $outfile);
         $rota = loadRotamer($outfile);
+        $tasks['rotadata'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=plain' target='_blank'>preview</a>\n";
         
         $rotaout = count(findRotaOutliers($rota));
         $entry .= "<li>Found $rotaout sidechains with rotamer scores &lt; 1%</li>\n";
@@ -102,6 +104,7 @@ function runAnalysis($modelID, $opts)
         $outfile = "$model[dir]/$model[prefix]rama.data";
         runRamachandran($infile, $outfile);
         $rama = loadRamachandran($outfile);
+        $tasks['ramadata'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=plain' target='_blank'>preview</a>\n";
         
         $ramaout = count(findRamaOutliers($rama));
         $entry .= "<li>Found $ramaout residues that are Ramachandran outliers</li>\n";
@@ -114,6 +117,7 @@ function runAnalysis($modelID, $opts)
         $outfile = "$model[dir]/$model[prefix]clash.data";
         runClashlist($infile, $outfile);
         $clash = loadClashlist($outfile);
+        $tasks['clashlist'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=plain' target='_blank'>preview</a>\n";
         
         $clashout = count(findClashOutliers($clash));
         $entry .= "<li>Found $clashout residues with serious steric clashes (&gt; 0.4&Aring; overlap)</li>\n";
@@ -128,8 +132,12 @@ function runAnalysis($modelID, $opts)
         setProgress($tasks, 'mcchart'); // updates the progress display if running as a background job
         $outfile = "$model[dir]/$model[prefix]multi.chart";
         makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, false);
+        //$tasks['mcchart'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=html' target='_blank'>preview bad</a>\n";
+        $tasks['mcchart'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=html' target='_blank'>preview</a>\n";
+
         $outfile = "$model[dir]/$model[prefix]multiall.chart";
         makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, true);
+        //$tasks['mcchart'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=html' target='_blank'>preview all</a>\n";
     }
     
     ////////////////////////////////////////////////////////////////////////////
@@ -140,7 +148,9 @@ function runAnalysis($modelID, $opts)
     {
         setProgress($tasks, 'mckin'); // updates the progress display if running as a background job
         $outfile = "$model[dir]/$model[prefix]multi.kin";
+        $outurl = "$model[url]/$model[prefix]multi.kin";
         makeMulticritKin($infile, $outfile, $rama, $rota);
+        $tasks['mckin'] .= " - <a href='viewking.php?$_SESSION[sessTag]&url=$outurl' target='_blank'>preview</a>\n";
     }
     
     // Ramachandran plots
@@ -151,6 +161,8 @@ function runAnalysis($modelID, $opts)
         makeRamachandranPDF($infile, "$model[dir]/$model[prefix]rama.pdf");
         //makeRamachandranImage($infile, "$model[dir]/$model[prefix]rama.jpg");
         //convertKinToPostscript("$model[dir]/$model[prefix]rama.kin");
+        $outurl = "$model[url]/$model[prefix]rama.kin";
+        $tasks['ramaplot'] .= " - <a href='viewking.php?$_SESSION[sessTag]&url=$outurl' target='_blank'>preview</a>\n";
     }
     
     // C-beta deviations
@@ -162,6 +174,8 @@ function runAnalysis($modelID, $opts)
         exec("prekin -lots $infile > $outfile");
         makeCbetaDevBalls($infile, $outfile);
         makeCbetaDevPlot($infile, "$model[dir]/$model[prefix]cb2d.kin");
+        $outurl = "$model[url]/$model[prefix]cb2d.kin";
+        $tasks['cbkin'] .= " - <a href='viewking.php?$_SESSION[sessTag]&url=$outurl' target='_blank'>preview</a>\n";
     }
     
     // All-atom contacts
@@ -171,11 +185,13 @@ function runAnalysis($modelID, $opts)
     {
         setProgress($tasks, 'aackin'); // updates the progress display if running as a background job
         $outfile = "$model[dir]/$model[prefix]aac.kin";
+        $outurl = "$model[url]/$model[prefix]aac.kin";
         exec("prekin -lots $infile > $outfile");
         makeSidechainDots($infile, $outfile);
         //$outfile = "$model[dir]/$model[prefix]aac-mc.kin";
         //exec("prekin -lots $infile > $outfile");
         makeMainchainDots($infile, $outfile);
+        $tasks['aackin'] .= " - <a href='viewking.php?$_SESSION[sessTag]&url=$outurl' target='_blank'>preview</a>\n";
     }
     
     setProgress($tasks, null); // everything is finished
