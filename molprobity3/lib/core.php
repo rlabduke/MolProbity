@@ -89,6 +89,7 @@ function mpNavigationBar($active)
     //$s .= "<br />\n";
     $s .= mpNavBar_goto('sitemap.php', 'Site map', ($active == 'sitemap'));
     $s .= mpNavBar_call('upload_setup.php', 'Upload / fetch files');
+    $s .= mpNavBar_call('reduce_setup.php', 'Add hydrogens');
     $s .= "<br />\n";
     $s .= mpNavBar_goto('file_browser.php', 'View &amp; download files', ($active == 'files'));
     $s .= mpNavBar_goto('notebook_main.php', 'Lab notebook', ($active == 'notebook'));

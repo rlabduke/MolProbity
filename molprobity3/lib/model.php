@@ -59,6 +59,10 @@ function addModel($tmpPdb, $origName, $isCnsFormat = false, $ignoreSegID = false
 #{{{ duplicateModel - makes a copy of an existing model for modification
 ############################################################################
 /**
+*
+*   XXX-FIXME: what should this do now that there aren't model directories?
+*
+*
 * A simple way to duplicate an existing model and its PDB for modification
 * The duplicate file will be registered as a new model,
 * and its model ID will be returned.

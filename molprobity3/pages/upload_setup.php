@@ -96,7 +96,7 @@ function displayPdbUploadForm()
 {
     echo "<p>\n" . makeEventForm("onUploadPdbFile", null, true) . "\n";
 ?>
-<div class='options'>
+<div class='side_options'>
     <b>Advanced options:</b>
     <br><label><input type="checkbox" name="isCnsFormat" value="1"> File is from CNS refinement</label>
     <br><label><input type="checkbox" name="ignoreSegID" value="1"> Ignore segID field</label>
