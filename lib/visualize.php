@@ -114,7 +114,7 @@ function makeMulticritKin($infiles, $outfile, $opt, $nmrConstraints = null)
 
 #{{{ makeAltConfKin - appends mc and sc alts
 ############################################################################
-function makeAltConfKin($infile, $outfile, $mcColor = 'yellow', $scColor = 'gold')
+function makeAltConfKin($infile, $outfile, $mcColor = 'yellow', $scColor = 'cyan')
 {
     $alts   = findAltConfs($infile);
     $mcGrp  = groupAdjacentRes(array_keys($alts['mc']));

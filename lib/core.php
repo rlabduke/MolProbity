@@ -93,6 +93,7 @@ function mpNavigationBar($active)
     $s .= mpNavBar_call('reduce_setup.php', 'Add hydrogens');
     $s .= mpNavBar_call('aacgeom_setup.php', 'AAC &amp; geometry');
     $s .= mpNavBar_call('sswing_setup1.php', 'Refit sidechains');
+    $s .= mpNavBar_call('makekin_setup.php', 'Make simple kins');
     $s .= "<br />\n";
     $s .= mpNavBar_goto('file_browser.php', 'View &amp; download files', ($active == 'files'));
     $s .= mpNavBar_goto('notebook_main.php', 'Lab notebook', ($active == 'notebook'));

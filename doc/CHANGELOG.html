@@ -38,17 +38,28 @@
     Add explanation of SSWING on setup page
     Explain 2d and 3d CB kins
     Make sure Reduce doesn't shrink the PDB file (lost atoms/models, etc)
-    Every time lab notebook is saved, create a HTML snapshot of it
+  > Every time lab notebook is saved, create a HTML snapshot of it
     Keep track of "last used" model and make it the default
     Get groups turned off properly in multi-crit kinemage
-  * Update Linux preGenScore, genContour, etc. (GRID_NUM=500000)
-  * Add noe-display to bin/
-  * Only deviant CB balls appear in kin; smaller ones are missing!
+  * Weird intra-sidechain clashes for 1BKR
     Use Reduce -build w/ high penalty for "no build" runs?
+    Missing masters for CB dev in multicrit kin (not in Prekin output)
+    Only deviant CB balls appear in kin; smaller ones are missing!
+    No explicit subgroup for Rota, Rama, but needed for CB balls
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
+
+### 3beta11 ###
+- moved timezone setting to top of lab notebook page
+- added noe-display to bin/
+- removed public_html/job_progress.php, because it's been superceded.
+- wrote document about the event/delegate model for the GUI
+- added new "wait" graphic based on 2SOD (clock face)
+- added count of mc/sc alternates in pdbstat
+- added note about percentile ranking for clashscores in multi-output
+- changed sc alts to cyan to complement the blue normal sc
 
 ### 3beta10 ###
 - continued work on aac/geom analysis, rendering results as a notebook entry
@@ -73,7 +84,8 @@
 - eliminated symlink-to-binary setup for other executables, except gawk on OS X
 - removed unneeded statements from makelinks.sh
 - renamed makelinks.sh to setup.sh
-- updated reduce/prekin/probe on linux, os xs
+- updated reduce/prekin/probe on linux, os x
+- updated linux SSWING binaries
 
 ### 3beta9 ###
 - changed PDB upload back to stacked, rather than 2 column layout -- it's more

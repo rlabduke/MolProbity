@@ -164,9 +164,9 @@ function runAnalysis($modelID, $opts)
     {
         $entry .= "<tr><td rowspan='2' align='center'>All-Atom<br>Contacts</td>\n";
         $entry .= "<td>Clashscore, all atoms:</td><td>$clash[scoreAll]</td>\n";
-        $entry .= "<td>$clashPct[pct_rank]<sup>".ordinalSuffix($clashPct['pct_rank'])."</sup> percentile (N=$clashPct[n_samples])</td></tr>\n";
+        $entry .= "<td>$clashPct[pct_rank]<sup>".ordinalSuffix($clashPct['pct_rank'])."</sup> percentile<sup>*</sup> (N=$clashPct[n_samples])</td></tr>\n";
         $entry .= "<tr><td>Clashscore, B&lt;40:</td><td>$clash[scoreBlt40]</td>\n";
-        $entry .= "<td>$clashPct[pct_rank40]<sup>".ordinalSuffix($clashPct['pct_rank40'])."</sup> percentile (N=$clashPct[n_samples])</td></tr>\n";
+        $entry .= "<td>$clashPct[pct_rank40]<sup>".ordinalSuffix($clashPct['pct_rank40'])."</sup> percentile<sup>*</sup> (N=$clashPct[n_samples])</td></tr>\n";
     }
     $proteinRows = 0;
     if(isset($rama))    $proteinRows += 2;
@@ -218,7 +218,9 @@ function runAnalysis($modelID, $opts)
         $entry .= "<td colspan='3'><i>No nucleic acid geometry info implemented</i></td>\n";
         $entry .= "</tr>\n";
     }
-    $entry .= "</table></p>\n"; // end of summary stats table
+    $entry .= "</table>\n";
+    if(isset($clash)) $entry .= "<small>* 0<sup>th</sup> percentile is the worst among structures at comparable resolutions; 100<sup>th</sup> percentile the is best.</small>\n";
+    $entry .= "</p>\n"; // end of summary stats table
     //}}} Create lab notebook entry: summary stats table
     
     //{{{ Create lab notebook entry: multi-crit and individual kins, charts
