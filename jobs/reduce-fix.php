@@ -1,15 +1,15 @@
 <?php # (jEdit options) :folding=explicit:collapseFolds=1:
 /*****************************************************************************
-    This file runs the standard Reduce -build command on an existing
-    model in this session and creates a new model entry for the Reduced file.
+    This file runs the user-configured Reduce -build command on an existing
+    model in this session and creates a new PDB in this model.
     
 INPUTS (via $_SESSION['bgjob']):
     model           ID code for model to process
-    makeFlipkin     true if the user wants a Flipkin made
+    doflip[]        an array of booleans, where the keys match the second index
+                    in the data structure from decodeReduceUsermods()
 
 OUTPUTS (via $_SESSION['bgjob']):
-    Adds a new entry to $_SESSION['models'].
-    newModel        the ID of the model just added
+    model           ID code for model that was processed
 
 *****************************************************************************/
 // EVERY *top-level* page must start this way:
@@ -20,7 +20,6 @@ OUTPUTS (via $_SESSION['bgjob']):
 // 2. Include core functionality - defines constants, etc.
     require_once(MP_BASE_DIR.'/lib/core.php');
     require_once(MP_BASE_DIR.'/lib/model.php');
-    require_once(MP_BASE_DIR.'/lib/visualize.php');
 // 3. Restore session data. If you don't want to access the session
 // data for some reason, you must call mpInitEnvirons() instead.
     session_id( $_SERVER['argv'][1] );
@@ -41,30 +40,53 @@ OUTPUTS (via $_SESSION['bgjob']):
 
 # MAIN - the beginning of execution for this page
 ############################################################################
+$doflip = $_SESSION['bgjob']['doflip'];
 $modelID = $_SESSION['bgjob']['model'];
 $model = $_SESSION['models'][$modelID];
 $pdb = "$model[dir]/$model[pdb]";
 
-// Set up progress message
-$tasks['create'] = "Create a new model entry";
-$tasks['reduce'] = "Add H with <code>reduce -build</code>";
-if($_SESSION['bgjob']['makeFlipkin']) $tasks['flipkin'] = "Create Asn/Gln and His <code>flipkin</code> kinemages";
+$changes = decodeReduceUsermods($pdb);
 
-setProgress($tasks, 'reduce');
-$id = reduceBuild($modelID, $pdb);
-
-$_SESSION['bgjob']['newModel'] = $id;
-
-if($_SESSION['bgjob']['makeFlipkin'])
+// If all changes were accepted, we will not need to re-run Reduce.
+$rerun = false;
+// Make a file of flip-noflip commands for Reduce
+$flipfile = "$model[dir]/$model[prefix]fix.flips";
+$fp = fopen($flipfile, "wb");
+$n = count($changes[0]); // How many changes are in the table?
+for($c = 0; $c < $n; $c++)
 {
-    setProgress($tasks, 'flipkin');
-    $model = $_SESSION['models'][$id];
-    makeFlipkin("$model[dir]/$model[pdb]",
-        "$model[dir]/$model[prefix]flipnq.kin",
-        "$model[dir]/$model[prefix]fliphis.kin");
-}
+    if($doflip[$c]) fwrite($fp, "F:" . $changes[0][$c] . "\n");
+    else            fwrite($fp, "O:" . $changes[0][$c] . "\n");
 
-setProgress($tasks, null);
+    // Expect checks for ones flipped originally; expect no check for ones not flipped.
+    $expected = ($changes[4][$c] == "FLIP" || $changes[4][$c] == "CLS-FL");
+    if($doflip[$c] != $expected) { $rerun = TRUE; }
+}
+fclose($fp);
+
+if(! $rerun)
+    setProgress(array("No additional changes made to model"), null);
+else
+{
+    $tasks['reduce'] = "Add H with user-selected Asn/Gln/His flips using <code>reduce -fix</code>";
+    setProgress($tasks, 'reduce');
+    
+    $outname = "$model[id]fixH.pdb";
+    $outpath = "$model[dir]/$outname";
+    
+    // input should be from parent model or we'll be double flipped!
+    $parentID = $model['parent'];
+    $parent = $_SESSION['models'][$parentID];
+    $parentPDB = "$parent[dir]/$parent[pdb]";
+    if(file_exists($parentPDB))
+    {
+        reduceFix($parentPDB, $outpath, $flipfile);
+        // new PDB is part of same model entry, like for Reduce no-build.
+        if(filesize($outpath) > 0) $_SESSION['models'][$modelID]['pdb'] = $outname;
+    }
+    
+    setProgress($tasks, null); // all done
+}
 
 ############################################################################
 // Clean up and go home

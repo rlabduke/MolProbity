@@ -212,12 +212,15 @@ $0 ~ /^@(dot|vector)list .* master=\{H-bonds\}/ { $0 = $0 " off" }
 }
 #}}}########################################################################
 
-#{{{ a_function_definition - sumary_statement_goes_here
+#{{{ makeFlipkin - runs Flipkin to generate a summary of the Reduce -build changes
 ############################################################################
 /**
-* Documentation for this function.
 */
-//function someFunctionName() {}
+function makeFlipkin($inpath, $outpathAsnGln, $outpathHis)
+{
+    exec("flipkin -limit" . MP_REDUCE_LIMIT . " $inpath > $outpathAsnGln");
+    exec("flipkin -limit" . MP_REDUCE_LIMIT . " -h $inpath > $outpathHis");
+}
 #}}}########################################################################
 
 #{{{ a_function_definition - sumary_statement_goes_here

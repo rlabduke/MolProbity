@@ -199,8 +199,10 @@ function launchBackground($script, $whereNext, $delay = 5)
 }
 #}}}########################################################################
 
-#{{{ setProgress - generate the job status report for background jobs
+#{{{ setProgress, getProgressTasks - job status reporting for background jobs
 ############################################################################
+$__progress_tasks__ = array();
+
 /**
 * Generates a listing of all the current tasks, indicating which ones
 * are complete, which one is in progress, and which remain to be done.
@@ -210,6 +212,7 @@ function launchBackground($script, $whereNext, $delay = 5)
 */
 function setProgress($tasks, $active)
 {
+    $__progress_tasks__ = $tasks; // make a record for later
     $f = fopen("$_SESSION[dataDir]/progress", "wb");
     $foundActive = false;
     if(is_array($tasks)) foreach($tasks as $index => $task)
@@ -226,6 +229,14 @@ function setProgress($tasks, $active)
     }
     fclose($f);
 }
+
+/**
+* Returns the latest set of tasks used in setProgress()
+*/
+function getProgressTasks()
+{
+    return $__progress_tasks__;
+}    
 #}}}########################################################################
 
 #{{{ listRecursive - lists a directories contents, and its subdirectories contents, etc.

@@ -38,7 +38,7 @@
         $c == MP_TABLE_ALT1 ? $c = MP_TABLE_ALT2 : $c = MP_TABLE_ALT1;
         echo " <tr bgcolor='$c' align='center'>\n";
         echo "  <td><b>$id</b></td>\n";
-        echo "  <td><a href='improve_reduce_launch.php?$_SESSION[sessTag]&model=$id'>Reduce -build</a></td>\n";
+        echo "  <td><a href='improve_reduce_setup.php?$_SESSION[sessTag]&model=$id'>Reduce -build</a></td>\n";
         echo "  <td>SSWING</td>\n";
         echo " </tr>\n";
         echo " <tr bgcolor='$c'>\n";
