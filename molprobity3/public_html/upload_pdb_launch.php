@@ -56,9 +56,12 @@ elseif($_FILES['uploadFile']['size'] > 0)       $mode = "upload";
 elseif($_REQUEST['cmd'] == "Get this file" )    $mode = "pdb/ndb";
 elseif($_REQUEST['cmd'] == "Upload this file")  $mode = "upload";
 
+// PDB codes and filenames are validated in jobs/addmodel.php
 
 if($mode == "upload")
 {
+    // Don't try running shell cmds, etc on the uploaded file directly b/c
+    // it's name could have space, .. , or other illegal chars in it!
     $tmpfile = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
     if( !$_FILES['uploadFile']['error'] && $_FILES['uploadFile']['size'] > 0
     &&  move_uploaded_file($_FILES['uploadFile']['tmp_name'], $tmpfile))
@@ -82,7 +85,12 @@ if($mode == "upload")
     {
         echo $tmpfile;
         unlink($tmpfile);
-        failMsg("File upload failed for unknown reason; error code $_FILES[uploadFile][error].");
+        if($_FILES['uploadFile']['error'])
+            failMsg("File upload failed with error code {$_FILES[uploadFile][error]}.");
+        elseif($_FILES['uploadFile']['size'] <= 0)
+            failMsg("File upload failed because of zero file size (no contents).");
+        else
+            failMsg("File upload failed for an unknown reason.");
     }
 }
 elseif($mode == "pdb/ndb")

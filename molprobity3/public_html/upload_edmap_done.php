@@ -24,10 +24,10 @@ INPUTS (via Get or Post):
 
 # MAIN - the beginning of execution for this page
 ############################################################################
-$mapName = $_FILES['uploadFile']['name'];
+$mapName = censorFileName($_FILES['uploadFile']['name']); // make sure no spaces, etc.
 $mapPath = "$_SESSION[dataDir]/$mapName";
 if( !$_FILES['uploadFile']['error'] && $_FILES['uploadFile']['size'] > 0
-&&  move_uploaded_file($_FILES['uploadFile']['tmp_name'], $mapPath))
+&& !file_exists($mapPath) && move_uploaded_file($_FILES['uploadFile']['tmp_name'], $mapPath))
 {
     // Uploaded file probably has restrictive permissions
     chmod($mapPath, (0666 & ~MP_UMASK));
@@ -37,7 +37,14 @@ if( !$_FILES['uploadFile']['error'] && $_FILES['uploadFile']['size'] > 0
 else
 {
     echo mpPageHeader("Sorry!");
-    echo "File upload failed for unknown reason; error code $_FILES[uploadFile][error].";
+    if($_FILES['uploadFile']['error'])
+        echo("File upload failed with error code {$_FILES[uploadFile][error]}.");
+    elseif(file_exists($mapPath))
+        echo("File upload failed because another file of the same name already exists.");
+    elseif($_FILES['uploadFile']['size'] <= 0)
+        echo("File upload failed because of zero file size (no contents).");
+    else
+        echo("File upload failed for an unknown reason.");
     echo "\n<p><a href='upload_tab.php?$_SESSION[sessTag]'>Try again</a>\n";
     echo mpPageFooter();
     die();
