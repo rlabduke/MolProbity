@@ -51,20 +51,24 @@ function display($context)
     echo "<tr bgcolor='".MP_TABLE_ALT1."'><td><input type='radio' name='scriptName' value='lots'></td>\n";
     echo "<td>Mainchain, sidechains, alpha carbon trace, hydrogens, hets, waters (color by sidechain/mainchain)</td></tr>\n";
 
+    // Lots -- half bonds
+    echo "<tr bgcolor='".MP_TABLE_ALT2."'><td><input type='radio' name='scriptName' value='halfbonds'></td>\n";
+    echo "<td>Mainchain, sidechains, alpha carbon trace, hydrogens, hets, waters (<b>half-bond coloring</b>)</td></tr>\n";
+
     // CA -- SS
-    echo "<tr bgcolor='".MP_TABLE_ALT2."'><td><input type='radio' name='scriptName' value='cass'></td>\n";
+    echo "<tr bgcolor='".MP_TABLE_ALT1."'><td><input type='radio' name='scriptName' value='cass'></td>\n";
     echo "<td>Alpha carbon trace with disulfides and non-water hets</td></tr>\n";
 
     // MC -- HB
-    echo "<tr bgcolor='".MP_TABLE_ALT1."'><td><input type='radio' name='scriptName' value='mchb'></td>\n";
+    echo "<tr bgcolor='".MP_TABLE_ALT2."'><td><input type='radio' name='scriptName' value='mchb'></td>\n";
     echo "<td>Mainchain and its hydrogen bonds</td></tr>\n";
 
     // AA/SC
-    echo "<tr bgcolor='".MP_TABLE_ALT2."'><td><input type='radio' name='scriptName' value='aasc'></td>\n";
-    echo "<td>Mainchain and sidechains, with amino acids grouped into sets.</td></tr>\n";
+    echo "<tr bgcolor='".MP_TABLE_ALT1."'><td><input type='radio' name='scriptName' value='aasc'></td>\n";
+    echo "<td>Mainchain and sidechains, with amino acids grouped into sets</td></tr>\n";
 
     // NABA
-    echo "<tr bgcolor='".MP_TABLE_ALT1."'><td><input type='radio' name='scriptName' value='naba'></td>\n";
+    echo "<tr bgcolor='".MP_TABLE_ALT2."'><td><input type='radio' name='scriptName' value='naba'></td>\n";
     echo "<td>Nucleic acid bases grouped into sets and more</td></tr>\n";
 
     echo "</table>\n";

@@ -75,7 +75,6 @@ This would lend itself nicely to a tabular format...
 ############################################################################
 // Clean up and go home
 unset($_SESSION['bgjob']['processID']);
-$_SESSION['models'][$modelID]['isAnalyzed'] = true;
 $_SESSION['bgjob']['endTime']   = time();
 $_SESSION['bgjob']['isRunning'] = false;
 ?>

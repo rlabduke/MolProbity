@@ -177,10 +177,10 @@ function pdbstat($pdbfilename)
                 elseif(preg_match("/[ 1-9][HDTZ][ A-Z][ 1-9][ A1]/", $atom)) { $hydrogens++; }
                 
                 # Does this residue have alternate conformations?
-                # TODO: This is still very protein-centric
                 if($atom{4} != ' ')
                 {
                     $allAlts[$id] = $id;
+                    # TODO: This is still very protein-centric
                     if(preg_match("/( N  | CA  | C  | O  | CB )./", $atom)) $mcAlts[$id] = $id;
                 }
             }
