@@ -244,12 +244,23 @@ function sortFilesAlpha($list)
 }
 #}}}########################################################################
 
-#{{{ a_function_definition - sumary_statement_goes_here
+#{{{ linkModelKin - creates a kinemage open/download link tailored to this session
 ############################################################################
 /**
-* Documentation for this function.
+* $model    a standard data structure describing the model from $_SESSION['model'][MODEL_ID]
+* $suffix   the kinemage name, without the model prefix, but with the .kin ending
 */
-//function someFunctionName() {}
+function linkModelKin($model, $suffix)
+{
+    $name = "$model[prefix]$suffix";
+    $file = "$model[dir]/$name";
+    $link = "$model[url]/$name";
+    $s = "";
+    $s .= "$name (" . formatFilesize(filesize($file)) . "): ";
+    $s .= "<a href='viewking.php?$_SESSION[sessTag]&url=$link' target='_blank'>View in KiNG</a> | ";
+    $s .= "<a href='$link'>Download</a>";
+    return $s;
+}
 #}}}########################################################################
 
 #{{{ a_function_definition - sumary_statement_goes_here

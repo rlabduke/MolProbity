@@ -31,18 +31,22 @@
 <h3>Models available for analysis:</h3>
 <table width="100%" border="0" cellspacing="0" cellpadding="2">
 <?php
-    $c = "#ffffff";
+    $c = MP_TABLE_ALT1;
     foreach($_SESSION['models'] as $id => $model)
     {
         // Alternate row colors:
-        $c == "#ffffff" ? $c = "#e8e8e8" : $c = "#ffffff";
+        $c == MP_TABLE_ALT1 ? $c = MP_TABLE_ALT2 : $c = MP_TABLE_ALT1;
         echo " <tr bgcolor='$c' align='center'>\n";
         echo "  <td><b>$id</b></td>\n";
-        echo "  <td><span class='inactive'>Optimize H and<br>find Asn/Gln/His flips</span></td>\n";
-        echo "  <td><span class='inactive'>Refit sidechains<br>with SSWING</span></td>\n";
-        echo "  <td><a href='analyze_setup.php?$_SESSION[sessTag]&model=$id'>Run analysis</a></td>\n";
-        echo "  <td><span class='inactive'>View results<br>of analysis</span></td>\n";
-        echo "  <td><span class='inactive'>Show all files</span></td>\n";
+        if($model['isAnalyzed'])
+        {
+            echo "  <td><a href='analyze_display.php?$_SESSION[sessTag]&model=$id'>View analysis results</a></td>\n";
+            echo "  <td><a href='analyze_setup.php?$_SESSION[sessTag]&model=$id'>Re-run analysis</a></td>\n";
+        }
+        else
+        {
+            echo "  <td><a href='analyze_setup.php?$_SESSION[sessTag]&model=$id'>Run analysis</a></td>\n";
+        }
         echo " </tr>\n";
         echo " <tr bgcolor='$c'>\n";
         echo "  <td colspan='6'><i>$model[history]</i></td>\n";

@@ -31,12 +31,12 @@ OUTPUTS (via Post):
 function makeFileList($list, $basePath, $baseURL, $depth = 0)
 {
     $s = '';
-    $c = "#ffffff";
+    $c = MP_TABLE_ALT1;
     foreach($list as $dir => $file)
     {
         if(is_array($file))
         {
-            $s .= "<tr bgcolor='#ccccff'><td>";
+            $s .= "<tr bgcolor='".MP_TABLE_HIGHLIGHT."'><td>";
             for($i = 0; $i < $depth; $i++) $s .= '&nbsp;&nbsp;&nbsp;&nbsp;';
             $s .= "<b>$dir/</b></td><td colspan='2'></td></tr>\n";
             $s .= makeFileList($file, "$basePath/$dir", "$baseURL/$dir", $depth+1);
@@ -48,7 +48,7 @@ function makeFileList($list, $basePath, $baseURL, $depth = 0)
             $s .= "<i>$file</i></td>".makeFileCommands("$basePath/$file", "$baseURL/$file")."</tr>\n";
         }
 
-        $c == "#ffffff" ? $c = "#e8e8e8" : $c = "#ffffff"; // alternate row colors
+        $c == MP_TABLE_ALT1 ? $c = MP_TABLE_ALT2 : $c = MP_TABLE_ALT1;
     }
     return $s;
 }

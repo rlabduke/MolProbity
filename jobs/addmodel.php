@@ -57,6 +57,7 @@ $id .= $serial;
 // Create directory
 $modelDir = $_SESSION['dataDir'].'/'.$id;
 mkdir($modelDir, 0777);
+$modelURL = $_SESSION['dataURL'].'/'.$id;
 
 // Process file - this is the part that matters
 $infile     = $_SESSION['bgjob']['tmpPdb'];
@@ -68,6 +69,7 @@ preparePDB($infile, $outpath, $_SESSION['bgjob']['isCnsFormat'], $_SESSION['bgjo
 $_SESSION['models'][$id] = array(
     'id'        => $id,
     'dir'       => $modelDir,
+    'url'       => $modelURL,
     'prefix'    => $id.'-',
     'pdb'       => $outname,
     'stats'     => pdbstat($outpath),

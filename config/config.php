@@ -48,6 +48,12 @@ define("MP_SESSION_LIFETIME", 60*60*24*14); // 14 days
 // How large a session can grow, in bytes
 define("MP_SESSION_MAX_SIZE", 200*1024*1024); // 200 Mb
 
+// Alternating colors for striped tables
+define("MP_TABLE_ALT1", "#ffffff");
+define("MP_TABLE_ALT2", "#e8e8e8");
+// Highlight color for striped tables
+define("MP_TABLE_HIGHLIGHT", "#ffff99");
+
 
 // Don't change this! It will break user bookmarks.
 define("MP_SESSION_NAME", "MolProbSID");

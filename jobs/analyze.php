@@ -62,7 +62,8 @@ OUTPUTS (via $_SESSION['bgjob']):
 
 # MAIN - the beginning of execution for this page
 ############################################################################
-$model  = $_SESSION['models'][ $_SESSION['bgjob']['model'] ];
+$modelID = $_SESSION['bgjob']['model'];
+$model  = $_SESSION['models'][$modelID];
 $infile = "$model[dir]/$model[pdb]";
 
 // C-betas
@@ -89,7 +90,7 @@ $clash = loadClashlist($outfile);
 // First index is 9-char residue name
 // Second index is 'cbdev', 'rota', 'rama', or 'clash'
 $worst = findOutliers($cbdev, $rota, $rama, $clash);
-$_SESSION['models'][$_SESSION['bgjob']['model']]['badRes'] = $worst;
+$_SESSION['models'][$modelID]['badRes'] = $worst;
 
 // Make some kinemages
 ////////////////////////////////////////////////////////////////////////////
@@ -109,7 +110,7 @@ fclose($h);
 exec("prekin -append -nogroup -scope -show 'wa(bluetint)' $infile >> $outfile");
 
 $h = fopen($outfile, 'a');
-fwrite($h, "@group {backbone} dominant\n");
+fwrite($h, "@group {Ca trace} dominant\n");
 fclose($h);
 exec("prekin -append -nogroup -scope -show 'ca(gray)' $infile >> $outfile");
 
@@ -141,6 +142,7 @@ This would lend itself nicely to a tabular format...
 *********************/
 ############################################################################
 // Clean up and go home
+$_SESSION['models'][$modelID]['isAnalyzed'] = true;
 $_SESSION['bgjob']['endTime']   = time();
 $_SESSION['bgjob']['isRunning'] = false;
 ?>
