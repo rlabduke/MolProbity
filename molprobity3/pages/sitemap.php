@@ -78,7 +78,7 @@ function display($context)
     echo "<h3><a href='".makeEventURL("onNavBarCall", "aacgeom_setup.php")."'>All-atom contact and geometric analyses</a></h3>\n<ul>\n";
     echo "<li>All-atom steric contacts (clashlist, clash score, contact dots)</li>\n";
     echo "<li>Protein geometry evaluation (Ramachandran plot, rotamers, C&beta; deviations)</li>\n";
-    echo "<li><i>Nucleic acid geometry (base-phosphate perpendiculars)</i></li>\n";
+    echo "<li>Nucleic acid geometry (base-phosphate perpendiculars)</li>\n";
     echo "<li>Multi-criterion chart and kinemage displays</li>\n";
     echo "</ul>\n";
 

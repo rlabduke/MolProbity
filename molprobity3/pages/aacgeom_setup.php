@@ -148,6 +148,7 @@ function checkSettingsBeforeSubmit()
             <option value='rota'>worst rotamers</option>
             <option value='cbdev'>worst C&beta; deviations</option>
             <option value='rama'>Ramachandran outliers</option>
+            <option value='pperp'>Base-P distance outliers</option>
         </select></label>
     </div>
 </div>

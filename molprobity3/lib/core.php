@@ -84,17 +84,20 @@ function mpPageHeader($title, $active = "none", $refresh = "")
 function mpNavigationBar($active)
 {
     $s = "";
-    //$s .= mpNavBar_goto('', 'Common uses', ($active == 'common'));
-    //$s .= mpNavBar_call('', 'Crystallography');
-    //$s .= "<br />\n";
+    $s .= mpNavBar_goto('welcome.php', 'Welcome', ($active == 'welcome'));
+    $s .= "<span class='minornav'>".mpNavBar_goto('', 'Evaluate X-ray')."</span>";
+    $s .= "<span class='minornav'>".mpNavBar_goto('', 'Evaluate NMR')."</span>";
+    $s .= "<span class='minornav'>".mpNavBar_goto('', 'Fix up structure')."</span>";
+    $s .= "<span class='minornav'>".mpNavBar_goto('', 'Work with kins')."</span>";
+    $s .= "<br />\n";
     $s .= mpNavBar_goto('sitemap.php', 'Site map', ($active == 'sitemap'));
-    $s .= mpNavBar_call('upload_pdb_setup.php', 'Input PDB files');
-    $s .= mpNavBar_call('upload_other_setup.php', 'Input other files');
-    $s .= mpNavBar_call('reduce_setup.php', 'Add hydrogens');
-    $s .= mpNavBar_call('aacgeom_setup.php', 'AAC &amp; geometry');
-    $s .= mpNavBar_call('sswing_setup1.php', 'Refit sidechains');
-    $s .= mpNavBar_call('makekin_setup.php', 'Make simple kins');
-    $s .= mpNavBar_call('interface_setup1.php', 'Interface contacts');
+    $s .= "<span class='minornav'>".mpNavBar_call('upload_pdb_setup.php', 'Input PDB files')."</span>";
+    $s .= "<span class='minornav'>".mpNavBar_call('upload_other_setup.php', 'Input other files')."</span>";
+    $s .= "<span class='minornav'>".mpNavBar_call('reduce_setup.php', 'Add hydrogens')."</span>";
+    $s .= "<span class='minornav'>".mpNavBar_call('aacgeom_setup.php', 'AAC &amp; geometry')."</span>";
+    $s .= "<span class='minornav'>".mpNavBar_call('sswing_setup1.php', 'Refit sidechains')."</span>";
+    $s .= "<span class='minornav'>".mpNavBar_call('makekin_setup.php', 'Make simple kins')."</span>";
+    $s .= "<span class='minornav'>".mpNavBar_call('interface_setup1.php', 'Interface contacts')."</span>";
     $s .= "<br />\n";
     $s .= mpNavBar_goto('file_browser.php', 'View &amp; download files', ($active == 'files'));
     $s .= mpNavBar_goto('notebook_main.php', 'Lab notebook', ($active == 'notebook'));
@@ -121,9 +124,9 @@ function mpNavBar_goto($page, $title, $isActive = false)
 function mpNavBar_call($page, $title)
 {
     if($page == '')
-        return "<span class='minornav'>$title</span><br />\n";
+        return "$title<br />\n";
     else
-        return "<span class='minornav'><a href='".makeEventURL("onNavBarCall", $page)."'>$title</a></span><br />\n";
+        return "<a href='".makeEventURL("onNavBarCall", $page)."'>$title</a><br />\n";
 }
 #}}}########################################################################
 

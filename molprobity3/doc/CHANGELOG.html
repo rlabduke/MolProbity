@@ -14,6 +14,7 @@
     User manual (do we need this in addition to page-by-page help?)
     Tutorial / walk-thru
     Write a decent document about installation of MolProbity for web and script use
+    Update Java install docs for end users
     Could make it a web service with XML-RPC (SOAP, CORBA too complex)
     should session lifetime be from start, or from last use?
     document PHP version needed (which is...? >=4.1:superglobals >=4.3:CLI)
@@ -49,12 +50,7 @@
     Remove dump of $_SESSION from sitemap
     Allow "live" sorting of finished multi-chart
 }}}
-    Develop welcome page and sketch out "helper" pages
-    |-- overall title like "macromolecular structure validation"?
-    |-- Note on sitemap: this for knowledgable users; other pgs for beginners
-    |-- add "(optional)" after Input other files
-    +-- "All-atom contacts" and "Geometry" as separate pictures/categories
-    allow sort by NA perpendiculars
+    Develop "helper" pages; mark optional steps clearly
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -70,6 +66,11 @@
 - swapped positions of AAC/geom and SSWING icons on sitemap at Jane's request
 - removed stand-alone 3-D Cbeta deviations kinemage b/c it appears in the multi
 - implemented base-P outliers in multi kin, summary stats, multi-chart
+- enabled sorting of multi-chart by baseP outliers
+- updated Probe and Prekin (v050121) binaries for OS X, Linux
+- added Welcome page (mostly without working links); made index.php start there.
+- reorganized formatting of side links in lib/core.php
+- added extra citation (NAR) to help/about
 
 ### 3beta12 ###
 - created command line scripts: reduce-build, reduce-nobuild, split-models

@@ -11,7 +11,7 @@ img {
 }
 
 /* Order that these appear in is important to Safari, apparently. */
-a {	text-decoration : none ; }
+a {    text-decoration : none ; }
 a:link { color : #000099 ; }
 a:visited { color : #000099 ; }
 a:hover { text-decoration : underline ; color : #0000ff ; }
@@ -46,20 +46,20 @@ div.pagecontent {
     border-style : solid ;
     border-color : #999966 ;
     padding : 0.4em ;
-	font-family : Palatino, Times, serif ;
+    font-family : Palatino, Times, serif ;
 }
 
 /* Because TABLE otherwise doesn't inherit these... */
 div.pagecontent table {
     color : #000000 ;
     background-color : #ffffff ;
-	font-family : Palatino, Times, serif ;
+    font-family : Palatino, Times, serif ;
 }
 
 /* Inheritance is tighter than comma op. */
 div.pagecontent h2, div.pagecontent h3, div.pagecontent h4, div.pagecontent h5, div.pagecontent h6 {
-	font-family : Helvetica, Arial, sans-serif ;
-    color : #660000
+    font-family : Helvetica, Arial, sans-serif ;
+    color : #660000 ;
 }
 
 /* These  differ only by not having a border on the left. */
@@ -70,20 +70,20 @@ div.pagecontent_alone {
     border-style : solid ;
     border-color : #999966 ;
     padding : 0.4em ;
-	font-family : Palatino, Times, serif ;
+    font-family : Palatino, Times, serif ;
 }
 
 /* Because TABLE otherwise doesn't inherit these... */
 div.pagecontent_alone table {
     color : #000000 ;
     background-color : #ffffff ;
-	font-family : Palatino, Times, serif ;
+    font-family : Palatino, Times, serif ;
 }
 
 /* Inheritance is tighter than comma op. */
 div.pagecontent_alone h2, div.pagecontent_alone h3, div.pagecontent_alone h4, div.pagecontent_alone h5, div.pagecontent_alone h6 {
-	font-family : Helvetica, Arial, sans-serif ;
-    color : #660000
+    font-family : Helvetica, Arial, sans-serif ;
+    color : #660000 ;
 }
 
 div.alert {
@@ -114,6 +114,7 @@ div.indent {
 }
 
 .inactive { color : #666666 ; }
+.nospaceafter { margin-bottom : 0 ; }
 
 /* Inheritance is tighter than comma op. */
 div.help_info { color : #666666 ; }
