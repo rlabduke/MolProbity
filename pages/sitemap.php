@@ -10,43 +10,33 @@ class SitemapDelegate extends BasicDelegate {
 #{{{ display - creates the UI for this page
 ############################################################################
 /**
-* Context is an array with these keys:
-*   suppressDetail      if true, the sitemap will be compressed to a minimum.
+* Context is not used.
 */
 function display($context)
 {
-    echo mpPageHeader("Site map", "home");
-    $detail = !$context['suppressDetail'];
-    if($detail) echo "<center><a href='".makeEventURL("onSetDetail", $detail)."'>[less detail]</a></center>\n";
-    else        echo "<center><a href='".makeEventURL("onSetDetail", $detail)."'>[more detail]</a></center>\n";
+    echo mpPageHeader("Site map", "sitemap");
+    echo "<i>Features in italics have not yet been implemented.</i>\n";
+    echo "<h3><a href='".makeEventURL("onUploadFiles")."'>Upload / fetch files</a></h3>\n<ul>\n";
+    echo "<li>Upload PDB files from local disk.</li>\n";
+    echo "<li>Retrieve PDB files from the PDB or NDB.</li>\n";
+    echo "<li>Upload electron density maps.</li>\n";
+    echo "<li><i>Retrieve 2Fo-Fc and Fo-Fc (difference) maps from the EDS.</i></li>\n";
+    echo "<li>Upload custom heterogen dictionaries (for adding hydrogens).</li>\n";
+    echo "<li><i>Upload kinemages for viewing in KiNG.</i></li>\n";
+    echo "</ul>\n";
     
-    echo "<h3><a href='".makeEventURL("onUploadFiles")."'>Upload / fetch files</a></h3>\n";
-    if($detail) {
-        echo "<ul>\n";
-        echo "<li>Upload PDB files from local disk.</li>\n";
-        echo "<li>Retrieve PDB files from the PDB or NDB.</li>\n";
-        echo "<li>Upload electron density maps.</li>\n";
-        echo "<li>Retrieve 2Fo-Fc and Fo-Fc (difference) maps from the EDS.</li>\n";
-        echo "<li>Upload custom heterogen dictionaries (for adding hydrogens).</li>\n";
-        echo "<li>Upload kinemages for viewing in KiNG.</li>\n";
-        echo "</ul>\n";
-    }
+    echo "<hr>\n";
 
-    echo "<h3><a href='".makeEventURL("onNavBarGoto", "notebook_main.php")."'>Lab notebook</a></h3>\n";
-    if($detail) {
-        echo "<ul>\n";
-        echo "<li>See notebook entries made automatically by MolProbity.</li>\n";
-        echo "<li>Annotate automatic entries with notes and comments.</li>\n";
-        echo "<li>Create your own new entries in the notebook.</li>\n";
-        echo "<li>Print the notebook or save it as an HTML page.</li>\n";
-        echo "</ul>\n";
-    }
+    echo "<h3><a href='".makeEventURL("onNavBarGoto", "notebook_main.php")."'>Lab notebook</a></h3>\n<ul>\n";
+    echo "<li>See notebook entries made automatically by MolProbity.</li>\n";
+    echo "<li>Annotate automatic entries with notes and comments.</li>\n";
+    echo "<li>Create your own new entries in the notebook.</li>\n";
+    echo "<li><i>Print the notebook or save it as an HTML page.</i></li>\n";
+    echo "</ul>\n";
     
-    if($detail) {
-        echo "<hr><pre>";
-        print_r($_SESSION);
-        echo "</pre>";
-    }
+    echo "<hr><pre>";
+    print_r($_SESSION);
+    echo "</pre>";
 
     echo mpPageFooter();
 }

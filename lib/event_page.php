@@ -203,6 +203,15 @@ class BasicDelegate {
     {
         pageGoto($arg);
     }
+    
+    /**
+    * $arg is the name of the page to call.
+    * The context for the call is assumed to be null.
+    */
+    function onNavBarCall($arg, $req)
+    {
+        pageCall($arg);
+    }
 }
 #}}}########################################################################
 ?>
