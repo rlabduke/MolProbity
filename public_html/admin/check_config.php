@@ -97,7 +97,19 @@ $ok = true;
     $cli = `php -r 'echo php_sapi_name();'`;
     if($cli == "cli")   echo "<li>CLI version of PHP installed - good.</li>\n";
     else                echo "<li><b>CLI version of PHP NOT installed.</b> Upgrade to a newer PHP (4.3.0+) before running MolProbity.</li>\n";
-        
+    
+    if(ini_get('file_uploads'))
+    {
+        echo "<li>File uploads are enabled - good. Maximum size for file uploads will be the <b>minimum</b> of:\n";
+        echo "<ul>\n";
+        echo "<li>post_max_size: <b>".ini_get('post_max_size')."</b> (in /etc/php.ini or equivalent)</li>\n";
+        echo "<li>upload_max_filesize: <b>".ini_get('upload_max_filesize')."</b> (in /etc/php.ini or equivalent)</li>\n";
+        $memlim = ini_get('memory_limit');
+        if($memlim > 0) echo "<li>/etc/php.ini - memory_limit: $memlim</li>\n";
+        echo "<li>...and any <tt>LimitRequestBody</tt> directives in /etc/httpd/httpd.conf (for Apache web server, anyway).</li>\n";
+        echo "</ul>\n</li>\n";
+    }
+    else echo "<li><b>File uploads not enabled!</b> Please set <tt>file_uploads</tt> to 1 in your php.ini file (usually in /etc/php.ini).</li>\n";
 ?>
 </ul>
 
