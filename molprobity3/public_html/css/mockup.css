@@ -1,0 +1,76 @@
+/* (jEdit options) :folding=explicit:collapseFolds=1: */
+
+
+/* MAIN BODY OF PAGE */
+body {
+    color : #666666 ;
+    background-color : #ffffff ;
+}
+a:link { color : #333399 ; }
+a:active { color : #000099 ; }
+a:visited { color : #333399 ; }
+
+
+/* NAVIGATION BAR */
+#navbar {
+    width : 20% ;
+    float : left ;
+}
+#navbar a:link { text-decoration : none ; }
+#navbar a:active { text-decoration : none ; }
+#navbar a:visited { text-decoration : none ; }
+
+#navcurrent {
+    font-weight : bolder ;
+}
+#navcurrent a:link { color : #993333 ; }
+#navcurrent a:active { color : #990000 ; }
+#navcurrent a:visited { color : #993333 ; }
+div.navblurb {
+    padding : 0 ;
+    margin : 0 0 0 1.5em;
+    font-size: smaller ;
+}
+
+
+/* PAGE TITLE / FOOTER */
+div.headfoot {
+    float : right;
+    width : 80% ;
+    text-align : right ;
+}
+div.headfoot h1 { color : #000066 ; }
+span.versionNumber {
+    font-size : smaller ;
+    font-style : italic ;
+}
+
+
+/* CONTENT AREA */
+#tabcontent {
+    border-width : 1px 0 1px 1px;
+    border-color : #666666 ;
+    border-style : solid ;
+}
+#simplecontent {
+    border-width : 1px 0 1px 0;
+    border-color : #666666 ;
+    border-style : solid ;
+    width : 100% ;
+}
+div.content {
+    color : #000000 ;
+    text-align : left ;
+    padding : 1em ;
+    margin : 0 0 0.5em 0;
+}
+div.content h2 { color : #000066 ; font-style : italic ; }
+div.content h3 { color : #000066 ; font-style : italic ; }
+div.content h4 { color : #000066 ; font-style : italic ; }
+div.content h5 { color : #000066 ; font-style : italic ; }
+div.content h6 { color : #000066 ; font-style : italic ; }
+div.content a:link { color : #660000 ; }
+div.content a:active { color : #ff0000 ; }
+div.content a:visited { color : #660000 ; }
+
+
