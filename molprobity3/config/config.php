@@ -51,7 +51,7 @@ define("MP_SESSION_MAX_SIZE", 200*1024*1024); // 200 Mb
 
 // Don't change this! It will break user bookmarks.
 define("MP_SESSION_NAME", "MolProbSID");
-define("MP_VERSION", "3pre7");
+define("MP_VERSION", "3pre8");
 
 
 ?>
