@@ -34,5 +34,6 @@ $file = $_REQUEST['file'];
 $name = basename($file);
 echo mpPageHeader("KiNG - $name");
 @readfile($file);
+echo "\n<hr>\n<p><i>Hint: use your browser's File | Save As... function to save a copy of this information.</i></p>\n";
 echo mpPageFooter();
 ?>

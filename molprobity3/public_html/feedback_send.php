@@ -77,6 +77,11 @@ mpLog("feedback:Sent to $fb_to with subject $inregardto; success=$ok");
     echo mpPageHeader("Email sent", "feedback");
     echo "<p>Your email was successfully sent to the author(s) and maintainer(s) of MolProbity.\n";
     echo "You should receive a response, if needed, within a few days.</p>\n";
+
+    echo "<p><div class='alert'>If you're having a problem or think you've found a bug, and\n";
+    echo "if you don't mind the MolProbity maintainers seeing your data files,\n";
+    echo "then please do NOT log out and erase your files.\n";
+    echo "This will help us diagnose and correct the problem.</div></p>\n";
 /*} else {
     // Start the page: produces <HTML>, <HEAD>, <BODY> tags
     echo mpPageHeader("Email not sent", "feedback");
