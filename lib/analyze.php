@@ -267,11 +267,11 @@ function findCbetaOutliers($cbdev)
 }
 #}}}########################################################################
 
-#{{{ calcCbetaStats - calculates min, max, mean, mode, and std. deviation
+#{{{ calcCbetaStats - calculates min, max, mean, median, and std. deviation
 ############################################################################
 /**
 * Accepts the data structure created by loadCbetaDev()
-* Returns an array with the keys 'min', 'max', 'mean', 'mode', 'stddev'
+* Returns an array with the keys 'min', 'max', 'mean', 'median', 'stddev'
 */
 function calcCbetaStats($cbdev)
 {
@@ -290,8 +290,8 @@ function calcCbetaStats($cbdev)
     $s['mean']  = $mean = $sum / $len;
     
     $half = intval($len/2);
-    if($len % 2 == 0)   $s['mode'] = ($dev[$half] + $dev[$half-1]) / 2;
-    else                $s['mode'] = $dev[$half];
+    if($len % 2 == 0)   $s['median'] = ($dev[$half] + $dev[$half-1]) / 2;
+    else                $s['median'] = $dev[$half];
     
     foreach($dev as $d)
         $sumSquareDev += ($d - $mean)*($d-$mean);
@@ -325,8 +325,11 @@ function loadClashlist($datafile)
     $data = file($datafile);
     $sum = array_values(array_slice($data, -2)); // last 2 lines with new indexes
     $scores = explode(':', $sum[0]);
-    $ret['scoreAll']    = $scores[2] + 0;
-    $ret['scoreBlt40']  = $scores[3] + 0;
+    if(startsWith($sum[0], "#sum2")) // in case no clashes, thus no summary
+    {
+        $ret['scoreAll']    = $scores[2] + 0;
+        $ret['scoreBlt40']  = $scores[3] + 0;
+    }
     
     // Parse data about individual clashes
     $clashes = array(); // in case there are no clashes
