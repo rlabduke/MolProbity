@@ -35,7 +35,7 @@ OUTPUTS (via Post):
 if(isset($_REQUEST['moreOpts_pdbUpload']))
     $_SESSION['moreOpts']['pdbUpload'] = $_REQUEST['moreOpts_pdbUpload'];
 
-echo mpPageHeader("Get input models", "upload");
+echo mpPageHeader("Get input files", "upload");
 ?>
 
 
@@ -45,14 +45,14 @@ echo mpPageHeader("Get input models", "upload");
 <?php echo postSessionID(); ?>
 <table border="0" width="100%">
 <tr align="left" valign="top"><td width="50%">
-    <h3>Upload file from local disk</h3>
+    <h3>Upload model from local disk</h3>
     <label>PDB-format file: <input type="file" name="uploadFile"></label>
     <?php if($_SESSION['moreOpts']['pdbUpload'] || $_SESSION['moreOpts']['all']) { ?>
         <br><label><input type="checkbox" name="isCnsFormat" value="1"> File is from CNS refinement</label>
         <br><label><input type="checkbox" name="ignoreSegID" value="1"> Ignore segID field</label>
     <?php } ?>
 </td><td width="50%">
-    <h3>Fetch file from network database</h3>
+    <h3>Fetch model from network database</h3>
     <!-- Longer code field to allow NDB codes as well as PDB codes -->
     <label>PDB/NDB ID code: <input type="text" name="pdbCode" size="6" maxlength="10"></label>
     <!-- <?php if($_SESSION['moreOpts']['pdbUpload'] || $_SESSION['moreOpts']['all']) { ?>

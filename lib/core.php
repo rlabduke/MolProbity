@@ -84,7 +84,7 @@ function mpNavigationBar($active)
 {
     $s = "";
     $s .= mpNavBar_format('home_tab.php', 'Intro & Help', ($active == 'home'));
-    $s .= mpNavBar_format('upload_tab.php', 'Get input models', ($active == 'upload'));
+    $s .= mpNavBar_format('upload_tab.php', 'Get input files', ($active == 'upload'));
     $s .= mpNavBar_format('analyze_tab.php', 'Analyze quality', ($active == 'analyze'));
     $s .= mpNavBar_format('improve_tab.php', 'Improve models', ($active == 'improve'));
     $s .= mpNavBar_format('compare_tab.php', 'Compare models', ($active == 'compare'));
