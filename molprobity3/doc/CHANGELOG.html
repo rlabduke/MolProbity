@@ -55,7 +55,7 @@
     Display comparison to run-of-PDB for clash score
     Specify what a CB outlier is
     Explain 2d and 3d CB kins
-  * Make sure Reduce doesn't shrink the PDB file (lost atoms, etc)
+    Make sure Reduce doesn't shrink the PDB file (lost atoms, etc)
     Add session resume link to preformatted email
     Make clashscore a choice during analysis
 
@@ -78,6 +78,14 @@
 - background event launching has been converted to MVC/event system.
   This is untested thus far but appears to be working.
 - removed lib/labbook.php:openWithEdit() because old pages are broken anyway.
+- considered allowing return values and handlers for pageCall() / pageReturn()
+  Ended up deciding against it -- see index.php for the complete argument.
+- modified style sheet to get a more subtle look
+- finished file upload (except for error handling)
+- fixed 'abort' function in new job progress page
+- got the fetch from PDB / NDB function working
+- added upload error handling
+- created initial pass on the site map's formatting
   
 ### 3beta5 ###
 - traced mysterious labbook load/save bug from beta3 to missing clearstatcache()

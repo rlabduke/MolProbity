@@ -60,6 +60,7 @@ function pageGoto($pageName, $context = null)
 /**
 * Like pageGoto(), but the new delegate is pushed onto a stack above
 * the old one, so it can be popped off by pageReturn().
+* Return values/handlers are not supported; see index.php for the rationale.
 */
 function pageCall($pageName, $context = null)
 {
@@ -76,11 +77,30 @@ function pageCall($pageName, $context = null)
 ############################################################################
 /**
 * Undoes the actions of pageCall() and returns to the old delegate.
+* Return values/handlers are not supported; see index.php for the rationale.
 */
 function pageReturn()
 {
     if(count($_SESSION['pages']) >= 1)
         array_pop($_SESSION['pages']);
+}
+#}}}########################################################################
+
+#{{{ get/setContext - communicate with display() by changing its $context
+############################################################################
+function getContext()
+{
+    $page = end($_SESSION['pages']);
+    return $page['context'];
+}
+
+function setContext($context)
+{
+    end($_SESSION['pages']);
+    $key = key($_SESSION['pages']);
+    $page =& $_SESSION['pages'][$key];
+    
+    $page['context'] = $context;
 }
 #}}}########################################################################
 
