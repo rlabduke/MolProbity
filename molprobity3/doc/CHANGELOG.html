@@ -50,7 +50,6 @@
     Make sure Reduce doesn't shrink the PDB file (lost atoms/models, etc)
     Make clashscore a choice during analysis
     Have analysis page actually be a lab notebook entry! (Easier to customize)
-  * Gray-out (brown-out?) the help text on file upload pages
     Every time lab notebook is saved, create a HTML snapshot of it
 
 ==============================================================================
@@ -66,6 +65,14 @@
 - allow user to choose files with no H for SSWING, but warn them first w JScript
 - finished SSwing interface, minus info about which sc really changed conf
 - improved formatting/layout on Reduce's "choose" page
+- added CSS rules for help text divs
+- help text for setup pages is now grayed out; could change background instead.
+- simplified sitemap.php by using onNavBarCall() instead of custom handlers.
+- started AAC/geometry analysis UI; added JavaScript smarts to it
+- finished JavaScript work in aacgeom_setup.php; got radios disabled
+- JavaScript tested against several browsers, and all are fine:
+  Mac: Safari 1.2.3; Mozilla 1.6; IE 5.2
+  Linux: Mozilla 1.0.1, 1.2.1; Konqueror 2.2.2 (disable broken), 3.1-15
 
 ### 3beta8 ###
 - started work on the Reduce pathway; got the setup page done.

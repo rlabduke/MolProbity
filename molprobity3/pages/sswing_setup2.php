@@ -57,6 +57,13 @@ function display($context)
     echo "<td><input type='submit' name='cmd' value='Run SSwing to refit these residues &gt;'></td>\n";
     echo "<td align='right'><input type='submit' name='cmd' value='Go back'></td>\n";
     echo "</tr></table></p></form>\n";
+?>
+<hr>
+<div class='help_info'>
+<h4>Refitting sidechains</h4>
+<i>TODO: Help text about SSwing and refitting sidechains goes here</i>
+</div>
+<?php
     
     echo mpPageFooter();
 }

@@ -51,6 +51,7 @@ function display($context)
 </tr></table>
 </form>
 <hr>
+<div class='help_info'>
 <h4>Upload kinemage</h4>
 <ul>
 <li>This function allows you to upload kinemages from your computer's hard drive,
@@ -80,6 +81,7 @@ version 1.3 or newer. See the user manual for more details.</li>
 <li>Uploading a new dictionary will replace the previous one.</li>
 <li>Dictionaries must be in <a href='http://deposit.pdb.org/het_dictionary.txt' target='_blank'>PDB format</a>.</li>
 </ul>
+</div>
     <?php
     echo mpPageFooter();
 }

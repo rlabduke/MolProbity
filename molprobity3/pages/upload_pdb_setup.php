@@ -46,6 +46,7 @@ function display($context)
 </tr></table>
 </form>
 <hr>
+<div class='help_info'>
 <h4>Upload model from local disk</h4>
 <ul>
 <li>This function allows you to upload a new macromolecular model from your computer's hard drive.</li>
@@ -68,6 +69,7 @@ function display($context)
 <li>Many RNA and DNA structures are available through the
     <a href="http://ndbserver.rutgers.edu/" target="_blank">Nucleic Acid Data Bank</a>.</li>
 </ul>
+</div>
 <?php
     echo mpPageFooter();
 }
