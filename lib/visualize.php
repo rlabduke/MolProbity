@@ -99,6 +99,11 @@ function makeMulticritKin($infiles, $outfile, $opt, $nmrConstraints = null)
     fwrite($h, "@master {H's} off\n");
     fwrite($h, "@master {water} off\n");
     fwrite($h, "@master {Calphas} on\n");
+    // Turns ribbons off but makes sure alpha/beta/coil are on,
+    // so it just takes one click to make ribbons visible.
+    if($opt['ribbons'])     fwrite($h, "@master {alpha} on\n");
+    if($opt['ribbons'])     fwrite($h, "@master {beta} on\n");
+    if($opt['ribbons'])     fwrite($h, "@master {coil} on\n");
     if($opt['ribbons'])     fwrite($h, "@master {ribbon} off\n");
     if($opt['dots'])        fwrite($h, "@master {wide contact} off\n");
     if($opt['dots'])        fwrite($h, "@master {close contact} off\n");
@@ -186,7 +191,10 @@ function makeBadRamachandranKin($infile, $outfile, $rama = null, $color = 'red')
     $mc = resGroupsForPrekin(groupAdjacentRes($worst));
     
     foreach($mc as $mcRange)
+    {
+        //echo("prekin -append -nogroup -listmaster 'Rama Outliers' -scope $mcRange -show 'mc($color)' $infile >> $outfile\n");
         exec("prekin -append -nogroup -listmaster 'Rama Outliers' -scope $mcRange -show 'mc($color)' $infile >> $outfile");
+    }
 }
 #}}}########################################################################
 
@@ -214,7 +222,10 @@ function makeBadRotamerKin($infile, $outfile, $rota = null, $color = 'orange', $
     $sc = resGroupsForPrekin(groupAdjacentRes($worst));
     
     foreach($sc as $scRange)
+    {
+        //echo("prekin -quiet -append -nogroup -listmaster 'rotamer outliers' -bval -scope $scRange -show 'sc($color)' $infile >> $outfile\n");
         exec("prekin -quiet -append -nogroup -listmaster 'rotamer outliers' -bval -scope $scRange -show 'sc($color)' $infile >> $outfile");
+    }
 }
 #}}}########################################################################
 
@@ -299,7 +310,7 @@ function makeBfactorScale($infile, $outfile)
 */
 function makeOccupancyScale($infile, $outfile)
 {
-    $colors = "-colorscale 'white,0.02,lilactint,0.33,lilac,0.66,purple,0.99,gray'";
+    $colors = "-colorscale 'white,0.02,lilactint,0.33,lilac,0.66,purple,0.99,gray,1.01,green'";
     exec("prekin -quiet -append -nogroup -listmaster 'occupancy' -bval -scope -show 'mc,sc' -ocol $colors $infile >> $outfile");
 }
 #}}}########################################################################

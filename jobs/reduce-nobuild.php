@@ -66,12 +66,19 @@ $newModel['isReduced']  = true;
 $_SESSION['models'][ $newModel['id'] ] = $newModel;
 $_SESSION['bgjob']['modelID'] = $newModel['id'];
 $_SESSION['lastUsedModelID'] = $newModel['id']; // this is now the current model
+$hcount = countReduceChanges($outpath);
 
 setProgress($tasks, 'notebook');
 $pdb = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$outname;
 $url = $_SESSION['dataURL'].'/'.MP_DIR_MODELS.'/'.$outname;
 $entry = "Reduce was run on $model[pdb] to add and optimize missing hydrogens, resulting in $newModel[pdb].\n";
-$entry .= "Existing hydrogens were not affected, and Asn/Gln/His flips were not optimized.\n";
+if($hcount)
+{
+    $entry .= "$hcount[found] hydrogens were found in the original model, and $hcount[add] hydrogens were added.\n";
+    if($hcount['std']) $entry .= "$hcount[std] H were repositioned to standardize bond lengths.\n";
+    if($hcount['adj']) $entry .= "The positions of $hcount[adj] hydrogens were adjusted to optimize H-bonding.\n";
+}
+$entry .= "Asn/Gln/His flips were not optimized.\n";
 $entry .= "<p>You can now <a href='$url'>download the annotated PDB file</a> (".formatFilesize(filesize($pdb)).").</p>\n";
 $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
     "Adding H with Reduce -nobuild gives $newModel[pdb]",
