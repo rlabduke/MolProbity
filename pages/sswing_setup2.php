@@ -31,6 +31,10 @@ function display($context)
     $all_res = listProteinResidues($_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$model['pdb']);
     
     echo makeEventForm("onStartSSwing");
+    echo "<div class='side_options'>\n";
+    echo "  <b>Advanced options:</b>\n";
+    echo "  <br><label><input type='checkbox' name='fastSearch' value='1' checked> Use faster search</label>\n";
+    echo "</div>\n";
     echo "Input PDB file: <b>$model[pdb]</b>\n";
     echo "<br>Input map file: <b>$context[map]</b>\n";
     
@@ -76,14 +80,15 @@ function onStartSSwing($arg, $req)
     
     $ctx = getContext();
     unset($_SESSION['bgjob']); // Clean up any old data
-    $_SESSION['bgjob']['modelID']   = $ctx['modelID'];
-    $_SESSION['bgjob']['edmap']     = $ctx['map'];
-    $_SESSION['bgjob']['cnit']      = $req['cnit'];
+    $_SESSION['bgjob']['modelID']       = $ctx['modelID'];
+    $_SESSION['bgjob']['edmap']         = $ctx['map'];
+    $_SESSION['bgjob']['cnit']          = $req['cnit'];
+    $_SESSION['bgjob']['fastSearch']    = $req['fastSearch'];
     
     mpLog("sswing:Launched SSWING to refit ".count($_req['cnit'])." residue(s)");
     // launch background job
     pageGoto("job_progress.php");
-    launchBackground(MP_BASE_DIR."/jobs/sswing.php", "sitemap.php", 5);
+    launchBackground(MP_BASE_DIR."/jobs/sswing.php", "sswing_choose.php", 5);
 }
 #}}}########################################################################
 

@@ -61,6 +61,7 @@ define("MP_TABLE_HIGHLIGHT", "#cc9999");
 
 // Subdirectories for things to be stored in.
 define("MP_DIR_SYSTEM", "system");              // Session data, lab notebook, etc.
+define("MP_DIR_WORK", "temporary");             // Temporary working files
 define("MP_DIR_MODELS", "coordinates");         // PDB files
 define("MP_DIR_EDMAPS", "electron_density");    // electron density
 define("MP_DIR_TOPPAR", "dictionaries");        // het dicts, etc. (named for CNS TOPology and PARameter)

@@ -36,6 +36,7 @@ function display($context)
     echo "</ul>\n";
 
     echo "<h3><a href='".makeEventURL("onRefitSC")."'>Refit sidechains</a></h3>\n<ul>\n";
+    echo "<li>Automatically refit sidechains based on electron density and all-atom contacts.</li>\n";
     echo "</ul>\n";
 
     echo "<hr>\n";

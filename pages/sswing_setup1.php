@@ -20,9 +20,19 @@ function display($context)
 {
     echo mpPageHeader("Refit sidechains");
     
+    // Script to discourage people from choosing models without H
+?><script language='JavaScript'>
+<!--
+function warnNoH(fileName)
+{
+    window.alert("The file you choose, "+fileName+", does not appear to have "+
+        "all its H atoms added. SSwing requires all H atoms to function properly.")
+}
+// -->
+</script><?php
+
     // Make sure we have some models with H added.
-    foreach($_SESSION['models'] as $m) if($m['isReduced']) $modelCount++;
-    if($modelCount > 0 && count($_SESSION['edmaps']) > 0)
+    if(count($_SESSION['models']) > 0 && count($_SESSION['edmaps']) > 0)
     {
         echo makeEventForm("onChooseResidues");
         echo "<h3>Select a model to work with:</h3>";
@@ -42,7 +52,8 @@ function display($context)
             }
             else
             {
-                echo "  <td></td>\n";
+                $checked = ($context['modelID'] == $id ? "checked" : "");
+                echo "  <td><input type='radio' name='modelID' value='$id' onclick='warnNoH(\"$model[pdb]\")' $checked></td>\n";
                 echo "  <td><span class='inactive' title='Doesn&apos;t have H added'><b>$model[pdb]</b></span></td>\n";
                 echo "  <td><span class='inactive'><small>$model[history]</small></span></td>\n";
             }
