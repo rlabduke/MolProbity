@@ -15,6 +15,7 @@ INPUTS (via $_SESSION['bgjob']):
 OUTPUTS (via $_SESSION['bgjob']):
     Adds a new entry to $_SESSION['models'].
     newModel        the ID of the model just added, or null on failure
+    labbookEntry    the labbook entry number for adding this new model
 
 *****************************************************************************/
 // EVERY *top-level* page must start this way:
@@ -24,6 +25,7 @@ OUTPUTS (via $_SESSION['bgjob']):
 // 2. Include core functionality - defines constants, etc.
     require_once(MP_BASE_DIR.'/lib/core.php');
     require_once(MP_BASE_DIR.'/lib/model.php');
+    require_once(MP_BASE_DIR.'/lib/labbook.php');
 // 3. Restore session data. If you don't want to access the session
 // data for some reason, you must call mpInitEnvirons() instead.
     session_id( $_SERVER['argv'][1] );
@@ -55,11 +57,13 @@ if(isset($_SESSION['bgjob']['pdbCode']))
     {
         setProgress(array("pdb" => "Retrieve PDB file $code over the network"), "pdb");
         $tmpfile = getPdbModel($code);
+        $fileSource = "http://www.rcsb.org/pdb/";
     }
     else if(preg_match('/^[0-9A-Z]{6,10}$/i', $code))
     {
         setProgress(array("pdb" => "Retrieve NDB file $code over the network (takes more than 30 sec)"), "pdb");
         $tmpfile = getNdbModel($code);
+        $fileSource = "http://ndbserver.rutgers.edu/";
     }
     else $tmpfile == null;
     
@@ -84,6 +88,7 @@ else
 {
     // Remove illegal chars from the upload file name
     $origName = censorFileName($_SESSION['bgjob']['origName']);
+    $fileSource = "local disk: ".$_SESSION['bgjob']['origName'];
     
     $id = addModel($_SESSION['bgjob']['tmpPdb'],
         $origName,
@@ -95,6 +100,37 @@ else
     // Clean up temp files
     unlink($_SESSION['bgjob']['tmpPdb']);
 }
+
+// Automatic labbook entry
+if($_SESSION['bgjob']['newModel'])
+{
+    $id = $_SESSION['bgjob']['newModel'];
+    $model = $_SESSION['models'][ $id ];
+    
+    $s = "A new model was added, with the ID <b>$id</b>\n";
+    $s .= "<br>It came from $fileSource\n";
+    
+    $details = describePdbStats($model['stats'], true);
+    $s .= "<ul>\n";
+    foreach($details as $detail) $s .= "<li>$detail</li>\n";
+    $s .= "</ul>\n";
+    
+    if($model['segmap'])
+    {
+        $s .= "<p><div class='alert'>Because this model had more segment IDs than chainIDs,\n";
+        $s .= "the segment IDs were automagically turned into new chain IDs for this model.\n";
+        $s .= "If you would prefer the original chain IDs, please check the <b>Ignore segID field</b>\n";
+        $s .= "under <b>More options</b> on the file upload page.</div></p>";
+    }
+    
+    $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
+        "Model added: $id",
+        $s,
+        $id,
+        "auto"
+    );
+}
+
 ############################################################################
 // Clean up and go home
 unset($_SESSION['bgjob']['processID']);

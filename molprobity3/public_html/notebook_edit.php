@@ -7,7 +7,7 @@ INPUTS (via Get or Post):
     entryNumber     (optional) the index for the entry to edit
 
 OUTPUTS (via Post):
-    cmd             one of "Save" or "Don't save"
+    labbookEditCmd  one of "Save" or "Don't save"
     entryNumber     (same as was provided as input)
     labbookEntry    the new entry (an array)
 
@@ -59,8 +59,8 @@ if(isset($_REQUEST['entryNumber']))
     echo "<input type='hidden' name='entryNumber' value='". $_REQUEST['entryNumber'] ."'>\n";
 }
 
-echo "<p><input type='submit' name='cmd' value='Save'>\n";
-echo "<input type='submit' name='cmd' value=\"Don't save\">\n";
+echo "<p><input type='submit' name='labbookEditCmd' value='Save'>\n";
+echo "<input type='submit' name='labbookEditCmd' value=\"Don't save\">\n";
 echo "</form>\n";
 
 echo "<p><i>Hint: you can use HTML tags in your lab notebook entries.</i></p>\n";

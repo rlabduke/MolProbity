@@ -4,6 +4,7 @@
     
 INPUTS (via $_SESSION['bgjob']):
     newModel        the ID of the model just added
+    labbookEntry    the labbook entry number for adding this new model
 
 OUTPUTS (via Post):
     paramName       description of parameter
@@ -16,6 +17,7 @@ OUTPUTS (via Post):
 // 2. Include core functionality - defines constants, etc.
     require_once(MP_BASE_DIR.'/lib/core.php');
     require_once(MP_BASE_DIR.'/lib/pdbstat.php');
+    require_once(MP_BASE_DIR.'/lib/labbook.php');
 // 3. Restore session data. If you don't want to access the session
 // data for some reason, you must call mpInitEnvirons() instead.
     mpStartSession();
@@ -37,6 +39,8 @@ $modelID = $_SESSION['bgjob']['newModel'];
 $model = $_SESSION['models'][$modelID];
 $pdbstats = $model['stats'];
 
+$labbook = openLabbookWithEdit();
+
 ############################################################################
 if($model == null)
 {
@@ -50,7 +54,7 @@ else // upload was OK
     // Start the page: produces <HTML>, <HEAD>, <BODY> tags
     echo mpPageHeader("Model $modelID added", "upload");
 
-    $details = describePdbStats($pdbstats, true);
+    /*$details = describePdbStats($pdbstats, true);
     echo "<ul>\n";
     foreach($details as $detail) echo "<li>$detail</li>\n";
     echo "</ul>\n";
@@ -61,7 +65,11 @@ else // upload was OK
         echo "the segment IDs were automagically turned into new chain IDs for this model.\n";
         echo "If you would prefer the original chain IDs, please check the <b>Ignore segID field</b>\n";
         echo "under <b>More options</b> on the file upload page.</div></p>";
-    }
+    }*/
+    
+    $num = $_SESSION['bgjob']['labbookEntry'];
+    echo formatLabbookEntry($labbook[$num]);
+    echo "<p><a href='notebook_edit.php?$_SESSION[sessTag]&entryNumber=$num&submitTo=upload_pdb_done.php'>Edit notebook entry</a></p>\n";
     ?>
     
     <p><table border='0' width='100%'><tr valign='top'>
