@@ -31,8 +31,9 @@ if($_SESSION['bgjob']['isRunning'])
     $rate       = ($count == 1 ? 1 : $_SESSION['bgjob']['refreshRate']);
     $refresh    = "$rate; $url";
     echo mpPageHeader("Job is running...", "none", $refresh);
-    echo "<p><center><img src='img/pbar-anim.gif'>\n";
+    //echo "<p><center><img src='img/pbar-anim.gif'>\n";
     echo "<br><table border='0'><tr><td>\n";
+    echo "<img src='img/1ubq-spin.gif'></td><td>\n";
     @readfile("$_SESSION[dataDir]/progress");
     echo "</td></tr></table></center>\n";
     echo "<p><small>Your job has been running for ".(time() - $_SESSION['bgjob']['startTime'])." seconds.\n";
@@ -42,15 +43,15 @@ if($_SESSION['bgjob']['isRunning'])
 else
 {
     $url        = $_SESSION['bgjob']['whereNext'];
-    $refresh    = "1; $url";
-    //echo mpPageHeader("Job is finished", "none", $refresh);
-    echo mpPageHeader("Job is finished");
+    $refresh    = "2; $url";
+      echo mpPageHeader("Job is finished", "none", $refresh);
+    //echo mpPageHeader("Job is finished");
     echo "<p><center>Your job ran for ".($_SESSION['bgjob']['endTime'] - $_SESSION['bgjob']['startTime'])." seconds.\n";
-      echo "<br><form action='$url' method='post'><input type='submit' value='Continue'></form></a>\n";
+    //echo "<br><form action='$url' method='post'><input type='submit' value='Continue'></form></a>\n";
     echo "<p><table border='0'><tr><td>\n";
     @readfile("$_SESSION[dataDir]/progress");
     echo "</td></tr></table></center>\n";
-    //echo "<p><small>If nothing happens, <a href='$url'>click here</a>.<small>\n";
+      echo "<p><small>If nothing happens, <a href='$url'>click here</a>.<small>\n";
     echo mpPageFooter();
 }
 ############################################################################

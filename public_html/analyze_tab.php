@@ -45,6 +45,7 @@
         }
         else
         {
+            echo "  <td>&nbsp;</td>\n";
             echo "  <td><a href='analyze_setup.php?$_SESSION[sessTag]&model=$id'>Run analysis</a></td>\n";
         }
         echo " </tr>\n";
