@@ -4,6 +4,8 @@
 ==============================================================================
     should session lifetime be from start, or from last use?
     document PHP version needed (which is...? >=4.1:superglobals >=4.3:CLI)
+        4.1.0 doesn't work on kinemage: cmd line can't load 'session mm'
+        4.1.2 seems to work on glass
     implement safety valve for disk too full
     create logging functions
     check script should check upload file size limit
@@ -13,6 +15,7 @@
     Move to core.php: formatDay(), formatTime(), formatDayTime()
         formatMinutesElapsed(), formatHoursElapsed()
   * Don't try to list models when no models are defined
+    Provide URL prefix for each model, too
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -22,6 +25,7 @@
 - brought the whole project under Subversion version control
 - created a shell script to restore filesystem state (symlinks and permissions)
 - created analyze_display.php for Jeremy to start working in
+- fixed loadCbetaDev() to deal with multiple headers from Prekin
 
 ### 3pre7 ###
 - filled in the PDB upload form, though it doesn't do anything yet.

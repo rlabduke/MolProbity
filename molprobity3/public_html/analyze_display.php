@@ -72,9 +72,9 @@ $clash  = loadClashlist("$model[dir]/$model[prefix]clash.data");
 // Print them out
 echo "<pre>\n";     // fixed-width text that doesn't collapse spaces
 print_r($cbdev);    // print Recursive (prints array, and arrays in it, etc)
-print_r($rota);
-print_r($rama);
-print_r($clash);
+//print_r($rota);
+//print_r($rama);
+//print_r($clash);
 echo "\n</pre>\n";
 
 // sessTag is what carries our session ID.
