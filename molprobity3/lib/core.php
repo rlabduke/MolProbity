@@ -84,24 +84,24 @@ function mpPageHeader($title, $active = "none", $refresh = "")
 function mpNavigationBar($active)
 {
     $s = "";
-    $s .= mpNavBar_format('sitemap.php', 'Site map', ($active == 'home'));
-    //$s .= mpNavBar_format('upload_tab.php', 'Get input files', ($active == 'upload'));
-    //$s .= mpNavBar_format('analyze_tab.php', 'Analyze quality', ($active == 'analyze'));
-    //$s .= mpNavBar_format('improve_tab.php', 'Improve models', ($active == 'improve'));
-    //$s .= mpNavBar_format('compare_tab.php', 'Compare models', ($active == 'compare'));
-    //$s .= mpNavBar_format('files_tab.php', 'Download files', ($active == 'files'));
-    //$s .= mpNavBar_format('finish_tab.php', 'Log out', ($active == 'logout'));
+    //$s .= mpNavBar_goto('', 'Common uses', ($active == 'common'));
+    //$s .= mpNavBar_call('', 'Crystallography');
+    //$s .= "<br />\n";
+    $s .= mpNavBar_goto('sitemap.php', 'Site map', ($active == 'sitemap'));
+    $s .= mpNavBar_call('upload_setup.php', 'Upload / fetch files');
     $s .= "<br />\n";
-    $s .= mpNavBar_format('notebook_main.php', 'Lab notebook', ($active == 'notebook'));
-    //$s .= mpNavBar_format('', 'Set preferences', ($active == 'preferences'));
-    //$s .= mpNavBar_format('feedback_tab.php', 'Feedback &amp; Bugs', ($active == 'feedback'));
-    //$s .= mpNavBar_format('savesess_tab.php', 'Save session', ($active == 'savesession'));
+    $s .= mpNavBar_goto('notebook_main.php', 'Lab notebook', ($active == 'notebook'));
+    //$s .= mpNavBar_goto('', 'Set preferences', ($active == 'preferences'));
+    //$s .= mpNavBar_goto('feedback_tab.php', 'Feedback &amp; Bugs', ($active == 'feedback'));
+    $s .= "<br />\n";
+    //$s .= mpNavBar_goto('finish_tab.php', 'Log out', ($active == 'logout'));
+    //$s .= mpNavBar_goto('savesess_tab.php', 'Save session', ($active == 'savesession'));
     $s .= "<br />\n";
     $s .= "<br /><small>You are using ".round(100*mpSessSizeOnDisk(session_id())/MP_SESSION_MAX_SIZE)."% of your available disk space.</small>";
     return $s;
 }
 
-function mpNavBar_format($page, $title, $isActive = false)
+function mpNavBar_goto($page, $title, $isActive = false)
 {
     if($page == '')
         return "<br />$title\n";
@@ -109,6 +109,14 @@ function mpNavBar_format($page, $title, $isActive = false)
         return "<br /><a href='".makeEventURL("onNavBarGoto", $page)."'><b>$title</b></a>\n";
     else
         return "<br /><a href='".makeEventURL("onNavBarGoto", $page)."'>$title</a>\n";
+}
+
+function mpNavBar_call($page, $title)
+{
+    if($page == '')
+        return "<br /><span class='minornav'>$title</span>\n";
+    else
+        return "<br /><span class='minornav'><a href='".makeEventURL("onNavBarCall", $page)."'>$title</a></span>\n";
 }
 #}}}########################################################################
 

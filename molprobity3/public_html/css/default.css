@@ -14,10 +14,6 @@ a:visited { color : #000099 ; }
 a:hover { text-decoration : underline ; color : #0000ff ; }
 a:active { color : #0000ff ; }
 
-span.inactive {
-    color : #666666 ;
-}
-
 div.pageheader {
     margin-bottom : 0.5em ;
 }
@@ -26,6 +22,17 @@ div.pageheader h1 {
 }
 
 div.leftnav {
+}
+
+span.minornav {
+    font-size : smaller ;
+    margin-left: 1.0em ;
+}
+
+div.pagefooter {
+    font-size : smaller ;
+    text-align : right ;
+    margin-top : 0.5em ;
 }
 
 div.pagecontent {
@@ -48,12 +55,6 @@ div.pagecontent h2, h3, h4, h5, h6 {
     color : #660000
 }
 
-div.pagefooter {
-    font-size : smaller ;
-    text-align : right ;
-    margin-top : 0.5em ;
-}
-
 div.alert {
     background-color : #ff9999 ;
     color : #330000 ;
@@ -68,6 +69,10 @@ div.options {
     border : 1px solid #999966 ;
     padding : 0.4em ;
     float : right ;
+}
+
+span.inactive {
+    color : #666666 ;
 }
 
 /* For syntax highlighting kinemage file produced by king.core.KinfileTokenizer */
