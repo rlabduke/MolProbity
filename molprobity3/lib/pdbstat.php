@@ -1,4 +1,6 @@
 <?php
+require_once(MP_BASE_DIR.'/lib/strings.php');
+
 # pdbstat - a script to document the contents of a PDB file
 #
 # Output: an associative array describing the model
@@ -53,29 +55,32 @@ function pdbstat($pdbfilename)
         $id = $chain.$resno.$icode.$restype; # 9-character residue ID
     
         # Switch on record type
-        if(preg_match("/^ENDMDL/", $s)) { $models++; }
+        if(startsWith($s, "ENDMDL")) { $models++; }
         # Prefer TITLE records over COMPND records
-        elseif(preg_match("/^TITLE /", $s)) { $compnd  .= " " . trim(substr($s,10,60)); $hadtitle = TRUE; }
-        elseif(preg_match("/^COMPND/", $s) && !$hadtitle) { $compnd  .= " " . trim(substr($s,10,60)); }
-        elseif(preg_match('/^REMARK   3   PROGRAM     : (.+)$/', $s, $match)) { $refiProg = $match[1]; }
-        elseif(preg_match('/^REMARK 200  TEMPERATURE           (KELVIN) : (.+)$/', $s, $match)) { $refiTemp = $match[1]; }
-        elseif(preg_match("/^REMARK   2/", $s) && preg_match("/ (\\d+\\.\\d+)/", substr($s,10,60), $match)) { $resolution = $match[1]; }
-        # CNS-style resolution record:
-        elseif(preg_match("/^REMARK refinement resolution: \\d+\\.\\d+ - (\\d+\\.\\d+) A/", $s, $match))
+        elseif(startsWith($s, "TITLE")) { $compnd  .= " " . trim(substr($s,10,60)); $hadtitle = TRUE; }
+        elseif(startsWith($s, "COMPND") && !$hadtitle) { $compnd  .= " " . trim(substr($s,10,60)); }
+        elseif(startsWith($s, "REMARK"))
         {
-            $resolution = $match[1];
-            $fromCNS++;
+            if(preg_match('/^REMARK   3   PROGRAM     : (.+)$/', $s, $match)) { $refiProg = $match[1]; }
+            elseif(preg_match('/^REMARK 200  TEMPERATURE           (KELVIN) : (.+)$/', $s, $match)) { $refiTemp = $match[1]; }
+            elseif(preg_match("/^REMARK   2/", $s) && preg_match("/ (\\d+\\.\\d+)/", substr($s,10,60), $match)) { $resolution = $match[1]; }
+            # CNS-style resolution record:
+            elseif(preg_match("/^REMARK refinement resolution: \\d+\\.\\d+ - (\\d+\\.\\d+) A/", $s, $match))
+            {
+                $resolution = $match[1];
+                $fromCNS++;
+            }
+            # Other CNS-type records (markers for being from CNS)
+            elseif(preg_match("/^REMARK coordinates from /", $s))           { $fromCNS++; }
+            elseif(preg_match("/^REMARK parameter file 1/", $s))            { $fromCNS++; }
+            elseif(preg_match("/^REMARK molecular structure file/", $s))    { $fromCNS++; }
+            elseif(preg_match("/^REMARK input coordinates/", $s))           { $fromCNS++; }
+            elseif(preg_match('/^REMARK FILENAME="/', $s))                  { $fromCNS++; }
+            elseif(preg_match("/^REMARK DATE:/", $s))                       { $fromCNS++; }
         }
-        # Other CNS-type records (markers for being from CNS)
-        elseif(preg_match("/^REMARK coordinates from /", $s))           { $fromCNS++; }
-        elseif(preg_match("/^REMARK parameter file 1/", $s))            { $fromCNS++; }
-        elseif(preg_match("/^REMARK molecular structure file/", $s))    { $fromCNS++; }
-        elseif(preg_match("/^REMARK input coordinates/", $s))           { $fromCNS++; }
-        elseif(preg_match('/^REMARK FILENAME="/', $s))                  { $fromCNS++; }
-        elseif(preg_match("/^REMARK DATE:/", $s))                       { $fromCNS++; }
-        elseif($models == 0)
+        elseif($models == 0) // only look at ATOMs in the first MODEL
         {
-            if(preg_match("/^ATOM  /", $s))
+            if(startsWith($s, "ATOM"))
             {
                 $chainids[$chain] = $chain; # record chain IDs used
                 # Start of a new residue?
@@ -97,7 +102,7 @@ function pdbstat($pdbfilename)
                 # Atom is a hydrogen?
                 elseif(preg_match("/[ 1-9][HDTZ][ A-Z][ 1-9][ A1]/", $atom)) { $hydrogens++; }
             }
-            elseif(preg_match("/^HETATM/", $s))
+            elseif(startsWith($s, "HETATM"))
             {
                 $chainids[$chain] = $chain; # record chain IDs used
                 # Start of a new residue?

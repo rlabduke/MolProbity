@@ -6,12 +6,15 @@
 INPUTS (via $_SESSION['bgjob']):
     tmpPdb          the (temporary) file where the upload is stored.
     origName        the name of the file on the user's system.
+    pdbCode         the PDB or NDB code for the molecule
+    (EITHER pdbCode OR tmpPdb and origName will be set)
+    
     isCnsFormat     true if the user thinks he has CNS atom names
     ignoreSegID     true if the user wants to never map segIDs to chainIDs
 
 OUTPUTS (via $_SESSION['bgjob']):
     Adds a new entry to $_SESSION['models'].
-    newModel        the ID of the model just added
+    newModel        the ID of the model just added, or null on failure
 
 *****************************************************************************/
 // EVERY *top-level* page must start this way:
@@ -42,16 +45,51 @@ OUTPUTS (via $_SESSION['bgjob']):
 
 # MAIN - the beginning of execution for this page
 ############################################################################
-
-$id = addModel($_SESSION['bgjob']['tmpPdb'],
-    $_SESSION['bgjob']['origName'],
-    $_SESSION['bgjob']['isCnsFormat'],
-    $_SESSION['bgjob']['ignoreSegID']);
-
-$_SESSION['bgjob']['newModel'] = $id;
-
-// Clean up temp files
-unlink($_SESSION['bgjob']['tmpPdb']);
+if(isset($_SESSION['bgjob']['pdbCode']))
+{
+    $code = strtoupper($_SESSION['bgjob']['pdbCode']);
+    
+    if(preg_match('/^[0-9A-Z]{4}$/i', $code))
+    {
+        setProgress(array("pdb" => "Retrieve PDB file $code over the network"), "pdb");
+        $tmpfile = getPdbModel($code);
+    }
+    else if(preg_match('/^[0-9A-Z]{6,10}$/i', $code))
+    {
+        setProgress(array("pdb" => "Retrieve NDB file $code over the network (takes more than 30 sec)"), "pdb");
+        $tmpfile = getNdbModel($code);
+    }
+    else $tmpfile == null;
+    
+    if($tmpfile == null)
+    {
+        $_SESSION['bgjob']['newModel'] = null;
+    }
+    else
+    {
+        $id = addModel($tmpfile,
+            "$code.pdb",
+            $_SESSION['bgjob']['isCnsFormat'],
+            $_SESSION['bgjob']['ignoreSegID']);
+        
+        $_SESSION['bgjob']['newModel'] = $id;
+        
+        // Clean up temp files
+        unlink($tmpfile);
+    }
+}
+else
+{
+    $id = addModel($_SESSION['bgjob']['tmpPdb'],
+        $_SESSION['bgjob']['origName'],
+        $_SESSION['bgjob']['isCnsFormat'],
+        $_SESSION['bgjob']['ignoreSegID']);
+    
+    $_SESSION['bgjob']['newModel'] = $id;
+    
+    // Clean up temp files
+    unlink($_SESSION['bgjob']['tmpPdb']);
+}
 ############################################################################
 // Clean up and go home
 $_SESSION['bgjob']['endTime']   = time();

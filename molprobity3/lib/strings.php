@@ -2,6 +2,7 @@
 /*****************************************************************************
     Defines string-handling and common formatting functions.
 *****************************************************************************/
+require_once(MP_BASE_DIR.'/lib/timezones.php');
 
 #{{{ startsWith, endsWith - tests whether haystack starts/ends with needle
 ############################################################################

@@ -57,7 +57,7 @@ define("MP_TABLE_HIGHLIGHT", "#ffff99");
 
 // Don't change this! It will break user bookmarks.
 define("MP_SESSION_NAME", "MolProbSID");
-define("MP_VERSION", "3pre12");
+define("MP_VERSION", "3pre13");
 
 
 ?>

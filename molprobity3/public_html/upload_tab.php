@@ -54,7 +54,8 @@ echo mpPageHeader("Get input models", "upload");
     <?php } ?>
 </td><td width="50%">
     <h3>Fetch file from network database</h3>
-    <label>PDB ID code: <input type="text" name="pdbCode" size="4" maxlength="4"></label>
+    <!-- Longer code field to allow NDB codes as well as PDB codes -->
+    <label>PDB/NDB ID code: <input type="text" name="pdbCode" size="6" maxlength="10"></label>
     <?php if($_SESSION['moreOpts']['pdbUpload'] || $_SESSION['moreOpts']['all']) { ?>
         <br><label><input type="checkbox" name="get2FoFc" value="1"> Get 2Fo-Fc map from <a href="http://fsrv1.bmc.uu.se/eds/" target="_blank">EDS</a>.</label>
         <br><label><input type="checkbox" name="getFoFc" value="1"> Get difference (Fo-Fc) map from <a href="http://fsrv1.bmc.uu.se/eds/" target="_blank">EDS</a>.</label>

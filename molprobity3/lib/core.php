@@ -339,7 +339,7 @@ function linkModelDownload($model, $suffix)
 function makeZipForModel($modelID)
 {
     $inpath = $_SESSION['models'][$modelID]['dir'];
-    $outpath = tempnam($_SESSION['dataDir'], "tmp_zip_");
+    $outpath = tempnam(MP_BASE_DIR."/tmp", "tmp_zip_");
     // must compress to stdout b/c otherwise zip wants a .zip ending
     exec("zip -qrj - $inpath > $outpath");
     return $outpath;
