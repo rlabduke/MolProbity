@@ -37,7 +37,6 @@
     ORACLE output for TN Bhat
     Add documentation to the analysis results page (how to interpret)
     Add explanation of SSWING on setup page
-    Display comparison to run-of-PDB for clash score
     Explain 2d and 3d CB kins
     Make sure Reduce doesn't shrink the PDB file (lost atoms/models, etc)
     Every time lab notebook is saved, create a HTML snapshot of it
@@ -48,6 +47,7 @@
   * Get new Prekin with -listmaster, new Probe w/ masters (Linux)
   * Add noe-display to bin/ ; record new programs (sswing) in admin/ script
   * Only deviant CB balls appear in kin; smaller ones are missing!
+    Use Reduce -build w/ high penalty for "no build" runs?
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -65,6 +65,8 @@
   as a resolution of 4.0 A
 - modified model splitter to REMARK out MODEL and ENDMDL lines
 - improved reduce_choose page for case of no flips
+- removed unneeded old pages from public_html (~r88)
+- we now display comparison to run-of-PDB (SCOP 2000) for clash score
 
 ### 3beta9 ###
 - changed PDB upload back to stacked, rather than 2 column layout -- it's more
