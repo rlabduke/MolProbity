@@ -40,7 +40,7 @@ function runAnalysis($modelID, $opts)
     $entry = "Model $modelID was analyzed, yielding these results:\n<ul>\n"; // lab notebook entry
     
     // The same conditionals cut and pasted from below, used to determine ahead of time what we're going to do
-    if(($opts['doAll'] || $opts['doAAC'] || $opts['doMultiChart'] || $opts['doMultiKin']) && (! $model['isReduced'])) $tasks['reduce'] = "Add H with <code>reduce -keep -noadjust -his</code>";
+    if(($opts['doAll'] || $opts['doAAC'] || $opts['doMultiChart'] || $opts['doMultiKin']) && (! $model['isReduced'])) $tasks['reduce'] = "Add H with <code>reduce -keep -his</code>";
     if($opts['doAll'] || $opts['doRama']) $tasks['ramaplot'] = "Create Ramachandran plots";
     if($opts['doAll'] || $opts['doCbeta']) $tasks['cbkin'] = "Create C-beta deviation kinemages";
     if($opts['doAll'] || $opts['doAAC']) $tasks['aackin'] = "Create all-atom contacts kinemage";
@@ -65,7 +65,7 @@ function runAnalysis($modelID, $opts)
         $model  = $_SESSION['models'][$modelID];
         $infile = "$model[dir]/$model[pdb]";
         
-        $entry .= "<li>Added missing hydrogens, if any, using <code>reduce -keep -noadjust -his -allalt</code></li>\n";
+        $entry .= "<li>Added missing hydrogens, if any, using <code>reduce -keep -his -allalt</code></li>\n";
     }
     
     ////////////////////////////////////////////////////////////////////////////

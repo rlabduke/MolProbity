@@ -48,7 +48,7 @@ $model = $_SESSION['models'][$modelID];
 $pdb = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$model['pdb'];
 
 // Set up progress message
-$tasks['reduce'] = "Add H with <code>reduce -keep -noadjust -his</code>";
+$tasks['reduce'] = "Add H with <code>reduce -keep -his</code>";
 $tasks['notebook'] = "Add entry to lab notebook";
 
 setProgress($tasks, 'reduce'); // updates the progress display if running as a background job
@@ -67,7 +67,7 @@ $entry = "Reduce was run on $modelID to add and optimize missing hydrogens.\n";
 $entry .= "Existing hydrogens were not affected, and Asn/Gln/His flips were not optimized.\n";
 $entry .= "<p>You can now <a href='$url'>download the annotated PDB file</a> (".formatFilesize(filesize($pdb)).").</p>\n";
 $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
-    "Missing H added to $modelID by Reduce -keep -noadjust -his",
+    "Missing H added to $modelID by Reduce -keep -his",
     $entry,
     $modelID,
     "auto"
