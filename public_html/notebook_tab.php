@@ -3,7 +3,8 @@
     This page allows users view and edit their lab notebooks
     
 INPUTS (via Get or Post):
-    cmd             one of "Save" or "Set time zone"
+    labbookEditCmd  one of "Save" or "Don't save"
+    cmd             one of "Set time zone"
     timezone        the abbreviation for the desired time zone
     
 *****************************************************************************/
@@ -69,23 +70,8 @@ if($_REQUEST['cmd'] == "Set time zone" && isset($_REQUEST['timezone']))
 }
 
 // Load lab notebook data
-$labbook = openLabbook();
-
-// Did we get an edit request?
-if($_REQUEST['cmd'] == "Save")
-{
-    if(isset($_REQUEST['entryNumber'])) // Replace an old entry
-    {
-        $labbook[  $_REQUEST['entryNumber']  ] = $_REQUEST['labbookEntry'];
-        mpLog("notebook-edit:User modified existing lab notebook entry");
-    }
-    else // Append the new entry
-    {
-        $labbook[] = $_REQUEST['labbookEntry'];
-        mpLog("notebook-add:User added a new entry to the lab notebook");
-    }
-    saveLabbook($labbook);
-}
+// If we got an edit in $_REQUEST, it will be handled for us.
+$labbook = openLabbookWithEdit();
 
 // Start the page
 echo mpPageHeader("Lab notebook", "notebook");
