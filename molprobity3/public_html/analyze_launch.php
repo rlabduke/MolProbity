@@ -28,7 +28,7 @@ $_SESSION['bgjob']['model']     = $_REQUEST['model'];
 $_SESSION['bgjob']['opts']      = $_REQUEST['opts'];
 
 // launch background job
-launchBackground(MP_BASE_DIR."/jobs/analyze.php", "analyze_display.php?$_SESSION[sessTag]&model=$_REQUEST[model]", 10);
+launchBackground(MP_BASE_DIR."/jobs/analyze.php", "analyze_display.php?$_SESSION[sessTag]&model=$_REQUEST[model]", 5);
 
 // include() status monitoring page
 include(MP_BASE_DIR."/public_html/job_progress.php");

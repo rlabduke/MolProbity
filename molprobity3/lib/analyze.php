@@ -35,10 +35,23 @@ function runAnalysis($modelID, $opts)
     $model  = $_SESSION['models'][$modelID];
     $infile = "$model[dir]/$model[pdb]";
     
+    // The same conditionals cut and pasted from below, used to determine ahead of time what we're going to do
+    if(($opts['doAll'] || $opts['doAAC'] || $opts['doMultiChart'] || $opts['doMultiKin']) && (! $model['isReduced'])) $tasks['reduce'] = "Add H with <code>reduce -keep -noadjust -his</code>";
+    if($opts['doAll'] || $opts['doCbeta'] || $opts['doMultiChart']) $tasks['cbdata'] = "Do C-beta analysis";
+    if($opts['doAll'] || $opts['doRota'] || $opts['doMultiChart'] || $opts['doMultiKin']) $tasks['rotadata'] = "Do rotamer analysis";
+    if($opts['doAll'] || $opts['doRama'] || $opts['doMultiChart'] || $opts['doMultiKin']) $tasks['ramadata'] = "Do Ramachandran analysis";
+    if($opts['doAll'] || $opts['doAAC'] || $opts['doMultiChart']) $tasks['clashlist'] = "Do clash analysis with <code>clashlist</code>";
+    if($opts['doAll'] || $opts['doMultiChart']) $tasks['mcchart'] = "Create multi-criteria chart";
+    if($opts['doAll'] || $opts['doMultiKin']) $tasks['mckin'] = "Create multi-criteria kinemage";
+    if($opts['doAll'] || $opts['doRama']) $tasks['ramaplot'] = "Create Ramachandran plots";
+    if($opts['doAll'] || $opts['doCbeta']) $tasks['cbkin'] = "Create C-beta deviation kinemages";
+    if($opts['doAll'] || $opts['doAAC']) $tasks['aackin'] = "Create all-atom contacts kinemage";
+
     ////////////////////////////////////////////////////////////////////////////
     // Check for hydrogens and add them if needed.
     if(($opts['doAll'] || $opts['doAAC'] || $opts['doMultiChart'] || $opts['doMultiKin']) && (! $model['isReduced']))
     {
+        setProgress($tasks, 'reduce'); // updates the progress display if running as a background job
         $outfile = $model['id']."nbH.pdb";
         $outpath = "$model[dir]/$outfile";
         reduceNoBuild($infile, $outpath);
@@ -55,6 +68,7 @@ function runAnalysis($modelID, $opts)
     // C-betas
     if($opts['doAll'] || $opts['doCbeta'] || $opts['doMultiChart'])
     {
+        setProgress($tasks, 'cbdata'); // updates the progress display if running as a background job
         $outfile = "$model[dir]/$model[prefix]cbdev.data";
         runCbetaDev($infile, $outfile);
         $cbdev = loadCbetaDev($outfile);
@@ -64,6 +78,7 @@ function runAnalysis($modelID, $opts)
     // Rotamers
     if($opts['doAll'] || $opts['doRota'] || $opts['doMultiChart'] || $opts['doMultiKin'])
     {
+        setProgress($tasks, 'rotadata'); // updates the progress display if running as a background job
         $outfile = "$model[dir]/$model[prefix]rota.data";
         runRotamer($infile, $outfile);
         $rota = loadRotamer($outfile);
@@ -73,6 +88,7 @@ function runAnalysis($modelID, $opts)
     // Ramachandran
     if($opts['doAll'] || $opts['doRama'] || $opts['doMultiChart'] || $opts['doMultiKin'])
     {
+        setProgress($tasks, 'ramadata'); // updates the progress display if running as a background job
         $outfile = "$model[dir]/$model[prefix]rama.data";
         runRamachandran($infile, $outfile);
         $rama = loadRamachandran($outfile);
@@ -82,6 +98,7 @@ function runAnalysis($modelID, $opts)
     // Clashes
     if($opts['doAll'] || $opts['doAAC'] || $opts['doMultiChart'])
     {
+        setProgress($tasks, 'clashlist'); // updates the progress display if running as a background job
         $outfile = "$model[dir]/$model[prefix]clash.data";
         runClashlist($infile, $outfile);
         $clash = loadClashlist($outfile);
@@ -93,6 +110,7 @@ function runAnalysis($modelID, $opts)
     // Second index is 'cbdev', 'rota', 'rama', or 'clash'
     if($opts['doAll'] || $opts['doMultiChart'])
     {
+        setProgress($tasks, 'mcchart'); // updates the progress display if running as a background job
         // TODO: Integrate outlier information from above analyses into a chart
     }
     
@@ -102,6 +120,7 @@ function runAnalysis($modelID, $opts)
     // Multi-criterion kinemage
     if($opts['doAll'] || $opts['doMultiKin'])
     {
+        setProgress($tasks, 'mckin'); // updates the progress display if running as a background job
         $outfile = "$model[dir]/$model[prefix]multi.kin";
         if(file_exists($outfile)) unlink($outfile);
         
@@ -130,6 +149,7 @@ function runAnalysis($modelID, $opts)
     // Ramachandran plots
     if($opts['doAll'] || $opts['doRama'])
     {
+        setProgress($tasks, 'ramaplot'); // updates the progress display if running as a background job
         makeRamachandranKin($infile, "$model[dir]/$model[prefix]rama.kin");
         makeRamachandranPDF($infile, "$model[dir]/$model[prefix]rama.pdf");
         //makeRamachandranImage($infile, "$model[dir]/$model[prefix]rama.jpg");
@@ -140,6 +160,7 @@ function runAnalysis($modelID, $opts)
     // In the future, we might use a custom lots kin here (e.g. with half-bond colors)
     if($opts['doAll'] || $opts['doCbeta'])
     {
+        setProgress($tasks, 'cbkin'); // updates the progress display if running as a background job
         $outfile = "$model[dir]/$model[prefix]cb3d.kin";
         exec("prekin -lots $infile > $outfile");
         makeCbetaDevBalls($infile, $outfile);
@@ -151,6 +172,7 @@ function runAnalysis($modelID, $opts)
     // In the future, we might use a custom lots kin here (e.g. with half-bond colors)
     if($opts['doAll'] || $opts['doAAC'])
     {
+        setProgress($tasks, 'aackin'); // updates the progress display if running as a background job
         $outfile = "$model[dir]/$model[prefix]aac.kin";
         exec("prekin -lots $infile > $outfile");
         makeSidechainDots($infile, $outfile);
@@ -158,6 +180,8 @@ function runAnalysis($modelID, $opts)
         //exec("prekin -lots $infile > $outfile");
         makeMainchainDots($infile, $outfile);
     }
+    
+    setProgress($tasks, null); // everything is finished
 }
 #}}}########################################################################
 
