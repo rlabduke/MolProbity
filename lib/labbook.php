@@ -164,45 +164,6 @@ function formEditLabbook($entry, $width = 90, $height = 30)
 }
 #}}}########################################################################
 
-#{{{ openLabbookWithEdit - opens book, saves edited entry from notebook_edit.php
-############################################################################
-/**
-* This functions checks for affirmative output of notebook_edit.php
-* (i.e., that the user pressed the Save button) and if found,
-* it saves the new/modified labbook entry.
-* It also logs the action in molprobity.log
-* This function is intended to simplify in-line notebook editing.
-*
-* It returns the same result as openLabbook().
-*/
-function openLabbookWithEdit($saveNow = true)
-{
-    // Load lab notebook data
-    $labbook = openLabbook();
-
-    // Did we get an edit request?
-    if($_REQUEST['labbookEditCmd'] == "Save")
-    {
-        if(isset($_REQUEST['entryNumber'])) // Replace an old entry
-        {
-            $entryNum = $_REQUEST['entryNumber'];
-            $labbook[ $entryNum ] = $_REQUEST['labbookEntry'];
-            mpLog("notebook-edit:User modified existing lab notebook entry");
-        }
-        else // Append the new entry
-        {
-            $entryNum = count($labbook);
-            $labbook[ $entryNum ] = $_REQUEST['labbookEntry'];
-            mpLog("notebook-add:User added a new entry to the lab notebook");
-        }
-        
-        saveLabbook($labbook);
-    }
-    
-    return $labbook;
-}
-#}}}########################################################################
-
 #{{{ a_function_definition - sumary_statement_goes_here
 ############################################################################
 /**

@@ -44,7 +44,7 @@ elseif(isset($_REQUEST['eventID']))
     // In case we changed $_SESSION but display() calls mpSessReadOnly()
     // This won't stop the session from being automatically saved again
     // after display() and the end of the page.
-    // (Though display() shouldn't every write to $_SESSION anyway!)
+    // (Though display() shouldn't ever write to $_SESSION anyway, except events!)
     mpSaveSession(); 
 }
 
@@ -56,6 +56,8 @@ clearEventHandlers();   // events defined by previous display() are not valid
 
 // Display user interface //////////////////////////////////////////////////////
 $page = end($_SESSION['pages']);                    // not a ref; read only
+// Can't call mpSessReadOnly() or we won't be able to create events.
+// Other than events, display() shouldn't write to the session though.
 // FUNKY: Must use require_once() b/c event delegate (above) may be the same,
 // or may be different, and we can't redefine classes or functions.
 require_once(MP_BASE_DIR."/pages/$page[delegate]"); // defines $delegate

@@ -17,6 +17,7 @@ if(!defined('MP_BASE_DIR')) die("MP_BASE_DIR is not defined.");
 require_once(MP_BASE_DIR.'/config/config.php'); // Import all the constants we use
 require_once(MP_BASE_DIR.'/lib/strings.php');
 require_once(MP_BASE_DIR.'/lib/sessions.php');  // Session handling functions
+require_once(MP_BASE_DIR.'/lib/event_page.php');// MVC/events architecture
 
 #{{{ mpPageHeader - creates the first part of a standard MolProbity page
 ############################################################################
@@ -83,18 +84,18 @@ function mpPageHeader($title, $active = "none", $refresh = "")
 function mpNavigationBar($active)
 {
     $s = "";
-    $s .= mpNavBar_format('home_tab.php', 'Intro & Help', ($active == 'home'));
-    $s .= mpNavBar_format('upload_tab.php', 'Get input files', ($active == 'upload'));
-    $s .= mpNavBar_format('analyze_tab.php', 'Analyze quality', ($active == 'analyze'));
-    $s .= mpNavBar_format('improve_tab.php', 'Improve models', ($active == 'improve'));
-    $s .= mpNavBar_format('compare_tab.php', 'Compare models', ($active == 'compare'));
-    $s .= mpNavBar_format('files_tab.php', 'Download files', ($active == 'files'));
-    $s .= mpNavBar_format('finish_tab.php', 'Log out', ($active == 'logout'));
+    $s .= mpNavBar_format('sitemap.php', 'Site map', ($active == 'home'));
+    //$s .= mpNavBar_format('upload_tab.php', 'Get input files', ($active == 'upload'));
+    //$s .= mpNavBar_format('analyze_tab.php', 'Analyze quality', ($active == 'analyze'));
+    //$s .= mpNavBar_format('improve_tab.php', 'Improve models', ($active == 'improve'));
+    //$s .= mpNavBar_format('compare_tab.php', 'Compare models', ($active == 'compare'));
+    //$s .= mpNavBar_format('files_tab.php', 'Download files', ($active == 'files'));
+    //$s .= mpNavBar_format('finish_tab.php', 'Log out', ($active == 'logout'));
     $s .= "<br />\n";
-    $s .= mpNavBar_format('notebook_tab.php', 'Lab notebook', ($active == 'notebook'));
+    $s .= mpNavBar_format('notebook_main.php', 'Lab notebook', ($active == 'notebook'));
     //$s .= mpNavBar_format('', 'Set preferences', ($active == 'preferences'));
-    $s .= mpNavBar_format('feedback_tab.php', 'Feedback &amp; Bugs', ($active == 'feedback'));
-    $s .= mpNavBar_format('savesess_tab.php', 'Save session', ($active == 'savesession'));
+    //$s .= mpNavBar_format('feedback_tab.php', 'Feedback &amp; Bugs', ($active == 'feedback'));
+    //$s .= mpNavBar_format('savesess_tab.php', 'Save session', ($active == 'savesession'));
     $s .= "<br />\n";
     $s .= "<br /><small>You are using ".round(100*mpSessSizeOnDisk(session_id())/MP_SESSION_MAX_SIZE)."% of your available disk space.</small>";
     return $s;
@@ -105,9 +106,9 @@ function mpNavBar_format($page, $title, $isActive = false)
     if($page == '')
         return "<br />$title\n";
     elseif($isActive)
-        return "<br /><a href='$page?$_SESSION[sessTag]'><b>$title</b></a>\n";
+        return "<br /><a href='".makeEventURL("onNavBarGoto", $page)."'><b>$title</b></a>\n";
     else
-        return "<br /><a href='$page?$_SESSION[sessTag]'>$title</a>\n";
+        return "<br /><a href='".makeEventURL("onNavBarGoto", $page)."'>$title</a>\n";
 }
 #}}}########################################################################
 
@@ -132,22 +133,21 @@ About <a href="help/about.html" target="_blank">MolProbity</a>
 }
 #}}}########################################################################
 
-#{{{ launchBackground - start a job running in the background (ENDS SESSION)
+#{{{ launchBackground - start a job running in the background (FREEZES SESSION)
 ############################################################################
 /**
-* Be warned -- this function ends the current session if one is started.
-* You may re-open it, but it should be read only until the job is done.
+* Be warned -- this function makes the current session READ ONLY.
+* The session data file must not be overwritten until the job ends.
 * This function ONLY makes sense in the context of a session.
 *
-* This command is typically followed immediately by:
-*   include(MP_BASE_DIR.'/public_html/job_progress.php');
-*   die();
-* However, the calling script could conceivably want to do additional
-* cleanup afterwards, or possibly use a different page for monitoring.
+* This command does NOT automatically do a pageGoto("job_progress.php").
+* You should do that manually BEFORE calling this function, or use another
+* background job monitor with equivalent functionality.
+* You can't pageGoto() AFTER calling this function b/c the session is frozen!
 *
 * $script       Absolute path to a PHP script to run.
 *               Command is "php -f $script ".session_id()
-* $whereNext    URL of the page to load when done. Should include session ID.
+* $whereNext    name of the next delegate script, for after the job
 * $delay        number of seconds to wait between refreshes
 */
 function launchBackground($script, $whereNext, $delay = 5)
@@ -155,8 +155,8 @@ function launchBackground($script, $whereNext, $delay = 5)
     if($_SESSION['bgjob']['isRunning']) return false;
     
     // No! Caller probably put some data in there already for this new job!
-    // This has to be done in the xxx_launch() scripts instead.
-    #unset($_SESSION['bgjob']); // Clean up any old data
+    // This has to be done in the launch functions instead.
+    //unset($_SESSION['bgjob']); // Clean up any old data
     
     // Remove old progress file
     $progress = "$_SESSION[dataDir]/progress";

@@ -7,7 +7,7 @@ require_once(MP_BASE_DIR.'/lib/labbook.php');
 // This variable must be defined for index.php to work! Must match class below.
 $delegate = new NotebookMainDelegate();
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
-class NotebookMainDelegate {
+class NotebookMainDelegate extends BasicDelegate {
     
 #{{{ display - creates the UI for this page
 ############################################################################
@@ -20,12 +20,11 @@ function display($context)
     
     $labbook = openLabbook();
     echo mpPageHeader("Lab notebook", "notebook");
-    echo "<p><a href='".makeEventURL("gotoSitemap")."'>Sitemap</a></p>\n";
     
     // Notebook table of contents
     echo "<a name='top'>\n";
     $this->printTOC($labbook);
-    echo makeEventForm("callNotebookEdit");
+    echo makeEventForm("onNotebookEdit");
     echo "<input type='submit' name='cmd' value='Create new entry'>\n</form>\n</a>\n<br clear='all' />\n";
     
     // Actual notebook entries
@@ -36,7 +35,7 @@ function display($context)
     
     // Set time zone form
     echo "<hr />\n";
-    echo makeEventForm("setTimezone");
+    echo makeEventForm("onSetTimezone");
     echo "Now: " . formatTime(time());
     echo "\n";
     echo timeZonePicker('timezone', $_SESSION['timeZone']);
@@ -55,7 +54,7 @@ function printEntry($num, $entry)
     echo "<a name='entry$num'>\n";
     echo formatLabbookEntry($entry);
     echo "</a>\n";
-    echo "<p><a href='#top'>Top</a> | <a href='".makeEventURL("callNotebookEdit", $num)."'>Edit</a>\n";
+    echo "<p><a href='#top'>Top</a> | <a href='".makeEventURL("onNotebookEdit", $num)."'>Edit</a>\n";
 }
 #}}}########################################################################
 
@@ -81,12 +80,12 @@ function printTOC($book)
 }
 #}}}########################################################################
 
-#{{{ setTimezone - sets the users preferred time zone for time display
+#{{{ onSetTimezone - sets the users preferred time zone for time display
 ############################################################################
 /**
 * Documentation for this function.
 */
-function setTimezone($arg, $req)
+function onSetTimezone($arg, $req)
 {
     if(isset($req['timezone']))
     {
@@ -96,23 +95,12 @@ function setTimezone($arg, $req)
 }
 #}}}########################################################################
 
-#{{{ gotoSitemap
-############################################################################
-/**
-* Documentation for this function.
-*/
-function gotoSitemap($arg, $req)
-{
-    pageGoto("sitemap.php");
-}
-#}}}########################################################################
-
-#{{{ callNotebookEdit
+#{{{ onNotebookEdit
 ############################################################################
 /**
 * $arg is the entry number to be edited
 */
-function callNotebookEdit($arg, $req)
+function onNotebookEdit($arg, $req)
 {
     pageCall("notebook_edit.php", array('entryNumber' => $arg));
 }

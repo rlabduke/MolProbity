@@ -48,6 +48,14 @@ div.alert {
     padding : 0.4em ;
 }
 
+div.options {
+    background-color : #cccccc ;
+    color : #000000 ;
+    border : 1px solid #000000 ;
+    padding : 0.4em ;
+    float : right ;
+}
+
 /* For syntax highlighting kinemage file produced by king.core.KinfileTokenizer */
 div.kin2html { font-family : monospace ; }
 div.kin2html span.nil-type { color : #ff0099 ; font-weight : bold ; }
