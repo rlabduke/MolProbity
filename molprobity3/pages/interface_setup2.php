@@ -48,8 +48,8 @@ function display($context)
     <option value="gap" selected>by gap/overlap distance (cool to warm)</option>
     <option value="atom">by element (CPK colors)</option>
     <option value="base">by nucleic acid base type</option>
-    <option value="gray">solid gray</option>
-    <option value="">[suggest other solid colors using Feedback]</option>
+    <option value="gray">solid gray (for -out only)</option>
+    <option value="">[suggest other solid colors for -out using Feedback]</option>
 </select>
 <p><input  type="checkbox" name="show_clashes" value="1" checked> Dots for clashes
 <br><input type="checkbox" name="show_hbonds" value="1" checked> Dots for H-bonds
@@ -61,6 +61,7 @@ function display($context)
 <br><input type="checkbox" name="alta" value="1" checked> 'A' conformation only
 <br><input type="checkbox" name="blt40" value="1"> Atoms with B&lt;40 only
 <br><input type="checkbox" name="ogt33" value="1"> Atoms with &gt;33% occupancy only
+<br><input type='checkbox' name='drop_flag' value='1'> Non-selected atoms don't exist (-drop)
 <br><input type="checkbox" name="elem_masters" value="1"> Masters for each element (C,H,O,...)
 <p>Output file: <?php echo $model['prefix']; ?><input type="text" name="kin_suffix" value="interface" size=10 maxlength=20>.kin
 <br><small>(Alphanumeric only, no spaces or symbols, &lt;20 chars)</small>
@@ -80,9 +81,14 @@ Just as a reminder:
     <td><b>"Targ" pattern</b></td>
 </tr>
 <tr align=center>
-    <td><b>Protein, DNA, RNA</b></small></td>
-    <td><input type=checkbox name="src_nonhets"  value="protein,dna,rna" checked></td>
-    <td><input type=checkbox name="targ_nonhets" value="protein,dna,rna" checked></td>
+    <td><b>Protein</b></small></td>
+    <td><input type=checkbox name="src_prot"  value="protein" checked></td>
+    <td><input type=checkbox name="targ_prot" value="protein" checked></td>
+</tr>
+<tr align=center>
+    <td><b>DNA, RNA</b></small></td>
+    <td><input type=checkbox name="src_nucacid"  value="dna,rna" checked></td>
+    <td><input type=checkbox name="targ_nucacid" value="dna,rna" checked></td>
 </tr>
 <tr align=center>
     <td><b>Hets</b></td>
@@ -112,6 +118,7 @@ foreach($model['stats']['chainids'] as $cid) {
 </table>
 </td>
 </tr></table>
+
 
 <p>Note that some steps are processor-intensive and may require several minutes to complete. Please be patient.
 <?php
