@@ -4,6 +4,7 @@
 *****************************************************************************/
 // Someone else MUST have defined this before including us!
 if(!defined('MP_BASE_DIR')) die("MP_BASE_DIR is not defined.");
+require_once(MP_BASE_DIR.'/lib/event_page.php');
 
 #{{{ mpInitEnvirons - sets environment variables, etc.
 ############################################################################
@@ -103,6 +104,10 @@ function mpStartSession($createIfNeeded = false)
             $_SESSION['userIP']     = getVisitorIP();
             $_SESSION['timeZone']   = MP_DEFAULT_TIMEZONE;
             $_SESSION['kingSize']   = "default";
+            $_SESSION['currEventID']= 1;
+            
+            // Set the starting page delegate:
+            pageGoto("dummy.php");
             
             // TODO: perform other tasks to start a session
             // Create databases, etc, etc.
@@ -189,6 +194,8 @@ function mpSessRead($id)
     // Read in session data, if present
     if($fp = @fopen($sessFile, "r"))
     {
+        // read-write-read sequence will fail if filesize changes unless we:
+        clearstatcache();
         $sessData = fread($fp, filesize($sessFile));
         @fclose($fp);
         return $sessData;

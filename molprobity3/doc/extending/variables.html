@@ -16,8 +16,16 @@ stored in.</li>
   <li><span style="font-weight: bold; font-family: monospace;">dataURL</span>:
 the (relative) URL for accessing user data. (Only correct for scripts
 in <span style="font-family: monospace;">public_html</span>, not its
-subdirectories.)<br>
-  </li>
+subdirectories.)</li>
+  <li><span style="font-weight: bold; font-family: monospace;">pages</span>:
+a stack of information about delegate pages in <span
+ style="font-family: monospace;">pages/</span>. This is the mechanism
+for the call-and-return, model-view-controller UI architecture provided
+by <span style="font-family: monospace;">index.php</span>. See <span
+ style="font-family: monospace;">lib/event-page.php</span> for details.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">currEventID</span>:
+also part of the MVC architecture. See <span
+ style="font-family: monospace;">lib/event-page.php</span> for details.</li>
   <li><span style="font-weight: bold; font-family: monospace;">userIP</span>:
 the probable IP number of the current user. Not 100% reliable.</li>
   <li><span style="font-weight: bold; font-family: monospace;">timeZone</span>:
@@ -37,10 +45,6 @@ an array of file names for temporary archive files, which are stored in
 the (absolute) path to a custom heterogen dictionary for Reduce. If
 this is not set, the system default will be used instead.<br>
   </li>
-  <li><span style="font-weight: bold; font-family: monospace;">kingSize</span>:
-one of "tiny", "small", "default", or "large" - determines the size of
-the KiNG window.<br>
-  </li>
   <li><span style="font-weight: bold; font-family: monospace;">bgjob</span>:
 an array for storing information about the currently running background
 job. This can serve both as input and output to the background script.
@@ -49,8 +53,10 @@ The only field that must be defined is <span
 this will be set automatically before the job is launched, but the job
 itself is responsible for clearing this flag just before it exits.
 Failing to clear this will make it appear that the job never exited and
-instead ran forever.<br>
-  </li>
+instead ran forever.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">kingSize</span>:
+one of "tiny", "small", "default", or "large" - determines the size of
+the KiNG window.</li>
   <li><span style="font-weight: bold; font-family: monospace;">moreOpts</span>:
 an array of flags for showing more options in various forms, described
 below.</li>

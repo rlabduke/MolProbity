@@ -2,6 +2,18 @@
 ==============================================================================
 ===  TO DO  ==================================================================
 ==============================================================================
+{{{ Features from MP2 missing in MP3
+    Kinemage upload and viewing via PDB upload (?)
+    Make simple kins via built-in Prekin scripts
+    Complex Probe runs
+    Half-bond coloring schemes
+    JavaMage thumbnail
+    User manual
+    Tutorial / walk-thru
+    Settable penalty function for Reduce
+    Ability to hide/unhide files
+    Turn off vdW and/or H-bonds in dot kins
+}}}
 {{{ Ideas, long-term goals, etc.
     Write a decent document about installation of MolProbity for web and script use
     Could make it a web service with XML-RPC (SOAP, CORBA too complex)
@@ -17,7 +29,6 @@
     Make color-coded versions of the flowchart for different stages of the process?
     Multicrit: views for trouble spots sorted by severity (also hypertext?)
     Create scripts for generating usage stats from molprobity.log
-    Keep thinking about a "stack" mechanism for call and return
     User sort multi chart by columns
     Estimate time for e.g. analysis jobs?
     Cache commonly run (or all) standard PDB queries?
@@ -26,6 +37,11 @@
     Allow uploads of tarballs of NMR models?
     On upload of alt conf model, do table to choose which ones to use
     "nice" large jobs such as multi-model NMR runs
+    "URL filesystem" to load/append/save kins from KiNG
+    Kinemage upload and viewing tool
+    Eliminate AAC kin completely
+    Have "all" analysis run use PDBstat to run Rama only on protein, etc
+    Allow "hidden" user files; default download doesn't include these?
 }}}
     Allow simple comparison of bad residues in two models; see jobs/analyze.php
     Rama outliers in multicrit kin don't look so hot (Ca-Ca, yellow?)
@@ -39,15 +55,25 @@
     Display comparison to run-of-PDB for clash score
     Specify what a CB outlier is
     Explain 2d and 3d CB kins
-    Check space requirements for running 1S72 and photosystem II
+  * Make sure Reduce doesn't shrink the PDB file (lost atoms, etc)
+    Add session resume link to preformatted email
+    Make clashscore a choice during analysis
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
 
+### 3beta6 ###
+- created MVC/delegate architecture in public_thml/index.php
+  and lib/event-page.php. See those files for documentation.
+- added clearstatcache() to session read, just in case (ala lab notebook)
+  
 ### 3beta5 ###
 - traced mysterious labbook load/save bug from beta3 to missing clearstatcache()
 - used that fixed bug to simplify improve_sswing_done.php; seems to still work
+- running 1S72 (lg ribosomal subunit) requires ~40 min (?) and 450 Mb on arachne
+- running 1S5L (photosystem II) on arachne takes 169 min and 62% of 200 Mb
+  (that's without an AAC kin). The 102 Mb multicrit kin won't load in web KiNG.
 
 ### 3beta4 ###
 - changed sswing runs to use idealPDB.pdb as the output, rather than stdout
