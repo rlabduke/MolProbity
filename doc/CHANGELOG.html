@@ -19,6 +19,13 @@
     Create scripts for generating usage stats from molprobity.log
     Keep thinking about a "stack" mechanism for call and return
     User sort multi chart by columns
+    Estimate time for e.g. analysis jobs?
+    Cache commonly run (or all) standard PDB queries?
+    Cache feedback emails in MySQL database as well as filesystem?
+    Add "priviledged" users who can e.g. run extra NMR models
+    Allow uploads of tarballs of NMR models?
+    On upload of alt conf model, do table to choose which ones to use
+    "nice" large jobs such as multi-model NMR runs
 }}}
     Allow simple comparison of bad residues in two models; see jobs/analyze.php
     Rama outliers in multicrit kin don't look so hot (Ca-Ca, yellow?)
@@ -32,18 +39,21 @@
     Display comparison to run-of-PDB for clash score
     Specify what a CB outlier is
     Explain 2d and 3d CB kins
+    Check space requirements for running 1S72 and photosystem II
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
 
+### 3beta5 ###
+- traced mysterious labbook load/save bug from beta3 to missing clearstatcache()
+- used that fixed bug to simplify improve_sswing_done.php; seems to still work
+
 ### 3beta4 ###
 - changed sswing runs to use idealPDB.pdb as the output, rather than stdout
   stdout formatting was not consistent enough to rely on
-********************************************************************************
-* Shuren tells me this is only a starting point for optimization. There is not *
-* yet any file that just contains the final sidechain conformation!            *
-********************************************************************************
+* Shuren tells me this is only a starting point for optimization. There is not
+* yet any file that just contains the final sidechain conformation!
 - no longer allow submission of SSWING form if no maps are present
 - new models from PDB/NDB are now given lowercase names
   this plays better with the xxxH.pdb convention for Reduce naming
