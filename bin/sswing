@@ -96,7 +96,7 @@
 #   system($kin3Dcont);
 
    unlink ($outputMAPfile);
-   unlink ($PDBfile_ideal);
+   ### We need this for MolProbity, which removes it later ### unlink ($PDBfile_ideal);
    unlink ($scoreOutput);
    
    # Changes by IWD 8/3/04 for MolProbity
@@ -105,6 +105,6 @@
    }else {
        unlink ("sswing_".$residueSeqNum.$modelChainID.".pdb");
    }
-   unlink ($resultFile);
+   ### Jane wants to be able to look at this ### unlink ($resultFile);
 
 

@@ -170,13 +170,20 @@ The program is described in
     echo "<input type='hidden' name='model' value='$modelID'>\n";
     echo "<br>Model: $modelID\n";
     echo "<br>CCP4 map: ".makeMapChooser("edmap")."\n";
-    echo "<p>Residues:\n";
-    echo makeResidueChooser($modelID, "cnit", $preselect);
-    echo "</p>\n";
-    echo "<br><small><a href='improve_sswing_setup.php?$_SESSION[sessTag]&model=$modelID&selNone=1'>Deselect all</a></small>\n";
-    echo "<br><small><a href='improve_sswing_setup.php?$_SESSION[sessTag]&model=$modelID&selNone=0'>Select bad residues</a></small>\n";
+    if(count($_SESSION['edmaps']) >= 1)
+    {
+        echo "<p>Residues:\n";
+        echo makeResidueChooser($modelID, "cnit", $preselect);
+        echo "</p>\n";
+        echo "<br><small><a href='improve_sswing_setup.php?$_SESSION[sessTag]&model=$modelID&selNone=1'>Deselect all</a></small>\n";
+        echo "<br><small><a href='improve_sswing_setup.php?$_SESSION[sessTag]&model=$modelID&selNone=0'>Select bad residues</a></small>\n";
+        echo "<p><input type='submit' name='cmd' value='Start refitting sidechains'>\n";
+    }
+    else
+    {
+        echo "<p><i>Cannot continue without a CCP4 electron density map.</i></p>\n";
+    }
 ?>
-<p><input type='submit' name='cmd' value='Start refitting sidechains'>
 </form>
 
 <?php echo mpPageFooter(); ?>

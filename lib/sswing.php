@@ -56,19 +56,27 @@ function runSswing($pdbfile, $mapfile, $workdir, $cnit)
     $cmd = "sswing $pdbfile ".trim(substr($cnit,1,4))." ".trim(substr($cnit,6,3))." $mapfile";
     if(substr($cnit,0,1) != ' ') $cmd .= " ".substr($cnit,0,1);
     //echo("\n\n".$cmd."\n\n"); //XXX-TMP
-    $out = explode("\n", shell_exec($cmd));
+    $out = shell_exec($cmd);
+    //echo($out."\n\n"); //XXX-TMP
     
     $swap = array();
-    foreach($out as $line)
+    $h = fopen('idealPDB.pdb', 'rb');
+    if($h)
     {
-        //echo $line; //XXX-TMP
-        if(preg_match('/^[ 0-9]{3}[0-9] [^\/]/', $line))
+        while(!feof($h))
         {
-            $al = substr($line, 7, 5);
-            $coords = substr($line, 25, 24);
-            $swap[$cnit.$al] = $coords;
+            $line = fgets($h, 4096);
+            if(startsWith($line, "ATOM  ") || startsWith($line, "HETATM"))
+            {
+                $al = substr($line, 12, 5);
+                $coords = substr($line, 30, 24);
+                $swap[$cnit.$al] = $coords;
+            }
         }
+        fclose($h);
+        unlink('idealPDB.pdb');
     }
+    else echo "*** Unable to open idealPDB.pdb from SSWING run\n";
     
     chdir($oldwd);
     return $swap;
