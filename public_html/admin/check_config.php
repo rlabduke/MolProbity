@@ -138,5 +138,14 @@ $ok = true;
         "genContour", "genScoreResult", "preGenScore",
         "noe-display")); ?>
 
+<hr><h2>Version numbers for external programs:</h2>
+<ul>
+<?php
+    echo "<li><b>Prekin:</b> ".exec("prekin -help")."</li>\n";
+    echo "<li><b>Reduce:</b> ".exec("reduce -help")."</li>\n";
+    echo "<li><b>Probe:</b> ".exec("probe -version")."</li>\n";
+?>
+</ul>
+
 </body>
 </html>
