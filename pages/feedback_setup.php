@@ -1,7 +1,6 @@
 <?php # (jEdit options) :folding=explicit:collapseFolds=1:
 /*****************************************************************************
     This page allows users to send email about bugs/features in MolProbity.
-    It should be accessed by pageCall().
 *****************************************************************************/
 // This variable must be defined for index.php to work! Must match class below.
 $delegate = new FeedbackSetupDelegate();
@@ -15,7 +14,7 @@ class FeedbackSetupDelegate extends BasicDelegate {
 */
 function display($context)
 {
-    echo mpPageHeader("Feedback &amp; Bugs");
+    echo mpPageHeader("Feedback &amp; Bugs", "feedback");
     echo makeEventForm("onFeedbackSend");
 ?>
 <table border='0' cellspacing='0'>

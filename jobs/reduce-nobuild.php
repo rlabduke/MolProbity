@@ -7,7 +7,7 @@ INPUTS (via $_SESSION['bgjob']):
     modelID         ID code for model to process
 
 OUTPUTS (via $_SESSION['bgjob']):
-    modelID         ID code for model to process
+    modelID         the ID of the model just added
     labbbookEntry   the labbook entry number describing this action
 
 *****************************************************************************/
@@ -52,24 +52,30 @@ $tasks['reduce'] = "Add H with <code>reduce -keep -his</code>";
 $tasks['notebook'] = "Add entry to lab notebook";
 
 setProgress($tasks, 'reduce'); // updates the progress display if running as a background job
-$outname = $model['id']."H_nobuild.pdb";
+$newModel = createModel($modelID."H");
+$outname = $newModel['pdb'];
 $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
 if(!file_exists($outpath)) mkdir($outpath, 0777); // shouldn't ever happen, but might...
 $outpath .= '/'.$outname;
 reduceNoBuild($pdb, $outpath);
-$_SESSION['models'][$modelID]['pdb'] = $outname;
-$_SESSION['models'][$modelID]['isReduced'] = true;
+
+$newModel['stats']      = pdbstat($outpath);
+$newModel['parent']     = $modelID;
+$newModel['history']    = "Derived from $model[pdb] by Reduce -keep -his";
+$newModel['isReduced']  = true;
+$_SESSION['models'][ $newModel['id'] ] = $newModel;
+$_SESSION['bgjob']['modelID'] = $newModel['id'];
 
 setProgress($tasks, 'notebook');
 $pdb = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$outname;
 $url = $_SESSION['dataURL'].'/'.MP_DIR_MODELS.'/'.$outname;
-$entry = "Reduce was run on $modelID to add and optimize missing hydrogens.\n";
+$entry = "Reduce was run on $model[pdb] to add and optimize missing hydrogens, resulting in $newModel[pdb].\n";
 $entry .= "Existing hydrogens were not affected, and Asn/Gln/His flips were not optimized.\n";
 $entry .= "<p>You can now <a href='$url'>download the annotated PDB file</a> (".formatFilesize(filesize($pdb)).").</p>\n";
 $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
-    "Missing H added to $modelID by Reduce -keep -his",
+    "Adding H with Reduce -keep -his gives $model[pdb]",
     $entry,
-    $modelID,
+    "$modelID|$newModel[id]", // applies to both old and new model
     "auto"
 );
 

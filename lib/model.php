@@ -4,7 +4,45 @@
 *****************************************************************************/
 require_once(MP_BASE_DIR.'/lib/pdbstat.php');
 
-#{{{ addModel - adds a model to the session and creates its directory
+#{{{ createModel - returns a "model" data structure for a given name.
+############################################################################
+/**
+* Creates a model data structure suitable for insertion into
+* $_SESSION[models], but does not actually insert it.
+* The primary purpose of this function is to encapsulate requirements
+* for name- and prefix-uniqueness within the current session.
+* Likewise, a name for the PDB file is created, but the file itself is NOT
+* created and MP_DIR_MODELS may not even exist yet.
+*
+*   modelID     the desired model ID. A serial number may be appended.
+*   pdbSuffix   a suffix to apply to the PDB filename. Usually "".
+*
+* returns: an array containing keys 'id', 'pdb', and 'prefix'.
+*/
+function createModel($modelID, $pdbSuffix = "")
+{
+    // Make sure this is a unique name
+    // FUNKY: Be careful here b/c HFS on OS X is not case-sensitive.
+    // (It's case-PRESERVING.) This could screw up file naming.
+    foreach($_SESSION['models'] as $k => $v) $lowercaseIDs[strtolower($k)] = $k;
+    while(isset($lowercaseIDs[strtolower($modelID.$serial)])
+    || file_exists($_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$modelID.$serial.$pdbSuffix.".pdb"))
+    {
+        $serial++;
+    }
+    $modelID = $modelID.$serial;
+    $outname = $modelID.$pdbSuffix.".pdb"; // $modelID already has $serial in it
+    
+    // Create the model entry
+    return array(
+        'id'        => $modelID,
+        'prefix'    => $modelID.'-',
+        'pdb'       => $outname
+    );
+}
+#}}}########################################################################
+
+#{{{ addModel - adds an up/downloaded model to the session
 ############################################################################
 /**
 * This is suitable for the traditional model addition, where the file
@@ -26,90 +64,23 @@ function addModel($tmpPdb, $origName, $isCnsFormat = false, $ignoreSegID = false
     else
         $id = $origName;
     
-    // Make sure this is a unique name
-    // FUNKY: Be careful here b/c HFS on OS X is not case-sensitive.
-    // (It's case-PRESERVING.) This could screw up file naming.
-    foreach($_SESSION['models'] as $k => $v) $lowercaseIDs[strtolower($k)] = $k;
-    while(isset($lowercaseIDs[strtolower($id.$serial)])) $serial++;
-    $id .= $serial;
+    $model = createModel($id, "_clean"); // don't confuse user by re-using exact original PDB name        
+    $id = $model['id'];
     
     // Process file - this is the part that matters
     $infile     = $tmpPdb;
-    $outname    = $id.'_clean.pdb'; // don't confuse user by re-using exact original PDB name
+    $outname    = $model['pdb'];
     $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
     if(!file_exists($outpath)) mkdir($outpath, 0777);
     $outpath .= '/'.$outname;
     list($stats, $segmap) = preparePDB($infile, $outpath, $isCnsFormat, $ignoreSegID);
     
-    // Create the model entry
-    $_SESSION['models'][$id] = array(
-        'id'        => $id,
-        'prefix'    => $id.'-',
-        'pdb'       => $outname,
-        'stats'     => $stats,
-        'history'   => 'Original file uploaded by user'
-    );
-    
-    if($segmap) $_SESSION['models'][$id]['segmap'] = $segmap;
-    
-    return $id;
-}
-#}}}########################################################################
-
-#{{{ duplicateModel - makes a copy of an existing model for modification
-############################################################################
-/**
-*
-*   XXX-FIXME: what should this do now that there aren't model directories?
-*
-*
-* A simple way to duplicate an existing model and its PDB for modification
-* The duplicate file will be registered as a new model,
-* and its model ID will be returned.
-*
-* You'll probably want to change the 'history' key on your own.
-*
-* $inModelID    the ID for the model that the newly Reduced file will be derived from
-* $suffix       naming suffix for the new model / PDB file.
-*/
-function duplicateModel($inModelID, $suffix)
-{
-    $inModel = $_SESSION['models'][$inModelID];
-    
-    // New model ID
-    $id = $inModelID.$suffix;
-    // Make sure this is a unique name
-    // FUNKY: Be careful here b/c HFS on OS X is not case-sensitive.
-    // (It's case-PRESERVING.) This could screw up file naming.
-    foreach($_SESSION['models'] as $k => $v) $lowercaseIDs[strtolower($k)] = $k;
-    while(isset($lowercaseIDs[strtolower($id.$serial)])) $serial++;
-    $id .= $serial;
-    
-    // Create directory
-    $modelDir = $_SESSION['dataDir'].'/'.$id;
-    mkdir($modelDir, 0777);
-    $modelURL = $_SESSION['dataURL'].'/'.$id;
-    
-    // Copy file
-    //$outname    = $id.'.pdb';
-    $outname    = $inModel['pdb'];
-    $outpath    = $modelDir.'/'.$outname;
-    copy("$inModel[dir]/$inModel[pdb]", $outpath);
+    $model['stats']                 = $stats;
+    $model['history']               = 'Original file uploaded by user';
+    if($segmap) $model['segmap']    = $segmap;
     
     // Create the model entry
-    $_SESSION['models'][$id] = array(
-        'id'        => $id,
-        'dir'       => $modelDir,
-        'url'       => $modelURL,
-        'prefix'    => $id.'-',
-        'pdb'       => $outname,
-        'stats'     => pdbstat($outpath),
-        'parent'    => $inModelID,
-        'history'   => "Derived from $inModelID by duplication",
-        'isReduced' => $inModel['isReduced'],
-        'isBuilt'   => $inModel['isBuilt']
-    );
-    
+    $_SESSION['models'][$id] = $model;
     return $id;
 }
 #}}}########################################################################
@@ -251,45 +222,14 @@ function reduceNoBuild($inpath, $outpath)
 ############################################################################
 /**
 * This is the standard, expert-system way of adding required hydrogens for AAC.
-* The input file or its ancestor should have already been passed thru preparePDB(),
-* and it may or may not have hydrogens added. The new file will be registered as
-* a new model, and its model ID will be returned.
+* The input file or its ancestor should have already been passed thru preparePDB().
 *
-* $inModelID    the ID for the model that the newly Reduced file will be derived from
-* $inpath       the full path and filename for the PDB file to be processed
+* $inpath       the full filename for the PDB file to be processed
+* $outpath      the full filename for the destination PDB. Will be overwritten.
 */
-function reduceBuild($inModelID, $inpath)
+function reduceBuild($inpath, $outpath)
 {
-    // New model ID just has a H appended
-    $id = $inModelID."H";
-    
-    // Make sure this is a unique name
-    // FUNKY: Be careful here b/c HFS on OS X is not case-sensitive.
-    // (It's case-PRESERVING.) This could screw up file naming.
-    foreach($_SESSION['models'] as $k => $v) $lowercaseIDs[strtolower($k)] = $k;
-    while(isset($lowercaseIDs[strtolower($id.$serial)])) $serial++;
-    $id .= $serial;
-    
-    // Process file - this is the part that matters
-    $outname    = $id.'.pdb';
-    $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
-    if(!file_exists($outpath)) mkdir($outpath, 0777); // shouldn't ever happen, but might...
-    $outpath .= '/'.$outname;
     exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -build -allalt $inpath > $outpath");
-    
-    // Create the model entry
-    $_SESSION['models'][$id] = array(
-        'id'        => $id,
-        'prefix'    => $id.'-',
-        'pdb'       => $outname,
-        'stats'     => pdbstat($outpath),
-        'parent'    => $inModelID,
-        'history'   => "Derived from $inModelID by default Reduce -build",
-        'isReduced' => true,
-        'isBuilt'   => true
-    );
-    
-    return $id;
 }
 #}}}########################################################################
 

@@ -49,7 +49,7 @@ function display($context)
     else // upload was OK
     {
         // Start the page: produces <HTML>, <HEAD>, <BODY> tags
-        echo mpPageHeader("Model $modelID added");
+        echo mpPageHeader("$model[pdb] added");
     
         $num = $context['labbookEntry'];
         echo formatLabbookEntry($labbook[$num]);

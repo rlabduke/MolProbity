@@ -56,11 +56,8 @@
     Specify what a CB outlier is
     Explain 2d and 3d CB kins
     Make sure Reduce doesn't shrink the PDB file (lost atoms/models, etc)
-    Add session resume link to preformatted email
     Make clashscore a choice during analysis
-  x duplicateModel(), used by SSWING, is broken right now.
-  ? even reduce -nobuild should create a new model entry, so we don't choke
-  * finish feedback; feedback form needs a Cancel btn?
+  * finish feedback
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -77,6 +74,10 @@
 - started on feedback system
 - removed -noadjust flag from Reduce -nobuild cmd lines; apparently causes
   problems with His protonation...
+- refactored model-creation code into createModel()
+- file upload now talks about PDB files, not "models"
+- notebook can take bar-separated list of modelIDs instead of a single ID
+- reduce-nobuild now generates a new model entry, and talks about file names
 
 ### 3beta7 ###
 - added forms for ED map and het dictionary upload

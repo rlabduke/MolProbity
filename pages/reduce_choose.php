@@ -15,7 +15,7 @@ class ReduceChooseDelegate extends BasicDelegate {
 ############################################################################
 /**
 * Context may contain the following keys:
-*   newModel        the ID of the model just added
+*   modelID         the ID of the model just added
 *   showAllNQH      true if all Asn, Gln, and His residues should be listed
 *
 * OUTPUTS:
@@ -27,7 +27,7 @@ function display($context)
 {
     echo mpPageHeader("Review flips");
     
-    $id = $context['newModel'];
+    $id = $context['modelID'];
     $model = $_SESSION['models'][$id];
     $pdb = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$model['pdb'];
     
@@ -169,20 +169,21 @@ function onRerunReduce($arg, $req)
     $userflip .= "</ul>\n</p>\n";
     $userkeep .= "</ul>\n</p>\n";
     
-    $entry = "Reduce was run on $model[parent] to add and optimize hydrogens, and optimize Asn, Gln, and His flips, yielding $modelID.\n";
+    $parent = $_SESSION['models'][ $model['parent'] ];
+    $entry = "Reduce was run on $parent[pdb] to add and optimize hydrogens, and optimize Asn, Gln, and His flips, yielding $model[pdb].\n";
     $entry .= "<p>You can now <a href='$url'>download the optimized and annotated PDB file</a> (".formatFilesize(filesize($pdb)).").</p>\n";
     if(strpos($autoflip, "<li>") !== false) $entry .= $autoflip;
     if(strpos($userflip, "<li>") !== false) $entry .= $userflip;
     if(strpos($userkeep, "<li>") !== false) $entry .= $userkeep;
     
     // Go ahead and make the notebook entry inline -- this can't take more than 1-2 sec.
-    if($rerun)  $title = "Reduce -build with user overrides gives $modelID";
-    else        $title = "Reduce -build with default settings gives $modelID";
+    if($rerun)  $title = "Adding H with Reduce -build and user overrides gives $model[pdb]";
+    else        $title = "Adding H with Reduce -build using default settings gives $model[pdb]";
     unset($_SESSION['bgjob']); // Clean up any old data
     $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
         $title,
         $entry,
-        $modelID,
+        "$parent[id]|$modelID", // applies to both old and new model
         "auto"
     );
     $_SESSION['bgjob']['modelID']   = $_REQUEST['modelID'];

@@ -10,6 +10,7 @@
     'ctime'     the time the entry was created (seconds since the Epoch)
     'modtime'   the time the entry was created (seconds since the Epoch)
     'model'     which model this relates to, or the empty string/undefined
+                This may also be a bar-separated list (see below).
     'keywords'  a bar-separated (|) list of keywords for classifying entries
                 Use explode() and implode() to convert to/from an array.
                 Stored as a string b/c they're easier to transmit in forms.
@@ -154,7 +155,7 @@ function formEditLabbook($entry, $width = 90, $height = 30)
     $s .= "</table>";
     
     if($entry['model'] != "")
-        $s .= "<br>Model: ".$entry['model']."\n";
+        $s .= "<br>Model: ".implode(", ", explode("|", $entry['model']))."\n";
     if($entry['keywords'] != "")
         $s .= "<br>Keywords: ".implode(", ", explode("|", $entry['keywords']))."\n";
 

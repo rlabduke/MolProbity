@@ -3,6 +3,7 @@ body {
     color : #666633 ;
     background-color : #cccc99 ;
 	font-family : Helvetica, Arial, sans-serif ;
+    margin : 0 ;
 }
 
 img {
@@ -25,6 +26,7 @@ div.pageheader h1 {
 
 div.leftnav {
     font-size : smaller ;
+    margin : 0 0 0 0.4em ;
 }
 
 span.minornav {
@@ -34,13 +36,15 @@ span.minornav {
 div.pagefooter {
     font-size : smaller ;
     text-align : right ;
-    margin-top : 0.5em ;
+    margin : 0.5em ;
 }
 
 div.pagecontent {
     color : #000000 ;
     background-color : #ffffff ;
-    border : 1px solid #999966 ;
+    border-width : 1px 0 1px 1px ; /* not on the right */
+    border-style : solid ;
+    border-color : #999966 ;
     padding : 0.4em ;
 	font-family : Palatino, Times, serif ;
 }
@@ -53,6 +57,29 @@ div.pagecontent table {
 }
 
 div.pagecontent h2, h3, h4, h5, h6 {
+	font-family : Helvetica, Arial, sans-serif ;
+    color : #660000
+}
+
+/* These  differ only by not having a border on the left. */
+div.pagecontent_alone {
+    color : #000000 ;
+    background-color : #ffffff ;
+    border-width : 1px 0 1px 0 ; /* not on the right or left */
+    border-style : solid ;
+    border-color : #999966 ;
+    padding : 0.4em ;
+	font-family : Palatino, Times, serif ;
+}
+
+/* Because TABLE otherwise doesn't inherit these... */
+div.pagecontent_alone table {
+    color : #000000 ;
+    background-color : #ffffff ;
+	font-family : Palatino, Times, serif ;
+}
+
+div.pagecontent_alone h2, h3, h4, h5, h6 {
 	font-family : Helvetica, Arial, sans-serif ;
     color : #660000
 }

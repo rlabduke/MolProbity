@@ -48,8 +48,8 @@ function mpPageHeader($title, $active = "none", $refresh = "")
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
-    <td><img src="img/small-logo5.gif" alt="MolProbity logo"></td>
-    <td><div class="pageheader">
+    <td width="150"><img src="img/small-logo5.gif" alt="MolProbity logo"></td>
+    <td valign="bottom"><div class="pageheader">
         <h1>'.$title.'</h1>
     </div></td>
 </tr>
@@ -58,7 +58,7 @@ function mpPageHeader($title, $active = "none", $refresh = "")
     if($active == "none")
     {
         $s .= '<tr><td valign="top" colspan="2">
-    <div class="pagecontent">
+    <div class="pagecontent_alone">
 ';
     }
     else
@@ -94,11 +94,10 @@ function mpNavigationBar($active)
     $s .= mpNavBar_goto('file_browser.php', 'View &amp; download files', ($active == 'files'));
     $s .= mpNavBar_goto('notebook_main.php', 'Lab notebook', ($active == 'notebook'));
     //$s .= mpNavBar_goto('', 'Set preferences', ($active == 'preferences'));
-    $s .= mpNavBar_call('feedback_setup.php', 'Feedback &amp; Bugs');
+    $s .= mpNavBar_goto('feedback_setup.php', 'Feedback &amp; Bugs');
     $s .= mpNavBar_goto('save_session.php', 'Save session', ($active == 'savesession'));
     $s .= "<br />\n";
     $s .= mpNavBar_goto('logout.php', 'Log out', ($active == 'logout'));
-    $s .= "<br />\n";
     $s .= "<br />You are using ".round(100*mpSessSizeOnDisk(session_id())/MP_SESSION_MAX_SIZE);
     $s .= "% of your ".formatFilesize(MP_SESSION_MAX_SIZE)." of disk space.";
     return $s;
@@ -107,19 +106,19 @@ function mpNavigationBar($active)
 function mpNavBar_goto($page, $title, $isActive = false)
 {
     if($page == '')
-        return "<br />$title\n";
+        return "$title<br />\n";
     elseif($isActive)
-        return "<br /><a href='".makeEventURL("onNavBarGoto", $page)."'><b>$title</b></a>\n";
+        return "<a href='".makeEventURL("onNavBarGoto", $page)."'><b>$title</b></a><br />\n";
     else
-        return "<br /><a href='".makeEventURL("onNavBarGoto", $page)."'>$title</a>\n";
+        return "<a href='".makeEventURL("onNavBarGoto", $page)."'>$title</a><br />\n";
 }
 
 function mpNavBar_call($page, $title)
 {
     if($page == '')
-        return "<br /><span class='minornav'>$title</span>\n";
+        return "<span class='minornav'>$title</span><br />\n";
     else
-        return "<br /><span class='minornav'><a href='".makeEventURL("onNavBarCall", $page)."'>$title</a></span>\n";
+        return "<span class='minornav'><a href='".makeEventURL("onNavBarCall", $page)."'>$title</a></span><br />\n";
 }
 #}}}########################################################################
 
