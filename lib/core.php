@@ -45,12 +45,12 @@ function mpPageHeader($title, $active = "none", $refresh = "")
     $s .= '</head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
-<tr><td colspan="2">
-    <div class="pageheader">
-        <img src="img/small-logo2.gif" alt="MolProbity logo">
+<tr>
+    <td><img src="img/small-logo3.gif" alt="MolProbity logo"></td>
+    <td><div class="pageheader">
         <h1>'.$title.'</h1>
-    </div>
-</td></tr>
+    </div></td>
+</tr>
 ';
     
     if($active == "none")
@@ -61,7 +61,7 @@ function mpPageHeader($title, $active = "none", $refresh = "")
     }
     else
     {
-        $s .= '<tr><td valign="top">
+        $s .= '<tr><td valign="top" width="150">
     <div class="leftnav">
 ' . mpNavigationBar($active) . '
     </div>

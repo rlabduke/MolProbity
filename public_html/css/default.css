@@ -1,7 +1,7 @@
 /* (jEdit options) :folding=explicit:collapseFolds=1: */
 body {
     color : #000000 ;
-    background-color : #fbfdf2 ;
+    background-color : #f0f0ff ;
 }
 
 a:link { color : #000099 ; }
@@ -12,15 +12,24 @@ span.inactive {
     color : #666666 ;
 }
 
-div.pageheader img {
-    float : right ;
+div.pageheader {
+    margin-bottom : 0.5em ;
+}
+div.pageheader h1 {
+    text-align : center ;
 }
 
 div.leftnav {
 }
 
 div.pagecontent {
+    background : #ffffff ;
+    border : 1px solid #000066 ;
+    padding : 0.4em;
 }
 
 div.pagefooter {
+    font-size : smaller ;
+    text-align : right ;
+    margin-top : 0.5em ;
 }
