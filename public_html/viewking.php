@@ -43,19 +43,19 @@ echo mpPageHeader("KiNG - $file");
 <?php
     echo "    <param name='kinSource' value='$url'>\n";
     // For supporting electron density maps:
-    /*if(isset($edmap_list))
+    if(is_array($_SESSION['edmaps']))
     {
-        foreach($edmap_list as $edmap)
+        foreach($_SESSION['edmaps'] as $edmap)
         {
             if(isset($ed_param))    $ed_param .= " ".$edmap;
             else                    $ed_param = $edmap;
         }
         if(isset($ed_param))
         {
-            echo "<param name=\"edmapBase\" value=\"$web_dir\">\n";
-            echo "<param name=\"edmapList\" value=\"$ed_param\">\n";
+            echo "    <param name='edmapBase' value='$_SESSION[dataURL]'>\n";
+            echo "    <param name='edmapList' value='$ed_param'>\n";
         }
-    }*/
+    }
 ?>
 </applet>
 </center>

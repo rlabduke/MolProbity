@@ -4,6 +4,9 @@
     
 INPUTS (via $_SESSION['bgjob']):
     newModel        the ID of the model just added
+    edmap           the map file name
+    cnit            a set of CNIT codes for residues that were processed
+    sswingChanges   the changes for pdbSwapCoords() produced by SSWING
 
 *****************************************************************************/
 // EVERY *top-level* page must start this way:
@@ -20,11 +23,12 @@ INPUTS (via $_SESSION['bgjob']):
 # MAIN - the beginning of execution for this page
 ############################################################################
 // Start the page: produces <HTML>, <HEAD>, <BODY> tags
+$modelID = $_SESSION['bgjob']['newModel'];
+$model = $_SESSION['models'][$modelID];
+
 echo mpPageHeader("Review SSWING changes");
 echo "<a href='files_tab.php?$_SESSION[sessTag]'>Done</a>";
-echo "<p><pre>";
-print_r($_SESSION['bgjob']['all_changes']);
-echo "</pre></p>";
+echo "<p>".linkModelKin($model, "sswing.kin")."</p>\n";
 ############################################################################
 ?>
 <?php echo mpPageFooter(); ?>

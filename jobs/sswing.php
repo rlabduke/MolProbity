@@ -11,6 +11,7 @@ INPUTS (via $_SESSION['bgjob']):
 OUTPUTS (via $_SESSION['bgjob']):
     Adds a new entry to $_SESSION['models'].
     newModel        the ID of the model just added
+    sswingChanges   the changes for pdbSwapCoords() produced by SSWING
 
 *****************************************************************************/
 // EVERY *top-level* page must start this way:
@@ -45,7 +46,10 @@ OUTPUTS (via $_SESSION['bgjob']):
 
 # MAIN - the beginning of execution for this page
 ############################################################################
-$modelID = $_SESSION['bgjob']['model'];
+$oldID = $_SESSION['bgjob']['model'];
+$modelID = duplicateModel($oldID, "w");
+$_SESSION['models'][$modelID]['history'] = "Derived from $oldID by SSWING";
+
 $model = $_SESSION['models'][$modelID];
 $pdb = "$model[dir]/$model[pdb]";
 $pdbout = "$model[dir]/$model[prefix]sswing.pdb";
@@ -53,6 +57,7 @@ $map = $_SESSION['dataDir'].'/'.$_SESSION['bgjob']['edmap'];
 $cnit = $_SESSION['bgjob']['cnit'];
 
 // Set up progress message
+$tasks['create'] = "Create a new model entry ($modelID)";
 foreach($cnit as $res)
     $tasks[$res] = "Process $res with SSWING";
 $tasks["combine"] = "Combine all changes and create kinemage";
@@ -68,9 +73,9 @@ foreach($cnit as $res)
 setProgress($tasks, "combine");
 pdbSwapCoords($pdb, $pdbout, $all_changes);
 makeSswingKin($pdb, $pdbout, "$model[dir]/$model[prefix]sswing.kin", $cnit);
-$_SESSION['bgjob']['all_changes'] = $all_changes; //XXX-TMP
 
-//$_SESSION['bgjob']['newModel'] = $id;
+$_SESSION['bgjob']['newModel'] = $modelID;
+$_SESSION['bgjob']['sswingChanges'] = $all_changes;
 setProgress($tasks, null);
 
 ############################################################################

@@ -2,6 +2,7 @@
 /*****************************************************************************
     Provides functions for running SSWING.
 *****************************************************************************/
+require_once(MP_BASE_DIR.'/lib/analyze.php');
 
 #{{{ pdbSwapCoords - updates coordinates of a PDB file
 ############################################################################
@@ -90,7 +91,16 @@ function makeSswingKin($pdb1, $pdb2, $outfile, $cnit)
         fwrite($h, "Sidechains have been refit by SSWING. Details of the input file:\n\n");
         foreach($stats as $stat) fwrite($h, "[+]   $stat\n");
         fwrite($h, "@kinemage 1\n");
-        //TODO: calculate views for each residue in CNIT
+        
+        // Calculate views for each residue in CNIT
+        $ctr = computeResCenters($pdb1);
+        foreach($cnit as $res)
+        {
+            $i++;
+            $c = $ctr[$res];
+            fwrite($h, "@{$i}viewid {{$res}}\n@{$i}span 12\n@{$i}zslab 100\n@{$i}center $c[x] $c[y] $c[z]\n");
+        }
+        
         fclose($h);
         exec("prekin -quiet -append -animate -lots $pdb1 >> $outfile");
         exec("prekin -quiet -append -animate -lots $pdb2 >> $outfile");

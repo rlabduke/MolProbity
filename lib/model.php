@@ -57,6 +57,56 @@ function addModel($tmpPdb, $origName, $isCnsFormat = false, $ignoreSegID = false
 }
 #}}}########################################################################
 
+#{{{ duplicateModel - makes a copy of an existing model for modification
+############################################################################
+/**
+* A simple way to duplicate an existing model and its PDB for modification
+* The duplicate file will be registered as a new model,
+* and its model ID will be returned.
+*
+* You'll probably want to change the 'history' key on your own.
+*
+* $inModelID    the ID for the model that the newly Reduced file will be derived from
+* $suffix       naming suffix for the new model / PDB file.
+*/
+function duplicateModel($inModelID, $suffix)
+{
+    $inModel = $_SESSION['models'][$inModelID];
+    
+    // New model ID
+    $id = $inModelID.$suffix;
+    // Make sure this is a unique name
+    while( isset($_SESSION['models'][$id.$serial]) )
+        $serial++;
+    $id .= $serial;
+    
+    // Create directory
+    $modelDir = $_SESSION['dataDir'].'/'.$id;
+    mkdir($modelDir, 0777);
+    $modelURL = $_SESSION['dataURL'].'/'.$id;
+    
+    // Copy file
+    //$outname    = $id.'.pdb';
+    $outname    = $inModel['pdb'];
+    $outpath    = $modelDir.'/'.$outname;
+    copy("$inModel[dir]/$inModel[pdb]", $outpath);
+    
+    // Create the model entry
+    $_SESSION['models'][$id] = array_merge($inModel, array(
+        'id'        => $id,
+        'dir'       => $modelDir,
+        'url'       => $modelURL,
+        'prefix'    => $id.'-',
+        'pdb'       => $outname,
+        'stats'     => pdbstat($outpath),
+        'parent'    => $inModelID,
+        'history'   => "Derived from $inModelID by duplication",
+    ));
+    
+    return $id;
+}
+#}}}########################################################################
+
 #{{{ removeModel - unregisters a model from the session and deletes its data
 ############################################################################
 /**
@@ -251,7 +301,8 @@ function reduceBuild($inModelID, $inpath)
     exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -build -allalt $inpath > $outpath");
     
     // Create the model entry
-    $_SESSION['models'][$id] = array(
+    //$_SESSION['models'][$id] = array(
+    $_SESSION['models'][$id] = array_merge($_SESSION['models'][$inModelID], array(
         'id'        => $id,
         'dir'       => $modelDir,
         'url'       => $modelURL,
@@ -262,7 +313,7 @@ function reduceBuild($inModelID, $inpath)
         'history'   => "Derived from $inModelID by default Reduce -build",
         'isReduced' => true,
         'isBuilt'   => true
-    );
+    ));
     
     return $id;
 }
