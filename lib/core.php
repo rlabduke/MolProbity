@@ -46,7 +46,7 @@ function mpPageHeader($title, $active = "none", $refresh = "")
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
-    <td><img src="img/small-logo4.gif" alt="MolProbity logo"></td>
+    <td><img src="img/small-logo5.gif" alt="MolProbity logo"></td>
     <td><div class="pageheader">
         <h1>'.$title.'</h1>
     </div></td>
