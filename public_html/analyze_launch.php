@@ -4,6 +4,7 @@
     
 INPUTS (via Get or Post):
     model           ID code for model to process
+    opts[]          an array of options for the background job
 
 *****************************************************************************/
 // EVERY *top-level* page must start this way:
@@ -24,6 +25,7 @@ INPUTS (via Get or Post):
 ############################################################################
 unset($_SESSION['bgjob']); // Clean up any old data
 $_SESSION['bgjob']['model']     = $_REQUEST['model'];
+$_SESSION['bgjob']['opts']      = $_REQUEST['opts'];
 
 // launch background job
 launchBackground(MP_BASE_DIR."/jobs/analyze.php", "analyze_display.php?$_SESSION[sessTag]&model=$_REQUEST[model]", 10);

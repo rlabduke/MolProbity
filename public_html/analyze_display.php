@@ -29,30 +29,6 @@ INPUTS (via Get or Post):
 //function someFunctionName() {}
 #}}}########################################################################
 
-#{{{ a_function_definition - sumary_statement_goes_here
-############################################################################
-/**
-* Documentation for this function.
-*/
-//function someFunctionName() {}
-#}}}########################################################################
-
-#{{{ a_function_definition - sumary_statement_goes_here
-############################################################################
-/**
-* Documentation for this function.
-*/
-//function someFunctionName() {}
-#}}}########################################################################
-
-#{{{ a_function_definition - sumary_statement_goes_here
-############################################################################
-/**
-* Documentation for this function.
-*/
-//function someFunctionName() {}
-#}}}########################################################################
-
 # MAIN - the beginning of execution for this page
 ############################################################################
 // Start the page: produces <HTML>, <HEAD>, <BODY> tags
@@ -115,13 +91,9 @@ The kinemages below show the same information in different ways or in more detai
 TODO: link to more info about all-atom contacts.
 <p><ul>
 <li>
-    <?php echo linkModelKin($model, "aac-sc.kin"); ?>
-    <br/><i>Sidechain clashes are most common in models of proteins.
-    </i>
-</li>
-<li>
-    <?php echo linkModelKin($model, "aac-mc.kin"); ?>
-    <br/><i>Mainchain clashes are most common in models of RNA.
+    <?php echo linkModelKin($model, "aac.kin"); ?>
+    <br/><i>Sidechain clashes are most common in models of proteins;
+    mainchain clashes are most common in models of RNA.
     </i>
 </li>
 </ul></p>
@@ -138,19 +110,9 @@ TODO: link to more info about Ramachandran plots.
     </i>
 </li>
 <li>
-    <b>PostScript</b>:
-    <?php echo "<a href='$model[url]/$model[prefix]rama.kin.1.eps'>All data</a>"; ?>
-    | <?php echo "<a href='$model[url]/$model[prefix]rama.kin.1.eps'>General case</a>"; ?>
-    | <?php echo "<a href='$model[url]/$model[prefix]rama.kin.1.eps'>Glycine</a>"; ?>
-    | <?php echo "<a href='$model[url]/$model[prefix]rama.kin.1.eps'>Proline</a>"; ?>
-    | <?php echo "<a href='$model[url]/$model[prefix]rama.kin.1.eps'>pre-Proline</a>"; ?>
-    <br /><i>Use Mage or KiNG to generate customized PostScript or PDF renderings of the Ramachandran kinemage.
-    </i>
-</li>
-<li>
-    <b>JPEG image</b>:
-    <?php echo "<a href='$model[url]/$model[prefix]rama.jpg' target='blank'>General, Gly, Pro, pre-Pro</a>"; ?>
-    <br /><i>All four plots on one page with outliers labeled.
+    <b>PDF</b>:
+    <br /><i>Coming soon.
+    Use Mage or KiNG to generate customized PostScript or PDF renderings of the Ramachandran kinemage.
     </i>
 </li>
 </ul></p>

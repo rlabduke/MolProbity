@@ -61,7 +61,7 @@ $modelURL = $_SESSION['dataURL'].'/'.$id;
 
 // Process file - this is the part that matters
 $infile     = $_SESSION['bgjob']['tmpPdb'];
-$outname    = $id.'.pdb';
+$outname    = $id.'mp.pdb'; // don't confuse user by re-using exact original PDB name
 $outpath    = $modelDir.'/'.$outname;
 preparePDB($infile, $outpath, $_SESSION['bgjob']['isCnsFormat'], $_SESSION['bgjob']['ignoreSegID']);
 

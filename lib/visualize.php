@@ -8,7 +8,7 @@
 ############################################################################
 function makeSidechainDots($infile, $outfile)
 {
-    exec("probe 'alta' $infile >> $outfile");
+    exec("probe -name 'sc-x dots' -self 'alta' $infile >> $outfile");
 }
 #}}}########################################################################
 
@@ -16,7 +16,7 @@ function makeSidechainDots($infile, $outfile)
 ############################################################################
 function makeMainchainDots($infile, $outfile)
 {
-    exec("probe -mc 'mc alta' $infile >> $outfile");
+    exec("probe -name 'mc-mc dots' -mc -self 'mc alta' $infile >> $outfile");
 }
 #}}}########################################################################
 
@@ -28,28 +28,18 @@ function makeRamachandranKin($infile, $outfile)
 }
 #}}}########################################################################
 
-#{{{ makeRamachandranImage - creates a bitmapped Ramachandran plot
+#{{{ [NOT SUPPORTED] convertKinToPostscript - uses Mage to do EPS output
 ############################################################################
-/**
-* outfile should end in ".png" or possibly ".jpg"
-* Other extensions will likely break the program.
-*/
-function makeRamachandranImage($infile, $outfile)
-{
-    exec("java -cp ".MP_BASE_DIR."/lib/hless.jar hless.Ramachandran $infile -nosummary -nokin -img $outfile");
-}
-#}}}########################################################################
-
-#{{{ convertKinToPostscript - uses Mage to do EPS output
-############################################################################
+// Would have to add Mage to bin/ for this to work again.
 /**
 * Outputs are named $infile.1.eps, $infile.2.eps, etc.
 * One page is generated per frame of animation.
-*/
+* /
 function convertKinToPostscript($infile)
 {
     exec("mage -postscript $infile");
 }
+*/
 #}}}########################################################################
 
 #{{{ makeCbetaDevBalls - plots CB dev in 3-D, appending to the given file

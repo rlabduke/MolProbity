@@ -18,11 +18,25 @@
     Coloring on download table is sometimes off
     Put icons on analysis results page to identify the most-used kins
     File upload should provide pdbstat-style summary
-    Add MAGE for Linux to bin/
+    Implement file retrieval from PDB and NDB (if possible)
+    Separate mc-mc and sc-x dots for multi-criterion kinemage
+  + Add Ramalyze to the analysis script
+ ** Track which analyses are done and customize report accordingly
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
+
+### 3pre11 ###
+- updated PDB stat to find nonpolar H in nucleic acids, too.
+- updated pdbstat to find nucleic acid residues
+- changed preparePDB() to not add H; now done by reduceNoBuild()
+- renamed prepared() upload PDB so as not to confuse user
+- reworked analysis scripts so that only selected jobs are performed
+- reworked analysis so that hydrogens are added "just in time" if needed
+- put both mc-mc and sc-(anything) dots in AAC kinemage, but separately
+- removed Ramachandran JPEG and EPS files in anticipation of providing PDFs
+- removed Mage as a necessary binary
 
 ### 3pre10 ###
 - really reworked page header/footer/styling. Style sheet hasn't been finished yet.
