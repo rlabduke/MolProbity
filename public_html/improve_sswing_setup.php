@@ -4,6 +4,7 @@
     
 INPUTS (via Get or Post):
     model           ID code for model to process
+    selNone         if true, don't select checkboxes for the user
 
 OUTPUTS (via Post):
     model           ID code for model to process
@@ -52,7 +53,7 @@ function makeMapChooser($chooserName)
 ############################################################################
 /**
 */
-function makeResidueChooser($modelID, $checkboxName)
+function makeResidueChooser($modelID, $checkboxName, $preselect = true)
 {
     $model = $_SESSION['models'][$modelID];
     $all_res = listProteinResidues("$model[dir]/$model[pdb]");
@@ -107,7 +108,7 @@ function makeResidueChooser($modelID, $checkboxName)
         }
 
         if(isset($all_outliers[$res]))
-            $s .= "<br><input type='checkbox' name='{$checkboxName}[{$res}]' value='$res' checked><b>$res</b></input>\n";
+            $s .= "<br><input type='checkbox' name='{$checkboxName}[{$res}]' value='$res' ".($preselect ? "checked" : "")."><b>$res</b></input>\n";
         else
             $s .= "<br><input type='checkbox' name='{$checkboxName}[{$res}]' value='$res'>$res</input>\n";
     }
@@ -138,6 +139,8 @@ function makeResidueChooser($modelID, $checkboxName)
 echo mpPageHeader("Refit sidechains with SSWING", "improve");
 
 $modelID = $_REQUEST['model'];
+$preselect = true;
+if(isset($_REQUEST['selNone'])) $preselect = ! $_REQUEST['selNone'];
 ############################################################################
 ?>
 
@@ -163,8 +166,10 @@ The program is described in
     echo "<br>Model: $modelID\n";
     echo "<br>CCP4 map: ".makeMapChooser("edmap")."\n";
     echo "<p>Residues:\n";
-    echo makeResidueChooser($modelID, "cnit");
+    echo makeResidueChooser($modelID, "cnit", $preselect);
     echo "</p>\n";
+    echo "<br><small><a href='improve_sswing_setup.php?$_SESSION[sessTag]&model=$modelID&selNone=1'>Deselect all</a></small>\n";
+    echo "<br><small><a href='improve_sswing_setup.php?$_SESSION[sessTag]&model=$modelID&selNone=0'>Select bad residues</a></small>\n";
 ?>
 <p><input type='submit' name='cmd' value='Start refitting sidechains'>
 </form>

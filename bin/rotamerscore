@@ -1,0 +1,57 @@
+#!/usr/bin/perl -w
+# usage: sswing inputHpdb mutatedAANo MutatedAA gofile [chainID]
+#
+
+   use strict;
+   my $i=0;
+   my $var;
+   my $name="";
+
+   foreach $var (@ARGV) {
+     $i++;
+   }
+
+   if ($i==4){
+       $name=$ARGV[0].$ARGV[1].$ARGV[2]
+   }else {
+       $name=$ARGV[0].$ARGV[4].$ARGV[1].$ARGV[2]
+   }
+   
+   #produce script file
+   my $outputRotscr=$name.".rotscr";
+   my $pdb2rotscr="";
+
+   if( $i == 4){
+      $pdb2rotscr = "sswingpdb2rotscr  $ARGV[0] $ARGV[1] $ARGV[2] > $outputRotscr";
+   } else {
+      $pdb2rotscr = "sswingpdb2rotscr  $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[4]> $outputRotscr"; 
+   }
+     system($pdb2rotscr);
+
+   #select rotamers
+   my $genScore ="";
+   if( $i == 4){
+       $genScore = "genScore  $ARGV[0] $outputRotscr $ARGV[3]  $ARGV[1]";
+   } else {
+       $genScore = "genScore  $ARGV[0] $outputRotscr $ARGV[3]  $ARGV[1] $ARGV[4]";
+   }
+   system($genScore);
+
+   #chmod  rotamer script file
+   my $rotamerRotscr=$outputRotscr."_rotamer";
+   chmod (0777,$rotamerRotscr);
+
+   #run script file and produce rotamer map
+   my $rotamerMap=$name.".map_rotamer";
+   my $rotamerScr="./"."$rotamerRotscr>$rotamerMap";
+   system ($rotamerScr);
+
+   my $output=$name.".out";
+   my $result="result $rotamerMap $ARGV[2] $ARGV[1] > $output";
+   system ($result);
+
+   unlink ("./".$outputRotscr);
+   unlink ("./".$rotamerMap);
+   unlink ("./".$rotamerScr);
+   unlink ("./".$ARGV[3]);
+   unlink ("./".$rotamerRotscr);

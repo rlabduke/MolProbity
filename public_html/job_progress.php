@@ -18,6 +18,28 @@ INPUTS are via $_SESSION['bgjob']
 // pages that are refreshing periodically to monitor a background job.
     mpSessReadOnly();
 
+#{{{ fmtTime - format a long time into minutes and seconds
+############################################################################
+/**
+* Documentation for this function.
+*/
+function fmtTime($sec)
+{
+    if($sec <= 60)
+        return "$sec seconds";
+    else
+        return floor($sec/60)." minutes and ".($sec%60)." seconds";
+}
+#}}}########################################################################
+
+#{{{ a_function_definition - sumary_statement_goes_here
+############################################################################
+/**
+* Documentation for this function.
+*/
+//function someFunctionName() {}
+#}}}########################################################################
+
 # MAIN - the beginning of execution for this page
 ############################################################################
 if(isset($_REQUEST['abort']) && $_REQUEST['abort'] == $_SESSION['bgjob']['processID'])
@@ -48,7 +70,7 @@ if($_SESSION['bgjob']['isRunning'])
     @readfile("$_SESSION[dataDir]/progress");
     echo "</td></tr></table></center>\n";
     $ellapsed = time() - $_SESSION['bgjob']['startTime'];
-    echo "<p><small>Your job has been running for $ellapsed seconds.</small>\n";
+    echo "<p><small>Your job has been running for ".fmtTime($ellapsed).".</small>\n";
     echo "<br><small>If this page doesn't update after $rate seconds, <a href='$url'>click here</a>.</small>\n";
     //if($ellapsed > 60 && isset($_SESSION['bgjob']['processID']))
     if(isset($_SESSION['bgjob']['processID']))
@@ -61,7 +83,7 @@ else
     $refresh    = "3; $url";
       echo mpPageHeader("Job is finished", "none", $refresh);
     //echo mpPageHeader("Job is finished");
-    echo "<p><center>Your job ran for ".($_SESSION['bgjob']['endTime'] - $_SESSION['bgjob']['startTime'])." seconds.\n";
+    echo "<p><center>Your job ran for ".fmtTime($_SESSION['bgjob']['endTime'] - $_SESSION['bgjob']['startTime']).".\n";
     //echo "<br><form action='$url' method='post'><input type='submit' value='Continue'></form></a>\n";
     echo "<p><table border='0'><tr><td>\n";
     @readfile("$_SESSION[dataDir]/progress");

@@ -39,7 +39,8 @@
         echo "  <td align='left'><b>$id</b></td>\n";
         if($model['isBuilt']) echo "  <td><span class='inactive'>already Reduced</span></td>\n";
         else echo "  <td><a href='improve_reduce_setup.php?$_SESSION[sessTag]&model=$id'>Reduce -build</a></td>\n";
-        echo "<td><a href='improve_sswing_setup.php?$_SESSION[sessTag]&model=$id'>SSWING</a></td>\n";
+        if($model['isReduced']) echo "  <td><a href='improve_sswing_setup.php?$_SESSION[sessTag]&model=$id'>SSWING</a></td>\n";
+        else echo "  <td><span class='inactive'>run analysis or Reduce first</span></td>\n";
         echo " </tr>\n";
         echo " <tr bgcolor='$c'>\n";
         echo "  <td colspan='3'><small>$model[history]</small></td>\n";

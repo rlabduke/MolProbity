@@ -53,6 +53,8 @@ if($rerun)
     $_SESSION['bgjob']['model']     = $_REQUEST['model'];
     $_SESSION['bgjob']['doflip']    = $_REQUEST['doflip'];
     
+    mpLog("reduce-custom:User made changes to flips suggested by Reduce -build");
+    
     // launch background job
     launchBackground(MP_BASE_DIR."/jobs/reduce-fix.php", "improve_reduce_done.php?$_SESSION[sessTag]", 5);
     
@@ -65,6 +67,7 @@ else
 {
     unset($_SESSION['bgjob']); // Clean up any old data
     $_SESSION['bgjob']['model']     = $_REQUEST['model']; // done page expects this
+    mpLog("reduce-accept:User accepted all flips proposed by Reduce -build as-is");
     include(MP_BASE_DIR."/public_html/improve_reduce_done.php");
     die();
 }

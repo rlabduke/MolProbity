@@ -64,6 +64,7 @@ function mpCheckSessionID($id)
 
 #{{{ mpStartSession - does mpInitEnvirons() and restores session data
 ############################################################################
+/** Returns true if a new session was created, false otherwise. */
 function mpStartSession($createIfNeeded = false)
 {
     // First set up constants, env. variables, etc.
@@ -105,10 +106,12 @@ function mpStartSession($createIfNeeded = false)
             // TODO: perform other tasks to start a session
             // Create databases, etc, etc.
             
-            mpLog("new-session:New user session started");
+            //mpLog("new-session:New user session started");
+            $sessionCreated = true;
         }
         else die("Specified session '".session_id()."' does not exist.");
     }
+    else $sessionCreated = false;
     
     // Mark the lifetime of this session
     if($fp = @fopen("$dataDir/lifetime", "w"))
@@ -120,6 +123,8 @@ function mpStartSession($createIfNeeded = false)
         fwrite($fp, "Destroy-on date: ".date("j M Y \\a\\t g:ia", ($time+MP_SESSION_LIFETIME))."\n");
         @fclose($fp);
     }
+    
+    return $sessionCreated;
 }
 #}}}########################################################################
 

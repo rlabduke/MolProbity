@@ -54,12 +54,14 @@ function runSswing($pdbfile, $mapfile, $workdir, $cnit)
     
     $cmd = "sswing $pdbfile ".trim(substr($cnit,1,4))." ".trim(substr($cnit,6,3))." $mapfile";
     if(substr($cnit,0,1) != ' ') $cmd .= " ".substr($cnit,0,1);
+    //echo("\n\n".$cmd."\n\n"); //XXX-TMP
     $out = explode("\n", shell_exec($cmd));
     
     $swap = array();
     foreach($out as $line)
     {
-        if(preg_match('/^[ 0-9]{3}[0-9] [^/]/', $line))
+        //echo $line; //XXX-TMP
+        if(preg_match('/^[ 0-9]{3}[0-9] [^\/]/', $line))
         {
             $al = substr($line, 7, 5);
             $coords = substr($line, 25, 24);
@@ -69,6 +71,30 @@ function runSswing($pdbfile, $mapfile, $workdir, $cnit)
     
     chdir($oldwd);
     return $swap;
+}
+#}}}########################################################################
+
+#{{{ makeSswingKin - display all changes
+############################################################################
+/**
+* $outfile will be overwritten.
+* $cnit is an array of CNIT codes for the residues that were processed.
+*/
+function makeSswingKin($pdb1, $pdb2, $outfile, $cnit)
+{
+        if(file_exists($outfile)) unlink($outfile);
+        
+        $stats = describePdbStats( pdbstat($pdb1), false );
+        $h = fopen($outfile, 'a');
+        fwrite($h, "@text\n");
+        fwrite($h, "Sidechains have been refit by SSWING. Details of the input file:\n\n");
+        foreach($stats as $stat) fwrite($h, "[+]   $stat\n");
+        fwrite($h, "@kinemage 1\n");
+        //TODO: calculate views for each residue in CNIT
+        fclose($h);
+        exec("prekin -quiet -append -animate -lots $pdb1 >> $outfile");
+        exec("prekin -quiet -append -animate -lots $pdb2 >> $outfile");
+        
 }
 #}}}########################################################################
 

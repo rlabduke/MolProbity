@@ -30,6 +30,8 @@ unset($_SESSION['bgjob']); // Clean up any old data
 $_SESSION['bgjob']['model']         = $_REQUEST['model'];
 $_SESSION['bgjob']['makeFlipkin']   = $_REQUEST['makeFlipkin'];
 
+mpLog("reduce-build:User ran default Reduce -build job; flipkins=".$_REQUEST['makeFlipkin']);
+
 // launch background job
 launchBackground(MP_BASE_DIR."/jobs/reduce-build.php", "improve_reduce_choose.php?$_SESSION[sessTag]", 5);
 

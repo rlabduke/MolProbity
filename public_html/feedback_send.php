@@ -38,8 +38,6 @@ $inregardto  = $_REQUEST['inRegardTo'];
 $sendername  = $_REQUEST['senderName'];
 $senderemail = $_REQUEST['senderEmail'];
 
-mpLog("FEEDBACK:Sent to $fb_to with subject $inregardto");
-
 $fb_to = MP_EMAIL_AUTHOR.",".MP_EMAIL_WEBMASTER;
 $fb_subj = "MolProbity feedback: $inregardto";
 $fb_hdrs = "From: " . MP_EMAIL_WEBMASTER
@@ -54,6 +52,7 @@ $fb_msg = "\n"
     . wordwrap($_REQUEST['feedbackText'], 76);
 
 $ok = mail($fb_to, $fb_subj, $fb_msg, $fb_hdrs);
+mpLog("feedback:Sent to $fb_to with subject $inregardto; success=$ok");
 
 if($ok)
 {

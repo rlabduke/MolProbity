@@ -48,11 +48,13 @@ if($target == 'model')
 {
     $file = makeZipForModel($modelID);
     $url = "$_SESSION[dataURL]/$file";
+    mpLog("archive-model:Archive file made of model $modelID");
 }
 elseif($target == 'session')
 {
     $file = makeZipForSession();
     $url = "$_SESSION[dataURL]/$file";
+    mpLog("archive-session:Archive file made for entire session");
 }
 else
 {
