@@ -56,15 +56,38 @@ INPUTS (via Get or Post):
 # MAIN - the beginning of execution for this page
 ############################################################################
 // Start the page: produces <HTML>, <HEAD>, <BODY> tags
-echo mpPageHeader("Analysis results");
+echo mpPageHeader("Analysis results", "analyze");
 
-$model = $_SESSION['models'][ $_REQUEST['model'] ];
+$modelID = $_REQUEST['model'];
+$model = $_SESSION['models'][$modelID];
 
-echo "<p><a href='analyze_tab.php?$_SESSION[sessTag]'>Done</a>";
+// Count *number* of outliers for each class
+// First index is 9-char residue name
+// Second index is 'cbdev', 'rota', 'rama', or 'clash'
+$worst = $_SESSION['models'][$modelID]['badRes'];
+$cbdev_outliers = $rota_outliers = $rama_outliers = $clash_outliers = 0;
+foreach($worst as $res)
+{
+    if(isset($res['cbdev']))    $cbdev_outliers++;
+    if(isset($res['rota']))     $rota_outliers++;
+    if(isset($res['rama']))     $rama_outliers++;
+    if(isset($res['clash']))    $clash_outliers++;
+}
+
+echo "<p><a href='analyze_tab.php?$_SESSION[sessTag]'>Done</a>\n";
+echo "<hr />\n";
+if(isset($model['parent'])) // this model is derived from an uploaded one
+{
+    echo "You can COMPARE THIS MODEL TO ITS PREDECESOR to see how much it's been improved.\n";
+}
+else // this model is an original upload
+{
+    echo "You can fix some of these problems automatically by letting Reduce OPTIMIZE HYDROGRENS AND FLIP ASN/GLN/HIS.\n";
+}
 ############################################################################
 ?>
 <hr />
-<h3>Multi-criterion display</h3>
+<h2>Multi-criterion display</h2>
 This single display presents all of the core validation criteria at once,
 allowing you to identify clusters of problems in the structure.
 <p><ul>
@@ -77,12 +100,33 @@ allowing you to identify clusters of problems in the structure.
 </li>
 <li>
     <a href=''>A link to the multicrit chart</a>
-    <br /><i>TODO: Jeremy Block is supposed to develop this chart.</i>
+    <br /><i>TODO: Jeremy Block is supposed to develop this chart.
+    A brief summary of the number of outliers and percentages should appear here.
+    </i>
 </li>
 </ul></p>
 
 <hr />
-<h3>Ramachandran plots</h3>
+The multi-criterion display presents results of all of the validation tests.
+The kinemages below show the same information in different ways or in more detail.
+<hr />
+
+<h3>All-atom contacts (<?php echo $clash_outliers; ?> clashing residues)</h3>
+TODO: link to more info about all-atom contacts.
+<p><ul>
+<li>
+    <?php echo linkModelKin($model, "aac-sc.kin"); ?>
+    <br/><i>Sidechain clashes are most common in models of proteins.
+    </i>
+</li>
+<li>
+    <?php echo linkModelKin($model, "aac-mc.kin"); ?>
+    <br/><i>Mainchain clashes are most common in models of RNA.
+    </i>
+</li>
+</ul></p>
+
+<h3>Ramachandran plots (<?php echo $rama_outliers; ?> outliers)</h3>
 The Ramachandran plot identifies protein residues in illegal backbone conformations,
 based on the phi and psi dihedral angles.
 TODO: link to more info about Ramachandran plots.
@@ -94,8 +138,40 @@ TODO: link to more info about Ramachandran plots.
     </i>
 </li>
 <li>
-    <?php echo "<a href='$model[url]/$model[prefix]rama.jpg' target='blank'><b>JPEG image</b></a>"; ?>
-    <br /><i>All four plots on one page with outliers labeled.</i>
+    <b>PostScript</b>:
+    <?php echo "<a href='$model[url]/$model[prefix]rama.kin.1.eps'>All data</a>"; ?>
+    | <?php echo "<a href='$model[url]/$model[prefix]rama.kin.1.eps'>General case</a>"; ?>
+    | <?php echo "<a href='$model[url]/$model[prefix]rama.kin.1.eps'>Glycine</a>"; ?>
+    | <?php echo "<a href='$model[url]/$model[prefix]rama.kin.1.eps'>Proline</a>"; ?>
+    | <?php echo "<a href='$model[url]/$model[prefix]rama.kin.1.eps'>pre-Proline</a>"; ?>
+    <br /><i>Use Mage or KiNG to generate customized PostScript or PDF renderings of the Ramachandran kinemage.
+    </i>
+</li>
+<li>
+    <b>JPEG image</b>:
+    <?php echo "<a href='$model[url]/$model[prefix]rama.jpg' target='blank'>General, Gly, Pro, pre-Pro</a>"; ?>
+    <br /><i>All four plots on one page with outliers labeled.
+    </i>
+</li>
+</ul></p>
+
+<h3>Rotamers (<?php echo $rota_outliers; ?> outliers)</h3>
+Refer to the multi-criterion displays to identify bad rotamers.
+TODO: link to more info about rotamers.
+
+<h3>C-beta deviations (<?php echo $cbdev_outliers; ?> outliers)</h3>
+TODO: link to more info about C-beta deviations
+<p><ul>
+<li>
+    <?php echo linkModelKin($model, "cb2d.kin"); ?>
+    <br/><i>2-D representation plots deviations for whole molecule as scatter around the ideal C-beta position.
+    </i>
+</li>
+<li>
+    <?php echo linkModelKin($model, "cb3d.kin"); ?>
+    <br/><i>3-D representation in which deviations are represented by gold balls.
+    Larger balls represent larger deviations; each is centered at the ideal C-beta position.
+    </i>
 </li>
 </ul></p>
 <?php echo mpPageFooter(); ?>
