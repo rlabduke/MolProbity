@@ -179,8 +179,11 @@ function formEditLabbook($entry, $width = 90, $height = 30)
 * This is because calling saveLabbook immediately followed by openLabbook
 * seems to result in some of the supposedly written info being lost,
 * at least on my Powerbook and PHP 4.3.2.
+*
+* By default, this function saves the labbook immediately. If you intend
+* to save it yourself later on, you can set $saveNow to false.
 */
-function openLabbookWithEdit()
+function openLabbookWithEdit($saveNow = true)
 {
     // Load lab notebook data
     $labbook = openLabbook();
