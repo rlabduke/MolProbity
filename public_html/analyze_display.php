@@ -84,7 +84,7 @@ else // this model is an original upload
 
 <h2>Quality summary</h2>
 <table width='100%' border='0'>
-<tr><td>Clashscore:</td><?php if(isset($clash)) echo "<td>$clash[scoreAll] (all)</td><td>$clash[scoreBlt40] (B&lt;40)</td>"; else echo "<td>?</td><td></td>"; ?></tr>
+<tr><td>Clashscore:</td><?php if(isset($clash)) echo "<td>$clash[scoreAll] <small>(all)</small></td><td>$clash[scoreBlt40] <small>(B&lt;40)</small></td>"; else echo "<td>?</td><td></td>"; ?></tr>
 <tr><td>Ramachandran outliers:</td><?php if(isset($rama)) echo "<td>$num_rama_outliers</td><td>($pct_rama_outliers%)</td>"; else echo "<td>?</td><td></td>"; ?></tr>
 <tr><td>Rotamer outliers:</td><?php if(isset($rota)) echo "<td>$num_rota_outliers</td><td>($pct_rota_outliers%)</td>"; else echo "<td>?</td><td></td>"; ?></tr>
 <tr><td>C&beta; deviations:</td><?php if(isset($cbdev)) echo "<td>$num_cb_outliers</td><td>($pct_cb_outliers%)</td>"; else echo "<td>?</td><td></td>"; ?></tr>

@@ -61,7 +61,10 @@ if(isset($_REQUEST['entryNumber']))
 
 echo "<p><input type='submit' name='cmd' value='Save'>\n";
 echo "<input type='submit' name='cmd' value=\"Don't save\">\n";
+echo "</form>\n";
+
+echo "<p><i>Hint: you can use HTML tags in your lab notebook entries.</i></p>\n";
 
 // End the page
-mpPageFooter();
+echo mpPageFooter();
 ?>
