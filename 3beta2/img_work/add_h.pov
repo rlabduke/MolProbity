@@ -1,0 +1,109 @@
+#include "colors.inc"
+#include "textures.inc"
+
+background { color rgb 0 }
+
+camera {
+  up <0,1,0>
+  right <1,0,0>
+  location <0, 0, -25>
+  look_at <0, 0, 0>
+  rotate <0,-30,0>
+}
+
+#declare BOND_TX = texture {
+  pigment { color rgb 0.35 }
+	finish {
+		ambient 0.25
+		diffuse 0.7
+		specular 0.5
+		roughness 0.01
+	}
+}
+
+#declare CARBON_TX = texture {
+  pigment { color rgb 0.7 }
+	finish {
+		ambient 0.25
+		diffuse 0.7
+		specular 0.5
+		roughness 0.01
+	}
+}
+
+#declare H_TX = texture {
+  pigment { color rgb <.8,1,.8> }
+	finish {
+		ambient 0.25
+		diffuse 0.7
+		specular 0.5
+		roughness 0.01
+	}
+}
+
+// The carbon atom
+union {
+  sphere {
+    <0,0,0>, 4
+    texture { CARBON_TX }
+  }
+  
+  cylinder {
+    <0,0,0>, <0,-30,0>, 1
+    texture { BOND_TX }
+  }
+  
+  // No translation
+}
+
+// H atom 1
+union {
+  sphere {
+    <0,0,-10>, 2
+    texture { H_TX }
+  }
+  
+  cylinder {
+    <0,0,0>, <0,0,-10>, 1
+    texture { BOND_TX }
+  }
+  
+  rotate <20,0,0> // Elevation
+}
+  
+// H atom 2
+union {
+  sphere {
+    <0,0,-10>, 2
+    texture { H_TX }
+  }
+  
+  cylinder {
+    <0,0,0>, <0,0,-10>, 1
+    texture { BOND_TX }
+  }
+  
+  rotate <20,0,0> // Elevation
+  rotate <0,-120,0>
+}
+
+// H atom 3
+union {
+  sphere {
+    <0,0,-10>, 2
+    texture { H_TX }
+  }
+  
+  cylinder {
+    <0,0,0>, <0,0,-10>, 1
+    texture { BOND_TX }
+  }
+  
+  rotate <20,0,0> // Elevation
+  rotate <0,120,0>
+}
+
+light_source {
+  <20,10,-20>
+  color White
+}

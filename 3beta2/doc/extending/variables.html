@@ -1,0 +1,284 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>MolProbity variables</title>
+</head>
+<body>
+<h2>Contents of $_SESSION:</h2>
+<ul>
+  <li><span style="font-weight: bold; font-family: monospace;">sessTag</span>:
+a string of the format SESSION_NAME=SESSION_ID, for embedding in URLs.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">dataDir</span>:
+the (absolute) directory on the server that all data for this user is
+stored in.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">dataURL</span>:
+the (relative) URL for accessing user data. (Only correct for scripts
+in <span style="font-family: monospace;">public_html</span>, not its
+subdirectories.)<br>
+  </li>
+  <li><span style="font-weight: bold; font-family: monospace;">userIP</span>:
+the probable IP number of the current user. Not 100% reliable.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">timeZone</span>:
+a key into $TIME_ZONES (see timezones.php) for the user's preferred
+time
+zone.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">models</span>:
+an array of model-information entries (which are themselves arrays), as
+described below.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">edmaps</span>:
+an array of file names for electron density maps, which are stored in <span
+ style="font-weight: bold; font-family: monospace;">dataDir</span>.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">archives</span>:
+an array of file names for temporary archive files, which are stored in
+    <span style="font-weight: bold; font-family: monospace;">dataDir</span>.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">kingSize</span>:
+one of "tiny", "small", "default", or "large" - determines the size of
+the KiNG window.<br>
+  </li>
+  <li><span style="font-weight: bold; font-family: monospace;">bgjob</span>:
+an array for storing information about the currently running background
+job. This can serve both as input and output to the background script.
+The only field that must be defined is <span
+ style="font-weight: bold; font-family: monospace;">isRunning</span>;
+this will be set automatically before the job is launched, but the job
+itself is responsible for clearing this flag just before it exits.
+Failing to clear this will make it appear that the job never exited and
+instead ran forever.<br>
+  </li>
+  <li><span style="font-weight: bold; font-family: monospace;">moreOpts</span>:
+an array of flags for showing more options in various forms, described
+below.</li>
+</ul>
+<h2>Files present in the user data directory ($_SESSION['dataDir']):</h2>
+You shouldn't ever be using the named files directly; instead, access
+them
+through the sessions and labbook APIs. Still, it's good to be aware
+that they're here.<br>
+<ul>
+  <li><span style="font-weight: bold; font-family: monospace;">session</span>:
+stores all the user session data.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">lifetime</span>:
+timestamps for the last time this session was accessed. Used for
+garbage collection.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">labbook</span>:
+the serialized PHP data structure for all of the lab notebook entries.
+Not (very) human readable.</li>
+  <li><span style="font-family: monospace; font-weight: bold;">progress</span>:
+the progress indicator for the background job. Controlled by <span
+ style="font-family: monospace;">setProgress()</span>.<br>
+  </li>
+  <li><span style="font-weight: bold; font-family: monospace;">errors</span>:
+the output (stdout and stderr) from background jobs.</li>
+  <li>... plus any electron density maps.<br>
+  </li>
+  <li>... plus individual directories for each model.</li>
+</ul>
+<h2>Issues to be aware of when working with files</h2>
+<ul>
+  <li>The Mac OS X filesystem (HFS) is case-<span
+ style="font-style: italic;">preserving</span> but <span
+ style="font-weight: bold;">not</span> case-<span
+ style="font-style: italic;">sensitive</span>.
+That means that files named "foo", "Foo", and "FOO" all refer to
+exactly the same file, although the file system will list that file
+with the capitalization you originally supplied. The PHP <span
+ style="font-family: monospace;">file_exists()</span> function deals
+with this correctly; i.e., if you <span style="font-family: monospace;">touch
+foo</span> then <span style="font-family: monospace;">file_exists("Foo")
+== true</span>.</li>
+  <li>Users love to upload files with "weird" characters in their
+names, especially spaces. See the <span style="font-family: monospace;">censorFileName()</span>
+function in lib/core.php.</li>
+  <li>Hackers would love to upload a file named <span
+ style="font-family: monospace;">session</span> and overwrite your
+session data, or to pass <span style="font-family: monospace;">/etc/passwd</span>
+to a script that displays files. Remember that the <span
+ style="font-family: monospace;">apache</span> account -- which runs
+PHP -- has pretty generous permissions on your server. Think security
+first when dealing with the file system!</li>
+  <li>Permissions of files created by PHP are controlled by the <span
+ style="font-family: monospace;">umask()</span> function; permissions
+of directories are set at create time by <span
+ style="font-family: monospace;">mkdir()</span>.
+Uploaded files often have very restrictive permissions that are
+retained when they are moved or copied. If you're not sure, use <span
+ style="font-family: monospace;">chmod()</span> to be safe! (And note
+that <span style="font-family: monospace;">chmod()</span> takes an
+octal argument, so be sure to prefix the number with a zero: e.g.,
+0644).</li>
+</ul>
+<h2>Contents of $_SESSION['models']['<span
+ style="font-style: italic; text-decoration: underline;">myModelID</span>']:</h2>
+<ul>
+  <li><span style="font-weight: bold; font-family: monospace;">id</span>:
+this is the key used for storing this model; labelled <span
+ style="font-style: italic; text-decoration: underline;">myModelID</span>
+above.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">dir</span>:
+the absolute path to the directory where files for this model are kept.
+Typically a directory with the same name as the model ID, located in <span
+ style="font-family: monospace;">$_SESSION['dataDir']</span>.</li>
+  <li><span style="font-family: monospace; font-weight: bold;">url</span>:
+the relative URL to the directory where files for this model are kept.
+URL is relative to <span style="font-family: monospace;">public_html</span>.<br>
+  </li>
+  <li><span style="font-weight: bold; font-family: monospace;">prefix</span>:
+a string to be prepended to file names for generated files. Usually
+something like "1ubq-" but it could even be the empty string. Example
+name: <span style="font-family: monospace;">$cbfile =
+"{$prefix}cbeta.dat"</span>, assuming <span
+ style="font-family: monospace;">$prefix</span> has already been
+assigned this value. Doesn't include the directory name (<span
+ style="font-weight: bold; font-family: monospace;">dir</span>, above).
+Curly braces ensure proper variable interpolation; see the PHP manual
+for explanation.<br>
+  </li>
+  <li><span style="font-weight: bold; font-family: monospace;">pdb</span>:
+the filename for the PDB that is this current model. Full
+path is <span style="font-family: monospace;">$_SESSION['models']['</span><span
+ style="font-style: italic; text-decoration: underline; font-family: monospace;">myModelID</span><span
+ style="font-family: monospace;">']['dir'] . "/" . $_SESSION['models']['</span><span
+ style="font-style: italic; text-decoration: underline; font-family: monospace;">myModelID</span><span
+ style="font-family: monospace;">']['pdb']</span>.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">stats</span>:
+the information returned by PdbStat for the PDB.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">segmap</span>:
+the segID-to-chainID mapping string that was applied to this file
+(relative to its parent), or not set if none. This is specifically <span
+ style="font-style: italic;">not</span> a heritable property: one
+remapping fixes the problem once and for all.<br>
+  </li>
+  <li><span style="font-family: monospace; font-weight: bold;">parent</span>:
+the model ID of the model this one is "derived" from. For instance, a
+model representing the results of <span style="font-family: monospace;">reduce
+-build</span> might point back to the file pulled directly from the
+PDB. This key is not set for models supplied by the user.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">history</span>:
+human-readable one-line statement about where this model came from.</li>
+  <li><span style="font-family: monospace; font-weight: bold;">isReduced</span>:
+true if the PDB file has been processed by Reduce, so we know at a
+minimum that all hydrogens are present. This is a heritable property.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">isBuilt</span>:
+true if the PDB is the result of a <span
+ style="font-family: monospace;">-build</span> and/or <span
+ style="font-family: monospace;">-fix</span> run in Reduce, so the
+expert system has already changed all the Asn, Gln, and His that might
+need changing. This is a heritable property.<br>
+  </li>
+  <li><span style="font-weight: bold; font-family: monospace;">isAnalyzed</span>:
+true if the analysis task has already been run on this model, so that
+it's at least partly analyzed already.</li>
+</ul>
+<h2>Files created for each model:</h2>
+All the actual file names are preceded by the model <span
+ style="font-weight: bold; font-family: monospace;">prefix</span>.
+Listed below are the suffixes. Order is alphabetical by file type, then
+by file name. Not all files will necessarily be generated for every
+model.<br>
+<ul>
+  <li>multi.chart</li>
+  <li>multiall.chart<br>
+  </li>
+  <li>cbdev.data</li>
+  <li><span style="font-weight: bold; font-family: monospace;">clash.data</span>:
+the result of running Clashlist.<br>
+  </li>
+  <li>rama.data</li>
+  <li>rota.data</li>
+  <li><span style="font-weight: bold; font-family: monospace;">aac</span><span
+ style="font-weight: bold; font-family: monospace;">.kin</span>:
+all-atom contacts combined in one kin, with separate groups for
+mainchain vs.
+sidechain<br>
+  </li>
+  <li><span style="font-weight: bold; font-family: monospace;">cb3d.kin</span>:
+the standard Prekin 3-D rendering of C-beta deviations</li>
+  <li><span style="font-weight: bold; font-family: monospace;">cb2d.kin</span>:
+the "bullseye" kinemage plot of C-beta deviations for the whole
+structure at once</li>
+  <li><span style="font-weight: bold; font-family: monospace;">multi.kin</span>:
+the "multi-criterion" kinemage with all validation data at once<br>
+  </li>
+  <li>rama.kin</li>
+  <li><span style="font-weight: bold; font-family: monospace;">sswing.kin</span>:
+shows the results of running SSWING on a set of user-selected residues.
+Similar to a flipkin.<br>
+  </li>
+  <li><span style="font-weight: bold; font-family: monospace;">H.pdb</span>:
+the result of a <span style="font-family: monospace;">reduce -build</span>
+run on some other model. Asn/Gln/His are flipped according to the
+judgement of the expert system.<br>
+  </li>
+  <li><span style="font-weight: bold; font-family: monospace;">mp.pdb</span>:
+the original uploaded/downloaded model file, as modified by <span
+ style="font-family: monospace;">preparePDB()</span> (linefeeds, CNS
+atom names, seg IDs).<br>
+  </li>
+  <li><span style="font-weight: bold; font-family: monospace;">nbH.pdb</span>:
+the "nb" stands for "no build" - none of the existing atoms have been
+moved, but missing hydrogens were added and optimized. Asn/Gln/His are
+in their original orientations.<br>
+  </li>
+  <li><span style="font-weight: bold; font-family: monospace;">Hfix.pdb</span>:
+the result of a <span style="font-family: monospace;">reduce -build
+-fix</span> run, where the user choose which Asn/Gln/His should be
+flipped. This should be different in some way than the H.pdb file.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">S.pdb</span>:
+the final SSWING PDB, which only includes user-approved changes.<br>
+  </li>
+  <li><span style="font-weight: bold; font-family: monospace;">sswing.pdb</span>:
+throw-away PDB generated by the initial SSWING run, before user review.</li>
+  <li>rama.pdf<br>
+  </li>
+</ul>
+<ul>
+</ul>
+<h2>Contents of $_SESSION['bgjob']:</h2>
+<ul>
+  <li><span style="font-family: monospace; font-weight: bold;">isRunning</span>:
+this will be set automatically before the job is launched by <span
+ style="font-family: monospace;">launchBackground()</span>, but the job
+itself is responsible for clearing this flag just before it exits.
+Failing to clear this will make it appear that the job never exited and
+instead ran forever.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">processID</span>:
+the Unix PID of the parent background process. Can be used to abort
+background jobs if necessary. Cleared by <span
+ style="font-family: monospace;">launchBackground()</span>.<br>
+  </li>
+  <li><span style="font-family: monospace; font-weight: bold;">startTime</span>:
+Unix timestamp of job start time. Set by <span
+ style="font-family: monospace;">launchBackground()</span>.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">endTime</span>:
+Unix timestamp of when the job finished. Must be set by the job itself.<br>
+  </li>
+  <li><span style="font-family: monospace; font-weight: bold;">refreshRate</span>:
+number of seconds between refreshes of the progress monitoring page.
+Set by <span style="font-family: monospace;">launchBackground()</span>.</li>
+  <li><span style="font-family: monospace; font-weight: bold;">whereNext</span>:
+URL to visit when job is finished. Must encode session ID. E.g. <span
+ style="font-family: monospace;">$_SESSION['bgjob']['whereNext'] =
+"home.php?$_SESSION[sessTag]&amp;foo=bar"</span>.</li>
+  <li>... plus other entries specific to the particular job at hand.<br>
+  </li>
+</ul>
+<h2>Contents of $_SESSION['moreOpts']:</h2>
+<ul>
+  <li><span style="font-weight: bold; font-family: monospace;">all</span>:
+true if we should always show extra options, regardless of any other
+settings below. If set, links to show more/fewer options are also
+supressed.<br>
+    <span style="font-weight: bold; font-family: monospace;"></span></li>
+  <li><span style="font-weight: bold; font-family: monospace;">pdbUpload</span>:
+true if we should show more options for uploading files.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">analyze</span>:
+true if the user wants to choose which analysis jobs are run.<br>
+  </li>
+</ul>
+<br>
+end<br>
+<br>
+</body>
+</html>
