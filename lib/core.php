@@ -95,7 +95,7 @@ function mpNavigationBar($active)
     //$s .= mpNavBar_goto('', 'Set preferences', ($active == 'preferences'));
     //$s .= mpNavBar_goto('feedback_tab.php', 'Feedback &amp; Bugs', ($active == 'feedback'));
     $s .= "<br />\n";
-    //$s .= mpNavBar_goto('finish_tab.php', 'Log out', ($active == 'logout'));
+    $s .= mpNavBar_goto('logout.php', 'Log out', ($active == 'logout'));
     //$s .= mpNavBar_goto('savesess_tab.php', 'Save session', ($active == 'savesession'));
     $s .= "<br />\n";
     $s .= "<br />You are using ".round(100*mpSessSizeOnDisk(session_id())/MP_SESSION_MAX_SIZE);
