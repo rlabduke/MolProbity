@@ -48,7 +48,7 @@ function displayMap($context)
     echo "<ul>\n";
     foreach($_SESSION['edmaps'] as $map)
     {
-        $mapPath = "$_SESSION[dataDir]/$map";
+        $mapPath = "$_SESSION[dataDir]/".MP_DIR_EDMAPS."/$map";
         echo "<li><b>$map</b> (".formatFilesize(filesize($mapPath)).")</li>\n";
     }
     echo "</ul>\n</p>\n";

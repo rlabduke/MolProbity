@@ -59,6 +59,12 @@ define("MP_TABLE_ALT2", "#f0f0f0");
 // Highlight color for striped tables
 define("MP_TABLE_HIGHLIGHT", "#cc9999");
 
+// Subdirectories for things to be stored in.
+define("MP_DIR_SYSTEM", "system");              // Session data, lab notebook, etc.
+define("MP_DIR_MODELS", "coordinates");         // PDB files
+define("MP_DIR_EDMAPS", "electron_density");    // electron density
+define("MP_DIR_TOPPAR", "dictionaries");        // het dicts, etc. (named for CNS TOPology and PARameter)
+
 //============================================================================
 //===  PLEASE DON'T CHANGE THINGS BELOW THIS LINE  ===========================
 //============================================================================

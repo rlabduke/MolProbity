@@ -94,9 +94,9 @@ function mpNavigationBar($active)
     $s .= mpNavBar_goto('notebook_main.php', 'Lab notebook', ($active == 'notebook'));
     //$s .= mpNavBar_goto('', 'Set preferences', ($active == 'preferences'));
     //$s .= mpNavBar_goto('feedback_tab.php', 'Feedback &amp; Bugs', ($active == 'feedback'));
+    $s .= mpNavBar_goto('save_session.php', 'Save session', ($active == 'savesession'));
     $s .= "<br />\n";
     $s .= mpNavBar_goto('logout.php', 'Log out', ($active == 'logout'));
-    //$s .= mpNavBar_goto('savesess_tab.php', 'Save session', ($active == 'savesession'));
     $s .= "<br />\n";
     $s .= "<br />You are using ".round(100*mpSessSizeOnDisk(session_id())/MP_SESSION_MAX_SIZE);
     $s .= "% of your ".formatFilesize(MP_SESSION_MAX_SIZE)." of disk space.";
@@ -169,7 +169,7 @@ function launchBackground($script, $whereNext, $delay = 5)
     //unset($_SESSION['bgjob']); // Clean up any old data
     
     // Remove old progress file
-    $progress = "$_SESSION[dataDir]/system/progress";
+    $progress = "$_SESSION[dataDir]/".MP_DIR_SYSTEM."/progress";
     if(file_exists($progress)) unlink($progress);
     
     unset($_SESSION['bgjob']['processID']);
@@ -178,7 +178,7 @@ function launchBackground($script, $whereNext, $delay = 5)
     $_SESSION['bgjob']['refreshRate']   = $delay;
     $_SESSION['bgjob']['whereNext']     = $whereNext;
     
-    $errlog = $_SESSION['dataDir']."/system/errors";
+    $errlog = $_SESSION['dataDir']."/".MP_DIR_SYSTEM."/errors";
     
     // Make sure session variables are written to disk.
     // session_write_close() doesn't take effect until end of script
@@ -211,7 +211,7 @@ $__progress_tasks__ = array();
 function setProgress($tasks, $active)
 {
     $__progress_tasks__ = $tasks; // make a record for later
-    $f = fopen("$_SESSION[dataDir]/system/progress", "wb");
+    $f = fopen("$_SESSION[dataDir]/".MP_DIR_SYSTEM."/progress", "wb");
     $foundActive = false;
     if(is_array($tasks)) foreach($tasks as $index => $task)
     {

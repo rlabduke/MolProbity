@@ -58,6 +58,7 @@
     Make sure Reduce doesn't shrink the PDB file (lost atoms, etc)
     Add session resume link to preformatted email
     Make clashscore a choice during analysis
+  x duplicateModel(), used by SSWING, is broken right now.
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -73,6 +74,14 @@
   functions; the session functions should be usable with the rest of it.
 - made a really nice file view/download page with collapsible folders
 - D&amp;J decided on a file-type-based folder system for organizing user files
+- added logout handler and save-session handler
+- updated the site map with download, logout, save session pages
+- changed to MP_DIR_xxxx system for naming subdirectories, b/c Dave and Jane
+  aren't sure what they want yet, and it will probably change later.
+- file upload functions now group files into directories by file type
+- KiNG viewing now looks in the (new) right place for electron density
+- many things that used the old model data structure will be broken, b/c
+  we've removed the per-model directories (and the corresponding URLs).
 
 ### 3beta6 ###
 - created MVC/delegate architecture in public_thml/index.php

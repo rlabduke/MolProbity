@@ -41,7 +41,7 @@ an array of model-information entries (which are themselves arrays), as
 described below.</li>
   <li><span style="font-weight: bold; font-family: monospace;">edmaps</span>:
 an array of file names for electron density maps, which are stored in <span
- style="font-weight: bold; font-family: monospace;">dataDir</span>.</li>
+ style="font-weight: bold; font-family: monospace;">dataDir/MP_DIR_EDMAPS</span>.</li>
   <li><span style="font-weight: bold; font-family: monospace;">archives</span>:
 an array of file names for temporary archive files, which are stored in
     <span style="font-weight: bold; font-family: monospace;">dataDir</span>.</li>
@@ -128,30 +128,20 @@ octal argument, so be sure to prefix the number with a zero: e.g.,
 this is the key used for storing this model; labelled <span
  style="font-style: italic; text-decoration: underline;">myModelID</span>
 above.</li>
-  <li><span style="font-weight: bold; font-family: monospace;">dir</span>:
-the absolute path to the directory where files for this model are kept.
-Typically a directory with the same name as the model ID, located in <span
- style="font-family: monospace;">$_SESSION['dataDir']</span>.</li>
-  <li><span style="font-family: monospace; font-weight: bold;">url</span>:
-the relative URL to the directory where files for this model are kept.
-URL is relative to <span style="font-family: monospace;">public_html</span>.<br>
-  </li>
   <li><span style="font-weight: bold; font-family: monospace;">prefix</span>:
 a string to be prepended to file names for generated files. Usually
 something like "1ubq-" but it could even be the empty string. Example
 name: <span style="font-family: monospace;">$cbfile =
 "{$prefix}cbeta.dat"</span>, assuming <span
  style="font-family: monospace;">$prefix</span> has already been
-assigned this value. Doesn't include the directory name (<span
- style="font-weight: bold; font-family: monospace;">dir</span>, above).
+assigned this value.
 Curly braces ensure proper variable interpolation; see the PHP manual
 for explanation.<br>
   </li>
   <li><span style="font-weight: bold; font-family: monospace;">pdb</span>:
 the filename for the PDB that is this current model. Full
-path is <span style="font-family: monospace;">$_SESSION['models']['</span><span
- style="font-style: italic; text-decoration: underline; font-family: monospace;">myModelID</span><span
- style="font-family: monospace;">']['dir'] . "/" . $_SESSION['models']['</span><span
+path is <span style="font-family: monospace;">$_SESSION['models']['dataDir']</span><span
+ style="font-family: monospace;">."/".MP_DIR_MODELS."/".$_SESSION['models']['</span><span
  style="font-style: italic; text-decoration: underline; font-family: monospace;">myModelID</span><span
  style="font-family: monospace;">']['pdb']</span>.</li>
   <li><span style="font-weight: bold; font-family: monospace;">stats</span>:

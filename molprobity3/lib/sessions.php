@@ -93,13 +93,11 @@ function mpStartSession($createIfNeeded = false)
             // Always do cleanup before starting a new session
             mpSessGC(MP_SESSION_LIFETIME);
             
+            // Main data directories
             mkdir($dataDir, 0777); // Default mode; is modified by UMASK too.
-            mkdir("$dataDir/charts", 0777);
-            mkdir("$dataDir/expmtl_data", 0777);
-            mkdir("$dataDir/kinemages", 0777);
-            mkdir("$dataDir/models", 0777);
-            mkdir("$dataDir/raw_data", 0777);
-            mkdir("$dataDir/system", 0777);
+            mkdir("$dataDir/".MP_DIR_SYSTEM, 0777);
+            
+            // Others specified in config.php must be created on demand.
 
             // Set up some session variables. See docs for explanation.
             $_SESSION['dataDir']        = $dataDir;
@@ -122,7 +120,7 @@ function mpStartSession($createIfNeeded = false)
     else $sessionCreated = false;
     
     // Mark the lifetime of this session
-    if($fp = @fopen("$dataDir/system/lifetime", "w"))
+    if($fp = @fopen("$dataDir/".MP_DIR_SYSTEM."/lifetime", "w"))
     {
         $time = time();
         fwrite($fp, "$time\n");
@@ -192,7 +190,7 @@ function mpSessRead($id)
 {
     mpCheckSessionID($id); // just in case something nasty is in there
     $dataDir    = MP_BASE_DIR."/public_html/data/$id";
-    $sessFile   = "$dataDir/system/session";
+    $sessFile   = "$dataDir/".MP_DIR_SYSTEM."/session";
     
     // Read in session data, if present
     if($fp = @fopen($sessFile, "r"))
@@ -220,7 +218,7 @@ function mpSessWrite($id, $sessData)
     
     mpCheckSessionID($id); // just in case something nasty is in there
     $dataDir    = MP_BASE_DIR."/public_html/data/$id";
-    $sessFile   = "$dataDir/system/session";
+    $sessFile   = "$dataDir/".MP_DIR_SYSTEM."/session";
     
     // Write the session data
     if($fp = @fopen($sessFile, "w"))
@@ -268,7 +266,7 @@ function mpSessTimeToLive($id)
 {
     mpCheckSessionID($id); // just in case something nasty is in there
     $dataDir    = MP_BASE_DIR."/public_html/data/$id";
-    if($fp = @fopen("$dataDir/system/lifetime", "r"))
+    if($fp = @fopen("$dataDir/".MP_DIR_SYSTEM."/lifetime", "r"))
     {
         $timestamp = trim(fgets($fp, 1024));
         @fclose($fp);

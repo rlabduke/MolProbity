@@ -25,7 +25,7 @@ require_once(MP_BASE_DIR.'/lib/strings.php');
 ############################################################################
 function openLabbook()
 {
-    $file = $_SESSION['dataDir']."/system/labbook";
+    $file = $_SESSION['dataDir']."/".MP_DIR_SYSTEM."/labbook";
     
     // Read in notebook data, if present
     if($fp = @fopen($file, "rb"))
@@ -51,7 +51,7 @@ function openLabbook()
 */
 function saveLabbook($bookData)
 {
-    $file = $_SESSION['dataDir']."/system/labbook";
+    $file = $_SESSION['dataDir']."/".MP_DIR_SYSTEM."/labbook";
 
     // Write the notebook data
     if($fp = @fopen($file, "wb"))
