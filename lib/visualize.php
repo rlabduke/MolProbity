@@ -4,6 +4,22 @@
     aspects of the analysis.
 *****************************************************************************/
 
+#{{{ makeSidechainDots - appends sc Probe dots
+############################################################################
+function makeSidechainDots($infile, $outfile)
+{
+    exec("probe 'alta' $infile >> $outfile");
+}
+#}}}########################################################################
+
+#{{{ makeMainchainDots - appends mc Probe dots
+############################################################################
+function makeMainchainDots($infile, $outfile)
+{
+    exec("probe -mc 'mc alta' $infile >> $outfile");
+}
+#}}}########################################################################
+
 #{{{ makeRamachandranKin - creates a kinemage-format Ramachandran plot
 ############################################################################
 function makeRamachandranKin($infile, $outfile)
@@ -21,6 +37,18 @@ function makeRamachandranKin($infile, $outfile)
 function makeRamachandranImage($infile, $outfile)
 {
     exec("java -cp ".MP_BASE_DIR."/lib/hless.jar hless.Ramachandran $infile -nosummary -nokin -img $outfile");
+}
+#}}}########################################################################
+
+#{{{ convertKinToPostscript - uses Mage to do EPS output
+############################################################################
+/**
+* Outputs are named $infile.1.eps, $infile.2.eps, etc.
+* One page is generated per frame of animation.
+*/
+function convertKinToPostscript($infile)
+{
+    exec("mage -postscript $infile");
 }
 #}}}########################################################################
 
@@ -182,22 +210,6 @@ $0 ~ /^@(dot|vector)list .* master=\{H-bonds\}/ { $0 = $0 " off" }
 
     exec("probe $options -noticks -mc -self 'alta' $infile | gawk '$dots_off_script' >> $outfile");
 }
-#}}}########################################################################
-
-#{{{ a_function_definition - sumary_statement_goes_here
-############################################################################
-/**
-* Documentation for this function.
-*/
-//function someFunctionName() {}
-#}}}########################################################################
-
-#{{{ a_function_definition - sumary_statement_goes_here
-############################################################################
-/**
-* Documentation for this function.
-*/
-//function someFunctionName() {}
 #}}}########################################################################
 
 #{{{ a_function_definition - sumary_statement_goes_here

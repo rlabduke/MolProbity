@@ -124,6 +124,26 @@ makeBadDotsVisible($infile, $outfile, true); // if false, don't write hb, vdw
 // Ramachandran plots
 makeRamachandranKin($infile, "$model[dir]/$model[prefix]rama.kin");
 makeRamachandranImage($infile, "$model[dir]/$model[prefix]rama.jpg");
+convertKinToPostscript("$model[dir]/$model[prefix]rama.kin");
+
+
+// C-beta deviations
+// In the future, we might use a custom lots kin here (e.g. with half-bond colors)
+$outfile = "$model[dir]/$model[prefix]cb3d.kin";
+exec("prekin -lots $infile > $outfile");
+makeCbetaDevBalls($infile, $outfile);
+makeCbetaDevPlot($infile, "$model[dir]/$model[prefix]cb2d.kin");
+
+
+// All-atom contacts
+// We might also want to not calculate H-bonds or VDW dots
+// In the future, we might use a custom lots kin here (e.g. with half-bond colors)
+$outfile = "$model[dir]/$model[prefix]aac-sc.kin";
+exec("prekin -lots $infile > $outfile");
+makeSidechainDots($infile, $outfile);
+$outfile = "$model[dir]/$model[prefix]aac-mc.kin";
+exec("prekin -lots $infile > $outfile");
+makeMainchainDots($infile, $outfile);
 
 /*********************
 To compare:

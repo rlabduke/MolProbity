@@ -14,6 +14,7 @@ cd macosx/
 ln -s dang.1.8.020529 dang
 ln -s gawk-3.1.3 gawk
 ln -s gawk-3.1.3 awk
+ln -s mage.6.33.031201 mage
 ln -s prekin.6.25.030309.macOSX prekin
 ln -s probe.2.9.030123.macosx probe
 ln -s reduce.2.21.030604 reduce
