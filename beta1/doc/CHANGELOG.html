@@ -1,0 +1,283 @@
+<html><head><title>CHANGELOG</title></head><body><!-- (jEdit options) :folding=explicit:collapseFolds=1: --><pre>
+==============================================================================
+===  TO DO  ==================================================================
+==============================================================================
+{{{ Ideas, long-term goals, etc.
+    Write a decent document about installation of MolProbity for web and script use
+    Could make it a web service with XML-RPC (SOAP, CORBA too complex)
+    should session lifetime be from start, or from last use?
+    document PHP version needed (which is...? >=4.1:superglobals >=4.3:CLI)
+        4.1.0 doesn't work on kinemage: cmd line can't load 'session mm'
+        4.1.2 seems to work on glass
+    user should get partial results as big job is running ?
+    Should analysis of worst residues ignore water or treat it separately?
+    ZIP download should include a static view of the lab notebook?
+    Retrieve maps from the EDS
+    Add ribbons or something else colored by (absolute) occupancy
+    Make color-coded versions of the flowchart for different stages of the process?
+    Multicrit: views for trouble spots sorted by severity (also hypertext?)
+    Create scripts for generating usage stats from molprobity.log
+}}}
+    Allow simple comparison of bad residues in two models; see jobs/analyze.php
+  * Make automatic entries including protocols and references in notebook
+        Allow users to annotate them: notebook_edit should be able to save
+    Rama outliers in multicrit kin don't look so hot (Ca-Ca, yellow?)
+    Waters are dots instead of balls??
+    No sc master on rotamers (how?)
+    Develop multi-model version of the multicrit kin
+    ORACLE output for TN Bhat
+    Add documentation to the analysis results page (how to interpret)
+    
+==============================================================================
+===  CHANGE LOG  =============================================================
+==============================================================================
+
+### 3beta1 ###
+### 3beta1 ###
+- first beta release for testing inside the Richardson lab
+- rotamers weren't showing up in multi-crit kin due to a stray "s" before -scope
+  Thus the error msg "Prekin can't open s-scope". Probably due to jEdit save bug
+
+### 3pre17 ###
+- decided all logging calls should be from public_html/* pages b/c we want to
+  know about web traffic, not about scripted use by local users.
+- inserted logging calls on many public_html pages
+- got basic SSWING function working! Yay!!
+- added "X minutes and Y seconds" formatting to job update page
+- made "download all files" always avail. from files page
+- added ED map support to viewking.php
+- added custom views to the SSWING kinemage
+- SSWING now creates a new model for the changes to go into
+- added basic dots to SSWING kins
+- added link to EDS (still need auto map download)
+- modified sswing (Perl) to delete all files it creates; we use stdout only.
+- changed sidechain colors for SSWING kins
+- made sure proper SSWING binaries are in place for both OS X and Linux
+- user can now accept or reject changes made by SSWING
+
+### 3pre16 ###
+- cleaned up lab notebook formatting a bit. Still needs better styling.
+- wrote text for log out and save session pages
+- wrote text for Reduce setup page
+- formatted Asn/Gln/His checkbox table with MP_XXX colors
+- wrote some text for after you've run Reduce
+- started working on Feedback system
+- completed code for Feedback system, seems to work but needs live testing
+- added B-vals in pt ID and blackbody colored B-factor ribbons to multi kin
+- added explanatory text to analysis setup page
+- hacked together a crude multi-criterion chart
+- added electron density map upload
+- improved the analysis results page to make it more usable.
+- added PDBSTAT text to the multicrit text window
+- added makeZipForSession() to core.php
+- file download page can now package things into ZIPs
+- started building in mechanisms for running SSWING
+- Subversion repository got screwed again!!
+- upgraded to svn 1.1.0-rc1 and rebuilt repos with "fsfs" filesystem
+  (fresh checkout is not needed if new repos is loaded from dump of old one)
+- added SSWING binaries and scripts
+
+### 3pre15 ###
+- elaborated oneline-batch to handle running Reduce -nobuild too
+  Still needs some work to really be clean.
+- added listDir() to core.php
+- used listDir() to clean up the weird problems with oneline-batch.php -reduce
+- got new Prekin, Reduce
+- learned the hard way to not do Subversion work inside sym link directories.
+  I could recover by doing dump/load and a clean checkout, but scary...
+- got new Reduce, Prekin binaries for the Mac
+- makelinks.sh now also creates molprobity.log and sets its permissions
+- still seems to work on OS X (whew...)
+- changed limit for Reduce to 100,000
+- added notification of disk space used
+- fixed coloring issue for download table
+- added robot-exclustion META to header
+- cleaned up home_tab for public viewing
+- added ALERT divs to home_tab and improve_reduce_choose
+- commented out non-functioning placeholders in upload_tab
+- dropped Reduce -limit to 10,000 b/c now 1SBP flipkins take a LONG time
+- background jobs now record their PID and user can abort them (POSIX only)
+  
+### 3pre14 ###
+- refactored multicriterion kin creation into makeMulticritKin()
+- created outlier-res-batch.php to do analysis for JNB
+- we now use dirname(__FILE__) instead of getcwd() to define MP3 install dir
+  This means e.g. that cmdline/ scripts can be run from any directory
+- removed useless Cb dev statistics
+- modified pdbstat regex's again for R/Rfree to catch data from TNT
+- changed resolution regex to pick up on resolutions like "2." and ".54"
+- changed fixH.pdb suffix to Hfix.pdb because its easier to get right
+- modified clashlist to avoid the divide-by-zero error for no atoms B &lt; 40
+- made the default Linux bin dir "linux/", symlinked it to linux-rh73/
+- added Perl to the list of external programs (for Mike's scripts)
+- removed defunct Cb stats from oneline-batch.php
+- reworked decodeReduceUsermods() to deal with rare cases that we were failing on
+- added a countflips.php command-line script to checking on what Reduce did
+
+### 3pre13 ###
+- created a tmp/ directory just for use by MolProbity (file uploads, ZIPs, etc)
+- allowed user to pull files from PDB
+- reworked pdbstat() to be slightly more efficient (still takes ~15 sec on 1JJ2)
+- upload page can deal with failed PDB/NDB upload in a basic way
+- download from NDB works but is slow...
+- connection to NDB FTP server takes ~30 seconds -- this is why so slow!
+- added refinement program and temperature, R and Rfree to pdbstats page
+- removed defunct images and mockup HTML pages
+- added configuration page for Reduce -build
+- incorporated Flipkin creation into the first Reduce step
+- started porting the second, user-guided Reduce step
+- finished the mechanics of porting the second Reduce step, now just UI tweaking
+- updated the documentation on files created per model, and reorganized the sections
+- added B-factor ribbons back to the multi-criteria kinemage
+- made it so that second Reduce run is entirely skipped if no changes are requested
+- marked models that have been through Reduce -build once; makes no sense to run them again!
+- replaced progress bar image with a spinning ubiquitin ribbon drawing
+- developed oneline-batch.php to extract basic quality stats from a folder of Reduced PDBs
+- added calcCbetaStats() to find min, max, mode, mean, stddev
+- improved REMARK regex's in pdbstat.php
+- oops! I was calling the median "mode" in the above calcCbetaStats().
+- code for tallying Rama outliers kept a running tally over all models (var not reset)
+- Reduce 2.21 on Linux introduced line noise into some USER MODS, including ASCII 26 (hex 1a).
+  Scrublines was set to terminate on this character, so I changed that and recompiled.
+  This was previously causing affected PDBs to be truncated upon upload.
+- improved regex's for R and Rfree to specify leading zero or decimal point
+- changed loadClashlist() to guard against no clashes (and no summary!) for scores
+
+### 3pre12 ###
+- updated program requirements to list "zip"
+- changed style sheet to sans-serif fonts, turned off link underlines
+- changed color and upped contrast slightly on the logo
+- added more elaborate flow chart
+- created dummy pages for compare and improve
+- created page to describe contents of uploaded file
+- added Ramalyze PDF to analysis script
+- swapped file upload and PDB-pull panes on upload page
+- mc-mc dots in multicrit kin were actually all dots
+- added reduceBuild() function to model.php
+- implemented removeModel() and tested it from the command line scripts
+- created a disk-too-full die() in mpInitEnvirons()
+- added endsWith() to strings.php
+- added system logging function. Individual user logging is of little use
+  and will be effectively replaced by automated lab notebook entries.
+- implemented a progress bar and list of tasks for analysis script
+- did the same for addmodel and reduce-build jobs
+
+### 3pre11 ###
+- updated PDB stat to find nonpolar H in nucleic acids, too.
+- updated pdbstat to find nucleic acid residues
+- changed preparePDB() to not add H; now done by reduceNoBuild()
+- renamed prepared() upload PDB so as not to confuse user
+- reworked analysis scripts so that only selected jobs are performed
+- reworked analysis so that hydrogens are added "just in time" if needed
+- put both mc-mc and sc-(anything) dots in AAC kinemage, but separately
+- removed Ramachandran JPEG and EPS files in anticipation of providing PDFs
+- removed Mage as a necessary binary
+- modified multicriterion kin to separate mc-mc and sc-x dots
+- replaced findOutliers() with 4 separate functions
+- analysis display page now adapts to the presence / absence of various criteria
+- refactored jobs/addmodel.php into lib/model.php:addModel()
+- refactored jobs/analyze.php into lib/analyze.php:runAnalysis()
+- created a proof-of-concept cmd-line-driven script to use MP functions
+- added machinery to create a ZIP archive of all a model's files
+
+### 3pre10 ###
+- really reworked page header/footer/styling. Style sheet hasn't been finished yet.
+- removed all tab bar images and templates
+- came up with a pretty decent "look" for the site; may change colors to match kinemage site
+- rearranged upload page
+- allowed user to revisit previously generated analysis
+- each model now has its own download URL too
+- implemented function to generate kinemage-viewing links
+- added embedded KiNG page for kinemage viewing
+- tried a pale brown background theme
+- fixed accidentally introduced bug in analyze_display.php
+- made nicer display of multi crit kinemage
+- added Ramachandran plots to output of analysis (jpeg, kin, eps)
+- added CB dev, all-atom contacts to analysis output
+
+### 3pre9 ###
+- added 'ignoreSegID' option to handle old Reduce'd files with 'new' in segID field
+- loadRamachandran() and loadRotamer() now decompose residue names into parts
+- loadCbetaDev() now synthesizes a residue name from the parts
+- loadClashlist() now picks up worst clash per residue
+- badRes now markes residues with clashes >= 0.40 A
+- refactored badRes code into lib/analysis.php:findOutliers()
+- started lib/visualize.php to make data visualizations
+- wrote functions to find res with alt confs and guess at res center in 3-space
+- started working on the new MultiCrit
+
+### 3pre8 ###
+- brought the whole project under Subversion version control
+- created a shell script to restore filesystem state (symlinks and permissions)
+- created analyze_display.php for Jeremy to start working in
+- fixed loadCbetaDev() to deal with multiple headers from Prekin
+- created a basic file-listing page
+- administrator can now "enter" sessions from the monitoring page
+- mocked up some HTML layouts for pages
+- check script now tells about how big file uploads can be
+- added "last touched" to admin page
+- moved all string and formating functions to strings.php
+- set svn:ignore properties on public_html/ and on symlinks in bin/
+- check for presence of models before trying to list them.
+  Alternately, we could just define $_SESSION['models'] = array() at startup.
+  Actually, lets do that too.
+
+### 3pre7 ###
+- filled in the PDB upload form, though it doesn't do anything yet.
+- implemented first cases of "More/Fewer options" links
+- implemented background execution via launchBackground()
+- implemented background job monitoring via job_progress.php
+- file upload now works, basically, though no processing is performed.
+- added config parameter MP_DEFAULT_TIMEZONE
+- worked out a bug in launchBackground(): session data wasn't written immediately
+- addmodel.php now does some nice pre-processing of all new models uploaded
+- pdbstat now reports refinement program and temp, and a count of CNS headers
+- refactored jobs/addmodel.php to facilitate future offline scripts
+- created a function to write session data to disk immediately
+- reworked the definition of a model entry.
+  Now using -build will create a new model, so you can compare to the old.
+- did proof-of-concept for Cbeta deviation analysis and clashlist
+
+### 3pre6 ###
+- filled in the Finish tab (rough draft) to allow users to log out
+- described what should go in each tab
+
+### 3pre5 ###
+- fixed bug in GC function
+- made PATH in config.php depend on MP_BASE_DIR
+- added some things to check_config.php
+- PATH setup is smarter: auto-detects OS and adds our bin/ directory
+- added read-only marker for sessions to enable D&J's partial results
+- it might make sense to make labbook keywords an array, but then
+  transmitting them in a form becomes harder.
+- started working on a standard page header
+- Experimented with tables, images to make tabs. Images are a better bet.
+- made first drafts of all the tab pages (empty). Linked them together.
+- made labbook page work pretty well
+
+### 3pre4 ###
+- refined sessions yet again: now each top level page must know where
+  the base installation directory is, relative to itself.
+- session support has been reworked to use MP_BASE_DIR
+- session create now defaults to false. This limits points of entry.
+- added marker file for session lifetime
+- added administrator overview of current sessions
+- created garbage collection functions
+
+### 3pre3 ###
+- added (optional) mode to mkdir() call in sessions.php
+- added time zone support to lab notebook
+- continued refining session code
+
+### 3pre2 ###
+- wrote the which() part of check_config.php
+- configured sessions to never use cookies
+- implemented bare-bones of a lab notebook system
+- rearranged how the include() system is set up
+
+### 3pre1 ###
+- built custom session-handling functions
+- established simple test case for running background jobs
+- started documentation
+
+</pre></body></html>

@@ -1,0 +1,45 @@
+/* (jEdit options) :folding=explicit:collapseFolds=1: */
+body {
+    color : #000000 ;
+    background-color : #cccc99 ;
+	font-family : Helvetica, Arial, sans-serif ;
+}
+
+a {	text-decoration : none ; }
+a:link { color : #000099 ; }
+a:active { color : #0000cc ; }
+a:visited { color : #000099 ; }
+
+span.inactive {
+    color : #666666 ;
+}
+
+div.pageheader {
+    margin-bottom : 0.5em ;
+}
+div.pageheader h1 {
+    text-align : center ;
+}
+
+div.leftnav {
+}
+
+div.pagecontent {
+    background-color : #ffffff ;
+    border : 1px solid #666666 ;
+    padding : 0.4em ;
+}
+
+div.pagefooter {
+    font-size : smaller ;
+    text-align : right ;
+    margin-top : 0.5em ;
+}
+
+div.alert {
+    background-color : #ff9999 ;
+    color : #330000 ;
+    text-align : justify ;
+    border : 1px solid #330000 ;
+    padding : 0.4em ;
+}
