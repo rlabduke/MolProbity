@@ -24,12 +24,12 @@ require_once(MP_BASE_DIR.'/lib/sessions.php');
 ############################################################################
 function formatFilesize($size)
 {
-        if( $size >= 10000000000 ) $size = round($size/1000000000, 0) . " GB";
-    elseif( $size >= 1000000000 )  $size = round($size/1000000000, 1) . " GB";
-    elseif( $size >= 10000000 )    $size = round($size/1000000, 0) . " MB";
-    elseif( $size >= 1000000 )     $size = round($size/1000000, 1) . " MB";
-    elseif( $size >= 10000 )       $size = round($size/1000, 0) . " KB";
-    elseif( $size >= 1000 )        $size = round($size/1000, 1) . " KB";
+        if( $size >= 10000000000 ) $size = round($size/1000000000, 0) . " Gb";
+    elseif( $size >= 1000000000 )  $size = round($size/1000000000, 1) . " Gb";
+    elseif( $size >= 10000000 )    $size = round($size/1000000, 0) . " Mb";
+    elseif( $size >= 1000000 )     $size = round($size/1000000, 1) . " Mb";
+    elseif( $size >= 10000 )       $size = round($size/1000, 0) . " Kb";
+    elseif( $size >= 1000 )        $size = round($size/1000, 1) . " Kb";
     else $size = $size . " bytes";
 
     return $size;
@@ -183,6 +183,72 @@ function startsWith($haystack, $needle)
 {
     return (strncmp($haystack, $needle, strlen($needle)) == 0);
 }
+#}}}########################################################################
+
+#{{{ listRecursive - lists a directories contents, and its subdirectories contents, etc.
+############################################################################
+/**
+* Returns an array of file and/or directory names.
+* File names will be strings, and directory names will be arrays with
+* the key set to the name of the directory. Test with is_array().
+* Keys for files are the same as the values (i.e. the file name).
+* Returns FALSE on failure.
+*/
+function listRecursive($dir)
+{
+    if ($handle = opendir($dir))
+    {
+        $list = array();
+        while(false !== ($file = readdir($handle)))
+        {
+            if ($file != "." && $file != "..")
+            {
+                $path = "$dir/$file";
+                if(is_dir($path))
+                {
+                    $sublist = listRecursive($path);
+                    if($sublist !== false)
+                        $list[$file] = $sublist;
+                }
+                else    $list[$file] = $file;
+            } 
+        }
+        closedir($handle);
+        return $list;
+    }
+    else return false;
+}
+#}}}########################################################################
+
+#{{{ sortFilesAlpha - sorts results of listRecursive() by name
+############################################################################
+function sortFilesAlpha($list)
+{
+    foreach($list as $el)
+    {
+        if(is_array($el))
+            $el = sortFilesAlpha($el);
+    }
+    ksort($list);
+    
+    return $list;
+}
+#}}}########################################################################
+
+#{{{ a_function_definition - sumary_statement_goes_here
+############################################################################
+/**
+* Documentation for this function.
+*/
+//function someFunctionName() {}
+#}}}########################################################################
+
+#{{{ a_function_definition - sumary_statement_goes_here
+############################################################################
+/**
+* Documentation for this function.
+*/
+//function someFunctionName() {}
 #}}}########################################################################
 
 #{{{ a_function_definition - sumary_statement_goes_here
