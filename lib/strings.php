@@ -137,6 +137,24 @@ function formatMinutesElapsed($secs)
 }
 #}}}########################################################################
 
+#{{{ ordinalSuffix - determines 1st, 2nd, 3rd, 4th, ... suffix for number
+############################################################################
+/**
+* Documentation for this function.
+*/
+function ordinalSuffix($num)
+{
+    $num %= 100;
+    if(11 <= $num && $num <= 19) return "th";
+    
+    $num %= 10;
+    if($num == 1) return "st";
+    elseif($num == 2) return "nd";
+    elseif($num == 3) return "rd";
+    else return "th";
+}
+#}}}########################################################################
+
 #{{{ a_function_definition - sumary_statement_goes_here
 ############################################################################
 /**

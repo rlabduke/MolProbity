@@ -120,6 +120,7 @@ function runAnalysis($modelID, $opts)
         $outfile = "$chartDir/$model[prefix]clashlist.txt";
         runClashlist($infile, $outfile);
         $clash = loadClashlist($outfile);
+        $clashPct = runClashStats($model['stats']['resolution'], $clash['scoreAll']);
         $tasks['clashlist'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=plain' target='_blank'>preview</a>\n";
         setProgress($tasks, 'clashlist'); // so the preview link is visible
     }
@@ -152,9 +153,9 @@ function runAnalysis($modelID, $opts)
     {
         $entry .= "<tr><td rowspan='2' align='center'>All-Atom<br>Contacts</td>\n";
         $entry .= "<td>Clashscore, all atoms:</td><td>$clash[scoreAll]</td>\n";
-        $entry .= "<td>XX<sup>th</sup> percentile</td></tr>\n";
+        $entry .= "<td>$clashPct[pct_rank]<sup>".ordinalSuffix($clashPct['pct_rank'])."</sup> percentile (N=$clashPct[n_samples])</td></tr>\n";
         $entry .= "<tr><td>Clashscore, B&lt;40:</td><td>$clash[scoreBlt40]</td>\n";
-        $entry .= "<td>XX<sup>th</sup> percentile</td></tr>\n";
+        $entry .= "<td>$clashPct[pct_rank40]<sup>".ordinalSuffix($clashPct['pct_rank40'])."</sup> percentile (N=$clashPct[n_samples])</td></tr>\n";
     }
     $proteinRows = 0;
     if(isset($rama))    $proteinRows += 2;
@@ -436,6 +437,36 @@ function findClashOutliers($clash)
     }
     ksort($worst); // Put the residues into a sensible order
     return $worst;
+}
+#}}}########################################################################
+
+#{{{ runClashStats - percentile ranks a clashscore vs a "reprsentative" database
+############################################################################
+/**
+* Returns an array with the following fields:
+*   minresol        minimum resolution considered comparable, or 0 for OOB
+*   maxresol        maximum resolution considered comparable, or 9999 for OOB
+*   n_samples       number of structures in the comparison group (i.e., "N")
+*   pct_rank        the percentile rank of this structure, 100 is great, 0 is bad
+*   pct_rank40      the percentile rank of this structure for B < 40
+*/
+function runClashStats($resol, $clashscore)
+{
+    // Determine the percentile rank of this structure
+    // fields are minres, maxres, n_samples, pct_rank
+    $bin = MP_BASE_DIR.'/bin';
+    $lib = MP_BASE_DIR.'/lib';
+    $cmd = "gawk -v res=$resol -v cs=$clashscore -f $bin/cs-rank.awk $lib/clashscore.db.tab";
+    //echo $cmd."\n";
+    $fields = explode(":", trim(shell_exec($cmd)));
+    //print_r($fields);
+    return array(
+        'minresol'      => $fields[0],
+        'maxresol'      => $fields[1],
+        'n_samples'     => $fields[2],
+        'pct_rank'      => $fields[3],
+        'pct_rank40'    => $fields[4]
+    );
 }
 #}}}########################################################################
 
@@ -796,14 +827,6 @@ function groupAdjacentRes($resList)
     
     return $out;
 }
-#}}}########################################################################
-
-#{{{ a_function_definition - sumary_statement_goes_here
-############################################################################
-/**
-* Documentation for this function.
-*/
-//function someFunctionName() {}
 #}}}########################################################################
 
 #{{{ a_function_definition - sumary_statement_goes_here
