@@ -115,8 +115,10 @@ function setContext($context)
 function makeEventURL($funcName, $funcArg = null)
 {
     $id = addEventHandler($funcName, $funcArg);
-    // What's the difference b/t this and $_SERVER[SCRIPT_NAME] ?
-    return "$_SERVER[PHP_SELF]?$_SESSION[sessTag]&eventID=$id";
+    // What's the difference b/t this and $_SERVER[SCRIPT_NAME] ? None I can see.
+    // We use basename() to get "index.php" instead of the full path,
+    // which is subject to corruption with URL forwarding thru kinemage.
+    return basename($_SERVER['PHP_SELF'])."?$_SESSION[sessTag]&eventID=$id";
 }
 #}}}########################################################################
 
@@ -134,8 +136,10 @@ function makeEventForm($funcName, $funcArg = null, $hasFileUpload = false, $onSu
     $s = "<form method='post' ";
     if($hasFileUpload)  $s .= "enctype='multipart/form-data' ";
     if($onSubmit)       $s .= "onsubmit='return $onSubmit' ";
-    // What's the difference b/t this and $_SERVER[SCRIPT_NAME] ?
-    $s .= "action='$_SERVER[PHP_SELF]'>\n";
+    // What's the difference b/t this and $_SERVER[SCRIPT_NAME] ? None I can see.
+    // We use basename() to get "index.php" instead of the full path,
+    // which is subject to corruption with URL forwarding thru kinemage.
+    $s .= "action='".basename($_SERVER['PHP_SELF'])."'>\n";
     $s .= postSessionID();
     $s .= "<input type='hidden' name='eventID' value='$id'>\n";
     return $s;

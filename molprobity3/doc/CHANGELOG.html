@@ -43,7 +43,6 @@
     Explain 2d and 3d CB kins
     Make sure Reduce doesn't shrink the PDB file (lost atoms/models, etc)
     Add coloring type drop box for -lots kins
-    Create SiteMap graphic
     Create Xray / NMR / Student Helper pages with suggested protocols
     Write command line scripts for common actions; remove junk from cmdline/
     Produce multi-model multicrit kinemages
@@ -73,6 +72,8 @@
 - AAC page now warns about missing H only during form submit
 - simplified JavaScripts on AAC page
 - slightly changed wording, code for other no-H warnings
+- replaced PHP_SELF with basename(PHP_SELF) b/c of kinemage-arachne URL rewrite
+- added extra info to admin/check_config.php
 
 ### 3beta11 ###
 - moved timezone setting to top of lab notebook page
