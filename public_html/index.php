@@ -37,15 +37,15 @@ elseif(isset($_REQUEST['eventID']))
         $funcArg    = $page['handlers'][$eid]['funcArg'];
         // We use a variable function name here to call the handler.
         $delegate->$funcName($funcArg, $_REQUEST);
+        
+        // In case we changed $_SESSION but display() calls mpSessReadOnly()
+        // This won't stop the session from being automatically saved again
+        // after display() and the end of the page.
+        // (Though display() shouldn't write to $_SESSION anyway, except events!)
+        mpSaveSession(); 
     }
     else
         mpLog("bad-event:Event ID '$eid' is unknown for page $page[delegate]. No action taken.");
-
-    // In case we changed $_SESSION but display() calls mpSessReadOnly()
-    // This won't stop the session from being automatically saved again
-    // after display() and the end of the page.
-    // (Though display() shouldn't ever write to $_SESSION anyway, except events!)
-    mpSaveSession(); 
 }
 
 // Clean up from event processing //////////////////////////////////////////////
@@ -53,6 +53,14 @@ clearEventHandlers();   // events defined by previous display() are not valid
 // FUNKY: can't unset $delegate here b/c it may or may not be redefined
 // when the UI delegate is require_once()'d. It will be overwritten if needed,
 // though, so we really don't need to worry about it.
+
+// Handle a return from a called page //////////////////////////////////////////
+//  Allowing return values and pseudo-handlers for pageReturn() gets us in a
+//  nasty situation, where the handler itself could pageReturn(), ad infinitum.
+//  This requires us to put a while() loop here with a require_once() for every
+//  pass. The danger is that we will go from delegate page A, to B, and back to
+//  A -- but then A won't be included again and so $delegate won't be defined
+//  correctly! I don't see a reasonable way around this, so we won't support it.
 
 // Display user interface //////////////////////////////////////////////////////
 $page = end($_SESSION['pages']);                    // not a ref; read only

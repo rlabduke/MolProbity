@@ -1,6 +1,6 @@
 /* (jEdit options) :folding=explicit:collapseFolds=1: */
 body {
-    color : #000000 ;
+    color : #666633 ;
     background-color : #cccc99 ;
 	font-family : Helvetica, Arial, sans-serif ;
 }
@@ -11,8 +11,8 @@ img { border : none ; }
 a {	text-decoration : none ; }
 a:link { color : #000099 ; }
 a:visited { color : #000099 ; }
-a:hover { text-decoration : underline ; }
-a:active { color : #0000cc ; }
+a:hover { text-decoration : underline ; color : #0000ff ; }
+a:active { color : #0000ff ; }
 
 span.inactive {
     color : #666666 ;
@@ -29,9 +29,23 @@ div.leftnav {
 }
 
 div.pagecontent {
+    color : #000000 ;
     background-color : #ffffff ;
-    border : 1px solid #666666 ;
+    border : 1px solid #999966 ;
     padding : 0.4em ;
+	font-family : Palatino, Times, serif ;
+}
+
+/* Because TABLE otherwise doesn't inherit these... */
+div.pagecontent table {
+    color : #000000 ;
+    background-color : #ffffff ;
+	font-family : Palatino, Times, serif ;
+}
+
+div.pagecontent h2, h3, h4, h5, h6 {
+	font-family : Helvetica, Arial, sans-serif ;
+    color : #660000
 }
 
 div.pagefooter {
@@ -49,9 +63,9 @@ div.alert {
 }
 
 div.options {
-    background-color : #cccccc ;
+    background-color : #ccccb2 ;
     color : #000000 ;
-    border : 1px solid #000000 ;
+    border : 1px solid #999966 ;
     padding : 0.4em ;
     float : right ;
 }

@@ -31,7 +31,8 @@ function display($context)
         $_SESSION['bgjob']['isRunning'] = false;
         // It no longer makes sense to continue -- needed vars may be undefined.
         // All we can do is return to the main page!
-        pageGoto("sitemap.php");
+        //pageGoto("sitemap.php"); No, b/c we're already in display()
+        $_SESSION['bgjob']['whereNext'] = "sitemap.php";
         mpSaveSession();
     }
     
