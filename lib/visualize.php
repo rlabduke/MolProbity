@@ -6,7 +6,7 @@
 require_once(MP_BASE_DIR.'/lib/pdbstat.php');
 require_once(MP_BASE_DIR.'/lib/analyze.php');
 
-#{{{ makeSidechainDots - appends sc Probe dots
+#{{{ [DEP?] makeSidechainDots - appends sc Probe dots
 ############################################################################
 function makeSidechainDots($infile, $outfile)
 {
@@ -14,7 +14,7 @@ function makeSidechainDots($infile, $outfile)
 }
 #}}}########################################################################
 
-#{{{ makeMainchainDots - appends mc Probe dots
+#{{{ [DEP?] makeMainchainDots - appends mc Probe dots
 ############################################################################
 function makeMainchainDots($infile, $outfile)
 {
@@ -94,6 +94,7 @@ function makeMulticritKin($infiles, $outfile, $opt, $nmrConstraints = null)
     foreach($stats as $stat) fwrite($h, "[+]   $stat\n");
     if(count($infiles) > 0) fwrite($h, "Statistics for first file only; ".count($infiles)." total files included in kinemage.\n");
     fwrite($h, "@kinemage 1\n");
+    fwrite($h, "@onewidth\n");
     fclose($h);
     
     foreach($infiles as $infile)
@@ -105,10 +106,23 @@ function makeMulticritKin($infiles, $outfile, $opt, $nmrConstraints = null)
         if($opt['rama'])            makeBadRamachandranKin($infile, $outfile);
         if($opt['rota'])            makeBadRotamerKin($infile, $outfile);
         if($opt['cbdev'])           makeBadCbetaBalls($infile, $outfile);
-        if($opt['dots'])            makeBadDotsVisible($infile, $outfile, $opt['hbdots'], $opt['vdwdots']);
+        if($opt['dots'])            makeProbeDots($infile, $outfile, $opt['hbdots'], $opt['vdwdots']);
         if($nmrConstraints)
             exec("noe-display -cv -s viol -ds+ -fs -k $infile $nmrConstraints < /dev/null >> $outfile");
     }
+
+    // KiNG allows us to do this to control what things are visible
+    $h = fopen($outfile, 'a');
+    fwrite($h, "@master {mainchain} off\n");
+    fwrite($h, "@master {H's} off\n");
+    fwrite($h, "@master {ribbon} off\n");
+    fwrite($h, "@master {water} off\n");
+    fwrite($h, "@master {Calphas} on\n");
+    fwrite($h, "@master {wide contact} off\n");
+    fwrite($h, "@master {close contact} off\n");
+    fwrite($h, "@master {small overlap} off\n");
+    fwrite($h, "@master {H-bonds} off\n");
+    fclose($h);
 }
 #}}}########################################################################
 
@@ -243,7 +257,7 @@ doprint && bigbeta';
 }
 #}}}########################################################################
 
-#{{{ makeBadDotsVisible - appends Probe dots with only bad clashes visible
+#{{{ [DEP] makeBadDotsVisible - appends Probe dots with only bad clashes visible
 ############################################################################
 /**
 * Documentation for this function.
@@ -262,6 +276,21 @@ $0 ~ /^@(dot|vector)list .* master=\{H-bonds\}/ { $0 = $0 " off" }
 {print $0}';
 
     exec("probe $options -4H -quiet -noticks -nogroup -mc -self 'alta' $infile | gawk '$dots_off_script' >> $outfile");
+}
+#}}}########################################################################
+
+#{{{ makeProbeDots - appends mc and sc Probe dots
+############################################################################
+/**
+* Documentation for this function.
+*/
+function makeProbeDots($infile, $outfile, $hbDots = false, $vdwDots = false)
+{
+    $options = "";
+    if(!$hbDots)    $options .= " -nohbout";
+    if(!$vdwDots)   $options .= " -novdwout";
+    
+    exec("probe $options -4H -quiet -noticks -nogroup -mc -self 'alta' $infile >> $outfile");
 }
 #}}}########################################################################
 
