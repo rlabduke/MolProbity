@@ -27,7 +27,9 @@ function addModel($tmpPdb, $origName, $isCnsFormat = false, $ignoreSegID = false
         $id = $origName;
     
     // Make sure this is a unique name
-    while( isset($_SESSION['models'][$id.$serial]) )
+    // Need file_exists() check because HFS on OS X is not case-sensitive.
+    // (It's case-PRESERVING.)
+    while( isset($_SESSION['models'][$id.$serial]) || file_exists($_SESSION['dataDir'].'/'.$id.$serial) )
         $serial++;
     $id .= $serial;
     
@@ -40,7 +42,7 @@ function addModel($tmpPdb, $origName, $isCnsFormat = false, $ignoreSegID = false
     $infile     = $tmpPdb;
     $outname    = $id.'mp.pdb'; // don't confuse user by re-using exact original PDB name
     $outpath    = $modelDir.'/'.$outname;
-    $stats = preparePDB($infile, $outpath, $isCnsFormat, $ignoreSegID);
+    list($stats, $segmap) = preparePDB($infile, $outpath, $isCnsFormat, $ignoreSegID);
     
     // Create the model entry
     $_SESSION['models'][$id] = array(
@@ -52,6 +54,8 @@ function addModel($tmpPdb, $origName, $isCnsFormat = false, $ignoreSegID = false
         'stats'     => $stats,
         'history'   => 'Original file uploaded by user'
     );
+    
+    if($segmap) $_SESSION['models'][$id]['segmap'] = $segmap;
     
     return $id;
 }
@@ -150,7 +154,14 @@ function removeModel($modelID)
 * $ignoreSegID  true if we should never use segIDs to create new chain IDs.
 *               false if we should convert automatically, as needed.
 *
-* Returns the statistics from pdbstat() for the fully prepared model.
+* Returns the following:
+* array(
+*   statistics from pdbstat() for the fully prepared model,
+*   the segID-to-chainID mapping string, or "" for none
+* );
+*
+* So call the function something like this:
+*   list($stats, $map) = preparePDB( ... );
 */
 function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
 {
@@ -214,6 +225,11 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
             $segToChainMapping = "";
         }
     }
+    elseif($segToChainMapping != "")
+    {
+        // Do the remapping some other way
+        remapSegIDs($tmp2, $tmp1, $segToChainMapping);
+    }
     else // swap tmp1 and tmp2; now tmp1 holds most recent file
     {
         $t = $tmp1;
@@ -230,7 +246,7 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
     setProgress($tasks, 'pdbstat2'); // updates the progress display if running as a background job
     $stats = pdbstat($outpath);
     setProgress($tasks, null); // all done
-    return $stats;
+    return array( $stats, $segToChainMapping );
 }
 #}}}########################################################################
 
@@ -242,32 +258,11 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
 *
 * $inpath       the full filename for the PDB file to be processed
 * $outpath      the full filename for the destination PDB. Will be overwritten.
-* $ignoreSegID  true if we should never use segIDs to create new chain IDs.
-*               false if we should convert automatically, as needed.
 */
 function reduceNoBuild($inpath, $outpath, $ignoreSegID = false)
 {
-    // Try to determine if we need to make chain IDs from segment IDs
-    $segToChainMapping = trim(`cksegid.pl $inpath`);
-    // Old Reduce used segID for 'new ' flag for H's.
-    if($ignoreSegID) $segToChainMapping = "";
-    if($segToChainMapping == "")
-    {
-        // Don't need to do anything
-    }
-    elseif(preg_match("/ OK\$/", $segToChainMapping))
-    {
-        $parts = preg_split("/\\s+/", $segToChainMapping);
-        $segToChainMapping = $parts[0];
-    }
-    else
-    {
-        echo "*** Unable to automagically correct XPLOR/CNS segIDs";
-        $segToChainMapping = "";
-    }
     // Add missing H's without trying to optimize or fix anything
-    $segmap = ($segToChainMapping == "" ? "" : "-segidmap '$segToChainMapping'");
-    exec("reduce -quiet -limit".MP_REDUCE_LIMIT." $segmap -keep -noadjust -his -allalt $inpath > $outpath");
+    exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -keep -noadjust -his -allalt $inpath > $outpath");
 }
 #}}}########################################################################
 
@@ -612,6 +607,44 @@ function getNdbModel($code)
         if(file_exists($outpath)) unlink($outpath);
         return null;
     }
+}
+#}}}########################################################################
+
+#{{{ remapSegIDs - translates segIDs into chain IDs for ATOM and HETATM records
+############################################################################
+/**
+* Translates segIDs into chain IDs for ATOM and HETATM records.
+* mapString is the same as Reduce's -segid: "ssss,c,ssss,c, ..."
+* Note that all chains/segments are rendered in all uppercase, regardless of
+* the original case in the PDB file, and space are converted to underscores.
+*/
+function remapSegIDs($inpath, $outpath, $mapString)
+{
+    // Create a segID -> chainID map for lookup
+    $mapString = str_replace("_", " ", $mapString);
+    $tmp = explode(',', $mapString);
+    echo(count($tmp));
+    print_r($tmp);
+    for($i = 0; $i < count($tmp); $i += 2)
+        $map[strtoupper($tmp[$i])] = strtoupper($tmp[$i+1]);
+    print_r($map);
+    
+    $in = fopen($inpath, 'rb');
+    $out = fopen($outpath, 'wb');
+    while(!feof($in))
+    {
+        $s = fgets($in, 4096);
+        $chainID = $map[ strtoupper(substr($s,72,4)) ];
+        if((startsWith($s, "ATOM  ") || startsWith($s, "HETATM")) && strlen($chainID) == 1 )
+        {
+            fwrite($out, substr($s,0,21));
+            fwrite($out, $chainID);
+            fwrite($out, substr($s,22));
+        }
+        else fwrite($out, $s);
+    }
+    fclose($out);
+    fclose($in);
 }
 #}}}########################################################################
 

@@ -55,46 +55,13 @@ else // upload was OK
     foreach($details as $detail) echo "<li>$detail</li>\n";
     echo "</ul>\n";
     
-    /*
-    $compnd = trim($pdbstats['compnd']);
-    if($compnd != "")
+    if($model['segmap'])
     {
-        echo "This compound is identified as the following:<br><b>$compnd</b>\n<p>";
+        echo "<p><div class='alert'>Because this model had more segment IDs than chainIDs,\n";
+        echo "the segment IDs were automagically turned into new chain IDs for this model.\n";
+        echo "If you would prefer the original chain IDs, please check the <b>Ignore segID field</b>\n";
+        echo "under <b>More options</b> on the file upload page.</div></p>";
     }
-    
-    echo "<ul>\n";
-    
-    // # of models, if any
-    if($pdbstats['models'] > 1) echo "<li>This is an multi-model structure, probably from NMR, with <b>".$pdbstats['models']." distinct models</b> present.</li>\n";
-    elseif(isset($pdbstats['resolution'])) echo "<li>This is a crystal structure at ".$pdbstats['resolution']." A resolution.</li>\n";
-    
-    // # of chains and residues
-    echo "<li>".$pdbstats['chains']." chain(s) is/are present [".$pdbstats['unique_chains']." unique chain(s)]</li>\n";
-    echo "<li>A total of ".$pdbstats['residues']." residues are present.</li>\n";
-    
-    // CA, sidechains, and H
-    if($pdbstats['hbetas'] > 0 and $pdbstats['sidechains'] > 0) echo "<li>Mainchain, sidechains, and hydrogens are present.</li>\n";
-    elseif($pdbstats['sidechains'] > 0) echo "<li>Mainchain and sidechains are present, but not hydrogens.</li>\n";
-    elseif($pdbstats['nucacids'] == 0) echo "<li><b>Only C-alphas</b> are present.</li>\n";
-    
-    // RNA / DNA
-    if($pdbstats['nucacids'] > 0) echo "<li>".$pdbstats['nucacids']." nucleic acid residues are present.\n";
-    
-    // Hets and waters
-    if($pdbstats['hets'] > 0) echo "<li>".$pdbstats['hets']." hetero group(s) is/are present.</li>\n";
-    
-    // Crystallographic information
-    if(isset($pdbstats['refiprog'])) echo "<li>Refinement was carried out in $pdbstats[refiprog].</li>\n";
-    if(isset($pdbstats['refitemp'])) echo "<li>Data was collected at $pdbstats[refitemp] K.</li>\n";
-    if(isset($pdbstats['rvalue']))
-    {
-        echo "<li>R = $pdbstats[rvalue]";
-        if(isset($pdbstats['rfree'])) echo "; R<sub>free</sub> = $pdbstats[rfree]";
-        echo "</li>\n";
-    }
-    
-    echo "</ul>\n";
-    */
     ?>
     
     <p><table border='0' width='100%'><tr valign='top'>
