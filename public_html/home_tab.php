@@ -26,9 +26,7 @@
 if(isset($_REQUEST['moreOpts_all']))
     $_SESSION['moreOpts']['all'] = $_REQUEST['moreOpts_all'];
 
-    echo mpPageHeader("Home page");
-    echo "<p>\n";
-    echo mpTabBar("home");
+    echo mpPageHeader("Home page", "home");
 ?>
 
 <p>An outline for how MolProbity 3 works:
@@ -38,9 +36,9 @@ if(isset($_REQUEST['moreOpts_all']))
 <hr>
 <?php
 if(!$_SESSION['moreOpts']['all'])
-    echo "<br><a href='home_tab.php?$_SESSION[sessTag]&moreOpts_all=1' class='more_opts'>Always show all available options</a>\n";
+    echo "<br><a href='home_tab.php?$_SESSION[sessTag]&moreOpts_all=1'>Always show all available options</a>\n";
 else
-    echo "<br><a href='home_tab.php?$_SESSION[sessTag]&moreOpts_all=0' class='more_opts'>Hide extra options by default</a>\n";
+    echo "<br><a href='home_tab.php?$_SESSION[sessTag]&moreOpts_all=0'>Hide extra options by default</a>\n";
 ?>
 
 

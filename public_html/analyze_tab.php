@@ -21,9 +21,7 @@
 //function someFunctionName() {}
 #}}}########################################################################
 
-    echo mpPageHeader("Analyze model quality");
-    echo "<p>\n";
-    echo mpTabBar("analyze");
+    echo mpPageHeader("Analyze model quality", "analyze");
 ?>
 
 
@@ -52,7 +50,9 @@
     }
 ?>
 </table>
-<?php } ?>
+<?php }
+else echo "No models have been provided yet. Please <a href='upload_tab.php?$_SESSION[sessTag]'>get input models</a> first.";
+?>
 
 
 <p>

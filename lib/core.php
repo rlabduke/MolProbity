@@ -22,10 +22,13 @@ require_once(MP_BASE_DIR.'/lib/sessions.php');  // Session handling functions
 ############################################################################
 /**
 * $title        the page title
+* $active       determines the state of the navigation panel
+*               "none" means no nav links will be present
+*               see mpNavigationBar() for other choices
 * $refresh      a string like "5; something.php?foo=bar&bar=nil"
 *               would refresh that page with those vars every 5 sec.
 */
-function mpPageHeader($title, $refresh = "")
+function mpPageHeader($title, $active = "none", $refresh = "")
 {
     $s = "";
     $s .= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
@@ -41,18 +44,66 @@ function mpPageHeader($title, $refresh = "")
 
     $s .= '</head>
 <body>
-<div class="mpheader">
-    <div class="mplogo">
-        <img src="img/small-logo.gif" alt="MolProbity logo">
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr><td colspan="2">
+    <div class="pageheader">
+        <img src="img/small-logo2.gif" alt="MolProbity logo">
+        <h1>'.$title.'</h1>
     </div>
-    <div class="head_links">
-        <a href="http://kinemage.biochem.duke.edu" target="_blank">Richardson Lab</a>
-    </div>
-    <h1 class="page_title">'.$title.'</h1>
-</div>
-<br clear="all">
+</td></tr>
 ';
+    
+    if($active == "none")
+    {
+        $s .= '<tr><td valign="top" colspan="2">
+    <div class="pagecontent">
+';
+    }
+    else
+    {
+        $s .= '<tr><td valign="top">
+    <div class="leftnav">
+' . mpNavigationBar($active) . '
+    </div>
+</td>
+<td valign="top">
+    <div class="pagecontent">
+';
+    }
     return $s;
+}
+#}}}########################################################################
+
+#{{{ mpNavigationBar - creates the nav bar as part of the header
+############################################################################
+/**
+* $active is one of ...
+*/
+function mpNavigationBar($active)
+{
+    $s = "";
+    $s .= mpNavBar_format('home_tab.php', 'Intro & Help', ($active == 'home'));
+    $s .= mpNavBar_format('upload_tab.php', 'Get input models', ($active == 'upload'));
+    $s .= mpNavBar_format('analyze_tab.php', 'Analyze quality', ($active == 'analyze'));
+    $s .= mpNavBar_format('', 'Improve models', ($active == 'improve'));
+    $s .= mpNavBar_format('', 'Compare models', ($active == 'compare'));
+    $s .= mpNavBar_format('files_tab.php', 'Download files', ($active == 'files'));
+    $s .= mpNavBar_format('finish_tab.php', 'Log out', ($active == 'logout'));
+    $s .= "<br />\n";
+    $s .= mpNavBar_format('notebook_tab.php', 'Lab notebook', ($active == 'notebook'));
+    $s .= mpNavBar_format('', 'Set preferences', ($active == 'preferences'));
+    $s .= mpNavBar_format('finish_tab.php', 'Save session', ($active == 'savesession'));
+    return $s;
+}
+
+function mpNavBar_format($page, $title, $isActive = false)
+{
+    if($page == '')
+        return "<br />$title\n";
+    elseif($isActive)
+        return "<br /><a href='$page?$_SESSION[sessTag]'><b>$title</b></a>\n";
+    else
+        return "<br /><a href='$page?$_SESSION[sessTag]'>$title</a>\n";
 }
 #}}}########################################################################
 
@@ -61,7 +112,20 @@ function mpPageHeader($title, $refresh = "")
 function mpPageFooter()
 {
     return '
-<div class="mpfooter">
+    </div>
+</td></tr>
+<tr><td colspan="2">
+    <div class="pagefooter">
+About <a href="">MolProbity</a>
+| About <a href="http://kinemage.biochem.duke.edu" target="_blank">the Richardson Lab</a>
+| Internal reference '.MP_VERSION.'
+    </div>
+</td></tr>
+</table>
+</body>
+</html>
+';
+/*
     <i>This page "generated" by:</i>
     <ul>
     <li>NIH Grant GM-15000, funding Richardson Lab research for over 34 years;</li>
@@ -77,36 +141,7 @@ function mpPageFooter()
         Proteins: Structure, Function, and Genetics. <u>50</u>: 437-450.
     </div>
     <p><a href="help/credits.html" target=_blank>Software authors and other credits...</a>
-</div>
-<p><i>Internal reference '.MP_VERSION.'</i>
-</body>
-</html>
-';
-}
-#}}}########################################################################
-
-#{{{ mpTabBar - constructs the tab bar used on all the main pages
-############################################################################
-/**
-* $active is one of
-* 'notebook', 'home', 'upload', 'analyze', 'compare', 'finish'
 */
-function mpTabBar($active)
-{
-    $tabs = array('notebook', 'home', 'upload', 'analyze', 'compare', 'finish');
-    
-    $s = "\n<table border=0 cellspacing=0 cellpadding=0><tr>\n";
-    $s .= "    <td><img src='img/tabs/leftcap.gif'></td>\n";
-    foreach($tabs as $tab)
-    {
-        if($tab == $active)
-            $s .= "    <td><img src='img/tabs/$tab-a.gif'></td>\n";
-        else
-            $s .= "    <td><a href='{$tab}_tab.php?$_SESSION[sessTag]'><img src='img/tabs/$tab-i.gif' border='0'></a></td>\n";
-    }
-    $s .= "    <td><img src='img/tabs/rightcap.gif'></td>\n";
-    $s .= "</tr></table>\n";
-    return $s;
 }
 #}}}########################################################################
 
@@ -207,14 +242,6 @@ function sortFilesAlpha($list)
     
     return $list;
 }
-#}}}########################################################################
-
-#{{{ a_function_definition - sumary_statement_goes_here
-############################################################################
-/**
-* Documentation for this function.
-*/
-//function someFunctionName() {}
 #}}}########################################################################
 
 #{{{ a_function_definition - sumary_statement_goes_here

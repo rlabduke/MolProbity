@@ -21,9 +21,7 @@
 //function someFunctionName() {}
 #}}}########################################################################
 
-    echo mpPageHeader("Compare models");
-    echo "<p>\n";
-    echo mpTabBar("compare");
+    echo mpPageHeader("Compare models", "compare");
 ?>
 
 

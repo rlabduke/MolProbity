@@ -29,7 +29,7 @@ if($_SESSION['bgjob']['isRunning'])
     $url        = "job_progress.php?$_SESSION[sessTag]&count=$count";
     $rate       = $_SESSION['bgjob']['refreshRate'];
     $refresh    = "$rate; $url";
-    echo mpPageHeader("Job is running...", $refresh);
+    echo mpPageHeader("Job is running...", "none", $refresh);
     echo "<p>Your job has been running for ".(time() - $_SESSION['bgjob']['startTime'])." seconds.\n";
     echo "<p>If nothing happens for $rate seconds, <a href='$url'>click here</a>.\n";
     echo mpPageFooter();
@@ -38,7 +38,7 @@ else
 {
     $url        = $_SESSION['bgjob']['whereNext'];
     $refresh    = "1; $url";
-    echo mpPageHeader("Job is finished", $refresh);
+    echo mpPageHeader("Job is finished", "none", $refresh);
     echo "<p>Your job ran for ".($_SESSION['bgjob']['endTime'] - $_SESSION['bgjob']['startTime'])." seconds.\n";
     echo "<p>If nothing happens, <a href='$url'>click here</a>.\n";
     echo mpPageFooter();

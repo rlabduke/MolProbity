@@ -84,7 +84,7 @@ function makeFileCommands($path, $url)
 # MAIN - the beginning of execution for this page
 ############################################################################
 // Start the page: produces <HTML>, <HEAD>, <BODY> tags
-echo mpPageHeader("File management");
+echo mpPageHeader("File management", "files");
 
 echo "<table width='100%' border='0' cellspacing='0'>\n";
 $list = listRecursive($_SESSION['dataDir']);
