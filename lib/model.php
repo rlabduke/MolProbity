@@ -243,7 +243,7 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
 function reduceNoBuild($inpath, $outpath)
 {
     // Add missing H's without trying to optimize or fix anything
-    exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -keep -noadjust -his -allalt $inpath > $outpath");
+    exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -keep -his -allalt $inpath > $outpath");
 }
 #}}}########################################################################
 
