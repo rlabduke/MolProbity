@@ -47,9 +47,9 @@ while(! feof($pdbopen))
 		$endmodel =  $line;
 		$pdbnew = fopen("splitmodels/" . basename($file, ".pdb") . "-" . $mdlnum . ".pdb", "wb");
 		fwrite($pdbnew, $header);
-		fwrite($pdbnew, $mdline);
+		fwrite($pdbnew, 'REMARK   '.$mdline);
 		fwrite($pdbnew, $model);
-		fwrite($pdbnew, $endmodel);
+		fwrite($pdbnew, 'REMARK   '.$endmodel);
 		fclose($pdbnew);
 		$model = "";
 		}
