@@ -48,7 +48,7 @@ $model = $_SESSION['models'][$modelID];
 $pdb = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$model['pdb'];
 
 // Set up progress message
-$tasks['reduce'] = "Add H with <code>reduce -build -pen9999 -keep</code>";
+$tasks['reduce'] = "Add H with <code>reduce -nobuild</code>";
 $tasks['notebook'] = "Add entry to lab notebook";
 
 setProgress($tasks, 'reduce'); // updates the progress display if running as a background job
@@ -61,7 +61,7 @@ reduceNoBuild($pdb, $outpath);
 
 $newModel['stats']      = pdbstat($outpath);
 $newModel['parent']     = $modelID;
-$newModel['history']    = "Derived from $model[pdb] by Reduce -build -pen9999 -keep";
+$newModel['history']    = "Derived from $model[pdb] by Reduce -nobuild";
 $newModel['isReduced']  = true;
 $_SESSION['models'][ $newModel['id'] ] = $newModel;
 $_SESSION['bgjob']['modelID'] = $newModel['id'];
@@ -74,7 +74,7 @@ $entry = "Reduce was run on $model[pdb] to add and optimize missing hydrogens, r
 $entry .= "Existing hydrogens were not affected, and Asn/Gln/His flips were not optimized.\n";
 $entry .= "<p>You can now <a href='$url'>download the annotated PDB file</a> (".formatFilesize(filesize($pdb)).").</p>\n";
 $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
-    "Adding H with Reduce -build -pen9999 -keep gives $newModel[pdb]",
+    "Adding H with Reduce -nobuild gives $newModel[pdb]",
     $entry,
     "$modelID|$newModel[id]", // applies to both old and new model
     "auto"

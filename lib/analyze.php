@@ -219,7 +219,7 @@ function runAnalysis($modelID, $opts)
         $entry .= "</tr>\n";
     }
     $entry .= "</table>\n";
-    if(isset($clash)) $entry .= "<small>* 0<sup>th</sup> percentile is the worst among structures at comparable resolutions; 100<sup>th</sup> percentile is the best.</small>\n";
+    if(isset($clash)) $entry .= "<small>* 0<sup>th</sup> percentile is the worst among structures between $clashPct[minresol]&Aring; and $clashPct[maxresol]&Aring;; 100<sup>th</sup> percentile is the best.</small>\n";
     $entry .= "</p>\n"; // end of summary stats table
     //}}} Create lab notebook entry: summary stats table
     
