@@ -563,6 +563,67 @@ function findAltConfs($infile)
 }
 #}}}########################################################################
 
+#{{{ listResidues - lists CNIT codes for all residues in a PDB file
+############################################################################
+/**
+* Returns NULL if the file could not be read.
+* Otherwise, an array of CNIT 9-char residue codes.
+* Does not account for the possibility of multiple MODELs
+*/
+function listResidues($infile)
+{
+    $out = array();
+    
+    $in = fopen($infile, "r");
+    if(!$in) return NULL;
+    while(!feof($in))
+    {
+        $s = fgets($in, 1024);
+        if(startsWith($s, "ATOM") || startsWith($s, "HETATM"))
+        {
+            $res = pdbComposeResName($s);
+            $out[$res] = $res;
+        }
+    }
+    fclose($in);
+
+    return $out;
+}
+#}}}########################################################################
+
+#{{{ listProteinResidues - lists CNIT codes for amino acid residues in a PDB
+############################################################################
+/**
+* Returns NULL if the file could not be read.
+* Otherwise, an array of CNIT 9-char residue codes.
+* Does not account for the possibility of multiple MODELs
+*/
+function listProteinResidues($infile)
+{
+    $protein = array('GLY'=>1, 'ALA'=>1, 'VAL'=>1, 'LEU'=>1, 'ILE'=>1, 'PRO'=>1,
+        'PHE'=>1, 'TYR'=>1, 'TRP'=>1, 'SER'=>1, 'THR'=>1, 'CYS'=>1, 'MET'=>1,
+        'MSE'=>1, 'LYS'=>1, 'HIS'=>1, 'ARG'=>1, 'ASP'=>1, 'ASN'=>1, 'GLN'=>1,
+        'GLU'=>1);
+    $out = array();
+    
+    $in = fopen($infile, "r");
+    if(!$in) return NULL;
+    while(!feof($in))
+    {
+        $s = fgets($in, 1024);
+        if(startsWith($s, "ATOM") || startsWith($s, "HETATM"))
+        {
+            $res = pdbComposeResName($s);
+            if(isset($protein[substr($res,6,3)]))
+                $out[$res] = $res;
+        }
+    }
+    fclose($in);
+
+    return $out;
+}
+#}}}########################################################################
+
 #{{{ computeResCenters - finds (x,y,z) for residue (pseudo) center-of-mass from PDB
 ############################################################################
 /**

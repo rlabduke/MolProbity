@@ -359,20 +359,75 @@ function linkModelDownload($model, $suffix, $name = null)
 }
 #}}}########################################################################
 
-#{{{ makeZipForModel - packages all model files as a ZIP archive
+#{{{ makeZipForFolder - packages all files as a ZIP archive
 ############################################################################
 /**
-* Creates a ZIP archive file containing all the current files in the model.
+* Creates a ZIP archive file containing all the files in the given folder.
 * The archive is created as a temporary file and should be unlinked afterwards.
 * The name of the temporary file is returned.
 */
+function makeZipForFolder($inpath)
+{
+    $outpath = tempnam(MP_BASE_DIR."/tmp", "tmp_zip_");
+    // Do the song and dance to get just the last dir of $inpath in the ZIP
+    // instead of all the dirs, starting from the filesystem root (/).
+    $inbase = basename($inpath);
+    $indir = dirname($inpath);
+    $cwd = getcwd();
+    chdir($indir);
+    // must compress to stdout b/c otherwise zip wants a .zip ending
+    exec("zip -qr - $inbase > $outpath");
+    chdir($cwd); // go back to our original working dir
+    return $outpath;
+}
+#}}}########################################################################
+
+#{{{ makeZipForModel/Session - packages all model/session files as a ZIP
+############################################################################
+/**
+* Creates a ZIP archive file containing all the current files in the model.
+* The archive is created in the main session directory, and any pre-existing
+* archives created by makeZipForModel() or makeZipForSession() are removed.
+* The name of the archive file is returned.
+*/
 function makeZipForModel($modelID)
 {
+    if(is_array($_SESSION['archives'])) foreach($_SESSION['archives'] as $archive)
+        @unlink("$_SESSION[dataDir]/$archive");
+    unset($_SESSION['archives']);
+    
     $inpath = $_SESSION['models'][$modelID]['dir'];
-    $outpath = tempnam(MP_BASE_DIR."/tmp", "tmp_zip_");
-    // must compress to stdout b/c otherwise zip wants a .zip ending
-    exec("zip -qrj - $inpath > $outpath");
-    return $outpath;
+    $tmppath = makeZipForFolder($inpath);
+    $outname = "$modelID.zip";
+    $outpath = "$_SESSION[dataDir]/$outname";
+    copy($tmppath, $outpath);
+    unlink($tmppath);
+    
+    $_SESSION['archives'][] = $outname;
+    return $outname;
+}
+
+/**
+* Creates a ZIP archive file containing all the current files in the session.
+* The archive is created in the main session directory, and any pre-existing
+* archives created by makeZipForModel() or makeZipForSession() are removed.
+* The name of the archive file is returned.
+*/
+function makeZipForSession()
+{
+    if(is_array($_SESSION['archives'])) foreach($_SESSION['archives'] as $archive)
+        @unlink("$_SESSION[dataDir]/$archive");
+    unset($_SESSION['archives']);
+    
+    $inpath = $_SESSION['dataDir'];
+    $tmppath = makeZipForFolder($inpath);
+    $outname = "molprobity.zip";
+    $outpath = "$_SESSION[dataDir]/$outname";
+    copy($tmppath, $outpath);
+    unlink($tmppath);
+    
+    $_SESSION['archives'][] = $outname;
+    return $outname;
 }
 #}}}########################################################################
 
