@@ -36,9 +36,7 @@ OUTPUTS (via Post):
 if(isset($_REQUEST['moreOpts_pdbUpload']))
     $_SESSION['moreOpts']['pdbUpload'] = $_REQUEST['moreOpts_pdbUpload'];
 
-echo mpPageHeader("Upload files");
-echo "<p>\n";
-echo mpTabBar("upload");
+echo mpPageHeader("Get input models", "upload");
 ?>
 
 
@@ -55,11 +53,11 @@ echo mpTabBar("upload");
         <br><label><input type="checkbox" name="getFoFc" value="1"> Get difference (Fo-Fc) map from <a href="http://fsrv1.bmc.uu.se/eds/" target="_blank">EDS</a>.</label>
     <?php
         if(!$_SESSION['moreOpts']['all'])
-            echo "<br><a href='upload_tab.php?$_SESSION[sessTag]&moreOpts_pdbUpload=0' class='more_opts'>Fewer options...</a>\n";
+            echo "<br><a href='upload_tab.php?$_SESSION[sessTag]&moreOpts_pdbUpload=0'>Fewer options...</a>\n";
     }
     else
     {
-        echo "<br><a href='upload_tab.php?$_SESSION[sessTag]&moreOpts_pdbUpload=1' class='more_opts'>More options...</a>\n";
+        echo "<br><a href='upload_tab.php?$_SESSION[sessTag]&moreOpts_pdbUpload=1'>More options...</a>\n";
     }
     ?>
 </td><td width="50%">
@@ -70,11 +68,11 @@ echo mpTabBar("upload");
         <br><label><input type="checkbox" name="ignoreSegID" value="1"> Ignore segID field</label>
     <?php
         if(!$_SESSION['moreOpts']['all'])
-            echo "<br><a href='upload_tab.php?$_SESSION[sessTag]&moreOpts_pdbUpload=0' class='more_opts'>Fewer options...</a>\n";
+            echo "<br><a href='upload_tab.php?$_SESSION[sessTag]&moreOpts_pdbUpload=0'>Fewer options...</a>\n";
     }
     else
     {
-        echo "<br><a href='upload_tab.php?$_SESSION[sessTag]&moreOpts_pdbUpload=1' class='more_opts'>More options...</a>\n";
+        echo "<br><a href='upload_tab.php?$_SESSION[sessTag]&moreOpts_pdbUpload=1'>More options...</a>\n";
     }
     ?>
 </td></tr>

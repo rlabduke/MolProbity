@@ -22,9 +22,7 @@
 //function someFunctionName() {}
 #}}}########################################################################
 
-    echo mpPageHeader("Finish session");
-    echo "<p>\n";
-    echo mpTabBar("finish");
+    echo mpPageHeader("Finish session", "logout");
 ?>
 
 <p>You can bookmark this page and come back later!

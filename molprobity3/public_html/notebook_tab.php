@@ -74,23 +74,8 @@ if($_REQUEST['cmd'] == "Save")
 }
 
 // Start the page
-echo mpPageHeader("Lab notebook");
-echo "<p>\n";
-echo mpTabBar("notebook");
+echo mpPageHeader("Lab notebook", "notebook");
 ?>
-
-<!-- Set time zone form -->
-<form method="post" action="notebook_tab.php">
-<div class="sidebar">
-    <?php
-        echo postSessionID();
-        echo "Now: " . formatTime(time());
-        echo "<br>\n";
-        echo timeZonePicker('timezone', $_SESSION['timeZone']);
-    ?>
-    <br><input type="submit" name="cmd" value="Set time zone">
-</div>
-</form>
 
 <!-- Notebook table of contents -->
 <a name="top">
@@ -101,7 +86,7 @@ echo mpTabBar("notebook");
 <input type='submit' name='cmd' value='Create new entry'>
 </form>
 </a>
-<br clear="all">
+<br clear="all" />
 
 <!-- Actual notebook entries -->
 <?php
@@ -110,5 +95,18 @@ echo mpTabBar("notebook");
         printEntry($num, $entry);
     }
 ?>
+
+<!-- Set time zone form -->
+<hr />
+<form method="post" action="notebook_tab.php">
+    <?php
+        echo postSessionID();
+        echo "Now: " . formatTime(time());
+        echo "<br>\n";
+        echo timeZonePicker('timezone', $_SESSION['timeZone']);
+    ?>
+    <br /><input type="submit" name="cmd" value="Set time zone">
+</form>
+
 
 <?php echo mpPageFooter(); ?>
