@@ -31,8 +31,9 @@ if($_SESSION['bgjob']['isRunning'])
     $rate       = ($count == 1 ? 1 : $_SESSION['bgjob']['refreshRate']);
     $refresh    = "$rate; $url";
     echo mpPageHeader("Job is running...", "none", $refresh);
-    //echo "<p><center><img src='img/pbar-anim.gif'>\n";
-    echo "<br><table border='0'><tr><td>\n";
+    echo "<p><center>\n";
+    //echo "<img src='img/pbar-anim.gif'><br>\n";
+    echo "<table border='0'><tr><td>\n";
     echo "<img src='img/1ubq-spin.gif'></td><td>\n";
     @readfile("$_SESSION[dataDir]/progress");
     echo "</td></tr></table></center>\n";

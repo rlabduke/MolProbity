@@ -54,7 +54,7 @@ mpStartSession(true); // create a new session
 
 // Describe the output of this script
 echo "#pdbFileName:chains:residues:nucacids:resolution:rvalue:rfree:clashscore:clashscoreB<40";
-echo ":cbeta>0.25:numCbeta:minCbeta:maxCbeta:modeCbeta:meanCbeta:stddevCbeta:rota<1%:numRota:ramaOutlier:ramaAllowed:ramaFavored\n";
+echo ":cbeta>0.25:numCbeta:minCbeta:maxCbeta:medianCbeta:meanCbeta:stddevCbeta:rota<1%:numRota:ramaOutlier:ramaAllowed:ramaFavored\n";
 
 // Loop through all PDBs in the provided directory
 $h = opendir($pdbFolder);
@@ -91,12 +91,13 @@ while(($infile = readdir($h)) !== false)
         
         // Cbetas
         echo ":" . count($badCbeta) . ":" . count($cbdev);
-        echo ":$cbStats[min]:$cbStats[max]:$cbStats[mode]:$cbStats[mean]:$cbStats[stddev]";
+        echo ":$cbStats[min]:$cbStats[max]:$cbStats[median]:$cbStats[mean]:$cbStats[stddev]";
         
         // Rotamers
         echo ":" . count($badRota) . ":" . count($rota);
         
         // Rama outliers - count each type
+        unset($ramaScore); // or else we will accumulate the counts for each model!
         foreach($rama as $r)
             $ramaScore[ $r['eval'] ] += 1;
         echo ":" . ($ramaScore['OUTLIER']+0) . ":" . ($ramaScore['Allowed']+0) . ":" . ($ramaScore['Favored']+0);

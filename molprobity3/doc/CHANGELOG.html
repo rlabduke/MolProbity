@@ -52,6 +52,14 @@
 - added calcCbetaStats() to find min, max, mode, mean, stddev
 - improved REMARK regex's in pdbstat.php
 
+- oops! I was calling the median "mode" in the above calcCbetaStats().
+- code for tallying Rama outliers kept a running tally over all models (var not reset)
+- Reduce 2.21 on Linux introduced line noise into some USER MODS, including ASCII 26 (hex 1a).
+  Scrublines was set to terminate on this character, so I changed that and recompiled.
+  This was previously causing affected PDBs to be truncated upon upload.
+- improved regex's for R and Rfree to specify leading zero or decimal point
+- changed loadClashlist() to guard against no clashes (and no summary!) for scores
+
 ### 3pre12 ###
 - updated program requirements to list "zip"
 - changed style sheet to sans-serif fonts, turned off link underlines

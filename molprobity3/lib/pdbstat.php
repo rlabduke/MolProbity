@@ -9,7 +9,7 @@ require_once(MP_BASE_DIR.'/lib/strings.php');
 #   chains          number of chains in the file
 #   chainids        ARRAY of all the unique chain IDs in the file
 #   unique_chains   number of unique (not duplicated) chains
-#   residues        total number of residues (in 1st model)
+#   residues        total number of residues in 1st model (but not all-HETATM)
 #   sidechains      are sidechains present? (0/>0)
 #   nucacids        are nucleic acids present? (0/>0)
 #   hnonpolar       are non-polar hydrogens present? (0/>0)
@@ -64,8 +64,8 @@ function pdbstat($pdbfilename)
         elseif(startsWith($s, "REMARK"))
         {
             if(startsWith($s, 'REMARK   3   PROGRAM')) { $refiProg = trim(substr($s, 26, 44)); }
-            elseif(!isset($rValue) && preg_match('/^REMARK   3   R VALUE .+? +(\d+\.\d+)/', $s, $match)) { $rValue = $match[1]; }
-            elseif(!isset($rFree) && preg_match('/^REMARK   3   FREE R VALUE .+?: +(\d+\.\d+)/', $s, $match)) { $rFree = $match[1]; }
+            elseif(!isset($rValue) && preg_match('/^REMARK   3   R VALUE .+? +(0?\.\d+)/', $s, $match)) { $rValue = $match[1]; }
+            elseif(!isset($rFree) && preg_match('/^REMARK   3   FREE R VALUE .+?: +(0?\.\d+)/', $s, $match)) { $rFree = $match[1]; }
             elseif(preg_match('/^REMARK 200  TEMPERATURE           \(KELVIN\) : +(\d+\.\d+)/', $s, $match)) { $refiTemp = $match[1]; }
             elseif(!isset($resolution) && preg_match("/^REMARK   2/", $s) && preg_match("/ (\\d+\\.\\d+)/", substr($s,10,60), $match)) { $resolution = $match[1]; }
             # Alternative location for resolution info:
