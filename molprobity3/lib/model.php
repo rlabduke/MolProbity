@@ -2,6 +2,60 @@
 /*****************************************************************************
     Provides functions for manipulating models.
 *****************************************************************************/
+require_once(MP_BASE_DIR.'/lib/pdbstat.php');
+
+#{{{ addModel - adds a model to the session and creates its directory
+############################################################################
+/**
+* This is suitable for the traditional model addition, where the file
+* to add already exists as a separate PDB.
+* It *only* makes sense in the context of an active session.
+* It may have to be modified to handle e.g. splitting a PDB into multiple models.
+*   tmpPdb          the (temporary) file where the upload is stored.
+*   origName        the name of the file on the user's system.
+*   isCnsFormat     true if the user thinks he has CNS atom names
+*   ignoreSegID     true if the user wants to never map segIDs to chainIDs
+*
+* It returns the model ID code.
+*/
+function addModel($tmpPdb, $origName, $isCnsFormat = false, $ignoreSegID = false)
+{
+    // Try stripping file extension
+    if(preg_match('/^(.+)\.(pdb|xyz|ent)$/i', $origName, $m))
+        $id = $m[1];
+    else
+        $id = $origName;
+    
+    // Make sure this is a unique name
+    while( isset($_SESSION['models'][$id.$serial]) )
+        $serial++;
+    $id .= $serial;
+    
+    // Create directory
+    $modelDir = $_SESSION['dataDir'].'/'.$id;
+    mkdir($modelDir, 0777);
+    $modelURL = $_SESSION['dataURL'].'/'.$id;
+    
+    // Process file - this is the part that matters
+    $infile     = $tmpPdb;
+    $outname    = $id.'mp.pdb'; // don't confuse user by re-using exact original PDB name
+    $outpath    = $modelDir.'/'.$outname;
+    preparePDB($infile, $outpath, $isCnsFormat, $ignoreSegID);
+    
+    // Create the model entry
+    $_SESSION['models'][$id] = array(
+        'id'        => $id,
+        'dir'       => $modelDir,
+        'url'       => $modelURL,
+        'prefix'    => $id.'-',
+        'pdb'       => $outname,
+        'stats'     => pdbstat($outpath),
+        'history'   => 'Original file uploaded by user'
+    );
+    
+    return $id;
+}
+#}}}########################################################################
 
 #{{{ preparePDB - cleans up a user PDB before use (fixes names, etc)
 ############################################################################
@@ -120,14 +174,6 @@ function reduceNoBuild($inpath, $outpath, $ignoreSegID = false)
     $segmap = ($segToChainMapping == "" ? "" : "-segidmap '$segToChainMapping'");
     exec("reduce -quiet -limit".MP_REDUCE_LIMIT." $segmap -keep -noadjust -his -allalt $inpath > $outpath");
 }
-#}}}########################################################################
-
-#{{{ a_function_definition - sumary_statement_goes_here
-############################################################################
-/**
-* Documentation for this function.
-*/
-//function someFunctionName() {}
 #}}}########################################################################
 
 #{{{ a_function_definition - sumary_statement_goes_here

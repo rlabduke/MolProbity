@@ -4,13 +4,7 @@
 
 INPUTS (via $_SESSION['bgjob']):
     model           ID code for model to process
-    opts[doRama]        a flag to create Ramachandran plots
-    opts[doRota]        a flag to find bad rotamers
-    opts[doCbeta]       a flag to make 2- and 3-D Cbeta deviation plots
-    opts[doAAC]         a flag to make all-atom contact kinemages
-    opts[doMultiKin]    a flag to make the multi-criterion kinemage
-    opts[doMultiChart]  a flag to make the multi-criterion chart
-    opts[doAll]         a flag to do all of the above
+    opts[]          the set of flags for lib/analyze.php:runAnalysis()
 
 OUTPUTS (via $_SESSION['bgjob']):
     paramName       description of parameter
@@ -23,9 +17,7 @@ OUTPUTS (via $_SESSION['bgjob']):
     if(!defined('MP_BASE_DIR')) define('MP_BASE_DIR', realpath(getcwd().'/..'));
 // 2. Include core functionality - defines constants, etc.
     require_once(MP_BASE_DIR.'/lib/core.php');
-    require_once(MP_BASE_DIR.'/lib/model.php');
     require_once(MP_BASE_DIR.'/lib/analyze.php');
-    require_once(MP_BASE_DIR.'/lib/visualize.php');
 // 3. Restore session data. If you don't want to access the session
 // data for some reason, you must call mpInitEnvirons() instead.
     session_id( $_SERVER['argv'][1] );
@@ -47,133 +39,9 @@ OUTPUTS (via $_SESSION['bgjob']):
 # MAIN - the beginning of execution for this page
 ############################################################################
 $modelID = $_SESSION['bgjob']['model'];
-$model  = $_SESSION['models'][$modelID];
-$infile = "$model[dir]/$model[pdb]";
 $opts = $_SESSION['bgjob']['opts'];
 
-////////////////////////////////////////////////////////////////////////////
-// Check for hydrogens and add them if needed.
-if(($opts['doAll'] || $opts['doAAC'] || $opts['doMultiChart'] || $opts['doMultiKin']) && (! $model['isReduced']))
-{
-    $outfile = $model['id']."nbH.pdb";
-    $outpath = "$model[dir]/$outfile";
-    reduceNoBuild($infile, $outpath);
-    $_SESSION['models'][$modelID]['pdb'] = $outfile;
-    $_SESSION['models'][$modelID]['isReduced'] = true;
-    
-    $modelID = $_SESSION['bgjob']['model'];
-    $model  = $_SESSION['models'][$modelID];
-    $infile = "$model[dir]/$model[pdb]";
-}
-
-////////////////////////////////////////////////////////////////////////////
-// Data collection for multi-crit chart, etc.
-
-// C-betas
-if($opts['doAll'] || $opts['doCbeta'] || $opts['doMultiChart'])
-{
-    $outfile = "$model[dir]/$model[prefix]cbdev.data";
-    runCbetaDev($infile, $outfile);
-    $cbdev = loadCbetaDev($outfile);
-    $_SESSION['models'][$modelID]['badCbeta'] = findCbetaOutliers($cbdev);
-}
-
-// Rotamers
-if($opts['doAll'] || $opts['doRota'] || $opts['doMultiChart'] || $opts['doMultiKin'])
-{
-    $outfile = "$model[dir]/$model[prefix]rota.data";
-    runRotamer($infile, $outfile);
-    $rota = loadRotamer($outfile);
-    $_SESSION['models'][$modelID]['badRota'] = findRotaOutliers($rota);
-}
-
-// Ramachandran
-if($opts['doAll'] || $opts['doRama'] || $opts['doMultiChart'] || $opts['doMultiKin'])
-{
-    $outfile = "$model[dir]/$model[prefix]rama.data";
-    runRamachandran($infile, $outfile);
-    $rama = loadRamachandran($outfile);
-    $_SESSION['models'][$modelID]['badRama'] = findRamaOutliers($rama);
-}
-
-// Clashes
-if($opts['doAll'] || $opts['doAAC'] || $opts['doMultiChart'])
-{
-    $outfile = "$model[dir]/$model[prefix]clash.data";
-    runClashlist($infile, $outfile);
-    $clash = loadClashlist($outfile);
-    $_SESSION['models'][$modelID]['badClash'] = findClashOutliers($clash);
-}
-
-// Find all residues on the naughty list
-// First index is 9-char residue name
-// Second index is 'cbdev', 'rota', 'rama', or 'clash'
-if($opts['doAll'] || $opts['doMultiChart'])
-{
-    // TODO: Integrate outlier information from above analyses into a chart
-}
-
-////////////////////////////////////////////////////////////////////////////
-// Kinemages and other visualizations
-
-// Multi-criterion kinemage
-if($opts['doAll'] || $opts['doMultiKin'])
-{
-    $outfile = "$model[dir]/$model[prefix]multi.kin";
-    if(file_exists($outfile)) unlink($outfile);
-    
-    $h = fopen($outfile, 'a');
-    fwrite($h, "@kinemage 1\n@group {macromol.} dominant off\n");
-    fclose($h);
-    exec("prekin -append -nogroup -scope -show 'mc(white),sc(brown),hy(gray),ht(sky)' $infile >> $outfile");
-    
-    $h = fopen($outfile, 'a');
-    fwrite($h, "@group {waters} dominant off\n");
-    fclose($h);
-    exec("prekin -append -nogroup -scope -show 'wa(bluetint)' $infile >> $outfile");
-    
-    $h = fopen($outfile, 'a');
-    fwrite($h, "@group {Ca trace} dominant\n");
-    fclose($h);
-    exec("prekin -append -nogroup -scope -show 'ca(gray)' $infile >> $outfile");
-    
-    makeAltConfKin($infile, $outfile);
-    makeBadRamachandranKin($infile, $outfile, $rama);
-    makeBadRotamerKin($infile, $outfile, $rota);
-    makeBadCbetaBalls($infile, $outfile);
-    makeBadDotsVisible($infile, $outfile, true); // if false, don't write hb, vdw
-}
-
-// Ramachandran plots
-if($opts['doAll'] || $opts['doRama'])
-{
-    makeRamachandranKin($infile, "$model[dir]/$model[prefix]rama.kin");
-    //makeRamachandranImage($infile, "$model[dir]/$model[prefix]rama.jpg");
-    //convertKinToPostscript("$model[dir]/$model[prefix]rama.kin");
-}
-
-// C-beta deviations
-// In the future, we might use a custom lots kin here (e.g. with half-bond colors)
-if($opts['doAll'] || $opts['doCbeta'])
-{
-    $outfile = "$model[dir]/$model[prefix]cb3d.kin";
-    exec("prekin -lots $infile > $outfile");
-    makeCbetaDevBalls($infile, $outfile);
-    makeCbetaDevPlot($infile, "$model[dir]/$model[prefix]cb2d.kin");
-}
-
-// All-atom contacts
-// We might also want to not calculate H-bonds or VDW dots
-// In the future, we might use a custom lots kin here (e.g. with half-bond colors)
-if($opts['doAll'] || $opts['doAAC'])
-{
-    $outfile = "$model[dir]/$model[prefix]aac.kin";
-    exec("prekin -lots $infile > $outfile");
-    makeSidechainDots($infile, $outfile);
-    //$outfile = "$model[dir]/$model[prefix]aac-mc.kin";
-    //exec("prekin -lots $infile > $outfile");
-    makeMainchainDots($infile, $outfile);
-}
+runAnalysis($modelID, $opts);
 
 /*********************
 To compare:

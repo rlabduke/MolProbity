@@ -22,7 +22,6 @@ OUTPUTS (via $_SESSION['bgjob']):
 // 2. Include core functionality - defines constants, etc.
     require_once(MP_BASE_DIR.'/lib/core.php');
     require_once(MP_BASE_DIR.'/lib/model.php');
-    require_once(MP_BASE_DIR.'/lib/pdbstat.php');
 // 3. Restore session data. If you don't want to access the session
 // data for some reason, you must call mpInitEnvirons() instead.
     session_id( $_SERVER['argv'][1] );
@@ -43,43 +42,16 @@ OUTPUTS (via $_SESSION['bgjob']):
 
 # MAIN - the beginning of execution for this page
 ############################################################################
-// Try stripping file extension
-if(preg_match('/^(.+)\.(pdb|xyz|ent)$/i', $_SESSION['bgjob']['origName'], $m))
-    $id = $m[1];
-else
-    $id = $_SESSION['bgjob']['origName'];
 
-// Make sure this is a unique name
-while( isset($_SESSION['models'][$id.$serial]) )
-    $serial++;
-$id .= $serial;
-
-// Create directory
-$modelDir = $_SESSION['dataDir'].'/'.$id;
-mkdir($modelDir, 0777);
-$modelURL = $_SESSION['dataURL'].'/'.$id;
-
-// Process file - this is the part that matters
-$infile     = $_SESSION['bgjob']['tmpPdb'];
-$outname    = $id.'mp.pdb'; // don't confuse user by re-using exact original PDB name
-$outpath    = $modelDir.'/'.$outname;
-preparePDB($infile, $outpath, $_SESSION['bgjob']['isCnsFormat'], $_SESSION['bgjob']['ignoreSegID']);
-
-// Create the model entry
-$_SESSION['models'][$id] = array(
-    'id'        => $id,
-    'dir'       => $modelDir,
-    'url'       => $modelURL,
-    'prefix'    => $id.'-',
-    'pdb'       => $outname,
-    'stats'     => pdbstat($outpath),
-    'history'   => 'Original file uploaded by user'
-);
+$id = addModel($_SESSION['bgjob']['tmpPdb'],
+    $_SESSION['bgjob']['origName'],
+    $_SESSION['bgjob']['isCnsFormat'],
+    $_SESSION['bgjob']['ignoreSegID']);
 
 $_SESSION['bgjob']['newModel'] = $id;
 
 // Clean up temp files
-unlink($infile);
+unlink($_SESSION['bgjob']['tmpPdb']);
 ############################################################################
 // Clean up and go home
 $_SESSION['bgjob']['endTime']   = time();
