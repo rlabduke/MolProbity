@@ -326,7 +326,7 @@ function makeFlipkin($inpath, $outpathAsnGln, $outpathHis)
 * $rota     is the data structure from loadRotamer()
 * $cbdev    is the data structure from loadCbetaDev()
 * $pperp    is the data structure from loadBasePhosPerp()
-* $sortBy   can be 'natural', 'bad', 'clash', 'rama', 'rota', 'cbdev'
+* $sortBy   can be 'natural', 'bad', 'clash', 'rama', 'rota', 'cbdev', 'pperp'
 * Any of them can be set to null if the data is unavailable.
 */
 function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pperp, $sortBy = 'natural')
@@ -406,6 +406,7 @@ function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pp
     elseif($sortBy == 'rama')       uasort($res, 'mcSortRama');
     elseif($sortBy == 'rota')       uasort($res, 'mcSortRota');
     elseif($sortBy == 'cbdev')      uasort($res, 'mcSortCbDev');
+    elseif($sortBy == 'pperp')      uasort($res, 'mcSortPPerp');
     
     $out = fopen($outfile, 'wb');
     fwrite($out, "<table width='100%' cellspacing='1' border='0'>\n");
@@ -517,6 +518,13 @@ function mcSortCbDev($a, $b)
 {
     if($a['cbdev_val'] < $b['cbdev_val'])       return 1;
     elseif($a['cbdev_val'] > $b['cbdev_val'])   return -1;
+    else                                        return mcSortNatural($a, $b);
+}
+
+function mcSortPPerp($a, $b)
+{
+    if($a['pperp_val'] < $b['pperp_val'])       return 1;
+    elseif($a['pperp_val'] > $b['pperp_val'])   return -1;
     else                                        return mcSortNatural($a, $b);
 }
 #}}}########################################################################
