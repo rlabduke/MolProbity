@@ -7,7 +7,7 @@ if(!defined('MP_BASE_DIR')) die("MP_BASE_DIR is not defined.");
 
 #{{{ mpInitEnvirons - sets environment variables, etc.
 ############################################################################
-/** Does not need to be called if mpStartSession is called. */
+/** Does not need to be called explicitly if mpStartSession is called. */
 function mpInitEnvirons()
 {
     // Die if disk is at least 98% full, in order to protect the server.
@@ -125,6 +125,11 @@ function mpStartSession($createIfNeeded = false)
         @fclose($fp);
     }
     
+    // Also set location of Reduce's heterogen dictionary,
+    // overriding the value set up by mpInitEnvirons().
+    // Better here than on command line b/c it affects e.g. flipkin too
+    if(isset($_SESSION['hetdict'])) putenv("REDUCE_HET_DICT=".$_SESSION['hetdict']);
+
     return $sessionCreated;
 }
 #}}}########################################################################
