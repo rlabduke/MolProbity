@@ -1,0 +1,46 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="content-type"
+ content="text/html; charset=ISO-8859-1">
+  <title>Installing and Configuring MolProbity</title>
+</head>
+<body>
+MolProbity often relies on symbolic links (symlinks), so it is critical
+that your webserver be configured to follow symlinks fot the MolProbity
+directories. For Apache, you should have a <span
+ style="font-family: monospace;">Options FollowSymLinks</span>
+directive in the proper part of your <span
+ style="font-family: monospace;">httpd.conf</span> file (usually in <span
+ style="font-family: monospace;">/etc/httpd/httpd.conf</span>).<br>
+<br>
+(Is this bit about symlinks still true?)<br>
+<br>
+In order for the web server to be able to access MolProbity data
+correctly, it must have read, write, and execute permissions on the <span
+ style="font-family: monospace;">public_html/data/</span> and <span
+ style="font-family: monospace;">tmp/</span> directories. If someone
+other than the web server pseudo-user owns the files, this probably
+implies a permission mask of 777. The same thing goes for <span
+ style="font-family: monospace;">public_html/data/molprobity.log</span>.<br>
+<br>
+It's also important to be sure the programs in the <span
+ style="font-family: monospace;">bin/</span> directory have their
+execute bit set for the web server pseudo-user.<br>
+<br>
+It's critical that the absolute path to the directory where MolProbity
+is installed not have any spaces or other funky characters in it.
+Alphanumerics, underscores, dashes, and dots are OK. Everything else is
+off limits. Those weird characters interfere both with passing paths in
+URLs (they have to be encoded and decoded) and with UNIX command line
+programs (all paths have to be enclosed in extra quote marks).<br>
+<br>
+<h2>Required software on the server</h2>
+<ul>
+  <li>rm</li>
+  <li>php (CLI version, 4.3.x and higher)</li>
+  <li>many more, see <span style="font-family: monospace;">public_html/admin/check_config.php</span>!<br>
+  </li>
+</ul>
+</body>
+</html>

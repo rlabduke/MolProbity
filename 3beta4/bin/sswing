@@ -1,0 +1,110 @@
+#!/usr/bin/perl -w
+# usage: sswing inputHpdb AminoAcidNo AminoAcidType DensityMapiFile [chainID]
+#               ARGV[0]    ARGV[1]     ARGV[2]       ARGV[3]    ARGV[4]
+
+   use strict;
+   my $i=0;
+   my $var;
+   my $name="";
+
+   foreach $var (@ARGV) {
+     $i++;
+   }
+
+   if ($i==4){
+       $name=$ARGV[0].$ARGV[1].$ARGV[2]
+   }else {
+       $name=$ARGV[0].$ARGV[4].$ARGV[1].$ARGV[2]
+   }
+   
+   #produce script file
+   my $outputRotscr=$name.".rotscr";
+   my $pdb2rotscr="";
+
+   if( $i == 4){
+      $pdb2rotscr = "sswingpdb2rotscr  $ARGV[0] $ARGV[1] $ARGV[2] > $outputRotscr";
+   } else {
+      $pdb2rotscr = "sswingpdb2rotscr  $ARGV[0] $ARGV[1] $ARGV[2] $ARGV[4]> $outputRotscr"; 
+   }
+     system($pdb2rotscr);
+
+   #select rotamers
+   my $genScore ="";
+   my $goFile="gofile";
+   if( $i == 4){
+       $genScore = "genScore  $ARGV[0] $outputRotscr $goFile  $ARGV[1]";
+   } else {
+       $genScore = "genScore  $ARGV[0] $outputRotscr $goFile  $ARGV[1] $ARGV[4]";
+   }
+   system($genScore);
+
+   #chmod  rotamer script file
+   my $rotamerRotscr=$outputRotscr."_rotamer";
+   chmod (0777,$rotamerRotscr);
+
+   #run script file and produce rotamer map
+   my $rotamerMap=$name.".map_rotamer";
+   my $rotamerScr="$rotamerRotscr>$rotamerMap";
+
+   system ($rotamerScr);
+
+   my $scoreOutput=$name.".out";
+   my $genScoreResult="genScoreResult $rotamerMap $ARGV[1] $ARGV[2] > $scoreOutput";
+   system ($genScoreResult);
+
+   unlink ($outputRotscr);
+   unlink ($rotamerMap);
+   unlink ($rotamerScr);
+   unlink ($goFile);
+   unlink ($rotamerRotscr);
+
+
+
+# usage: genContour PDBfile inputMAPfile outputMAPfile seqID   PDBfile(idealized) scorefile resultFile [ChainID]
+#                     0        1             2          3            4                  5       6        7
+
+   my $prekin="";
+
+   my $genContour="";
+   my $PDBfile=$ARGV[0];
+   my $inputMAPfile=$ARGV[3];
+   my $outputMAPfile="sswingOutput.map";
+   my $residueSeqNum=$ARGV[1];
+   my $aminoAcidType=$ARGV[2];
+   my $PDBfile_ideal="idealPDB.pdb";
+   my $resultFile="sswingOutput.txt";
+   my $modelChainID=$ARGV[4];
+
+
+   if ($i==4){
+       $prekin="prekin $PDBfile - -scope -show 'sc,hy' -mutate $residueSeqNum $aminoAcidType alt_ -pdbout>$PDBfile_ideal";
+   }else {
+       $prekin="prekin $PDBfile - -scope -show 'sc,hy' -mutate $residueSeqNum $aminoAcidType alt_ -chainID $modelChainID -pdbout>$PDBfile_ideal";
+   }
+   system($prekin);
+
+   if ($i==4){
+       $genContour="genContour $PDBfile $inputMAPfile $outputMAPfile $residueSeqNum $PDBfile_ideal $scoreOutput $resultFile";
+   }else {
+       $genContour="genContour $PDBfile $inputMAPfile $outputMAPfile $residueSeqNum $PDBfile_ideal $scoreOutput $resultFile $modelChainID";
+   }
+   system($genContour);
+
+#   my $ouputKin=$outputMAPfile.".kin";
+#   my $kin3Dcont="kin3Dcont $outputMAPfile -KIN -G0.25 -S0.2 -LAST -SAMPLED -L  0.25 blue 0.5 yellow 1.0 red > $ouputKin";
+
+#   system($kin3Dcont);
+
+   unlink ($outputMAPfile);
+   unlink ($PDBfile_ideal);
+   unlink ($scoreOutput);
+   
+   # Changes by IWD 8/3/04 for MolProbity
+   if ($i==4){
+       unlink ("sswing_".$residueSeqNum.".pdb");
+   }else {
+       unlink ("sswing_".$residueSeqNum.$modelChainID.".pdb");
+   }
+   ### Jane wants to be able to look at this ### unlink ($resultFile);
+
+
