@@ -11,9 +11,10 @@
     add H and analyze should be able to run in same script (wait once)
     user should get partial results as big job is running
     Provide URL prefix for each model, too
-  * Allow simple comparison of bad residues in two different models;
+    Allow simple comparison of bad residues in two different models;
         see jobs/analyze.php for ideas
     Should analysis of worst residues ignore water or treat it separately?
+    Add text at top of multicrit kinemage
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -25,6 +26,10 @@
 - loadCbetaDev() now synthesizes a residue name from the parts
 - loadClashlist() now picks up worst clash per residue
 - badRes now markes residues with clashes >= 0.40 A
+- refactored badRes code into lib/analysis.php:findOutliers()
+- started lib/visualize.php to make data visualizations
+- wrote functions to find res with alt confs and guess at res center in 3-space
+- started working on the new MultiCrit
 
 ### 3pre8 ###
 - brought the whole project under Subversion version control

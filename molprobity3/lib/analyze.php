@@ -2,7 +2,15 @@
 /*****************************************************************************
     Provides functions for producing analysis data from outside programs
     and for loading and interpretting that data.
+    
+    Many functions work with a column-formatted residue name
+    stored in exactly 9 characters, like this: 'cnnnnittt'
+        c: Chain ID, space for none
+        n: sequence number, right justified, space padded
+        i: insertion code, space for none
+        t: residue type (ALA, LYS, etc.), all caps, left justified, space padded
 *****************************************************************************/
+require_once(MP_BASE_DIR.'/lib/strings.php');
 
 #{{{ runCbetaDev - generates numeric info about CB deviations
 ############################################################################
@@ -241,6 +249,183 @@ function decomposeResName($name)
         'insCode'   => substr($name, 5, 1)
     );
 }
+#}}}########################################################################
+
+#{{{ pdbComposeResName - makes a 9-char res ID from a PDB ATOM line
+############################################################################
+function pdbComposeResName($pdbline)
+{
+    return substr($pdbline, 21, 6) . substr($pdbline, 17, 3);
+}
+#}}}########################################################################
+
+#{{{ findOutliers - evaluates residues for bad score on any of four criteria
+############################################################################
+/**
+* Find all residues on the naughty list
+* First index is 9-char residue name
+* Second index is 'cbdev', 'rota', 'rama', or 'clash'
+* Inputs are from appropriate loadXXX() functions above.
+*/
+function findOutliers($cbdev, $rota, $rama, $clash)
+{
+    $worst = array();
+    foreach($cbdev as $res)
+    {
+        if($res['dev'] >= 0.25)
+            $worst[$res['resName']]['cbdev'] = $res['dev'];
+    }
+    foreach($rota as $res)
+    {
+        if($res['scorePct'] <= 1.0)
+            $worst[$res['resName']]['rota'] = $res['scorePct'];
+    }
+    foreach($rama as $res)
+    {
+        if($res['eval'] == 'OUTLIER')
+            $worst[$res['resName']]['rama'] = $res['eval'];
+    }
+    foreach($clash['clashes'] as $res => $dist)
+    {
+        if($dist >= 0.4)
+            $worst[$res]['clash'] = $dist;
+    }
+    
+    ksort($worst); // Put the residues into a sensible order
+    return $worst;
+}
+#}}}########################################################################
+
+#{{{ findAltConfs - parses a PDB file for residues with mc and/or sc alts
+############################################################################
+/**
+* Returns NULL if the file could not be read.
+* Otherwise, returns an array of arrays of booleans.
+* First key is 'mc', 'sc', or 'all';
+* second key is the 9-char residue ID.
+*/
+function findAltConfs($infile)
+{
+    $mcAtoms = array(" N  " => true, " CA " => true, " C  " => true, " O  " => true,
+        " H  " => true, " HA " => true, "1HA " => true, "2HA " => true);
+    
+    $out = array('all' => array(), 'mc' => array(), 'sc' => array());
+    $in = fopen($infile, "r");
+    if(!$in) return NULL;
+    while(!feof($in))
+    {
+        $s = fgets($in, 1024);
+        $alt = $s{16};
+        if($alt != ' ' && (startsWith($s, "ATOM") || startsWith($s, "HETATM")))
+        {
+            $res    = pdbComposeResName($s);
+            $atom   = substr($s, 12, 4);
+            $out['all'][$res] = true;
+            
+            if($mcAtoms[$atom])
+                $out['mc'][$res] = true;
+            else
+                $out['sc'][$res] = true;
+        }
+    }
+    fclose($in);
+    
+    return $out;
+}
+#}}}########################################################################
+
+#{{{ computeResCenters - finds (x,y,z) for residue (pseudo) center-of-mass from PDB
+############################################################################
+/**
+* Returns NULL if the file could not be read.
+* Otherwise, an array of arrays
+* where the first key is the 9-char residue code
+* and the second key is 'x', 'y', or 'z'.
+* Does not account for the possibility of multiple MODELs
+*/
+function computeResCenters($infile)
+{
+    $out = array(); // x, y, z
+    $cnt = array(); // how many atoms have been tallied
+    
+    $in = fopen($infile, "r");
+    if(!$in) return NULL;
+    while(!feof($in))
+    {
+        $s = fgets($in, 1024);
+        if(startsWith($s, "ATOM") || startsWith($s, "HETATM"))
+        {
+            $res = pdbComposeResName($s);
+            $out[$res]['x'] += substr($s, 30, 8) + 0.0;
+            $out[$res]['y'] += substr($s, 38, 8) + 0.0;
+            $out[$res]['z'] += substr($s, 46, 8) + 0.0;
+            $cnt[$res]      += 1;
+        }
+    }
+    fclose($in);
+    
+    foreach($cnt as $res => $num)
+    {
+        $out[$res]['x'] /= $num;
+        $out[$res]['y'] /= $num;
+        $out[$res]['z'] /= $num;
+    }
+    
+    return $out;
+}
+#}}}########################################################################
+
+#{{{ groupAdjacentRes - structures a list of residues into chains and "runs"
+############################################################################
+/**
+* Given a list of 9-char residue codes as the values (not keys) of an array,
+* a new data structure is created where
+* the first index is a one-char chain ID,
+* the second index is an arbitrary run number,
+* the third index is arbitrary, and
+* the value is the 9-char residue code.
+* The so-called "runs" are just residues that were adjacent in the input list
+* and had sequence numbers that differed by 1 (or 0).
+*/
+function groupAdjacentRes($resList)
+{
+    $out = array();
+    foreach($resList as $res)
+    {
+        $num = substr($res, 1, 4) + 0;
+        // If old run is ending, append it and start fresh:
+        if(isset($run) && !($num - $prevNum <= 1 && $chainID == $res{0}))
+        {
+            $out[$chainID][] = $run;
+            unset($run);
+        }
+        // Append this residue to the current run (which is potentially empty)
+        $prevNum    = $num;
+        $chainID    = $res{0};
+        $run[]      = $res;
+    }
+    
+    // Append the last run, if any
+    if(isset($run)) $out[$chainID][] = $run;
+    
+    return $out;
+}
+#}}}########################################################################
+
+#{{{ a_function_definition - sumary_statement_goes_here
+############################################################################
+/**
+* Documentation for this function.
+*/
+//function someFunctionName() {}
+#}}}########################################################################
+
+#{{{ a_function_definition - sumary_statement_goes_here
+############################################################################
+/**
+* Documentation for this function.
+*/
+//function someFunctionName() {}
 #}}}########################################################################
 
 #{{{ a_function_definition - sumary_statement_goes_here
