@@ -36,15 +36,38 @@ echo mpPageHeader("Analysis results", "analyze");
 $modelID = $_REQUEST['model'];
 $model = $_SESSION['models'][$modelID];
 
-// Count *number* of outliers for each class
-$worst = $_SESSION['models'][$modelID]['badRes'];
-$cbdev_outliers = count($_SESSION['models'][$modelID]['badCbeta']);
-$rota_outliers = count($_SESSION['models'][$modelID]['badRota']);
-$rama_outliers = count($_SESSION['models'][$modelID]['badRama']);
-$clash_outliers = count($_SESSION['models'][$modelID]['badClash']);
+if(modelDataExists($model, "clash.data"))
+{
+    $file = "$model[dir]/$model[prefix]clash.data";
+    $clash = loadClashlist($file);
+    $num_clash_outliers = count(findClashOutliers($clash));
+}
+if(modelDataExists($model, "rama.data"))
+{
+    $file = "$model[dir]/$model[prefix]rama.data";
+    $rama = loadRamachandran($file);
+    $num_rama_outliers = count(findRamaOutliers($rama));
+    $num_rama_res = count($rama);
+    $pct_rama_outliers = round( 100*$num_rama_outliers/$num_rama_res, 1 );
+}
+if(modelDataExists($model, "rota.data"))
+{
+    $file = "$model[dir]/$model[prefix]rota.data";
+    $rota = loadRotamer($file);
+    $num_rota_outliers = count(findRotaOutliers($rota));
+    $num_rota_res = count($rota);
+    $pct_rota_outliers = round( 100*$num_rota_outliers/$num_rota_res, 1 );
+}
+if(modelDataExists($model, "cbdev.data"))
+{
+    $file = "$model[dir]/$model[prefix]cbdev.data";
+    $cbdev = loadCbetaDev($file);
+    $num_cb_outliers = count(findCbetaOutliers($cbdev));
+    $num_cb_res = count($cbdev);
+    $pct_cb_outliers = round( 100*$num_cb_outliers/$num_cb_res, 1 );
+}
 
-echo "<p><a href='analyze_tab.php?$_SESSION[sessTag]'>Done</a>\n";
-echo "<hr />\n";
+/*
 if(isset($model['parent'])) // this model is derived from an uploaded one
 {
     echo "You can COMPARE THIS MODEL TO ITS PREDECESOR to see how much it's been improved.\n";
@@ -53,117 +76,50 @@ else // this model is an original upload
 {
     echo "You can fix some of these problems automatically by letting Reduce OPTIMIZE HYDROGRENS AND FLIP ASN/GLN/HIS.\n";
 }
+*/
 ############################################################################
 ?>
+
+<h2>Quality summary</h2>
+<table width='100%' border='0'>
+<tr><td>Clashscore:</td><?php if(isset($clash)) echo "<td>$clash[scoreAll]</td><td>($num_clash_outliers res.)</td>"; else echo "<td>?</td><td></td>"; ?></tr>
+<tr><td>Ramachandran outliers:</td><?php if(isset($rama)) echo "<td>$num_rama_outliers</td><td>($pct_rama_outliers%)</td>"; else echo "<td>?</td><td></td>"; ?></tr>
+<tr><td>Rotamer outliers:</td><?php if(isset($rota)) echo "<td>$num_rota_outliers</td><td>($pct_rota_outliers%)</td>"; else echo "<td>?</td><td></td>"; ?></tr>
+<tr><td>C&beta; deviations:</td><?php if(isset($cbdev)) echo "<td>$num_cb_outliers</td><td>($pct_cb_outliers%)</td>"; else echo "<td>?</td><td></td>"; ?></tr>
+</table>
 <hr />
+
 <h2>Multi-criterion display</h2>
 This single display presents all of the core validation criteria at once,
 allowing you to identify clusters of problems in the structure.
-<p><ul>
-<li>
-    <?php if(modelDataExists($model, "multi.kin")) { ?>
-        <?php echo linkModelKin($model, "multi.kin"); ?>
-        <br/><i>All-atom contacts, Ramachandran &amp; rotamer outliers, C-beta deviations,
-        and alternate conformations are highlighted in the 3-D structure.
-        TODO: link to complete tutorial on multicrit displays.
-        </i>
-    <?php } else { ?>
-        <i>Multi-criterion kinemage has not been generated.</i>
-    <?php } ?>
-</li>
-<li>
-    <?php if(modelDataExists($model, "multi.chart")) { ?>
-        <a href=''>A link to the multicrit chart</a>
-        <br /><i>TODO: Jeremy Block is supposed to develop this chart.
-        A brief summary of the number of outliers and percentages should appear here.
-        </i>
-    <?php } else { ?>
-        <i>Multi-criterion chart has not been generated.</i>
-    <?php } ?>
-</li>
-</ul></p>
-
-<?php if(modelDataExists($model, "multi.chart")) readfile("$model[dir]/$model[prefix]multi.chart"); ?>
-
-<hr />
-The multi-criterion display presents results of all of the validation tests.
-The kinemages below show the same information in different ways or in more detail.
+<p><?php
+if(modelDataExists($model, "multi.kin")) echo linkModelKin($model, "multi.kin", "Kinemage");
+else echo "<i>Multi-criterion kinemage has not been generated.</i>";
+?></p>
+<p><?php
+if(modelDataExists($model, "multi.chart") && modelDataExists($model, "multiall.chart"))
+{
+    $badurl = "viewhtml.php?$_SESSION[sessTag]&file=$model[dir]/$model[prefix]multi.chart";
+    $allurl = "viewhtml.php?$_SESSION[sessTag]&file=$model[dir]/$model[prefix]multiall.chart";
+    echo "<b>Chart:</b> <a href='$badurl' target='_blank'>Bad residues</a> | <a href='$allurl' target='_blank'>All residues</a>";
+}
+else echo "<i>Multi-criterion charts have not been generated.</i>";
+?></p>
 <hr />
 
-<h3>All-atom contacts</h3>
-TODO: link to more info about all-atom contacts.
+<h2>Additional displays</h2>
 <p><ul>
-<?php if(modelDataExists($model, "aac.kin")) { ?>
-    <li>
-        <b><?php echo $clash_outliers; ?> clashing residues</b>
-    </li>
-    <li>
-        <?php echo linkModelKin($model, "aac.kin"); ?>
-        <br/><i>Sidechain clashes are most common in models of proteins;
-        mainchain clashes are most common in models of RNA.
-        </i>
-    </li>
-<?php } else { ?>
-    <li><i>All-atom contacts have not been generated.</i></li>
-<?php } ?>
-</ul></p>
-
-<h3>Ramachandran plots</h3>
-The Ramachandran plot identifies protein residues in illegal backbone conformations,
-based on the phi and psi dihedral angles.
-TODO: link to more info about Ramachandran plots.
-<p><ul>
-<?php if(modelDataExists($model, "rama.kin") && modelDataExists($model, "rama.pdf")) { ?>
-    <li>
-        <b><?php echo $rama_outliers; ?> outliers</b>
-    </li>
-    <li>
-        <?php echo linkModelKin($model, "rama.kin"); ?>
-        <br/><i>Click points to identify; animate to see general, Gly, Pro, pre-Pro plots.
-        Summary statistics printed in kinemage text window.
-        </i>
-    </li>
-    <li>
-        <?php echo linkModelDownload($model, "rama.pdf"); ?>
-        <br /><i>You can also use Mage or KiNG to generate customized PostScript
-        or PDF renderings of the Ramachandran kinemage.
-        </i>
-    </li>
-<?php } else { ?>
-    <li><i>Ramachandran plots have not been generated.</i></li>
-<?php } ?>
-</ul></p>
-
-<h3>Rotamers</h3>
-Refer to the multi-criterion displays to identify bad rotamers.
-TODO: link to more info about rotamers.
 <?php
-    if(modelDataExists($model, "rota.data"))
-    {
-        echo "<ul><li><b>$rota_outliers outliers</b></li></ul>\n";
-    }
+    if(modelDataExists($model, "aac.kin")) echo "<li>".linkModelKin($model, "aac.kin", "All-atom contacts")."</li>\n";
+    if(modelDataExists($model, "rama.kin")) echo "<li>".linkModelKin($model, "rama.kin", "Kinemage Ramachandran plot")."</li>\n";
+    if(modelDataExists($model, "rama.pdf")) echo "<li>".linkModelDownload($model, "rama.pdf", "PDF Ramachandran plot")."</li>\n";
+    if(modelDataExists($model, "cb2d.kin")) echo "<li>".linkModelKin($model, "cb2d.kin", "2-D C&beta; deviations")."</li>\n";
+    if(modelDataExists($model, "cb3d.kin")) echo "<li>".linkModelKin($model, "cb3d.kin", "3-D C&beta; deviations")."</li>\n";
 ?>
-
-<h3>C-beta deviations</h3>
-TODO: link to more info about C-beta deviations
-<p><ul>
-<?php if(modelDataExists($model, "cb2d.kin") && modelDataExists($model, "cb3d.kin")) { ?>
-    <li>
-        <b><?php echo $cbdev_outliers; ?> outliers</b>
-    </li>
-    <li>
-        <?php echo linkModelKin($model, "cb2d.kin"); ?>
-        <br/><i>2-D representation plots deviations for whole molecule as scatter around the ideal C-beta position.
-        </i>
-    </li>
-    <li>
-        <?php echo linkModelKin($model, "cb3d.kin"); ?>
-        <br/><i>3-D representation in which deviations are represented by gold balls.
-        Larger balls represent larger deviations; each is centered at the ideal C-beta position.
-        </i>
-    </li>
-<?php } else { ?>
-    <li><i>C-beta deviation plots have not been generated.</i></li>
-<?php } ?>
 </ul></p>
-<?php echo mpPageFooter(); ?>
+<hr />
+
+<?php
+echo "<p><a href='analyze_tab.php?$_SESSION[sessTag]'>Return to analysis page</a></p>\n";
+echo mpPageFooter();
+?>

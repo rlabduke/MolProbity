@@ -15,6 +15,7 @@ OUTPUTS (via Post):
     if(!defined('MP_BASE_DIR')) define('MP_BASE_DIR', realpath(dirname(__FILE__).'/..'));
 // 2. Include core functionality - defines constants, etc.
     require_once(MP_BASE_DIR.'/lib/core.php');
+    require_once(MP_BASE_DIR.'/lib/pdbstat.php');
 // 3. Restore session data. If you don't want to access the session
 // data for some reason, you must call mpInitEnvirons() instead.
     mpStartSession();
@@ -49,6 +50,12 @@ else // upload was OK
     // Start the page: produces <HTML>, <HEAD>, <BODY> tags
     echo mpPageHeader("Model $modelID added", "upload");
 
+    $details = describePdbStats($pdbstats, true);
+    echo "<ul>\n";
+    foreach($details as $detail) echo "<li>$detail</li>\n";
+    echo "</ul>\n";
+    
+    /*
     $compnd = trim($pdbstats['compnd']);
     if($compnd != "")
     {
@@ -87,6 +94,7 @@ else // upload was OK
     }
     
     echo "</ul>\n";
+    */
     ?>
     
     <p><table border='0' width='100%'><tr valign='top'>

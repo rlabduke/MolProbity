@@ -3,6 +3,7 @@
     Provides kinemage-creation functions for visualizing various
     aspects of the analysis.
 *****************************************************************************/
+    require_once(MP_BASE_DIR.'/lib/pdbstat.php');
 
 #{{{ makeSidechainDots - appends sc Probe dots
 ############################################################################
@@ -77,7 +78,10 @@ function makeMulticritKin($infile, $outfile, $rama, $rota)
 {
         if(file_exists($outfile)) unlink($outfile);
         
+        $stats = describePdbStats( pdbstat($infile), false );
         $h = fopen($outfile, 'a');
+        fwrite($h, "@text\n");
+        foreach($stats as $stat) fwrite($h, "[+]   $stat\n");
         fwrite($h, "@kinemage 1\n@group {macromol.} dominant off\n");
         fclose($h);
         exec("prekin -quiet -append -nogroup -bval -scope -show 'mc(white),sc(brown),hy(gray),ht(sky)' $infile >> $outfile");
@@ -443,7 +447,7 @@ function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $fu
             if(isset($eval['cbdev']))   fwrite($out, $eval['cbdev']);
             else                        fwrite($out, "<td>-</td>");
         }
-        fwrite("</tr>\n");
+        fwrite($out, "</tr>\n");
         $color == MP_TABLE_ALT1 ? $color = MP_TABLE_ALT2 : $color = MP_TABLE_ALT1;
     }
     fwrite($out, "</table>\n");

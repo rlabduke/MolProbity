@@ -72,7 +72,6 @@ function runAnalysis($modelID, $opts)
         $outfile = "$model[dir]/$model[prefix]cbdev.data";
         runCbetaDev($infile, $outfile);
         $cbdev = loadCbetaDev($outfile);
-        $_SESSION['models'][$modelID]['badCbeta'] = findCbetaOutliers($cbdev);
     }
     
     // Rotamers
@@ -82,7 +81,6 @@ function runAnalysis($modelID, $opts)
         $outfile = "$model[dir]/$model[prefix]rota.data";
         runRotamer($infile, $outfile);
         $rota = loadRotamer($outfile);
-        $_SESSION['models'][$modelID]['badRota'] = findRotaOutliers($rota);
     }
     
     // Ramachandran
@@ -92,7 +90,6 @@ function runAnalysis($modelID, $opts)
         $outfile = "$model[dir]/$model[prefix]rama.data";
         runRamachandran($infile, $outfile);
         $rama = loadRamachandran($outfile);
-        $_SESSION['models'][$modelID]['badRama'] = findRamaOutliers($rama);
     }
     
     // Clashes
@@ -102,7 +99,6 @@ function runAnalysis($modelID, $opts)
         $outfile = "$model[dir]/$model[prefix]clash.data";
         runClashlist($infile, $outfile);
         $clash = loadClashlist($outfile);
-        $_SESSION['models'][$modelID]['badClash'] = findClashOutliers($clash);
     }
     
     // Find all residues on the naughty list
@@ -112,7 +108,9 @@ function runAnalysis($modelID, $opts)
     {
         setProgress($tasks, 'mcchart'); // updates the progress display if running as a background job
         $outfile = "$model[dir]/$model[prefix]multi.chart";
-        makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev);
+        makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, false);
+        $outfile = "$model[dir]/$model[prefix]multiall.chart";
+        makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, true);
     }
     
     ////////////////////////////////////////////////////////////////////////////

@@ -12,21 +12,23 @@
     user should get partial results as big job is running ?
     Should analysis of worst residues ignore water or treat it separately?
     ZIP download should include a static view of the lab notebook?
-    Retrieve maps from the EDS and allow map upload
+    Retrieve maps from the EDS
     Add ribbons or something else colored by (absolute) occupancy
     Make color-coded versions of the flowchart for different stages of the process?
     Multicrit: views for trouble spots sorted by severity (also hypertext?)
     Create scripts for generating usage stats from molprobity.log
 }}}
     Allow simple comparison of bad residues in two models; see jobs/analyze.php
-    Add text at top of multicrit kinemage
-    Create multicrit chart
     Improved file download page to package all files for one model?
     Put icons on analysis results page to identify the most-used kins
     Make automatic entries including protocols and references in notebook
     Insert calls to logging functions (where?)
     Rama outliers in multicrit kin don't look so hot (Ca-Ca, yellow?)
     Waters are dots instead of balls??
+    No sc master on rotamers
+    Develop multi-model version of the multicrit kin
+    ORACLE output for TN Bhat
+    Add documentation to the analysis results page (how to interpret)
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -43,6 +45,9 @@
 - added B-vals in pt ID and blackbody colored B-factor ribbons to multi kin
 - added explanatory text to analysis setup page
 - hacked together a crude multi-criterion chart
+- added electron density map upload
+- improved the analysis results page to make it more usable.
+- added PDBSTAT text to the multicrit text window
 
 ### 3pre15 ###
 - elaborated oneline-batch to handle running Reduce -nobuild too
