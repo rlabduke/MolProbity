@@ -95,6 +95,7 @@ function mpStartSession($createIfNeeded = false)
             mpSessGC(MP_SESSION_LIFETIME);
             
             mkdir($dataDir, 0777); // Default mode; is modified by UMASK too.
+            mkdir("$dataDir/system", 0777);
 
             // Set up some session variables. See docs for explanation.
             $_SESSION['dataDir']    = $dataDir;
@@ -120,7 +121,7 @@ function mpStartSession($createIfNeeded = false)
     else $sessionCreated = false;
     
     // Mark the lifetime of this session
-    if($fp = @fopen("$dataDir/lifetime", "w"))
+    if($fp = @fopen("$dataDir/system/lifetime", "w"))
     {
         $time = time();
         fwrite($fp, "$time\n");
@@ -190,7 +191,7 @@ function mpSessRead($id)
 {
     mpCheckSessionID($id); // just in case something nasty is in there
     $dataDir    = MP_BASE_DIR."/public_html/data/$id";
-    $sessFile   = "$dataDir/session";
+    $sessFile   = "$dataDir/system/session";
     
     // Read in session data, if present
     if($fp = @fopen($sessFile, "r"))
@@ -218,7 +219,7 @@ function mpSessWrite($id, $sessData)
     
     mpCheckSessionID($id); // just in case something nasty is in there
     $dataDir    = MP_BASE_DIR."/public_html/data/$id";
-    $sessFile   = "$dataDir/session";
+    $sessFile   = "$dataDir/system/session";
     
     // Write the session data
     if($fp = @fopen($sessFile, "w"))
@@ -266,7 +267,7 @@ function mpSessTimeToLive($id)
 {
     mpCheckSessionID($id); // just in case something nasty is in there
     $dataDir    = MP_BASE_DIR."/public_html/data/$id";
-    if($fp = @fopen("$dataDir/lifetime", "r"))
+    if($fp = @fopen("$dataDir/system/lifetime", "r"))
     {
         $timestamp = trim(fgets($fp, 1024));
         @fclose($fp);
