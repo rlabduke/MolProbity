@@ -38,8 +38,9 @@
         $c == MP_TABLE_ALT1 ? $c = MP_TABLE_ALT2 : $c = MP_TABLE_ALT1;
         echo " <tr bgcolor='$c' align='center'>\n";
         echo "  <td><b>$id</b></td>\n";
-        echo "  <td><a href='improve_reduce_setup.php?$_SESSION[sessTag]&model=$id'>Reduce -build</a></td>\n";
-        echo "  <td>SSWING</td>\n";
+        if($model['isBuilt']) echo "  <td><span class='inactive'>already Reduced</span></td>\n";
+        else echo "  <td><a href='improve_reduce_setup.php?$_SESSION[sessTag]&model=$id'>Reduce -build</a></td>\n";
+        echo "  <td><span class='inactive'>SSWING</span></td>\n";
         echo " </tr>\n";
         echo " <tr bgcolor='$c'>\n";
         echo "  <td colspan='6'><i>$model[history]</i></td>\n";

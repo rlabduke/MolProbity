@@ -135,6 +135,11 @@ function runAnalysis($modelID, $opts)
         exec("prekin -append -nogroup -scope -show 'wa(bluetint)' $infile >> $outfile");
         
         $h = fopen($outfile, 'a');
+        fwrite($h, "@group {B ribbons} dominant off\n");
+        fclose($h);
+        makeBfactorRibbons($infile, $outfile);
+        
+        $h = fopen($outfile, 'a');
         fwrite($h, "@group {Ca trace} dominant\n");
         fclose($h);
         exec("prekin -append -nogroup -scope -show 'ca(gray)' $infile >> $outfile");
@@ -259,6 +264,40 @@ function findCbetaOutliers($cbdev)
     }
     ksort($worst); // Put the residues into a sensible order
     return $worst;
+}
+#}}}########################################################################
+
+#{{{ calcCbetaStats - calculates min, max, mean, mode, and std. deviation
+############################################################################
+/**
+* Accepts the data structure created by loadCbetaDev()
+* Returns an array with the keys 'min', 'max', 'mean', 'mode', 'stddev'
+*/
+function calcCbetaStats($cbdev)
+{
+    if(!(is_array($cbdev) && count($cbdev) >= 2)) return array();
+    
+    foreach($cbdev as $cb)
+    {
+        $dev[] = $cb['dev'];
+        $sum += $cb['dev'];
+    }
+    sort($dev);
+    
+    $len = count($dev);
+    $s['min']   = $dev[0];
+    $s['max']   = $dev[ $len-1 ];
+    $s['mean']  = $mean = $sum / $len;
+    
+    $half = intval($len/2);
+    if($len % 2 == 0)   $s['mode'] = ($dev[$half] + $dev[$half-1]) / 2;
+    else                $s['mode'] = $dev[$half];
+    
+    foreach($dev as $d)
+        $sumSquareDev += ($d - $mean)*($d-$mean);
+    $s['stddev'] = sqrt($sumSquareDev);
+    
+    return $s;
 }
 #}}}########################################################################
 
@@ -629,14 +668,6 @@ function groupAdjacentRes($resList)
     
     return $out;
 }
-#}}}########################################################################
-
-#{{{ a_function_definition - sumary_statement_goes_here
-############################################################################
-/**
-* Documentation for this function.
-*/
-//function someFunctionName() {}
 #}}}########################################################################
 
 #{{{ a_function_definition - sumary_statement_goes_here

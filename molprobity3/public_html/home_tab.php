@@ -34,10 +34,15 @@ if(isset($_REQUEST['moreOpts_all']))
 	<area shape=poly coords="65,15,128,15,141,33,128,51,65,51,51,33,65,15" href="upload_tab.php?<?php echo $_SESSION['sessTag']; ?>">
 	<area shape=poly coords="218,15,281,15,294,33,281,51,218,51,204,33,218,15" href="upload_tab.php?<?php echo $_SESSION['sessTag']; ?>">
 	<area shape=rect coords="24,150,141,276" href="analyze_tab.php?<?php echo $_SESSION['sessTag']; ?>">
+	<area shape=rect coords="204,150,321,213" href="improve_tab.php?<?php echo $_SESSION['sessTag']; ?>">
+	<area shape=poly coords="204,273,204,244,263,240,321,244,321,273,263,276,204,273,204,244,263,248,321,244" href="improve_tab.php?<?php echo $_SESSION['sessTag']; ?>">
 	<area shape=rect coords="24,303,141,339" href="compare_tab.php?<?php echo $_SESSION['sessTag']; ?>">
+	<area shape=rect coords="204,366,321,420" href="files_tab.php?<?php echo $_SESSION['sessTag']; ?>">
+	<area shape=poly coords="33,408,33,379,92,375,150,379,150,408,92,411,33,408,33,379,92,383,150,379" href="files_tab.php?<?php echo $_SESSION['sessTag']; ?>">
+	<area shape=poly coords="114,111,114,82,173,78,231,82,231,111,173,114,114,111,114,82,173,86,231,82" href="upload_tab.php?<?php echo $_SESSION['sessTag']; ?>">
 	<area shape=rect coords="357,305,443,333" href="notebook_tab.php?<?php echo $_SESSION['sessTag']; ?>">
 </map>
-<image src="img/flowchart.jpg" usemap="#GraffleExport">
+<image src="img/flowchart.gif" usemap="#GraffleExport">
 
 <!-- Control for global "verbosity" of options in forms -->
 <hr>

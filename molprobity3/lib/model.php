@@ -260,7 +260,8 @@ function reduceBuild($inModelID, $inpath)
         'stats'     => pdbstat($outpath),
         'parent'    => $inModelID,
         'history'   => "Derived from $inModelID by default Reduce -build",
-        'isReduced' => true
+        'isReduced' => true,
+        'isBuilt'   => true
     );
     
     return $id;

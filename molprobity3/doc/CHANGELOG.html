@@ -3,6 +3,7 @@
 ===  TO DO  ==================================================================
 ==============================================================================
 {{{ Ideas, long-term goals, etc.
+    Write a decent document about installation of MolProbity for web and script use
     Could make it a web service with XML-RPC (SOAP, CORBA too complex)
     should session lifetime be from start, or from last use?
     document PHP version needed (which is...? >=4.1:superglobals >=4.3:CLI)
@@ -11,8 +12,9 @@
     user should get partial results as big job is running ?
     Should analysis of worst residues ignore water or treat it separately?
     ZIP download should include a static view of the lab notebook?
-    For installation, note that public_html/data/ and tmp/ must be 777
     Retrieve maps from the EDS and allow map upload
+    Do a better job of the B-factor colored ribbons kinemage
+    Add ribbons or something else colored by (absolute) occupancy
 }}}
     Allow simple comparison of bad residues in two models; see jobs/analyze.php
     Add text at top of multicrit kinemage
@@ -21,8 +23,8 @@
     Put icons on analysis results page to identify the most-used kins
     Make automatic entries including protocols and references in notebook
   * Insert calls to logging functions (where?)
-    Make color-coded versions of the flowchart for different stages of the process
-    Polish the Reduce -build pathway
+    Make color-coded versions of the flowchart for different stages of the process?
+    Change makelinks.sh into a generic setup script that also sets permissions, creates molprobity.log, etc.
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -41,6 +43,14 @@
 - incorporated Flipkin creation into the first Reduce step
 - started porting the second, user-guided Reduce step
 - finished the mechanics of porting the second Reduce step, now just UI tweaking
+- updated the documentation on files created per model, and reorganized the sections
+- added B-factor ribbons back to the multi-criteria kinemage
+- made it so that second Reduce run is entirely skipped if no changes are requested
+- marked models that have been through Reduce -build once; makes no sense to run them again!
+- replaced progress bar image with a spinning ubiquitin ribbon drawing
+- developed oneline-batch.php to extract basic quality stats from a folder of Reduced PDBs
+- added calcCbetaStats() to find min, max, mode, mean, stddev
+- improved REMARK regex's in pdbstat.php
 
 ### 3pre12 ###
 - updated program requirements to list "zip"

@@ -6,29 +6,6 @@
   <title>MolProbity variables</title>
 </head>
 <body>
-<h2>Files present in the user data directory ($_SESSION['dataDir']):</h2>
-You shouldn't ever be using these files directly; instead, access them
-through the sessions and labbook APIs. Still, it's good to be aware
-that they're here.<br>
-<ul>
-  <li><span style="font-weight: bold; font-family: monospace;">session</span>:
-stores all the user session data.</li>
-  <li><span style="font-weight: bold; font-family: monospace;">lifetime</span>:
-timestamps for the last time this session was accessed. Used for
-garbage collection.</li>
-  <li><span style="font-weight: bold; font-family: monospace;">labbook</span>:
-the serialized PHP data structure for all of the lab notebook entries.
-Not (very) human readable.</li>
-  <li><span style="font-family: monospace; font-weight: bold;">progress</span>:
-the progress indicator for the background job. Controlled by <span
- style="font-family: monospace;">setProgress()</span>.<br>
-  </li>
-  <li><span style="font-weight: bold; font-family: monospace;">errors</span>:
-the output (stdout and stderr) from background jobs.<br>
-  </li>
-  <li>... plus individual directories for each model.<br>
-  </li>
-</ul>
 <h2>Contents of $_SESSION:</h2>
 <ul>
   <li><span style="font-weight: bold; font-family: monospace;">sessTag</span>:
@@ -64,6 +41,28 @@ instead ran forever.<br>
 an array of flags for showing more options in various forms, described
 below.<br>
   </li>
+</ul>
+<h2>Files present in the user data directory ($_SESSION['dataDir']):</h2>
+You shouldn't ever be using these files directly; instead, access them
+through the sessions and labbook APIs. Still, it's good to be aware
+that they're here.<br>
+<ul>
+  <li><span style="font-weight: bold; font-family: monospace;">session</span>:
+stores all the user session data.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">lifetime</span>:
+timestamps for the last time this session was accessed. Used for
+garbage collection.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">labbook</span>:
+the serialized PHP data structure for all of the lab notebook entries.
+Not (very) human readable.</li>
+  <li><span style="font-family: monospace; font-weight: bold;">progress</span>:
+the progress indicator for the background job. Controlled by <span
+ style="font-family: monospace;">setProgress()</span>.<br>
+  </li>
+  <li><span style="font-weight: bold; font-family: monospace;">errors</span>:
+the output (stdout and stderr) from background jobs.<br>
+  </li>
+  <li>... plus individual directories for each model.</li>
 </ul>
 <h2>Contents of $_SESSION['models']['<span
  style="font-style: italic; text-decoration: underline;">myModelID</span>']:</h2>
@@ -109,7 +108,13 @@ PDB. This key is not set for models supplied by the user.</li>
 human-readable one-line statement about where this model came from.</li>
   <li><span style="font-family: monospace; font-weight: bold;">isReduced</span>:
 true if the PDB file has been processed by Reduce, so we know at a
-minimum that all hydrogens are present. This is a heritable property.<br>
+minimum that all hydrogens are present. This is a heritable property.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">isBuilt</span>:
+true if the PDB is the result of a <span
+ style="font-family: monospace;">-build</span> and/or <span
+ style="font-family: monospace;">-fix</span> run in Reduce, so the
+expert system has already changed all the Asn, Gln, and His that might
+need changing. This is a heritable property.<br>
   </li>
   <li><span style="font-weight: bold; font-family: monospace;">isAnalyzed</span>:
 true if the analysis task has already been run on this model, so that
@@ -124,6 +129,57 @@ the cached results of findClashOutliers(), if any. </li>
 the cached results of findRamaOutliers(), if any. </li>
   <li><span style="font-weight: bold; font-family: monospace;">badRota</span>:
 the cached results of findRotaOutliers(), if any.<br>
+  </li>
+</ul>
+<h2>Files created for each model:</h2>
+All the actual file names are preceded by the model <span
+ style="font-weight: bold; font-family: monospace;">prefix</span>.
+Listed below are the suffixes. Order is alphabetical by file type, then
+by file name. Not all files will necessarily be generated for every
+model.<br>
+<ul>
+  <li>cbdev.data</li>
+  <li><span style="font-weight: bold; font-family: monospace;">clash.data</span>:
+the result of running Clashlist.<br>
+  </li>
+  <li>rama.data</li>
+  <li>rota.data</li>
+  <li><span style="font-weight: bold; font-family: monospace;">aac</span><span
+ style="font-weight: bold; font-family: monospace;">.kin</span>:
+all-atom contacts combined in one kin, with separate groups for
+mainchain vs.
+sidechain<br>
+  </li>
+  <li><span style="font-weight: bold; font-family: monospace;">cb3d.kin</span>:
+the standard Prekin 3-D rendering of C-beta deviations</li>
+  <li><span style="font-weight: bold; font-family: monospace;">cb2d.kin</span>:
+the "bullseye" kinemage plot of C-beta deviations for the whole
+structure at once<br>
+  </li>
+  <li><span style="font-weight: bold; font-family: monospace;">multi.kin</span>:
+the "multi-criterion" kinemage with all validation data at once<br>
+  </li>
+  <li>rama.kin</li>
+  <li><span style="font-weight: bold; font-family: monospace;">H.pdb</span>:
+the result of a <span style="font-family: monospace;">reduce -build</span>
+run on some other model. Asn/Gln/His are flipped according to the
+judgement of the expert system.<br>
+  </li>
+  <li><span style="font-weight: bold; font-family: monospace;">mp.pdb</span>:
+the original uploaded/downloaded model file, as modified by <span
+ style="font-family: monospace;">preparePDB()</span> (linefeeds, CNS
+atom names, seg IDs).<br>
+  </li>
+  <li><span style="font-weight: bold; font-family: monospace;">nbH.pdb</span>:
+the "nb" stands for "no build" - none of the existing atoms have been
+moved, but missing hydrogens were added and optimized. Asn/Gln/His are
+in their original orientations.<br>
+  </li>
+  <li><span style="font-weight: bold; font-family: monospace;">fixH.pdb</span>:
+the result of a <span style="font-family: monospace;">reduce -build
+-fix</span> run, where the user choose which Asn/Gln/His should be
+flipped. This should be different in some way than the H.pdb file.</li>
+  <li>rama.pdf<br>
   </li>
 </ul>
 <ul>
@@ -161,37 +217,6 @@ supressed.<br>
     <span style="font-weight: bold; font-family: monospace;"></span></li>
   <li><span style="font-weight: bold; font-family: monospace;">pdbUpload</span>:
 true if we should show more options for uploading files.</li>
-</ul>
-<h2>Files created for each model:</h2>
-All the actual file names are preceded by the model <span
- style="font-weight: bold; font-family: monospace;">prefix</span>.
-Listed below are the suffixes. Order is alphabetical by file type, then
-by file name.<br>
-<ul>
-  <li>cbdev.data</li>
-  <li>clash.data</li>
-  <li>rama.data</li>
-  <li>rota.data</li>
-  <li><span style="font-weight: bold; font-family: monospace;">aac-mc.kin</span>
-&amp; <span style="font-weight: bold; font-family: monospace;">aac-sc.kin</span>:
-all-atom contacts (dot kins) split up according to mainchain vs.
-sidechain<br>
-  </li>
-  <li><span style="font-weight: bold; font-family: monospace;">rama.kin.1.eps</span>
-- <span style="font-weight: bold; font-family: monospace;">rama.kin.5.eps</span>:
-PostScript renderings of the Ramachandran kinemage<br>
-  </li>
-  <li>rama.jpg</li>
-  <li><span style="font-weight: bold; font-family: monospace;">cb3d.kin</span>:
-the standard Prekin 3-D rendering of C-beta deviations</li>
-  <li><span style="font-weight: bold; font-family: monospace;">cb2d.kin</span>:
-the "bullseye" kinemage plot of C-beta deviations for the whole
-structure at once<br>
-  </li>
-  <li><span style="font-weight: bold; font-family: monospace;">multi.kin</span>:
-the "multi-criterion" kinemage with all validation data at once<br>
-  </li>
-  <li>rama.kin</li>
 </ul>
 <br>
 end<br>

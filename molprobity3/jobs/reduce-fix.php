@@ -60,7 +60,7 @@ for($c = 0; $c < $n; $c++)
 
     // Expect checks for ones flipped originally; expect no check for ones not flipped.
     $expected = ($changes[4][$c] == "FLIP" || $changes[4][$c] == "CLS-FL");
-    if($doflip[$c] != $expected) { $rerun = TRUE; }
+    if($doflip[$c] != $expected) { $rerun = true; }
 }
 fclose($fp);
 
