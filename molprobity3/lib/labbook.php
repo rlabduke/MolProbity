@@ -30,6 +30,9 @@ function openLabbook()
     // Read in notebook data, if present
     if($fp = @fopen($file, "rb"))
     {
+        // Without this, we read the wrong number of bytes and so particularly
+        // additions to the book will be truncated!
+        clearstatcache();
         $bookData = fread($fp, filesize($file));
         $book = unserialize($bookData);
         if(!$book) echo "Unable to unserialize '$bookData'";
@@ -44,10 +47,6 @@ function openLabbook()
 #{{{ saveLabbook - writes labbook array to disk
 ############################################################################
 /**
-* Don't try calling openLabbook() right after this!
-* Some of the data doesn't get read in correctly,
-* but no error is produced in fopen() etc.
-*
 * Returns false on failure
 */
 function saveLabbook($bookData)
@@ -82,7 +81,6 @@ function newLabbookEntry($model = "", $keywords = "")
 ############################################################################
 /**
 * Returns the entry number of the new entry.
-* Don't call openLabbook() right after using this.
 */
 function addLabbookEntry($title, $text, $model = "", $keywords = "")
 {
@@ -176,12 +174,6 @@ function formEditLabbook($entry, $width = 90, $height = 30)
 * This function is intended to simplify in-line notebook editing.
 *
 * It returns the same result as openLabbook().
-* This is because calling saveLabbook immediately followed by openLabbook
-* seems to result in some of the supposedly written info being lost,
-* at least on my Powerbook and PHP 4.3.2.
-*
-* By default, this function saves the labbook immediately. If you intend
-* to save it yourself later on, you can set $saveNow to false.
 */
 function openLabbookWithEdit($saveNow = true)
 {

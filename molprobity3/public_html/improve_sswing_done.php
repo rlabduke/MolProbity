@@ -51,9 +51,6 @@ if(isset($_SESSION['bgjob']['labbookEntry']))
 {
     $newPDB = "$model[dir]/$model[pdb]";
     $url = "$model[url]/$model[pdb]";
-
-    $entryNum = $_SESSION['bgjob']['labbookEntry'];
-    $labbook = openLabbookWithEdit();
 }
 // First time to this page -- make the PDB and the entry
 else
@@ -79,19 +76,15 @@ else
     pdbSwapCoords($oldPDB, $newPDB, $all_changes);
 
     // Make up the lab notebook entry
-    $entry = newLabbookEntry($modelID, 'auto');
     $text = "The following residues were automatically refit by SSWING, creating $modelID from $model[parent]:\n<ul>\n";
     foreach($changed_res as $res) $text .= "<li>$res</li>\n";
     $text .= "</ul>\n";
-    $entry['title'] = "SSWING refitting creates $modelID";
-    $entry['entry'] = $text;
-    
-    $labbook = openLabbook();
-    $entryNum = $_SESSION['bgjob']['labbookEntry'] = count($labbook);
-    $labbook[ $entryNum ] = $entry;
-    saveLabbook($labbook);
+    // setting this also keeps us from making the PDB file again
+    $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry("SSWING refitting creates $modelID", $text, $modelID, 'auto');
 }
 
+$entryNum = $_SESSION['bgjob']['labbookEntry'];
+$labbook = openLabbookWithEdit();
 
 ############################################################################
 ?>
