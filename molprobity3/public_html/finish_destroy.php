@@ -35,6 +35,6 @@ echo mpPageHeader("Thanks!");
 
 Thanks for using MolProbity!
 
-<p><a href="home_tab.php">Start over</a>
+<p><a href="index.php">Start over</a>
 
 <?php echo mpPageFooter(); ?>
