@@ -2,25 +2,25 @@
 ==============================================================================
 ===  TO DO  ==================================================================
 ==============================================================================
+    {{{ Ideas, long-term goals, etc.
+    Could make it a web service with XML-RPC (SOAP, CORBA too complex)
     should session lifetime be from start, or from last use?
     document PHP version needed (which is...? >=4.1:superglobals >=4.3:CLI)
         4.1.0 doesn't work on kinemage: cmd line can't load 'session mm'
         4.1.2 seems to work on glass
-    implement safety valve for disk too full
-    create logging functions
     user should get partial results as big job is running ?
-    Allow simple comparison of bad residues in two different models;
-        see jobs/analyze.php for ideas
     Should analysis of worst residues ignore water or treat it separately?
+    ZIP download should include a static view of the lab notebook?
+    }}}
+    Allow simple comparison of bad residues in two models; see jobs/analyze.php
     Add text at top of multicrit kinemage
-    Allow user to retrieve PDB by id code
+    Create multicrit chart
     Coloring on download table is sometimes off
     Put icons on analysis results page to identify the most-used kins
-    File upload should provide pdbstat-style summary
     Implement file retrieval from PDB and NDB (if possible)
-  + Add Ramalyze to the analysis script
-    MolProbity as a SOAP/CORBA/RPC service?
-    Create a removeModel() function
+    Make automatic entries including protocols and references in notebook
+    Implement architecture for doing progress updates
+  * Insert calls to logging functions (where?)
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -30,6 +30,18 @@
 - updated program requirements to list "zip"
 - changed style sheet to sans-serif fonts, turned off link underlines
 - changed color and upped contrast slightly on the logo
+- added more elaborate flow chart
+- created dummy pages for compare and improve
+- created page to describe contents of uploaded file
+- added Ramalyze PDF to analysis script
+- swapped file upload and PDB-pull panes on upload page
+- mc-mc dots in multicrit kin were actually all dots
+- added reduceBuild() function to model.php
+- implemented removeModel() and tested it from the command line scripts
+- created a disk-too-full die() in mpInitEnvirons()
+- added endsWith() to strings.php
+- added system logging function. Individual user logging is of little use
+  and will be effectively replaced by automated lab notebook entries.
 
 ### 3pre11 ###
 - updated PDB stat to find nonpolar H in nucleic acids, too.

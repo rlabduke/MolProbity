@@ -47,30 +47,6 @@ function failMsg($msg)
 }
 #}}}########################################################################
 
-#{{{ a_function_definition - sumary_statement_goes_here
-############################################################################
-/**
-* Documentation for this function.
-*/
-//function someFunctionName() {}
-#}}}########################################################################
-
-#{{{ a_function_definition - sumary_statement_goes_here
-############################################################################
-/**
-* Documentation for this function.
-*/
-//function someFunctionName() {}
-#}}}########################################################################
-
-#{{{ a_function_definition - sumary_statement_goes_here
-############################################################################
-/**
-* Documentation for this function.
-*/
-//function someFunctionName() {}
-#}}}########################################################################
-
 # MAIN - the beginning of execution for this page
 ############################################################################
 if($_REQUEST['cmd'] == "Upload this file")
@@ -86,7 +62,7 @@ if($_REQUEST['cmd'] == "Upload this file")
         $_SESSION['bgjob']['ignoreSegID']   = $_REQUEST['ignoreSegID'];
         
         // launch background job
-        launchBackground(MP_BASE_DIR."/jobs/addmodel.php", "analyze_tab.php?$_SESSION[sessTag]", 3);
+        launchBackground(MP_BASE_DIR."/jobs/addmodel.php", "upload_pdb_done.php?$_SESSION[sessTag]", 3);
         
         // include() status monitoring page
         include(MP_BASE_DIR."/public_html/job_progress.php");
