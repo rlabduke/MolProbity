@@ -34,7 +34,7 @@ function mpPageHeader($title, $active = "none", $refresh = "")
     $s .= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
 <head>
-    <title>MolProbity - '.$title.'</title>
+    <title>'.$title.' - MolProbity</title>
     <link rel="StyleSheet" href="css/default.css" TYPE="text/css">
     <link rel="shortcut icon" href="favicon.ico">
     <meta name="ROBOTS" content="NOINDEX, NOFOLLOW">
