@@ -31,7 +31,6 @@ function warnNoH(fileName)
 // -->
 </script><?php
 
-    // Make sure we have some models with H added.
     if(count($_SESSION['models']) > 0 && count($_SESSION['edmaps']) > 0)
     {
         echo makeEventForm("onChooseResidues");
@@ -80,17 +79,17 @@ function warnNoH(fileName)
         echo "<td><input type='submit' name='cmd' value='Choose residues to refit &gt;'></td>\n";
         echo "<td align='right'><input type='submit' name='cmd' value='Cancel'></td>\n";
         echo "</tr></table></p></form>\n";
+?>
+<hr>
+<div class='help_info'>
+<h4>Refitting sidechains</h4>
+<i>TODO: Help text about SSwing and refitting sidechains goes here</i>
+</div>
+<?php
     }
     elseif(count($_SESSION['models']) == 0)
     {
         echo "No models are available. Please <a href='".makeEventURL("onNavBarCall", "upload_pdb_setup.php")."'>upload or fetch a PDB file</a> in order to continue.\n";
-        echo makeEventForm("onReturn");
-        echo "<p><input type='submit' name='cmd' value='Cancel'></p></form>\n";
-        
-    }
-    elseif(!$modelCount)
-    {
-        echo "No models have H added. Please <a href='".makeEventURL("onNavBarCall", "reduce_setup.php")."'>add hydrogens to a PDB file</a> in order to continue.\n";
         echo makeEventForm("onReturn");
         echo "<p><input type='submit' name='cmd' value='Cancel'></p></form>\n";
         

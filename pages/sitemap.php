@@ -17,26 +17,30 @@ function display($context)
     echo mpPageHeader("Site map", "sitemap");
     echo "<i>Features in italics have not yet been implemented.</i>\n";
 
-    echo "<h3><a href='".makeEventURL("onUploadPDBs")."'>Input PDB files</a></h3>\n<ul>\n";
+    echo "<h3><a href='".makeEventURL("onNavBarCall", "upload_pdb_setup.php")."'>Input PDB files</a></h3>\n<ul>\n";
     echo "<li>Upload PDB files from local disk.</li>\n";
     echo "<li>Retrieve PDB files from the PDB or NDB.</li>\n";
     echo "</ul>\n";
     
-    echo "<h3><a href='".makeEventURL("onUploadOther")."'>Input other files</a></h3>\n<ul>\n";
+    echo "<h3><a href='".makeEventURL("onNavBarCall", "upload_other_setup.php")."'>Input other files</a></h3>\n<ul>\n";
     echo "<li>Upload kinemages for viewing in KiNG.</li>\n";
     echo "<li>Upload electron density maps.</li>\n";
     echo "<li><i>Retrieve 2Fo-Fc and Fo-Fc (difference) maps from the EDS.</i></li>\n";
     echo "<li>Upload custom heterogen dictionaries (for adding hydrogens).</li>\n";
     echo "</ul>\n";
     
-    echo "<h3><a href='".makeEventURL("onAddH")."'>Add hydrogens</a></h3>\n<ul>\n";
+    echo "<h3><a href='".makeEventURL("onNavBarCall", "reduce_setup.php")."'>Add hydrogens</a></h3>\n<ul>\n";
     echo "<li>Add missing hydrogens.</li>\n";
     echo "<li>Optimize H-bond networks.</li>\n";
     echo "<li>Check for Asn, Gln, His flips.</li>\n";
     echo "</ul>\n";
 
-    echo "<h3><a href='".makeEventURL("onRefitSC")."'>Refit sidechains</a></h3>\n<ul>\n";
+    echo "<h3><a href='".makeEventURL("onNavBarCall", "sswing_setup1.php")."'>Refit sidechains</a></h3>\n<ul>\n";
     echo "<li>Automatically refit sidechains based on electron density and all-atom contacts.</li>\n";
+    echo "</ul>\n";
+
+    echo "<h3><a href='".makeEventURL("onNavBarCall", "aacgeom_setup.php")."'>All-atom contact and geometric analyses</a></h3>\n<ul>\n";
+    echo "<li><i>TODO: List things here</i></li>\n";
     echo "</ul>\n";
 
     echo "<hr>\n";
@@ -70,29 +74,6 @@ function display($context)
     echo "</pre>";
 
     echo mpPageFooter();
-}
-#}}}########################################################################
-
-#{{{ onUploadPDBs, onUploadOther, onAddH, onRefitSC
-############################################################################
-function onUploadPDBs($arg, $req)
-{
-    pageCall("upload_pdb_setup.php");
-}
-
-function onUploadOther($arg, $req)
-{
-    pageCall("upload_other_setup.php");
-}
-
-function onAddH($arg, $req)
-{
-    pageCall("reduce_setup.php");
-}
-
-function onRefitSC($arg, $req)
-{
-    pageCall("sswing_setup1.php");
 }
 #}}}########################################################################
 

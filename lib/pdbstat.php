@@ -1,4 +1,4 @@
-<?php
+<?php # (jEdit options) :folding=explicit:collapseFolds=1:
 require_once(MP_BASE_DIR.'/lib/strings.php');
 
 #{{{ describePdbStats - human-readable list of derived properties

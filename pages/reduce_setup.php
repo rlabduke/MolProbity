@@ -69,6 +69,13 @@ function display($context)
         echo "<td><input type='submit' name='cmd' value='Start adding H &gt;'></td>\n";
         echo "<td align='right'><input type='submit' name='cmd' value='Cancel'></td>\n";
         echo "</tr></table></p></form>\n";
+?>
+<hr>
+<div class='help_info'>
+<h4>Adding hydrogens</h4>
+<i>TODO: Help text about Reduce and adding hydrogens goes here</i>
+</div>
+<?php
     }
     else
     {

@@ -56,7 +56,8 @@ div.pagecontent table {
 	font-family : Palatino, Times, serif ;
 }
 
-div.pagecontent h2, h3, h4, h5, h6 {
+/* Inheritance is tighter than comma op. */
+div.pagecontent h2, div.pagecontent h3, div.pagecontent h4, div.pagecontent h5, div.pagecontent h6 {
 	font-family : Helvetica, Arial, sans-serif ;
     color : #660000
 }
@@ -79,7 +80,8 @@ div.pagecontent_alone table {
 	font-family : Palatino, Times, serif ;
 }
 
-div.pagecontent_alone h2, h3, h4, h5, h6 {
+/* Inheritance is tighter than comma op. */
+div.pagecontent_alone h2, div.pagecontent_alone h3, div.pagecontent_alone h4, div.pagecontent_alone h5, div.pagecontent_alone h6 {
 	font-family : Helvetica, Arial, sans-serif ;
     color : #660000
 }
@@ -107,9 +109,19 @@ div.inline_options {
     padding : 0.4em ;
 }
 
-span.inactive {
-    color : #666666 ;
+div.indent {
+    margin-left : 1.5em ;
 }
+
+.inactive { color : #666666 ; }
+
+/* Inheritance is tighter than comma op. */
+div.help_info { color : #666666 ; }
+div.help_info h2, div.help_info h3, div.help_info h4, div.help_info h5, div.help_info h6 { color : #996666 ; }
+div.help_info a:link { color : #333399 ; }
+div.help_info a:visited { color : #333399 ; }
+div.help_info a:hover { text-decoration : underline ; color : #3333ff ; }
+div.help_info a:active { color : #3333ff ; }
 
 /* For syntax highlighting kinemage file produced by king.core.KinfileTokenizer */
 div.kin2html { font-family : monospace ; }
