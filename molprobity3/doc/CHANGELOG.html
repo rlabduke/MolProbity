@@ -31,7 +31,7 @@
     "nice" large jobs such as multi-model NMR runs
     Allow "hidden" user files; default download doesn't include these?
 }}}
-    Allow simple comparison of bad residues in two models; see jobs/analyze.php
+    Allow simple comparison of bad residues in two models; see jobs/aacgeom.php
     Rama outliers in multicrit kin don't look so hot (Ca-Ca, yellow?)
     ORACLE output for TN Bhat
     Add documentation to the analysis results page (how to interpret)
@@ -39,13 +39,14 @@
     Explain 2d and 3d CB kins
     Make sure Reduce doesn't shrink the PDB file (lost atoms/models, etc)
   > Every time lab notebook is saved, create a HTML snapshot of it
-    Keep track of "last used" model and make it the default
+  > Keep track of "last used" model and make it the default
   * Weird intra-sidechain clashes for 1BKR
     Use Reduce -build w/ high penalty for "no build" runs?
     Missing masters for CB dev in multicrit kin (not in Prekin output)
     Only deviant CB balls appear in kin; smaller ones are missing!
     No explicit subgroup for Rota, Rama, but needed for CB balls
     @onewidth and messed up balls for Flipkins (these are flipkin/XXX bugs)
+  > Simple kins needs to make sure there are models present!
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -62,6 +63,8 @@
 - changed sc alts to cyan to complement the blue normal sc
 - added @onewidth to multikins; turned stuff off/on with masters
 - updated KiNG to support new on/off (point)masters
+- finished doc on adding pages to MolProbity
+- simple kins page works, but needs more detail (N--C color, etc)
 
 ### 3beta10 ###
 - continued work on aac/geom analysis, rendering results as a notebook entry

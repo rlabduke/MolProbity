@@ -3,10 +3,11 @@
     This file is intended as a reference for MolProbity PHP background scripts.
 
 INPUTS (via $_SESSION['bgjob']):
-    paramName       description of parameter
+    modelID         model to be used for making kins
+    scriptName      which Prekin 'script' to run
 
 OUTPUTS (via $_SESSION['bgjob']):
-    paramName       description of parameter
+    labbookEntry    the labbook entry number
 
 *****************************************************************************/
 // EVERY *top-level* page must start this way:
@@ -15,6 +16,7 @@ OUTPUTS (via $_SESSION['bgjob']):
     if(!defined('MP_BASE_DIR')) define('MP_BASE_DIR', realpath(dirname(__FILE__).'/..'));
 // 2. Include core functionality - defines constants, etc.
     require_once(MP_BASE_DIR.'/lib/core.php');
+    require_once(MP_BASE_DIR.'/lib/labbook.php');
 // 3. Restore session data. If you don't want to access the session
 // data for some reason, you must call mpInitEnvirons() instead.
     session_id( $_SERVER['argv'][1] );
@@ -62,10 +64,18 @@ OUTPUTS (via $_SESSION['bgjob']):
 
 # MAIN - the beginning of execution for this page
 ############################################################################
+$modelID    = $_SESSION['bgjob']['modelID'];
+$model      = $_SESSION['models'][$modelID];
+$modelDir   = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
+$infile     = "$modelDir/$model[pdb]";
+$scriptName = $_SESSION['bgjob']['scriptName'];
 
-/*
-// Do a safety check on $script:
-switch($script) {
+$kinDir     = $_SESSION['dataDir'].'/'.MP_DIR_KINS;
+$kinURL     = $_SESSION['dataURL'].'/'.MP_DIR_KINS;
+    if(!file_exists($kinDir)) mkdir($kinDir, 0777);
+    
+// Do a safety check on $scriptName:
+switch($scriptName) {
     case "cass":
         $flag = "-cass";
         break;
@@ -85,34 +95,36 @@ switch($script) {
     case "naba":
         $flag = "-naba";
         break;
-    case "bestribbon":
-        $flag = "-bestribbon";
+    case "ribnhet":
+        $flag = "-ribnhet";
         break;
     default:
         $flag = "-cass";
         break;
 }
-
-// Name the output file
-// Given xxxx.pdb, write to xxxx-flag.kin
-if( eregi("^.+\.pdb$", $pdb) ) {
-    $kin = eregi_replace("^(.+)(\.pdb)$", "\\1$flag.kin", $pdb);
-// Given foobar.file, write to foobar.file-flag.kin
-} else {
-    $kin = $pdb . "$flag.kin";
-}
-
 // Color ramp N --> C ?
-if($rainbow) { $flag .= " -colornc"; }
+if($rainbow) $flag .= " -colornc";
 
-if($script == "halfbonds")
-    $cmd = "prekin $flag $working_dir/$pdb | php -f halfbonds.php > $working_dir/$kin";
+$tasks['kin'] = "Make kinemage using <code>Prekin $flag</code>";
+setProgress($tasks, 'kin'); // updates the progress display if running as a background job
+
+$outfile = "$kinDir/$model[prefix]".substr($flag,1).".kin";
+if($scriptName == "halfbonds")
+    $cmd = "prekin $flag $infile | php -f ".MP_BASE_DIR."/lib/halfbonds.php > $outfile";
 else
-    $cmd = "prekin $flag $working_dir/$pdb > $working_dir/$kin";
-
+    $cmd = "prekin $flag $infile > $outfile";
 exec($cmd);
-*/
 
+// Lab notebook entry / results page
+$entry = "";
+$entry .= "<p>Your kinemage is ready for viewing in KiNG: ".linkKinemage($model['prefix'].substr($flag,1).".kin")."</p>\n";
+
+$_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
+    "Simple kinemage: $model[pdb]",
+    $entry,
+    $modelID,
+    "auto"
+);
 
 ############################################################################
 // Clean up and go home

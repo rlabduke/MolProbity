@@ -217,6 +217,205 @@ chores are done for the delegate pages by <span
  style="font-family: monospace;">public_html/index.php</span>, so they
 never have to bother with it.<br>
 <br>
+Within the main part of the script, we retrieve form values from the <span
+ style="font-family: monospace;">$_SESSION['bgjob']</span> array, which
+was filled with data from the form by our <span
+ style="font-family: monospace;">onRunPrekin()</span> function. We also
+make sure the kinemage file directory exists so we have somewhere to
+put the output file -- notice that files are stored in directories
+based on their type (PDB, kinemage, tabular ASCII data, etc) and are
+named with a prefix that comes from their original PDB file.<br>
 <br>
+Next, we'll use a <span style="font-family: monospace;">switch</span>
+statement to make sure that the specified script is a valid one. It's
+very easy for someone to submit arbitrary data to a web form, so we
+want to make sure the input is valid before running it on the command
+line. This sort of precaution is very important -- it would be bad if
+someone embedded a <span style="font-family: monospace;">"; rm -rf / ;"</span>
+in the middle of your command! PHP has several built-in functions that
+can also help protect you (<span style="font-style: italic;">e.g.</span>
+<span style="font-family: monospace;">escapeshellcmd()</span>); use
+these when appropriate.<br>
+<br>
+Even though our script will run quickly, in just a few seconds, we
+should display a status message for the user. Remember, the <span
+ style="font-family: monospace;">job_progress.php</span> page is being
+displayed in the user's browser while <span style="font-style: italic;">this</span>
+script is running in the background, and it gets refreshed every few
+seconds with the latest status. The steps to be checked off are listed
+in order in an array (call it <span style="font-family: monospace;">$tasks</span>),
+and then you call <span style="font-family: monospace;">setProgress()</span>
+to update which step is the active one. In our example, we have just
+one step:<br>
+<br>
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; $tasks['kin']
+= "Make kinemage using &lt;code&gt;Prekin $flag&lt;/code&gt;";</span><span
+ style="font-family: monospace;"><br>
+&nbsp;&nbsp;&nbsp; setProgress($tasks, 'kin');</span><br>
+<br>
+Now were ready to execute the Prekin command. When it returns, we'll
+call <span style="font-family: monospace;">setProgress($tasks, null)</span>
+to mark all steps as complete, just before returning from the script.<br>
+<br>
+There are two ways to approach getting output to the user. We could
+store some data in the <span style="font-family: monospace;">$_SESSION['bgjob']</span>
+array (<span style="font-style: italic;">e.g.</span> the name of the
+kinemage file) and pass that to our "results" delegate page, which
+would then use it to construct a bit of explanatory HTML with a link to
+open the kinemage in KiNG. There's nothing wrong with that <span
+ style="font-style: italic;">per se</span>, and that's the way a lot of
+the old MolProbity was written. The alternative scheme is to construct
+a result message or mini-page in HTML and store it as a lab notebook
+entry. This is done as the last processing step of the background
+script. Using a notebook entry has two benefits:<br>
+<ol>
+  <li>At any time, the user can go to the lab notebook page and see a
+chronological, stream-of-consciousness record of all the results
+they've produced during the MolProbity session.</li>
+  <li>The user can edit the HTML of these entries in order to annotate
+them, creating a rich record of the refitting process that can be
+archived as part of a "real" lab notebook.</li>
+</ol>
+The disadvantage of a notebook entry is that it can only contain links
+to "data" -- things like kinemages and charts. Trying to link to an
+"active" page in the site via <span style="font-family: monospace;">makeEventURL()</span>
+creates a link that will be stale and unusable by the time anyone
+actually sees it. It's fairly rare that you need to do this, although
+you can imagine (for example) the results from running Reduce having a
+link that suggests running SSWING too. This sort of thing has to be
+done from the delegate page that displays results (see the next
+section). Most of the time, though, the results page can just display
+the lab notebook entry that was created by the background job, which is
+the approach we'll take in the next section.<br>
+<br>
+First, though, we have to create a notebook entry. It's quite simple:
+just build up a string containing data and HTML formatting, like you
+would embed in a &lt;BODY&gt; or &lt;DIV&gt; tag somewhere in a page.
+Notice the <span style="font-family: monospace;">linkKinemage()</span>
+convenience function for generating a kin-viewing link. Then call <span
+ style="font-family: monospace;">addLabbookEntry()</span> with a title,
+body, etc. and save the resulting entry ID so that the results page can
+look it up and display it. Here we save the ID as <span
+ style="font-family: monospace;">$_SESSION['bgjob']['labbookEntry']</span>.
+MolProbity's machinery for background jobs will automatically make this
+available as <span style="font-family: monospace;">$context['labbookEntry']</span>
+in the <span style="font-family: monospace;">display()</span> function
+of the results page. Notice that all these machine-generated notebook
+entries should be marked with the "auto" keyword, to distinguish them
+from entries created <span style="font-style: italic;">de novo</span>
+by the user.<br>
+<br>
+The last few lines of boilerplate code are very important, but don't
+need any modification. They mark the background job as complete and
+record the total running time. Nothing should come after them -- they
+should be the last lines in the script. Once the script exits, <span
+ style="font-family: monospace;">job_progress.php</span> will notice
+the background job is finished and control will be transferred to the
+results page delegate.<br>
+<hr style="width: 100%; height: 2px;">
+<h2>Results page</h2>
+The results page is very, very simple, because there are lots of
+results pages already written that just display a lab notebook entry. I
+simply copied <span style="font-family: monospace;">pages/aacgeom_done.php</span>
+to <span style="font-family: monospace;">makekin_done.php</span>. The
+only changes needed were (1) the name of the class (now <span
+ style="font-family: monospace;">MakeKinDoneDelegate</span>) and (2)
+the page title.<br>
+<br>
+Notice that the data from <span style="font-family: monospace;">$_SESSION['bgjob']</span>
+has been transferred to this page's <span
+ style="font-family: monospace;">$context</span>, so that it's easy to
+retrieve the lab notebook ID number. That number can be used with <span
+ style="font-family: monospace;">openLabbbook()</span> and <span
+ style="font-family: monospace;">formatLabbookEntry()</span> to easily
+retrieve and display the entry.<br>
+<br>
+Two event handlers are set up on this page: a button (form) to <span
+ style="font-family: monospace;">pageReturn()</span> out of the Prekin
+loop, back to wherever we came from; and a link that will <span
+ style="font-family: monospace;">pageCall()</span> the notebook
+editting page.<br>
+<hr style="width: 100%; height: 2px;">
+<h2>Launching the background job</h2>
+Now it's time to go back to <span style="font-family: monospace;">pages/makekin_setup.php</span>,
+and make sure that when the user presses the "Make kinemage" button,
+something actually happens. This involves three steps:<br>
+<ol>
+  <li>Pass all the data the user submitted in the HTML form (in <span
+ style="font-family: monospace;">$req</span>) to the background job, by
+storing that data in the <span style="font-family: monospace;">$_SESSION['bgjob']</span>
+variable. In this case, there are only two pieces of data (which model
+to act on, and which script to run) but a complicated input page might
+provide tens of input fields that need to be made available to the
+background job.</li>
+  <li>Log a message about what's happening to the system log using <span
+ style="font-family: monospace;">mpLog()</span>. While the lab notebook
+serves as a log of sorts for the user, <span
+ style="font-family: monospace;">mpLog()</span> records short messages
+in the system log. The system log can then later be parsed to provide
+usage statistics for the MolProbity administrators. The log file has
+one record per line with colon-delimited fields, so the proper message
+format is a short unique identifier (in this case, "makekin") followed
+by a colon and a longer, human-readable explanation of what's
+happening, possibly with additional information about which options or
+files were used.</li>
+  <li>Use <span style="font-family: monospace;">pageGoto()</span> to
+transfer control to <span style="font-family: monospace;">job_progress.php</span>,
+which will display the progress messages while the background job is
+running. This doesn't take affect until we exit <span
+ style="font-family: monospace;">onRunPrekin()</span>, so you still
+have time to launch the background job with <span
+ style="font-family: monospace;">launchBackground()</span>. It's very
+important that <span style="font-family: monospace;">pageGoto()</span>
+be called before <span style="font-family: monospace;">launchBackground()</span>,
+because the later freezes the session data. In fact, as a rule of thumb
+nothing should be done after calling <span
+ style="font-family: monospace;">launchBackground()</span>; it should
+be the last call in the event handler.</li>
+</ol>
+That's it. Now when the user pushes the button on the set-up page, the
+background job script will be started and the progress page displayed.
+When the background job finishes, control will pass to the results
+page, which will display the HTML notebook entry created by the
+background job.<br>
+<hr style="width: 100%; height: 2px;">
+<h2>Denouement</h2>
+Your script is finished -- now all that remains is to test and debug
+it. Here are some hints:<br>
+<ul>
+  <li>PHP errors in the background script are particularly nasty
+because the error messages don't show up anywhere obvious. Use the
+"View &amp; download file" page to view <span
+ style="font-family: monospace;">system/errors</span>, which should
+have (most) the errors generated by any programs run in the background.</li>
+  <li>Use <span style="font-family: monospace;">php -l</span> ("L" for
+"lint") to check your scripts for syntax errors before trying to run
+them. This is especially useful for background job scripts.</li>
+  <li>You can also use the download page to view the contents of
+kinemage files, which sometimes contain error messages instead of data
+when something goes wrong.</li>
+  <li>Make sure your variable names are spelled correctly. I'm always
+mistyping variable names and then wondering why my variable doesn't
+have any data in it. This can happen when you copy and paste, too.<br>
+  </li>
+  <li>Ditto for making sure the <span style="font-family: monospace;">name</span>
+fields in your HTML forms actually match up with the variable names
+you're looking for in <span style="font-family: monospace;">$_REQUEST</span>
+or in <span style="font-family: monospace;">$_SESSION['bgjob']</span>.</li>
+  <li>Make sure you've included the library/libraries you need using <span
+ style="font-family: monospace;">require_once()</span>. Missing library
+function definitions will crash your script.</li>
+  <li>Document the inputs and outputs of your own library functions. In
+detail. You won't remember later.</li>
+  <li>Read the existing documentation, both in the code (comments) and
+in the <span style="font-family: monospace;">doc/</span> folder.<br>
+  </li>
+  <li>When in doubt, look for something that already exists that's
+similar to what you want. I've done the best I can with MolProbity's
+architecture, but it's still complicated and difficult to remember. I
+am constantly using the existing code as a reference manual.</li>
+</ul>
+<br>
+The End<br>
 </body>
 </html>
