@@ -32,6 +32,7 @@ function syncSubcontrols()
     document.forms[0].showContacts.disabled     = !document.forms[0].doContactDots.checked
     //document.forms[0].dotStyle[0].disabled      = !document.forms[0].doContactDots.checked
     //document.forms[0].dotStyle[1].disabled      = !document.forms[0].doContactDots.checked
+    document.forms[0].multiChartSort.disabled   = !document.forms[0].doMultiChart.checked
 }
 
 function userTouch()
@@ -133,6 +134,18 @@ function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
 <h5>Multi-criterion displays</h5>
     <div class='indent'>
     <label><input type='checkbox' name='doMultiKin' value='1' checked> Multi-criterion kinemage</label>
+    <br><label><input type='checkbox' name='doMultiChart' value='1' checked onclick='userTouch()'> Multi-criterion chart</label>
+    <div class='indent'>
+        <label>Sort by
+        <select name='multiChartSort'>
+            <option value='natural'>(natural order)</option>
+            <option value='bad'>outliers first</option>
+            <option value='clash'>worst clashes</option>
+            <option value='rota'>worst rotamers</option>
+            <option value='cbdev'>worst C&beta; deviations</option>
+            <option value='rama'>Ramachandran outliers</option>
+        </select></label>
+    </div>
     </div>
 </div>
 <?php

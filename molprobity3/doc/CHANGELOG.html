@@ -22,7 +22,6 @@
     Add ribbons or something else colored by (absolute) occupancy
     Multicrit: views for trouble spots sorted by severity (also hypertext?)
     Create scripts for generating usage stats from molprobity.log
-    User sort multi chart by columns
     Estimate time for e.g. analysis jobs?
     Cache commonly run (or all) standard PDB queries?
     Cache feedback emails in MySQL database as well as filesystem?
@@ -41,11 +40,10 @@
     Make sure Reduce doesn't shrink the PDB file (lost atoms/models, etc)
     Every time lab notebook is saved, create a HTML snapshot of it
     Keep track of "last used" model and make it the default
-    Implement multi-crit chart
     Get groups turned off properly in multi-crit kinemage
   * Update Linux preGenScore, genContour, etc. (GRID_NUM=500000)
   * Get new Prekin with -listmaster, new Probe w/ masters (Linux)
-  * Add noe-display to bin/ ; record new programs (sswing) in admin/ script
+  * Add noe-display to bin/
   * Only deviant CB balls appear in kin; smaller ones are missing!
     Use Reduce -build w/ high penalty for "no build" runs?
 
@@ -67,6 +65,12 @@
 - improved reduce_choose page for case of no flips
 - removed unneeded old pages from public_html (~r88)
 - we now display comparison to run-of-PDB (SCOP 2000) for clash score
+- added sortable multicriterion chart to aac/geom analysis page
+  Sorting on the fly is complicated b/c of formatting issues. We could consider
+  a page that lets you regenerate that chart to simulate dynamic sorting.
+- fixed sorting bug for unset Rama, rota values appearing as zero
+- did a little more work on check_config.php
+- eliminated symlink-to-binary setup for pdbcns
 
 ### 3beta9 ###
 - changed PDB upload back to stacked, rather than 2 column layout -- it's more

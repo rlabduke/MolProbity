@@ -367,23 +367,29 @@ function makeFlipkin($inpath, $outpathAsnGln, $outpathHis)
 * $rama     is the data structure from loadRamachandran()
 * $rota     is the data structure from loadRotamer()
 * $cbdev    is the data structure from loadCbetaDev()
-* $full     if false, only outlier residues will be listed
+* $sortBy   can be 'natural', 'bad', 'clash', 'rama', 'rota', 'cbdev'
 * Any of them can be set to null if the data is unavailable.
 */
-function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $full = true)
+function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $sortBy = 'natural')
 {
-    if($clash != null)
+    // Make sure all residues are represented, and in the right order.
+    $res = listResidues($infile);
+    foreach($res as $k => $v) $res[$k] = array('cnit' => $v);
+    
+    if(is_array($clash))
     {
         foreach($clash['clashes'] as $cnit => $worst)
         {
+            $res[$cnit]['clash_val'] = $worst;
             $res[$cnit]['clash'] = "<td bgcolor='#ff6699'>$worst&Aring;</td>";
             $res[$cnit]['isbad'] = true;
         }
     }
-    if($rama != null)
+    if(is_array($rama))
     {
         foreach($rama as $item)
         {
+            $res[$item['resName']]['rama_val'] = $item['scorePct'];
             if($item['eval'] == "OUTLIER")
             {
                 $res[$item['resName']]['rama'] = "<td bgcolor='#ff6699'>$item[eval] ($item[scorePct]%)<br><small>$item[type] - $item[phi],$item[psi]</small></td>";
@@ -393,10 +399,11 @@ function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $fu
                 $res[$item['resName']]['rama'] = "<td>$item[eval] ($item[scorePct]%)<br><small>$item[type] / $item[phi],$item[psi]</small></td>";
         }
     }
-    if($rota != null)
+    if(is_array($rota))
     {
         foreach($rota as $item)
         {
+            $res[$item['resName']]['rota_val'] = $item['scorePct'];
             if($item['scorePct'] <= 1.0)
             {
                 $res[$item['resName']]['rota'] = "<td bgcolor='#ff6699'>$item[scorePct]%<br><small>angles: $item[chi1],$item[chi2],$item[chi3],$item[chi4]</small></td>";
@@ -406,10 +413,11 @@ function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $fu
                 $res[$item['resName']]['rota'] = "<td>$item[scorePct]%<br><small>angles: $item[chi1],$item[chi2],$item[chi3],$item[chi4]</small></td>";
         }
     }
-    if($cbdev != null)
+    if(is_array($cbdev))
     {
         foreach($cbdev as $item)
         {
+            $res[$item['resName']]['cbdev_val'] = $item['dev'];
             if($item['dev'] >= 0.25)
             {
                 $res[$item['resName']]['cbdev'] = "<td bgcolor='#ff6699'>$item[dev]A</small></td>";
@@ -420,41 +428,45 @@ function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $fu
         }
     }
     
-    ksort($res); // sort by CNIT code
+    // Sort into user-defined order
+    if($sortBy == 'natural')        {} // don't change order
+    elseif($sortBy == 'bad')        uasort($res, 'mcSortBad');
+    elseif($sortBy == 'clash')      uasort($res, 'mcSortClash');
+    elseif($sortBy == 'rama')       uasort($res, 'mcSortRama');
+    elseif($sortBy == 'rota')       uasort($res, 'mcSortRota');
+    elseif($sortBy == 'cbdev')      uasort($res, 'mcSortCbDev');
     
     $out = fopen($outfile, 'wb');
     fwrite($out, "<table width='100%' cellspacing='1' border='0'>\n");
     fwrite($out, "<tr align='center' bgcolor='".MP_TABLE_HIGHLIGHT."'>\n");
     fwrite($out, "<td><b>Res</b></td>\n");
-    if($clash != null)  fwrite($out, "<td><b>Clash &gt; 0.4&Aring;</b></td>\n");
-    if($rama != null)   fwrite($out, "<td><b>Ramachandran</b></td>\n");
-    if($rota != null)   fwrite($out, "<td><b>Rotamer</b></td>\n");
-    if($cbdev != null)  fwrite($out, "<td><b>C&beta; deviation</b></td>\n");
+    if(is_array($clash))  fwrite($out, "<td><b>Clash &gt; 0.4&Aring;</b></td>\n");
+    if(is_array($rama))   fwrite($out, "<td><b>Ramachandran</b></td>\n");
+    if(is_array($rota))   fwrite($out, "<td><b>Rotamer</b></td>\n");
+    if(is_array($cbdev))  fwrite($out, "<td><b>C&beta; deviation</b></td>\n");
     fwrite($out, "</tr>\n");
     
     $color = MP_TABLE_ALT1;
     foreach($res as $cnit => $eval)
     {
-        if(!$full && !$eval['isbad']) continue;
-        
         fwrite($out, "<tr align='center' bgcolor='$color'>");
         fwrite($out, "<td align='left'>$cnit</td>");
-        if($clash != null)
+        if(is_array($clash))
         {
             if(isset($eval['clash']))   fwrite($out, $eval['clash']);
             else                        fwrite($out, "<td>-</td>");
         }
-        if($rama != null)
+        if(is_array($rama))
         {
             if(isset($eval['rama']))    fwrite($out, $eval['rama']);
             else                        fwrite($out, "<td>-</td>");
         }
-        if($rota != null)
+        if(is_array($rota))
         {
             if(isset($eval['rota']))    fwrite($out, $eval['rota']);
             else                        fwrite($out, "<td>-</td>");
         }
-        if($cbdev != null)
+        if(is_array($cbdev))
         {
             if(isset($eval['cbdev']))   fwrite($out, $eval['cbdev']);
             else                        fwrite($out, "<td>-</td>");
@@ -464,6 +476,71 @@ function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $fu
     }
     fwrite($out, "</table>\n");
     fclose($out);
+}
+#}}}########################################################################
+
+#{{{ mcSortXXX - sort functions for multicriterion chart
+############################################################################
+// We need this b/c sort is not guaranteed to preserve starting order
+// for elements that compare as equal.
+function mcSortNatural($a, $b)
+{
+    if($a['cnit'] < $b['cnit'])     return -1;
+    elseif($a['cnit'] > $b['cnit']) return 1;
+    else                            return 0;
+}
+
+function mcSortBad($a, $b)
+{
+    if($a['isbad'])
+    {
+        if($b['isbad']) return mcSortNatural($a, $b);
+        else            return -1;
+    }
+    elseif($b['isbad']) return 1;
+    else                return mcSortNatural($a, $b);
+}
+
+function mcSortClash($a, $b)
+{
+    if($a['clash_val'] < $b['clash_val'])       return 1;
+    elseif($a['clash_val'] > $b['clash_val'])   return -1;
+    else                                        return mcSortNatural($a, $b);
+}
+
+function mcSortRama($a, $b)
+{
+    // unset values compare as zero and sort to top otherwise
+    if(!isset($a['rama_val']))
+    {
+        if(!isset($b['rama_val']))          return mcSortNatural($a, $b);
+        else                                return 1;
+    }
+    elseif(!isset($b['rama_val']))          return -1;
+    elseif($a['rama_val'] < $b['rama_val']) return -1;
+    elseif($a['rama_val'] > $b['rama_val']) return 1;
+    else                                    return mcSortNatural($a, $b);
+}
+
+function mcSortRota($a, $b)
+{
+    // unset values compare as zero and sort to top otherwise
+    if(!isset($a['rota_val']))
+    {
+        if(!isset($b['rota_val']))          return mcSortNatural($a, $b);
+        else                                return 1;
+    }
+    elseif(!isset($b['rota_val']))          return -1;
+    elseif($a['rota_val'] < $b['rota_val']) return -1;
+    elseif($a['rota_val'] > $b['rota_val']) return 1;
+    else                                    return mcSortNatural($a, $b);
+}
+
+function mcSortCbDev($a, $b)
+{
+    if($a['cbdev_val'] < $b['cbdev_val'])       return 1;
+    elseif($a['cbdev_val'] > $b['cbdev_val'])   return -1;
+    else                                        return mcSortNatural($a, $b);
 }
 #}}}########################################################################
 
