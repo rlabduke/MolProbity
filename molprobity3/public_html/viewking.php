@@ -58,6 +58,13 @@ echo mpPageHeader("KiNG - $file");
 <param name="mode" value="flat">
 <?php
     echo "    <param name='kinSource' value='$url'>\n";
+    
+    // For kinemage load/save:
+    $kinfiles = implode(' ', listDir($_SESSION['dataDir'].'/'.MP_DIR_KINS));
+    echo "    <param name='kinfileList' value='$kinfiles'>\n";
+    echo "    <param name='kinfileBase' value='$_SESSION[dataURL]/".MP_DIR_KINS."'>\n";
+    echo "    <param name='kinfileSaveHandler' value='save_kinemage.php?$_SESSION[sessTag]'>\n";
+    
     // For supporting electron density maps:
     if(is_array($_SESSION['edmaps']))
     {

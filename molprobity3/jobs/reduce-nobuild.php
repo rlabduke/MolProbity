@@ -1,15 +1,14 @@
 <?php # (jEdit options) :folding=explicit:collapseFolds=1:
 /*****************************************************************************
-    This file runs the user-configured Reduce -build command on an existing
-    model in this session and creates a new PDB in this model.
+    This file runs the Reduce to add missing H without doing a full -build.
+    It runs on model in this session and **replaces** its PDB file.
     
 INPUTS (via $_SESSION['bgjob']):
     modelID         ID code for model to process
-    doflip[]        an array of booleans, where the keys match the second index
-                    in the data structure from decodeReduceUsermods()
 
 OUTPUTS (via $_SESSION['bgjob']):
-    modelID         ID code for model that was processed
+    modelID         ID code for model to process
+    labbbookEntry   the labbook entry number describing this action
 
 *****************************************************************************/
 // EVERY *top-level* page must start this way:
@@ -19,6 +18,8 @@ OUTPUTS (via $_SESSION['bgjob']):
 // 2. Include core functionality - defines constants, etc.
     require_once(MP_BASE_DIR.'/lib/core.php');
     require_once(MP_BASE_DIR.'/lib/model.php');
+    require_once(MP_BASE_DIR.'/lib/visualize.php');
+    require_once(MP_BASE_DIR.'/lib/labbook.php');
 // 3. Restore session data. If you don't want to access the session
 // data for some reason, you must call mpInitEnvirons() instead.
     session_id( $_SERVER['argv'][1] );
@@ -42,55 +43,37 @@ OUTPUTS (via $_SESSION['bgjob']):
 
 # MAIN - the beginning of execution for this page
 ############################################################################
-$doflip = $_SESSION['bgjob']['doflip'];
 $modelID = $_SESSION['bgjob']['modelID'];
 $model = $_SESSION['models'][$modelID];
 $pdb = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$model['pdb'];
 
-$changes = decodeReduceUsermods($pdb);
+// Set up progress message
+$tasks['reduce'] = "Add H with <code>reduce -keep -noadjust -his</code>";
+$tasks['notebook'] = "Add entry to lab notebook";
 
-// If all changes were accepted, we will not need to re-run Reduce.
-$rerun = false;
-// Make a file of flip-noflip commands for Reduce
-$flipfile = $_SESSION['dataDir'].'/'.MP_DIR_MODELS."/$model[prefix]fix.flips";
-$fp = fopen($flipfile, "wb");
-$n = count($changes[0]); // How many changes are in the table?
-for($c = 0; $c < $n; $c++)
-{
-    if($doflip[$c]) fwrite($fp, "F:" . $changes[0][$c] . "\n");
-    else            fwrite($fp, "O:" . $changes[0][$c] . "\n");
+setProgress($tasks, 'reduce'); // updates the progress display if running as a background job
+$outname = $model['id']."H_nobuild.pdb";
+$outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
+if(!file_exists($outpath)) mkdir($outpath, 0777); // shouldn't ever happen, but might...
+$outpath .= '/'.$outname;
+reduceNoBuild($pdb, $outpath);
+$_SESSION['models'][$modelID]['pdb'] = $outname;
+$_SESSION['models'][$modelID]['isReduced'] = true;
 
-    // Expect checks for ones flipped originally; expect no check for ones not flipped.
-    $expected = ($changes[4][$c] == "FLIP" || $changes[4][$c] == "CLS-FL");
-    if($doflip[$c] != $expected) { $rerun = true; }
-}
-fclose($fp);
+setProgress($tasks, 'notebook');
+$pdb = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$outname;
+$url = $_SESSION['dataURL'].'/'.MP_DIR_MODELS.'/'.$outname;
+$entry = "Reduce was run on $modelID to add and optimize missing hydrogens.\n";
+$entry .= "Existing hydrogens were not affected, and Asn/Gln/His flips were not optimized.\n";
+$entry .= "<p>You can now <a href='$url'>download the annotated PDB file</a> (".formatFilesize(filesize($pdb)).").</p>\n";
+$_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
+    "Missing H added to $modelID by Reduce -keep -noadjust -his",
+    $entry,
+    $modelID,
+    "auto"
+);
 
-if(! $rerun)
-    setProgress(array("No additional changes made to model"), null);
-else
-{
-    $tasks['reduce'] = "Add H with user-selected Asn/Gln/His flips using <code>reduce -fix</code>";
-    setProgress($tasks, 'reduce');
-    
-    $outname = $model['id']."_fix.pdb"; // "H" already added to model ID
-    $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
-    if(!file_exists($outpath)) mkdir($outpath, 0777); // shouldn't ever happen, but might...
-    $outpath .= '/'.$outname;
-
-    // input should be from parent model or we'll be double flipped!
-    $parentID = $model['parent'];
-    $parent = $_SESSION['models'][$parentID];
-    $parentPDB = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$parent['pdb'];
-    if(file_exists($parentPDB))
-    {
-        reduceFix($parentPDB, $outpath, $flipfile);
-        // new PDB is part of same model entry, like for Reduce no-build.
-        if(filesize($outpath) > 0) $_SESSION['models'][$modelID]['pdb'] = $outname;
-    }
-    
-    setProgress($tasks, null); // all done
-}
+setProgress($tasks, null);
 
 ############################################################################
 // Clean up and go home
