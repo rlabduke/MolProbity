@@ -3,7 +3,8 @@
     Processes a directory full of PDB files non-recursively and outputs
     a one-line validation summary for each of them.
     
- -> We assume all files already have H's added! <-
+ -> We assume all files already have H's added, <-
+    unless run with the -reduce switch.
 
 INPUTS (via $_SERVER['argv']):
     the path to a directory; *.pdb will be processed
@@ -35,7 +36,9 @@ OUTPUTS:
 // First argument is the name of this script...
 if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
 {
-    if(!isset($pdbFolder))
+    if($arg == '-reduce')
+        $runReduce = true;
+    else if(!isset($pdbFolder))
         $pdbFolder = $arg;
     else
         die("Too many or unrecognized arguments: '$arg'\n");
@@ -56,12 +59,22 @@ echo "#pdbFileName:chains:residues:nucacids:resolution:rvalue:rfree:clashscore:c
 echo ":cbeta>0.25:numCbeta:maxCbeta:medianCbeta:meanCbeta:rota<1%:numRota:ramaOutlier:ramaAllowed:ramaFavored\n";
 
 // Loop through all PDBs in the provided directory
-$h = opendir($pdbFolder);
-while(($infile = readdir($h)) !== false)
+$filelist = listDir($pdbFolder);
+foreach($filelist as $infile)
 {
     $infile = "$pdbFolder/$infile";
-    if(is_file($infile) && endsWith($infile, ".pdb"))
+    if(is_file($infile) && (endsWith($infile, ".pdb") || endsWith($infile, ".ent")))
     {
+        // Run Reduce (no build) if requested
+        if($runReduce)
+        {
+            $filename = basename($infile);
+            $filename = substr($filename, 0, -4);
+            $outfile = "$pdbFolder/{$filename}H.pdb";
+            reduceNoBuild($infile, $outfile);
+            $infile = $outfile;
+        }
+        
         // Add model
         $filename = basename($infile);
         $modelID = addModel($infile, $filename);
@@ -105,7 +118,6 @@ while(($infile = readdir($h)) !== false)
         removeModel($modelID);
     }
 }
-closedir($h);
 
 ############################################################################
 // Clean up and go home

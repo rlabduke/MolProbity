@@ -17,6 +17,7 @@
     Add ribbons or something else colored by (absolute) occupancy
     Make color-coded versions of the flowchart for different stages of the process?
     Multicrit: views for trouble spots sorted by severity (also hypertext?)
+    Create scripts for generating usage stats from molprobity.log
 }}}
     Allow simple comparison of bad residues in two models; see jobs/analyze.php
     Add text at top of multicrit kinemage
@@ -29,11 +30,18 @@
     Change makelinks.sh into a generic setup script that also sets permissions, creates molprobity.log (666), etc.
     Rama outliers in multicrit kin don't look so hot (Ca-Ca, yellow?)
     Waters are dots instead of balls??
+    Get new Prekin, Reduce
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
 
+### 3pre15 ###
+- elaborated oneline-batch to handle running Reduce -nobuild too
+  Still needs some work to really be clean.
+- added listDir() to core.php
+- used listDir() to clean up the weird problems with oneline-batch.php -reduce
+  
 ### 3pre14 ###
 - refactored multicriterion kin creation into makeMulticritKin()
 - created outlier-res-batch.php to do analysis for JNB
