@@ -5,10 +5,9 @@
 {{{ Features from MP2 missing in MP3
     Make simple kins via built-in Prekin scripts
     Complex Probe runs
-    Half-bond coloring schemes
+    Half-bond coloring / CPK atom markers (these move to simple kins section)
     User manual
     Tutorial / walk-thru
-    Turn off vdW and/or H-bonds in dot kins
 }}}
 {{{ Ideas, long-term goals, etc.
     Write a decent document about installation of MolProbity for web and script use
@@ -31,31 +30,41 @@
     Allow uploads of tarballs of NMR models?
     On upload of alt conf model, do table to choose which ones to use
     "nice" large jobs such as multi-model NMR runs
-    "URL filesystem" to load/append/save kins from KiNG
-    Eliminate AAC kin completely
-    Have "all" analysis run use PDBstat to run Rama only on protein, etc
     Allow "hidden" user files; default download doesn't include these?
 }}}
     Allow simple comparison of bad residues in two models; see jobs/analyze.php
     Rama outliers in multicrit kin don't look so hot (Ca-Ca, yellow?)
-    Waters are dots instead of balls??
-    No sc master on rotamers (how?)
-    Develop multi-model version of the multicrit kin
     ORACLE output for TN Bhat
     Add documentation to the analysis results page (how to interpret)
     Add explanation of SSWING on setup page
     Display comparison to run-of-PDB for clash score
-    Specify what a CB outlier is
     Explain 2d and 3d CB kins
     Make sure Reduce doesn't shrink the PDB file (lost atoms/models, etc)
-    Make clashscore a choice during analysis
-    Have analysis page actually be a lab notebook entry! (Easier to customize)
     Every time lab notebook is saved, create a HTML snapshot of it
+    Keep track of "last used" model and make it the default
+    Implement multi-crit chart
+    Get groups turned off properly in multi-crit kinemage
   * Update Linux preGenScore, genContour, etc. (GRID_NUM=500000)
+  * Get new Prekin with -listmaster, new Probe w/ masters (Linux)
+  * Add noe-display to bin/ ; record new programs (sswing) in admin/ script
+  * Only deviant CB balls appear in kin; smaller ones are missing!
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
+
+### 3beta10 ###
+- continued work on aac/geom analysis, rendering results as a notebook entry
+- removed options for half-bond colors and atom-markers; this should be part
+  of the simple kins. User can append later using URL filesystem!
+- rewrote multi-crit kin function borrowing ideas from Jeremy's NMR kins
+- not a bug: $_SESSION[hetdict] is used to set an environment var instead of directly
+- added lib/models.php::splitModelNMR() based on JNB's code
+- enabled upload and splitting of multiple NMR models
+- fixed pdbstat() to not find "RESOLUTION. NOT APPLICABLE.  SEE REMARK 4."
+  as a resolution of 4.0 A
+- modified model splitter to REMARK out MODEL and ENDMDL lines
+- improved reduce_choose page for case of no flips
 
 ### 3beta9 ###
 - changed PDB upload back to stacked, rather than 2 column layout -- it's more

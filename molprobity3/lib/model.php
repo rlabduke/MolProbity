@@ -54,34 +54,71 @@ function createModel($modelID, $pdbSuffix = "")
 *   isCnsFormat     true if the user thinks he has CNS atom names
 *   ignoreSegID     true if the user wants to never map segIDs to chainIDs
 *
-* It returns the model ID code.
+* It returns an array of model ID codes, one per MODEL in the input file.
+* In most cases this will be a singleton; i.e., an array with only one entry.
 */
 function addModel($tmpPdb, $origName, $isCnsFormat = false, $ignoreSegID = false)
 {
     // Try stripping file extension
     if(preg_match('/^(.+)\.(pdb|xyz|ent)$/i', $origName, $m))
-        $id = $m[1];
+        $origID = $m[1];
     else
-        $id = $origName;
+        $origID = $origName;
     
-    $model = createModel($id, "_clean"); // don't confuse user by re-using exact original PDB name        
-    $id = $model['id'];
+    // Process file to clean it up
+    $tmp2 = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
+    list($stats, $segmap) = preparePDB($tmpPdb, $tmp2, $isCnsFormat, $ignoreSegID);
     
-    // Process file - this is the part that matters
-    $infile     = $tmpPdb;
-    $outname    = $model['pdb'];
-    $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
-    if(!file_exists($outpath)) mkdir($outpath, 0777);
-    $outpath .= '/'.$outname;
-    list($stats, $segmap) = preparePDB($infile, $outpath, $isCnsFormat, $ignoreSegID);
+    if($stats['models'] > 1) // NMR/theoretical with multiple models
+    {
+        // Original task list set during preparePDB()
+        $tasks = getProgressTasks();
+        $tasks['splitNMR'] = "Split NMR models into separate PDB files";
+        setProgress($tasks, "splitNMR");
+        
+        $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
+        if(!file_exists($outpath)) mkdir($outpath, 0777);
+        $splitModels = splitModelsNMR($tmp2);
+        foreach($splitModels as $modelNum => $tmp3)
+        {
+            $model = createModel(sprintf("{$origID}_m%02d", $modelNum));
+            $id = $model['id'];
+            $idList[] = $id;
+            
+            $file = $outpath.'/'.$model['pdb'];
+            copy($tmp3, $file);
+            unlink($tmp3);
+            
+            $model['stats']                 = pdbstat($file);
+            $model['history']               = "Model $modelNum from file uploaded by user";
+            if($segmap) $model['segmap']    = $segmap;
+            
+            // Create the model entry
+            $_SESSION['models'][$id] = $model;
+        }
+    }
+    else // "standard" x-ray structure with one model
+    {
+        $model = createModel($origID, "_clean"); // don't confuse user by re-using exact original PDB name        
+        $id = $model['id'];
+        $idList = array( $id ); // singleton array
+        
+        $outname    = $model['pdb'];
+        $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
+        if(!file_exists($outpath)) mkdir($outpath, 0777);
+        $outpath .= '/'.$outname;
+        copy($tmp2, $outpath);
     
-    $model['stats']                 = $stats;
-    $model['history']               = 'Original file uploaded by user';
-    if($segmap) $model['segmap']    = $segmap;
+        $model['stats']                 = $stats;
+        $model['history']               = 'Original file uploaded by user';
+        if($segmap) $model['segmap']    = $segmap;
+        
+        // Create the model entry
+        $_SESSION['models'][$id] = $model;
+    }
     
-    // Create the model entry
-    $_SESSION['models'][$id] = $model;
-    return $id;
+    unlink($tmp2);
+    return $idList;
 }
 #}}}########################################################################
 
@@ -202,6 +239,55 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
 }
 #}}}########################################################################
 
+#{{{ splitModelsNMR - creates many PDBs from one multi-MODEL PDB file
+############################################################################
+/**
+* Returns an array of temp file names holding the split models.
+* The models appear in order, and the keys of the array are the model numbers.
+*/
+function splitModelsNMR($infile)
+{
+	//Open PDB file
+	$pdbopen = fopen($infile,"rb");
+    while(! feof($pdbopen))
+    {
+        $line = fgets($pdbopen);
+		
+		if(preg_match('/^(MODEL)/', $line))
+		{
+            $mdline = $line;
+            $mdlnum = trim(substr($mdline, 5, 20));
+		}
+		elseif(preg_match('/^(ATOM|HETATM|TER)/', $line))
+		{
+            $model[] = $line;
+		}
+		elseif(preg_match('/^(ENDMDL)/', $line))
+		{
+            $endmodel = $line;
+            $tmpFile = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
+            $modelFiles[$mdlnum] = $tmpFile;
+            
+            $pdbnew = fopen($tmpFile, "wb");
+            foreach($header as $h) fwrite($pdbnew, $h);
+            fwrite($pdbnew, "REMARK  99 ".$mdline);
+            foreach($model as $m) fwrite($pdbnew, $m);
+            fwrite($pdbnew, "REMARK  99 ".$endmodel);
+            fclose($pdbnew);
+            
+            unset($model);
+		}
+		else
+		{
+            $header[] = $line;
+		}
+    }
+    fclose($pdbopen);
+    
+    return $modelFiles;
+}
+#}}}########################################################################
+
 #{{{ reduceNoBuild - adds missing H without changing existing atoms
 ############################################################################
 /**
@@ -214,6 +300,8 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
 function reduceNoBuild($inpath, $outpath)
 {
     // Add missing H's without trying to optimize or fix anything
+    // $_SESSION[hetdict] is used to set REDUCE_HET_DICT environment variable,
+    // so it doesn't need to appear on the command line here.
     exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -keep -his -allalt $inpath > $outpath");
 }
 #}}}########################################################################
@@ -229,6 +317,8 @@ function reduceNoBuild($inpath, $outpath)
 */
 function reduceBuild($inpath, $outpath)
 {
+    // $_SESSION[hetdict] is used to set REDUCE_HET_DICT environment variable,
+    // so it doesn't need to appear on the command line here.
     exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -build -allalt $inpath > $outpath");
 }
 #}}}########################################################################
@@ -247,6 +337,8 @@ function reduceBuild($inpath, $outpath)
 */
 function reduceFix($inpath, $outpath, $flippath)
 {
+    // $_SESSION[hetdict] is used to set REDUCE_HET_DICT environment variable,
+    // so it doesn't need to appear on the command line here.
     exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -build -fix $flippath -allalt $inpath > $outpath");
 }
 #}}}########################################################################

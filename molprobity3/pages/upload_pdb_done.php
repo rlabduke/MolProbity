@@ -13,17 +13,15 @@ class UploadPdbDoneDelegate extends BasicDelegate {
 ############################################################################
 /**
 * Context is an array containing:
-*   newModel        the ID of the model just added
+*   newModel        the ID of the model just added, or null on failure
 *   labbookEntry    the labbook entry number for adding this new model
 *   errorMsg        an error diagnosis from failed PDB upload
 */
 function display($context)
 {
-    $modelID = $context['newModel'];
-    $model = $_SESSION['models'][$modelID];
     $labbook = openLabbook();
     
-    if($model == null)
+    if(!$context['newModel'])
     {
         if(isset($context['errorMsg']))
         {
@@ -48,10 +46,10 @@ function display($context)
     }
     else // upload was OK
     {
-        // Start the page: produces <HTML>, <HEAD>, <BODY> tags
-        echo mpPageHeader("$model[pdb] added");
-    
         $num = $context['labbookEntry'];
+
+        // Start the page: produces <HTML>, <HEAD>, <BODY> tags
+        echo mpPageHeader($labbook[$num]['title']);
         echo formatLabbookEntry($labbook[$num]);
         echo "<p><a href='".makeEventURL('onEditNotebook', $num)."'>Edit notebook entry</a></p>\n";
         echo "<p>" . makeEventForm("onReturn");

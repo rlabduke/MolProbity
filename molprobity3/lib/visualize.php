@@ -3,7 +3,8 @@
     Provides kinemage-creation functions for visualizing various
     aspects of the analysis.
 *****************************************************************************/
-    require_once(MP_BASE_DIR.'/lib/pdbstat.php');
+require_once(MP_BASE_DIR.'/lib/pdbstat.php');
+require_once(MP_BASE_DIR.'/lib/analyze.php');
 
 #{{{ makeSidechainDots - appends sc Probe dots
 ############################################################################
@@ -70,48 +71,50 @@ function makeCbetaDevPlot($infile, $outfile)
 #{{{ makeMulticritKin - display all quality metrics at once in 3-D
 ############################################################################
 /**
+* $infiles is an array of one or more PDB files to process
 * $outfile will be overwritten.
-* $rama is the data structure from loadRamachandran()
-* $rota is the data structure from loadRotamer()
+* $opt controls what will be output. Each key below maps to a boolean:
+*   Bribbons            ribbons colored by B-factor
+*   altconf             alternate conformations
+*   rama                Ramachandran outliers
+*   rota                rotamer outliers
+*   cbdev               C-beta deviations greater than 0.25A
+*   dots                all-atom contacts dots
+*       hbdots          H-bond dots
+*       vdwdots         van der Waals (contact) dots
+* $nmrConstraints is optional, and if present will generate lines for violated NOEs
 */
-function makeMulticritKin($infile, $outfile, $rama, $rota)
+function makeMulticritKin($infiles, $outfile, $opt, $nmrConstraints = null)
 {
-        if(file_exists($outfile)) unlink($outfile);
+    if(file_exists($outfile)) unlink($outfile);
+    
+    $stats = describePdbStats( pdbstat(reset($infiles)), false );
+    $h = fopen($outfile, 'a');
+    fwrite($h, "@text\n");
+    foreach($stats as $stat) fwrite($h, "[+]   $stat\n");
+    if(count($infiles) > 0) fwrite($h, "Statistics for first file only; ".count($infiles)." total files included in kinemage.\n");
+    fwrite($h, "@kinemage 1\n");
+    fclose($h);
+    
+    foreach($infiles as $infile)
+    {
+        exec("prekin -quiet -mchb -lots -append -animate -onegroup -show 'mc(white),sc(blue)' $infile >> $outfile");
         
-        $stats = describePdbStats( pdbstat($infile), false );
-        $h = fopen($outfile, 'a');
-        fwrite($h, "@text\n");
-        foreach($stats as $stat) fwrite($h, "[+]   $stat\n");
-        fwrite($h, "@kinemage 1\n@group {macromol.} dominant off\n");
-        fclose($h);
-        exec("prekin -quiet -append -nogroup -bval -scope -show 'mc(white),sc(brown),hy(gray),ht(sky)' $infile >> $outfile");
-        
-        $h = fopen($outfile, 'a');
-        fwrite($h, "@group {waters} dominant off\n");
-        fclose($h);
-        exec("prekin -quiet -append -nogroup -bval -scope -show 'wa(bluetint)' $infile >> $outfile");
-        
-        $h = fopen($outfile, 'a');
-        fwrite($h, "@group {B ribbons} dominant off\n");
-        fclose($h);
-        makeBfactorRibbons($infile, $outfile);
-        
-        $h = fopen($outfile, 'a');
-        fwrite($h, "@group {Ca trace} dominant\n");
-        fclose($h);
-        exec("prekin -append -nogroup -scope -show 'ca(gray)' $infile >> $outfile");
-        
-        makeAltConfKin($infile, $outfile);
-        makeBadRamachandranKin($infile, $outfile, $rama);
-        makeBadRotamerKin($infile, $outfile, $rota);
-        makeBadCbetaBalls($infile, $outfile);
-        makeBadDotsVisible($infile, $outfile, true); // if false, don't write hb, vdw
+        if($opt['Bribbons'])        makeBfactorRibbons($infile, $outfile);
+        if($opt['altconf'])         makeAltConfKin($infile, $outfile);
+        if($opt['rama'])            makeBadRamachandranKin($infile, $outfile);
+        if($opt['rota'])            makeBadRotamerKin($infile, $outfile);
+        if($opt['cbdev'])           makeBadCbetaBalls($infile, $outfile);
+        if($opt['dots'])            makeBadDotsVisible($infile, $outfile, $opt['hbdots'], $opt['vdwdots']);
+        if($nmrConstraints)
+            exec("noe-display -cv -s viol -ds+ -fs -k $infile $nmrConstraints < /dev/null >> $outfile");
+    }
 }
 #}}}########################################################################
 
 #{{{ makeAltConfKin - appends mc and sc alts
 ############################################################################
-function makeAltConfKin($infile, $outfile, $mcColor = 'yellow', $scColor = 'gold', $off = 'off')
+function makeAltConfKin($infile, $outfile, $mcColor = 'yellow', $scColor = 'gold')
 {
     $alts   = findAltConfs($infile);
     $mcGrp  = groupAdjacentRes(array_keys($alts['mc']));
@@ -119,17 +122,11 @@ function makeAltConfKin($infile, $outfile, $mcColor = 'yellow', $scColor = 'gold
     $mc     = resGroupsForPrekin($mcGrp);
     $sc     = resGroupsForPrekin($scGrp);
     
-    $h = fopen($outfile, 'a');
-    fwrite($h, "@group {mc alts} dominant $off\n");
-    fclose($h);
     foreach($mc as $mcRange)
-        exec("prekin -quiet -append -nogroup -bval -scope $mcRange -show 'mc($mcColor)' $infile >> $outfile");
+        exec("prekin -quiet -append -nogroup -listmaster 'mc alts' -bval -scope $mcRange -show 'mc($mcColor)' $infile >> $outfile");
 
-    $h = fopen($outfile, 'a');
-    fwrite($h, "@group {sc alts} dominant $off\n");
-    fclose($h);
     foreach($sc as $scRange)
-        exec("prekin -quiet -append -nogroup -bval -scope $scRange -show 'sc($scColor)' $infile >> $outfile");
+        exec("prekin -quiet -append -nogroup -listmaster 'sc alts' -bval -scope $scRange -show 'sc($scColor)' $infile >> $outfile");
 }
 #}}}########################################################################
 
@@ -170,10 +167,19 @@ function resGroupsForPrekin($data)
 #{{{ makeBadRamachandranKin - appends mc of Ramachandran outliers
 ############################################################################
 /**
-* rama is the data from loadRamachandran()
+* rama is the data from loadRamachandran(),
+* or null to have the data generated automatically.
 */
-function makeBadRamachandranKin($infile, $outfile, $rama, $color = 'green')
+function makeBadRamachandranKin($infile, $outfile, $rama = null, $color = 'red')
 {
+    if(!$rama)
+    {
+        $tmp = tempnam(MP_BASE_DIR."/tmp", "tmp_rama_");
+        runRamachandran($infile, $tmp);
+        $rama = loadRamachandran($tmp);
+        unlink($tmp);
+    }
+    
     foreach($rama as $res)
     {
         if($res['eval'] == 'OUTLIER')
@@ -182,20 +188,29 @@ function makeBadRamachandranKin($infile, $outfile, $rama, $color = 'green')
     $mc = resGroupsForPrekin(groupAdjacentRes($worst));
     
     $h = fopen($outfile, 'a');
-    fwrite($h, "@group {Rama outliers} dominant\n");
+    fwrite($h, "@subgroup {Rama outliers} dominant\n");
     fclose($h);
     foreach($mc as $mcRange)
-        exec("prekin -append -nogroup -scope $mcRange -show 'mc($color)' $infile >> $outfile");
+        exec("prekin -append -nogroup -listmaster 'Rama Outliers' -scope $mcRange -show 'mc($color)' $infile >> $outfile");
 }
 #}}}########################################################################
 
 #{{{ makeBadRotamerKin - appends sc of bad rotamers
 ############################################################################
 /**
-* rota is the data from loadRotamer()
+* rota is the data from loadRotamer(),
+* or null to have it generated on the fly.
 */
-function makeBadRotamerKin($infile, $outfile, $rota, $color = 'sea', $cutoff = 1.0)
+function makeBadRotamerKin($infile, $outfile, $rota = null, $color = 'orange', $cutoff = 1.0)
 {
+    if(!$rota)
+    {
+        $tmp = tempnam(MP_BASE_DIR."/tmp", "tmp_rota_");
+        runRotamer($infile, $tmp);
+        $rota = loadRotamer($tmp);
+        unlink($tmp);
+    }
+
     foreach($rota as $res)
     {
         if($res['scorePct'] <= $cutoff)
@@ -204,10 +219,10 @@ function makeBadRotamerKin($infile, $outfile, $rota, $color = 'sea', $cutoff = 1
     $sc = resGroupsForPrekin(groupAdjacentRes($worst));
     
     $h = fopen($outfile, 'a');
-    fwrite($h, "@group {bad rotamers} dominant\n");
+    fwrite($h, "@subgroup {bad rotamers} dominant\n");
     fclose($h);
     foreach($sc as $scRange)
-        exec("prekin -quiet -append -nogroup -bval -scope $scRange -show 'sc($color)' $infile >> $outfile");
+        exec("prekin -quiet -append -nogroup -listmaster 'rotamer outliers' -bval -scope $scRange -show 'sc($color)' $infile >> $outfile");
 }
 #}}}########################################################################
 
@@ -215,10 +230,6 @@ function makeBadRotamerKin($infile, $outfile, $rota, $color = 'sea', $cutoff = 1
 ############################################################################
 function makeBadCbetaBalls($infile, $outfile)
 {
-    $h = fopen($outfile, 'a');
-    fwrite($h, "@group {CB deviation} dominant\n");
-    fclose($h);
-
     // C-beta deviation balls >= 0.25A
     $cbeta_dev_script = 
 'BEGIN { doprint = 0; bigbeta = 0; }
@@ -237,10 +248,11 @@ doprint && bigbeta';
 /**
 * Documentation for this function.
 */
-function makeBadDotsVisible($infile, $outfile, $allDots = false)
+function makeBadDotsVisible($infile, $outfile, $hbDots = false, $vdwDots = false)
 {
-    if($allDots)    $options = "";
-    else            $options = "-nohbout -novdwout";
+    $options = "";
+    if(!$hbDots)    $options .= " -nohbout";
+    if(!$vdwDots)   $options .= " -novdwout";
     
     $dots_off_script =
 '$0 ~ /^@(dot|vector)list .* master=\{wide contact\}/ { $0 = $0 " off" }
@@ -249,9 +261,7 @@ $0 ~ /^@(dot|vector)list .* master=\{small overlap\}/ { $0 = $0 " off" }
 $0 ~ /^@(dot|vector)list .* master=\{H-bonds\}/ { $0 = $0 " off" }
 {print $0}';
 
-    //exec("probe $options -quiet -noticks -mc -self 'alta' $infile | gawk '$dots_off_script' >> $outfile");
-    exec("probe $options -quiet -noticks -name 'sc-x dots' -self 'alta' $infile | gawk '$dots_off_script' >> $outfile");
-    exec("probe $options -quiet -noticks -name 'mc-mc dots' -mc -self 'mc alta' $infile | gawk '$dots_off_script' >> $outfile");
+    exec("probe $options -4H -quiet -noticks -nogroup -mc -self 'alta' $infile | gawk '$dots_off_script' >> $outfile");
 }
 #}}}########################################################################
 
@@ -342,6 +352,8 @@ mode==2 { print $0; }';
 */
 function makeFlipkin($inpath, $outpathAsnGln, $outpathHis)
 {
+    // $_SESSION[hetdict] is used to set REDUCE_HET_DICT environment variable,
+    // so it doesn't need to appear on the command line here.
     exec("flipkin -limit" . MP_REDUCE_LIMIT . " $inpath > $outpathAsnGln");
     exec("flipkin -limit" . MP_REDUCE_LIMIT . " -h $inpath > $outpathHis");
 }

@@ -138,6 +138,7 @@ function mpStartSession($createIfNeeded = false)
     // overriding the value set up by mpInitEnvirons().
     // Better here than on command line b/c it affects e.g. flipkin too
     if(isset($_SESSION['hetdict'])) putenv("REDUCE_HET_DICT=".$_SESSION['hetdict']);
+    else                            putenv("REDUCE_HET_DICT=".MP_REDUCE_HET_DICT);
 
     return $sessionCreated;
 }

@@ -18,7 +18,7 @@ function display($context)
 {
     echo mpPageHeader("All-atom contact and geometric analyses");
     
-    // Script to set default choices based on model properties.
+    //{{{ Script to set default choices based on model properties.
 ?><script language='JavaScript'>
 <!--
 var userTouchedSettings = false
@@ -30,8 +30,8 @@ function syncSubcontrols()
     // Notice radio buttons are accessed by name with a numeric index
     document.forms[0].showHbonds.disabled       = !document.forms[0].doContactDots.checked
     document.forms[0].showContacts.disabled     = !document.forms[0].doContactDots.checked
-    document.forms[0].dotStyle[0].disabled      = !document.forms[0].doContactDots.checked
-    document.forms[0].dotStyle[1].disabled      = !document.forms[0].doContactDots.checked
+    //document.forms[0].dotStyle[0].disabled      = !document.forms[0].doContactDots.checked
+    //document.forms[0].dotStyle[1].disabled      = !document.forms[0].doContactDots.checked
 }
 
 function userTouch()
@@ -63,6 +63,8 @@ function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
     
     document.forms[0].doClashlist.checked       = doAAC
     document.forms[0].doContactDots.checked     = doAAC
+    //document.forms[0].dotStyle[0].checked       = !hasNucAcid
+    //document.forms[0].dotStyle[1].checked       = hasNucAcid
     document.forms[0].showContacts.checked      = !isBig
     
     document.forms[0].doRama.checked            = hasProtein
@@ -76,6 +78,7 @@ function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
 }
 // -->
 </script><?php
+    //}}} Script to set default choices based on model properties.
 
     if(count($_SESSION['models']) > 0)
     {
@@ -113,9 +116,7 @@ function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
     <label><input type='checkbox' name='doClashlist' value='1' onclick='userTouchAAC(this)'> Clashscore and clash list</label>
     <br><label><input type='checkbox' name='doContactDots' value='1' onclick='userTouchAAC(this)'> Contacts dots</label>
     <div class='indent'>
-        <label><input type='radio' name='dotStyle' value='2' onclick='return false'> Protein mode: mc-mc dots separate from sc-anything dots</label>
-        <br><label><input type='radio' name='dotStyle' value='3'> RNA mode: mc-mc, mc-sc, and sc-sc dots all separate</label>
-        <br><label><input type='checkbox' name='showHbonds' value='1' checked> Include dots for H-bonds</label>
+        <label><input type='checkbox' name='showHbonds' value='1' checked> Include dots for H-bonds</label>
         <br><label><input type='checkbox' name='showContacts' value='1' checked> Include dots for van der Waals contacts</label>
     </div>
     </div>
@@ -129,10 +130,9 @@ function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
     <div class='indent'>
     <label><input type='checkbox' name='doBaseP' value='1' onclick='userTouch()'> Base-phosphate perpendiculars</label>
     </div>
-<h5>Multi-criterion kinemage</h5>
+<h5>Multi-criterion displays</h5>
     <div class='indent'>
-    <label><input type='checkbox' name='doHalfBond' value='1'> Half-bond coloring</label>
-    <br><label><input type='checkbox' name='doAtomBalls' value='1'> CPK-colored atom markers</label>
+    <label><input type='checkbox' name='doMultiKin' value='1' checked> Multi-criterion kinemage</label>
     </div>
 </div>
 <?php
@@ -191,19 +191,16 @@ function onRunAnalysis($arg, $req)
     }
     
     // Otherwise, moving forward:
-    /*if(isset($req['modelID']) && isset($req['map']))
+    if(isset($req['modelID']))
     {
-        $ctx['modelID'] = $req['modelID'];
-        $ctx['map']     = $req['map'];
-        pageGoto("sswing_setup2.php", $ctx);
+        unset($_SESSION['bgjob']); // Clean up any old data
+        $_SESSION['bgjob'] = $req;
+        
+        mpLog("aacgeom:Running all-atom contact and geometric analyses");
+        // launch background job
+        pageGoto("job_progress.php");
+        launchBackground(MP_BASE_DIR."/jobs/aacgeom.php", "aacgeom_done.php", 5);
     }
-    else
-    {
-        $ctx = getContext();
-        if(isset($req['modelID']))  $ctx['modelID'] = $req['modelID'];
-        if(isset($req['map']))      $ctx['map']     = $req['map'];
-        setContext($ctx);
-    }*/
 }
 #}}}########################################################################
 

@@ -15,6 +15,7 @@ INPUTS (via $_SESSION['bgjob']):
 OUTPUTS (via $_SESSION['bgjob']):
     Adds a new entry to $_SESSION['models'].
     newModel        the ID of the model just added, or null on failure
+                    In the case of multiple of models, it will be the first one.
     labbookEntry    the labbook entry number for adding this new model
 
 *****************************************************************************/
@@ -74,12 +75,10 @@ if(isset($_SESSION['bgjob']['pdbCode']))
     }
     else
     {
-        $id = addModel($tmpfile,
+        $idList = addModel($tmpfile,
             strtolower("$code.pdb"), // lower case is nicer for readability
             $_SESSION['bgjob']['isCnsFormat'],
             $_SESSION['bgjob']['ignoreSegID']);
-        
-        $_SESSION['bgjob']['newModel'] = $id;
         
         // Clean up temp files
         unlink($tmpfile);
@@ -91,22 +90,23 @@ else
     $origName = censorFileName($_SESSION['bgjob']['origName']);
     $fileSource = "local disk";
     
-    $id = addModel($_SESSION['bgjob']['tmpPdb'],
+    $idList = addModel($_SESSION['bgjob']['tmpPdb'],
         $origName,
         $_SESSION['bgjob']['isCnsFormat'],
         $_SESSION['bgjob']['ignoreSegID']);
-    
-    $_SESSION['bgjob']['newModel'] = $id;
     
     // Clean up temp files
     unlink($_SESSION['bgjob']['tmpPdb']);
 }
 
 // Automatic labbook entry
-if($_SESSION['bgjob']['newModel'])
+if(isset($idList))
 {
-    $id = $_SESSION['bgjob']['newModel'];
+    $id = reset($idList);
     $model = $_SESSION['models'][ $id ];
+    $_SESSION['bgjob']['newModel'] = $id;
+    
+    // Original task list set during addModel()
     $tasks = getProgressTasks();
     $tasks['thumbnail'] = "Make a thumbnail kinemage using <code>prekin -cass -colornc</code>";
     setProgress($tasks, "thumbnail");
@@ -126,7 +126,17 @@ if($_SESSION['bgjob']['newModel'])
     $s .= "</applet>\n";
     $s .= "</div>\n";
 
-    $s .= "Your file from $fileSource was uploaded as $model[pdb]\n";
+    if(count($idList) > 1) // NMR/multiple models
+    {
+        $title = count($idList)." models added";
+        $s .= "Your file from $fileSource was uploaded as ".count($idList)." separate PDB files, one per MODEL contained in the original.\n";
+        $s .= "The following description applies to the first of these models, which is shown in the thumbnail kinemage:\n";
+    }
+    else // xray/single model
+    {
+        $title = "$model[pdb] added";
+        $s .= "Your file from $fileSource was uploaded as $model[pdb]\n";
+    }
     $details = describePdbStats($model['stats'], true);
     $s .= "<ul>\n";
     foreach($details as $detail) $s .= "<li>$detail</li>\n";
@@ -141,7 +151,7 @@ if($_SESSION['bgjob']['newModel'])
     }
     
     $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
-        "$model[pdb] added",
+        $title,
         $s,
         $id,
         "auto"

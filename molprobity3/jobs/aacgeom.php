@@ -1,14 +1,13 @@
 <?php # (jEdit options) :folding=explicit:collapseFolds=1:
 /*****************************************************************************
-    This file runs the Reduce to add missing H without doing a full -build.
-    It runs on model in this session and **replaces** its PDB file.
-    
+    Runs all the all-atom contact and geometric analysis
+    tasks -- CB deviation, clashes, Ramachandran, etc.
+
 INPUTS (via $_SESSION['bgjob']):
     modelID         ID code for model to process
+    (for other options, see lib/analyze.php::runAnalysis())
 
 OUTPUTS (via $_SESSION['bgjob']):
-    modelID         the ID of the model just added
-    labbbookEntry   the labbook entry number describing this action
 
 *****************************************************************************/
 // EVERY *top-level* page must start this way:
@@ -17,8 +16,7 @@ OUTPUTS (via $_SESSION['bgjob']):
     if(!defined('MP_BASE_DIR')) define('MP_BASE_DIR', realpath(dirname(__FILE__).'/..'));
 // 2. Include core functionality - defines constants, etc.
     require_once(MP_BASE_DIR.'/lib/core.php');
-    require_once(MP_BASE_DIR.'/lib/model.php');
-    require_once(MP_BASE_DIR.'/lib/visualize.php');
+    require_once(MP_BASE_DIR.'/lib/analyze.php');
     require_once(MP_BASE_DIR.'/lib/labbook.php');
 // 3. Restore session data. If you don't want to access the session
 // data for some reason, you must call mpInitEnvirons() instead.
@@ -32,7 +30,7 @@ OUTPUTS (via $_SESSION['bgjob']):
 // 6. Record this PHP script's PID in case it needs to be killed.
     $_SESSION['bgjob']['processID'] = posix_getpid();
     mpSaveSession();
-    
+
 #{{{ a_function_definition - sumary_statement_goes_here
 ############################################################################
 /**
@@ -45,45 +43,39 @@ OUTPUTS (via $_SESSION['bgjob']):
 ############################################################################
 $modelID = $_SESSION['bgjob']['modelID'];
 $model = $_SESSION['models'][$modelID];
-$pdb = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$model['pdb'];
 
-// Set up progress message
-$tasks['reduce'] = "Add H with <code>reduce -keep -his</code>";
-$tasks['notebook'] = "Add entry to lab notebook";
+$labbookEntry = runAnalysis($modelID, $_SESSION['bgjob']);
 
-setProgress($tasks, 'reduce'); // updates the progress display if running as a background job
-$newModel = createModel($modelID."H");
-$outname = $newModel['pdb'];
-$outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
-if(!file_exists($outpath)) mkdir($outpath, 0777); // shouldn't ever happen, but might...
-$outpath .= '/'.$outname;
-reduceNoBuild($pdb, $outpath);
-
-$newModel['stats']      = pdbstat($outpath);
-$newModel['parent']     = $modelID;
-$newModel['history']    = "Derived from $model[pdb] by Reduce -keep -his";
-$newModel['isReduced']  = true;
-$_SESSION['models'][ $newModel['id'] ] = $newModel;
-$_SESSION['bgjob']['modelID'] = $newModel['id'];
-
-setProgress($tasks, 'notebook');
-$pdb = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$outname;
-$url = $_SESSION['dataURL'].'/'.MP_DIR_MODELS.'/'.$outname;
-$entry = "Reduce was run on $model[pdb] to add and optimize missing hydrogens, resulting in $newModel[pdb].\n";
-$entry .= "Existing hydrogens were not affected, and Asn/Gln/His flips were not optimized.\n";
-$entry .= "<p>You can now <a href='$url'>download the annotated PDB file</a> (".formatFilesize(filesize($pdb)).").</p>\n";
 $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
-    "Adding H with Reduce -keep -his gives $newModel[pdb]",
-    $entry,
-    "$modelID|$newModel[id]", // applies to both old and new model
+    "All-atom contact and geometric analyses: $model[pdb]",
+    $labbookEntry,
+    $modelID,
     "auto"
 );
 
-setProgress($tasks, null);
+/*********************
+To compare:
 
+    array_diff( array_keys($worst1), array_keys($worst2) ); // things fixed 1->2
+    array_diff( array_keys($worst2), array_keys($worst1) ); // things broken 1->2
+
+to find residues that are bad in one structure but not the other.
+A detailed comparison can then be done between residues in:
+
+    array_intersect( array_keys($worst1), array_keys($worst2) ); // things changed but not fixed
+
+**********************
+Alternately, you might do
+
+    array_unique( array_merge(...keys...) )
+    
+and then do a comparison on each of the possible second keys using isset().
+This would lend itself nicely to a tabular format...
+*********************/
 ############################################################################
 // Clean up and go home
 unset($_SESSION['bgjob']['processID']);
+$_SESSION['models'][$modelID]['isAnalyzed'] = true;
 $_SESSION['bgjob']['endTime']   = time();
 $_SESSION['bgjob']['isRunning'] = false;
 ?>

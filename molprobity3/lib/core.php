@@ -338,41 +338,6 @@ function sortFilesAlpha($list)
 }
 #}}}########################################################################
 
-#{{{ modelDataExists - shortcut for checking on non-zero-size files existing
-############################################################################
-/**
-* $model    a standard data structure describing the model from $_SESSION['model'][MODEL_ID]
-* $suffix   the data file name, without the model prefix, but with the .foo ending
-*/
-function modelDataExists($model, $suffix)
-{
-    $name = "$model[prefix]$suffix";
-    $file = "$model[dir]/$name";
-    return (is_file($file) && filesize($file) > 0);
-}
-#}}}########################################################################
-
-#{{{ linkModelKin - creates a kinemage open/download link tailored to this session
-############################################################################
-/**
-* $model    a standard data structure describing the model from $_SESSION['model'][MODEL_ID]
-* $suffix   the kinemage name, without the model prefix, but with the .kin ending
-* $name     an optional name to use in place of the filename
-*/
-function linkModelKin($model, $suffix, $name = null)
-{
-    $fname = "$model[prefix]$suffix";
-    $file = "$model[dir]/$fname";
-    $link = "$model[url]/$fname";
-    if($name == null) $name = $fname;
-    $s = "";
-    $s .= "<b>$name</b> (" . formatFilesize(filesize($file)) . "): ";
-    $s .= "<a href='viewking.php?$_SESSION[sessTag]&url=$link' target='_blank'>View in KiNG</a> | ";
-    $s .= "<a href='$link'>Download</a>";
-    return $s;
-}
-#}}}########################################################################
-
 #{{{ linkKinemage - creates a kinemage open/download link tailored to this session
 ############################################################################
 /**
@@ -387,26 +352,6 @@ function linkKinemage($fname, $name = null)
     $s = "";
     $s .= "<b>$name</b> (" . formatFilesize(filesize($file)) . "): ";
     $s .= "<a href='viewking.php?$_SESSION[sessTag]&url=$link' target='_blank'>View in KiNG</a> | ";
-    $s .= "<a href='$link'>Download</a>";
-    return $s;
-}
-#}}}########################################################################
-
-#{{{ linkModelDownload - creates a file-download link tailored to this session
-############################################################################
-/**
-* $model    a standard data structure describing the model from $_SESSION['model'][MODEL_ID]
-* $suffix   the file name, without the model prefix, but with the .foo ending
-* $name     an optional name to use in place of the filename
-*/
-function linkModelDownload($model, $suffix, $name = null)
-{
-    $fname = "$model[prefix]$suffix";
-    $file = "$model[dir]/$fname";
-    $link = "$model[url]/$fname";
-    if($name == null) $name = $fname;
-    $s = "";
-    $s .= "<b>$name</b> (" . formatFilesize(filesize($file)) . "): ";
     $s .= "<a href='$link'>Download</a>";
     return $s;
 }
@@ -435,31 +380,8 @@ function makeZipForFolder($inpath)
 }
 #}}}########################################################################
 
-#{{{ makeZipForModel/Session - packages all model/session files as a ZIP
+#{{{ makeZipForSession - packages all session files as a ZIP
 ############################################################################
-/**
-* Creates a ZIP archive file containing all the current files in the model.
-* The archive is created in the main session directory, and any pre-existing
-* archives created by makeZipForModel() or makeZipForSession() are removed.
-* The name of the archive file is returned.
-*/
-function makeZipForModel($modelID)
-{
-    if(is_array($_SESSION['archives'])) foreach($_SESSION['archives'] as $archive)
-        @unlink("$_SESSION[dataDir]/$archive");
-    unset($_SESSION['archives']);
-    
-    $inpath = $_SESSION['models'][$modelID]['dir'];
-    $tmppath = makeZipForFolder($inpath);
-    $outname = "$modelID.zip";
-    $outpath = "$_SESSION[dataDir]/$outname";
-    copy($tmppath, $outpath);
-    unlink($tmppath);
-    
-    $_SESSION['archives'][] = $outname;
-    return $outname;
-}
-
 /**
 * Creates a ZIP archive file containing all the current files in the session.
 * The archive is created in the main session directory, and any pre-existing
