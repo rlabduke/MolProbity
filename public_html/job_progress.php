@@ -20,6 +20,17 @@ INPUTS are via $_SESSION['bgjob']
 
 # MAIN - the beginning of execution for this page
 ############################################################################
+if(isset($_REQUEST['abort']) && $_REQUEST['abort'] == $_SESSION['bgjob']['processID'])
+{
+    if(posix_kill($_SESSION['bgjob']['processID'], 9)) // 9 --> KILL
+    {
+        mpSessReadOnly(false);
+        unset($_SESSION['bgjob']['processID']);
+        $_SESSION['bgjob']['endTime']   = time();
+        $_SESSION['bgjob']['isRunning'] = false;
+    }
+}
+
 if($_SESSION['bgjob']['isRunning'])
 {
     // A simple counter to make sure browsers think each reload
@@ -36,8 +47,12 @@ if($_SESSION['bgjob']['isRunning'])
     echo "<img src='img/1ubq-spin.gif'></td><td>\n";
     @readfile("$_SESSION[dataDir]/progress");
     echo "</td></tr></table></center>\n";
-    echo "<p><small>Your job has been running for ".(time() - $_SESSION['bgjob']['startTime'])." seconds.\n";
-    echo "If nothing happens for $rate seconds, <a href='$url'>click here</a>.</small>\n";
+    $ellapsed = time() - $_SESSION['bgjob']['startTime'];
+    echo "<p><small>Your job has been running for $ellapsed seconds.</small>\n";
+    echo "<br><small>If nothing happens for $rate seconds, <a href='$url'>click here</a>.</small>\n";
+    //if($ellapsed > 60 && isset($_SESSION['bgjob']['processID']))
+    if(isset($_SESSION['bgjob']['processID']))
+        echo "<br><small>If needed, you can <a href='$url&abort={$_SESSION[bgjob][processID]}'>abort this job</a>.\n";
     echo mpPageFooter();
 }
 else

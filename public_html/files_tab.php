@@ -24,13 +24,18 @@ OUTPUTS (via Post):
 
 #{{{ makeFileList - returns tables rows to display all the user's files
 ############################################################################
+// Needed b/c we're already using the return value
+$fileListColor = MP_TABLE_ALT1;
+
 /**
 * Takes the output of listRecursive()
 */
 function makeFileList($list, $basePath, $baseURL, $depth = 0)
 {
+    global $fileListColor;
+    if($depth === 0) $fileListColor = MP_TABLE_ALT1;
+
     $s = '';
-    $c = MP_TABLE_ALT1;
     foreach($list as $dir => $file)
     {
         if(is_array($file))
@@ -42,12 +47,11 @@ function makeFileList($list, $basePath, $baseURL, $depth = 0)
         }
         else
         {
-            $s .= "<tr bgcolor='$c'><td>";
+            $s .= "<tr bgcolor='$fileListColor'><td>";
             for($i = 0; $i < $depth; $i++) $s .= '&nbsp;&nbsp;&nbsp;&nbsp;';
-            $s .= "<i>$file</i></td>".makeFileCommands("$basePath/$file", "$baseURL/$file")."</tr>\n";
+            $s .= "$file</td>".makeFileCommands("$basePath/$file", "$baseURL/$file")."</tr>\n";
+            $fileListColor == MP_TABLE_ALT1 ? $fileListColor = MP_TABLE_ALT2 : $fileListColor = MP_TABLE_ALT1;
         }
-
-        $c == MP_TABLE_ALT1 ? $c = MP_TABLE_ALT2 : $c = MP_TABLE_ALT1;
     }
     return $s;
 }

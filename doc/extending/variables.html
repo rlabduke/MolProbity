@@ -192,6 +192,11 @@ this will be set automatically before the job is launched by <span
 itself is responsible for clearing this flag just before it exits.
 Failing to clear this will make it appear that the job never exited and
 instead ran forever.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">processID</span>:
+the Unix PID of the parent background process. Can be used to abort
+background jobs if necessary. Cleared by <span
+ style="font-family: monospace;">launchBackground()</span>.<br>
+  </li>
   <li><span style="font-family: monospace; font-weight: bold;">startTime</span>:
 Unix timestamp of job start time. Set by <span
  style="font-family: monospace;">launchBackground()</span>.</li>
@@ -217,6 +222,9 @@ supressed.<br>
     <span style="font-weight: bold; font-family: monospace;"></span></li>
   <li><span style="font-weight: bold; font-family: monospace;">pdbUpload</span>:
 true if we should show more options for uploading files.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">analyze</span>:
+true if the user wants to choose which analysis jobs are run.<br>
+  </li>
 </ul>
 <br>
 end<br>

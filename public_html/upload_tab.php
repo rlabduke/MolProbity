@@ -55,10 +55,10 @@ echo mpPageHeader("Get input models", "upload");
     <h3>Fetch file from network database</h3>
     <!-- Longer code field to allow NDB codes as well as PDB codes -->
     <label>PDB/NDB ID code: <input type="text" name="pdbCode" size="6" maxlength="10"></label>
-    <?php if($_SESSION['moreOpts']['pdbUpload'] || $_SESSION['moreOpts']['all']) { ?>
+    <!-- <?php if($_SESSION['moreOpts']['pdbUpload'] || $_SESSION['moreOpts']['all']) { ?>
         <br><label><input type="checkbox" name="get2FoFc" value="1"> Get 2Fo-Fc map from <a href="http://fsrv1.bmc.uu.se/eds/" target="_blank">EDS</a>.</label>
         <br><label><input type="checkbox" name="getFoFc" value="1"> Get difference (Fo-Fc) map from <a href="http://fsrv1.bmc.uu.se/eds/" target="_blank">EDS</a>.</label>
-    <?php } ?>
+    <?php } ?> -->
 </td></tr>
 <tr align="left" valign="top"><td width="50%">
     <input type="submit" name="cmd" value="Upload this file">
@@ -69,6 +69,7 @@ echo mpPageHeader("Get input models", "upload");
 </form>
 
 <p>
+    <small>
     <?php
     if(!$_SESSION['moreOpts']['all'])
     {
@@ -81,13 +82,15 @@ echo mpPageHeader("Get input models", "upload");
     <a href="http://www.rcsb.org/pdb/" target="_blank">Protein Data Bank</a>
     | <a href="http://ndbserver.rutgers.edu/" target="_blank">Nucleic Acid Data Bank</a>
     | <a href="http://www.rcsb.org/pdb/docs/format/pdbguide2.2/guide2.2_frame.html" target="_blank">PDB file format</a>
+    </small>
 </p>
 
-<hr>
-Upload electron density maps and NOE tables?
+
+<!-- <hr>Upload electron density maps and NOE tables? -->
 
 
 <!-- List of current models available -->
+<!--
 <?php if(count($_SESSION['models']) > 0) { ?>
 <hr>
 <h3>Models available for splitting:</h3>
@@ -111,7 +114,6 @@ Upload electron density maps and NOE tables?
 ?>
 </table>
 <?php } ?>
+-->
 
-
-<p>
 <?php echo mpPageFooter(); ?>
