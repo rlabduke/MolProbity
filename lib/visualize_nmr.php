@@ -198,6 +198,51 @@ function nmrMultiKin($pdbname, $constraints, $kinName)
 } //end of nmrMultiKin
 #}}}
 
+#{{{ nmrMultiKinPACK - dots all in subgroups, multimodel support
 
+// $pdbname - array of pdbs to be iterated and subsequently appended into the kin (all same file)
+// $kinName - name of output .kin file, should make consistent with input pdb name (parts are appended).
+
+
+
+function nmrMultiKinPACK($pdbname, $kinName)
+{
+	
+	$first = true;
+	 foreach($pdbname as $pdb)
+	 {
+		 if($first)
+		 {
+			 //commands run on the first .pdb opened
+			 
+			 //create a base kin w/ mainchain and h-bonds
+			 echo("prekin -lots -animate -show 'mc(white),sc(blue)' $pdb > $kinName");
+			 exec("prekin -lots -animate -show 'mc(white),sc(blue)' $pdb > $kinName");
+			 
+			 //dots 
+			 exec("eborp -stdbonds -NOGroup -quiet -noticks -self 'ALL' $pdb > $kinName");
+			 
+			 
+			 //separates so not running this 'first' on any others... (for supressing @kinemage)
+			 $first = false;
+			 
+		 }
+		 else
+		 {
+			 //commands run on all subsequent .pdb files opened
+			 
+			 //create a base kin w/ mainchain and h-bonds and colors them
+			 echo("prekin -lots -append -animate -show 'mc(white),sc(blue)' $pdb >> $kinName");
+			 exec("prekin -lots -append -animate -show 'mc(white),sc(blue)' $pdb >> $kinName");
+			 
+			 //dots 
+			
+			 exec("eborp -stdbonds -NOGroup -quiet -noticks -self 'ALL' $pdb >> $kinName");
+			 
+		 }
+	 }
+	 
+} //end of nmrMultiKinPACK
+#}}}
 
 ?>
