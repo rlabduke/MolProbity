@@ -20,7 +20,16 @@
 // data for some reason, you must call mpInitEnvirons() instead.
     $isNewSess = mpStartSession(true);
 // New sessions must define where they start!
-    if($isNewSess) pageGoto("welcome.php");
+// Default is welcome page unless URL is like index.php?start=____
+    if($isNewSess)
+    {
+        switch($_REQUEST['start'])
+        {
+            case "sitemap":     pageGoto("sitemap.php"); break;
+            case "xray":        pageGoto("helper_xray.php"); break;
+            default:            pageGoto("welcome.php"); break;
+        }
+    }
 
 // Process submitted event /////////////////////////////////////////////////////
 $page = end($_SESSION['pages']);                    // not a ref; read only

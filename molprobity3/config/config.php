@@ -84,6 +84,6 @@ define("MP_EMAIL_AUTHOR", "moler@kinemage.biochem.duke.edu,iwd@duke.edu");
 define("MP_SESSION_NAME", "MolProbSID");
 
 // Current "internal reference" version number. Please DO NOT change.
-define("MP_VERSION", "3beta13");
+define("MP_VERSION", "3beta14");
 
 ?>
