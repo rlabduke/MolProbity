@@ -30,6 +30,8 @@ require_once(MP_BASE_DIR.'/lib/visualize.php'); // for making kinemages
 *       doCbDev         calc Cbeta deviations and make kins
 *       doBaseP         calc base-phosphate perpendiculars and make (chart?)
 *       doMultiKin      make multicrit kinemage
+*       doMultiChart    make multicrit chart
+*       multiChartSort  how to sort the chart [ see makeMulticritChart() ]
 *       
 * This function returns some HTML suitable for using in a lab notebook entry.
 */
@@ -55,6 +57,7 @@ function runAnalysis($modelID, $opts)
     if($opts['doBaseP'])        $tasks['base-phos'] = "<i>Base-phosphate perpendicular analysis is not implemented</i>";
     
     if($opts['doClashlist'])    $tasks['clashlist'] = "Run <code>clashlist</code> to find bad clashes and clashscore";
+    if($opts['doMultiChart'])   $tasks['multichart'] = "Create multi-criterion chart";
     if($opts['doMultiKin'])     $tasks['multikin'] = "Create multi-criterion kinemage";
     //}}} Set up file/directory vars and the task list
     
@@ -127,9 +130,17 @@ function runAnalysis($modelID, $opts)
     //}}} Run all-atom contact programs and offer kins to user
     
     //{{{ Build multi-criterion chart, kinemage
+    if($opts['doMultiChart'])
+    {
+        setProgress($tasks, 'multichart'); // updates the progress display if running as a background job
+        $outfile = "$chartDir/$model[prefix]multi.chart";
+        makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $opts['multiChartSort']);
+        $tasks['multichart'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=html' target='_blank'>preview</a>\n";
+        setProgress($tasks, 'multichart'); // so the preview link is visible
+    }
     if($opts['doMultiKin'])
     {
-        setProgress($tasks, 'clashlist'); // updates the progress display if running as a background job
+        setProgress($tasks, 'multikin'); // updates the progress display if running as a background job
         $mcKinOpts = array(
             'Bribbons'  =>  true,
             'altconf'   =>  true,
@@ -211,10 +222,14 @@ function runAnalysis($modelID, $opts)
     //}}} Create lab notebook entry: summary stats table
     
     //{{{ Create lab notebook entry: multi-crit and individual kins, charts
-    $entry .= "<h3>Multi-criterion visualizations</h3>\n";
-    if($opts['doMultiKin'])
-        $entry .= "<p>".linkKinemage("$model[prefix]multi.kin", "Multi-criterion kinemage")."</p>\n";
-    $entry .= "<p><i>Multi-criterion chart has not been implemented yet.</i></p>\n";
+    if($opts['doMultiKin'] || $opts['doMultiChart'])
+    {
+        $entry .= "<h3>Multi-criterion visualizations</h3>\n";
+        if($opts['doMultiKin'])
+            $entry .= "<p>".linkKinemage("$model[prefix]multi.kin", "Multi-criterion kinemage")."</p>\n";
+        if($opts['doMultiChart'])
+            $entry .= "<p><a href='viewtext.php?$_SESSION[sessTag]&file=$chartDir/$model[prefix]multi.chart&mode=html' target='_blank'>Multi-criterion chart</a></p>\n";
+    }
     
     $entry .= "<h3>Single-criterion visualizations</h3>";
     $entry .= "<ul>\n";
@@ -235,26 +250,6 @@ function runAnalysis($modelID, $opts)
     $entry .= "</ul>\n";
     //}}} Create lab notebook entry: multi-crit and individual kins, charts
     
-    /*    
-    ////////////////////////////////////////////////////////////////////////////
-    // Multi-criterion chart and kinemage, built from the data above.
-
-    // Find all residues on the naughty list
-    // First index is 9-char residue name
-    // Second index is 'cbdev', 'rota', 'rama', or 'clash'
-    if($opts['doAll'] || $opts['doMultiChart'])
-    {
-        setProgress($tasks, 'mcchart'); // updates the progress display if running as a background job
-        $outfile = "$model[dir]/$model[prefix]multi.chart";
-        makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, false);
-        //$tasks['mcchart'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=html' target='_blank'>preview bad</a>\n";
-        $tasks['mcchart'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=html' target='_blank'>preview</a>\n";
-
-        $outfile = "$model[dir]/$model[prefix]multiall.chart";
-        makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, true);
-        //$tasks['mcchart'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=html' target='_blank'>preview all</a>\n";
-    }
-    */
     setProgress($tasks, null); // everything is finished
     return $entry;
 }
@@ -694,7 +689,7 @@ function findAltConfs($infile)
 ############################################################################
 /**
 * Returns NULL if the file could not be read.
-* Otherwise, an array of CNIT 9-char residue codes.
+* Otherwise, an array of CNIT 9-char residue codes (in keys and values).
 * Does not account for the possibility of multiple MODELs
 */
 function listResidues($infile)

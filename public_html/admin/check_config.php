@@ -20,7 +20,7 @@ Checks on prerequisites for running MolProbity and reports on their status.
 function whichProg($progName)
 {
     $result = `which '$progName'`;
-    if($result == "" || preg_match("/ not found/", $result))
+    if($result == "" || preg_match("/ not found/", $result) || preg_match("/^no $progName in/", $result))
         return array(false, "");
     else
         return array(true, $result);
@@ -113,6 +113,16 @@ $ok = true;
         echo "</ul>\n</li>\n";
     }
     else echo "<li><b>File uploads not enabled!</b> Please set <tt>file_uploads</tt> to 1 in your php.ini file (usually in /etc/php.ini).</li>\n";
+
+    if(ini_get('safe_mode'))
+        echo "<li><b>Safe mode enabled.</b> MolProbity cannot run when safe mode is enabled.</li>\n";
+    else
+        echo "<li>Safe mode disabled - good.</li>\n";
+
+    if(ini_get('display_errors'))
+        echo "<li>PHP error-display is enabled - good. This should make debugging easier.</li>\n";
+    else
+        echo "<li><b>PHP error-display is disabled.</b> This makes it much harder to debug MolProbity, so check your webserver logs for PHP errors.</li>\n";
 ?>
 </ul>
 
@@ -123,7 +133,10 @@ $ok = true;
     <?php $ok &= testForProgs(array("which", "rm", "du", "df", "zip", "gunzip",
         "php", "awk", "gawk", "perl", "java",
         "reduce", "prekin", "probe", "flipkin", "clashlist", "cluster",
-        "pdbcns", "dang", "scrublines", "cksegid.pl")); ?>
+        "pdbcns", "dang", "scrublines", "cksegid.pl",
+        "sswing", "sswingmkrotscrByPerl", "sswingpdb2rotscr",
+        "genContour", "genScoreResult", "preGenScore",
+        "noe-display")); ?>
 
 </body>
 </html>
