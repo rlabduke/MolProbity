@@ -1,0 +1,103 @@
+<?php # (jEdit options) :folding=explicit:collapseFolds=1:
+/*****************************************************************************
+    This page allows the user to compose an email to the MolProbity author.
+    
+INPUTS (via Get or Post):
+    senderName      The sender's real name
+    senderEmail     The sender's email address, for replies
+    inRegardTo      A hint about the subject of the email
+    feedbackText    Body of the email
+
+OUTPUTS (via Post):
+
+*****************************************************************************/
+// EVERY *top-level* page must start this way:
+// 1. Define it's relationship to the root of the MolProbity installation.
+// Pages in subdirectories of lib/ or public_html/ will need more "/.." 's.
+    if(!defined('MP_BASE_DIR')) define('MP_BASE_DIR', realpath(dirname(__FILE__).'/..'));
+// 2. Include core functionality - defines constants, etc.
+    require_once(MP_BASE_DIR.'/lib/core.php');
+// 3. Restore session data. If you don't want to access the session
+// data for some reason, you must call mpInitEnvirons() instead.
+    mpStartSession();
+// 4. For pages that want to see the session but not change it, such as
+// pages that are refreshing periodically to monitor a background job.
+    #mpSessReadOnly();
+
+#{{{ a_function_definition - sumary_statement_goes_here
+############################################################################
+/**
+* Documentation for this function.
+*/
+//function someFunctionName() {}
+#}}}########################################################################
+
+# MAIN - the beginning of execution for this page
+############################################################################
+$inregardto  = $_REQUEST['inRegardTo'];
+$sendername  = $_REQUEST['senderName'];
+$senderemail = $_REQUEST['senderEmail'];
+
+$fb_to = MP_EMAIL_AUTHOR.",".MP_EMAIL_WEBMASTER;
+$fb_subj = "MolProbity feedback: $inregardto";
+$fb_hdrs = "From: " . MP_EMAIL_WEBMASTER
+    . "\nReply-To: $sendername<$senderemail>"
+    . "\nX-Mailer: PHP_MolProbity3"
+    . "\nReturn-Path: " . MP_EMAIL_WEBMASTER;
+
+$fb_msg = "\n"
+    . "User name     : $_REQUEST[senderName]\n"
+    . "User email    : $_REQUEST[senderEmail]\n"
+    . "\n\n"
+    . wordwrap($_REQUEST['feedbackText'], 76);
+
+// Write a local copy of the email in case sendmail isn't working
+$tmpfile = tempnam(MP_BASE_DIR.'/feedback', 'email_');
+chmod($tmpfile, 0666 & ~MP_UMASK); // tempnam gets wrong permissions sometimes?
+$h = fopen($tmpfile, 'wb');
+fwrite($h, $fb_to."\n");
+fwrite($h, $fb_hdrs."\n");
+fwrite($h, $fb_subj."\n\n");
+fwrite($h, $fb_msg."\n");
+fclose($h);
+
+// Mail messages MUST use \r\n for new lines!!
+//$fb_to      = str_replace("\n", "\r\n", $fb_to);      Cannot have newlines
+//$fb_subj    = str_replace("\n", "\r\n", $fb_subj);    Cannot have newlines
+$fb_to      = trim($fb_to);
+$fb_subj    = trim($fb_subj);
+$rn_hdrs    = str_replace("\n", "\r\n", $fb_hdrs);
+$rn_msg     = str_replace("\n", "\r\n", $fb_msg);
+
+$ok = mail($fb_to, $fb_subj, $rn_msg, $rn_hdrs);
+mpLog("feedback:Sent to $fb_to with subject $inregardto; success=$ok");
+
+//if($ok) {  -- always OK b/c we're storing the message on disk, too
+    // Start the page: produces <HTML>, <HEAD>, <BODY> tags
+    echo mpPageHeader("Email sent", "feedback");
+    echo "<p>Your email was successfully sent to the author(s) and maintainer(s) of MolProbity.\n";
+    echo "You should receive a response, if needed, within a few days.</p>\n";
+
+    echo "<p><div class='alert'>If you're having a problem or think you've found a bug, and\n";
+    echo "if you don't mind the MolProbity maintainers seeing your data files,\n";
+    echo "then please do NOT log out and erase your files.\n";
+    echo "This will help us diagnose and correct the problem.</div></p>\n";
+/*} else {
+    // Start the page: produces <HTML>, <HEAD>, <BODY> tags
+    echo mpPageHeader("Email not sent", "feedback");
+    echo "<p><div class='alert'>It appears that our email system is not functioning properly.\n";
+    echo "Your message could not be sent.\n";
+    echo "You can email the author directly at <a href='mailto:".MP_EMAIL_AUTHOR."'>".MP_EMAIL_AUTHOR."</a>.</div></p>\n";
+}*/
+
+echo "<hr><p><pre>\n";
+echo "To: $fb_to\n";
+echo htmlspecialchars($fb_hdrs)."\n";
+echo "Subject: $fb_subj\n\n";
+echo htmlspecialchars($fb_msg)."\n";
+echo "</pre></p>\n";
+
+############################################################################
+?>
+
+<?php echo mpPageFooter(); ?>

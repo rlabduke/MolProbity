@@ -1,0 +1,63 @@
+/* (jEdit options) :folding=explicit:collapseFolds=1: */
+body {
+    color : #000000 ;
+    background-color : #cccc99 ;
+	font-family : Helvetica, Arial, sans-serif ;
+}
+
+img { border : none ; }
+
+/* Order that these appear in is important to Safari, apparently. */
+a {	text-decoration : none ; }
+a:link { color : #000099 ; }
+a:visited { color : #000099 ; }
+a:hover { text-decoration : underline ; }
+a:active { color : #0000cc ; }
+
+span.inactive {
+    color : #666666 ;
+}
+
+div.pageheader {
+    margin-bottom : 0.5em ;
+}
+div.pageheader h1 {
+    text-align : center ;
+}
+
+div.leftnav {
+}
+
+div.pagecontent {
+    background-color : #ffffff ;
+    border : 1px solid #666666 ;
+    padding : 0.4em ;
+}
+
+div.pagefooter {
+    font-size : smaller ;
+    text-align : right ;
+    margin-top : 0.5em ;
+}
+
+div.alert {
+    background-color : #ff9999 ;
+    color : #330000 ;
+    text-align : justify ;
+    border : 1px solid #330000 ;
+    padding : 0.4em ;
+}
+
+/* For syntax highlighting kinemage file produced by king.core.KinfileTokenizer */
+div.kin2html { font-family : monospace ; }
+div.kin2html span.nil-type { color : #ff0099 ; font-weight : bold ; }
+div.kin2html span.identifier { color : #330099 ; }
+div.kin2html span.comment { color : #666666 ; font-style : italic ; }
+div.kin2html span.aspect { color : #00cc00 ; }
+div.kin2html span.s-quote { color : #009900 ; }
+div.kin2html span.d-quote { color : #ff0099 ; font-weight : bold ; }
+div.kin2html span.keyword { color : #cc0000 ; font-weight : bold ; }
+div.kin2html span.property { color : #0000cc ; font-weight : bold ; }
+div.kin2html span.integer { color : #003366 ; }
+div.kin2html span.number { color : #003366 ; }
+div.kin2html span.literal { color : #000000 ; }
