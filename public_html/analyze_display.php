@@ -40,31 +40,33 @@ if(modelDataExists($model, "clash.data"))
 {
     $file = "$model[dir]/$model[prefix]clash.data";
     $clash = loadClashlist($file);
-    $num_clash_outliers = count(findClashOutliers($clash));
 }
 if(modelDataExists($model, "rama.data"))
 {
     $file = "$model[dir]/$model[prefix]rama.data";
     $rama = loadRamachandran($file);
-    $num_rama_outliers = count(findRamaOutliers($rama));
     $num_rama_res = count($rama);
-    $pct_rama_outliers = round( 100*$num_rama_outliers/$num_rama_res, 1 );
+    $num_rama_outliers = count(findRamaOutliers($rama));
+    if($num_rama_res > 0)   $pct_rama_outliers = round( 100*$num_rama_outliers/$num_rama_res, 1 );
+    else                    $pct_rama_outliers = 0;
 }
 if(modelDataExists($model, "rota.data"))
 {
     $file = "$model[dir]/$model[prefix]rota.data";
     $rota = loadRotamer($file);
-    $num_rota_outliers = count(findRotaOutliers($rota));
     $num_rota_res = count($rota);
-    $pct_rota_outliers = round( 100*$num_rota_outliers/$num_rota_res, 1 );
+    $num_rota_outliers = count(findRotaOutliers($rota));
+    if($num_rota_res > 0)   $pct_rota_outliers = round( 100*$num_rota_outliers/$num_rota_res, 1 );
+    else                    $pct_rota_outliers = 0;
 }
 if(modelDataExists($model, "cbdev.data"))
 {
     $file = "$model[dir]/$model[prefix]cbdev.data";
     $cbdev = loadCbetaDev($file);
-    $num_cb_outliers = count(findCbetaOutliers($cbdev));
     $num_cb_res = count($cbdev);
-    $pct_cb_outliers = round( 100*$num_cb_outliers/$num_cb_res, 1 );
+    $num_cb_outliers = count(findCbetaOutliers($cbdev));
+    if($num_cb_res > 0)     $pct_cb_outliers = round( 100*$num_cb_outliers/$num_cb_res, 1 );
+    else                    $pct_cb_outliers = 0;
 }
 
 /*
@@ -82,7 +84,7 @@ else // this model is an original upload
 
 <h2>Quality summary</h2>
 <table width='100%' border='0'>
-<tr><td>Clashscore:</td><?php if(isset($clash)) echo "<td>$clash[scoreAll]</td><td>($num_clash_outliers res.)</td>"; else echo "<td>?</td><td></td>"; ?></tr>
+<tr><td>Clashscore:</td><?php if(isset($clash)) echo "<td>$clash[scoreAll] (all)</td><td>$clash[scoreBlt40] (B&lt;40)</td>"; else echo "<td>?</td><td></td>"; ?></tr>
 <tr><td>Ramachandran outliers:</td><?php if(isset($rama)) echo "<td>$num_rama_outliers</td><td>($pct_rama_outliers%)</td>"; else echo "<td>?</td><td></td>"; ?></tr>
 <tr><td>Rotamer outliers:</td><?php if(isset($rota)) echo "<td>$num_rota_outliers</td><td>($pct_rota_outliers%)</td>"; else echo "<td>?</td><td></td>"; ?></tr>
 <tr><td>C&beta; deviations:</td><?php if(isset($cbdev)) echo "<td>$num_cb_outliers</td><td>($pct_cb_outliers%)</td>"; else echo "<td>?</td><td></td>"; ?></tr>
@@ -110,6 +112,7 @@ else echo "<i>Multi-criterion charts have not been generated.</i>";
 <h2>Additional displays</h2>
 <p><ul>
 <?php
+    if(modelDataExists($model, "clash.data")) echo "<li>".linkModelDownload($model, "clash.data", "Clash list")."</li>\n";
     if(modelDataExists($model, "aac.kin")) echo "<li>".linkModelKin($model, "aac.kin", "All-atom contacts")."</li>\n";
     if(modelDataExists($model, "rama.kin")) echo "<li>".linkModelKin($model, "rama.kin", "Kinemage Ramachandran plot")."</li>\n";
     if(modelDataExists($model, "rama.pdf")) echo "<li>".linkModelDownload($model, "rama.pdf", "PDF Ramachandran plot")."</li>\n";

@@ -159,6 +159,11 @@ The program is described in
 <a href="http://kinemage.biochem.duke.edu/software/reduce.php" target="_blank">kinemage.biochem.duke.edu</a>.
 </p> -->
 
+<p>Lys and Arg take 10 to 20 minutes each.
+<br>Glu, Gln, and Met take 1 to 2 minutes each.
+<br>Other sidechains take only a few seconds.
+</p>
+
 <form method='post' action='improve_sswing_launch.php'>
 <?php
     echo postSessionID();

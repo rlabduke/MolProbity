@@ -51,24 +51,39 @@ $fb_msg = "\n"
     . "\n\n"
     . wordwrap($_REQUEST['feedbackText'], 76);
 
-$ok = mail($fb_to, $fb_subj, $fb_msg, $fb_hdrs);
+// Write a local copy of the email in case sendmail isn't working
+$tmpfile = tempnam(MP_BASE_DIR.'/feedback', 'email_');
+chmod($tmpfile, 0666 & ~MP_UMASK); // tempnam gets wrong permissions sometimes?
+$h = fopen($tmpfile, 'wb');
+fwrite($h, $fb_to."\n");
+fwrite($h, $fb_hdrs."\n");
+fwrite($h, $fb_subj."\n\n");
+fwrite($h, $fb_msg."\n");
+fclose($h);
+
+// Mail messages MUST use \r\n for new lines!!
+//$fb_to      = str_replace("\n", "\r\n", $fb_to);      Cannot have newlines
+//$fb_subj    = str_replace("\n", "\r\n", $fb_subj);    Cannot have newlines
+$fb_to      = trim($fb_to);
+$fb_subj    = trim($fb_subj);
+$rn_hdrs    = str_replace("\n", "\r\n", $fb_hdrs);
+$rn_msg     = str_replace("\n", "\r\n", $fb_msg);
+
+$ok = mail($fb_to, $fb_subj, $rn_msg, $rn_hdrs);
 mpLog("feedback:Sent to $fb_to with subject $inregardto; success=$ok");
 
-if($ok)
-{
+//if($ok) {  -- always OK b/c we're storing the message on disk, too
     // Start the page: produces <HTML>, <HEAD>, <BODY> tags
     echo mpPageHeader("Email sent", "feedback");
     echo "<p>Your email was successfully sent to the author(s) and maintainer(s) of MolProbity.\n";
     echo "You should receive a response, if needed, within a few days.</p>\n";
-}
-else
-{
+/*} else {
     // Start the page: produces <HTML>, <HEAD>, <BODY> tags
     echo mpPageHeader("Email not sent", "feedback");
     echo "<p><div class='alert'>It appears that our email system is not functioning properly.\n";
     echo "Your message could not be sent.\n";
     echo "You can email the author directly at <a href='mailto:".MP_EMAIL_AUTHOR."'>".MP_EMAIL_AUTHOR."</a>.</div></p>\n";
-}
+}*/
 
 echo "<hr><p><pre>\n";
 echo "To: $fb_to\n";

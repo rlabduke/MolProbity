@@ -9,7 +9,8 @@ chmod 777 public_html/data
 touch public_html/data/molprobity.log
 chmod 666 public_html/data/molprobity.log
 
-# Set world-writable permisions on tmp/
+# Set world-writable permisions on feedback/ and tmp/
+chmod 777 feedback/
 chmod 777 tmp/
 
 # Create symlinks for executables
