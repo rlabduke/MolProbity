@@ -28,6 +28,7 @@
 
 
 <!-- List of current models available -->
+<?php if(count($_SESSION['models']) > 0) { ?>
 <p>
 <h3>Models available for analysis:</h3>
 <table width="100%" border="0" cellspacing="0" cellpadding="2">
@@ -51,6 +52,7 @@
     }
 ?>
 </table>
+<?php } ?>
 
 
 <p>

@@ -71,7 +71,8 @@ $clash  = loadClashlist("$model[dir]/$model[prefix]clash.data");
 
 // Print them out
 echo "<pre>\n";     // fixed-width text that doesn't collapse spaces
-print_r($cbdev);    // print Recursive (prints array, and arrays in it, etc)
+print_r($model['badRes']);
+//print_r($cbdev);    // print Recursive (prints array, and arrays in it, etc)
 //print_r($rota);
 //print_r($rama);
 //print_r($clash);
