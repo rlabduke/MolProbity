@@ -21,8 +21,7 @@ function display($context)
     //{{{ Script to set default choices based on model properties.
 ?><script language='JavaScript'>
 <!--
-var userTouchedSettings = false
-var selectionHasH       = true
+var selectionHasH = true
 
 function syncSubcontrols()
 {
@@ -30,42 +29,15 @@ function syncSubcontrols()
     // Notice radio buttons are accessed by name with a numeric index
     document.forms[0].showHbonds.disabled       = !document.forms[0].doContactDots.checked
     document.forms[0].showContacts.disabled     = !document.forms[0].doContactDots.checked
-    //document.forms[0].dotStyle[0].disabled      = !document.forms[0].doContactDots.checked
-    //document.forms[0].dotStyle[1].disabled      = !document.forms[0].doContactDots.checked
     document.forms[0].multiChartSort.disabled   = !document.forms[0].doMultiChart.checked
-}
-
-function userTouch()
-{
-    syncSubcontrols() // enables/disables subsettings
-    userTouchedSettings = true
-}
-
-function userTouchAAC(obj)
-{
-    userTouch()
-    if(obj.checked && !selectionHasH && !window.confirm("The file you choose does not appear to"+
-    " have all its H atoms added. All-atom contacts requires all H atoms to function properly."))
-    {
-        obj.checked = false
-        userTouch()
-    }
 }
 
 function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
 {
     selectionHasH = doAAC
     
-    if(userTouchedSettings)
-    {
-        // If user doesn't OK it, we should not do the following.
-        // Actually, I don't think we want to do this after all.
-    }
-    
     document.forms[0].doClashlist.checked       = doAAC
     document.forms[0].doContactDots.checked     = doAAC
-    //document.forms[0].dotStyle[0].checked       = !hasNucAcid
-    //document.forms[0].dotStyle[1].checked       = hasNucAcid
     document.forms[0].showContacts.checked      = !isBig
     
     document.forms[0].doRama.checked            = hasProtein
@@ -75,7 +47,19 @@ function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
     document.forms[0].doBaseP.checked           = hasNucAcid
     
     syncSubcontrols() // enables/disables subsettings
-    userTouchedSettings = false
+}
+
+// Try to make sure we have H if we're doing AAC
+function checkForHwithAAC()
+{
+    if(!selectionHasH && (document.forms[0].doClashlist.checked
+    || document.forms[0].doContactDots.checked))
+    {
+        return window.confirm("The file you choose may not have all its H atoms added."
+        +" All-atom contacts requires all H atoms to function properly."
+        +" Do you want to proceed anyway?")
+    }
+    else return true; // OK to submit
 }
 // -->
 </script><?php
@@ -88,7 +72,7 @@ function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
         if(!$lastUsedID) $lastUsedID = $_SESSION['lastUsedModelID'];
         
         $jsOnLoad = "syncSubcontrols()"; // cmd to run on page load -- may be changed below
-        echo makeEventForm("onRunAnalysis");
+        echo makeEventForm("onRunAnalysis", null, false, "checkForHwithAAC()");
         echo "<h3>Select a model to work with:</h3>";
         echo "<p><table width='100%' border='0' cellspacing='0' cellpadding='2'>\n";
         $c = MP_TABLE_ALT1;
@@ -120,8 +104,8 @@ function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
 <div class='indent'>
 <h5>All-atom contact analysis</h5>
     <div class='indent'>
-    <label><input type='checkbox' name='doClashlist' value='1' onclick='userTouchAAC(this)'> Clashscore and clash list</label>
-    <br><label><input type='checkbox' name='doContactDots' value='1' onclick='userTouchAAC(this)'> Contacts dots</label>
+    <label><input type='checkbox' name='doClashlist' value='1' onclick='syncSubcontrols()'> Clashscore and clash list</label>
+    <br><label><input type='checkbox' name='doContactDots' value='1' onclick='syncSubcontrols()'> Contacts dots</label>
     <div class='indent'>
         <label><input type='checkbox' name='showHbonds' value='1' checked> Include dots for H-bonds</label>
         <br><label><input type='checkbox' name='showContacts' value='1' checked> Include dots for van der Waals contacts</label>
@@ -129,18 +113,18 @@ function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
     </div>
 <h5>Protein geometry analysis</h5>
     <div class='indent'>
-    <label><input type='checkbox' name='doRama' value='1' onclick='userTouch()'> Ramachandran plots</label>
-    <br><label><input type='checkbox' name='doRota' value='1' onclick='userTouch()'> Rotamer evaluation</label>
-    <br><label><input type='checkbox' name='doCbDev' value='1' onclick='userTouch()'> C&beta; deviations</label>
+    <label><input type='checkbox' name='doRama' value='1' onclick='syncSubcontrols()'> Ramachandran plots</label>
+    <br><label><input type='checkbox' name='doRota' value='1' onclick='syncSubcontrols()'> Rotamer evaluation</label>
+    <br><label><input type='checkbox' name='doCbDev' value='1' onclick='syncSubcontrols()'> C&beta; deviations</label>
     </div>
 <h5>Nucleic acid geometry analysis</h5>
     <div class='indent'>
-    <label><input type='checkbox' name='doBaseP' value='1' onclick='userTouch()'> Base-phosphate perpendiculars</label>
+    <label><input type='checkbox' name='doBaseP' value='1' onclick='syncSubcontrols()'> Base-phosphate perpendiculars</label>
     </div>
 <h5>Multi-criterion displays</h5>
     <div class='indent'>
     <label><input type='checkbox' name='doMultiKin' value='1' checked> Multi-criterion kinemage</label>
-    <br><label><input type='checkbox' name='doMultiChart' value='1' checked onclick='userTouch()'> Multi-criterion chart</label>
+    <br><label><input type='checkbox' name='doMultiChart' value='1' checked onclick='syncSubcontrols()'> Multi-criterion chart</label>
     <div class='indent'>
         <label>Sort by
         <select name='multiChartSort'>

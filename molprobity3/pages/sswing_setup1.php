@@ -23,10 +23,13 @@ function display($context)
     // Script to discourage people from choosing models without H
 ?><script language='JavaScript'>
 <!--
-function warnNoH(fileName)
+function warnNoH(obj)
 {
-    window.alert("The file you choose, "+fileName+", does not appear to have "+
-        "all its H atoms added. SSwing requires all H atoms to function properly.")
+    if(!window.confirm("The file you chose may not have all its H atoms added."+
+    " All-atom contacts requires all H atoms to function properly."))
+    {
+        obj.checked = false
+    }
 }
 // -->
 </script><?php
@@ -55,7 +58,7 @@ function warnNoH(fileName)
             }
             else
             {
-                echo "  <td><input type='radio' name='modelID' value='$id' onclick='warnNoH(\"$model[pdb]\")' $checked></td>\n";
+                echo "  <td><input type='radio' name='modelID' value='$id' onclick='warnNoH(this)' $checked></td>\n";
                 echo "  <td><span class='inactive' title='Doesn&apos;t have H added'><b>$model[pdb]</b></span></td>\n";
                 echo "  <td><span class='inactive'><small>$model[history]</small></span></td>\n";
             }

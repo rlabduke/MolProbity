@@ -11,7 +11,7 @@
     Probe: -NOVDWout switch missing from docs, duplicated ONLYBADOUT
 }}}
 {{{ Ideas, long-term goals, etc.
-    User manual
+    User manual (do we need this in addition to page-by-page help?)
     Tutorial / walk-thru
     Write a decent document about installation of MolProbity for web and script use
     Could make it a web service with XML-RPC (SOAP, CORBA too complex)
@@ -21,6 +21,7 @@
         4.1.2 seems to work on arachne
     Should analysis of worst residues ignore water or treat it separately?
     ZIP download should include a static view of the lab notebook?
+    Download ZIP archives of session files
     Allow "hidden" user files; default download doesn't include these?
     Retrieve maps from the EDS
     Add ribbons or something else colored by (absolute) occupancy
@@ -43,10 +44,11 @@
     Make sure Reduce doesn't shrink the PDB file (lost atoms/models, etc)
     Add coloring type drop box for -lots kins
     Create SiteMap graphic
-    Download ZIP archives of session files
+    Create Xray / NMR / Student Helper pages with suggested protocols
     Write command line scripts for common actions; remove junk from cmdline/
+    Produce multi-model multicrit kinemages
+    Give NMR models a linking ID somehow
 }}}
-    How to deal with clashscore stats for NMR models / no resol?
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -65,6 +67,12 @@
 - split "Protein,DNA,RNA" selection into protein vs. nucleic acids
 - added -DROP option for interface contacts
 - fixed bug in describePdbStats() that never saw hydrogens
+- modified cs-rank.awk to compare no-resol structures to entire c-score database
+- made some navigation icons for sitemap; font is Helvetica Neue, 12pt, 75 Bold
+- allowed makeEventForm() to accept a onSubmit cmd
+- AAC page now warns about missing H only during form submit
+- simplified JavaScripts on AAC page
+- slightly changed wording, code for other no-H warnings
 
 ### 3beta11 ###
 - moved timezone setting to top of lab notebook page
