@@ -239,7 +239,34 @@ function getProgressTasks()
 }    
 #}}}########################################################################
 
-#{{{ listRecursive - lists a directories contents, and its subdirectories contents, etc.
+#{{{ listDir - lists a directory's contents without recursion
+############################################################################
+/**
+* Returns an array of file and/or directory names.
+* Both will be strings, and will not include . or ..
+* Paths will be relative to $dir, so you'll need to prepend that before using them.
+* Returns FALSE on failure.
+*/
+function listDir($dir)
+{
+    if($handle = opendir($dir))
+    {
+        $list = array();
+        while(false !== ($file = readdir($handle)))
+        {
+            if ($file != "." && $file != "..")
+            {
+                $list[] = $file;
+            } 
+        }
+        closedir($handle);
+        return $list;
+    }
+    else return false;
+}
+#}}}########################################################################
+
+#{{{ listRecursive - lists a directory's contents, and its subdirectories' contents, etc.
 ############################################################################
 /**
 * Returns an array of file and/or directory names.
@@ -250,7 +277,7 @@ function getProgressTasks()
 */
 function listRecursive($dir)
 {
-    if ($handle = opendir($dir))
+    if($handle = opendir($dir))
     {
         $list = array();
         while(false !== ($file = readdir($handle)))
