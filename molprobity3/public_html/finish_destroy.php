@@ -8,9 +8,8 @@ INPUTS (via Post ONLY):
 *****************************************************************************/
 // EVERY *top-level* page must start this way:
 // 1. Define it's relationship to the root of the MolProbity installation.
-// PHP's working dir is set by the script that is begins execution with.
 // Pages in subdirectories of lib/ or public_html/ will need more "/.." 's.
-    if(!defined('MP_BASE_DIR')) define('MP_BASE_DIR', realpath(getcwd().'/..'));
+    if(!defined('MP_BASE_DIR')) define('MP_BASE_DIR', realpath(dirname(__FILE__).'/..'));
 // 2. Include core functionality - defines constants, etc.
     require_once(MP_BASE_DIR.'/lib/core.php');
 // 3. Restore session data. If you don't want to access the session

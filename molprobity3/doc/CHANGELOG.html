@@ -20,15 +20,25 @@
     Add text at top of multicrit kinemage
     Create multicrit chart
     Coloring on download table is sometimes off
+    Improved file download page to package all files for one model?
     Put icons on analysis results page to identify the most-used kins
     Make automatic entries including protocols and references in notebook
-  * Insert calls to logging functions (where?)
+    Insert calls to logging functions (where?)
     Make color-coded versions of the flowchart for different stages of the process?
     Change makelinks.sh into a generic setup script that also sets permissions, creates molprobity.log, etc.
+    PdbStat to recognize "REMARK   2 RESOLUTION. 2.   ANGSTROMS." ?
+    Batch script for just doing PdbStats
+    Multicrit: views for trouble spots sorted by severity (also hypertext?)
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
+
+### 3pre14 ###
+- refactored multicriterion kin creation into makeMulticritKin()
+- created outlier-res-batch.php to do analysis for JNB
+- we now use dirname(__FILE__) instead of getcwd() to define MP3 install dir
+  This means e.g. that cmdline/ scripts can be run from any directory
 
 ### 3pre13 ###
 - created a tmp/ directory just for use by MolProbity (file uploads, ZIPs, etc)
@@ -51,7 +61,6 @@
 - developed oneline-batch.php to extract basic quality stats from a folder of Reduced PDBs
 - added calcCbetaStats() to find min, max, mode, mean, stddev
 - improved REMARK regex's in pdbstat.php
-
 - oops! I was calling the median "mode" in the above calcCbetaStats().
 - code for tallying Rama outliers kept a running tally over all models (var not reset)
 - Reduce 2.21 on Linux introduced line noise into some USER MODS, including ASCII 26 (hex 1a).
