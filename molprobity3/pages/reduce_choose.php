@@ -83,13 +83,13 @@ function display($context)
         echo "<tr bgcolor='".MP_TABLE_HIGHLIGHT."'>";
         echo "<td align='center'><b>Flip?</b></td>\n";
         echo "<td align='center'><b>Chain</b></td>\n";
-        echo "<td align='center'><b>Res#</b></td>\n";
+        echo "<td align='right'><b>Res#</b></td>\n";
         echo "<td align='center'><b>Res ID</b></td>\n";
-        echo "<td align='center'><b>Orig</b></td>\n";
-        echo "<td align='center'><b>Flip</b></td>\n";
-        echo "<td align='center'><b>Flip-Orig</b></td>\n";
-        echo "<td align='center'><b>Code</b></td>\n";
-        echo "<td align='center'><b>Explanation</b></td>\n";
+        echo "<td align='left'><b>Orig</b></td>\n";
+        echo "<td align='left'><b>Flip</b></td>\n";
+        echo "<td align='left'><b>Flip-Orig</b></td>\n";
+        echo "<td align='left'><b>Code</b></td>\n";
+        echo "<td align='left'><b>Explanation</b></td>\n";
         echo "</tr>\n";
         $color = MP_TABLE_ALT1;
         for($c = 0; $c < $n; $c++)
@@ -101,7 +101,7 @@ function display($context)
                 
                 echo "<tr bgcolor='$color'>\n";
                 echo "<td align='center'><input type='checkbox' $checked name='doflip[$c]' value='1'></td>\n";
-                echo "<td align='left'>" . $changes[1][$c] . "</td>\n";
+                echo "<td align='center'>" . $changes[1][$c] . "</td>\n";
                 echo "<td align='right'>" . $changes[2][$c] . "</td>\n";
                 echo "<td align='center'>" . $changes[3][$c] . "</td>\n";
                 echo "<td align='left'>" . $changes[8][$c] . "</td>\n";
@@ -114,9 +114,9 @@ function display($context)
             }
         }
         echo "</table>\n";
-        echo "<p><center><input type='submit' name='cmd' value='Regenerate H, applying only selected flips &gt;'>\n";
+        echo "<p><input type='submit' name='cmd' value='Regenerate H, applying only selected flips &gt;'>\n";
         echo "<br><small>(If you didn't make any changes, we won't recalculate.)</small>\n";
-        echo "</center></form>\n";
+        echo "</form>\n";
     }
     
     echo mpPageFooter();

@@ -53,11 +53,11 @@ function runSswing($pdbfile, $mapfile, $workdir, $cnit)
     $oldwd = getcwd();
     chdir($workdir);
     
-    $cmd = "sswing $pdbfile ".trim(substr($cnit,1,4))." ".trim(substr($cnit,6,3))." $mapfile";
-    if(substr($cnit,0,1) != ' ') $cmd .= " ".substr($cnit,0,1);
+    $cmd = "sswing -f -s";
+    if(substr($cnit,0,1) != ' ') $cmd .= " -c ".substr($cnit,0,1);
+    $cmd .= " $pdbfile ".trim(substr($cnit,1,4))." ".trim(substr($cnit,6,3))." $mapfile";
     //echo("\n\n".$cmd."\n\n"); //XXX-TMP
-    $out = shell_exec($cmd);
-    //echo($out."\n\n"); //XXX-TMP
+    exec($cmd);
     
     $swap = array();
     $h = fopen('sidechainPDB.pdb', 'rb');

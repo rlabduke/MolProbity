@@ -4,9 +4,10 @@
     resulting PDB file.
     
 INPUTS (via $_SESSION['bgjob']):
-    model           ID code for model to process
+    modelID         ID code for model to process
     edmap           the map file name
     cnit            a set of CNIT codes for residues to process
+    fastSearch      true iff we should use SSwing's -f flag for faster searching
 
 OUTPUTS (via $_SESSION['bgjob']):
     Adds a new entry to $_SESSION['models'].
@@ -46,35 +47,45 @@ OUTPUTS (via $_SESSION['bgjob']):
 
 # MAIN - the beginning of execution for this page
 ############################################################################
-$oldID = $_SESSION['bgjob']['model'];
-$modelID = duplicateModel($oldID, "S");
-$_SESSION['models'][$modelID]['history'] = "Derived from $oldID by SSWING";
+$oldID = $_SESSION['bgjob']['modelID'];
+$oldModel = $_SESSION['models'][$oldID];
 
-$model = $_SESSION['models'][$modelID];
-$pdb = "$model[dir]/$model[pdb]";
-$pdbout = "$model[dir]/$model[prefix]sswing.pdb";
-$map = $_SESSION['dataDir'].'/'.$_SESSION['bgjob']['edmap'];
-$cnit = $_SESSION['bgjob']['cnit'];
+$newModel = createModel($oldID."S");
+$newModel['stats']      = $oldModel['stats'];
+$newModel['parent']     = $oldID;
+$newModel['history']    = "Derived from $oldModel[pdb] by SSwing";
+$newModel['isReduced']  = $oldModel['isReduced'];
+$newModel['isBuilt']    = $oldModel['isBuilt'];
+$_SESSION['models'][ $newModel['id'] ] = $newModel;
+
+$pdbin  = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$oldModel['pdb'];
+$pdbout = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$newModel['pdb'];
+$map    = $_SESSION['dataDir'].'/'.MP_DIR_EDMAPS.'/'.$_SESSION['bgjob']['edmap'];
+$cnit   = $_SESSION['bgjob']['cnit'];
 
 // Set up progress message
-$tasks['create'] = "Create a new model entry ($modelID)";
 foreach($cnit as $res)
     $tasks[$res] = "Process $res with SSWING";
 $tasks["combine"] = "Combine all changes and create kinemage";
+
+$tmpdir = $_SESSION['dataDir'].'/'.MP_DIR_WORK;
+if(!file_exists($tmpdir)) mkdir($tmpdir, 0777);
 
 $all_changes = array();
 foreach($cnit as $res)
 {
     setProgress($tasks, $res);
-    $changes = runSswing($pdb, $map, $model['dir'], $res);
+    $changes = runSswing($pdbin, $map, $tmpdir, $res);
     $all_changes = array_merge($all_changes, $changes);
 }
 
 setProgress($tasks, "combine");
-pdbSwapCoords($pdb, $pdbout, $all_changes);
-makeSswingKin($pdb, $pdbout, "$model[dir]/$model[prefix]sswing.kin", $cnit);
+pdbSwapCoords($pdbin, $pdbout, $all_changes);
+$kindir = $_SESSION['dataDir'].'/'.MP_DIR_KINS;
+if(!file_exists($kindir)) mkdir($kindir, 0777);
+makeSswingKin($pdbin, $pdbout, "$kindir/$newModel[prefix]sswing.kin", $cnit);
 
-$_SESSION['bgjob']['newModel'] = $modelID;
+$_SESSION['bgjob']['newModel'] = $newModel['id'];
 $_SESSION['bgjob']['sswingChanges'] = $all_changes;
 setProgress($tasks, null);
 
