@@ -14,6 +14,7 @@ OUTPUTS (via Post):
     if(!defined('MP_BASE_DIR')) define('MP_BASE_DIR', realpath(dirname(__FILE__).'/..'));
 // 2. Include core functionality - defines constants, etc.
     require_once(MP_BASE_DIR.'/lib/core.php');
+    require_once(MP_BASE_DIR.'/lib/labbook.php');
 // 3. Restore session data. If you don't want to access the session
 // data for some reason, you must call mpInitEnvirons() instead.
     mpStartSession();
@@ -72,6 +73,13 @@ echo "You can now ";
 echo "<a href='$url'>download the optimized and annotated PDB file</a> (".formatFilesize(filesize($pdb)).").";
 ?>
 </p>
+
+<hr/><?php
+    $labbook = openLabbookWithEdit();
+    $num = $model['entry_reduce'];
+    echo formatLabbookEntry($labbook[$num]);
+    echo "<p><a href='notebook_edit.php?$_SESSION[sessTag]&entryNumber=$num&submitTo=improve_reduce_done.php'>Edit notebook entry</a></p>\n";
+?><hr/>
 
 <p>Now that H placement and Asn/Gln/His flips have been optimized, you may want to
 <?php echo "<a href='analyze_setup.php?$_SESSION[sessTag]&model=$modelID'>"; ?>run analysis on this model</a>

@@ -20,6 +20,7 @@ OUTPUTS (via $_SESSION['bgjob'])
 // 2. Include core functionality - defines constants, etc.
     require_once(MP_BASE_DIR.'/lib/core.php');
     require_once(MP_BASE_DIR.'/lib/model.php');
+    require_once(MP_BASE_DIR.'/lib/labbook.php');
 // 3. Restore session data. If you don't want to access the session
 // data for some reason, you must call mpInitEnvirons() instead.
     mpStartSession();
@@ -36,15 +37,53 @@ $pdb        = "$model[dir]/$model[pdb]";
 
 
 // If all changes were accepted, we will not need to re-run Reduce.
+// We're going to construct a lab notebook entry at the same time.
 $changes = decodeReduceUsermods($pdb);
 $rerun = false;
 $n = count($changes[0]); // How many changes are in the table?
+$autoflip = "<p>The following residues were flipped automatically by Reduce:\n<ul>\n";
+$userflip = "<p>The following residues were flipped manually by the user:\n<ul>\n";
+$userkeep = "<p>The following residues were NOT flipped, though Reduce recommended doing so:\n<ul>\n";
 for($c = 0; $c < $n; $c++)
 {
     // Expect checks for ones flipped originally; expect no check for ones not flipped.
     $expected = ($changes[4][$c] == "FLIP" || $changes[4][$c] == "CLS-FL");
-    if($doflip[$c] != $expected) { $rerun = true; }
+    //if($doflip[$c] != $expected) { $rerun = true; }
+    if($expected)
+    {
+        if($doflip[$c])
+        {
+            $autoflip .= "<li>{$changes[1][$c]} {$changes[2][$c]} {$changes[3][$c]}</li>\n";
+        }
+        else
+        {
+            $userkeep .= "<li>{$changes[1][$c]} {$changes[2][$c]} {$changes[3][$c]}</li>\n";
+            $rerun = true;
+        }
+    }
+    elseif($doflip[$c])
+    {
+        $userflip .= "<li>{$changes[1][$c]} {$changes[2][$c]} {$changes[3][$c]}</li>\n";
+    }
 }
+$autoflip .= "</ul>\n</p>\n";
+$userflip .= "</ul>\n</p>\n";
+$userkeep .= "</ul>\n</p>\n";
+
+$entry = "Reduce was run on $model[parent] to add and optimize hydrogens, and optimize Asn, Gln, and His flips, yielding $modelID.\n";
+if(strpos($autoflip, "<li>") !== false) $entry .= $autoflip;
+if(strpos($userflip, "<li>") !== false) $entry .= $userflip;
+if(strpos($userkeep, "<li>") !== false) $entry .= $userkeep;
+
+// Go ahead and make the notebook entry inline -- this can't take more than 1-2 sec.
+if($rerun)  $title = "Reduce -build with user overrides gives $modelID";
+else        $title = "Reduce -build with default settings gives $modelID";
+$_SESSION['models'][$modelID]['entry_reduce'] = addLabbookEntry(
+    $title,
+    $entry,
+    $modelID,
+    "auto"
+);
 
 // User requested changes; re-launch Reduce
 if($rerun)

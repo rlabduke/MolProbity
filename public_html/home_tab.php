@@ -81,13 +81,22 @@ else
 
 <hr>
 <a name="citation"></a>
-<b>Please cite:</b>
+<b>For protein work, please cite:</b>
 <p>
 Simon C. Lovell, Ian W. Davis, W. Bryan Arendall III, Paul I. W. de Bakker, J. Michael Word,
 Michael G. Prisant, Jane S. Richardson, David C. Richardson (2003)
 <a href="http://kinemage.biochem.duke.edu/validation/valid.html" target=_blank>
 Structure validation by C-alpha geometry: phi, psi, and C-beta deviation.</a>
 Proteins: Structure, Function, and Genetics. <u>50</u>: 437-450.
+</p>
+
+<p><b>For nucleic acid work, please cite:</b></p>
+<p>
+Ian W. Davis, Laura Weston Murray, Jane S. Richardson and David C. Richardson (2004)
+<a href="http://kinemage.biochem.duke.edu/research/rna/rnarotamer.php" target=_blank>
+MolProbity: structure validation and all-atom contact analysis for nucleic acids and their complexes.</a>
+Nucleic Acids Research. <u>32</u>: W615-W619 (Web Server issue).
+</p>
 
 <p><b>Grants supporting this work:</b>
 <ul>
