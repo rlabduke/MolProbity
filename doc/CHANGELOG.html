@@ -35,7 +35,6 @@
     Specify what a CB outlier is
     Explain 2d and 3d CB kins
     Reference NAR paper for NA uses of MolProbity
-    Weird results on 1AAC (from Top500)
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -65,6 +64,11 @@
 - fixed addmodel.php (upload system) to rename files with "weird" names
 - patched filesystem-access security hole in viewtext.php
 - patched filesystem-overwrite security hole in ED Map Upload system
+- fixed addModel() to protect from case-insensitive file systems like OS X
+- removed segID remapping from reduceNoBuild() b/c it's not appropriate
+- segID remapping is now done immediately on upload
+- user is now warned if segID remapping occurred
+- this avoids the bug from Top500/1aacH.pdb, which had its H in segment 'new '
 
 ### 3beta1 ###
 - first beta release for testing inside the Richardson lab

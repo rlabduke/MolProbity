@@ -49,8 +49,7 @@ instead ran forever.<br>
   </li>
   <li><span style="font-weight: bold; font-family: monospace;">moreOpts</span>:
 an array of flags for showing more options in various forms, described
-below.<br>
-  </li>
+below.</li>
 </ul>
 <h2>Files present in the user data directory ($_SESSION['dataDir']):</h2>
 You shouldn't ever be using the named files directly; instead, access
@@ -75,6 +74,40 @@ the output (stdout and stderr) from background jobs.</li>
   <li>... plus any electron density maps.<br>
   </li>
   <li>... plus individual directories for each model.</li>
+</ul>
+<h2>Issues to be aware of when working with files</h2>
+<ul>
+  <li>The Mac OS X filesystem (HFS) is case-<span
+ style="font-style: italic;">preserving</span> but <span
+ style="font-weight: bold;">not</span> case-<span
+ style="font-style: italic;">sensitive</span>.
+That means that files named "foo", "Foo", and "FOO" all refer to
+exactly the same file, although the file system will list that file
+with the capitalization you originally supplied. The PHP <span
+ style="font-family: monospace;">file_exists()</span> function deals
+with this correctly; i.e., if you <span style="font-family: monospace;">touch
+foo</span> then <span style="font-family: monospace;">file_exists("Foo")
+== true</span>.</li>
+  <li>Users love to upload files with "weird" characters in their
+names, especially spaces. See the <span style="font-family: monospace;">censorFileName()</span>
+function in lib/core.php.</li>
+  <li>Hackers would love to upload a file named <span
+ style="font-family: monospace;">session</span> and overwrite your
+session data, or to pass <span style="font-family: monospace;">/etc/passwd</span>
+to a script that displays files. Remember that the <span
+ style="font-family: monospace;">apache</span> account -- which runs
+PHP -- has pretty generous permissions on your server. Think security
+first when dealing with the file system!</li>
+  <li>Permissions of files created by PHP are controlled by the <span
+ style="font-family: monospace;">umask()</span> function; permissions
+of directories are set at create time by <span
+ style="font-family: monospace;">mkdir()</span>.
+Uploaded files often have very restrictive permissions that are
+retained when they are moved or copied. If you're not sure, use <span
+ style="font-family: monospace;">chmod()</span> to be safe! (And note
+that <span style="font-family: monospace;">chmod()</span> takes an
+octal argument, so be sure to prefix the number with a zero: e.g.,
+0644).</li>
 </ul>
 <h2>Contents of $_SESSION['models']['<span
  style="font-style: italic; text-decoration: underline;">myModelID</span>']:</h2>
@@ -111,6 +144,12 @@ path is <span style="font-family: monospace;">$_SESSION['models']['</span><span
  style="font-family: monospace;">']['pdb']</span>.</li>
   <li><span style="font-weight: bold; font-family: monospace;">stats</span>:
 the information returned by PdbStat for the PDB.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">segmap</span>:
+the segID-to-chainID mapping string that was applied to this file
+(relative to its parent), or not set if none. This is specifically <span
+ style="font-style: italic;">not</span> a heritable property: one
+remapping fixes the problem once and for all.<br>
+  </li>
   <li><span style="font-family: monospace; font-weight: bold;">parent</span>:
 the model ID of the model this one is "derived" from. For instance, a
 model representing the results of <span style="font-family: monospace;">reduce
