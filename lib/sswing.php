@@ -102,8 +102,10 @@ function makeSswingKin($pdb1, $pdb2, $outfile, $cnit)
         }
         
         fclose($h);
-        exec("prekin -quiet -append -animate -lots $pdb1 >> $outfile");
-        exec("prekin -quiet -append -animate -lots $pdb2 >> $outfile");
+        exec("prekin -quiet -append -animate -onegroup -show 'mc,sc(peach),ca,hy,ht,wa' $pdb1 >> $outfile");
+        exec("probe -quiet -noticks -nogroup -self 'alta' $pdb1 >> $outfile");
+        exec("prekin -quiet -append -animate -onegroup -show 'mc,sc(sky),ca,hy,ht,wa' $pdb2 >> $outfile");
+        exec("probe -quiet -noticks -nogroup -self 'alta' $pdb2 >> $outfile");
         
 }
 #}}}########################################################################

@@ -47,7 +47,7 @@ OUTPUTS (via $_SESSION['bgjob']):
 # MAIN - the beginning of execution for this page
 ############################################################################
 $oldID = $_SESSION['bgjob']['model'];
-$modelID = duplicateModel($oldID, "w");
+$modelID = duplicateModel($oldID, "S");
 $_SESSION['models'][$modelID]['history'] = "Derived from $oldID by SSWING";
 
 $model = $_SESSION['models'][$modelID];

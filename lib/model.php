@@ -92,7 +92,7 @@ function duplicateModel($inModelID, $suffix)
     copy("$inModel[dir]/$inModel[pdb]", $outpath);
     
     // Create the model entry
-    $_SESSION['models'][$id] = array_merge($inModel, array(
+    $_SESSION['models'][$id] = array(
         'id'        => $id,
         'dir'       => $modelDir,
         'url'       => $modelURL,
@@ -101,7 +101,9 @@ function duplicateModel($inModelID, $suffix)
         'stats'     => pdbstat($outpath),
         'parent'    => $inModelID,
         'history'   => "Derived from $inModelID by duplication",
-    ));
+        'isReduced' => $inModel['isReduced'],
+        'isBuilt'   => $inModel['isBuilt']
+    );
     
     return $id;
 }
@@ -301,8 +303,7 @@ function reduceBuild($inModelID, $inpath)
     exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -build -allalt $inpath > $outpath");
     
     // Create the model entry
-    //$_SESSION['models'][$id] = array(
-    $_SESSION['models'][$id] = array_merge($_SESSION['models'][$inModelID], array(
+    $_SESSION['models'][$id] = array(
         'id'        => $id,
         'dir'       => $modelDir,
         'url'       => $modelURL,
@@ -313,7 +314,7 @@ function reduceBuild($inModelID, $inpath)
         'history'   => "Derived from $inModelID by default Reduce -build",
         'isReduced' => true,
         'isBuilt'   => true
-    ));
+    );
     
     return $id;
 }

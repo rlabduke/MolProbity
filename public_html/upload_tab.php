@@ -74,14 +74,15 @@ echo mpPageHeader("Get input models", "upload");
     if(!$_SESSION['moreOpts']['all'])
     {
         if($_SESSION['moreOpts']['pdbUpload'])
-            echo "<a href='upload_tab.php?$_SESSION[sessTag]&moreOpts_pdbUpload=0'>Fewer upload options</a> |\n";
+            echo "<a href='upload_tab.php?$_SESSION[sessTag]&moreOpts_pdbUpload=0'>Fewer upload options</a>\n";
         else
-            echo "<a href='upload_tab.php?$_SESSION[sessTag]&moreOpts_pdbUpload=1'>More upload options</a> |\n";
+            echo "<a href='upload_tab.php?$_SESSION[sessTag]&moreOpts_pdbUpload=1'>More upload options</a>\n";
     }
     ?>
-    <a href="http://www.rcsb.org/pdb/" target="_blank">Protein Data Bank</a>
+    <br><a href="http://www.rcsb.org/pdb/" target="_blank">Protein Data Bank</a>
     | <a href="http://ndbserver.rutgers.edu/" target="_blank">Nucleic Acid Data Bank</a>
-    | <a href="http://www.rcsb.org/pdb/docs/format/pdbguide2.2/guide2.2_frame.html" target="_blank">PDB file format</a>
+    | <a href="http://fsrv1.bmc.uu.se/eds/" target="_blank">Electron Density Server</a>
+    <br><a href="http://www.rcsb.org/pdb/docs/format/pdbguide2.2/guide2.2_frame.html" target="_blank">PDB file format</a>
     </small>
 </p>
 

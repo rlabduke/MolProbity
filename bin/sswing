@@ -100,7 +100,11 @@
    unlink ($scoreOutput);
    
    # Changes by IWD 8/3/04 for MolProbity
-   # unlink sswing_XXX.pdb
+   if ($i==4){
+       unlink ("sswing_".$residueSeqNum.".pdb");
+   }else {
+       unlink ("sswing_".$residueSeqNum.$modelChainID.".pdb");
+   }
    unlink ($resultFile);
 
 
