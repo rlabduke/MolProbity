@@ -17,36 +17,35 @@ function display($context)
 {
     echo mpPageHeader("Input PDB files");
     
-    echo "<table border='0' width='100%'><tr valign='top'><td>\n";
     echo makeEventForm("onUploadPdbFile", null, true) . "\n";
 ?>
-<h3>Upload model from local disk</h3>
-<label>PDB file:
-<input type="file" name="uploadFile"></label>
-<p><div class='inline_options'>
+<div class='side_options'>
     <b>Advanced options:</b>
     <br><label><input type="checkbox" name="isCnsFormat" value="1"> File is from CNS refinement</label>
     <br><label><input type="checkbox" name="ignoreSegID" value="1"> Ignore segID field</label>
-</div></p>
-<input type="submit" name="cmd" value="Upload this file &gt;">
+</div>
+<h3>Upload model from local disk</h3>
+<label>PDB file:
+<input type="file" name="uploadFile"></label>
+<br clear='all'><table border='0' width='100%'><tr>
+<td><input type="submit" name="cmd" value="Upload this file &gt;"></td>
+<td align='right'><input type="submit" name="cmd" value="Cancel"></td>
+</tr></table>
 </form>
+<hr>
 <?php
-    echo "</td><td align='center' valign='bottom'>\n";
-    echo makeEventForm("onReturn");
-    echo "<input type='submit' name='cmd' value='Cancel'>\n</form>\n";
-    echo "</td><td>\n";
     echo makeEventForm("onFetchPdbFile", null, true) . "\n";
 ?>
 <h3>Fetch model from network database</h3>
 <!-- Longer code field to allow NDB codes as well as PDB codes -->
 <label>PDB / NDB ID code:
 <input type="text" name="pdbCode" size="6" maxlength="10"></label>
-<br><input type="submit" name="cmd" value="Fetch this file &gt;">
+<br><table border='0' width='100%'><tr>
+<td><input type="submit" name="cmd" value="Upload this file &gt;"></td>
+<td align='right'><input type="submit" name="cmd" value="Cancel"></td>
+</tr></table>
 </form>
-<?php
-    echo "</td></tr></table>\n";
-    echo "<hr>\n";
-?>
+<hr>
 <h4>Upload model from local disk</h4>
 <ul>
 <li>This function allows you to upload a new macromolecular model from your computer's hard drive.</li>
@@ -69,7 +68,7 @@ function display($context)
 <li>Many RNA and DNA structures are available through the
     <a href="http://ndbserver.rutgers.edu/" target="_blank">Nucleic Acid Data Bank</a>.</li>
 </ul>
-    <?php
+<?php
     echo mpPageFooter();
 }
 #}}}########################################################################
@@ -92,6 +91,12 @@ function onReturn($arg, $req)
 */
 function onUploadPdbFile($arg, $req)
 {
+    if($req['cmd'] == "Cancel")
+    {
+        pageReturn();
+        return;
+    }
+    
     // Don't try running shell cmds, etc on the uploaded file directly b/c
     // it's name could have space, .. , or other illegal chars in it!
     $tmpfile = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
@@ -132,6 +137,12 @@ function onUploadPdbFile($arg, $req)
 */
 function onFetchPdbFile($arg, $req)
 {
+    if($req['cmd'] == "Cancel")
+    {
+        pageReturn();
+        return;
+    }
+    
     unset($_SESSION['bgjob']); // Clean up any old data
     $_SESSION['bgjob']['pdbCode']       = $req['pdbCode'];
     $_SESSION['bgjob']['isCnsFormat']   = false;

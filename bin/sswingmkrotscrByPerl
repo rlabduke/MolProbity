@@ -8,7 +8,7 @@
 # usage:  sswingmkrotscrByPerl my.kin 99 my.pdb > my.rotscr
 # change AWK to Perl on 2/14/2003 by Shuren Wang
 # fix His, Trp, Pro, Phe and Tyr bugs (atom duplicated) 
-
+# add some option " within 12 of $X, $Y, $Z
 
 $[ = 1;			# set array base to 1
 my $pdbfile=$ARGV[3];
@@ -29,9 +29,10 @@ line: while (<>) {
     	  $pdbfile = 'pdbfile';	
     }
 	  $prevrotnum = 0;
-	  printf (('probe -q -stdbonds -3 -drop '));
-	  printf "-once \"file1\" \"file1 | file2 alta not water not(sc %d)\" -auto - %s <<END_OF_INPUT\n",
-                              $resnum+0, $pdbfile;
+    $atom=0;
+#	  printf (('probe -q -stdbonds -3 -drop '));
+#	  printf "-once \"file1\" \"file1 | file2 alta not water not(sc %d)\" -auto - %s <<END_OF_INPUT\n",
+#                              $resnum+0, $pdbfile;
   }
 
   if (/^[ \t]*@(sub)*group/) {
@@ -89,7 +90,7 @@ line: while (<>) {
 	      $id = substr($cursor, 1, $M);
 	      if ($id eq "\"") {
 	       	$id = $lastpointid;
-	    }
+	      }
 
 	    &checkid();
 	    $lastpointid = $id;
@@ -133,6 +134,14 @@ line: while (<>) {
 		        $seg2 = sprintf('%6.3f:%6.3f:%6.3f', $X, $Y, $z);
 
 		        $ov{$nov++} = sprintf('# %d', $rotnum);
+
+            if ($atom==0)
+            {
+           	  printf (('probe -q -stdbonds -3 -drop '));
+	            printf "-once \"file1 \" \"file1 | file2 alta not water not(sc %d) within 12 of %6.3f,%6.3f,%6.3f\" -auto - %s <<END_OF_INPUT\n",
+                               $resnum+0, $X, $Y, $z, $pdbfile;
+              $atom++;
+            }
 		        $ov{$nov++} = sprintf('atom  %5d %s   %8.3f%8.3f%8.3f%6.2f%6.2f', 1, $id,
 		                                                   $X, $Y, $z, 1, 0);
 		        $ov{$nov++} = sprintf('%s:%s:%s', $xformprefix, $seg1, $seg2);
@@ -220,6 +229,7 @@ printf (("#   otherwise, comment out the probe and END_OF_INPUT lines\n"));
 printf (("\n"));
 printf (("END_OF_INPUT\n"));
 
+
 sub checkid {
     local($lenid, $pos, $ch, $ss1, $ss2, $ss3) = @_;
     $lenid = length($id);
@@ -261,3 +271,4 @@ sub checkid {
 	    }
    }
 }
+
