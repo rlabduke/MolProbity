@@ -42,7 +42,7 @@ function makeFileList($list, $basePath, $baseURL, $depth = 0)
         {
             $s .= "<tr bgcolor='".MP_TABLE_HIGHLIGHT."'><td>";
             for($i = 0; $i < $depth; $i++) $s .= '&nbsp;&nbsp;&nbsp;&nbsp;';
-            $s .= "<b>$dir/</b></td><td colspan='4'></td></tr>\n";
+            $s .= "<b>$dir/</b></td><td colspan='5'></td></tr>\n";
             $s .= makeFileList($file, "$basePath/$dir", "$baseURL/$dir", $depth+1);
         }
         else
@@ -65,10 +65,26 @@ function makeFileCommands($path, $url)
     $s .= "<td><small>".formatFilesize(filesize($path))."</small></td>";
     if(endsWith($path, ".kin"))
     {
-        $s .= "<td><a href='viewkin2html.php?$_SESSION[sessTag]&file=$path' target='_blank'>Syntax highlighted</a></td>";
+        $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=plain' target='_blank'>source</a></small></td>";
+        $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=kin' target='_blank'>highlighted</a></small></td>";
+        $s .= "<td><small><a href='viewking.php?$_SESSION[sessTag]&url=$url' target='_blank'>in KiNG</a></small></td>";
+    }
+    elseif(endsWith($path, ".chart"))
+    {
+        $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=plain' target='_blank'>source</a></small></td>";
+        $s .= "<td></td>";
+        $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=html' target='_blank'>as HTML</a></small></td>";
+    }
+    elseif(endsWith($path, ".pdf"))
+    {
+        $s .= "<td></td>";
+        $s .= "<td></td>";
+        $s .= "<td></td>";
     }
     else
     {
+        $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=plain' target='_blank'>plain text</a></small></td>";
+        $s .= "<td></td>";
         $s .= "<td></td>";
     }
     $s .= "<td><small><a href='$url'>Download</a></small></td>";

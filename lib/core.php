@@ -450,6 +450,23 @@ function makeZipForSession()
 }
 #}}}########################################################################
 
+#{{{ censorFileName - removes illegal and unusual characters from file name
+############################################################################
+/**
+* Documentation for this function.
+*/
+function censorFileName($origName)
+{
+    // Remove illegal chars from the upload file name:
+    // two or more dots or any non- alphanumeric/dash/dot/underscore
+    $origName = preg_replace('/\.{2,}|[^-_.a-zA-Z0-9]+/', '_', $origName);
+    // Remove multiple underscores, for consistency/aesthetics
+    $origName = preg_replace('/_{2,}/', '_', $origName);
+    if($origName == '') $origName = "null_name"; // I don't think this is possible...
+    return $origName;
+}
+#}}}########################################################################
+
 #{{{ a_function_definition - sumary_statement_goes_here
 ############################################################################
 /**

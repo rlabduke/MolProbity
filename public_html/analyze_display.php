@@ -101,8 +101,8 @@ else echo "<i>Multi-criterion kinemage has not been generated.</i>";
 <p><?php
 if(modelDataExists($model, "multi.chart") && modelDataExists($model, "multiall.chart"))
 {
-    $badurl = "viewhtml.php?$_SESSION[sessTag]&file=$model[dir]/$model[prefix]multi.chart";
-    $allurl = "viewhtml.php?$_SESSION[sessTag]&file=$model[dir]/$model[prefix]multiall.chart";
+    $badurl = "viewtext.php?$_SESSION[sessTag]&file=$model[dir]/$model[prefix]multi.chart&mode=html";
+    $allurl = "viewtext.php?$_SESSION[sessTag]&file=$model[dir]/$model[prefix]multiall.chart&mode=html";
     echo "<b>Chart:</b> <a href='$badurl' target='_blank'>Bad residues</a> | <a href='$allurl' target='_blank'>All residues</a>";
 }
 else echo "<i>Multi-criterion charts have not been generated.</i>";

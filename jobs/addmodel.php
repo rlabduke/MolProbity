@@ -82,8 +82,11 @@ if(isset($_SESSION['bgjob']['pdbCode']))
 }
 else
 {
+    // Remove illegal chars from the upload file name
+    $origName = censorFileName($_SESSION['bgjob']['origName']);
+    
     $id = addModel($_SESSION['bgjob']['tmpPdb'],
-        $_SESSION['bgjob']['origName'],
+        $origName,
         $_SESSION['bgjob']['isCnsFormat'],
         $_SESSION['bgjob']['ignoreSegID']);
     
