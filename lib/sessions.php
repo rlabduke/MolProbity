@@ -107,7 +107,7 @@ function mpStartSession($createIfNeeded = false)
             $_SESSION['currEventID']= 1;
             
             // Set the starting page delegate:
-            pageGoto("dummy.php");
+            pageGoto("sitemap.php");
             
             // TODO: perform other tasks to start a session
             // Create databases, etc, etc.

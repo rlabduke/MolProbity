@@ -58,6 +58,7 @@
   * Make sure Reduce doesn't shrink the PDB file (lost atoms, etc)
     Add session resume link to preformatted email
     Make clashscore a choice during analysis
+    remove labbook/openWithEdit()
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -67,6 +68,8 @@
 - created MVC/delegate architecture in public_thml/index.php
   and lib/event-page.php. See those files for documentation.
 - added clearstatcache() to session read, just in case (ala lab notebook)
+- created "site map" page based on the MVC/events model
+- ported notebook view/edit pages to MVC/events model
   
 ### 3beta5 ###
 - traced mysterious labbook load/save bug from beta3 to missing clearstatcache()
