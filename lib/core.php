@@ -167,7 +167,7 @@ function launchBackground($script, $whereNext, $delay = 5)
     //unset($_SESSION['bgjob']); // Clean up any old data
     
     // Remove old progress file
-    $progress = "$_SESSION[dataDir]/progress";
+    $progress = "$_SESSION[dataDir]/system/progress";
     if(file_exists($progress)) unlink($progress);
     
     unset($_SESSION['bgjob']['processID']);
@@ -176,7 +176,7 @@ function launchBackground($script, $whereNext, $delay = 5)
     $_SESSION['bgjob']['refreshRate']   = $delay;
     $_SESSION['bgjob']['whereNext']     = $whereNext;
     
-    $errlog = $_SESSION['dataDir']."/errors";
+    $errlog = $_SESSION['dataDir']."/system/errors";
     
     // Make sure session variables are written to disk.
     // session_write_close() doesn't take effect until end of script
@@ -209,7 +209,7 @@ $__progress_tasks__ = array();
 function setProgress($tasks, $active)
 {
     $__progress_tasks__ = $tasks; // make a record for later
-    $f = fopen("$_SESSION[dataDir]/progress", "wb");
+    $f = fopen("$_SESSION[dataDir]/system/progress", "wb");
     $foundActive = false;
     if(is_array($tasks)) foreach($tasks as $index => $task)
     {

@@ -9,7 +9,11 @@
 <h2>Contents of $_SESSION:</h2>
 <ul>
   <li><span style="font-weight: bold; font-family: monospace;">sessTag</span>:
-a string of the format SESSION_NAME=SESSION_ID, for embedding in URLs.</li>
+a string of the format SESSION_NAME=SESSION_ID, for embedding in URLs.
+(This is rarely used now; you use <span style="font-family: monospace;">makeEventURL()</span>
+and <span style="font-family: monospace;">makeEventForm()</span>
+instead.)<br>
+  </li>
   <li><span style="font-weight: bold; font-family: monospace;">dataDir</span>:
 the (absolute) directory on the server that all data for this user is
 stored in.</li>
@@ -61,7 +65,8 @@ the KiNG window.</li>
 an array of flags for showing more options in various forms, described
 below.</li>
 </ul>
-<h2>Files present in the user data directory ($_SESSION['dataDir']):</h2>
+<h2>Files present in the system data directory
+($_SESSION[dataDir]/system):</h2>
 You shouldn't ever be using the named files directly; instead, access
 them
 through the sessions and labbook APIs. Still, it's good to be aware
@@ -81,9 +86,6 @@ the progress indicator for the background job. Controlled by <span
   </li>
   <li><span style="font-weight: bold; font-family: monospace;">errors</span>:
 the output (stdout and stderr) from background jobs.</li>
-  <li>... plus any electron density maps.<br>
-  </li>
-  <li>... plus individual directories for each model.</li>
 </ul>
 <h2>Issues to be aware of when working with files</h2>
 <ul>
@@ -273,9 +275,12 @@ Unix timestamp of when the job finished. Must be set by the job itself.<br>
 number of seconds between refreshes of the progress monitoring page.
 Set by <span style="font-family: monospace;">launchBackground()</span>.</li>
   <li><span style="font-family: monospace; font-weight: bold;">whereNext</span>:
-URL to visit when job is finished. Must encode session ID. E.g. <span
+Name of the page to go to when job is finished, in the same form as
+would be passed to <span style="font-family: monospace;">pageGoto()</span>.
+The context will automatically be set to <span
+ style="font-family: monospace;">$_SESSION['bgjob']</span>. E.g. <span
  style="font-family: monospace;">$_SESSION['bgjob']['whereNext'] =
-"home.php?$_SESSION[sessTag]&amp;foo=bar"</span>.</li>
+"sitemap.php"</span>.</li>
   <li>... plus other entries specific to the particular job at hand.<br>
   </li>
 </ul>
