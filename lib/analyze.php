@@ -122,33 +122,7 @@ function runAnalysis($modelID, $opts)
     {
         setProgress($tasks, 'mckin'); // updates the progress display if running as a background job
         $outfile = "$model[dir]/$model[prefix]multi.kin";
-        if(file_exists($outfile)) unlink($outfile);
-        
-        $h = fopen($outfile, 'a');
-        fwrite($h, "@kinemage 1\n@group {macromol.} dominant off\n");
-        fclose($h);
-        exec("prekin -append -nogroup -scope -show 'mc(white),sc(brown),hy(gray),ht(sky)' $infile >> $outfile");
-        
-        $h = fopen($outfile, 'a');
-        fwrite($h, "@group {waters} dominant off\n");
-        fclose($h);
-        exec("prekin -append -nogroup -scope -show 'wa(bluetint)' $infile >> $outfile");
-        
-        $h = fopen($outfile, 'a');
-        fwrite($h, "@group {B ribbons} dominant off\n");
-        fclose($h);
-        makeBfactorRibbons($infile, $outfile);
-        
-        $h = fopen($outfile, 'a');
-        fwrite($h, "@group {Ca trace} dominant\n");
-        fclose($h);
-        exec("prekin -append -nogroup -scope -show 'ca(gray)' $infile >> $outfile");
-        
-        makeAltConfKin($infile, $outfile);
-        makeBadRamachandranKin($infile, $outfile, $rama);
-        makeBadRotamerKin($infile, $outfile, $rota);
-        makeBadCbetaBalls($infile, $outfile);
-        makeBadDotsVisible($infile, $outfile, true); // if false, don't write hb, vdw
+        makeMulticritKin($infile, $outfile, $rama, $rota);
     }
     
     // Ramachandran plots
