@@ -8,7 +8,7 @@
 ############################################################################
 function makeSidechainDots($infile, $outfile)
 {
-    exec("probe -name 'sc-x dots' -self 'alta' $infile >> $outfile");
+    exec("probe -noticks -name 'sc-x dots' -self 'alta' $infile >> $outfile");
 }
 #}}}########################################################################
 
@@ -16,7 +16,7 @@ function makeSidechainDots($infile, $outfile)
 ############################################################################
 function makeMainchainDots($infile, $outfile)
 {
-    exec("probe -name 'mc-mc dots' -mc -self 'mc alta' $infile >> $outfile");
+    exec("probe -noticks -name 'mc-mc dots' -mc -self 'mc alta' $infile >> $outfile");
 }
 #}}}########################################################################
 
@@ -198,7 +198,9 @@ $0 ~ /^@(dot|vector)list .* master=\{small overlap\}/ { $0 = $0 " off" }
 $0 ~ /^@(dot|vector)list .* master=\{H-bonds\}/ { $0 = $0 " off" }
 {print $0}';
 
-    exec("probe $options -noticks -mc -self 'alta' $infile | gawk '$dots_off_script' >> $outfile");
+    //exec("probe $options -noticks -mc -self 'alta' $infile | gawk '$dots_off_script' >> $outfile");
+    exec("probe $options -noticks -name 'sc-x dots' -self 'alta' $infile | gawk '$dots_off_script' >> $outfile");
+    exec("probe $options -noticks -name 'mc-mc dots' -mc -self 'alta' $infile | gawk '$dots_off_script' >> $outfile");
 }
 #}}}########################################################################
 

@@ -9,7 +9,7 @@
     implement safety valve for disk too full
     create logging functions
     add H and analyze should be able to run in same script (wait once)
-    user should get partial results as big job is running
+    user should get partial results as big job is running ?
     Allow simple comparison of bad residues in two different models;
         see jobs/analyze.php for ideas
     Should analysis of worst residues ignore water or treat it separately?
@@ -19,9 +19,9 @@
     Put icons on analysis results page to identify the most-used kins
     File upload should provide pdbstat-style summary
     Implement file retrieval from PDB and NDB (if possible)
-    Separate mc-mc and sc-x dots for multi-criterion kinemage
   + Add Ramalyze to the analysis script
- ** Track which analyses are done and customize report accordingly
+    Refactor files in jobs/ where necessary to allow script-driven operation
+    MolProbity as a SOAP/CORBA/RPC service?
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -37,6 +37,9 @@
 - put both mc-mc and sc-(anything) dots in AAC kinemage, but separately
 - removed Ramachandran JPEG and EPS files in anticipation of providing PDFs
 - removed Mage as a necessary binary
+- modified multicriterion kin to separate mc-mc and sc-x dots
+- replaced findOutliers() with 4 separate functions
+- analysis display page now adapts to the presence / absence of various criteria
 
 ### 3pre10 ###
 - really reworked page header/footer/styling. Style sheet hasn't been finished yet.

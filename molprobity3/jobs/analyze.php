@@ -75,6 +75,7 @@ if($opts['doAll'] || $opts['doCbeta'] || $opts['doMultiChart'])
     $outfile = "$model[dir]/$model[prefix]cbdev.data";
     runCbetaDev($infile, $outfile);
     $cbdev = loadCbetaDev($outfile);
+    $_SESSION['models'][$modelID]['badCbeta'] = findCbetaOutliers($cbdev);
 }
 
 // Rotamers
@@ -83,6 +84,7 @@ if($opts['doAll'] || $opts['doRota'] || $opts['doMultiChart'] || $opts['doMultiK
     $outfile = "$model[dir]/$model[prefix]rota.data";
     runRotamer($infile, $outfile);
     $rota = loadRotamer($outfile);
+    $_SESSION['models'][$modelID]['badRota'] = findRotaOutliers($rota);
 }
 
 // Ramachandran
@@ -91,14 +93,16 @@ if($opts['doAll'] || $opts['doRama'] || $opts['doMultiChart'] || $opts['doMultiK
     $outfile = "$model[dir]/$model[prefix]rama.data";
     runRamachandran($infile, $outfile);
     $rama = loadRamachandran($outfile);
+    $_SESSION['models'][$modelID]['badRama'] = findRamaOutliers($rama);
 }
 
 // Clashes
-if($opts['doAll'] || $opts['doMultiChart'])
+if($opts['doAll'] || $opts['doAAC'] || $opts['doMultiChart'])
 {
     $outfile = "$model[dir]/$model[prefix]clash.data";
     runClashlist($infile, $outfile);
     $clash = loadClashlist($outfile);
+    $_SESSION['models'][$modelID]['badClash'] = findClashOutliers($clash);
 }
 
 // Find all residues on the naughty list
@@ -106,8 +110,7 @@ if($opts['doAll'] || $opts['doMultiChart'])
 // Second index is 'cbdev', 'rota', 'rama', or 'clash'
 if($opts['doAll'] || $opts['doMultiChart'])
 {
-    $worst = findOutliers($cbdev, $rota, $rama, $clash);
-    $_SESSION['models'][$modelID]['badRes'] = $worst;
+    // TODO: Integrate outlier information from above analyses into a chart
 }
 
 ////////////////////////////////////////////////////////////////////////////
