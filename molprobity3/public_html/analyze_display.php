@@ -58,13 +58,44 @@ INPUTS (via Get or Post):
 // Start the page: produces <HTML>, <HEAD>, <BODY> tags
 echo mpPageHeader("Analysis results");
 
+$model = $_SESSION['models'][ $_REQUEST['model'] ];
+
 echo "<p><a href='analyze_tab.php?$_SESSION[sessTag]'>Done</a>";
-
-echo "<p>" . linkModelKin($model, "multi.kin") . "\n";
-
 ############################################################################
 ?>
+<hr />
+<h3>Multi-criterion display</h3>
+This single display presents all of the core validation criteria at once,
+allowing you to identify clusters of problems in the structure.
+<p><ul>
+<li>
+    <?php echo linkModelKin($model, "multi.kin"); ?>
+    <br/><i>All-atom contacts, Ramachandran &amp; rotamer outliers, C-beta deviations,
+    and alternate conformations are highlighted in the 3-D structure.
+    TODO: link to complete tutorial on multicrit displays.
+    </i>
+</li>
+<li>
+    <a href=''>A link to the multicrit chart</a>
+    <br /><i>TODO: Jeremy Block is supposed to develop this chart.</i>
+</li>
+</ul></p>
 
-<!-- HTML code may want to go here... -->
-
+<hr />
+<h3>Ramachandran plots</h3>
+The Ramachandran plot identifies protein residues in illegal backbone conformations,
+based on the phi and psi dihedral angles.
+TODO: link to more info about Ramachandran plots.
+<p><ul>
+<li>
+    <?php echo linkModelKin($model, "rama.kin"); ?>
+    <br/><i>Click points to identify; animate to see general, Gly, Pro, pre-Pro plots.
+    Summary statistics printed in kinemage text window.
+    </i>
+</li>
+<li>
+    <?php echo "<a href='$model[url]/$model[prefix]rama.jpg' target='blank'><b>JPEG image</b></a>"; ?>
+    <br /><i>All four plots on one page with outliers labeled.</i>
+</li>
+</ul></p>
 <?php echo mpPageFooter(); ?>

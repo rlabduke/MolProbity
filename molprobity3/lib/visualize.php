@@ -20,7 +20,7 @@ function makeRamachandranKin($infile, $outfile)
 */
 function makeRamachandranImage($infile, $outfile)
 {
-    exec("java -cp ".MP_BASE_DIR."/lib/hless.jar hless.Ramachandran -nosummary -nokin -img $infile > $outfile");
+    exec("java -cp ".MP_BASE_DIR."/lib/hless.jar hless.Ramachandran $infile -nosummary -nokin -img $outfile");
 }
 #}}}########################################################################
 

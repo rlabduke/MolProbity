@@ -46,7 +46,7 @@ function mpPageHeader($title, $active = "none", $refresh = "")
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
 <tr>
-    <td><img src="img/small-logo3.gif" alt="MolProbity logo"></td>
+    <td><img src="img/small-logo4.gif" alt="MolProbity logo"></td>
     <td><div class="pageheader">
         <h1>'.$title.'</h1>
     </div></td>
@@ -256,7 +256,7 @@ function linkModelKin($model, $suffix)
     $file = "$model[dir]/$name";
     $link = "$model[url]/$name";
     $s = "";
-    $s .= "$name (" . formatFilesize(filesize($file)) . "): ";
+    $s .= "<b>$name</b> (" . formatFilesize(filesize($file)) . "): ";
     $s .= "<a href='viewking.php?$_SESSION[sessTag]&url=$link' target='_blank'>View in KiNG</a> | ";
     $s .= "<a href='$link'>Download</a>";
     return $s;
