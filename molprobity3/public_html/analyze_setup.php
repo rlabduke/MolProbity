@@ -91,7 +91,7 @@ which are almost certainly indicitive of a local problem with the model.</p>
 <?php } else { ?>
     As necessary, Reduce will <b>automatically generate any H</b> that may be missing from your model.
     They will be optimized as much as possible without moving any pre-existing H or other atoms,
-    but a better placement may be obtained by <a href='improve_tab.php?<?php echo $_SESSION['sessTag']; ?>'>running Reduce -build</a>.
+    but a better placement may be obtained by <a href='improve_reduce_setup.php?<?php echo $_SESSION['sessTag'].'&model='.$modelID; ?>'>running Reduce -build</a>.
 <?php } ?>
 
 <form method='post' action='analyze_launch.php'>

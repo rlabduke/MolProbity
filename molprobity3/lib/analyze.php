@@ -13,6 +13,7 @@
 require_once(MP_BASE_DIR.'/lib/strings.php');
 require_once(MP_BASE_DIR.'/lib/model.php');     // for running Reduce as needed
 require_once(MP_BASE_DIR.'/lib/visualize.php'); // for making kinemages
+require_once(MP_BASE_DIR.'/lib/labbook.php');
 
 #{{{ runAnalysis - generate (a subset of) all the validation criteria
 ############################################################################
@@ -29,11 +30,14 @@ require_once(MP_BASE_DIR.'/lib/visualize.php'); // for making kinemages
 *   opts[doMultiChart]  a flag to make the multi-criterion chart
 *   opts[doAll]         a flag to do all of the above
 * If opts is not set, nothing will be done!
+*
+* This function returns some HTML suitable for using in a lab notebook entry.
 */
 function runAnalysis($modelID, $opts)
 {
     $model  = $_SESSION['models'][$modelID];
     $infile = "$model[dir]/$model[pdb]";
+    $entry = "Model $modelID was analyzed, yielding these results:\n<ul>\n"; // lab notebook entry
     
     // The same conditionals cut and pasted from below, used to determine ahead of time what we're going to do
     if(($opts['doAll'] || $opts['doAAC'] || $opts['doMultiChart'] || $opts['doMultiKin']) && (! $model['isReduced'])) $tasks['reduce'] = "Add H with <code>reduce -keep -noadjust -his</code>";
@@ -60,6 +64,8 @@ function runAnalysis($modelID, $opts)
         
         $model  = $_SESSION['models'][$modelID];
         $infile = "$model[dir]/$model[pdb]";
+        
+        $entry .= "<li>Added missing hydrogens, if any, using <code>reduce -keep -noadjust -his -allalt</code></li>\n";
     }
     
     ////////////////////////////////////////////////////////////////////////////
@@ -72,6 +78,9 @@ function runAnalysis($modelID, $opts)
         $outfile = "$model[dir]/$model[prefix]cbdev.data";
         runCbetaDev($infile, $outfile);
         $cbdev = loadCbetaDev($outfile);
+        
+        $cbout = count(findCbetaOutliers($cbdev));
+        $entry .= "<li>Found $cbout residues with C&beta; deviations &gt; 0.25&Aring;</li>\n";
     }
     
     // Rotamers
@@ -81,6 +90,9 @@ function runAnalysis($modelID, $opts)
         $outfile = "$model[dir]/$model[prefix]rota.data";
         runRotamer($infile, $outfile);
         $rota = loadRotamer($outfile);
+        
+        $rotaout = count(findRotaOutliers($rota));
+        $entry .= "<li>Found $rotaout sidechains with rotamer scores &lt; 1%</li>\n";
     }
     
     // Ramachandran
@@ -90,6 +102,9 @@ function runAnalysis($modelID, $opts)
         $outfile = "$model[dir]/$model[prefix]rama.data";
         runRamachandran($infile, $outfile);
         $rama = loadRamachandran($outfile);
+        
+        $ramaout = count(findRamaOutliers($rama));
+        $entry .= "<li>Found $ramaout residues that are Ramachandran outliers</li>\n";
     }
     
     // Clashes
@@ -99,6 +114,10 @@ function runAnalysis($modelID, $opts)
         $outfile = "$model[dir]/$model[prefix]clash.data";
         runClashlist($infile, $outfile);
         $clash = loadClashlist($outfile);
+        
+        $clashout = count(findClashOutliers($clash));
+        $entry .= "<li>Found $clashout residues with serious steric clashes (&gt; 0.4&Aring; overlap)</li>\n";
+        $entry .= "<li>Overall clashscore for all atoms was $clash[scoreAll], or $clash[scoreBlt40] for atoms with B-factors &lt; 40</li>\n";
     }
     
     // Find all residues on the naughty list
@@ -160,6 +179,9 @@ function runAnalysis($modelID, $opts)
     }
     
     setProgress($tasks, null); // everything is finished
+
+    $entry .= "</ul>\n";    
+    return $entry;
 }
 #}}}########################################################################
 

@@ -44,13 +44,18 @@ function fmtTime($sec)
 ############################################################################
 if(isset($_REQUEST['abort']) && $_REQUEST['abort'] == $_SESSION['bgjob']['processID'])
 {
-    if(posix_kill($_SESSION['bgjob']['processID'], 9)) // 9 --> KILL
-    {
-        mpSessReadOnly(false);
-        unset($_SESSION['bgjob']['processID']);
-        $_SESSION['bgjob']['endTime']   = time();
-        $_SESSION['bgjob']['isRunning'] = false;
-    }
+    // Sometimes jobs die due to seg fault or PHP syntax error.
+    // Thus, the isRunning flag remains set forever, causing the UI to "hang".
+    // However, posix_kill() will return failure, b/c the job no longer exists.
+    // So, we try to kill the job and proceed, with the assumption that it worked.
+    posix_kill($_SESSION['bgjob']['processID'], 9); // 9 --> KILL
+    mpSessReadOnly(false);
+    unset($_SESSION['bgjob']['processID']);
+    $_SESSION['bgjob']['endTime']   = time();
+    $_SESSION['bgjob']['isRunning'] = false;
+    // It no longer makes sense to continue -- needed vars may be undefined.
+    // All we can do is return to the main page!
+    $_SESSION['bgjob']['whereNext'] = "home_tab.php?$_SESSION[sessTag]";
 }
 
 if($_SESSION['bgjob']['isRunning'])

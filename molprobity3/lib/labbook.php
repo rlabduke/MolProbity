@@ -113,10 +113,11 @@ function formatLabbookEntry($entry)
     $s .= "<br><table border=0 cellpadding=0 cellspacing=3>\n";
     $s .= "<tr align=left valign=top><td><small>Entry begun:</small></td><td><small>".formatDayTime($entry['ctime'])."</small></td></tr>\n";
     $s .= "<tr align=left valign=top><td><small>Last modified:</small></td><td><small>".formatDayTime($entry['modtime'])."</small></td></tr>\n";
-    if($entry['model'] != "")
-        $s .= "<tr align=left valign=top><td><small>Model:</small></td><td><small>".$entry['model']."</small></td></tr>\n";
-    if($entry['keywords'] != "")
-        $s .= "<tr align=left valign=top><td><small>Keywords:</small></td><td><small>".$entry['keywords']."</small></td></tr>\n";
+    // At the moment, these fields are more for internal use than for the user.
+    //if($entry['model'] != "")
+    //    $s .= "<tr align=left valign=top><td><small>Model:</small></td><td><small>".$entry['model']."</small></td></tr>\n";
+    //if($entry['keywords'] != "")
+    //    $s .= "<tr align=left valign=top><td><small>Keywords:</small></td><td><small>".$entry['keywords']."</small></td></tr>\n";
     $s .= "</table>";
     $s .= "<p>".$entry['entry']."\n";
     
@@ -140,8 +141,10 @@ function formatLabbookEntry($entry)
 */
 function formEditLabbook($entry, $width = 90, $height = 30)
 {
+    // HTML entities are interpretted once by the browser inside the form,
+    // so title and entry have to be "double protected" to save correctly.
     $s = "";
-    $s .= "<input type='text' size='$width' name='labbookEntry[title]' value='$entry[title]'>\n";
+    $s .= "<input type='text' size='$width' name='labbookEntry[title]' value='".htmlspecialchars($entry['title'])."'>\n";
     $s .= "<input type='hidden' name='labbookEntry[ctime]' value='$entry[ctime]'>\n";
     $s .= "<input type='hidden' name='labbookEntry[modtime]' value='$entry[modtime]'>\n";
     $s .= "<input type='hidden' name='labbookEntry[model]' value='$entry[model]'>\n";
@@ -157,7 +160,7 @@ function formEditLabbook($entry, $width = 90, $height = 30)
     if($entry['keywords'] != "")
         $s .= "<br>Keywords: ".implode(", ", explode("|", $entry['keywords']))."\n";
 
-    $s .= "<br><textarea name='labbookEntry[entry]' cols='$width' rows='$height'>$entry[entry]</textarea>\n";
+    $s .= "<br><textarea name='labbookEntry[entry]' cols='$width' rows='$height'>".htmlspecialchars($entry['entry'])."</textarea>\n";
     
     return $s;
 }

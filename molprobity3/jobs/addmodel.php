@@ -107,8 +107,7 @@ if($_SESSION['bgjob']['newModel'])
     $id = $_SESSION['bgjob']['newModel'];
     $model = $_SESSION['models'][ $id ];
     
-    $s = "A new model was added, with the ID <b>$id</b>\n";
-    $s .= "<br>It came from $fileSource\n";
+    $s = "The new model, $id, came from $fileSource\n";
     
     $details = describePdbStats($model['stats'], true);
     $s .= "<ul>\n";

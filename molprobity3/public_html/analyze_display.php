@@ -1,6 +1,12 @@
 <?php # (jEdit options) :folding=explicit:collapseFolds=1:
 /*****************************************************************************
     This page should display the results of our analysis to the user.
+    
+    Because this page can be re-entered long after the original background job
+    terminates, everything else (e.g. lab notebook entry number) needs to be
+    stored in the model data itself, rather than $_SESSION['bgjob'].
+    
+    BUT see the silly cheat that we use below to work around labbook editing.
 
 INPUTS (via Get or Post):
     model           ID code for model to process
@@ -13,6 +19,7 @@ INPUTS (via Get or Post):
 // 2. Include core functionality - defines constants, etc.
     require_once(MP_BASE_DIR.'/lib/core.php');
     require_once(MP_BASE_DIR.'/lib/analyze.php');
+    require_once(MP_BASE_DIR.'/lib/labbook.php');
 // 3. Restore session data. If you don't want to access the session
 // data for some reason, you must call mpInitEnvirons() instead.
     mpStartSession();
@@ -30,11 +37,23 @@ INPUTS (via Get or Post):
 
 # MAIN - the beginning of execution for this page
 ############################################################################
-// Start the page: produces <HTML>, <HEAD>, <BODY> tags
-echo mpPageHeader("Analysis results", "analyze");
+// A silly cheat! We still need to know which model we were on when we come
+// back from the notebook edit page, but we could also get to this page
+// when $_SESSION['bgjob']['model'] is set from another background run.
+if(isset($_REQUEST['model']))
+{
+    $modelID = $_REQUEST['model'];
+    $_SESSION['bgjob']['model'] = $modelID;
+}
+else
+{
+    $modelID = $_SESSION['bgjob']['model'];
+}
 
-$modelID = $_REQUEST['model'];
 $model = $_SESSION['models'][$modelID];
+
+// Start the page: produces <HTML>, <HEAD>, <BODY> tags
+echo mpPageHeader("Analysis results - $modelID", "analyze");
 
 if(modelDataExists($model, "clash.data"))
 {
@@ -120,6 +139,15 @@ else echo "<i>Multi-criterion charts have not been generated.</i>";
     if(modelDataExists($model, "cb3d.kin")) echo "<li>".linkModelKin($model, "cb3d.kin", "3-D C&beta; deviations")."</li>\n";
 ?>
 </ul></p>
+<hr />
+
+<h2>Lab notebook entry</h2>
+<?php
+    $labbook = openLabbookWithEdit();
+    $num = $model['entry_analysis'];
+    echo formatLabbookEntry($labbook[$num]);
+    echo "<p><a href='notebook_edit.php?$_SESSION[sessTag]&entryNumber=$num&submitTo=analyze_display.php'>Edit notebook entry</a></p>\n";
+?>
 <hr />
 
 <?php
