@@ -1,0 +1,63 @@
+/* (jEdit options) :folding=explicit:collapseFolds=1: */
+/*{{{ Basic characteristics of the page */
+body {
+    color : #000000 ;
+    background-color : #ffffff ;
+}
+a:link { color : #000099 ; }
+a:active { color : #0000cc ; }
+a:visited { color : #000099 ; }
+
+a.more_opts {
+    background-color : #ccccff ;
+    font-size : smaller ;
+}
+
+span.inactive {
+    color : #666666 ;
+}
+/*}}}*/
+
+/*{{{ Header and footer */
+div.mpheader {
+    width : 100% ;
+}
+div.mplogo {
+    float : left ;
+}
+h1.page_title {
+    text-align : center ;
+}
+div.head_links {
+    float : right ;
+}
+div.mpfooter {
+    background-color : #ccccff ;
+    padding : 0.5em ;
+    border-width : thin ;
+    border-color : #666666 ;
+    border-style : solid ;
+    font-size: smaller ;
+}
+div.foot_cite {
+    background-color : #9999cc ;
+    padding : 0.5em ;
+    margin-left : 2em;
+    border-width : thin ;
+    border-color : #666666 ;
+    border-style : solid ;
+}
+/*}}}*/
+
+/*{{{ Boxes: sidebars, etc. */
+div.sidebar {
+    float : right ;
+    background-color : #cccccc ;
+    padding : 0.5em ;
+    margin-left : 2em;
+    border-width : thin ;
+    border-color : #666666 ;
+    border-style : solid ;
+}
+/*}}}*/
+
