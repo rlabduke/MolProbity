@@ -10,12 +10,19 @@
     create logging functions
     add H and analyze should be able to run in same script (wait once)
     user should get partial results as big job is running
-  * Don't try to list models when no models are defined
     Provide URL prefix for each model, too
+  * Allow simple comparison of bad residues in two different models;
+        see jobs/analyze.php for ideas
+ ** Pull more info out of clashlist; add that to badRes analysis
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
+
+### 3pre9 ###
+- added 'ignoreSegID' option to handle old Reduce'd files with 'new' in segID field
+- loadRamachandran() and loadRotamer() now decompose residue names into parts
+- loadCbetaDev() now synthesizes a residue name from the parts
 
 ### 3pre8 ###
 - brought the whole project under Subversion version control
@@ -28,6 +35,10 @@
 - check script now tells about how big file uploads can be
 - added "last touched" to admin page
 - moved all string and formating functions to strings.php
+- set svn:ignore properties on public_html/ and on symlinks in bin/
+- check for presence of models before trying to list them.
+  Alternately, we could just define $_SESSION['models'] = array() at startup.
+  Actually, lets do that too.
 
 ### 3pre7 ###
 - filled in the PDB upload form, though it doesn't do anything yet.

@@ -17,8 +17,14 @@ function runCbetaDev($infile, $outfile)
 /**
 * Returns an array of entries, one per residue. Their keys:
 *   altConf         alternate conformer flag, or ' ' for none
+*   resName         a formatted name for the residue: 'cnnnnittt'
+*                       c: Chain ID, space for none
+*                       n: sequence number, right justified, space padded
+*                       i: insertion code, space for none
+*                       t: residue type (ALA, LYS, etc.), all caps,
+*                          left justified, space padded
 *   resType         3-letter residue code (e.g. ALA)
-*   chainID         1-letter chain ID
+*   chainID         1-letter chain ID or ' '
 *   resNum          residue number
 *   insCode         insertion code or ' '
 *   dev             deviation distance, in Angstroms
@@ -34,7 +40,7 @@ function loadCbetaDev($datafile)
         if($line != "" && !startsWith($line, 'pdb:alt:res:'))
         {
             $line = explode(':', $line);
-            $ret[] = array(
+            $entry = array(
                 'altConf'   => strtoupper($line[1]),
                 'resType'   => strtoupper($line[2]),
                 'chainID'   => strtoupper($line[3]),
@@ -44,6 +50,11 @@ function loadCbetaDev($datafile)
                 'dihedral'  => $line[6] + 0,
                 'occ'       => $line[7] + 0
             );
+            $entry['resName']   = $entry['chainID']
+                                . str_pad($entry['resNum'], 4, ' ', STR_PAD_LEFT)
+                                . $entry['insCode']
+                                . str_pad($entry['resType'], 3, ' ', STR_PAD_RIGHT);
+            $ret[] = $entry;
         }
     }
     return $ret;
@@ -89,7 +100,16 @@ function runRotamer($infile, $outfile)
 ############################################################################
 /**
 * Returns an array of entries, one per residue. Their keys:
-*   resName         a formatted name for the residue
+*   resName         a formatted name for the residue: 'cnnnnittt'
+*                       c: Chain ID, space for none
+*                       n: sequence number, right justified, space padded
+*                       i: insertion code, space for none
+*                       t: residue type (ALA, LYS, etc.), all caps,
+*                          left justified, space padded
+*   resType         3-letter residue code (e.g. ALA)
+*   chainID         1-letter chain ID or ' '
+*   resNum          residue number
+*   insCode         insertion code or ' '
 *   scorePct        the percentage score from 0 (bad) to 100 (good)
 *   chi1            the chi-1 angle
 *   chi2            the chi-2 angle ("" for none)
@@ -102,8 +122,13 @@ function loadRotamer($datafile)
     foreach($data as $line)
     {
         $line = explode(':', rtrim($line));
+        $decomp = decomposeResName($line[0]);
         $ret[] = array(
             'resName'   => $line[0],
+            'resType'   => $decomp['resType'],
+            'chainID'   => $decomp['chainID'],
+            'resNum'    => $decomp['resNum'],
+            'insCode'   => $decomp['insCode'],
             'scorePct'  => $line[1] + 0,
             'chi1'      => $line[2] + 0,
             'chi2'      => $line[3] + 0,
@@ -127,7 +152,16 @@ function runRamachandran($infile, $outfile)
 ############################################################################
 /**
 * Returns an array of entries, one per residue. Their keys:
-*   resName         a formatted name for the residue
+*   resName         a formatted name for the residue: 'cnnnnittt'
+*                       c: Chain ID, space for none
+*                       n: sequence number, right justified, space padded
+*                       i: insertion code, space for none
+*                       t: residue type (ALA, LYS, etc.), all caps,
+*                          left justified, space padded
+*   resType         3-letter residue code (e.g. ALA)
+*   chainID         1-letter chain ID or ' '
+*   resNum          residue number
+*   insCode         insertion code or ' '
 *   scorePct        the percentage score from 0 (bad) to 100 (good)
 *   phi             the phi angle
 *   psi             the psi angle
@@ -140,8 +174,13 @@ function loadRamachandran($datafile)
     foreach($data as $line)
     {
         $line = explode(':', rtrim($line));
+        $decomp = decomposeResName($line[0]);
         $ret[] = array(
             'resName'   => $line[0],
+            'resType'   => $decomp['resType'],
+            'chainID'   => $decomp['chainID'],
+            'resNum'    => $decomp['resNum'],
+            'insCode'   => $decomp['insCode'],
             'scorePct'  => $line[1] + 0,
             'phi'       => $line[2] + 0,
             'psi'       => $line[3] + 0,
@@ -153,12 +192,32 @@ function loadRamachandran($datafile)
 }
 #}}}########################################################################
 
-#{{{ a_function_definition - sumary_statement_goes_here
+#{{{ decomposeResName - breaks a 9-character packed name into pieces
 ############################################################################
 /**
-* Documentation for this function.
+* Decomposes this:
+*   resName         a formatted name for the residue: 'cnnnnittt'
+*                       c: Chain ID, space for none
+*                       n: sequence number, right justified, space padded
+*                       i: insertion code, space for none
+*                       t: residue type (ALA, LYS, etc.), all caps,
+*                          left justified, space padded
+*
+* Into this (as an array):
+*   resType         3-letter residue code (e.g. ALA)
+*   chainID         1-letter chain ID or ' '
+*   resNum          residue number
+*   insCode         insertion code or ' '
 */
-//function someFunctionName() {}
+function decomposeResName($name)
+{
+    return array(
+        'resType'   => substr($name, 6, 3),
+        'chainID'   => substr($name, 0, 1),
+        'resNum'    => trim(substr($name, 1, 4))+0,
+        'insCode'   => substr($name, 5, 1)
+    );
+}
 #}}}########################################################################
 
 #{{{ a_function_definition - sumary_statement_goes_here

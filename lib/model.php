@@ -15,11 +15,14 @@
 *   CNS atom names and SEG IDs are repaired by pdbcns
 *   Missing hydrogens are added by Reduce; no flips are made
 *
-* $inpath   the full filename for the PDB file to be processed
-* $outpath  the full filename for the destination PDB. Will be overwritten.
-* $isCNS    true if the file is known to use CNS atom naming conventions
+* $inpath       the full filename for the PDB file to be processed
+* $outpath      the full filename for the destination PDB. Will be overwritten.
+* $isCNS        true if the file is known to use CNS atom naming conventions
+*               false if we should auto-detect CNS headers and/or atom names.
+* $ignoreSegID  true if we should never use segIDs to create new chain IDs.
+*               false if we should convert automatically, as needed.
 */
-function preparePDB($inpath, $outpath, $isCNS = false)
+function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
 {
     // If no session is started, this should eval to NULL or '',
     // which will specify the system tmp directory.
@@ -36,6 +39,8 @@ function preparePDB($inpath, $outpath, $isCNS = false)
     $stats = pdbstat($tmp2);
     // Try to determine if we need to make chain IDs from segment IDs
     $segToChainMapping = trim(`cksegid.pl $tmp2`);
+    // Old Reduce used segID for 'new ' flag for H's.
+    if($ignoreSegID) $segToChainMapping = "";
     if($segToChainMapping == "")
     {
         // Don't need to do anything

@@ -7,6 +7,7 @@ OUTPUTS (via Post):
                     or something else (guess intended action).
     uploadFile      the uploaded file (data in $_FILES['uploadFile'][...])
     isCnsFormat     true if the user thinks he has CNS atom names
+    ignoreSegID     true if the user wants to never map segIDs to chainIDs
     pdbCode         the four-character PDB identifier (mixed case)
     get2FoFc        true if user wants map from EDS
     getFoFc         true if user wants map from EDS
@@ -66,6 +67,7 @@ echo mpTabBar("upload");
     <label><a href="http://www.rcsb.org/pdb/docs/format/pdbguide2.2/guide2.2_frame.html" target="_blank">PDB format</a> file: <input type="file" name="uploadFile"></label>
     <?php if($_SESSION['moreOpts']['pdbUpload'] || $_SESSION['moreOpts']['all']) { ?>
         <br><label><input type="checkbox" name="isCnsFormat" value="1"> File is from CNS refinement</label>
+        <br><label><input type="checkbox" name="ignoreSegID" value="1"> Ignore segID field</label>
     <?php
         if(!$_SESSION['moreOpts']['all'])
             echo "<br><a href='upload_tab.php?$_SESSION[sessTag]&moreOpts_pdbUpload=0' class='more_opts'>Fewer options...</a>\n";
@@ -90,6 +92,7 @@ Upload electron density maps and NOE tables?
 
 
 <!-- List of current models available -->
+<?php if(count($_SESSION['models']) > 0) { ?>
 <hr>
 <h3>Models available for analysis:</h3>
 <table width="100%" border="0" cellspacing="0" cellpadding="2">
@@ -111,6 +114,7 @@ Upload electron density maps and NOE tables?
     }
 ?>
 </table>
+<?php } ?>
 
 
 <p>

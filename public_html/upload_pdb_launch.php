@@ -9,6 +9,7 @@ INPUTS (via Get or Post):
                     or something else (guess intended action).
     uploadFile      the uploaded file (data in $_FILES['uploadFile'][...])
     isCnsFormat     true if the user thinks he has CNS atom names
+    ignoreSegID     true if the user wants to never map segIDs to chainIDs
     pdbCode         the four-character PDB identifier (mixed case)
     get2FoFc        true if user wants map from EDS
     getFoFc         true if user wants map from EDS
@@ -17,6 +18,7 @@ OUTPUTS (via $_SESSION['bgjob']):
     tmpPdb          the (temporary) file where the upload is stored.
     origName        the name of the file on the user's system.
     isCnsFormat     true if the user thinks he has CNS atom names
+    ignoreSegID     true if the user wants to never map segIDs to chainIDs
 
 *****************************************************************************/
 // EVERY *top-level* page must start this way:
@@ -81,6 +83,7 @@ if($_REQUEST['cmd'] == "Upload this file")
         $_SESSION['bgjob']['tmpPdb']        = $tmpfile;
         $_SESSION['bgjob']['origName']      = $_FILES['uploadFile']['name'];
         $_SESSION['bgjob']['isCnsFormat']   = $_REQUEST['isCnsFormat'];
+        $_SESSION['bgjob']['ignoreSegID']   = $_REQUEST['ignoreSegID'];
         
         // launch background job
         launchBackground(MP_BASE_DIR."/jobs/addmodel.php", "analyze_tab.php?$_SESSION[sessTag]", 3);

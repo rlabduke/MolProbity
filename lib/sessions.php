@@ -92,6 +92,7 @@ function mpStartSession($createIfNeeded = false)
             // Set up some session variables. See docs for explanation.
             $_SESSION['dataDir']    = $dataDir;
             $_SESSION['dataURL']    = "data/".session_id();
+            $_SESSION['models']     = array(); // no models to start with
             $_SESSION['sessTag']    = session_name() . "=" . session_id();
             $_SESSION['userIP']     = getVisitorIP();
             $_SESSION['timeZone']   = MP_DEFAULT_TIMEZONE;

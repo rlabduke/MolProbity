@@ -71,7 +71,7 @@ $cbdev = loadCbetaDev($outfile);
 // Rotamers
 $outfile = "$model[dir]/$model[prefix]rota.data";
 runRotamer("$model[dir]/$model[pdb]", $outfile);
-$rotamer = loadRotamer($outfile);
+$rota = loadRotamer($outfile);
 
 // Ramachandran
 $outfile = "$model[dir]/$model[prefix]rama.data";
@@ -81,7 +81,50 @@ $rama = loadRamachandran($outfile);
 // Clashes
 $outfile = "$model[dir]/$model[prefix]clash.data";
 runClashlist("$model[dir]/$model[pdb]", $outfile);
-$clashlist = loadClashlist($outfile);
+$clash = loadClashlist($outfile);
+
+// Find all residues on the naughty list
+// First index is 9-char residue name
+// Second index is 'cbdev', 'rota', 'rama', 
+$worst = array();
+foreach($cbdev as $res)
+{
+    if($res['dev'] >= 0.25)
+        $worst[$res['resName']]['cbdev'] = $res['dev'];
+}
+foreach($rota as $res)
+{
+    if($res['scorePct'] <= 1.0)
+        $worst[$res['resName']]['rota'] = $res['scorePct'];
+}
+foreach($rama as $res)
+{
+    if($res['eval'] == 'OUTLIER')
+        $worst[$res['resName']]['rama'] = $res['eval'];
+}
+
+/*********************
+To compare:
+
+    array_diff( array_keys($worst1), array_keys($worst2) ); // things fixed 1->2
+    array_diff( array_keys($worst2), array_keys($worst1) ); // things broken 1->2
+
+to find residues that are bad in one structure but not the other.
+A detailed comparison can then be done between residues in:
+
+    array_intersect( array_keys($worst1), array_keys($worst2) ); // things changed but not fixed
+
+**********************
+Alternately, you might do
+
+    array_unique( array_merge(...keys...) )
+    
+and then do a comparison on each of the possible second keys using isset().
+This would lend itself nicely to a tabular format...
+*********************/
+
+ksort($worst); // Put the residues into a sensible order
+$_SESSION['models'][$_SESSION['bgjob']['model']]['badRes'] = $worst;
 
 ############################################################################
 // Clean up and go home

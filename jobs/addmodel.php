@@ -7,6 +7,7 @@ INPUTS (via $_SESSION['bgjob']):
     tmpPdb          the (temporary) file where the upload is stored.
     origName        the name of the file on the user's system.
     isCnsFormat     true if the user thinks he has CNS atom names
+    ignoreSegID     true if the user wants to never map segIDs to chainIDs
 
 OUTPUTS (via $_SESSION['bgjob']):
     Adds a new entry to $_SESSION['models'].
@@ -61,7 +62,7 @@ mkdir($modelDir, 0777);
 $infile     = $_SESSION['bgjob']['tmpPdb'];
 $outname    = $id.'.pdb';
 $outpath    = $modelDir.'/'.$outname;
-preparePDB($infile, $outpath, $_SESSION['bgjob']['isCnsFormat']);
+preparePDB($infile, $outpath, $_SESSION['bgjob']['isCnsFormat'], $_SESSION['bgjob']['ignoreSegID']);
 
 // Create the model entry
 $_SESSION['models'][$id] = array(
