@@ -75,7 +75,7 @@ $all_changes = array();
 foreach($cnit as $res)
 {
     setProgress($tasks, $res);
-    $changes = runSswing($pdbin, $map, $tmpdir, $res);
+    $changes = runSswing($pdbin, $map, $tmpdir, $res, ($_SESSION['bgjob']['fastSearch'] ? true : false));
     $all_changes = array_merge($all_changes, $changes);
 }
 

@@ -51,6 +51,7 @@
     Make clashscore a choice during analysis
     Have analysis page actually be a lab notebook entry! (Easier to customize)
     Every time lab notebook is saved, create a HTML snapshot of it
+  * Update Linux preGenScore, genContour, etc. (GRID_NUM=500000)
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -73,6 +74,10 @@
 - JavaScript tested against several browsers, and all are fine:
   Mac: Safari 1.2.3; Mozilla 1.6; IE 5.2
   Linux: Mozilla 1.0.1, 1.2.1; Konqueror 2.2.2 (disable broken), 3.1-15
+- added debug switch to sswing (-d); added debug output to sswing.php
+- "Fast search" checkbox for sswing is now actually connected to something
+- fixed setProgress() / getProgressTasks() bug (variable not marked global)
+- added progress marker for making -cass kinemage during upload
 
 ### 3beta8 ###
 - started work on the Reduce pathway; got the setup page done.

@@ -24,7 +24,7 @@
    my $residueSeqNum="";
    my $aminoAcidType="";
       
-   getopts('hfc:p:k:su:x:y:z:r',\%options);   
+   getopts('hdfc:p:k:su:x:y:z:r',\%options);   
    $modelChainID=$options{c} if defined $options{c};
 
    if (defined $options{h})
@@ -37,6 +37,7 @@
      print "sswing  -s -c A 0409201618_refmac1H.pdb 6 ARG cth682map.ccp4 (greedy search)\n";
      print "sswing  -f -s -c A 0409201618_refmac1H.pdb 6 ARG cth682map.ccp4 (fast search)\n\n";
      print "Options:\n";
+     print "-d          Debug mode: print cmd lines, leave tmp files\n";
      print "-f          Do fast search\n";
      print "-c char     Select chain ID\n";
      print "-p float    Set probe probe_score threshold(default=0.0)\n";
@@ -82,6 +83,7 @@
    $preGenScore=$preGenScore." -z ".$options{z}    if defined $options{z};
    $preGenScore=$preGenScore." -r "                if defined $options{r};
 
+   print $preGenScore."\n"                          if defined $options{d};
    system($preGenScore);
 
    #chmod  rotamer script file
@@ -102,11 +104,11 @@
    $genScoreResult=$genScoreResult." > $scoreOutput";
    system ($genScoreResult);
  
-   unlink ($outputRotscr);
-   unlink ($rotamerMap);
-   unlink ($rotamerScr);
-   unlink ($goFile);
-   unlink ($rotamerRotscr);
+   unlink ($outputRotscr)                       unless defined $options{d};
+   unlink ($rotamerMap)                         unless defined $options{d};
+   unlink ($rotamerScr)                         unless defined $options{d};
+   unlink ($goFile)                             unless defined $options{d};
+   unlink ($rotamerRotscr)                      unless defined $options{d};
 
    $genContour="genContour $PDBfile $inputMAPfile $residueSeqNum $PDBfile_ideal $scoreOutput $resultFile";
    $genContour=$genContour." -c ".$modelChainID  if defined $options{c};
@@ -115,5 +117,5 @@
    $genContour=$genContour." -r "                if defined $options{r};
    system($genContour);
 
-   unlink ($PDBfile_ideal);
-   unlink ($scoreOutput);
+   unlink ($PDBfile_ideal)                      unless defined $options{d};
+   unlink ($scoreOutput)                        unless defined $options{d};
