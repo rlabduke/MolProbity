@@ -120,6 +120,7 @@ $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
     "auto"
 );
 
+setProgress($tasks, null);
 ############################################################################
 // Clean up and go home
 unset($_SESSION['bgjob']['processID']);
