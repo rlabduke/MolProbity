@@ -5,10 +5,14 @@ body {
 	font-family : Helvetica, Arial, sans-serif ;
 }
 
+img { border : none ; }
+
+/* Order that these appear in is important to Safari, apparently. */
 a {	text-decoration : none ; }
 a:link { color : #000099 ; }
-a:active { color : #0000cc ; }
 a:visited { color : #000099 ; }
+a:hover { text-decoration : underline ; }
+a:active { color : #0000cc ; }
 
 span.inactive {
     color : #666666 ;

@@ -61,7 +61,11 @@ function printPath()
 {
     // For some reason, getenv() doesn't see changes we make with putenv().
     $path = explode(':', mpGetPath());
-    foreach($path as $pathEl) $result .= "<li><tt>$pathEl</tt></li>\n";
+    foreach($path as $pathEl)
+    {
+        if(is_dir($pathEl)) $result .= "<li><tt>$pathEl</tt></li>\n";
+        else $result .= "<li><b><font color=#990000><tt>$pathEl</tt></font> - does not exist</b></li>\n";
+    }
     echo "<ul>\n$result</ul>\n";
 }
 #}}}########################################################################

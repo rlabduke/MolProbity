@@ -33,7 +33,7 @@ function makeTemplateText()
 {
     $fb_msg = "\n"
             . "\n"
-            . "        [PLACE YOUR COMMENTS HERE]\n"
+            . "[PLACE YOUR COMMENTS HERE]\n"
             . "\n"
             . "==================================================\n"
             . "  USER / SERVER INFORMATION\n"

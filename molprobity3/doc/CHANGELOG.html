@@ -27,12 +27,36 @@
     Develop multi-model version of the multicrit kin
     ORACLE output for TN Bhat
     Add documentation to the analysis results page (how to interpret)
-    
+  * Add explanation of SSWING on setup page
+    User sort multi chart by columns
+  * User het dictionary: session var, prepend to std dict.
+    User note - Save As for multichart HTML
+    User note - HTML can be used in lab book
+    User note - KiNG window size and instructions to close it
+    Link to clashlist output
+    Explicitly allow upload of kins, and view them from download page
+    Display comparison to run-of-PDB for clash score
+    Specify what a CB outlier is
+    Explain 2d and 3d CB kins
+    Reference NAR paper for NA uses of MolProbity
+
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
 
-### 3beta1 ###
+### 3beta2 ###
+- added timing notes to SSWING setup page
+- links now highlight on hover using CSS A:hover
+- changed feedback code to use \r\n instead of \n for new lines.
+  This eliminates the error message, but mail still doesn't get delivered?
+- now caching user feedback on disk in addition to trying to send mail.
+  Not elegant, but ensures nothing is lost.
+  Feedback page now doesn't report failure except in the system log.
+- changed CSS to remove border from link images (needed in Mozilla)
+- fixed potential div-by-0 bug in analyze_display (lines 51,59,etc)
+- added display of B lt 40 clashscore
+- made some timing improvements in job_progress: slows down for long jobs
+
 ### 3beta1 ###
 - first beta release for testing inside the Richardson lab
 - rotamers weren't showing up in multi-crit kin due to a stray "s" before -scope
