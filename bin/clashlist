@@ -1,0 +1,151 @@
+#! /bin/sh
+#name: clashlistcluster (combination of clashlistscore and clcl)
+#author: Mike Word
+#date written: 6/6/99
+#modified 8/15/02 by JSR to leave out -3 flag for probe
+#purpose: generate tables of clusters of large bumps with a summary line
+# parameters: input.pdb identifier
+# format-
+#  #summary:file:n atoms:n atoms B<40:n potential dots:#.# A^2:n bumps:n bumps B<40:#.# score
+#  name : natoms : a       :       b       :  lowgap : maxB  
+# (sorted by cluster max clash with spaces between clusters)
+bcutval=40
+ocutval=33
+
+bcna=`probe -q -mc -het -dumpatominfo "alta blt$bcutval ogt$ocutval not water" $1|cut -d: -f2`
+
+tmpfile=/tmp/junk.clashlistscore.`date '+%H%M%S'`
+tmpf2=/tmp/junk2.clashlistscore.`date '+%H%M%S'`
+
+probe -c -q -mc -het -once "alta ogt$ocutval not water" "none" $1 |\
+awk -F: '
+/^atoms selected:/ { na = $2 + 0.0 }
+/^potential dots:/ { pd = $2 + 0.0 }
+/^potential area:/ { pa = $2 + 0.0 }
+END {
+ printf("#atom-potential-summary:%s: %d: %d: %.4g\n", name, na, pd, pa)
+}' name=$2 - >$tmpfile
+
+probe -u -q -mc -het -once "alta ogt$ocutval not water" "alta ogt$ocutval" $1 |\
+awk -F: 'BEGIN {
+   totalScore = 0.0
+   limit = -0.4   # how bad a gap has to be before it is counted
+}
+/^#atom-potential-summary:/ {
+   natoms = $3 + 0.0
+   pd     = $4 + 0.0
+   pa     = $5 + 0.0
+   next
+}
+{ totalScore += ($12 + 0.0)
+  atompair = ($4 ":" $5)
+  opp = ($5 ":" $4)
+  other[atompair]=opp
+  other[opp]=atompair
+  mbmp[atompair] = ( $18 > $19 ) ? $18 : $19
+}
+/:hb:/ { hbonds[atompair] = 1; }
+/:so:|:bo:/ {
+   if ($7 <= limit) {
+      if (atompair in lowgap) {
+	 if (lowgap[atompair] > $7) {
+	    lowgap[atompair] = $7;
+	 }
+      }
+      else {
+	 lowgap[atompair] = $7;
+      }
+   }
+}
+END {
+ bumpcount = 0
+ cutbumpcount = 0
+ for (atompair in lowgap) {
+   opp = other[atompair]
+   if (!((atompair in used) || (opp in used))) {
+      used[atompair] = 1
+      used[opp] = 1
+      low = lowgap[atompair]
+      if (opp in lowgap) {
+	 if (low > lowgap[opp]) {
+	    low = lowgap[opp]
+	 }
+      }
+      ishb = hbonds[atompair] + hbonds[opp] + 0
+      if (!ishb) {
+	 bumpcount++
+	 if (mbmp[atompair] < bcut) { cutbumpcount++ }
+	 printf("%s:%6d:%s:   %6.3f:   %6.0f\n",
+	    name, natoms, atompair, low, mbmp[atompair])
+      }
+   }
+ }
+ printf("#summary:%s:%d atoms:%d atoms B<%g:%d potential dots:%.1f A^2:%d bumps:%d bumps B<%g:%.4g score\n",
+   name, natoms, nabcut, bcut, pd, pa, bumpcount, cutbumpcount, bcut, totalScore)
+ printf("#sum2 :%s:%.2f clashscore : %.2f clashscore B<%g \n",
+   name,  (bumpcount*1000/natoms), (cutbumpcount*1000/nabcut),bcut)
+
+
+}' name=$2 bcut=$bcutval nabcut="$bcna" $tmpfile - > $tmpf2
+awk -F: '
+/^[^#]/ {
+   a = substr($3, 1, 9)
+   b = substr($4, 1, 9)
+   printf("%s:%s\n",a, b)
+} ' $tmpf2 | cluster -single -N "*CLUSTER*" -F : -O : - | \
+awk -F: '
+/^[^#]/ {
+   if ($3 == "*CLUSTER*") {
+      clusterid = $1 + 0
+      clustersz = $2 + 0
+      for (i = 4; i < 4 + clustersz; i++) {
+	 whichcluster[$i] = clusterid
+      }
+   }
+   else {
+      a = substr($3, 1, 9)
+      if (a in whichcluster) { # cluster
+	 ac = whichcluster[a]
+	 if (ac in scorebycluster) {
+	    if ($5 < scorebycluster[ac]) {
+	       scorebycluster[ac] = $5 + 0.0
+	    }
+	 }
+	 else {
+	    scorebycluster[ac] = $5 + 0.0
+	 }
+      }
+      else { # singleton
+	 ac = 0
+      }
+      ++nr
+      rec[nr] = $0
+      recC[nr] = ac
+   }
+}
+/^#/ { print }
+END {
+   for(nr in rec) {
+      ac = recC[nr]
+      if (ac > 0) {
+	 sc = scorebycluster[ac]
+      }
+      else {
+	 split(rec[nr], vec, ":")
+	 sc = vec[5] + 0.0
+      }
+      printf("%g:%d:%s\n", sc, ac, rec[nr])
+   }
+} ' - $tmpf2 | sort -t: -k1,1n -k7,7n | \
+awk -F: '
+/^[^#]/ { cl = $2
+   if (cl == 0 || cl != lastcluster) {
+      printf("\n")
+      lastcluster = cl
+   }
+   for (i = 3; i <= NF; i++) {
+      printf("%s%s", $i, (i < NF)?":":"\n")
+   }
+}
+/^#/ { print } ' -
+rm -f $tmpfile $tmpf2
