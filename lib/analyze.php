@@ -69,6 +69,26 @@ function loadCbetaDev($datafile)
 }
 #}}}########################################################################
 
+#{{{ findCbetaOutliers - evaluates residues for bad score
+############################################################################
+/**
+* Returns an array of 9-char residue names for residues that
+* fall outside the allowed boundaries for this criteria.
+* Inputs are from appropriate loadXXX() function above.
+*/
+function findCbetaOutliers($cbdev)
+{
+    $worst = array();
+    if(is_array($cbdev)) foreach($cbdev as $res)
+    {
+        if($res['dev'] >= 0.25)
+            $worst[$res['resName']] = $res['dev'];
+    }
+    ksort($worst); // Put the residues into a sensible order
+    return $worst;
+}
+#}}}########################################################################
+
 #{{{ runClashlist - generates clash data with Clashlist
 ############################################################################
 function runClashlist($infile, $outfile)
@@ -97,6 +117,7 @@ function loadClashlist($datafile)
     $ret['scoreBlt40']  = $scores[3] + 0;
     
     // Parse data about individual clashes
+    $clashes = array(); // in case there are no clashes
     foreach($data as $datum)
     {
         // Ignore blank lines and #sum... lines
@@ -116,6 +137,26 @@ function loadClashlist($datafile)
     $ret['clashes'] = $clashes;
     
     return $ret;
+}
+#}}}########################################################################
+
+#{{{ findClashOutliers - evaluates residues for bad score
+############################################################################
+/**
+* Returns an array of 9-char residue names for residues that
+* fall outside the allowed boundaries for this criteria.
+* Inputs are from appropriate loadXXX() function above.
+*/
+function findClashOutliers($clash)
+{
+    $worst = array();
+    if(is_array($clash)) foreach($clash['clashes'] as $res => $dist)
+    {
+        if($dist >= 0.4)
+            $worst[$res] = $dist;
+    }
+    ksort($worst); // Put the residues into a sensible order
+    return $worst;
 }
 #}}}########################################################################
 
@@ -171,6 +212,26 @@ function loadRotamer($datafile)
 }
 #}}}########################################################################
 
+#{{{ findRotaOutliers - evaluates residues for bad score
+############################################################################
+/**
+* Returns an array of 9-char residue names for residues that
+* fall outside the allowed boundaries for this criteria.
+* Inputs are from appropriate loadXXX() function above.
+*/
+function findRotaOutliers($rota)
+{
+    $worst = array();
+    if(is_array($rota)) foreach($rota as $res)
+    {
+        if($res['scorePct'] <= 1.0)
+            $worst[$res['resName']] = $res['scorePct'];
+    }
+    ksort($worst); // Put the residues into a sensible order
+    return $worst;
+}
+#}}}########################################################################
+
 #{{{ runRamachandran - generates rotamer analysis data
 ############################################################################
 function runRamachandran($infile, $outfile)
@@ -223,6 +284,26 @@ function loadRamachandran($datafile)
 }
 #}}}########################################################################
 
+#{{{ findRamaOutliers - evaluates residues for bad score
+############################################################################
+/**
+* Returns an array of 9-char residue names for residues that
+* fall outside the allowed boundaries for this criteria.
+* Inputs are from appropriate loadXXX() function above.
+*/
+function findRamaOutliers($rama)
+{
+    $worst = array();
+    if(is_array($rama)) foreach($rama as $res)
+    {
+        if($res['eval'] == 'OUTLIER')
+            $worst[$res['resName']] = $res['eval'];
+    }
+    ksort($worst); // Put the residues into a sensible order
+    return $worst;
+}
+#}}}########################################################################
+
 #{{{ decomposeResName - breaks a 9-character packed name into pieces
 ############################################################################
 /**
@@ -256,43 +337,6 @@ function decomposeResName($name)
 function pdbComposeResName($pdbline)
 {
     return substr($pdbline, 21, 6) . substr($pdbline, 17, 3);
-}
-#}}}########################################################################
-
-#{{{ findOutliers - evaluates residues for bad score on any of four criteria
-############################################################################
-/**
-* Find all residues on the naughty list
-* First index is 9-char residue name
-* Second index is 'cbdev', 'rota', 'rama', or 'clash'
-* Inputs are from appropriate loadXXX() functions above.
-*/
-function findOutliers($cbdev, $rota, $rama, $clash)
-{
-    $worst = array();
-    foreach($cbdev as $res)
-    {
-        if($res['dev'] >= 0.25)
-            $worst[$res['resName']]['cbdev'] = $res['dev'];
-    }
-    foreach($rota as $res)
-    {
-        if($res['scorePct'] <= 1.0)
-            $worst[$res['resName']]['rota'] = $res['scorePct'];
-    }
-    foreach($rama as $res)
-    {
-        if($res['eval'] == 'OUTLIER')
-            $worst[$res['resName']]['rama'] = $res['eval'];
-    }
-    foreach($clash['clashes'] as $res => $dist)
-    {
-        if($dist >= 0.4)
-            $worst[$res]['clash'] = $dist;
-    }
-    
-    ksort($worst); // Put the residues into a sensible order
-    return $worst;
 }
 #}}}########################################################################
 

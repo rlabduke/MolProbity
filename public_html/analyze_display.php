@@ -38,17 +38,11 @@ $modelID = $_REQUEST['model'];
 $model = $_SESSION['models'][$modelID];
 
 // Count *number* of outliers for each class
-// First index is 9-char residue name
-// Second index is 'cbdev', 'rota', 'rama', or 'clash'
 $worst = $_SESSION['models'][$modelID]['badRes'];
-$cbdev_outliers = $rota_outliers = $rama_outliers = $clash_outliers = 0;
-foreach($worst as $res)
-{
-    if(isset($res['cbdev']))    $cbdev_outliers++;
-    if(isset($res['rota']))     $rota_outliers++;
-    if(isset($res['rama']))     $rama_outliers++;
-    if(isset($res['clash']))    $clash_outliers++;
-}
+$cbdev_outliers = count($_SESSION['models'][$modelID]['badCbeta']);
+$rota_outliers = count($_SESSION['models'][$modelID]['badRota']);
+$rama_outliers = count($_SESSION['models'][$modelID]['badRama']);
+$clash_outliers = count($_SESSION['models'][$modelID]['badClash']);
 
 echo "<p><a href='analyze_tab.php?$_SESSION[sessTag]'>Done</a>\n";
 echo "<hr />\n";
@@ -68,17 +62,25 @@ This single display presents all of the core validation criteria at once,
 allowing you to identify clusters of problems in the structure.
 <p><ul>
 <li>
-    <?php echo linkModelKin($model, "multi.kin"); ?>
-    <br/><i>All-atom contacts, Ramachandran &amp; rotamer outliers, C-beta deviations,
-    and alternate conformations are highlighted in the 3-D structure.
-    TODO: link to complete tutorial on multicrit displays.
-    </i>
+    <?php if(modelDataExists($model, "multi.kin")) { ?>
+        <?php echo linkModelKin($model, "multi.kin"); ?>
+        <br/><i>All-atom contacts, Ramachandran &amp; rotamer outliers, C-beta deviations,
+        and alternate conformations are highlighted in the 3-D structure.
+        TODO: link to complete tutorial on multicrit displays.
+        </i>
+    <?php } else { ?>
+        <i>Multi-criterion kinemage has not been generated.</i>
+    <?php } ?>
 </li>
 <li>
-    <a href=''>A link to the multicrit chart</a>
-    <br /><i>TODO: Jeremy Block is supposed to develop this chart.
-    A brief summary of the number of outliers and percentages should appear here.
-    </i>
+    <?php if(modelDataExists($model, "multi.html")) { ?>
+        <a href=''>A link to the multicrit chart</a>
+        <br /><i>TODO: Jeremy Block is supposed to develop this chart.
+        A brief summary of the number of outliers and percentages should appear here.
+        </i>
+    <?php } else { ?>
+        <i>Multi-criterion chart has not been generated.</i>
+    <?php } ?>
 </li>
 </ul></p>
 
@@ -87,53 +89,80 @@ The multi-criterion display presents results of all of the validation tests.
 The kinemages below show the same information in different ways or in more detail.
 <hr />
 
-<h3>All-atom contacts (<?php echo $clash_outliers; ?> clashing residues)</h3>
+<h3>All-atom contacts</h3>
 TODO: link to more info about all-atom contacts.
 <p><ul>
-<li>
-    <?php echo linkModelKin($model, "aac.kin"); ?>
-    <br/><i>Sidechain clashes are most common in models of proteins;
-    mainchain clashes are most common in models of RNA.
-    </i>
-</li>
+<?php if(modelDataExists($model, "aac.kin")) { ?>
+    <li>
+        <b><?php echo $clash_outliers; ?> clashing residues</b>
+    </li>
+    <li>
+        <?php echo linkModelKin($model, "aac.kin"); ?>
+        <br/><i>Sidechain clashes are most common in models of proteins;
+        mainchain clashes are most common in models of RNA.
+        </i>
+    </li>
+<?php } else { ?>
+    <li><i>All-atom contacts have not been generated.</i></li>
+<?php } ?>
 </ul></p>
 
-<h3>Ramachandran plots (<?php echo $rama_outliers; ?> outliers)</h3>
+<h3>Ramachandran plots</h3>
 The Ramachandran plot identifies protein residues in illegal backbone conformations,
 based on the phi and psi dihedral angles.
 TODO: link to more info about Ramachandran plots.
 <p><ul>
-<li>
-    <?php echo linkModelKin($model, "rama.kin"); ?>
-    <br/><i>Click points to identify; animate to see general, Gly, Pro, pre-Pro plots.
-    Summary statistics printed in kinemage text window.
-    </i>
-</li>
-<li>
-    <b>PDF</b>:
-    <br /><i>Coming soon.
-    Use Mage or KiNG to generate customized PostScript or PDF renderings of the Ramachandran kinemage.
-    </i>
-</li>
+<?php if(modelDataExists($model, "rama.kin") /*&& modelDataExists($model, "rama.pdf")*/) { ?>
+    <li>
+        <b><?php echo $rama_outliers; ?> outliers</b>
+    </li>
+    <li>
+        <?php echo linkModelKin($model, "rama.kin"); ?>
+        <br/><i>Click points to identify; animate to see general, Gly, Pro, pre-Pro plots.
+        Summary statistics printed in kinemage text window.
+        </i>
+    </li>
+    <li>
+        <b>PDF</b>:
+        <br /><i>Coming soon.
+        Use Mage or KiNG to generate customized PostScript or PDF renderings of the Ramachandran kinemage.
+        </i>
+    </li>
+<?php } else { ?>
+    <li><i>Ramachandran plots have not been generated.</i></li>
+<?php } ?>
 </ul></p>
 
-<h3>Rotamers (<?php echo $rota_outliers; ?> outliers)</h3>
+<h3>Rotamers</h3>
 Refer to the multi-criterion displays to identify bad rotamers.
 TODO: link to more info about rotamers.
+<?php
+    if(modelDataExists($model, "rota.data"))
+    {
+        echo "<ul><li><b>$rota_outliers outliers</b></li></ul>\n";
+    }
+?>
 
-<h3>C-beta deviations (<?php echo $cbdev_outliers; ?> outliers)</h3>
+<h3>C-beta deviations</h3>
 TODO: link to more info about C-beta deviations
 <p><ul>
-<li>
-    <?php echo linkModelKin($model, "cb2d.kin"); ?>
-    <br/><i>2-D representation plots deviations for whole molecule as scatter around the ideal C-beta position.
-    </i>
-</li>
-<li>
-    <?php echo linkModelKin($model, "cb3d.kin"); ?>
-    <br/><i>3-D representation in which deviations are represented by gold balls.
-    Larger balls represent larger deviations; each is centered at the ideal C-beta position.
-    </i>
-</li>
+<?php if(modelDataExists($model, "cb2d.kin") && modelDataExists($model, "cb3d.kin")) { ?>
+    <li>
+        <b><?php echo $cbdev_outliers; ?> outliers</b>
+    </li>
+    <li>
+        <?php echo linkModelKin($model, "cb2d.kin"); ?>
+        <br/><i>2-D representation plots deviations for whole molecule as scatter around the ideal C-beta position.
+        </i>
+    </li>
+    <li>
+        <?php echo linkModelKin($model, "cb3d.kin"); ?>
+        <br/><i>3-D representation in which deviations are represented by gold balls.
+        Larger balls represent larger deviations; each is centered at the ideal C-beta position.
+        </i>
+    </li>
+<?php } else { ?>
+    <li><i>C-beta deviation plots have not been generated.</i></li>
+<?php } ?>
 </ul></p>
 <?php echo mpPageFooter(); ?>

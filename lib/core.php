@@ -244,6 +244,20 @@ function sortFilesAlpha($list)
 }
 #}}}########################################################################
 
+#{{{ modelDataExists - shortcut for checking on non-zero-size files existing
+############################################################################
+/**
+* $model    a standard data structure describing the model from $_SESSION['model'][MODEL_ID]
+* $suffix   the data file name, without the model prefix, but with the .foo ending
+*/
+function modelDataExists($model, $suffix)
+{
+    $name = "$model[prefix]$suffix";
+    $file = "$model[dir]/$name";
+    return (is_file($file) && filesize($file) > 0);
+}
+#}}}########################################################################
+
 #{{{ linkModelKin - creates a kinemage open/download link tailored to this session
 ############################################################################
 /**

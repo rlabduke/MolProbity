@@ -108,11 +108,21 @@ true if the PDB file has been processed by Reduce, so we know at a
 minimum that all hydrogens are present. This is a heritable property.<br>
   </li>
   <li><span style="font-weight: bold; font-family: monospace;">isAnalyzed</span>:
-true if the analysis task has already been run on this model.</li>
-  <li><span style="font-weight: bold; font-family: monospace;">badRes</span>:
-the cached results of findOutliers() from the last analysis run (if
-any).<br>
+true if the analysis task has already been run on this model, so that
+it's at least partly analyzed already. (deprecated)<br>
   </li>
+  <li><span style="font-weight: bold; font-family: monospace;">badCbeta</span>:
+the cached results of findCbetaOutliers(), if any.<br>
+  </li>
+  <li><span style="font-weight: bold; font-family: monospace;">badClash</span>:
+the cached results of findClashOutliers(), if any. </li>
+  <li><span style="font-weight: bold; font-family: monospace;">badRama</span>:
+the cached results of findRamaOutliers(), if any. </li>
+  <li><span style="font-weight: bold; font-family: monospace;">badRota</span>:
+the cached results of findRotaOutliers(), if any.<br>
+  </li>
+</ul>
+<ul>
 </ul>
 <h2>Contents of $_SESSION['bgjob']:</h2>
 <ul>
