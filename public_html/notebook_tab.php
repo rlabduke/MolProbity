@@ -22,14 +22,21 @@ INPUTS (via Get or Post):
 ############################################################################
 function printTOC($book)
 {
-    echo "<ul>\n";
-    foreach($book as $num => $entry)
+    if(count($book) == 0)
     {
-        $title = $entry['title'];
-        if($title == "") $title = "(no title)";
-        echo "<li><a href='#entry$num'>$title</a> [".formatDayTime($entry['modtime'])."]</li>\n";
+        echo "<center><p><i>No entries have been made in the lab notebook.</i></p></center>\n";
     }
-    echo "</ul>\n";
+    else
+    {
+        echo "<ul>\n";
+        foreach($book as $num => $entry)
+        {
+            $title = $entry['title'];
+            if($title == "") $title = "(no title)";
+            echo "<li><a href='#entry$num'>$title</a> [".formatDayTime($entry['modtime'])."]</li>\n";
+        }
+        echo "</ul>\n";
+    }
 }
 #}}}########################################################################
 
@@ -101,10 +108,10 @@ echo mpPageHeader("Lab notebook", "notebook");
     <?php
         echo postSessionID();
         echo "Now: " . formatTime(time());
-        echo "<br>\n";
+        echo "\n";
         echo timeZonePicker('timezone', $_SESSION['timeZone']);
     ?>
-    <br /><input type="submit" name="cmd" value="Set time zone">
+    <input type="submit" name="cmd" value="Set time zone">
 </form>
 
 

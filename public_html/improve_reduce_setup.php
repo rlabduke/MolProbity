@@ -65,13 +65,28 @@ $model = $_REQUEST['model'];
 ############################################################################
 ?>
 
+<p>Reduce is a program for adding hydrogens to a Protein DataBank (PDB) molecular structure file.
+Hydrogens are added in standardized geometry with combinatorial optimization of the orientations
+of OH, SH, NH<sub>3</sub><sup>+</sup>, Met methyls, Asn and Gln sidechain amides, and His rings.
+Both proteins and nucleic acids can be processed.
+HET groups can also be processed as long as the atom connectivity is provided;
+a slightly modified version of the connectivity table published by the PDB - reduce_het_dict.txt - is included.
+The program is described in
+<a href="http://www.ncbi.nlm.nih.gov:80/entrez/query.fcgi?cmd=Retrieve&amp;db=PubMed&amp;list_uids=9917408&amp;dopt=Abstract" target="_blank">Word, et al. (1999)</a>
+"Asparagine and glutamine: using hydrogen atom contacts in the choice of sidechain amide orientation" J. Mol. Biol. <b>285</b>, 1733-1745.
+</p>
+
+<p>A stand-alone version of Reduce, along with the source code, can be obtained for free from
+<a href="http://kinemage.biochem.duke.edu/software/reduce.php" target="_blank">kinemage.biochem.duke.edu</a>.
+</p>
+
 <form method='post' action='improve_reduce_launch.php'>
 <?php
     echo postSessionID();
     echo "<input type='hidden' name='model' value='$model'>\n";
 ?>
 <p><input type='checkbox' name='makeFlipkin' value='1' checked>
-    Produce Flipkin kinemage showing what changes were made
+    Make Flipkin kinemages illustrating any Asn, Gln, and His flips
 <p><input type='submit' name='cmd' value='Start adding H'>
 </form>
 

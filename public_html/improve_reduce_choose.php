@@ -51,13 +51,13 @@ for($c = 0; $c < $n; $c++)
 
 if($didnt_solve)
     echo '<p><center><div class="alert">Some H-bonding networks ("cliques") were too complex to optimize.
-If this is a problem, please download Reduce and run it with a higher -limit.</div></center>
+If this is a problem, please download Reduce and run it with a higher <code>-limit</code> setting.</div></center>
 <p>
 ';
     
 if(modelDataExists($model, "flipnq.kin") && modelDataExists($model, "fliphis.kin"))
 {
-    echo "These <code>flipkin</code> kinemages illustrate the changes Reduce made.\n";
+    echo "These Flipkin kinemages illustrate the changes Reduce made.\n";
     echo "Residues that were flipped are marked with stars (*) in the Views menu.\n";
     echo "<ul>\n";
     echo "<li>" . linkModelKin($model, "flipnq.kin") . "</li>\n";
@@ -88,19 +88,20 @@ unselect those you wish not to flip.
     This <b>may</b> indicate that all of the Asn's, Gln's, and His's
     in your structure are correctly assigned.
 <?php } else { ?>
-    <table border='1'>
-    <tr>
+    <table border='0' cellspacing='0' width='100%'>
+    <?php echo "<tr bgcolor='".MP_TABLE_HIGHLIGHT."'>"; ?>
         <td align='center'><b>Flip?</b></td>
         <td align='center'><b>Chain</b></td>
-        <td align='center'><b>Residue #</b></td>
-        <td align='center'><b>Residue ID</b></td>
-        <td align='center'><b>Original</b></td>
-        <td align='center'><b>Flipped</b></td>
-        <td align='center'><b>Flip. - Orig.</b></td>
+        <td align='center'><b>Res#</b></td>
+        <td align='center'><b>Res ID</b></td>
+        <td align='center'><b>Orig</b></td>
+        <td align='center'><b>Flip</b></td>
+        <td align='center'><b>Flip-Orig</b></td>
         <td align='center'><b>Code</b></td>
         <td align='center'><b>Explanation</b></td>
     </tr>
     <?php
+        $color = MP_TABLE_ALT1;
         for($c = 0; $c < $n; $c++)
         {
             if($changes[4][$c] == "FLIP" || $changes[4][$c] == "CLS-FL" || $showAllNQH)
@@ -108,7 +109,7 @@ unselect those you wish not to flip.
                 if($changes[4][$c] == "FLIP" or $changes[4][$c] == "CLS-FL") { $checked = "checked"; }
                 else                                                         { $checked = "";        }
                 
-                echo "<tr>\n";
+                echo "<tr bgcolor='$color'>\n";
                 echo "<td align='center'><input type='checkbox' $checked name='doflip[$c]' value='1'></td>\n";
                 echo "<td align='left'>" . $changes[1][$c] . "</td>\n";
                 echo "<td align='right'>" . $changes[2][$c] . "</td>\n";
@@ -118,7 +119,8 @@ unselect those you wish not to flip.
                 echo "<td align='left'>" . ($changes[10][$c] - $changes[8][$c]) . "</td>\n";
                 echo "<td align='left'>" . $changes[4][$c] . "</td>\n";
                 echo "<td align='left'>" . $changes[5][$c] . "</td>\n";
-               echo "</tr>\n";
+                echo "</tr>\n";
+                $color == MP_TABLE_ALT1 ? $color = MP_TABLE_ALT2 : $color = MP_TABLE_ALT1;
             }
         }
     ?>

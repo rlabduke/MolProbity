@@ -6,6 +6,11 @@
 // This file controls paths to working space and to binaries.
 // Edit this file to match your system configuration.
 
+// MP_EMAIL_WEBMASTER
+//  An email address for the owner of this site.
+//  If you run this code, set this to your address.
+define("MP_EMAIL_WEBMASTER", "webmaster@$_SERVER[SERVER_NAME]");
+
 // MP_BIN_PATH
 //  Directory(s) where all MolProbity-specific binary
 //  executables are stored. Remember, apache must
@@ -54,10 +59,20 @@ define("MP_TABLE_ALT2", "#e8e8e8");
 // Highlight color for striped tables
 define("MP_TABLE_HIGHLIGHT", "#ffff99");
 
+//============================================================================
+//===  PLEASE DON'T CHANGE THINGS BELOW THIS LINE  ===========================
+//============================================================================
+
+// MP_EMAIL_AUTHOR
+//  The email address of the (current) author and maintainer
+//  of the MolProbity source code. Please DO NOT modify this
+//  entry; this is how we get feedback about bugs, etc.
+define("MP_EMAIL_AUTHOR", "moler@kinemage.biochem.duke.edu,iwd@duke.edu");
 
 // Don't change this! It will break user bookmarks.
 define("MP_SESSION_NAME", "MolProbSID");
-define("MP_VERSION", "3pre15");
 
+// Current "internal reference" version number. Please DO NOT change.
+define("MP_VERSION", "3pre16");
 
 ?>

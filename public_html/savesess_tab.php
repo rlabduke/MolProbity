@@ -1,6 +1,6 @@
 <?php # (jEdit options) :folding=explicit:collapseFolds=1:
 /*****************************************************************************
-    This page allows users to clean up their files.
+    This page allows users to bookmark their session or clean up their files.
 *****************************************************************************/
 // EVERY *top-level* page must start this way:
 // 1. Define it's relationship to the root of the MolProbity installation.
@@ -21,23 +21,24 @@
 //function someFunctionName() {}
 #}}}########################################################################
 
-    echo mpPageHeader("Finish session", "logout");
+    echo mpPageHeader("Save session", "savesession");
 ?>
 
-<p>We appreciate your help in freeing up disk space for other users.
-By clicking the button below, you will <b>permanently delete</b> all the files you generated during this session.
-Before logging out, you may wish to
+<p>To make MolProbity more convenient, you can bookmark this page and return to it later.
+We will do our best to preserve all your files, but the unexpected does sometimes happen --
+so we recommend that you
 <a href='files_tab.php?<?php echo $_SESSION['sessTag']; ?>'>download</a>
-some of your files.
-It is also possible to 
-<a href='savesess_tab.php?<?php echo $_SESSION['sessTag']; ?>'>save this session</a>
-and return to do more work with these files later.
+anything really important.
+</p>
 
-<p><form method="post" action="finish_destroy.php">
-<?php echo postSessionID(); ?>
-<input type="hidden" name="confirm" value="1">
-<br>This action cannot be undone:
-<input type="submit" name="cmd" value="Destroy all my files and log me out">
-</form>
+<p>If you're not going to use these files anymore, please
+<a href='finish_tab.php?<?php echo $_SESSION['sessTag']; ?>'>log out</a>
+instead.
+We appreciate your help in freeing up disk space for other users.
+</p>
+
+<center><p>Your data will be kept until:
+<br><b><?php echo formatDayTime( time() + mpSessTimeToLive(session_id()) ); ?></b>
+</p></center>
 
 <?php echo mpPageFooter(); ?>

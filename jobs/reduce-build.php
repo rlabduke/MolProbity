@@ -56,6 +56,7 @@ setProgress($tasks, 'reduce');
 $id = reduceBuild($modelID, $pdb);
 
 $_SESSION['bgjob']['newModel'] = $id;
+$tasks['create'] .= " ($id)"; // shows ID of new model in progress info
 
 if($_SESSION['bgjob']['makeFlipkin'])
 {
