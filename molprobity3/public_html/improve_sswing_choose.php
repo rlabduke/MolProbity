@@ -25,10 +25,30 @@ INPUTS (via $_SESSION['bgjob']):
 // Start the page: produces <HTML>, <HEAD>, <BODY> tags
 $modelID = $_SESSION['bgjob']['newModel'];
 $model = $_SESSION['models'][$modelID];
+$cnit = $_SESSION['bgjob']['cnit'];
 
 echo mpPageHeader("Review SSWING changes");
-echo "<a href='files_tab.php?$_SESSION[sessTag]'>Done</a>";
-echo "<p>".linkModelKin($model, "sswing.kin")."</p>\n";
 ############################################################################
 ?>
+
+<p>
+Please examine the kinemage below to see the effects of changes made by SSWING.
+Afterwards, please select which of the changes you would like to accept as-is.
+Residues that are not selected will be restored to their original conformation.
+</p>
+
+<?php echo "<p>".linkModelKin($model, "sswing.kin")."</p>\n"; ?>
+
+<form method='post' action='improve_sswing_done.php'>
+<?php
+echo postSessionID();
+foreach($cnit as $res)
+{
+    echo "<br><input type='checkbox' name='cnit[$res]' value='$res' checked> $res\n";
+}
+?>
+<p><center><input type='submit' name='cmd' value='Generate modified PDB file'>
+</center>
+</form>
+
 <?php echo mpPageFooter(); ?>
