@@ -103,6 +103,7 @@ else
 if(isset($idList))
 {
     $id = reset($idList);
+    $_SESSION['lastUsedModelID'] = $id; // this is now the "working model" until overriden
     $model = $_SESSION['models'][ $id ];
     $_SESSION['bgjob']['newModel'] = $id;
     

@@ -29,6 +29,7 @@
 #                                -limit, -fix, -v flags
 #   6/ 1/2001 - JM Word - v2.3 - added error checking for abandoned opt.
 #   7/19/2001 - JM Word - v2.4 - added -db flag to pass reduce het dict
+#   1/11/2005 - I Davis - v2.5 - added @onewidth to kinemage output
 
    use strict;
 
@@ -336,6 +337,7 @@
    printf "\@master \{H's\}\n";
    printf "\@master \{hets\}\n";
    printf "\@master \{water\}\n";
+   printf "\@onewidth\n";
 
    # -----------------------------------------------------------
    

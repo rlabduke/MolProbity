@@ -69,6 +69,8 @@ $model      = $_SESSION['models'][$modelID];
 $modelDir   = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
 $infile     = "$modelDir/$model[pdb]";
 $scriptName = $_SESSION['bgjob']['scriptName'];
+$rainbow    = $_SESSION['bgjob']['rainbow'];
+$cpkballs    = $_SESSION['bgjob']['cpkballs'];
 
 $kinDir     = $_SESSION['dataDir'].'/'.MP_DIR_KINS;
 $kinURL     = $_SESSION['dataURL'].'/'.MP_DIR_KINS;
@@ -77,38 +79,30 @@ $kinURL     = $_SESSION['dataURL'].'/'.MP_DIR_KINS;
 // Do a safety check on $scriptName:
 switch($scriptName) {
     case "cass":
-        $flag = "-cass";
-        break;
     case "mchb":
-        $flag = "-mchb";
-        break;
     case "aasc":
-        $flag = "-aasc";
-        break;
     case "lots":
-        $flag = "-lots";
+    case "naba":
+    case "ribnhet":
+        $flag = "-" . $scriptName;
         break;
     case "halfbonds":
         $flag = "-lots";
         $rainbow = FALSE; // the two are incompatible
         break;
-    case "naba":
-        $flag = "-naba";
-        break;
-    case "ribnhet":
-        $flag = "-ribnhet";
-        break;
     default:
+        $scriptName = "cass";
         $flag = "-cass";
         break;
 }
-// Color ramp N --> C ?
-if($rainbow) $flag .= " -colornc";
+// Do this after file name or it'll get junked up!
+if($rainbow)    $flag .= " -colornc"; // Color ramp N --> C ?
+if($cpkballs)   $flag .= " -show 'mc,sc,ht,at'";
 
 $tasks['kin'] = "Make kinemage using <code>Prekin $flag</code>";
 setProgress($tasks, 'kin'); // updates the progress display if running as a background job
 
-$outfile = "$kinDir/$model[prefix]".substr($flag,1).".kin";
+$outfile = "$kinDir/$model[prefix]$scriptName.kin";
 if($scriptName == "halfbonds")
     $cmd = "prekin $flag $infile | php -f ".MP_BASE_DIR."/lib/halfbonds.php > $outfile";
 else
@@ -117,7 +111,7 @@ exec($cmd);
 
 // Lab notebook entry / results page
 $entry = "";
-$entry .= "<p>Your kinemage is ready for viewing in KiNG: ".linkKinemage($model['prefix'].substr($flag,1).".kin")."</p>\n";
+$entry .= "<p>Your kinemage is ready for viewing in KiNG: ".linkKinemage("$model[prefix]$scriptName.kin")."</p>\n";
 
 $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
     "Simple kinemage: $model[pdb]",

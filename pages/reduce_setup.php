@@ -23,6 +23,10 @@ function display($context)
     
     if(count($_SESSION['models']) > 0)
     {
+        // Choose a default model to select
+        $lastUsedID = $context['modelID'];
+        if(!$lastUsedID) $lastUsedID = $_SESSION['lastUsedModelID'];
+
         echo makeEventForm("onAddH");
         echo "<h3>Select a model to add H to:</h3>";
         echo "<p><table width='100%' border='0' cellspacing='0' cellpadding='2'>\n";
@@ -40,7 +44,7 @@ function display($context)
             }
             else
             {
-                $checked = ($context['modelID'] == $id ? "checked" : "");
+                $checked = ($lastUsedID == $id ? "checked" : "");
                 echo "  <td><input type='radio' name='modelID' value='$id' $checked></td>\n";
                 echo "  <td><b>$model[pdb]</b></td>\n";
                 echo "  <td><small>$model[history]</small></td>\n";
@@ -62,7 +66,7 @@ function display($context)
         echo "Make Flipkin kinemages illustrating any Asn, Gln, or His flips</label></div>\n";
         echo "</small></td></tr>\n";
         echo "<tr valign='top'><td><input type='radio' name='method' value='nobuild' $check2> <b>Add missing ONLY</b><td>";
-        echo "<td><small>Add missing H only, leave all other atoms alone (<code>Reduce -keep -his</code>)</small></td></tr>\n";
+        echo "<td><small>Add missing H only, leave all other atoms alone (<code>Reduce -build -pen9999 -keep</code>)</small></td></tr>\n";
         echo "</table></p>\n";
 
         echo "<p><table width='100%' border='0'><tr>\n";

@@ -36,7 +36,10 @@ function display($context)
     echo "</ul>\n";
 
     echo "<h3><a href='".makeEventURL("onNavBarCall", "aacgeom_setup.php")."'>All-atom contact and geometric analyses</a></h3>\n<ul>\n";
-    echo "<li><i>TODO: List things here</i></li>\n";
+    echo "<li>All-atom steric contacts (clashlist, clash score, contact dots)</li>\n";
+    echo "<li>Protein geometry evaluation (Ramachandran plot, rotamers, C&beta; deviations)</li>\n";
+    echo "<li><i>Nucleic acid geometry (base-phosphate perpendiculars)</i></li>\n";
+    echo "<li>Multi-criterion chart and kinemage displays</li>\n";
     echo "</ul>\n";
 
     echo "<h3><a href='".makeEventURL("onNavBarCall", "sswing_setup1.php")."'>Refit sidechains</a></h3>\n<ul>\n";
@@ -44,7 +47,9 @@ function display($context)
     echo "</ul>\n";
 
     echo "<h3><a href='".makeEventURL("onNavBarCall", "makekin_setup.php")."'>Make simple kinemages</a></h3>\n<ul>\n";
-    echo "<li><i>TODO: List things here</i></li>\n";
+    echo "<li>Make kinemages using basic Prekin scripts.</li>\n";
+    echo "<li>Kinemages can be combined and edited in KiNG with File | Append.</li>\n";
+    echo "<li>KiNG can save modified kinemages to the server with File | Save as.</li>\n";
     echo "</ul>\n";
 
     echo "<hr>\n";
@@ -62,6 +67,10 @@ function display($context)
     echo "<li><i>Print the notebook or save it as an HTML page.</i></li>\n";
     echo "</ul>\n";
     
+    echo "<h3><a href='".makeEventURL("onNavBarGoto", "feedback_setup.php")."'>Feedback &amp; bugs</a></h3>\n<ul>\n";
+    echo "<li>Report problems with MolProbity or suggestions for improvement.</li>\n";
+    echo "</ul>\n";
+    
     echo "<h3><a href='".makeEventURL("onNavBarGoto", "save_session.php")."'>Save session</a></h3>\n<ul>\n";
     echo "<li>Save your results from this session and come back later to keep working.</li>\n";
     echo "<li>Creates a page that can be bookmarked in your web browser.</li>\n";
@@ -73,7 +82,7 @@ function display($context)
     echo "<li>Free up disk space for other users. (Thanks!)</li>\n";
     echo "</ul>\n";
     
-    echo "<hr><pre>";
+    echo "<hr><pre>\$_SESSION = ";
     print_r($_SESSION);
     echo "</pre>";
 

@@ -86,6 +86,7 @@ if(!file_exists($kindir)) mkdir($kindir, 0777);
 makeSswingKin($pdbin, $pdbout, "$kindir/$newModel[prefix]sswing.kin", $cnit);
 
 $_SESSION['bgjob']['newModel'] = $newModel['id'];
+$_SESSION['lastUsedModelID'] = $newModel['id']; // this is now the current model
 $_SESSION['bgjob']['sswingChanges'] = $all_changes;
 setProgress($tasks, null);
 

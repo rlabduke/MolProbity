@@ -66,6 +66,7 @@ $newModel['isReduced']  = true;
 $newModel['isBuilt']    = true;
 $_SESSION['models'][ $newModel['id'] ] = $newModel;
 $_SESSION['bgjob']['modelID'] = $newModel['id'];
+$_SESSION['lastUsedModelID'] = $newModel['id']; // this is now the current model
 
 if($_SESSION['bgjob']['makeFlipkin'])
 {

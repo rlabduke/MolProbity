@@ -33,6 +33,10 @@ function warnNoH(fileName)
 
     if(count($_SESSION['models']) > 0 && count($_SESSION['edmaps']) > 0)
     {
+        // Choose a default model to select
+        $lastUsedID = $context['modelID'];
+        if(!$lastUsedID) $lastUsedID = $_SESSION['lastUsedModelID'];
+
         echo makeEventForm("onChooseResidues");
         echo "<h3>Select a model to work with:</h3>";
         echo "<p><table width='100%' border='0' cellspacing='0' cellpadding='2'>\n";
@@ -41,17 +45,16 @@ function warnNoH(fileName)
         {
             // Alternate row colors:
             $c == MP_TABLE_ALT1 ? $c = MP_TABLE_ALT2 : $c = MP_TABLE_ALT1;
+            $checked = ($lastUsedID == $id ? "checked" : "");
             echo " <tr bgcolor='$c'>\n";
             if($model['isReduced'])
             {
-                $checked = ($context['modelID'] == $id ? "checked" : "");
                 echo "  <td><input type='radio' name='modelID' value='$id' $checked></td>\n";
                 echo "  <td><b>$model[pdb]</b></td>\n";
                 echo "  <td><small>$model[history]</small></td>\n";
             }
             else
             {
-                $checked = ($context['modelID'] == $id ? "checked" : "");
                 echo "  <td><input type='radio' name='modelID' value='$id' onclick='warnNoH(\"$model[pdb]\")' $checked></td>\n";
                 echo "  <td><span class='inactive' title='Doesn&apos;t have H added'><b>$model[pdb]</b></span></td>\n";
                 echo "  <td><span class='inactive'><small>$model[history]</small></span></td>\n";
