@@ -14,7 +14,7 @@ class FeedbackSetupDelegate extends BasicDelegate {
 */
 function display($context)
 {
-    echo mpPageHeader("Feedback &amp; Bugs", "feedback");
+    echo mpPageHeader("Feedback &amp; bugs", "feedback");
     echo makeEventForm("onFeedbackSend");
 ?>
 <table border='0' cellspacing='0'>
@@ -28,11 +28,11 @@ function display($context)
     <td align='right'>My comment regards</td>
     <td align='left'><select name='inRegardTo'>
         <option selected value="Bug Report">a bug or error in MolProbity</option>
+        <option value="Suggestion">a suggestion on how to improve MolProbity</option>
         <option value="KiNG">the KiNG applet</option>
         <option value="JavaMage">the JavaMage applet</option>
         <option value="Tutorial">the online tutorial</option>
         <option value="User Manual">the other online documentation</option>
-        <option value="Suggestion">a suggestion on how to improve MolProbity</option>
         <option value="General Feedback">(none of the above)</option>
     </select></td>
 </tr><tr>
@@ -64,7 +64,7 @@ function makeTemplateText()
             . "==================================================\n"
             . "  USER / SERVER INFORMATION\n"
             . "==================================================\n"
-            . "User IP       : " . getVisitorIP() . "\n"
+            . "User IP       : $_SESSION[userIP]\n"
             . "User browser  : $_SERVER[HTTP_USER_AGENT]\n"
             . "Session ID    : " . session_id() . "\n"
             . "Session URL   : http://$_SERVER[SERVER_NAME]$_SERVER[PHP_SELF]?$_SESSION[sessTag]\n"
@@ -115,13 +115,11 @@ function onFeedbackSend($arg, $req)
         . wordwrap($req['feedbackText'], 76);
     
     // Write a local copy of the email in case sendmail isn't working
+    $msg_text = "To: $fb_to\n$fb_hdrs\nSubject: $fb_subj\n\n$fb_msg\n";
     $tmpfile = tempnam(MP_BASE_DIR.'/feedback', 'email_');
     chmod($tmpfile, 0666 & ~MP_UMASK); // tempnam gets wrong permissions sometimes?
     $h = fopen($tmpfile, 'wb');
-    fwrite($h, $fb_to."\n");
-    fwrite($h, $fb_hdrs."\n");
-    fwrite($h, $fb_subj."\n\n");
-    fwrite($h, $fb_msg."\n");
+    fwrite($h, $msg_text);
     fclose($h);
     
     // Mail messages MUST use \r\n for new lines!!
@@ -135,9 +133,7 @@ function onFeedbackSend($arg, $req)
     $ok = mail($fb_to, $fb_subj, $rn_msg, $rn_hdrs);
     mpLog("feedback:Sent to $fb_to with subject $inregardto; success=$ok");
     
-    // TODO: set up context for feedback_done
-
-    pageGoto("feedback_done.php");
+    pageGoto("feedback_done.php", $msg_text);
 }
 #}}}########################################################################
 

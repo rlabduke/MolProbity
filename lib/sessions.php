@@ -376,8 +376,17 @@ function postSessionID()
 **********************************************/
 function getVisitorIP()
 {
-    global  $HTTP_VIA, $HTTP_X_COMING_FROM, $HTTP_X_FORWARDED_FOR, $HTTP_X_FORWARDED,
-    $HTTP_COMING_FROM, $HTTP_FORWARDED_FOR, $HTTP_FORWARDED, $REMOTE_ADDR;
+    // These aren't registered globally by default anymore -- IWD
+    //global  $HTTP_VIA, $HTTP_X_COMING_FROM, $HTTP_X_FORWARDED_FOR, $HTTP_X_FORWARDED,
+    //$HTTP_COMING_FROM, $HTTP_FORWARDED_FOR, $HTTP_FORWARDED, $REMOTE_ADDR;
+    $HTTP_VIA               = $_SERVER['HTTP_VIA'];
+    $HTTP_X_COMING_FROM     = $_SERVER['HTTP_X_COMING_FROM'];
+    $HTTP_X_FORWARDED_FOR   = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    $HTTP_X_FORWARDED       = $_SERVER['HTTP_X_FORWARDED'];
+    $HTTP_COMING_FROM       = $_SERVER['HTTP_COMING_FROM'];
+    $HTTP_FORWARDED_FOR     = $_SERVER['HTTP_FORWARDED_FOR'];
+    $HTTP_FORWARDED         = $_SERVER['HTTP_FORWARDED'];
+    $REMOTE_ADDR            = $_SERVER['REMOTE_ADDR'];
     
     if($HTTP_X_FORWARDED_FOR)
     {

@@ -3,15 +3,11 @@
 ===  TO DO  ==================================================================
 ==============================================================================
 {{{ Features from MP2 missing in MP3
-    Kinemage upload and viewing via PDB upload (?)
     Make simple kins via built-in Prekin scripts
     Complex Probe runs
     Half-bond coloring schemes
-    JavaMage thumbnail
     User manual
     Tutorial / walk-thru
-    Settable penalty function for Reduce
-    Ability to hide/unhide files
     Turn off vdW and/or H-bonds in dot kins
 }}}
 {{{ Ideas, long-term goals, etc.
@@ -21,12 +17,10 @@
     document PHP version needed (which is...? >=4.1:superglobals >=4.3:CLI)
         4.1.0 doesn't work on kinemage: cmd line can't load 'session mm'
         4.1.2 seems to work on glass
-    user should get partial results as big job is running ?
     Should analysis of worst residues ignore water or treat it separately?
     ZIP download should include a static view of the lab notebook?
     Retrieve maps from the EDS
     Add ribbons or something else colored by (absolute) occupancy
-    Make color-coded versions of the flowchart for different stages of the process?
     Multicrit: views for trouble spots sorted by severity (also hypertext?)
     Create scripts for generating usage stats from molprobity.log
     User sort multi chart by columns
@@ -38,7 +32,6 @@
     On upload of alt conf model, do table to choose which ones to use
     "nice" large jobs such as multi-model NMR runs
     "URL filesystem" to load/append/save kins from KiNG
-    Kinemage upload and viewing tool
     Eliminate AAC kin completely
     Have "all" analysis run use PDBstat to run Rama only on protein, etc
     Allow "hidden" user files; default download doesn't include these?
@@ -51,13 +44,12 @@
     ORACLE output for TN Bhat
     Add documentation to the analysis results page (how to interpret)
     Add explanation of SSWING on setup page
-    Explicitly allow upload of kins
     Display comparison to run-of-PDB for clash score
     Specify what a CB outlier is
     Explain 2d and 3d CB kins
     Make sure Reduce doesn't shrink the PDB file (lost atoms/models, etc)
     Make clashscore a choice during analysis
-  * finish feedback
+  * JavaMage thumbnail
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -78,6 +70,10 @@
 - file upload now talks about PDB files, not "models"
 - notebook can take bar-separated list of modelIDs instead of a single ID
 - reduce-nobuild now generates a new model entry, and talks about file names
+- fixed getVisitorIP() b/c $HTTP_* aren't registered by default anymore
+- finished feedback pages
+- broke upload pages into two parts
+- added kinemage upload and viewing
 
 ### 3beta7 ###
 - added forms for ED map and het dictionary upload

@@ -16,15 +16,25 @@ function display($context)
 {
     echo mpPageHeader("Site map", "sitemap");
     echo "<i>Features in italics have not yet been implemented.</i>\n";
-    echo "<h3><a href='".makeEventURL("onUploadFiles")."'>Upload / fetch files</a></h3>\n<ul>\n";
+
+    echo "<h3><a href='".makeEventURL("onUploadPDBs")."'>Input PDB files</a></h3>\n<ul>\n";
     echo "<li>Upload PDB files from local disk.</li>\n";
     echo "<li>Retrieve PDB files from the PDB or NDB.</li>\n";
+    echo "</ul>\n";
+    
+    echo "<h3><a href='".makeEventURL("onUploadOther")."'>Input other files</a></h3>\n<ul>\n";
+    echo "<li>Upload kinemages for viewing in KiNG.</li>\n";
     echo "<li>Upload electron density maps.</li>\n";
     echo "<li><i>Retrieve 2Fo-Fc and Fo-Fc (difference) maps from the EDS.</i></li>\n";
     echo "<li>Upload custom heterogen dictionaries (for adding hydrogens).</li>\n";
-    echo "<li><i>Upload kinemages for viewing in KiNG.</i></li>\n";
     echo "</ul>\n";
     
+    echo "<h3><a href='".makeEventURL("onAddH")."'>Add hydrogens</a></h3>\n<ul>\n";
+    echo "<li>Add missing hydrogens.</li>\n";
+    echo "<li>Optimize H-bond networks.</li>\n";
+    echo "<li>Check for Asn, Gln, His flips.</li>\n";
+    echo "</ul>\n";
+
     echo "<hr>\n";
 
     echo "<h3><a href='".makeEventURL("onNavBarGoto", "file_browser.php")."'>View & download files</a></h3>\n<ul>\n";
@@ -59,14 +69,21 @@ function display($context)
 }
 #}}}########################################################################
 
-#{{{ onUploadFiles
+#{{{ onUploadPDBs, onUploadOther, onAddH
 ############################################################################
-/**
-* Documentation for this function.
-*/
-function onUploadFiles($arg, $req)
+function onUploadPDBs($arg, $req)
 {
-    pageCall("upload_setup.php");
+    pageCall("upload_pdb_setup.php");
+}
+
+function onUploadOther($arg, $req)
+{
+    pageCall("upload_other_setup.php");
+}
+
+function onAddH($arg, $req)
+{
+    pageCall("reduce_setup.php");
 }
 #}}}########################################################################
 

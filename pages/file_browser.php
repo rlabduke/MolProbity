@@ -83,19 +83,19 @@ function makeFileCommands($path, $url)
 {
     $s = '';
     $s .= "<td><small>".formatFilesize(filesize($path))."</small></td>";
-    if(endsWith($path, ".kin"))
+    if(endsWith(strtolower($path), ".kin"))
     {
         $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=plain' target='_blank'>plain text</a></small></td>";
         $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=kin' target='_blank'>highlighted</a></small></td>";
         $s .= "<td><small><a href='viewking.php?$_SESSION[sessTag]&url=$url' target='_blank'>in KiNG</a></small></td>";
     }
-    elseif(endsWith($path, ".chart"))
+    elseif(endsWith(strtolower($path), ".chart"))
     {
         $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=plain' target='_blank'>plain text</a></small></td>";
         $s .= "<td></td>";
         $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=html' target='_blank'>as HTML</a></small></td>";
     }
-    elseif(endsWith($path, ".pdf"))
+    elseif(endsWith(strtolower($path), ".pdf"))
     {
         $s .= "<td></td>";
         $s .= "<td></td>";
