@@ -58,7 +58,7 @@ OUTPUTS (via Post):
 # MAIN - the beginning of execution for this page
 ############################################################################
 // Start the page: produces <HTML>, <HEAD>, <BODY> tags
-echo mpPageHeader("Analyze model quality");
+echo mpPageHeader("Analyze model quality", "analyze");
 
 
 $model = $_REQUEST['model'];
