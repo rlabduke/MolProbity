@@ -25,13 +25,24 @@ function createModel($modelID, $pdbSuffix = "")
     // FUNKY: Be careful here b/c HFS on OS X is not case-sensitive.
     // (It's case-PRESERVING.) This could screw up file naming.
     foreach($_SESSION['models'] as $k => $v) $lowercaseIDs[strtolower($k)] = $k;
-    while(isset($lowercaseIDs[strtolower($modelID.$serial)])
-    || file_exists($_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$modelID.$serial.$pdbSuffix.".pdb"))
+    
+    // If this is true, we're going to need to differentiate this model from an existing one
+    if(isset($lowercaseIDs[strtolower($modelID)])
+    || file_exists($_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$modelID.$pdbSuffix.".pdb"))
     {
-        $serial++;
+        // If we're appending a number to an ID ending in a number, add an underscore!
+        if(preg_match('/[0-9]$/', $modelID)) $modelID .= '_';
+        $serial = 1;
+        while(isset($lowercaseIDs[strtolower($modelID.$serial)])
+        || file_exists($_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$modelID.$serial.$pdbSuffix.".pdb"))
+        {
+            $serial++;
+        }
+        $modelID .= $serial;
     }
-    $modelID = $modelID.$serial;
-    $outname = $modelID.$pdbSuffix.".pdb"; // $modelID already has $serial in it
+    
+    // $modelID already has $serial in it (if needed)
+    $outname = $modelID.$pdbSuffix.".pdb";
     
     // Create the model entry
     return array(

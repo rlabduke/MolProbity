@@ -16,6 +16,22 @@ function display($context)
 {
     echo mpPageHeader("Site map", "sitemap");
     echo "<i>Features in italics have not yet been implemented.</i>\n";
+    
+    if(count($_SESSION['models']) > 0)
+    {
+        echo "<p><table width='100%' border='0' cellspacing='0' cellpadding='2'>\n";
+        $c = MP_TABLE_ALT1;
+        foreach($_SESSION['models'] as $id => $model)
+        {
+            // Alternate row colors:
+            $c == MP_TABLE_ALT1 ? $c = MP_TABLE_ALT2 : $c = MP_TABLE_ALT1;
+            echo " <tr bgcolor='$c'>\n";
+            echo "  <td><b>$model[pdb]</b></td>\n";
+            echo "  <td><small>$model[history]</small></td>\n";
+            echo " </tr>\n";
+        }
+        echo "</table></p>\n";
+    }
 
     echo "<h3><a href='".makeEventURL("onNavBarCall", "upload_pdb_setup.php")."'>Input PDB files</a></h3>\n<ul>\n";
     echo "<li>Upload PDB files from local disk.</li>\n";
@@ -50,6 +66,11 @@ function display($context)
     echo "<li>Make kinemages using basic Prekin scripts.</li>\n";
     echo "<li>Kinemages can be combined and edited in KiNG with File | Append.</li>\n";
     echo "<li>KiNG can save modified kinemages to the server with File | Save as.</li>\n";
+    echo "</ul>\n";
+
+    echo "<h3><a href='".makeEventURL("onNavBarCall", "interface_setup1.php")."'>Visualize interface contacts</a></h3>\n<ul>\n";
+    echo "<li>Offers detailed control over running Probe to visualize steric interactions.</li>\n";
+    echo "<li>Displaying contacts between two subunits or chains is common, but other uses are possible.</li>\n";
     echo "</ul>\n";
 
     echo "<hr>\n";
