@@ -1,11 +1,11 @@
 <?php # (jEdit options) :folding=explicit:collapseFolds=1:
 /*****************************************************************************
-    This page warns the user before they log out.
+    This page allows users to bookmark their session.
 *****************************************************************************/
 // This variable must be defined for index.php to work! Must match class below.
-$delegate = new LogoutDelegate();
+$delegate = new SaveSessionDelegate();
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
-class LogoutDelegate extends BasicDelegate {
+class SaveSessionDelegate extends BasicDelegate {
     
 #{{{ display - creates the UI for this page
 ############################################################################
@@ -14,23 +14,24 @@ class LogoutDelegate extends BasicDelegate {
 */
 function display($context)
 {
-    echo mpPageHeader("Log out &amp; end session", "logout");
+    echo mpPageHeader("Save session", "savesession");
 ?>
-<p>We appreciate your help in freeing up disk space for other users.
-By clicking the button below, you will <b>permanently delete</b> all the files you generated during this session.
-Before logging out, you may wish to
+<p>To make MolProbity more convenient, you can bookmark this page and return to it later.
+We will do our best to preserve all your files, but the unexpected does sometimes happen --
+so we recommend that you
 <a href='<?php echo makeEventURL('onNavBarGoto', 'file_browser.php'); ?>'>download</a>
-some of your files.
-It is also possible to 
-<a href='<?php echo makeEventURL('onNavBarGoto', 'save_session.php'); ?>'>save this session</a>
-and return to do more work with these files later.
+anything really important.
+</p>
 
-<p><form method="post" action="logout_destroy.php">
-<?php echo postSessionID(); ?>
-<input type="hidden" name="confirm" value="1">
-<br>This action cannot be undone:
-<input type="submit" name="cmd" value="Destroy all my files and log me out &gt;">
-</form>
+<p>If you're not going to use these files anymore, please
+<a href='<?php echo makeEventURL('onNavBarGoto', 'logout.php'); ?>'>log out</a>
+instead.
+We appreciate your help in freeing up disk space for other users.
+</p>
+
+<center><p>Your data will be kept until:
+<br><b><?php echo formatDayTime( time() + mpSessTimeToLive(session_id()) ); ?></b>
+</p></center>
 <?php
     echo mpPageFooter();
 }

@@ -223,7 +223,9 @@ function displayMapUploadForm()
 function onUploadMapFile($arg, $req)
 {
     $mapName = censorFileName($_FILES['uploadFile']['name']); // make sure no spaces, etc.
-    $mapPath = "$_SESSION[dataDir]/$mapName";
+    $mapPath = "$_SESSION[dataDir]/".MP_DIR_EDMAPS;
+    if(!file_exists($mapPath)) mkdir($mapPath, 0777);
+    $mapPath .= "/$mapName";
     if( !$_FILES['uploadFile']['error'] && $_FILES['uploadFile']['size'] > 0
     && !file_exists($mapPath) && move_uploaded_file($_FILES['uploadFile']['tmp_name'], $mapPath))
     {
@@ -280,7 +282,9 @@ function onUploadHetDictFile($arg, $req)
     }
     
     $dictName = "user_het_dict.txt";
-    $dictPath = "$_SESSION[dataDir]/$dictName";
+    $dictPath = "$_SESSION[dataDir]/".MP_DIR_TOPPAR;
+    if(!file_exists($dictPath)) mkdir($dictPath, 0777);
+    $dictPath .= "/$dictName";
     if( !$_FILES['uploadFile']['error'] && $_FILES['uploadFile']['size'] > 0
     && move_uploaded_file($_FILES['uploadFile']['tmp_name'], $dictPath))
     {

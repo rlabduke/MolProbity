@@ -63,8 +63,8 @@ echo mpPageHeader("KiNG - $file");
     {
         foreach($_SESSION['edmaps'] as $edmap)
         {
-            if(isset($ed_param))    $ed_param .= " ".$edmap;
-            else                    $ed_param = $edmap;
+            if(isset($ed_param))    $ed_param .= " ".MP_DIR_EDMAPS."/".$edmap;
+            else                    $ed_param = MP_DIR_EDMAPS."/".$edmap;
         }
         if(isset($ed_param))
         {

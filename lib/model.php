@@ -27,28 +27,23 @@ function addModel($tmpPdb, $origName, $isCnsFormat = false, $ignoreSegID = false
         $id = $origName;
     
     // Make sure this is a unique name
-    // Need file_exists() check because HFS on OS X is not case-sensitive.
-    // (It's case-PRESERVING.)
-    while( isset($_SESSION['models'][$id.$serial]) || file_exists($_SESSION['dataDir'].'/'.$id.$serial) )
-        $serial++;
+    // FUNKY: Be careful here b/c HFS on OS X is not case-sensitive.
+    // (It's case-PRESERVING.) This could screw up file naming.
+    foreach($_SESSION['models'] as $k => $v) $lowercaseIDs[strtolower($k)] = $k;
+    while(isset($lowercaseIDs[strtolower($id.$serial)])) $serial++;
     $id .= $serial;
-    
-    // Create directory
-    $modelDir = $_SESSION['dataDir'].'/'.$id;
-    mkdir($modelDir, 0777);
-    $modelURL = $_SESSION['dataURL'].'/'.$id;
     
     // Process file - this is the part that matters
     $infile     = $tmpPdb;
-    $outname    = $id.'mp.pdb'; // don't confuse user by re-using exact original PDB name
-    $outpath    = $modelDir.'/'.$outname;
+    $outname    = $id.'_clean.pdb'; // don't confuse user by re-using exact original PDB name
+    $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
+    if(!file_exists($outpath)) mkdir($outpath, 0777);
+    $outpath .= '/'.$outname;
     list($stats, $segmap) = preparePDB($infile, $outpath, $isCnsFormat, $ignoreSegID);
     
     // Create the model entry
     $_SESSION['models'][$id] = array(
         'id'        => $id,
-        'dir'       => $modelDir,
-        'url'       => $modelURL,
         'prefix'    => $id.'-',
         'pdb'       => $outname,
         'stats'     => $stats,
@@ -80,8 +75,10 @@ function duplicateModel($inModelID, $suffix)
     // New model ID
     $id = $inModelID.$suffix;
     // Make sure this is a unique name
-    while( isset($_SESSION['models'][$id.$serial]) )
-        $serial++;
+    // FUNKY: Be careful here b/c HFS on OS X is not case-sensitive.
+    // (It's case-PRESERVING.) This could screw up file naming.
+    foreach($_SESSION['models'] as $k => $v) $lowercaseIDs[strtolower($k)] = $k;
+    while(isset($lowercaseIDs[strtolower($id.$serial)])) $serial++;
     $id .= $serial;
     
     // Create directory
@@ -110,26 +107,6 @@ function duplicateModel($inModelID, $suffix)
     );
     
     return $id;
-}
-#}}}########################################################################
-
-#{{{ removeModel - unregisters a model from the session and deletes its data
-############################################################################
-/**
-* Removes a model from the current session and destroys all its data.
-* This only makes sense in the context of an established session.
-* Only recommended for use in batch-processing scripts, because other
-* data structures (model parent, lab notebook, etc) may reference this model.
-*/
-function removeModel($modelID)
-{
-    if(isset($_SESSION['models'][$modelID]))
-    {
-        $modelDir = $_SESSION['models'][$modelID]['dir'];
-        // This actually seems to be most robust and portable... unlink() is very awkward
-        exec("rm -rf '$modelDir'");
-        unset($_SESSION['models'][$modelID]);
-    }
 }
 #}}}########################################################################
 

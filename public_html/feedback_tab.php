@@ -50,7 +50,7 @@ function makeTemplateText()
             . "  ERRORS FROM THIS SESSION\n"
             . "==================================================\n";
     
-    $errfile = $_SESSION['dataDir'] . "/system/errors";
+    $errfile = $_SESSION['dataDir']."/".MP_DIR_SYSTEM."/errors";
     if(file_exists($errfile))
     {
         $a = file($errfile);
