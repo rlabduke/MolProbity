@@ -121,6 +121,10 @@ makeBadCbetaBalls($infile, $outfile);
 makeBadDotsVisible($infile, $outfile, true); // if false, don't write hb, vdw
 
 
+// Ramachandran plots
+makeRamachandranKin($infile, "$model[dir]/$model[prefix]rama.kin");
+makeRamachandranImage($infile, "$model[dir]/$model[prefix]rama.jpg");
+
 /*********************
 To compare:
 

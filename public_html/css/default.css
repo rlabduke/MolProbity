@@ -1,7 +1,8 @@
 /* (jEdit options) :folding=explicit:collapseFolds=1: */
 body {
     color : #000000 ;
-    background-color : #f0f0ff ;
+    /*background-color : #f0f0ff ;*/
+    background-color : #F4EFE7 ;
 }
 
 a:link { color : #000099 ; }
@@ -24,7 +25,8 @@ div.leftnav {
 
 div.pagecontent {
     background : #ffffff ;
-    border : 1px solid #000066 ;
+    /*border : 1px solid #000066 ;*/
+    border : 1px solid #666461 ;
     padding : 0.4em;
 }
 
