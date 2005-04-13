@@ -162,7 +162,7 @@ function pdbstat($pdbfilename)
                 {
                     $residues++;
                     $rescode = $id;
-                    $chains[$chain] .= $restype;
+                    $chains[$chain] .= $restype.'/'; # need slashes for correct substring test, below
                 }
                 
                 # Atom name == CB?
@@ -208,7 +208,16 @@ function pdbstat($pdbfilename)
         {
             for($j = $i+1; $j < count($ch); $j++)
             {
-                if($ch[$i] == $ch[$j]) { continue 2; }
+                #if($ch[$i] == $ch[$j]) { continue 2; }
+                # Chains are "identical" if either is a substring of the other.
+                if(strlen($ch[$i]) < strlen($ch[$j]))
+                {
+                    if(strpos($ch[$i], $ch[$j]) !== FALSE) { continue 2; }
+                }
+                else
+                {
+                    if(strpos($ch[$j], $ch[$i]) !== FALSE) { continue 2; }
+                }
             }
             $unique_chains++;
         }

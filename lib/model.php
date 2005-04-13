@@ -92,7 +92,10 @@ function addModel($tmpPdb, $origName, $isCnsFormat = false, $ignoreSegID = false
         $splitModels = splitModelsNMR($tmp2);
         foreach($splitModels as $modelNum => $tmp3)
         {
-            $model = createModel(sprintf("{$origID}_m%02d", $modelNum));
+            //$model = createModel(sprintf("{$origID}_m%02d", $modelNum));
+            // Jane prefers the model number in front. This is good for kins,
+            // so mdl can be ID'd, but bad for sorting multiple structures...
+            $model = createModel(sprintf("m%02d_{$origID}", $modelNum));
             $id = $model['id'];
             $idList[] = $id;
             

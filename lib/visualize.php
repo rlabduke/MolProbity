@@ -52,8 +52,8 @@ function makeCbetaDevPlot($infile, $outfile)
 * $opt controls what will be output. Each key below maps to a boolean:
 *   Bscale              color scale by B-factor
 *   Qscale              color scale by occupancy
-*   ribbons             ribbons rainbow colored N to C
 *   altconf             alternate conformations
+*   ribbons             ribbons rainbow colored N to C
 *   rama                Ramachandran outliers
 *   rota                rotamer outliers
 *   cbdev               C-beta deviations greater than 0.25A
@@ -71,7 +71,7 @@ function makeMulticritKin($infiles, $outfile, $opt, $nmrConstraints = null)
     $h = fopen($outfile, 'a');
     fwrite($h, "@text\n");
     foreach($stats as $stat) fwrite($h, "[+]   $stat\n");
-    if(count($infiles) > 0) fwrite($h, "Statistics for first file only; ".count($infiles)." total files included in kinemage.\n");
+    if(count($infiles) > 0) fwrite($h, "Statistics for first model only; ".count($infiles)." total models included in kinemage.\n");
     fwrite($h, "@kinemage 1\n");
     fwrite($h, "@onewidth\n");
     fclose($h);
@@ -81,13 +81,13 @@ function makeMulticritKin($infiles, $outfile, $opt, $nmrConstraints = null)
         exec("prekin -quiet -mchb -lots -append -animate -onegroup -show 'mc(white),sc(blue)' $infile >> $outfile");
         
         if($opt['ribbons'])         makeRainbowRibbons($infile, $outfile);
-        if($opt['altconf'])         makeAltConfKin($infile, $outfile);
         if($opt['rama'])            makeBadRamachandranKin($infile, $outfile);
         if($opt['rota'])            makeBadRotamerKin($infile, $outfile);
         if($opt['cbdev'])           makeBadCbetaBalls($infile, $outfile);
         if($opt['pperp'])           makeBadPPerpKin($infile, $outfile);
         if($opt['Bscale'])          makeBfactorScale($infile, $outfile);
         if($opt['Qscale'])          makeOccupancyScale($infile, $outfile);
+        if($opt['altconf'])         makeAltConfKin($infile, $outfile);
         if($opt['dots'])            makeProbeDots($infile, $outfile, $opt['hbdots'], $opt['vdwdots']);
         if($nmrConstraints)
             exec("noe-display -cv -s viol -ds+ -fs -k $infile $nmrConstraints < /dev/null >> $outfile");
@@ -111,6 +111,8 @@ function makeMulticritKin($infiles, $outfile, $opt, $nmrConstraints = null)
     if($opt['dots'])        fwrite($h, "@master {H-bonds} off\n");
     if($opt['Bscale'])      fwrite($h, "@master {B factors} off\n");
     if($opt['Qscale'])      fwrite($h, "@master {occupancy} off\n");
+    if($opt['altconf'])     fwrite($h, "@master {mc alt confs} off\n");
+    if($opt['altconf'])     fwrite($h, "@master {sc alt confs} off\n");
     fclose($h);
 }
 #}}}########################################################################
@@ -126,10 +128,10 @@ function makeAltConfKin($infile, $outfile, $mcColor = 'yellow', $scColor = 'cyan
     $sc     = resGroupsForPrekin($scGrp);
     
     foreach($mc as $mcRange)
-        exec("prekin -quiet -append -nogroup -listmaster 'mc alts' -bval -scope $mcRange -show 'mc($mcColor)' $infile >> $outfile");
+        exec("prekin -quiet -append -nogroup -listmaster 'mc alt confs' -bval -scope $mcRange -show 'mc($mcColor)' $infile >> $outfile");
 
     foreach($sc as $scRange)
-        exec("prekin -quiet -append -nogroup -listmaster 'sc alts' -bval -scope $scRange -show 'sc($scColor)' $infile >> $outfile");
+        exec("prekin -quiet -append -nogroup -listmaster 'sc alt confs' -bval -scope $scRange -show 'sc($scColor)' $infile >> $outfile");
 }
 #}}}########################################################################
 
@@ -277,7 +279,7 @@ function makeProbeDots($infile, $outfile, $hbDots = false, $vdwDots = false)
 }
 #}}}########################################################################
 
-#{{{ makeRainbowRibbons - make ribbon kin color-coded by C-alpha temp. factor
+#{{{ makeRainbowRibbons - make ribbon kin color-coded N to C
 ############################################################################
 /**
 * Create a ribbon colored from N to C with varying hues
@@ -286,6 +288,60 @@ function makeProbeDots($infile, $outfile, $hbDots = false, $vdwDots = false)
 function makeRainbowRibbons($infile, $outfile)
 {
     exec("prekin -quiet -append -nogroup -colornc -bestribbon $infile >> $outfile");
+}
+#}}}########################################################################
+
+#{{{ makeBfactorRibbons - make ribbon kin color-coded by C-alpha temp. factor
+############################################################################
+/**
+* Create a ribbon colored by B-value:
+* 0%--purple--40%--lilac--70%--lilactint--%90--white--%100
+*
+* Used to color a ribbon kinemage by B-factor!
+* The mode==1 block extracts CA B-values from a PDB file
+* The mode==2 block reads kinemage lines,
+*   looks up the B-value of a given residue CA,
+*   compares it to the rest of the structure to determine a color,
+*   inserts the color name and writes the modified line.
+*
+* Output will be appended onto outfile.
+*/
+function makeBfactorRibbons($infile, $outfile)
+{
+    $bbB_ribbon_script =
+'BEGIN { mode = 0; }
+FNR == 1 {
+    mode += 1;
+    if(mode == 2) {
+        size = asort(bvals, sortedbs);
+        b1 = int((40 * size) / 100);
+        b1 = sortedbs[b1];
+        b2 = int((70 * size) / 100);
+        b2 = sortedbs[b2];
+        b3 = int((90 * size) / 100);
+        b3 = sortedbs[b3];
+    }
+}
+mode==1 && match($0, /ATOM  ...... CA  (...) (.)(....)(.)/, frag) {
+    resno = frag[3] + 0;
+    reslbl = tolower( frag[1] " " frag[2] " " resno frag[4] );
+    bvals[reslbl] = substr($0, 61, 6) + 0;
+}
+mode==2 && match($0, /(^\{ *[^ ]+ ([^}]+))(\} *[PL] )(.+$)/, frag) {
+    reslbl = frag[2];
+    bval = bvals[reslbl];
+    if(bval >= b3) color = "white";
+    else if(bval >= b2) color = "lilactint";
+    else if(bval >= b1) color = "lilac";
+    else color = "purple";
+    $0 = frag[1] " B" bval frag[3] color " " frag[4];
+}
+mode==2 { print $0; }';
+
+    $tmp = tempnam(MP_BASE_DIR."/tmp", "tmp_kin_");
+    exec("prekin -append -bestribbon -nogroup $infile > $tmp");
+    exec("gawk '$bbB_ribbon_script' $infile $tmp >> $outfile");
+    unlink($tmp);
 }
 #}}}########################################################################
 

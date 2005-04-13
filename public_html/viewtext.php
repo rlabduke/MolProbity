@@ -45,9 +45,9 @@ echo mpPageHeader("Viewing $name");
 <form>
 <table border='0' width='100%'><tr>
 <td align='left'><small>
-    When finished, you should close this window:
-    <input type="button" value="Close"
-    language="JavaScript" onclick="self.close();">
+    When finished, you should 
+    <input type="button" value="close this window"
+    language="JavaScript" onclick="self.close();">.
 </small></td><td align='right'><small><i>
     Hint: Use File | Save As... to save a copy of this page.
 </i></small></td>

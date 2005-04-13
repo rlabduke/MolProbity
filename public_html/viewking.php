@@ -85,9 +85,9 @@ echo mpPageHeader("KiNG - $file");
 <br><form>
 <table border='0' width='100%'><tr>
 <td align='left'>
-When finished, you should close this window:
-<input type="button" value="Close"
-language="JavaScript" onclick="self.close();">
+When finished, you should 
+<input type="button" value="close this window"
+language="JavaScript" onclick="self.close();">.
 </td><td align='right'>
 <?php
 if($_SESSION['kingSize'] == "tiny") echo "tiny";

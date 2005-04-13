@@ -133,12 +133,12 @@ function checkSettingsBeforeSubmit()
 <hr>
 <h3>Choose output formats for requested analysis:</h3>
 <div class='indent'>
-    <label><input type='checkbox' name='doSummaryStats' value='1' checked> Summary statistics</label>
-    <br><label><input type='checkbox' name='doMultiKin' value='1' checked onclick='syncSubcontrols()'> Visual/3-D: multi-criterion kinemage</label>
+    <label><input type='checkbox' name='doSummaryStats' value='1' checked> <b>Summary statistics</b></label>
+    <br><label><input type='checkbox' name='doMultiKin' value='1' checked onclick='syncSubcontrols()'> <b>Visual/3-D</b>: multi-criterion kinemage + other plots and kinemages</label>
     <div class='indent'>
         <label><input type='checkbox' name='multiKinExtras' value='1' checked> Include rainbow ribbons, B-factor and occupancy colors, and alternate conformation markers.</label>
     </div>
-    <label><input type='checkbox' name='doMultiChart' value='1' checked onclick='syncSubcontrols()'> Tabular: multi-criterion chart</label>
+    <label><input type='checkbox' name='doMultiChart' value='1' checked onclick='syncSubcontrols()'> <b>Tabular</b>: multi-criterion chart + other lists and tables</label>
     <div class='indent'>
         <label>Sort by
         <select name='multiChartSort'>
