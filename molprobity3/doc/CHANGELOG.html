@@ -51,10 +51,24 @@
     Give NMR models a linking ID somehow
     Remove dump of $_SESSION from sitemap
     Allow "live" sorting of finished multi-chart
+    How to handle multi-model Ramachandran plots when models are split out?
 }}}
     Develop "helper" pages; mark optional steps clearly
+    Output PDB header records for pasting into deposited files
     Pick lowest resolution number mentioned in file; allow override?
     Doc note: disable E_NOTICE or your screen will be flooded...
+    GZIP the multikin for faster download and smaller storage
+    Summary stats at top of multichart
+    Only one decimal place for phi, psi list
+    Sort by outliers first moves hets to top (unstable sort?) (1U4B)
+    Add sc hiB or res hiB to multichart rotamers (and rama?)
+    SC off and not blue
+    Rama thick, green, and half-Ca
+    NOEs thicker, esp. violations
+    Cb dev master doesn't work for all subunits (2SOD)
+    Biol. units use MODELs rather than chain IDs? Check and then email P. Bourne
+    Color by OCC/B still leaves SS as yellow (Prekin bug?)
+    JSR: bring back B-factor ribbons
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -65,6 +79,15 @@
 - following bug has been fixed by update to Prekin 6.40.050310:
     Prekin: excess rota/rama outliers from too-long -range statement (?)
     test cases: 1FFY, 1XFH, 3AL1 (used to; doesn't any more)
+- PdbStat now does chain identity as substring test rather than identity
+- changed "AAC" to "All-atom contacts" (JSR); required changing minornav SPANs
+  to DIVs in the navigation side bar. Safari still renders them correctly...
+- changed viewer close button: When done [close this window]
+- Multikin text: "Statistics for first FILE only..." becomes MODEL
+- multikin: "mc/sc alts" to "mc/sc alt confs" and come up turned off
+- NMR model splitter now puts model number first, not last (JSR)
+- AAC/geom: "Output Formats" section now mentions extra plots/kins/lists (JSR)
+- restored makeBfactorRibbons() function, though it's not in the multikin yet.
 
 ### 3beta13 ###
 - added check in index.php that a delegate page is actually specified
