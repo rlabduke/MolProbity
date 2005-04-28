@@ -5,6 +5,7 @@
 *****************************************************************************/
 require_once(MP_BASE_DIR.'/lib/pdbstat.php');
 require_once(MP_BASE_DIR.'/lib/analyze.php');
+require_once(MP_BASE_DIR.'/lib/pdbstat.php');
 
 #{{{ makeRamachandranKin - creates a kinemage-format Ramachandran plot
 ############################################################################
@@ -44,94 +45,16 @@ function makeCbetaDevPlot($infile, $outfile)
 }
 #}}}########################################################################
 
-#{{{ makeMulticritKin - display all quality metrics at once in 3-D
+#{{{ makeFlipkin - runs Flipkin to generate a summary of the Reduce -build changes
 ############################################################################
 /**
-* $infiles is an array of one or more PDB files to process
-* $outfile will be overwritten.
-* $opt controls what will be output. Each key below maps to a boolean:
-*   Bscale              color scale by B-factor
-*   Qscale              color scale by occupancy
-*   altconf             alternate conformations
-*   ribbons             ribbons rainbow colored N to C
-*   rama                Ramachandran outliers
-*   rota                rotamer outliers
-*   cbdev               C-beta deviations greater than 0.25A
-*   pperp               phosphate-base perpendicular outliers
-*   dots                all-atom contacts dots
-*       hbdots          H-bond dots
-*       vdwdots         van der Waals (contact) dots
-* $nmrConstraints is optional, and if present will generate lines for violated NOEs
 */
-function makeMulticritKin($infiles, $outfile, $opt, $nmrConstraints = null)
+function makeFlipkin($inpath, $outpathAsnGln, $outpathHis)
 {
-    if(file_exists($outfile)) unlink($outfile);
-    
-    $stats = describePdbStats( pdbstat(reset($infiles)), false );
-    $h = fopen($outfile, 'a');
-    fwrite($h, "@text\n");
-    foreach($stats as $stat) fwrite($h, "[+]   $stat\n");
-    if(count($infiles) > 0) fwrite($h, "Statistics for first model only; ".count($infiles)." total models included in kinemage.\n");
-    fwrite($h, "@kinemage 1\n");
-    fwrite($h, "@onewidth\n");
-    fclose($h);
-    
-    foreach($infiles as $infile)
-    {
-        exec("prekin -quiet -mchb -lots -append -animate -onegroup -show 'mc(white),sc(blue)' $infile >> $outfile");
-        
-        if($opt['ribbons'])         makeRainbowRibbons($infile, $outfile);
-        if($opt['rama'])            makeBadRamachandranKin($infile, $outfile);
-        if($opt['rota'])            makeBadRotamerKin($infile, $outfile);
-        if($opt['cbdev'])           makeBadCbetaBalls($infile, $outfile);
-        if($opt['pperp'])           makeBadPPerpKin($infile, $outfile);
-        if($opt['Bscale'])          makeBfactorScale($infile, $outfile);
-        if($opt['Qscale'])          makeOccupancyScale($infile, $outfile);
-        if($opt['altconf'])         makeAltConfKin($infile, $outfile);
-        if($opt['dots'])            makeProbeDots($infile, $outfile, $opt['hbdots'], $opt['vdwdots']);
-        if($nmrConstraints)
-            exec("noe-display -cv -s viol -ds+ -fs -k $infile $nmrConstraints < /dev/null >> $outfile");
-    }
-
-    // KiNG allows us to do this to control what things are visible
-    $h = fopen($outfile, 'a');
-    fwrite($h, "@master {mainchain} off\n");
-    fwrite($h, "@master {H's} off\n");
-    fwrite($h, "@master {water} off\n");
-    fwrite($h, "@master {Calphas} on\n");
-    // Turns ribbons off but makes sure alpha/beta/coil are on,
-    // so it just takes one click to make ribbons visible.
-    if($opt['ribbons'])     fwrite($h, "@master {alpha} on\n");
-    if($opt['ribbons'])     fwrite($h, "@master {beta} on\n");
-    if($opt['ribbons'])     fwrite($h, "@master {coil} on\n");
-    if($opt['ribbons'])     fwrite($h, "@master {ribbon} off\n");
-    if($opt['dots'])        fwrite($h, "@master {wide contact} off\n");
-    if($opt['dots'])        fwrite($h, "@master {close contact} off\n");
-    if($opt['dots'])        fwrite($h, "@master {small overlap} off\n");
-    if($opt['dots'])        fwrite($h, "@master {H-bonds} off\n");
-    if($opt['Bscale'])      fwrite($h, "@master {B factors} off\n");
-    if($opt['Qscale'])      fwrite($h, "@master {occupancy} off\n");
-    if($opt['altconf'])     fwrite($h, "@master {mc alt confs} off\n");
-    if($opt['altconf'])     fwrite($h, "@master {sc alt confs} off\n");
-    fclose($h);
-}
-#}}}########################################################################
-
-#{{{ makeAltConfKin - appends mc and sc alts
-############################################################################
-function makeAltConfKin($infile, $outfile, $mcColor = 'yellow', $scColor = 'cyan')
-{
-    $alts   = findAltConfs($infile);
-    $mcGrp  = groupAdjacentRes(array_keys($alts['mc']));
-    $scGrp  = groupAdjacentRes(array_keys($alts['sc']));
-    $mc     = resGroupsForPrekin($mcGrp);
-    $sc     = resGroupsForPrekin($scGrp);
-    
-    foreach($mc as $mcRange)
-        exec("prekin -quiet -append -nogroup -listmaster 'mc alt confs' -bval -scope $mcRange -show 'mc($mcColor)' $infile >> $outfile");
-
-    foreach($sc as $scRange)
-        exec("prekin -quiet -append -nogroup -listmaster 'sc alt confs' -bval -scope $scRange -show 'sc($scColor)' $infile >> $outfile");
+    // $_SESSION[hetdict] is used to set REDUCE_HET_DICT environment variable,
+    // so it doesn't need to appear on the command line here.
+    exec("flipkin -limit" . MP_REDUCE_LIMIT . " $inpath > $outpathAsnGln");
+    exec("flipkin -limit" . MP_REDUCE_LIMIT . " -h $inpath > $outpathHis");
 }
 #}}}########################################################################
 
@@ -169,15 +92,170 @@ function resGroupsForPrekin($data)
 }
 #}}}########################################################################
 
+
+
+#{{{ makeMulticritKin - display all quality metrics at once in 3-D
+############################################################################
+/**
+* $infiles is an array of one or more PDB files to process
+* $outfile will be overwritten.
+* $opt controls what will be output. Each key below maps to a boolean:
+*   Bscale              color scale by B-factor
+*   Qscale              color scale by occupancy
+*   altconf             alternate conformations
+*   ribbons             ribbons rainbow colored N to C
+*   rama                Ramachandran outliers
+*   rota                rotamer outliers
+*   cbdev               C-beta deviations greater than 0.25A
+*   pperp               phosphate-base perpendicular outliers
+*   dots                all-atom contacts dots
+*       hbdots          H-bond dots
+*       vdwdots         van der Waals (contact) dots
+* $nmrConstraints is optional, and if present will generate lines for violated NOEs
+*/
+function makeMulticritKin($infiles, $outfile, $opt, $nmrConstraints = null)
+{
+    if(file_exists($outfile)) unlink($outfile);
+    
+    $stats = describePdbStats( pdbstat(reset($infiles)), false );
+    $h = fopen($outfile, 'a');
+    fwrite($h, "@text\n");
+    foreach($stats as $stat)
+        fwrite($h, "[+]   $stat\n");
+    $isMultiModel = (count($infiles) > 1);
+    if($isMultiModel)
+        fwrite($h, "Statistics for first model only; ".count($infiles)." total models included in kinemage.\n");
+    fwrite($h, "@kinemage 1\n");
+    fwrite($h, "@onewidth\n");
+    fclose($h);
+    
+    foreach($infiles as $infile)
+    {
+        // Animate is used only for multi-model kins.
+        exec("prekin -quiet -lots -append ".($isMultiModel ? "-animate" : "")." -onegroup $infile >> $outfile");
+        
+        if($opt['ribbons'])
+        {
+            if($isMultiModel) makeRainbowRibbons($infile, $outfile);
+            else
+            {
+                $h = fopen($outfile, 'a');
+                fwrite($h, "@group {ribbon} off dominant\n");
+                fclose($h);
+                makeBfactorRibbons($infile, $outfile);
+            }
+        }
+        if($nmrConstraints)
+        {
+            if(!$isMultiModel) { $h = fopen($outfile, 'a'); fwrite($h, "@group {NOEs} dominant\n"); fclose($h); }
+            exec("noe-display -cv -s viol -ds+ -fs -k $infile $nmrConstraints < /dev/null >> $outfile");
+        }
+        if($opt['dots'])
+        {
+            if(!$isMultiModel) { $h = fopen($outfile, 'a'); fwrite($h, "@group {Probe dots} dominant\n"); fclose($h); }
+            makeProbeDots($infile, $outfile, $opt['hbdots'], $opt['vdwdots']);
+        }
+        if($opt['rama'])
+        {
+            if(!$isMultiModel) { $h = fopen($outfile, 'a'); fwrite($h, "@group {Rama outliers} dominant\n"); fclose($h); }
+            makeBadRamachandranKin($infile, $outfile);
+        }
+        if($opt['rota'])
+        {
+            if(!$isMultiModel) { $h = fopen($outfile, 'a'); fwrite($h, "@group {rotamer outliers} dominant\n"); fclose($h); }
+            makeBadRotamerKin($infile, $outfile);
+        }
+        if($opt['cbdev'])
+        {
+            if(!$isMultiModel) { $h = fopen($outfile, 'a'); fwrite($h, "@group {Cb deviations} dominant\n"); fclose($h); }
+            makeBadCbetaBalls($infile, $outfile);
+        }
+        if($opt['pperp'])
+        {
+            if(!$isMultiModel) { $h = fopen($outfile, 'a'); fwrite($h, "@group {base-P outliers} dominant\n"); fclose($h); }
+            makeBadPPerpKin($infile, $outfile);
+        }
+        if($opt['Bscale'])
+        {
+            if(!$isMultiModel) { $h = fopen($outfile, 'a'); fwrite($h, "@group {B factors} off recessiveon\n"); fclose($h); }
+            makeBfactorScale($infile, $outfile);
+        }
+        if($opt['Qscale'])
+        {
+            if(!$isMultiModel) { $h = fopen($outfile, 'a'); fwrite($h, "@group {occupancy} off recessiveon\n"); fclose($h); }
+            makeOccupancyScale($infile, $outfile);
+        }
+        if($opt['altconf'])
+        {
+            if(!$isMultiModel) { $h = fopen($outfile, 'a'); fwrite($h, "@group {alt confs} off recessiveon\n"); fclose($h); }
+            makeAltConfKin($infile, $outfile);
+        }
+    }
+
+    // KiNG allows us to do this to control what things are visible
+    $h = fopen($outfile, 'a');
+    fwrite($h, "@master {mainchain} off\n");
+    fwrite($h, "@master {sidechain} off\n");
+    fwrite($h, "@master {H's} off\n");
+    fwrite($h, "@master {water} off\n");
+    fwrite($h, "@master {Calphas} on\n");
+
+    if($opt['dots'])
+    {
+        fwrite($h, "@master {wide contact} off\n");
+        fwrite($h, "@master {close contact} off\n");
+        fwrite($h, "@master {small overlap} off\n");
+        fwrite($h, "@master {H-bonds} off\n");
+    }
+
+    if($isMultiModel)
+    {
+        // Turns ribbons off but makes sure alpha/beta/coil are on,
+        // so it just takes one click to make ribbons visible.
+        if($opt['ribbons'])     fwrite($h, "@master {alpha} on\n");
+        if($opt['ribbons'])     fwrite($h, "@master {beta} on\n");
+        if($opt['ribbons'])     fwrite($h, "@master {coil} on\n");
+        if($opt['ribbons'])     fwrite($h, "@master {ribbon} off\n");
+        if($opt['Bscale'])      fwrite($h, "@master {B factors} off\n");
+        if($opt['Qscale'])      fwrite($h, "@master {occupancy} off\n");
+        if($opt['altconf'])     fwrite($h, "@master {mc alt confs} off\n");
+        if($opt['altconf'])     fwrite($h, "@master {sc alt confs} off\n");
+    }
+    fclose($h);
+}
+#}}}########################################################################
+
+#{{{ makeAltConfKin - appends mc and sc alts
+############################################################################
+function makeAltConfKin($infile, $outfile, $mcColor = 'brown', $scColor = 'brown')
+{
+    $alts   = findAltConfs($infile);
+    $mcGrp  = groupAdjacentRes(array_keys($alts['mc']));
+    $scGrp  = groupAdjacentRes(array_keys($alts['sc']));
+    $mc     = resGroupsForPrekin($mcGrp);
+    $sc     = resGroupsForPrekin($scGrp);
+    
+    foreach($mc as $mcRange)
+        exec("prekin -quiet -append -nogroup -listmaster 'mc alt confs' -bval -scope $mcRange -show 'mc($mcColor)' $infile >> $outfile");
+
+    foreach($sc as $scRange)
+        exec("prekin -quiet -append -nogroup -listmaster 'sc alt confs' -bval -scope $scRange -show 'sc($scColor)' $infile >> $outfile");
+}
+#}}}########################################################################
+
 #{{{ makeBadRamachandranKin - appends mc of Ramachandran outliers
 ############################################################################
 /**
 * rama is the data from loadRamachandran(),
 * or null to have the data generated automatically.
 */
-function makeBadRamachandranKin($infile, $outfile, $rama = null, $color = 'red')
+function makeBadRamachandranKin($infile, $outfile, $rama = null, $color = 'green')
 {
-    if(!$rama)
+    // Jane still likes this best.
+    exec("java -cp ".MP_BASE_DIR."/lib/hless.jar hless.Ramachandran -nosummary -outliers $color < $infile >> $outfile");
+    
+    // This uses Prekin, but just produces chunks of mainchain. Hard to see.
+    /*if(!$rama)
     {
         $tmp = tempnam(MP_BASE_DIR."/tmp", "tmp_rama_");
         runRamachandran($infile, $tmp);
@@ -194,9 +272,9 @@ function makeBadRamachandranKin($infile, $outfile, $rama = null, $color = 'red')
     
     foreach($mc as $mcRange)
     {
-        //echo("prekin -append -nogroup -listmaster 'Rama Outliers' -scope $mcRange -show 'mc($color)' $infile >> $outfile\n");
-        exec("prekin -append -nogroup -listmaster 'Rama Outliers' -scope $mcRange -show 'mc($color)' $infile >> $outfile");
-    }
+        //echo("prekin -append -nogroup -listmaster 'Rama outliers' -scope $mcRange -show 'mc($color)' $infile >> $outfile\n");
+        exec("prekin -append -nogroup -listmaster 'Rama outliers' -scope $mcRange -show 'mc($color)' $infile >> $outfile");
+    }*/
 }
 #}}}########################################################################
 
@@ -206,7 +284,7 @@ function makeBadRamachandranKin($infile, $outfile, $rama = null, $color = 'red')
 * rota is the data from loadRotamer(),
 * or null to have it generated on the fly.
 */
-function makeBadRotamerKin($infile, $outfile, $rota = null, $color = 'orange', $cutoff = 1.0)
+function makeBadRotamerKin($infile, $outfile, $rota = null, $color = 'gold', $cutoff = 1.0)
 {
     if(!$rota)
     {
@@ -245,6 +323,7 @@ function makeBadCbetaBalls($infile, $outfile)
 $0 ~ /^@/ { doprint = 0; }
 $0 ~ /^@(point)?master/ { print $0 }
 $0 ~ /^@balllist/ { doprint = 1; print $0 " master= {Cbeta dev}"; }
+{ bigbeta = 0 }
 match($0, /^\{ cb .+ r=([0-9]\.[0-9]+) /, frag) { gsub(/gold|pink/, "magenta"); bigbeta = (frag[1]+0 >= 0.25); }
 doprint && bigbeta';
     
@@ -257,7 +336,7 @@ doprint && bigbeta';
 function makeBadPPerpKin($infile, $outfile)
 {
     $h = fopen($outfile, 'a');
-    fwrite($h, "@subgroup {base-phos perp} dominant master={base-P outliers}\n");
+    fwrite($h, "@subgroup {base-phos perp} dominant master= {base-P outliers}\n");
     fclose($h);
     
     exec("prekin -quiet -append -nogroup -pperpoutliers $infile >> $outfile");
@@ -371,18 +450,7 @@ function makeOccupancyScale($infile, $outfile)
 }
 #}}}########################################################################
 
-#{{{ makeFlipkin - runs Flipkin to generate a summary of the Reduce -build changes
-############################################################################
-/**
-*/
-function makeFlipkin($inpath, $outpathAsnGln, $outpathHis)
-{
-    // $_SESSION[hetdict] is used to set REDUCE_HET_DICT environment variable,
-    // so it doesn't need to appear on the command line here.
-    exec("flipkin -limit" . MP_REDUCE_LIMIT . " $inpath > $outpathAsnGln");
-    exec("flipkin -limit" . MP_REDUCE_LIMIT . " -h $inpath > $outpathHis");
-}
-#}}}########################################################################
+
 
 #{{{ makeMulticritChart - display all quality metrics at once in 2-D
 ############################################################################
@@ -400,7 +468,11 @@ function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pp
 {
     // Make sure all residues are represented, and in the right order.
     $res = listResidues($infile);
-    foreach($res as $k => $v) $res[$k] = array('cnit' => $v);
+    $orderIndex = 0; // used to maintain original PDB order on sorting.
+    foreach($res as $k => $v)
+    {
+        $res[$k] = array('cnit' => $v, 'order' => $orderIndex++);
+    }
     
     if(is_array($clash))
     {
@@ -416,13 +488,14 @@ function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pp
         foreach($rama as $item)
         {
             $res[$item['resName']]['rama_val'] = $item['scorePct'];
+            $phipsi = sprintf("%.1f,%.1f", $item['phi'], $item['psi']);
             if($item['eval'] == "OUTLIER")
             {
-                $res[$item['resName']]['rama'] = "<td bgcolor='#ff6699'>$item[eval] ($item[scorePct]%)<br><small>$item[type] - $item[phi],$item[psi]</small></td>";
+                $res[$item['resName']]['rama'] = "<td bgcolor='#ff6699'>$item[eval] ($item[scorePct]%)<br><small>$item[type] - $phipsi</small></td>";
                 $res[$item['resName']]['isbad'] = true;
             }
             else
-                $res[$item['resName']]['rama'] = "<td>$item[eval] ($item[scorePct]%)<br><small>$item[type] / $item[phi],$item[psi]</small></td>";
+                $res[$item['resName']]['rama'] = "<td>$item[eval] ($item[scorePct]%)<br><small>$item[type] / $phipsi</small></td>";
         }
     }
     if(is_array($rota))
@@ -475,7 +548,11 @@ function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pp
     elseif($sortBy == 'cbdev')      uasort($res, 'mcSortCbDev');
     elseif($sortBy == 'pperp')      uasort($res, 'mcSortPPerp');
     
+    // Do summary chart
     $out = fopen($outfile, 'wb');
+    $pdbstats = pdbstat($infile);
+    fwrite($out, makeSummaryStatsTable($pdbstats['resolution'], $clash, $rama, $rota, $cbdev, $pperp));
+    
     fwrite($out, "<table width='100%' cellspacing='1' border='0'>\n");
     fwrite($out, "<tr align='center' bgcolor='".MP_TABLE_HIGHLIGHT."'>\n");
     fwrite($out, "<td><b>Res</b></td>\n");
@@ -486,6 +563,15 @@ function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pp
     if(is_array($pperp))  fwrite($out, "<td><b>Base-P perp. dist.</b></td>\n");
     fwrite($out, "</tr>\n");
     
+    fwrite($out, "<tr align='center' bgcolor='".MP_TABLE_HIGHLIGHT."'>\n");
+    fwrite($out, "<td></td>\n");
+    if(is_array($clash))  fwrite($out, "<td>Clashscore: $clash[scoreAll]</td>\n");
+    if(is_array($rama))   fwrite($out, "<td>Outliers: ".count(findRamaOutliers($rama))." of ".count($rama)."</td>\n");
+    if(is_array($rota))   fwrite($out, "<td>Outliers: ".count(findRotaOutliers($rota))." of ".count($rota)."</td>\n");
+    if(is_array($cbdev))  fwrite($out, "<td>Outliers: ".count(findCbetaOutliers($cbdev))." of ".count($cbdev)."</td>\n");
+    if(is_array($pperp))  fwrite($out, "<td>Outliers: ".count(findBasePhosPerpOutliers($pperp))." of ".count($pperp)."</td>\n");
+    fwrite($out, "</tr>\n");
+
     $color = MP_TABLE_ALT1;
     foreach($res as $cnit => $eval)
     {
@@ -530,9 +616,12 @@ function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pp
 // for elements that compare as equal.
 function mcSortNatural($a, $b)
 {
-    if($a['cnit'] < $b['cnit'])     return -1;
-    elseif($a['cnit'] > $b['cnit']) return 1;
-    else                            return 0;
+    // Alphabetical sort moves _ chain IDs before A, which can sometimes
+    // end up putting hets at the beginning of the file. D'oh!
+    //if($a['cnit'] < $b['cnit'])     return -1;
+    //elseif($a['cnit'] > $b['cnit']) return 1;
+    //else                            return 0;
+    return ($a['order'] - $b['order']); // original order from the PDB file
 }
 
 function mcSortBad($a, $b)

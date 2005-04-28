@@ -136,7 +136,7 @@ function checkSettingsBeforeSubmit()
     <label><input type='checkbox' name='doSummaryStats' value='1' checked> <b>Summary statistics</b></label>
     <br><label><input type='checkbox' name='doMultiKin' value='1' checked onclick='syncSubcontrols()'> <b>Visual/3-D</b>: multi-criterion kinemage + other plots and kinemages</label>
     <div class='indent'>
-        <label><input type='checkbox' name='multiKinExtras' value='1' checked> Include rainbow ribbons, B-factor and occupancy colors, and alternate conformation markers.</label>
+        <label><input type='checkbox' name='multiKinExtras' value='1' checked> Include ribbons, B-factor and occupancy colors, and alternate conformation markers.</label>
     </div>
     <label><input type='checkbox' name='doMultiChart' value='1' checked onclick='syncSubcontrols()'> <b>Tabular</b>: multi-criterion chart + other lists and tables</label>
     <div class='indent'>

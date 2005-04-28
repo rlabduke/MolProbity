@@ -55,10 +55,13 @@ function display($context)
 
         echo "<h3>Select a method of adding H:</h3>";
         echo "<p><table width='100%' border='0'>\n";
-        $check1 = ($context['method'] == 'build' ? "checked" : "");
-        $check2 = ($context['method'] == 'nobuild' ? "checked" : "");
+        // Starts with no default method checked. This is well-intentioned but annoying.
+        //$check1 = ($context['method'] == 'build' ? "checked" : "");
+        //$check2 = ($context['method'] == 'nobuild' ? "checked" : "");
+        // Selects -BUILD by default unless the user changes it.
+        if($context['method'] == 'nobuild') { $check1 = ""; $check2 = "checked"; }
+        else                                { $check1 = "checked"; $check2 = ""; }
         echo "<tr valign='top'><td><input type='radio' name='method' value='build' $check1> <b>Add &amp; Optimize</b><td>";
-        //echo "<td><small>Add missing H, optimize H-bond networks, check for flipped Asn, Gln, His</small></td></tr>\n";
         echo "<td><small>Add missing H, optimize H-bond networks, check for flipped Asn, Gln, His";
         echo " (<code>Reduce -build</code>)\n";
         echo "<div class='inline_options'><b>Advanced options:</b>\n";

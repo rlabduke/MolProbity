@@ -131,7 +131,8 @@ $ok = true;
     <?php printPath(); ?>
 
 <hr><h2>External programs required by MolProbity:</h2>
-    <?php $ok &= testForProgs(array("which", "rm", "du", "df", "zip", "gunzip",
+    <?php $ok &= testForProgs(array("which", "rm", "du", "df",
+        "zip", "gzip", "gunzip",
         "php", "awk", "gawk", "perl", "java",
         "reduce", "prekin", "probe", "flipkin", "clashlist", "cluster",
         "pdbcns", "dang", "scrublines", "cksegid.pl",
