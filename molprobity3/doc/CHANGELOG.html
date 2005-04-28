@@ -12,6 +12,8 @@
     Prekin: doesn't mark pointmasters on the start of vectors (those flagged P)
     Reduce -nobuild: wrong protonation for 1gca His 152
         Wrong placement for het O3 H wrt R141 and D215 in 2DRI
+    NOEs thicker, esp. violations
+    Color by OCC/B still leaves SS as yellow (Prekin bug?)
 }}}
 {{{ Ideas, long-term goals, etc.
     User manual (do we need this in addition to page-by-page help?)
@@ -52,23 +54,23 @@
     Remove dump of $_SESSION from sitemap
     Allow "live" sorting of finished multi-chart
     How to handle multi-model Ramachandran plots when models are split out?
+    GZIP the multikin for faster download and smaller storage (config.php)
+        But then the file name changes!
+    Verb-centered (sitemap) vs. noun-centered (PDB "stable") interface
+    The "0+3" concept: single model, chain-chain (interface), overlapped pairs
+        (NCS, etc), large ensembles (NMR/MD)
 }}}
     Develop "helper" pages; mark optional steps clearly
     Output PDB header records for pasting into deposited files
     Pick lowest resolution number mentioned in file; allow override?
     Doc note: disable E_NOTICE or your screen will be flooded...
-    GZIP the multikin for faster download and smaller storage
-    Summary stats at top of multichart
-    Only one decimal place for phi, psi list
-    Sort by outliers first moves hets to top (unstable sort?) (1U4B)
     Add sc hiB or res hiB to multichart rotamers (and rama?)
-    SC off and not blue
-    Rama thick, green, and half-Ca
-    NOEs thicker, esp. violations
-    Cb dev master doesn't work for all subunits (2SOD)
+    2SOD: Rama. outlier output is also broken...
+        Prekin adds @listcolordominant to ribbons?
     Biol. units use MODELs rather than chain IDs? Check and then email P. Bourne
-    Color by OCC/B still leaves SS as yellow (Prekin bug?)
-    JSR: bring back B-factor ribbons
+    DANG is included in bin/ but we don't *use* it anywhere...
+    Create "geometrical" layout for icons on Site Map, like MP2 (JSR)
+ ** Clashstats for B lt 40 are not correct (done against raw clashscore)
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -88,6 +90,17 @@
 - NMR model splitter now puts model number first, not last (JSR)
 - AAC/geom: "Output Formats" section now mentions extra plots/kins/lists (JSR)
 - restored makeBfactorRibbons() function, though it's not in the multikin yet.
+- fixed: Sort by Outliers moves hets to top (het chain = _) (1U4B)
+- added gzip to list of required programs anticipating compression of lg. files
+- created overview flowchart for interaction of different UIs with lib/*
+- seriously reworked the multi-criterion kinemage for single-model mode
+- changed colors, esp. Rama markers to thick, green, half-Ca bonds.
+- changed rainbow ribbons back to B-factor ribbons for single models
+- phi,psi output in multi-crit list now truncated to one decimal place
+- put (some) summary stats at top of multichart
+- put stats summary table at top, too
+- factored summary stats table out of analyze.php:runAnalysis()
+- fixed CBdev AWK script so master works for all subunits (test case: 2SOD)
 
 ### 3beta13 ###
 - added check in index.php that a delegate page is actually specified
