@@ -83,24 +83,43 @@ function makeFileCommands($path, $url)
 {
     $s = '';
     $s .= "<td><small>".formatFilesize(filesize($path))."</small></td>";
-    if(endsWith(strtolower($path), ".kin"))
+    $lcPath = strtolower($path);
+    // Kinemages
+    if(endsWith($lcPath, ".kin"))
     {
         $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=plain' target='_blank'>plain text</a></small></td>";
         $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=kin' target='_blank'>highlighted</a></small></td>";
         $s .= "<td><small><a href='viewking.php?$_SESSION[sessTag]&url=$url' target='_blank'>in KiNG</a></small></td>";
     }
-    elseif(endsWith(strtolower($path), ".chart"))
+    // Compressed kinemages
+    elseif(endsWith($lcPath, ".kin.gz"))
+    {
+        $s .= "<td></td>";
+        $s .= "<td></td>";
+        $s .= "<td><small><a href='viewking.php?$_SESSION[sessTag]&url=$url' target='_blank'>in KiNG</a></small></td>";
+    }
+    // HTML
+    elseif(endsWith($lcPath, ".chart") || endsWith($lcPath, ".html"))
     {
         $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=plain' target='_blank'>plain text</a></small></td>";
         $s .= "<td></td>";
         $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=html' target='_blank'>as HTML</a></small></td>";
     }
-    elseif(endsWith(strtolower($path), ".pdf"))
+    // Binary results files
+    elseif(endsWith($lcPath, ".pdf"))
     {
         $s .= "<td></td>";
         $s .= "<td></td>";
         $s .= "<td></td>";
     }
+    // Binary archive files
+    elseif(endsWith($lcPath, ".gz") || endsWith($lcPath, ".tgz") || endsWith($lcPath, ".zip"))
+    {
+        $s .= "<td></td>";
+        $s .= "<td></td>";
+        $s .= "<td></td>";
+    }
+    // The default: assume plain text...
     else
     {
         $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=plain' target='_blank'>plain text</a></small></td>";

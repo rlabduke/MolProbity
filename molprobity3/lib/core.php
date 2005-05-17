@@ -13,6 +13,10 @@
 *****************************************************************************/
 // Someone else MUST have defined this before including us!
 if(!defined('MP_BASE_DIR')) die("MP_BASE_DIR is not defined.");
+// If we don't do this, newer PHP defaults will flood us with "errors" about
+// uninitiallized variables, keys not in arrays, etc. -- all the implicit PHP
+// behaviors that this code counts on  ;)
+error_reporting(E_ALL ^ E_NOTICE);
 
 require_once(MP_BASE_DIR.'/config/config.php'); // Import all the constants we use
 require_once(MP_BASE_DIR.'/lib/strings.php');
@@ -352,6 +356,13 @@ function sortFilesAlpha($list)
 function linkKinemage($fname, $name = null)
 {
     $file = $_SESSION['dataDir'].'/'.MP_DIR_KINS.'/'.$fname;
+        /* Experimental: detect if kinemage has been gzipped */
+        if(!is_file($file) && filesize($file.".gz") > 0)
+        {
+            $fname  .= ".gz";
+            $file   .= ".gz";
+        }
+        /* Experimental: detect if kinemage has been gzipped */
     $link = $_SESSION['dataURL'].'/'.MP_DIR_KINS.'/'.$fname;
     if($name == null) $name = $fname;
     $s = "";
@@ -408,6 +419,17 @@ function makeZipForSession()
     
     $_SESSION['archives'][] = $outname;
     return $outname;
+}
+#}}}########################################################################
+
+#{{{ destructiveGZipFile - overwrites foo.bar with foo.bar.gz
+############################################################################
+function destructiveGZipFile($path)
+{
+    exec("gzip -f $path");  // -f to force overwrite
+    clearstatcache();       // so we don't still think $path exists
+    if(is_file($path))      // this *should* never be true...
+        echo "destructiveGZipFile: $path was not overwritten\n";
 }
 #}}}########################################################################
 

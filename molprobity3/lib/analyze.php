@@ -124,7 +124,7 @@ function runAnalysis($modelID, $opts)
         $outfile = "$chartDir/$model[prefix]clashlist.txt";
         runClashlist($infile, $outfile);
         $clash = loadClashlist($outfile);
-        //$clashPct = runClashStats($model['stats']['resolution'], $clash['scoreAll']);
+        //$clashPct = runClashStats($model['stats']['resolution'], $clash['scoreAll'], $clash['scoreBlt40']);
         $tasks['clashlist'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=plain' target='_blank'>preview</a>\n";
         setProgress($tasks, 'clashlist'); // so the preview link is visible
     }
@@ -157,6 +157,10 @@ function runAnalysis($modelID, $opts)
         );
         $outfile = "$kinDir/$model[prefix]multi.kin";
         makeMulticritKin(array($infile), $outfile, $mcKinOpts);
+        
+        // EXPERIMENTAL: gzip compress large multikins
+        if(filesize($outfile) > MP_KIN_GZIP_THRESHOLD)
+            destructiveGZipFile($outfile);
     }
     //}}} Build multi-criterion chart, kinemage
     
@@ -212,7 +216,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
     $entry .= "<p><table border='1' width='100%'>\n";
     if(is_array($clash))
     {
-        $clashPct = runClashStats($resolution, $clash['scoreAll']);
+        $clashPct = runClashStats($resolution, $clash['scoreAll'], $clash['scoreBlt40']);
         if($clashPct['pct_rank'] <= 33)     $bg = $bgPoor;
         elseif($clashPct['pct_rank'] <= 66) $bg = $bgFair;
         else                                $bg = $bgGood;
@@ -295,7 +299,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
         $entry .= "</tr>\n";
     }
     $entry .= "</table>\n";
-    if(is_array($clash)) $entry .= "<small>* 0<sup>th</sup> percentile is the worst among structures between $clashPct[minresol]&Aring; and $clashPct[maxresol]&Aring;; 100<sup>th</sup> percentile is the best.</small>\n";
+    if(is_array($clash)) $entry .= "<small>* 100<sup>th</sup> percentile is the best among structures between $clashPct[minresol]&Aring; and $clashPct[maxresol]&Aring;; 0<sup>th</sup> percentile is the worst.</small>\n";
     $entry .= "</p>\n"; // end of summary stats table
     return $entry;
 }
@@ -568,13 +572,13 @@ function findClashOutliers($clash)
 *   pct_rank        the percentile rank of this structure, 100 is great, 0 is bad
 *   pct_rank40      the percentile rank of this structure for B < 40
 */
-function runClashStats($resol, $clashscore)
+function runClashStats($resol, $clashscore, $clashscoreBlt40)
 {
     // Determine the percentile rank of this structure
     // fields are minres, maxres, n_samples, pct_rank
     $bin = MP_BASE_DIR.'/bin';
     $lib = MP_BASE_DIR.'/lib';
-    $cmd = "gawk -v res=$resol -v cs=$clashscore -f $bin/cs-rank.awk $lib/clashscore.db.tab";
+    $cmd = "gawk -v res=$resol -v cs=$clashscore -v cs40=$clashscoreBlt40 -f $bin/cs-rank.awk $lib/clashscore.db.tab";
     //echo $cmd."\n";
     $fields = explode(":", trim(shell_exec($cmd)));
     //print_r($fields);

@@ -39,7 +39,7 @@
     Allow uploads of tarballs of NMR models?
     On upload of alt conf model, do table to choose which ones to use
     "nice" large jobs such as multi-model NMR runs
-    Write management and monitoring scripts for administrators
+    Write management and *monitoring* scripts for administrators
     Allow simple comparison of bad residues in two models; see jobs/aacgeom.php
     Rama outliers in multicrit kin don't look so hot (Ca-Ca, yellow?)
     ORACLE output for TN Bhat
@@ -54,27 +54,33 @@
     Remove dump of $_SESSION from sitemap
     Allow "live" sorting of finished multi-chart
     How to handle multi-model Ramachandran plots when models are split out?
-    GZIP the multikin for faster download and smaller storage (config.php)
-        But then the file name changes!
     Verb-centered (sitemap) vs. noun-centered (PDB "stable") interface
     The "0+3" concept: single model, chain-chain (interface), overlapped pairs
         (NCS, etc), large ensembles (NMR/MD)
+    Support "permevents" for notebook pages - eval() or just a pageCall() target
 }}}
     Develop "helper" pages; mark optional steps clearly
-    Output PDB header records for pasting into deposited files
+    Output PDB header records for pasting into deposited files (REMARK 42)
     Pick lowest resolution number mentioned in file; allow override?
-    Doc note: disable E_NOTICE or your screen will be flooded...
     Add sc hiB or res hiB to multichart rotamers (and rama?)
     2SOD: Rama. outlier output is also broken...
         Prekin adds @listcolordominant to ribbons?
     Biol. units use MODELs rather than chain IDs? Check and then email P. Bourne
     DANG is included in bin/ but we don't *use* it anywhere...
     Create "geometrical" layout for icons on Site Map, like MP2 (JSR)
- ** Clashstats for B lt 40 are not correct (done against raw clashscore)
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
+
+### 3beta15 ###
+- clash stats for score B lt 40 are now done correctly rather than against the
+  raw clashscore, which was producing an unfair negative bias for all structures
+- made explanation of percentile rank more upbeat: "100 is best...; 0 is worst"
+- experimental: gzip large multikins (see core.php, analyze.php in lib/)
+- file browser: links for .kin.gz, .gz, .tgz, .zip, .html
+- core.php now turns off E_NOTICE, which should save reconfiguring newer PHPs.
+- cleaned up multikin gzip code -- it seems to work, so we'll keep it for now.
 
 ### 3beta14 ###
 - added "start" parameter to allow starting other places besides welcome page

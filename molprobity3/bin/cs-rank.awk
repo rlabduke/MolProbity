@@ -13,16 +13,17 @@
 # min_res may be 0 and max_res may be "9999" if this
 # structure is out of range relative to the database.
 #
-# It expects the variables cs (clashscore of query structure) and
+# It expects the variables cs and cs40 (clashscores of query structure) and
 # res (resolution in Angstroms of query structure) to be defined
 # on the command line with the -v switch. It also expects to be
 # supplied with "clashlist.db", a tab file produced from the Top500
 # and from MedRes.
 #
-#   awk -v res=<resolution> -v cs=<clashscore> -f cs-rank.awk clashlist.db
+#   awk -v res=<resolution> -v cs=<clashscore> -v cs40=<clashscore, B less than 40> -f cs-rank.awk clashlist.db
 #
 # 19 Feb 2003, IWD
 # 29 Oct 2004, IWD: updated to use database from SCOP 2000 dataset.
+# 11 May 2005, IWD: added cs40, to get a fair statistic for that ranking!
 #
 BEGIN {
     windowHalfWidth = 0.25
@@ -50,8 +51,8 @@ BEGIN {
 }
 $0 !~ /^\#/ && minres <= $2 && $2 <= maxres {
     nSamples++
-    if($3 >= cs) { nWorse++ }
-    if($4 >= cs) { nWorse40++ }
+    if($3 >= cs)    { nWorse++ }
+    if($4 >= cs40)  { nWorse40++ }
 }
 END {
     pctRank = int(100.0*nWorse / nSamples)

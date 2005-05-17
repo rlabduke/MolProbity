@@ -17,7 +17,7 @@ define("MP_EMAIL_WEBMASTER", "webmaster@$_SERVER[SERVER_NAME]");
 //  have execute permission for these.
 //
 //  Does not need to include the bin/, bin/macosx/,
-//  and/or bin/linux-rh73 directories -- these are
+//  and/or bin/linux directories -- these are
 //  included automatically as appropriate.
 //
 //  These directories have highest precedence of all.
@@ -53,6 +53,10 @@ define("MP_SESSION_LIFETIME", 60*60*24*14); // 14 days
 // How large a session can grow, in bytes
 define("MP_SESSION_MAX_SIZE", 200*1000*1000); // 200 Mb
 
+// Kinemages above this size will be gzipped (in most cases).
+// To disable, set to a very large value, like 100 Gb.
+define("MP_KIN_GZIP_THRESHOLD", 1*1000*1000); // 1 Mb
+
 // Alternating colors for striped tables
 define("MP_TABLE_ALT1", "#ffffff");
 define("MP_TABLE_ALT2", "#f0f0f0");
@@ -84,6 +88,6 @@ define("MP_EMAIL_AUTHOR", "moler@kinemage.biochem.duke.edu,iwd@duke.edu");
 define("MP_SESSION_NAME", "MolProbSID");
 
 // Current "internal reference" version number. Please DO NOT change.
-define("MP_VERSION", "3beta14");
+define("MP_VERSION", "3beta15");
 
 ?>
