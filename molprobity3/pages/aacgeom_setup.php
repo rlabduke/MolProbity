@@ -151,6 +151,7 @@ function checkSettingsBeforeSubmit()
             <option value='pperp'>Base-P distance outliers</option>
         </select></label>
     </div>
+    <label><input type='checkbox' name='doRemark42' value='1' checked> <b>REMARK 42</b>: official summary of MolProbity validation embedded in PDB file as REMARK 42</label>
 </div>
 <?php
         echo "<p><table width='100%' border='0'><tr>\n";

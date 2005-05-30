@@ -121,9 +121,9 @@ $ok = true;
         echo "<li>Safe mode disabled - good.</li>\n";
 
     if(ini_get('display_errors'))
-        echo "<li>PHP error-display is enabled - good. This should make debugging easier.</li>\n";
+        echo "<li>PHP display_errors is enabled - good. This should make debugging easier.</li>\n";
     else
-        echo "<li><b>PHP error-display is disabled.</b> This makes it much harder to debug MolProbity, so check your webserver logs for PHP errors.</li>\n";
+        echo "<li><b>PHP display_errors is disabled.</b> This makes it much harder to debug MolProbity, so check your webserver logs for PHP errors.</li>\n";
 ?>
 </ul>
 
