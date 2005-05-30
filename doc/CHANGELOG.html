@@ -14,6 +14,8 @@
         Wrong placement for het O3 H wrt R141 and D215 in 2DRI
     NOEs thicker, esp. violations
     Color by OCC/B still leaves SS as yellow (Prekin bug?)
+    Prekin: dangling altB C--N for 1NBX B 29 (whenever i has all A and B alts)
+    Prekin: unwanted @listcolordominant for multi-subunit ribbons
 }}}
 {{{ Ideas, long-term goals, etc.
     User manual (do we need this in addition to page-by-page help?)
@@ -25,6 +27,7 @@
     document PHP version needed (which is...? >=4.1:superglobals >=4.3:CLI)
         4.1.0 doesn't work on kinemage: cmd line can't load 'session mm'
         4.1.2 seems to work on arachne
+        4.3.7 introduces a critical bug-fix to printf(); see #28633 and #29286
     Should analysis of worst residues ignore water or treat it separately?
     ZIP download should include a static view of the lab notebook?
     Download ZIP archives of session files
@@ -60,14 +63,22 @@
     Support "permevents" for notebook pages - eval() or just a pageCall() target
 }}}
     Develop "helper" pages; mark optional steps clearly
-    Output PDB header records for pasting into deposited files (REMARK 42)
     Pick lowest resolution number mentioned in file; allow override?
     Add sc hiB or res hiB to multichart rotamers (and rama?)
     2SOD: Rama. outlier output is also broken...
-        Prekin adds @listcolordominant to ribbons?
+        Exception in thread "main" java.lang.NullPointerException
+                at hless.Triple.midpoint(Triple.java:209)
+                at hless.Ramachandran.drawOutlierCaTrace(Ramachandran.java:488)
+                at hless.Ramachandran.Main(Ramachandran.java:819)
+                at hless.Ramachandran.main(Ramachandran.java:852)
     Biol. units use MODELs rather than chain IDs? Check and then email P. Bourne
     DANG is included in bin/ but we don't *use* it anywhere...
     Create "geometrical" layout for icons on Site Map, like MP2 (JSR)
+    LIST of interacting (residues|*ATOMS*) across an interface
+    Link flipkins (if avail.) to Reduce notebook page
+ ** Upgrade Arachne's PHP to ge 4.3.7
+    Remove "highlighted" kinemage view from downloads page
+    IE 6.x has page-caching problems with MolProbity3?
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -81,6 +92,12 @@
 - file browser: links for .kin.gz, .gz, .tgz, .zip, .html
 - core.php now turns off E_NOTICE, which should save reconfiguring newer PHPs.
 - cleaned up multikin gzip code -- it seems to work, so we'll keep it for now.
+- removed the (ugly) gray clock face from behind the spinning SOD "progress bar"
+- moved makeSummaryStatsTable() from analyze.php to visualize.php
+- moved to PHP 5.0.4 due to a printf() bug prior to 4.3.7
+- wrote makeRemark42(), which was affected by said printf() bug
+- wrote replacePdbRemark() to insert/update REMARK 42 records
+- added interface for REMARK 42 in AAC/geom. pages
 
 ### 3beta14 ###
 - added "start" parameter to allow starting other places besides welcome page

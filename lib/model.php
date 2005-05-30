@@ -705,6 +705,61 @@ function remapSegIDs($inpath, $outpath, $mapString)
 }
 #}}}########################################################################
 
+#{{{ replacePdbRemark - used for inserting REMARK 42
+############################################################################
+/**
+* Inserts the given block of text into the named PDB file.
+*/
+function replacePdbRemark($inpath, $remarkText, $remarkNumber)
+{
+    // Make a copy of the starting PDB file into the tmp dir
+    $outpath = $inpath;
+    $inpath = tempnam(MP_BASE_DIR."/tmp", "tmp_remark_");
+    copy($outpath, $inpath);
+    // Open input and output streams
+    $in = fopen($inpath, 'r');
+    $out = fopen($outpath, 'w');
+    // Copy headers and remarks that precede ours...
+    while(!feof($in))
+    {
+        $line = fgets($in, 1024);
+        $start = substr($line, 0, 6);
+        if($start == 'REMARK')
+        {
+            $num = substr($line, 7, 3) + 0;
+            if($num >= $remarkNumber) break;
+            else fwrite($out, $line);
+        }
+        elseif($start == 'USER  ' || $start == 'HEADER' || $start == 'OBSLTE' || $start == 'TITLE ' || $start == 'CAVEAT'
+        || $start == 'COMPND' || $start == 'SOURCE' || $start == 'KEYWDS' || $start == 'EXPDTA' || $start == 'AUTHOR'
+        || $start == 'REVDAT' || $start == 'SPRSDE' || $start == 'JRNL  ')
+        {
+            fwrite($out, $line);
+        }
+        else break; // abort loop for any other type of record
+    }
+    // Write our remark
+    fwrite($out, $remarkText);
+    // Copy remaining records, skipping any with our same remark number
+    while(!feof($in))
+    {
+        $line = fgets($in, 1024);
+        $start = substr($line, 0, 6);
+        if($start == 'REMARK')
+        {
+            $num = substr($line, 7, 3) + 0;
+            if($num == $remarkNumber) continue;
+        }
+        fwrite($out, $line);
+    }
+    // Close streams
+    fclose($out);
+    fclose($in);
+    // Remove duplicate of original file
+    unlink($inpath);
+}
+#}}}########################################################################
+
 #{{{ a_function_definition - sumary_statement_goes_here
 ############################################################################
 /**

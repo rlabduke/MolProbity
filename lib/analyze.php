@@ -12,6 +12,7 @@
 *****************************************************************************/
 require_once(MP_BASE_DIR.'/lib/strings.php');
 require_once(MP_BASE_DIR.'/lib/visualize.php'); // for making kinemages
+require_once(MP_BASE_DIR.'/lib/model.php'); // for making kinemages
 
 #{{{ runAnalysis - generate (a subset of) all the validation criteria
 ############################################################################
@@ -34,6 +35,7 @@ require_once(MP_BASE_DIR.'/lib/visualize.php'); // for making kinemages
 *       multiKinExtras  include ribbons, B's and Q's, and alt confs
 *       doMultiChart    make multicrit chart
 *       multiChartSort  how to sort the chart [ see makeMulticritChart() ]
+*       doRemark42      make a REMARK 42 record and insert it in the PDB file
 *       
 * This function returns some HTML suitable for using in a lab notebook entry.
 */
@@ -42,6 +44,7 @@ function runAnalysis($modelID, $opts)
     //{{{ Set up file/directory vars and the task list
     $model      = $_SESSION['models'][$modelID];
     $modelDir   = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
+    $modelURL   = $_SESSION['dataURL'].'/'.MP_DIR_MODELS;
     $kinDir     = $_SESSION['dataDir'].'/'.MP_DIR_KINS;
     $kinURL     = $_SESSION['dataURL'].'/'.MP_DIR_KINS;
         if(!file_exists($kinDir)) mkdir($kinDir, 0777);
@@ -63,6 +66,7 @@ function runAnalysis($modelID, $opts)
     if($runClashlist)           $tasks['clashlist'] = "Run <code>clashlist</code> to find bad clashes and clashscore";
     if($opts['doMultiChart'])   $tasks['multichart'] = "Create multi-criterion chart";
     if($opts['doMultiKin'])     $tasks['multikin'] = "Create multi-criterion kinemage";
+    if($opts['doRemark42'])     $tasks['remark42'] = "Create REMARK 42 record for the PDB file";
     //}}} Set up file/directory vars and the task list
     
     //{{{ Run protein geometry programs and offer kins to user
@@ -164,6 +168,15 @@ function runAnalysis($modelID, $opts)
     }
     //}}} Build multi-criterion chart, kinemage
     
+    //{{{ Create REMARK 42 and insert into PDB file
+    if($opts['doRemark42'] && (is_array($clash) || is_array($rama) || is_array($rota)))
+    {
+        setProgress($tasks, 'remark42'); // updates the progress display if running as a background job
+        $remark42 = makeRemark42($clash, $rama, $rota);
+        replacePdbRemark($infile, $remark42, 42);
+    }
+    //}}} Create REMARK 42 and insert into PDB file
+    
     //{{{ Create lab notebook entry
     $entry = "";
     if($opts['doSummaryStats'])
@@ -194,113 +207,21 @@ function runAnalysis($modelID, $opts)
         $entry .= "<li>".linkKinemage("$model[prefix]cb2d.kin", "C&beta; deviation scatter plot (2D)")."</li>\n";
     }
     $entry .= "</ul>\n";
+    
+    if($opts['doRemark42'])
+    {
+        $entry .= "<h3>REMARK 42</h3>";
+        if(is_array($clash) || is_array($rama) || is_array($rota))
+        {
+            $url = "$modelURL/$model[pdb]";
+            $entry .= "You can <a href='$url'>download your PDB file with REMARK 42</a> inserted.\n";
+            $entry .= "<p><pre>$remark42</pre></p>";
+        }
+        else $entry .= "<i>Clash, Ramachandran, and/or rotamer analysis must be run to create REMARK 42.</i>\n";
+    }
     //}}} Create lab notebook entry
     
     setProgress($tasks, null); // everything is finished
-    return $entry;
-}
-#}}}########################################################################
-
-#{{{ makeSummaryStatsTable - HTML table summary of validation statistics
-############################################################################
-/**
-* Documentation for this function.
-*/
-function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp)
-{
-    $entry = "";
-    $bgPoor = '#ff9999';
-    $bgFair = '#ffff99';
-    $bgGood = '#99ff99';
-    
-    $entry .= "<p><table border='1' width='100%'>\n";
-    if(is_array($clash))
-    {
-        $clashPct = runClashStats($resolution, $clash['scoreAll'], $clash['scoreBlt40']);
-        if($clashPct['pct_rank'] <= 33)     $bg = $bgPoor;
-        elseif($clashPct['pct_rank'] <= 66) $bg = $bgFair;
-        else                                $bg = $bgGood;
-        $entry .= "<tr><td rowspan='2' align='center'>All-Atom<br>Contacts</td>\n";
-        $entry .= "<td>Clashscore, all atoms:</td><td bgcolor='$bg'>$clash[scoreAll]</td>\n";
-        $entry .= "<td>$clashPct[pct_rank]<sup>".ordinalSuffix($clashPct['pct_rank'])."</sup> percentile<sup>*</sup> (N=$clashPct[n_samples])</td></tr>\n";
-        
-        if($clashPct['pct_rank40'] <= 33)       $bg = $bgPoor;
-        elseif($clashPct['pct_rank40'] <= 66)   $bg = $bgFair;
-        else                                    $bg = $bgGood;
-        $entry .= "<tr><td>Clashscore, B&lt;40:</td><td bgcolor='$bg'>$clash[scoreBlt40]</td>\n";
-        $entry .= "<td>$clashPct[pct_rank40]<sup>".ordinalSuffix($clashPct['pct_rank40'])."</sup> percentile<sup>*</sup> (N=$clashPct[n_samples])</td></tr>\n";
-    }
-    $proteinRows = 0;
-    if(is_array($rama))    $proteinRows += 2;
-    if(is_array($rota))    $proteinRows += 1;
-    if(is_array($cbdev))   $proteinRows += 1;
-    if($proteinRows > 0)
-    {
-        $entry .= "<tr><td rowspan='$proteinRows' align='center'>Protein<br>Geometry</td>\n";
-        $firstRow = true;
-        if(is_array($rama))
-        {
-            $ramaOut = count(findRamaOutliers($rama));
-            foreach($rama as $r) { if($r['eval'] == "Favored") $ramaFav++; }
-            $ramaTot = count($rama);
-            $ramaOutPct = sprintf("%.2f", 100.0 * $ramaOut / $ramaTot);
-            $ramaFavPct = sprintf("%.2f", 100.0 * $ramaFav / $ramaTot);
-            
-            if($firstRow) $firstRow = false;
-            else $entry .= "<tr>";
-
-            if($ramaOut == 0) $bg = $bgGood;
-            elseif($ramaOut == 1 || $ramaOutPct+0 <= 0.5) $bg = $bgFair;
-            else $bg = $bgPoor;
-            $entry .= "<td>Ramachandran outliers</td><td bgcolor='$bg'>$ramaOutPct%</td>\n";
-            $entry .= "<td>Goal: &lt;0.05%</td></tr>\n";
-            if($ramaFavPct+0 >= 98)     $bg = $bgGood;
-            elseif($ramaFavPct+0 >= 95) $bg = $bgFair;
-            else                        $bg = $bgPoor;
-            $entry .= "<tr><td>Ramachandran favored</td><td bgcolor='$bg'>$ramaFavPct%</td>\n";
-            $entry .= "<td>Goal: &gt;98%</td></tr>\n";
-        }
-        if(is_array($rota))
-        {
-            $rotaOut = count(findRotaOutliers($rota));
-            $rotaTot = count($rota);
-            $rotaOutPct = sprintf("%.2f", 100.0 * $rotaOut / $rotaTot);
-            
-            if($firstRow) $firstRow = false;
-            else $entry .= "<tr>";
-            
-            if($rotaOutPct+0 <= 1)      $bg = $bgGood;
-            elseif($rotaOutPct+0 <= 5)  $bg = $bgFair;
-            else                        $bg = $bgPoor;
-            $entry .= "<td>Rotamer outliers</td><td bgcolor='$bg'>$rotaOutPct%</td>\n";
-            $entry .= "<td>Goal: &lt;1%</td></tr>\n";
-        }
-        if(is_array($cbdev))
-        {
-            $cbOut = count(findCbetaOutliers($cbdev));
-            if($firstRow) $firstRow = false;
-            else $entry .= "<tr>";
-            
-            if($cbOut == 0) $bg = $bgGood;
-            else            $bg = $bgFair;
-            $entry .= "<td>C&beta; deviations &gt;0.25&Aring;</td><td bgcolor='$bg'>$cbOut</td>\n";
-            $entry .= "<td>Goal: 0</td></tr>\n";
-        }
-    }// end of protein-specific stats
-    if(is_array($pperp))
-    {
-        $pperpOut = count(findBasePhosPerpOutliers($pperp));
-        $pperpTot = count($pperp);
-        if($pperpOut == 0)  $bg = $bgGood;
-        else                $bg = $bgFair;
-        $entry .= "<tr><td rowspan='1' align='center'>Nucleic Acid<br>Geometry</td>\n";
-        $entry .= "<td>Base-P dist./pucker disagreement:</td><td bgcolor='$bg'>$pperpOut</td>\n";
-        $entry .= "<td>Goal: 0</td></tr>\n";
-        $entry .= "</tr>\n";
-    }
-    $entry .= "</table>\n";
-    if(is_array($clash)) $entry .= "<small>* 100<sup>th</sup> percentile is the best among structures between $clashPct[minresol]&Aring; and $clashPct[maxresol]&Aring;; 0<sup>th</sup> percentile is the worst.</small>\n";
-    $entry .= "</p>\n"; // end of summary stats table
     return $entry;
 }
 #}}}########################################################################
@@ -949,14 +870,6 @@ function groupAdjacentRes($resList)
     
     return $out;
 }
-#}}}########################################################################
-
-#{{{ a_function_definition - sumary_statement_goes_here
-############################################################################
-/**
-* Documentation for this function.
-*/
-//function someFunctionName() {}
 #}}}########################################################################
 
 #{{{ a_function_definition - sumary_statement_goes_here
