@@ -794,6 +794,37 @@ function listProteinResidues($infile)
 }
 #}}}########################################################################
 
+#{{{ listResidueBfactors - lists highest B-factor for each residue in a PDB file
+############################################################################
+/**
+* Returns NULL if the file could not be read.
+* Otherwise, an array with one key ('res') which points to another array
+* mapping CNIT codes to highest B-factor in any atom of the residue.
+* In the future, other top-level keys may be added, like 'mc' and 'sc'.
+* Does not account for the possibility of multiple MODELs.
+*/
+function listResidueBfactors($infile)
+{
+    $out = array();
+    
+    $in = fopen($infile, "r");
+    if(!$in) return NULL;
+    while(!feof($in))
+    {
+        $s = fgets($in, 1024);
+        if(startsWith($s, "ATOM") || startsWith($s, "HETATM"))
+        {
+            $res = pdbComposeResName($s);
+            $Bfact = substr($s, 60, 6) + 0;
+            $out[$res] = max($Bfact, $out[$res]);
+        }
+    }
+    fclose($in);
+
+    return array('res' => $out);
+}
+#}}}########################################################################
+
 #{{{ computeResCenters - finds (x,y,z) for residue (pseudo) center-of-mass from PDB
 ############################################################################
 /**
