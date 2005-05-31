@@ -61,23 +61,15 @@
     The "0+3" concept: single model, chain-chain (interface), overlapped pairs
         (NCS, etc), large ensembles (NMR/MD)
     Support "permevents" for notebook pages - eval() or just a pageCall() target
+    analyze::findAltConfs() should also support nuc. acid mc/sc classification
 }}}
     Develop "helper" pages; mark optional steps clearly
     Pick lowest resolution number mentioned in file; allow override?
-    Add sc hiB or res hiB to multichart rotamers (and rama?)
-    2SOD: Rama. outlier output is also broken...
-        Exception in thread "main" java.lang.NullPointerException
-                at hless.Triple.midpoint(Triple.java:209)
-                at hless.Ramachandran.drawOutlierCaTrace(Ramachandran.java:488)
-                at hless.Ramachandran.Main(Ramachandran.java:819)
-                at hless.Ramachandran.main(Ramachandran.java:852)
     Biol. units use MODELs rather than chain IDs? Check and then email P. Bourne
-    DANG is included in bin/ but we don't *use* it anywhere...
+    DANG is included in bin/ but we don't *use* it anywhere... / upgrade to 1.9
     Create "geometrical" layout for icons on Site Map, like MP2 (JSR)
     LIST of interacting (residues|*ATOMS*) across an interface
-    Link flipkins (if avail.) to Reduce notebook page
  ** Upgrade Arachne's PHP to ge 4.3.7
-    Remove "highlighted" kinemage view from downloads page
     IE 6.x has page-caching problems with MolProbity3?
     
 ==============================================================================
@@ -98,6 +90,11 @@
 - wrote makeRemark42(), which was affected by said printf() bug
 - wrote replacePdbRemark() to insert/update REMARK 42 records
 - added interface for REMARK 42 in AAC/geom. pages
+- fixed hless bug that threw NPEx when drawing 2SOD Rama outliers
+- linked flipkins (if avail.) to Reduce notebook page
+- removed "highlighted" kinemage view from downloads page
+- added some extra version checking to check_config.php
+- added res hiB to multichart for JSR
 
 ### 3beta14 ###
 - added "start" parameter to allow starting other places besides welcome page

@@ -90,8 +90,12 @@ $ok = true;
 <hr><h2>Server information:</h2>
 <ul>
 <?php
+    define("MINIMUM_ALLOWED_PHP_VERSION", "4.3.7");
     echo "<li>Current URL: http://$_SERVER[SERVER_NAME]$_SERVER[PHP_SELF]</li>\n";
-    echo "<li>PHP version (webserver): ".PHP_VERSION."</li>\n";
+    if(version_compare(PHP_VERSION, MINIMUM_ALLOWED_PHP_VERSION, "ge"))
+        echo "<li>PHP version (webserver): ".PHP_VERSION." - fine.</li>\n";
+    else
+        echo "<li><b>PHP version (webserver): ".PHP_VERSION."</b> - upgrade to ".MINIMUM_ALLOWED_PHP_VERSION." or newer.</li>\n";
     echo "<li>Operating system: ".PHP_OS."</li>\n";
     
     $magic = get_magic_quotes_gpc();
@@ -104,7 +108,7 @@ $ok = true;
     
     if(ini_get('file_uploads'))
     {
-        echo "<li>File uploads are enabled - good. Maximum size for file uploads will be the <b>minimum</b> of:\n";
+        echo "<li>File uploads are enabled - good. Maximum size for file uploads will be the <i>minimum</i> of:\n";
         echo "<ul>\n";
         echo "<li>post_max_size: <b>".ini_get('post_max_size')."</b> (in /etc/php.ini or equivalent)</li>\n";
         echo "<li>upload_max_filesize: <b>".ini_get('upload_max_filesize')."</b> (in /etc/php.ini or equivalent)</li>\n";
@@ -144,13 +148,25 @@ $ok = true;
 <ul>
 <?php
     // Reduce writes help on stderr
-    $reduce_help = explode("\n", shell_exec("reduce -help 2>&1"));
     $php_help = explode("\n", shell_exec("php -v"));
+    preg_match('/PHP ([0-9.]+)/', $php_help[0], $m);
+    if(version_compare($m[1], MINIMUM_ALLOWED_PHP_VERSION, "lt"))
+        echo "<li><b>PHP (cmd line): $php_help[0]</b> - upgrade to ".MINIMUM_ALLOWED_PHP_VERSION." or newer.</li>\n";
+    elseif(version_compare($m[1], PHP_VERSION, "ne"))
+        echo "<li><b>PHP (cmd line): $php_help[0]</b> - warning: does not match webserver version (".PHP_VERSION.").</li>\n";
+    else
+        echo "<li>PHP (cmd line): $php_help[0]</li>\n";
+    
+    $java_help = explode("\n", shell_exec("java -version 2>&1"));
+    $reduce_help = explode("\n", shell_exec("reduce -help 2>&1"));
+    preg_match('/version.+?\n/i', shell_exec("noe-display 2>&1"), $m);
+    $noe_version = $m[0];
 
-    echo "<li><b>PHP (cmd line):</b> $php_help[0]</li>\n";
-    echo "<li><b>Prekin:</b> ".exec("prekin -help")."</li>\n";
-    echo "<li><b>Reduce:</b> $reduce_help[0]</li>\n";
-    echo "<li><b>Probe:</b> ".exec("probe -version")."</li>\n";
+    echo "<li>Java (cmd line): $java_help[0]</li>\n";
+    echo "<li>Prekin: ".exec("prekin -help")."</li>\n";
+    echo "<li>Reduce: $reduce_help[0]</li>\n";
+    echo "<li>Probe: ".exec("probe -version")."</li>\n";
+    echo "<li>NOE-display: $noe_version</li>\n";
 ?>
 </ul>
 

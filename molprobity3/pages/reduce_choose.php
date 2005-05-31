@@ -181,6 +181,19 @@ function onRerunReduce($arg, $req)
         if($hcount['adj']) $entry .= "The positions of $hcount[adj] hydrogens were adjusted to optimize H-bonding.\n";
     }
     $entry .= "<p>You can now <a href='$url'>download the optimized and annotated PDB file</a> (".formatFilesize(filesize($pdb)).").</p>\n";
+
+    $nqkin = $_SESSION['dataDir'].'/'.MP_DIR_KINS."/$model[prefix]flipnq.kin";
+    $hiskin = $_SESSION['dataDir'].'/'.MP_DIR_KINS."/$model[prefix]fliphis.kin";
+    if(file_exists($nqkin) && file_exists($hiskin))
+    {
+        $entry .= "<p>These Flipkin kinemages illustrate both flip states for all Asn/Gln/His.\n";
+        $entry .= "Residues that Reduce <i>suggested</i> flipping are marked with stars (*) in the Views menu.\n";
+        $entry .= "<ul>\n";
+        $entry .= "<li>" . linkKinemage("$model[prefix]flipnq.kin") . "</li>\n";
+        $entry .= "<li>" . linkKinemage("$model[prefix]fliphis.kin") . "</li>\n";
+        $entry .= "</ul></p>\n";
+    }
+
     if(strpos($autoflip, "<li>") !== false) $entry .= $autoflip;
     if(strpos($userflip, "<li>") !== false) $entry .= $userflip;
     if(strpos($userkeep, "<li>") !== false) $entry .= $userkeep;

@@ -23,7 +23,7 @@ function display($context)
     echo "<tr bgcolor='".MP_TABLE_HIGHLIGHT."'>";
     echo "<td><b>File name</b></td>";
     echo "<td><b>Size</b></td>";
-    echo "<td colspan='3' align='center'><b>View...</b></td>";
+    echo "<td colspan='2' align='center'><b>View...</b></td>";
     echo "<td align='right'><b>Download</b></td>";
     $list = listRecursive($_SESSION['dataDir']);
     $list = sortFilesAlpha($list);
@@ -56,14 +56,14 @@ function makeFileList($list, $basePath, $baseURL, $isExpanded, $depth = 0)
             {
                 $s .= "<a href='".makeEventURL("onFolderClose", "$basePath/$dir")."'>";
                 $s .= "<img src='img/openfolder.gif'></a> ";
-                $s .= "<b>$dir</b></td><td colspan='5'></td></tr>\n";
+                $s .= "<b>$dir</b></td><td colspan='4'></td></tr>\n";
                 $s .= $this->makeFileList($file, "$basePath/$dir", "$baseURL/$dir", $isExpanded, $depth+1);
             }
             else
             {
                 $s .= "<a href='".makeEventURL("onFolderOpen", "$basePath/$dir")."'>";
                 $s .= "<img src='img/closedfolder.gif'></a> ";
-                $s .= "<b>$dir</b></td><td colspan='5'></td></tr>\n";
+                $s .= "<b>$dir</b></td><td colspan='4'></td></tr>\n";
             }
         }
         else
@@ -88,13 +88,12 @@ function makeFileCommands($path, $url)
     if(endsWith($lcPath, ".kin"))
     {
         $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=plain' target='_blank'>plain text</a></small></td>";
-        $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=kin' target='_blank'>highlighted</a></small></td>";
+        //$s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=kin' target='_blank'>highlighted</a></small></td>";
         $s .= "<td><small><a href='viewking.php?$_SESSION[sessTag]&url=$url' target='_blank'>in KiNG</a></small></td>";
     }
     // Compressed kinemages
     elseif(endsWith($lcPath, ".kin.gz"))
     {
-        $s .= "<td></td>";
         $s .= "<td></td>";
         $s .= "<td><small><a href='viewking.php?$_SESSION[sessTag]&url=$url' target='_blank'>in KiNG</a></small></td>";
     }
@@ -102,13 +101,11 @@ function makeFileCommands($path, $url)
     elseif(endsWith($lcPath, ".chart") || endsWith($lcPath, ".html"))
     {
         $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=plain' target='_blank'>plain text</a></small></td>";
-        $s .= "<td></td>";
         $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=html' target='_blank'>as HTML</a></small></td>";
     }
     // Binary results files
     elseif(endsWith($lcPath, ".pdf"))
     {
-        $s .= "<td></td>";
         $s .= "<td></td>";
         $s .= "<td></td>";
     }
@@ -117,13 +114,11 @@ function makeFileCommands($path, $url)
     {
         $s .= "<td></td>";
         $s .= "<td></td>";
-        $s .= "<td></td>";
     }
     // The default: assume plain text...
     else
     {
         $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=plain' target='_blank'>plain text</a></small></td>";
-        $s .= "<td></td>";
         $s .= "<td></td>";
     }
     $s .= "<td align='right'><small><a href='$url'><img src='img/download.gif'> Download</a></small></td>";

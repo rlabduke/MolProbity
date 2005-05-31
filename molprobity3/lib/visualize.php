@@ -571,6 +571,9 @@ function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pp
 {
     // Make sure all residues are represented, and in the right order.
     $res = listResidues($infile);
+    $Bfact = listResidueBfactors($infile);
+    $Bfact = $Bfact['res'];
+    
     $orderIndex = 0; // used to maintain original PDB order on sorting.
     foreach($res as $k => $v)
     {
@@ -659,6 +662,7 @@ function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pp
     fwrite($out, "<table width='100%' cellspacing='1' border='0'>\n");
     fwrite($out, "<tr align='center' bgcolor='".MP_TABLE_HIGHLIGHT."'>\n");
     fwrite($out, "<td><b>Res</b></td>\n");
+    fwrite($out, "<td><b>High B</b></td>\n");
     if(is_array($clash))  fwrite($out, "<td><b>Clash &gt; 0.4&Aring;</b></td>\n");
     if(is_array($rama))   fwrite($out, "<td><b>Ramachandran</b></td>\n");
     if(is_array($rota))   fwrite($out, "<td><b>Rotamer</b></td>\n");
@@ -668,6 +672,7 @@ function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pp
     
     fwrite($out, "<tr align='center' bgcolor='".MP_TABLE_HIGHLIGHT."'>\n");
     fwrite($out, "<td></td>\n");
+    fwrite($out, sprintf("<td>Avg: %.2f</td>\n", array_sum($Bfact)/count($Bfact)));
     if(is_array($clash))  fwrite($out, "<td>Clashscore: $clash[scoreAll]</td>\n");
     if(is_array($rama))   fwrite($out, "<td>Outliers: ".count(findRamaOutliers($rama))." of ".count($rama)."</td>\n");
     if(is_array($rota))   fwrite($out, "<td>Outliers: ".count(findRotaOutliers($rota))." of ".count($rota)."</td>\n");
@@ -680,6 +685,7 @@ function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pp
     {
         fwrite($out, "<tr align='center' bgcolor='$color'>");
         fwrite($out, "<td align='left'>$cnit</td>");
+        fwrite($out, "<td>".$Bfact[$cnit]."</td>");
         if(is_array($clash))
         {
             if(isset($eval['clash']))   fwrite($out, $eval['clash']);
