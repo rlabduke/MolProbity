@@ -12,13 +12,8 @@ Checks on prerequisites for running MolProbity and reports on their status.
 // data for some reason, you must call mpInitEnvirons() instead.
     mpInitEnvirons();
 
-#{{{ a_function_definition - sumary_statement_goes_here
-############################################################################
-/**
-* Documentation for this function.
-*/
-//function someFunctionName() {}
-#}}}########################################################################
+function sortTTL($a, $b) { return $b['ttl'] - $a['ttl']; }
+function sortSize($a, $b) { return $b['size'] - $a['size']; }
 
 if($_REQUEST['cmd'] == "Destroy")
 {
@@ -31,31 +26,39 @@ if($_REQUEST['cmd'] == "Destroy")
     <title>MolProbity - show sessions</title>
 </head>
 <body bgcolor="#FFFFFF" text="#000000" link="#000099" vlink="#000099" alink="#990000">
-<table width=100%>
-<tr>
-<td><b>Session ID</b></td>
-<td><b>Last touched</b></td>
-<td><b>Time-to-live</b></td>
-<td><b>Size on disk</b></td>
-<td><!-- space for "Enter" cmd --></td>
-<td><!-- space for "Destroy" cmd --></td>
-</tr>
 <?php
     $sessList = mpEnumerateSessions();
-    foreach($sessList as $sess)
+    if(count($sessList) > 0)
     {
+        if($_REQUEST['sort'] == 'ttl')      usort($sessList, 'sortTTL');
+        elseif($_REQUEST['sort'] == 'size') usort($sessList, 'sortSize');
+        
+        echo "<table width=100%>\n";
         echo "<tr>\n";
-        echo "<td>$sess[id]</td>\n";
-        echo "<td>".formatMinutesElapsed(MP_SESSION_LIFETIME - $sess['ttl'])." ago</td>\n";
-        echo "<td>".formatHoursElapsed($sess['ttl'])."</td>\n";
-        echo "<td>".formatFilesize($sess['size'])."</td>\n";
-        echo "<td><a href='../index.php?".MP_SESSION_NAME."=$sess[id]'>Enter</a></td>\n";
-        // We use basename() to get "index.php" instead of the full path,
-        // which is subject to corruption with URL forwarding thru kinemage.
-        echo "<td><a href='".basename($_SERVER['PHP_SELF'])."?cmd=Destroy&target=$sess[id]'>Destroy</a></td>\n";
+        echo "<td><b>Session ID</b></td>\n";
+        echo "<td><a href='".basename($_SERVER['PHP_SELF'])."?sort=ttl'><b>Last touched</b></a></td>\n";
+        echo "<td><b>Time-to-live</b></td>\n";
+        echo "<td><a href='".basename($_SERVER['PHP_SELF'])."?sort=size'><b>Size on disk</b></a></td>\n";
+        echo "<td><!-- space for Enter cmd --></td>\n";
+        echo "<td><!-- space for Destroy cmd --></td>\n";
         echo "</tr>\n";
+        foreach($sessList as $sess)
+        {
+            echo "<tr>\n";
+            echo "<td>$sess[id]</td>\n";
+            echo "<td>".formatMinutesElapsed(MP_SESSION_LIFETIME - $sess['ttl'])." ago</td>\n";
+            echo "<td>".formatHoursElapsed($sess['ttl'])."</td>\n";
+            echo "<td>".formatFilesize($sess['size'])."</td>\n";
+            echo "<td><a href='../index.php?".MP_SESSION_NAME."=$sess[id]'>Enter</a></td>\n";
+            // We use basename() to get "index.php" instead of the full path,
+            // which is subject to corruption with URL forwarding thru kinemage.
+            echo "<td><a href='".basename($_SERVER['PHP_SELF'])."?cmd=Destroy&target=$sess[id]'>Destroy</a></td>\n";
+            echo "</tr>\n";
+        }
+        echo "</table>\n";
     }
+    else
+        echo "<center><i>No live sessions found on disk.</i></center>\n";
 ?>
-</table>
 </body>
 </html>

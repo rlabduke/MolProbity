@@ -23,8 +23,9 @@ INPUTS (via Post ONLY):
 ############################################################################
 if($_POST['confirm'])
 {
-    mpDestroySession();
+    // Must log first or we lose our session ID for the log!
     mpLog("logout-session:User cleaned up all session files and left the site");
+    mpDestroySession();
 }
 
 // Start the page: produces <HTML>, <HEAD>, <BODY> tags

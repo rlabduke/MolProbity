@@ -93,6 +93,25 @@ $TIME_ZONES = array(
 );
 #}}}########################################################################
 
+#{{{ guessDefaultTimezone - guesses the time zone of the server machine
+############################################################################
+function guessDefaultTimezone()
+{
+    global $TIME_ZONES;
+    $seconds = date('Z')+0;
+    $abbrev = date('T');
+    foreach($TIME_ZONES as $zone => $data)
+    {
+        if($data['seconds'] == $seconds && $data['abbrev'] == $abbrev)
+        {
+            define("MP_DEFAULT_TIMEZONE", $zone);
+            break;
+        }
+    }
+    if(!defined('MP_DEFAULT_TIMEZONE')) define("MP_DEFAULT_TIMEZONE", 'UTC');
+}
+#}}}########################################################################
+
 #{{{ timeZonePicker - produces a HTML drop-box of timezone choices
 ############################################################################
 /**
