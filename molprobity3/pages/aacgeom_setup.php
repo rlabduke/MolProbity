@@ -31,7 +31,6 @@ function syncSubcontrols()
     document.forms[0].showHbonds.disabled       = !willMakeDots
     document.forms[0].showContacts.disabled     = !willMakeDots
     document.forms[0].multiKinExtras.disabled   = !document.forms[0].doMultiKin.checked
-    document.forms[0].multiChartSort.disabled   = !document.forms[0].doMultiChart.checked
 }
 
 function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
@@ -138,20 +137,8 @@ function checkSettingsBeforeSubmit()
     <div class='indent'>
         <label><input type='checkbox' name='multiKinExtras' value='1' checked> Include ribbons, B-factor and occupancy colors, and alternate conformation markers.</label>
     </div>
-    <label><input type='checkbox' name='doMultiChart' value='1' checked onclick='syncSubcontrols()'> <b>Tabular</b>: multi-criterion chart + other lists and tables</label>
-    <div class='indent'>
-        <label>Sort by
-        <select name='multiChartSort'>
-            <option value='natural'>(natural order)</option>
-            <option value='bad'>outliers first</option>
-            <option value='clash'>worst clashes</option>
-            <option value='rota'>worst rotamers</option>
-            <option value='cbdev'>worst C&beta; deviations</option>
-            <option value='rama'>Ramachandran outliers</option>
-            <option value='pperp'>Base-P distance outliers</option>
-        </select></label>
-    </div>
-    <label><input type='checkbox' name='doRemark42' value='1' checked> <b>REMARK 42</b>: official summary of MolProbity validation embedded in PDB file as REMARK 42</label>
+    <label><input type='checkbox' name='doMultiChart' value='1' checked> <b>Tabular</b>: multi-criterion chart + other lists and tables</label>
+    <br><label><input type='checkbox' name='doRemark42' value='1' checked> <b>REMARK 42</b>: official summary of MolProbity validation embedded in PDB file</label>
 </div>
 <?php
         echo "<p><table width='100%' border='0'><tr>\n";

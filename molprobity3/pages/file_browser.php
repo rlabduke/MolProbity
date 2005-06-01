@@ -97,8 +97,14 @@ function makeFileCommands($path, $url)
         $s .= "<td></td>";
         $s .= "<td><small><a href='viewking.php?$_SESSION[sessTag]&url=$url' target='_blank'>in KiNG</a></small></td>";
     }
+    // PHP-encoded-array chart or table (e.g. the multicriterion chart)
+    elseif(endsWith($lcPath, ".table"))
+    {
+        $s .= "<td></td>";
+        $s .= "<td><small><a href='viewtable.php?$_SESSION[sessTag]&file=$path' target='_blank'>as table</a></small></td>";
+    }
     // HTML
-    elseif(endsWith($lcPath, ".chart") || endsWith($lcPath, ".html"))
+    elseif(endsWith($lcPath, ".html"))
     {
         $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=plain' target='_blank'>plain text</a></small></td>";
         $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=html' target='_blank'>as HTML</a></small></td>";

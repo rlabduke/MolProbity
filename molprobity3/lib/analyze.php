@@ -34,7 +34,6 @@ require_once(MP_BASE_DIR.'/lib/model.php'); // for making kinemages
 *       doMultiKin      make multicrit kinemage
 *       multiKinExtras  include ribbons, B's and Q's, and alt confs
 *       doMultiChart    make multicrit chart
-*       multiChartSort  how to sort the chart [ see makeMulticritChart() ]
 *       doRemark42      make a REMARK 42 record and insert it in the PDB file
 *       
 * This function returns some HTML suitable for using in a lab notebook entry.
@@ -138,9 +137,9 @@ function runAnalysis($modelID, $opts)
     if($opts['doMultiChart'])
     {
         setProgress($tasks, 'multichart'); // updates the progress display if running as a background job
-        $outfile = "$chartDir/$model[prefix]multi.chart";
-        makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pperp, $opts['multiChartSort']);
-        $tasks['multichart'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=html' target='_blank'>preview</a>\n";
+        $outfile = "$chartDir/$model[prefix]multi.table";
+        writeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pperp);
+        $tasks['multichart'] .= " - <a href='viewtable.php?$_SESSION[sessTag]&file=$outfile' target='_blank'>preview</a>\n";
         setProgress($tasks, 'multichart'); // so the preview link is visible
     }
     if($opts['doMultiKin'])
@@ -190,7 +189,7 @@ function runAnalysis($modelID, $opts)
         if($opts['doMultiKin'])
             $entry .= "<p>".linkKinemage("$model[prefix]multi.kin", "Multi-criterion kinemage")."</p>\n";
         if($opts['doMultiChart'])
-            $entry .= "<p><a href='viewtext.php?$_SESSION[sessTag]&file=$chartDir/$model[prefix]multi.chart&mode=html' target='_blank'>Multi-criterion chart</a></p>\n";
+            $entry .= "<p><a href='viewtable.php?$_SESSION[sessTag]&file=$chartDir/$model[prefix]multi.table' target='_blank'>Multi-criterion chart</a></p>\n";
     }
     
     $entry .= "<h3>Single-criterion visualizations</h3>";
