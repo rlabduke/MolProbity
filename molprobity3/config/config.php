@@ -45,7 +45,8 @@ define("MP_REDUCE_LIMIT", 10000);
 define("MP_UMASK", 0);
 
 // Default timezone. See lib/timezones.php for allowed keys.
-define("MP_DEFAULT_TIMEZONE", 'EST');
+// If left undefined (commented out), MolProbity can usually guess correctly.
+//define("MP_DEFAULT_TIMEZONE", 'EST');
 
 // How long a session can go unused, in seconds
 define("MP_SESSION_LIFETIME", 60*60*24*14); // 14 days
@@ -88,6 +89,6 @@ define("MP_EMAIL_AUTHOR", "moler@kinemage.biochem.duke.edu,iwd@duke.edu");
 define("MP_SESSION_NAME", "MolProbSID");
 
 // Current "internal reference" version number. Please DO NOT change.
-define("MP_VERSION", "3beta15");
+define("MP_VERSION", "3beta16");
 
 ?>

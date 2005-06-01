@@ -19,6 +19,12 @@ if(!defined('MP_BASE_DIR')) die("MP_BASE_DIR is not defined.");
 error_reporting(E_ALL ^ E_NOTICE);
 
 require_once(MP_BASE_DIR.'/config/config.php'); // Import all the constants we use
+if(!defined('MP_DEFAULT_TIMEZONE'))
+{
+    require_once(MP_BASE_DIR.'/lib/timezones.php');
+    guessDefaultTimezone();
+}
+
 require_once(MP_BASE_DIR.'/lib/strings.php');
 require_once(MP_BASE_DIR.'/lib/sessions.php');  // Session handling functions
 require_once(MP_BASE_DIR.'/lib/event_page.php');// MVC/events architecture
