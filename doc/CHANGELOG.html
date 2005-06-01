@@ -44,8 +44,6 @@
     "nice" large jobs such as multi-model NMR runs
     Write management and *monitoring* scripts for administrators
     Allow simple comparison of bad residues in two models; see jobs/aacgeom.php
-    Rama outliers in multicrit kin don't look so hot (Ca-Ca, yellow?)
-    ORACLE output for TN Bhat
     Add documentation to the analysis results page (how to interpret)
     Add explanation of SSWING, Reduce, AAC, kins on setup pages
     Make sure Reduce doesn't shrink the PDB file (lost atoms/models, etc)
@@ -55,7 +53,6 @@
     Produce multi-model multicrit kinemages from the GUI
     Give NMR models a linking ID somehow
     Remove dump of $_SESSION from sitemap
-    Allow "live" sorting of finished multi-chart
     How to handle multi-model Ramachandran plots when models are split out?
     Verb-centered (sitemap) vs. noun-centered (PDB "stable") interface
     The "0+3" concept: single model, chain-chain (interface), overlapped pairs
@@ -95,6 +92,10 @@
 - removed "highlighted" kinemage view from downloads page
 - added some extra version checking to check_config.php
 - added res hiB to multichart for JSR
+- made multicriterion chart sortable by storing as an encoded PHP array and
+  writing public_html/viewtable.php to display it and sort it.
+- updated analyze.php::runAnalysis() and aacgeom_setup.php for new multichart.
+- added support for .table files in file_browser.php
 
 ### 3beta14 ###
 - added "start" parameter to allow starting other places besides welcome page

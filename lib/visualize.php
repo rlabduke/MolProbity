@@ -555,20 +555,21 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
 }
 #}}}########################################################################
 
-#{{{ makeMulticritChart - display all quality metrics at once in 2-D
+#{{{ writeMulticritChart - compose table of quality metrics at once in 2-D
 ############################################################################
 /**
-* $outfile will be overwritten with an HTML table.
+* $outfile will be overwritten with a data structure suitable for
+*   viewtable.php; see that code for documentation.
 * $clash    is the data structure from loadClashlist()
 * $rama     is the data structure from loadRamachandran()
 * $rota     is the data structure from loadRotamer()
 * $cbdev    is the data structure from loadCbetaDev()
 * $pperp    is the data structure from loadBasePhosPerp()
-* $sortBy   can be 'natural', 'bad', 'clash', 'rama', 'rota', 'cbdev', 'pperp'
 * Any of them can be set to null if the data is unavailable.
 */
-function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pperp, $sortBy = 'natural')
+function writeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pperp)
 {
+    //{{{ Process validation data
     // Make sure all residues are represented, and in the right order.
     $res = listResidues($infile);
     $Bfact = listResidueBfactors($infile);
@@ -577,7 +578,7 @@ function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pp
     $orderIndex = 0; // used to maintain original PDB order on sorting.
     foreach($res as $k => $v)
     {
-        $res[$k] = array('cnit' => $v, 'order' => $orderIndex++);
+        $res[$k] = array('cnit' => $v, 'order' => $orderIndex++, 'resHiB' => $Bfact[$v]);
     }
     
     if(is_array($clash))
@@ -585,8 +586,8 @@ function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pp
         foreach($clash['clashes'] as $cnit => $worst)
         {
             $res[$cnit]['clash_val'] = $worst;
-            $res[$cnit]['clash'] = "<td bgcolor='#ff6699'>$worst&Aring;</td>";
-            $res[$cnit]['isbad'] = true;
+            $res[$cnit]['clash'] = "$worst&Aring;";
+            $res[$cnit]['clash_isbad'] = true;
         }
     }
     if(is_array($rama))
@@ -597,11 +598,11 @@ function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pp
             $phipsi = sprintf("%.1f,%.1f", $item['phi'], $item['psi']);
             if($item['eval'] == "OUTLIER")
             {
-                $res[$item['resName']]['rama'] = "<td bgcolor='#ff6699'>$item[eval] ($item[scorePct]%)<br><small>$item[type] - $phipsi</small></td>";
-                $res[$item['resName']]['isbad'] = true;
+                $res[$item['resName']]['rama'] = "$item[eval] ($item[scorePct]%)<br><small>$item[type] - $phipsi</small>";
+                $res[$item['resName']]['rama_isbad'] = true;
             }
             else
-                $res[$item['resName']]['rama'] = "<td>$item[eval] ($item[scorePct]%)<br><small>$item[type] / $phipsi</small></td>";
+                $res[$item['resName']]['rama'] = "$item[eval] ($item[scorePct]%)<br><small>$item[type] / $phipsi</small>";
         }
     }
     if(is_array($rota))
@@ -611,11 +612,11 @@ function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pp
             $res[$item['resName']]['rota_val'] = $item['scorePct'];
             if($item['scorePct'] <= 1.0)
             {
-                $res[$item['resName']]['rota'] = "<td bgcolor='#ff6699'>$item[scorePct]%<br><small>angles: $item[chi1],$item[chi2],$item[chi3],$item[chi4]</small></td>";
-                $res[$item['resName']]['isbad'] = true;
+                $res[$item['resName']]['rota'] = "$item[scorePct]%<br><small>angles: $item[chi1],$item[chi2],$item[chi3],$item[chi4]</small>";
+                $res[$item['resName']]['rota_isbad'] = true;
             }
             else
-                $res[$item['resName']]['rota'] = "<td>$item[scorePct]%<br><small>angles: $item[chi1],$item[chi2],$item[chi3],$item[chi4]</small></td>";
+                $res[$item['resName']]['rota'] = "$item[scorePct]%<br><small>angles: $item[chi1],$item[chi2],$item[chi3],$item[chi4]</small>";
         }
     }
     if(is_array($cbdev))
@@ -625,11 +626,11 @@ function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pp
             $res[$item['resName']]['cbdev_val'] = $item['dev'];
             if($item['dev'] >= 0.25)
             {
-                $res[$item['resName']]['cbdev'] = "<td bgcolor='#ff6699'>$item[dev]A</small></td>";
-                $res[$item['resName']]['isbad'] = true;
+                $res[$item['resName']]['cbdev'] = "$item[dev]A</small>";
+                $res[$item['resName']]['cbdev_isbad'] = true;
             }
             else
-                $res[$item['resName']]['cbdev'] = "<td>$item[dev]&Aring;</small></td>";
+                $res[$item['resName']]['cbdev'] = "$item[dev]&Aring;</small>";
         }
     }
     if(is_array($pperp))
@@ -639,158 +640,81 @@ function makeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pp
             if($item['outlier'])
             {
                 $res[$item['resName']]['pperp_val'] = 1; // no way to quantify this
-                $res[$item['resName']]['pperp'] = "<td bgcolor='#ff6699'>wrong pucker?</td>";
-                $res[$item['resName']]['isbad'] = true;
+                $res[$item['resName']]['pperp'] = "wrong pucker?";
+                $res[$item['resName']]['pperp_isbad'] = true;
             }
         }
     }
+    //}}} Process validation data
     
-    // Sort into user-defined order
-    if($sortBy == 'natural')        {} // don't change order
-    elseif($sortBy == 'bad')        uasort($res, 'mcSortBad');
-    elseif($sortBy == 'clash')      uasort($res, 'mcSortClash');
-    elseif($sortBy == 'rama')       uasort($res, 'mcSortRama');
-    elseif($sortBy == 'rota')       uasort($res, 'mcSortRota');
-    elseif($sortBy == 'cbdev')      uasort($res, 'mcSortCbDev');
-    elseif($sortBy == 'pperp')      uasort($res, 'mcSortPPerp');
+    // Set up output data structure
+    $table = array('prequel' => '', 'headers' => array(), 'rows' => array(), 'footers' => array(), 'sequel' => '');
     
+    //{{{ Table prequel and headers
     // Do summary chart
-    $out = fopen($outfile, 'wb');
     $pdbstats = pdbstat($infile);
-    fwrite($out, makeSummaryStatsTable($pdbstats['resolution'], $clash, $rama, $rota, $cbdev, $pperp));
+    $table['prequel'] = makeSummaryStatsTable($pdbstats['resolution'], $clash, $rama, $rota, $cbdev, $pperp);
     
-    fwrite($out, "<table width='100%' cellspacing='1' border='0'>\n");
-    fwrite($out, "<tr align='center' bgcolor='".MP_TABLE_HIGHLIGHT."'>\n");
-    fwrite($out, "<td><b>Res</b></td>\n");
-    fwrite($out, "<td><b>High B</b></td>\n");
-    if(is_array($clash))  fwrite($out, "<td><b>Clash &gt; 0.4&Aring;</b></td>\n");
-    if(is_array($rama))   fwrite($out, "<td><b>Ramachandran</b></td>\n");
-    if(is_array($rota))   fwrite($out, "<td><b>Rotamer</b></td>\n");
-    if(is_array($cbdev))  fwrite($out, "<td><b>C&beta; deviation</b></td>\n");
-    if(is_array($pperp))  fwrite($out, "<td><b>Base-P perp. dist.</b></td>\n");
-    fwrite($out, "</tr>\n");
+    $header1 = array();
+    $header1[] = array('html' => "<b>Res</b>",                                          'sort' => 1);
+    $header1[] = array('html' => "<b>High B</b>",                                       'sort' => -1);
+    if(is_array($clash))  $header1[] = array('html' => "<b>Clash &gt; 0.4&Aring;</b>",  'sort' => -1);
+    if(is_array($rama))   $header1[] = array('html' => "<b>Ramachandran</b>",           'sort' => 1);
+    if(is_array($rota))   $header1[] = array('html' => "<b>Rotamer</b>",                'sort' => 1);
+    if(is_array($cbdev))  $header1[] = array('html' => "<b>C&beta; deviation</b>",      'sort' => -1);
+    if(is_array($pperp))  $header1[] = array('html' => "<b>Base-P perp. dist.</b>",     'sort' => -1);
     
-    fwrite($out, "<tr align='center' bgcolor='".MP_TABLE_HIGHLIGHT."'>\n");
-    fwrite($out, "<td></td>\n");
-    fwrite($out, sprintf("<td>Avg: %.2f</td>\n", array_sum($Bfact)/count($Bfact)));
-    if(is_array($clash))  fwrite($out, "<td>Clashscore: $clash[scoreAll]</td>\n");
-    if(is_array($rama))   fwrite($out, "<td>Outliers: ".count(findRamaOutliers($rama))." of ".count($rama)."</td>\n");
-    if(is_array($rota))   fwrite($out, "<td>Outliers: ".count(findRotaOutliers($rota))." of ".count($rota)."</td>\n");
-    if(is_array($cbdev))  fwrite($out, "<td>Outliers: ".count(findCbetaOutliers($cbdev))." of ".count($cbdev)."</td>\n");
-    if(is_array($pperp))  fwrite($out, "<td>Outliers: ".count(findBasePhosPerpOutliers($pperp))." of ".count($pperp)."</td>\n");
-    fwrite($out, "</tr>\n");
+    $header2 = array();
+    $header2[] = array('html' => "");
+    $header2[] = array('html' => sprintf("Avg: %.2f", array_sum($Bfact)/count($Bfact)));
+    if(is_array($clash))  $header2[] = array('html' => "Clashscore: $clash[scoreAll]");
+    if(is_array($rama))   $header2[] = array('html' => "Outliers: ".count(findRamaOutliers($rama))." of ".count($rama));
+    if(is_array($rota))   $header2[] = array('html' => "Outliers: ".count(findRamaOutliers($rota))." of ".count($rota));
+    if(is_array($cbdev))  $header2[] = array('html' => "Outliers: ".count(findCbetaOutliers($cbdev))." of ".count($cbdev));
+    if(is_array($pperp))  $header2[] = array('html' => "Outliers: ".count(findBasePhosPerpOutliers($pperp))." of ".count($pperp));
+    
+    $table['headers'] = array($header1, $header2);
+    //}}} Table prequel and headers
 
-    $color = MP_TABLE_ALT1;
+    //{{{ Table body
+    $rows = array();
     foreach($res as $cnit => $eval)
     {
-        fwrite($out, "<tr align='center' bgcolor='$color'>");
-        fwrite($out, "<td align='left'>$cnit</td>");
-        fwrite($out, "<td>".$Bfact[$cnit]."</td>");
+        $row = array();
+        $row[] = array('html' => $cnit,             'sort_val' => $eval['order']+0);
+        $row[] = array('html' => $eval['resHiB'],   'sort_val' => $eval['resHiB']+0);
+        foreach(array('clash', 'rama', 'rota', 'cbdev', 'pperp') as $type)
+        {
+            if(is_array($$type))
+            {
+                $cell = array();
+                if(isset($eval[$type]))             $cell['html'] = $eval[$type];
+                else                                $cell['html'] = "-";
+                if(isset($eval[$type.'_isbad']))    $cell['color'] = '#ff6699';
+                if(isset($eval[$type.'_val']))      $cell['sort_val'] = $eval[$type.'_val']+0;
+                $row[] = $cell;
+            }
+        }
+        /*
         if(is_array($clash))
-        {
-            if(isset($eval['clash']))   fwrite($out, $eval['clash']);
-            else                        fwrite($out, "<td>-</td>");
-        }
+            $row[] = array('html' => (isset($eval['clash']) ? $eval['clash'] : "-"),        'sort_val' => $eval['clash_val']+0);
         if(is_array($rama))
-        {
-            if(isset($eval['rama']))    fwrite($out, $eval['rama']);
-            else                        fwrite($out, "<td>-</td>");
-        }
+            $row[] = array('html' => (isset($eval['rama']) ? $eval['rama'] : "-"),          'sort_val' => $eval['rama_val']+0);
         if(is_array($rota))
-        {
-            if(isset($eval['rota']))    fwrite($out, $eval['rota']);
-            else                        fwrite($out, "<td>-</td>");
-        }
+            $row[] = array('html' => (isset($eval['rota']) ? $eval['rota'] : "-"),          'sort_val' => $eval['rota_val']+0);
         if(is_array($cbdev))
-        {
-            if(isset($eval['cbdev']))   fwrite($out, $eval['cbdev']);
-            else                        fwrite($out, "<td>-</td>");
-        }
+            $row[] = array('html' => (isset($eval['cbdev']) ? $eval['cbdev'] : "-"),        'sort_val' => $eval['cbdev_val']+0);
         if(is_array($pperp))
-        {
-            if(isset($eval['pperp']))   fwrite($out, $eval['pperp']);
-            else                        fwrite($out, "<td>-</td>");
-        }
-        fwrite($out, "</tr>\n");
-        $color == MP_TABLE_ALT1 ? $color = MP_TABLE_ALT2 : $color = MP_TABLE_ALT1;
+            $row[] = array('html' => (isset($eval['pperp']) ? $eval['pperp'] : "-"),        'sort_val' => $eval['pperp_val']+0);
+        */
+        $rows[] = $row;
     }
-    fwrite($out, "</table>\n");
+    $table['rows'] = $rows;
+    //}}} Table body
+    
+    $out = fopen($outfile, 'wb');
+    fwrite($out, serialize($table));
     fclose($out);
-}
-#}}}########################################################################
-
-#{{{ mcSortXXX - sort functions for multicriterion chart
-############################################################################
-// We need this b/c sort is not guaranteed to preserve starting order
-// for elements that compare as equal.
-function mcSortNatural($a, $b)
-{
-    // Alphabetical sort moves _ chain IDs before A, which can sometimes
-    // end up putting hets at the beginning of the file. D'oh!
-    //if($a['cnit'] < $b['cnit'])     return -1;
-    //elseif($a['cnit'] > $b['cnit']) return 1;
-    //else                            return 0;
-    return ($a['order'] - $b['order']); // original order from the PDB file
-}
-
-function mcSortBad($a, $b)
-{
-    if($a['isbad'])
-    {
-        if($b['isbad']) return mcSortNatural($a, $b);
-        else            return -1;
-    }
-    elseif($b['isbad']) return 1;
-    else                return mcSortNatural($a, $b);
-}
-
-function mcSortClash($a, $b)
-{
-    if($a['clash_val'] < $b['clash_val'])       return 1;
-    elseif($a['clash_val'] > $b['clash_val'])   return -1;
-    else                                        return mcSortNatural($a, $b);
-}
-
-function mcSortRama($a, $b)
-{
-    // unset values compare as zero and sort to top otherwise
-    if(!isset($a['rama_val']))
-    {
-        if(!isset($b['rama_val']))          return mcSortNatural($a, $b);
-        else                                return 1;
-    }
-    elseif(!isset($b['rama_val']))          return -1;
-    elseif($a['rama_val'] < $b['rama_val']) return -1;
-    elseif($a['rama_val'] > $b['rama_val']) return 1;
-    else                                    return mcSortNatural($a, $b);
-}
-
-function mcSortRota($a, $b)
-{
-    // unset values compare as zero and sort to top otherwise
-    if(!isset($a['rota_val']))
-    {
-        if(!isset($b['rota_val']))          return mcSortNatural($a, $b);
-        else                                return 1;
-    }
-    elseif(!isset($b['rota_val']))          return -1;
-    elseif($a['rota_val'] < $b['rota_val']) return -1;
-    elseif($a['rota_val'] > $b['rota_val']) return 1;
-    else                                    return mcSortNatural($a, $b);
-}
-
-function mcSortCbDev($a, $b)
-{
-    if($a['cbdev_val'] < $b['cbdev_val'])       return 1;
-    elseif($a['cbdev_val'] > $b['cbdev_val'])   return -1;
-    else                                        return mcSortNatural($a, $b);
-}
-
-function mcSortPPerp($a, $b)
-{
-    if($a['pperp_val'] < $b['pperp_val'])       return 1;
-    elseif($a['pperp_val'] > $b['pperp_val'])   return -1;
-    else                                        return mcSortNatural($a, $b);
 }
 #}}}########################################################################
 
