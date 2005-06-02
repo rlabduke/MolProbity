@@ -87,7 +87,14 @@ $ok = true;
     <title>MolProbity - check configuration</title>
 </head>
 <body bgcolor="#FFFFFF" text="#000000" link="#000099" vlink="#000099" alink="#990000">
-<hr><h2>Server information:</h2>
+<center>
+[ <a href='phpinfo.php'>PHP info</a>
+| <a href='check_config.php'>Configuration check</a>
+| <a href='show_sessions.php'>Live sessions</a>
+| <a href='usage_history.php'>Usage history</a>
+]
+</center><hr>
+<h2>Server information:</h2>
 <ul>
 <?php
     define("MINIMUM_ALLOWED_PHP_VERSION", "4.3.7");

@@ -26,6 +26,13 @@ if($_REQUEST['cmd'] == "Destroy")
     <title>MolProbity - show sessions</title>
 </head>
 <body bgcolor="#FFFFFF" text="#000000" link="#000099" vlink="#000099" alink="#990000">
+<center>
+[ <a href='phpinfo.php'>PHP info</a>
+| <a href='check_config.php'>Configuration check</a>
+| <a href='show_sessions.php'>Live sessions</a>
+| <a href='usage_history.php'>Usage history</a>
+]
+</center><hr>
 <?php
     $sessList = mpEnumerateSessions();
     if(count($sessList) > 0)
