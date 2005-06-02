@@ -63,6 +63,8 @@
     LIST of interacting (residues|*ATOMS*) across an interface
  ** Upgrade Arachne's PHP to ge 4.3.7
     IE 6.x has page-caching problems with MolProbity3?
+    Finer-grained logging for AAC/geom (in _setup.php)
+    Oneline, all-in-one (kins, etc) for JCSG
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -72,6 +74,8 @@
 - fixed bug in logout_destroy.php that kept the session ID out of the log file
 - added sorting and "no sessions" msg to show_sessions.php
 - changed config.php and core.php to auto-detect server timezone (usually?)
+- added page for monitoring usage history based on molprobity.log
+- added links between the various admin/ scripts
 
 ### 3beta15 ###
 - clash stats for score B lt 40 are now done correctly rather than against the
