@@ -229,7 +229,7 @@ function runAnalysis($modelID, $opts)
 ############################################################################
 function runBasePhosPerp($infile, $outfile)
 {
-    exec("prekin -pperpdump $infile > $outfile");
+    exec("prekin -pperptoline -pperpdump $infile > $outfile");
 }
 #}}}########################################################################
 
@@ -426,6 +426,10 @@ function runClashlist($infile, $outfile)
 *                   (see loadCbetaDev() for explanation of naming)
 *                   and maximum clashes as values (positive Angstroms).
 *                   NB: only clashes >= 0.40A are currently listed.
+*   clashes-with    same keys as "clashes", values are:
+*                       'srcatom' => atom from this residue making bigest clash
+*                       'dstatom' => atom it clashes with
+*                       'dstcnit' => chain/residue it clashes with
 */
 function loadClashlist($datafile)
 {
@@ -440,6 +444,7 @@ function loadClashlist($datafile)
     
     // Parse data about individual clashes
     $clashes = array(); // in case there are no clashes
+    $clashes_with = array();
     foreach($data as $datum)
     {
         // Ignore blank lines and #sum... lines
@@ -448,15 +453,24 @@ function loadClashlist($datafile)
         {
             $line = explode(':', $datum);
             $res1 = substr($line[2], 0, 9);
+            $atm1 = substr($line[2], 10, 5);
             $res2 = substr($line[3], 0, 9);
+            $atm2 = substr($line[3], 10, 5);
             $dist = abs(trim($line[4])+0);
             if(!isset($clashes[$res1]) || $clashes[$res1] < $dist)
+            {
                 $clashes[$res1] = $dist;
+                $clashes_with[$res1] = array('srcatom' => $atm1, 'dstatom' => $atm2, 'dstcnit' => $res2); 
+            }
             if(!isset($clashes[$res2]) || $clashes[$res2] < $dist)
+            {
                 $clashes[$res2] = $dist;
+                $clashes_with[$res2] = array('srcatom' => $atm2, 'dstatom' => $atm1, 'dstcnit' => $res1); 
+            }
         }
     }
     $ret['clashes'] = $clashes;
+    $ret['clashes-with'] = $clashes_with;
     
     return $ret;
 }

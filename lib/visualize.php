@@ -338,7 +338,7 @@ function makeBadPPerpKin($infile, $outfile)
     fwrite($h, "@subgroup {base-phos perp} dominant master= {base-P outliers}\n");
     fclose($h);
     
-    exec("prekin -quiet -append -nogroup -pperpoutliers $infile >> $outfile");
+    exec("prekin -quiet -append -nogroup -pperptoline -pperpoutliers $infile >> $outfile");
 }
 #}}}########################################################################
 
@@ -583,10 +583,11 @@ function writeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $p
     
     if(is_array($clash))
     {
+        $with = $clash['clashes-with'];
         foreach($clash['clashes'] as $cnit => $worst)
         {
             $res[$cnit]['clash_val'] = $worst;
-            $res[$cnit]['clash'] = "$worst&Aring;";
+            $res[$cnit]['clash'] = "$worst&Aring;<br><small>".$with[$cnit]['srcatom']." with ".$with[$cnit]['dstcnit']." ".$with[$cnit]['dstatom']."</small>";
             $res[$cnit]['clash_isbad'] = true;
         }
     }
