@@ -72,8 +72,9 @@ function countActions($records)
 {
     $actions = array();
     foreach($records as $rec) $actions[$rec[3]] = $actions[$rec[3]]+1;
-    asort($actions);
-    $actions = array_reverse($actions, true);
+    ksort($actions);
+    //asort($actions);
+    //$actions = array_reverse($actions, true);
     return $actions;
 }
 
@@ -85,8 +86,7 @@ function countActionsBySession($records)
 
     $actions = array();
     foreach($tmp as $action => $sesslist) $actions[$action] = count($sesslist);
-    asort($actions);
-    $actions = array_reverse($actions, true);
+    ksort($actions);
     return $actions;
 }
 #}}}########################################################################
@@ -196,16 +196,36 @@ if($end_time > end($times))     $end_time   = end($times)+(60*60*24);
     echo "End date (inclusive): <input type='text' size='15' name='end_date' value='".date('j M Y', $end_time)."'>\n";
     echo "<br>Divide into \n";
     echo "<select name='divide_into'>\n";
-    echo "  <option value='weeks'".($_REQUEST['divide_into'] == 'weeks' ? ' selected' : '').">weeks</option>\n";
-    echo "  <option value='months'".($_REQUEST['divide_into'] == 'months' ? ' selected' : '').">months</option>\n";
     echo "  <option value='years'".($_REQUEST['divide_into'] == 'years' ? ' selected' : '').">years</option>\n";
+    echo "  <option value='months'".($_REQUEST['divide_into'] == 'months' ? ' selected' : '').">months</option>\n";
+    echo "  <option value='weeks'".($_REQUEST['divide_into'] == 'weeks' ? ' selected' : '').">weeks</option>\n";
     echo "</select>\n";
-    echo "<input type='checkbox' name='show_action_pct' value='1'> Show percentage of sessions for each action\n";
+    echo "<input type='checkbox' name='show_action_pct' value='1'".($_REQUEST['show_action_pct'] ? ' checked' : '')."> Show percentage of sessions for each action\n";
     echo "<br><input type='submit' name='cmd' value='Refresh'>\n";
     echo "<hr>\n";
     echo count($log)." records found in the log.<br>\n";
     echo uniqueSessions($log)." unique sessions active during this timeframe.<br>\n";
     echo uniqueIPs($log)." unique IP addresses active during this timeframe. This is an <i>estimate</i> of the unique users.<br>\n";
+    
+    echo "<p>Grand summary, use checkboxes for detailed view below:<br>\n<table cellspacing='4'>\n";
+    echo "<tr><td></td><td><u>Action name</u></td><td><u>Number of times</u></td><td><u>% of sessions</u></td></tr>\n";
+    $active_sessions = uniqueSessions($log);
+    $actions = countActions($log);
+    $unique_actions = countActionsBySession($log);
+    $detail_actions = array();
+    $color = MP_TABLE_ALT1;
+    foreach($actions as $action => $num)
+    {
+        $detail = $_REQUEST['detail_'.$action];
+        if($detail) $detail_actions[] = $action;
+        echo "  <tr align='right' bgcolor='$color'><td><input type='checkbox' name='detail_$action' value='1'".($detail ? ' checked' : '')."></td>";
+        echo "<td align='left'>$action</td><td>$num</td><td>";
+        if($num && $active_sessions)
+            echo round(100.0 * $unique_actions[$action] / $active_sessions)."%";
+        echo "</td></tr>\n";
+        $color == MP_TABLE_ALT1 ? $color = MP_TABLE_ALT2 : $color = MP_TABLE_ALT1;
+    }
+    echo "</table></p>\n";
     
     if($_REQUEST['divide_into'] == 'weeks')         $time_ranges = divideIntoWeeks($start_time, $end_time);
     elseif($_REQUEST['divide_into'] == 'months')    $time_ranges = divideIntoMonths($start_time, $end_time);
@@ -214,23 +234,11 @@ if($end_time > end($times))     $end_time   = end($times)+(60*60*24);
 
     if(isset($time_ranges))
     {
-        echo "<p><table>\n";
-        echo "<tr align='right'><td align='left'><b>Window</b></td>";
-        echo "<td><b>IP addr.</b></td>";
-        echo "<td><b>New sess.</b></td>";
-        echo "<td><b>Feedback</b></td>";
-        echo "<td><b>Insecure req.</b></td>";
-        echo "<td><b>Bad event</b></td>";
-        echo "<td><b>Used KiNG</b></td>";
-        echo "<td><b>Saw notebook</b></td>";
-        echo "<td><b>Logged out</b></td>";
-        echo "<td><b>Saved sess.</b></td>";
-        echo "<td><b>PDB up.</b></td>";
-        echo "<td><b>Fetch</b></td>";
-        echo "<td><b>-build</b></td>";
-        echo "<td><b>-fix</b></td>";
-        echo "<td><b>-nobuild</b></td>";
-        echo "<td><b>AAC/geom</b></td>";
+        echo "<p><table cellspacing='4'>\n";
+        echo "<tr align='right'><td align='left'><u>Window</u></td>";
+        echo "<td><u>Unique IPs</u></td>";
+        foreach($detail_actions as $action)
+            echo "<td><u>$action</u></td>";
         echo "</tr>\n";
         $color = MP_TABLE_ALT1;
         foreach($time_ranges as $time_range)
@@ -241,9 +249,7 @@ if($end_time > end($times))     $end_time   = end($times)+(60*60*24);
             $unique_actions = countActionsBySession($sublog);
             echo "  <tr align='right' bgcolor='$color'><td align='left'>$time_range[range_text]</td>";
             echo "<td>".uniqueIPs($sublog)."</td>";
-            $columns = array('new-session', 'feedback', 'bad-event', 'security', 'king', 'notebook-view', 'logout-session', 'archive-session',
-                'pdb-upload', 'pdb-fetch', 'reduce-build', 'reduce-custom', 'reduce-nobuild', 'aacgeom');
-            foreach($columns as $action)
+            foreach($detail_actions as $action)
             {
                 echo "<td>".$actions[$action];
                 if($show_action_pct && $actions[$action] && $active_sessions)
@@ -256,19 +262,7 @@ if($end_time > end($times))     $end_time   = end($times)+(60*60*24);
         echo "</table></p>\n";
     }
     
-    echo "<p>Grand summary:<br>\n<table cellspacing='6'>\n";
-    echo "<tr><td><b>Action name</b></td><td><b>Number of times</b></td><td><b>% of sessions</b></td></tr>\n";
-    $active_sessions = uniqueSessions($log);
-    $actions = countActions($log);
-    $unique_actions = countActionsBySession($log);
-    foreach($actions as $action => $num)
-    {
-        echo "  <tr align='right'><td align='left'>$action</td><td>$num</td><td>";
-        if($num && $active_sessions)
-            echo round(100.0 * $unique_actions[$action] / $active_sessions)."%";
-        echo "</td></tr>\n";
-    }
-    echo "</table></p>\n";
+    echo "</form>\n";
 ?>
 </body>
 </html>

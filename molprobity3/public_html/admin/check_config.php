@@ -99,19 +99,24 @@ $ok = true;
 <?php
     define("MINIMUM_ALLOWED_PHP_VERSION", "4.3.7");
     echo "<li>Current URL: http://$_SERVER[SERVER_NAME]$_SERVER[PHP_SELF]</li>\n";
+    echo "<li>Operating system: ".PHP_OS."</li>\n";
+
     if(version_compare(PHP_VERSION, MINIMUM_ALLOWED_PHP_VERSION, "ge"))
         echo "<li>PHP version (webserver): ".PHP_VERSION." - fine.</li>\n";
     else
         echo "<li><b>PHP version (webserver): ".PHP_VERSION."</b> - upgrade to ".MINIMUM_ALLOWED_PHP_VERSION." or newer.</li>\n";
-    echo "<li>Operating system: ".PHP_OS."</li>\n";
     
-    $magic = get_magic_quotes_gpc();
-    if($magic)  echo "<li><b>Magic quotes GPC is enabled.</b> Disable it in <tt>/etc/php.ini</tt> or user-entered text may be corrupted.</li>\n";
-    else        echo "<li>Magic quotes GPC is disabled - good.</li>\n";
-    
+    $php_help = explode("\n", shell_exec("php -v"));
+    preg_match('/PHP ([0-9.]+)/', $php_help[0], $m);
+    if(version_compare($m[1], MINIMUM_ALLOWED_PHP_VERSION, "lt"))
+        echo "<li><b>PHP version (cmd line): $php_help[0]</b> - upgrade to ".MINIMUM_ALLOWED_PHP_VERSION." or newer.</li>\n";
+    elseif(version_compare($m[1], PHP_VERSION, "ne"))
+        echo "<li><b>PHP version (cmd line): $php_help[0]</b> - warning: does not match webserver version (".PHP_VERSION.").</li>\n";
+    else
+        echo "<li>PHP version (cmd line): $php_help[0] - fine.</li>\n";
     $cli = `php -r 'echo php_sapi_name();'`;
     if($cli == "cli")   echo "<li>CLI version of PHP installed - good.</li>\n";
-    else                echo "<li><b>CLI version of PHP NOT installed.</b> Upgrade to a newer PHP (4.3.0+) before running MolProbity.</li>\n";
+    else                echo "<li><b>CLI version of PHP NOT installed.</b> Upgrade to a newer PHP (".MINIMUM_ALLOWED_PHP_VERSION."+) before running MolProbity.</li>\n";
     
     if(ini_get('file_uploads'))
     {
@@ -131,6 +136,10 @@ $ok = true;
     else
         echo "<li>Safe mode disabled - good.</li>\n";
 
+    $magic = get_magic_quotes_gpc();
+    if($magic)  echo "<li><b>Magic quotes GPC is enabled.</b> Disable it in <tt>/etc/php.ini</tt> or user-entered text may be corrupted.</li>\n";
+    else        echo "<li>Magic quotes GPC is disabled - good.</li>\n";
+    
     if(ini_get('display_errors'))
         echo "<li>PHP display_errors is enabled - good. This should make debugging easier.</li>\n";
     else
@@ -154,16 +163,8 @@ $ok = true;
 <hr><h2>Version numbers for external programs:</h2>
 <ul>
 <?php
-    // Reduce writes help on stderr
-    $php_help = explode("\n", shell_exec("php -v"));
-    preg_match('/PHP ([0-9.]+)/', $php_help[0], $m);
-    if(version_compare($m[1], MINIMUM_ALLOWED_PHP_VERSION, "lt"))
-        echo "<li><b>PHP (cmd line): $php_help[0]</b> - upgrade to ".MINIMUM_ALLOWED_PHP_VERSION." or newer.</li>\n";
-    elseif(version_compare($m[1], PHP_VERSION, "ne"))
-        echo "<li><b>PHP (cmd line): $php_help[0]</b> - warning: does not match webserver version (".PHP_VERSION.").</li>\n";
-    else
-        echo "<li>PHP (cmd line): $php_help[0]</li>\n";
     
+    // Reduce writes help on stderr
     $java_help = explode("\n", shell_exec("java -version 2>&1"));
     $reduce_help = explode("\n", shell_exec("reduce -help 2>&1"));
     preg_match('/version.+?\n/i', shell_exec("noe-display 2>&1"), $m);

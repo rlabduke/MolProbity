@@ -199,6 +199,17 @@ function onRunAnalysis($arg, $req)
         $_SESSION['bgjob'] = $req;
         
         mpLog("aacgeom:Running all-atom contact and geometric analyses");
+        if($req['doAAC'])   mpLog("aacgeom-aac:Generataing all-atom contact data of some type");
+        if($req['doRama'])  mpLog("aacgeom-rama:Doing Ramachandran analysis");
+        if($req['doRota'])  mpLog("aacgeom-rota:Doing rotamer analysis");
+        if($req['doCbDev']) mpLog("aacgeom-cbdev:Doing C-beta deviation analysis");
+        if($req['doBaseP']) mpLog("aacgeom-basep:Validating base-phosphate distances vs sugar puckers");
+        
+        if($req['doSummaryStats'])  mpLog("aacgeom-sumary:AAC/geometry validation summary");
+        if($req['doMultiKin'])      mpLog("aacgeom-mkin:Multi-criterion validation kinemage");
+        if($req['doMultiChart'])    mpLog("aacgeom-mchart:Multi-criterion validation chart");
+        if($req['doRemark42'])      mpLog("aacgeom-remark42:Generating REMARK 42 for PDB file");
+        
         // launch background job
         pageGoto("job_progress.php");
         launchBackground(MP_BASE_DIR."/jobs/aacgeom.php", "aacgeom_done.php", 5);
