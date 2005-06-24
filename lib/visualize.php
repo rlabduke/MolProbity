@@ -5,6 +5,7 @@
 *****************************************************************************/
 require_once(MP_BASE_DIR.'/lib/pdbstat.php');
 require_once(MP_BASE_DIR.'/lib/analyze.php');
+require_once(MP_BASE_DIR.'/lib/sortable_table.php');
 
 #{{{ makeRamachandranKin - creates a kinemage-format Ramachandran plot
 ############################################################################
@@ -559,7 +560,9 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
 ############################################################################
 /**
 * $outfile will be overwritten with a data structure suitable for
-*   viewtable.php; see that code for documentation.
+*   sortable_table.php; see that code for documentation.
+* $snapfile will be overwritten with an HTML snapshot of the unsorted table;
+*   if null, this will be skipped.
 * $clash    is the data structure from loadClashlist()
 * $rama     is the data structure from loadRamachandran()
 * $rota     is the data structure from loadRotamer()
@@ -567,7 +570,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
 * $pperp    is the data structure from loadBasePhosPerp()
 * Any of them can be set to null if the data is unavailable.
 */
-function writeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pperp)
+function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota, $cbdev, $pperp)
 {
     //{{{ Process validation data
     // Make sure all residues are represented, and in the right order.
@@ -716,6 +719,13 @@ function writeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $p
     $out = fopen($outfile, 'wb');
     fwrite($out, serialize($table));
     fclose($out);
+    
+    if($snapfile)
+    {
+        $out = fopen($snapfile, 'wb');
+        fwrite($out, formatSortableTable($table, 'DUMMY_URL'));
+        fclose($out);
+    }
 }
 #}}}########################################################################
 

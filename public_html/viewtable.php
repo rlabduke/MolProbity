@@ -12,6 +12,7 @@ INPUTS (via Get or Post):
     if(!defined('MP_BASE_DIR')) define('MP_BASE_DIR', realpath(dirname(__FILE__).'/..'));
 // 2. Include core functionality - defines constants, etc.
     require_once(MP_BASE_DIR.'/lib/core.php');
+    require_once(MP_BASE_DIR.'/lib/sortable_table.php');
 // 3. Restore session data. If you don't want to access the session
 // data for some reason, you must call mpInitEnvirons() instead.
     mpStartSession();
@@ -56,86 +57,14 @@ fclose($in);
     if(isset($_REQUEST['sort_dir']))    $direction = $_REQUEST['sort_dir']+0;
     else                                $direction  = 1; // ascending
     if(isset($_REQUEST['sort_col']))    $col = $_REQUEST['sort_col']+0;
-    else                                $col = -1; // sort by '@@NATIVE@@'
-    // Stupid song and dance b/c PHP doesn't have a stable sort function like mergesort.
-    $rows = &$table['rows'];
-    $i = 1;
-    foreach($rows as $key => $row)
-        $rows[$key]['@@NATIVE@@'] = $i++;
-    // Custom "lambda" sort function -- essentially, curried on the name of the sort field and direction
-    $mySortFunc = create_function('$a,$b', "
-        if(!isset(\$a[$col]['sort_val']))
-        {
-            if(!isset(\$b[$col]['sort_val']))   return $direction*(\$a['@@NATIVE@@'] - \$b['@@NATIVE@@']);
-            else                                return 1;
-        }
-        elseif(!isset(\$b[$col]['sort_val']))   return -1;
-        elseif(\$a[$col]['sort_val'] < \$b[$col]['sort_val']) return -($direction);
-        elseif(\$a[$col]['sort_val'] > \$b[$col]['sort_val']) return $direction;
-        else                                    return $direction*(\$a['@@NATIVE@@'] - \$b['@@NATIVE@@']);
-    ");
-    // This check isn't necessary (sort will be done correctly) but makes me feel better...
-    if($col != -1)
-        uasort($rows, $mySortFunc);
+    else                                $col = -1; // don't sort (native order)
     
+    echo formatSortableTable($table, "viewtable.php?$_SESSION[sessTag]&file=$file", $col, $direction);
     
     // Debug version:
     //echo "<pre>";
     //print_r($table);
     //echo "</pre>\n";
-    
-    
-    echo $table['prequel'];
-    echo "\n";
-    echo "<table width='100%' cellspacing='1' border='0'>\n";
-    foreach($table['headers'] as $header)
-    {
-        echo "<tr align='center' bgcolor='".MP_TABLE_HIGHLIGHT."'>";
-        $i = 0;
-        foreach($header as $cell)
-        {
-            echo "<td>";
-            $sort_dir = ($i == $col ? -$direction : $cell['sort']);
-            if($cell['sort']) echo "<a href='viewtable.php?$_SESSION[sessTag]&file=$file&sort_col=$i&sort_dir=$sort_dir'>";
-            echo $cell['html'];
-            if($cell['sort']) echo "</a>";
-            echo "</td>";
-            $i++;
-        }
-        echo "</tr>\n";
-    }
-
-    
-    $color = MP_TABLE_ALT1;
-    foreach($table['rows'] as $row)
-    {
-        echo "<tr align='center' bgcolor='$color'>";
-        foreach($row as $key => $cell)
-        {
-            // For some odd reason, 0 == '@@NATIVE' in PHP 5.0.4, so we use ===
-            // Ah, because the string is being coerced to a number, which becomes zero...
-            if($key === '@@NATIVE') continue;
-            echo "<td";
-            if($cell['color']) echo " bgcolor='$cell[color]'";
-            echo ">$cell[html]</td>";
-        }
-        echo "</tr>\n";
-        $color == MP_TABLE_ALT1 ? $color = MP_TABLE_ALT2 : $color = MP_TABLE_ALT1;
-    }
-    
-    
-    foreach($table['footers'] as $footer)
-    {
-        echo "<tr align='center' bgcolor='".MP_TABLE_HIGHLIGHT."'>";
-        foreach($footer as $cell)
-        {
-            echo "<td>$cell[html]</td>";
-        }
-        echo "</tr>\n";
-    }
-    echo "</table>\n";
-    echo $table['sequel'];
-    echo "\n";
 
 echo mpPageFooter();
 ?>
