@@ -8,10 +8,8 @@
 *****************************************************************************/
 require_once(MP_BASE_DIR.'/lib/analyze.php');
 
-// This variable must be defined for index.php to work! Must match class below.
-$delegate = new SSwingSetup2Delegate();
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
-class SSwingSetup2Delegate extends BasicDelegate {
+class sswing_setup2_delegate extends BasicDelegate {
     
 #{{{ display - creates the UI for this page
 ############################################################################

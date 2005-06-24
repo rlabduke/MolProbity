@@ -47,9 +47,10 @@ The file <span style="font-family: monospace;">makekin_setup.php</span>
 in fact already exists, so that you can follow along in it and see the
 actual code that is summarized below. Every script in <span
  style="font-family: monospace;">pages/</span> declares a class, and
-those classes must all have unique names. So, change "TemplateDelegate"
-to something like "MakeKinSetupDelegate" (everywhere it appears -- 2
-places).<br>
+those classes must all have unique names that exactly match their
+filenames (with ".php" removed and and "_delegate" added). So, change
+"template_delegate"
+to "makekin_setup_delegate".<br>
 <br>
 The template contains a fair bit of junk that we don't need, but there
 are a lot of other <span style="font-family: monospace;"><span

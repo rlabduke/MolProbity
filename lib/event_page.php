@@ -186,6 +186,33 @@ function clearEventHandlers()
 }
 #}}}########################################################################
 
+#{{{ makeDelegateObject - instantiates the current delegate class
+############################################################################
+/**
+* Instantiates the current delegate class. In order for this to work,
+* the class name must be the same as the file name, with ".php" stripped off
+* and "_delegate" appended. Thus, for "pages/reduce_setup.php", we get:
+*   class reduce_setup_delegate extends BasicDelegate { ... }
+*/
+function makeDelegateObject()
+{
+    $page = end($_SESSION['pages']); // not a ref; read only
+    if(! $page['delegate']) die("No page delegate defined for events"); // else cryptic error from require_once()
+    
+    // FUNKY: Must use require_once() b/c UI delegate (below) may be the same,
+    // or may be different, and we can't redefine classes or functions.
+    $page_file = MP_BASE_DIR."/pages/$page[delegate]";
+    require_once($page_file);
+    
+    $page_class = basename($page['delegate'], '.php') . '_delegate';
+    if(! class_exists($page_class)) die("Class $page_class not defined in $page_file");
+    // Now we instantiate a variably-named class:
+    $delegate = new $page_class();
+    
+    return $delegate;
+}
+#}}}########################################################################
+
 #{{{ a_function_definition - sumary_statement_goes_here
 ############################################################################
 /**

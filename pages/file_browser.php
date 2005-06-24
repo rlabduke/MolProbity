@@ -5,10 +5,8 @@
 // Needed for makeFileList() b/c we're already using the return value
 $fileListColor = MP_TABLE_ALT1;
 
-// This variable must be defined for index.php to work! Must match class below.
-$delegate = new FileBrowserDelegate();
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
-class FileBrowserDelegate extends BasicDelegate {
+class file_browser_delegate extends BasicDelegate {
     
 #{{{ display - creates the UI for this page
 ############################################################################

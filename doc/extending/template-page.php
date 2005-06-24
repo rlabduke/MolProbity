@@ -11,10 +11,10 @@ require_once(MP_BASE_DIR.'/lib/labbook.php');
 // public_html/index.php has already included core.php, sessions.php, etc.
 // so you don't need to include them explicitly here.
 
-// This variable must be defined for index.php to work! Must match class below.
-$delegate = new TemplateDelegate();
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
-class TemplateDelegate extends BasicDelegate {
+// The name of the class must match the name of the file, with ".php" taken off
+// and "_delegate" appended. See makeDelegateObject() in lib/event_page.php
+class template_delegate extends BasicDelegate {
     
 #{{{ display - creates the UI for this page
 ############################################################################

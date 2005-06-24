@@ -32,12 +32,8 @@
     }
 
 // Process submitted event /////////////////////////////////////////////////////
-$page = end($_SESSION['pages']);                    // not a ref; read only
-if(! $page['delegate']) die("No page delegate defined for events"); // else cryptic error from require_once()
-// FUNKY: Must use require_once() b/c UI delegate (below) may be the same,
-// or may be different, and we can't redefine classes or functions.
-require_once(MP_BASE_DIR."/pages/$page[delegate]"); // defines $delegate
-// Can't have an event submitted if we're having to start a new session.
+$page = end($_SESSION['pages']); // not a ref; read only
+$delegate = makeDelegateObject();
 if($isNewSess)
     mpLog("new-session:New interactive user session started on the web");
 elseif(isset($_REQUEST['eventID']))
@@ -62,27 +58,18 @@ elseif(isset($_REQUEST['eventID']))
 
 // Clean up from event processing //////////////////////////////////////////////
 clearEventHandlers();   // events defined by previous display() are not valid
-// FUNKY: can't unset $delegate here b/c it may or may not be redefined
-// when the UI delegate is require_once()'d. It will be overwritten if needed,
-// though, so we really don't need to worry about it.
 
 // Handle a return from a called page //////////////////////////////////////////
-//  Allowing return values and pseudo-handlers for pageReturn() gets us in a
-//  nasty situation, where the handler itself could pageReturn(), ad infinitum.
-//  This requires us to put a while() loop here with a require_once() for every
-//  pass. The danger is that we will go from delegate page A, to B, and back to
-//  A -- but then A won't be included again and so $delegate won't be defined
-//  correctly! I don't see a reasonable way around this, so we won't support it.
+// This should now be possible but has not been implemented yet.
+// pageReturn() should set global variables ($page_return_callback and _argument)
+// and there should be a while() loop here to process multi-level returns.
 
 // Display user interface //////////////////////////////////////////////////////
-$page = end($_SESSION['pages']);                    // not a ref; read only
-if(! $page['delegate']) die("No page delegate defined for display"); // else cryptic error from require_once()
+$page = end($_SESSION['pages']); // not a ref; read only
+$delegate = makeDelegateObject();
 // Can't call mpSessReadOnly() or we won't be able to create events.
 // Other than events, display() shouldn't write to the session though.
-// FUNKY: Must use require_once() b/c event delegate (above) may be the same,
-// or may be different, and we can't redefine classes or functions.
-require_once(MP_BASE_DIR."/pages/$page[delegate]"); // defines $delegate
 // Not a variable function name; UI function is always 'display()'
-$delegate->display($page['context']);               // creates a HTML UI
+$delegate->display($page['context']); // creates a HTML UI
 
 ?>

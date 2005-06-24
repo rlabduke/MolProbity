@@ -4,10 +4,8 @@
 *****************************************************************************/
 require_once(MP_BASE_DIR.'/lib/labbook.php');
 
-// This variable must be defined for index.php to work! Must match class below.
-$delegate = new InterfaceDoneDelegate();
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
-class InterfaceDoneDelegate extends BasicDelegate {
+class interface_done_delegate extends BasicDelegate {
     
 #{{{ display - creates the UI for this page
 ############################################################################

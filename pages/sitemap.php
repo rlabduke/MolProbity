@@ -2,10 +2,8 @@
 /*****************************************************************************
     This is an overall "site map" or super-index page for MolProbity3 experts.
 *****************************************************************************/
-// This variable must be defined for index.php to work! Must match class below.
-$delegate = new SitemapDelegate();
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
-class SitemapDelegate extends BasicDelegate {
+class sitemap_delegate extends BasicDelegate {
     
 #{{{ display - creates the UI for this page
 ############################################################################

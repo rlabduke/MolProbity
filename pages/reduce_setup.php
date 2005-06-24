@@ -5,10 +5,8 @@
 *****************************************************************************/
 require_once(MP_BASE_DIR.'/lib/model.php');
 
-// This variable must be defined for index.php to work! Must match class below.
-$delegate = new ReduceSetupDelegate();
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
-class ReduceSetupDelegate extends BasicDelegate {
+class reduce_setup_delegate extends BasicDelegate {
     
 #{{{ display - creates the UI for this page
 ############################################################################

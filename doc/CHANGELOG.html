@@ -67,10 +67,7 @@
     "outlier" column for multichart
     Move labbook.html to charts/ ?
     Detect whether uploaded files have enough H by H/heavy ratio
-  * Change $delegate declarations before classes to be done dynamically from
-        within index.php as $delg_class = basename(...); $delegate = new $delg_class;
-        This will require renaming all the classes in pages/
-    *** Do SVN CI before proceeding!!!
+    for welcome: smarter tool list, more icons, notebook entries and files
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -78,6 +75,11 @@
 
 ### 3beta17 ###
 - started on new welcome "all in wonder" page
+- changed $delegate declarations before classes to be done dynamically from
+  within index.php as $delg_class = basename(...); $delegate = new $delg_class;
+  This required renaming all the classes in pages/ and updating devel docs.
+- continued development of new welcome page including working model selector
+  with JavaScript autosubmit and list of tools with pretty new icons.
 
 ### 3beta16 ###
 - fixed bug in logout_destroy.php that kept the session ID out of the log file

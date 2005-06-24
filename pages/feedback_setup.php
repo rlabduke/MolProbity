@@ -2,10 +2,8 @@
 /*****************************************************************************
     This page allows users to send email about bugs/features in MolProbity.
 *****************************************************************************/
-// This variable must be defined for index.php to work! Must match class below.
-$delegate = new FeedbackSetupDelegate();
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
-class FeedbackSetupDelegate extends BasicDelegate {
+class feedback_setup_delegate extends BasicDelegate {
     
 #{{{ display - creates the UI for this page
 ############################################################################
