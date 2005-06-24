@@ -54,6 +54,7 @@
     Support "permevents" for notebook pages - eval() or just a pageCall() target
         Why did I want this? Redirect to action pages, maybe?
     analyze::findAltConfs() should also support nuc. acid mc/sc classification
+    re-assort the functions from visualize.php and analyze.php
 }}}
     Develop "helper" pages; mark optional steps clearly
     Pick lowest resolution number mentioned in file; allow override?
@@ -61,15 +62,22 @@
     DANG is included in bin/ but we don't *use* it anywhere... / upgrade to 1.9
     Create "geometrical" layout for icons on Site Map, like MP2 (JSR)
     LIST of interacting (residues|*ATOMS*) across an interface
- ** Upgrade Arachne's PHP to ge 4.3.7
     IE 6.x has page-caching problems with MolProbity3?
     Oneline, all-in-one (kins, etc) for JCSG
-    Create HTML snapshot of multichart (at create time)
     "outlier" column for multichart
+    Move labbook.html to charts/ ?
+    Detect whether uploaded files have enough H by H/heavy ratio
+  * Change $delegate declarations before classes to be done dynamically from
+        within index.php as $delg_class = basename(...); $delegate = new $delg_class;
+        This will require renaming all the classes in pages/
+    *** Do SVN CI before proceeding!!!
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
+
+### 3beta17 ###
+- started on new welcome "all in wonder" page
 
 ### 3beta16 ###
 - fixed bug in logout_destroy.php that kept the session ID out of the log file
@@ -83,6 +91,9 @@
 - made link to "alpha test" more visible on kinemage
 - usage history now has selectable columns for detailed breakdown
 - added "clashes-with" information to clashlist parser and multichart
+- moved most HTML formatting for multichart in lib/sortable_table.php
+- created multichart snapshot in charts/, main data in raw_data/ -- is this OK?
+- rebuilt glass with Michael as the new alpha-test host of MolProbity3
 
 ### 3beta15 ###
 - clash stats for score B lt 40 are now done correctly rather than against the

@@ -137,8 +137,9 @@ function runAnalysis($modelID, $opts)
     if($opts['doMultiChart'])
     {
         setProgress($tasks, 'multichart'); // updates the progress display if running as a background job
-        $outfile = "$chartDir/$model[prefix]multi.table";
-        writeMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pperp);
+        $outfile = "$rawDir/$model[prefix]multi.table";
+        $snapfile = "$chartDir/$model[prefix]multi.html";
+        writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota, $cbdev, $pperp);
         $tasks['multichart'] .= " - <a href='viewtable.php?$_SESSION[sessTag]&file=$outfile' target='_blank'>preview</a>\n";
         setProgress($tasks, 'multichart'); // so the preview link is visible
     }
@@ -189,7 +190,7 @@ function runAnalysis($modelID, $opts)
         if($opts['doMultiKin'])
             $entry .= "<p>".linkKinemage("$model[prefix]multi.kin", "Multi-criterion kinemage")."</p>\n";
         if($opts['doMultiChart'])
-            $entry .= "<p><a href='viewtable.php?$_SESSION[sessTag]&file=$chartDir/$model[prefix]multi.table' target='_blank'>Multi-criterion chart</a></p>\n";
+            $entry .= "<p><a href='viewtable.php?$_SESSION[sessTag]&file=$rawDir/$model[prefix]multi.table' target='_blank'>Multi-criterion chart</a></p>\n";
     }
     
     $entry .= "<h3>Single-criterion visualizations</h3>";
