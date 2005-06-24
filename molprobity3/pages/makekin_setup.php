@@ -7,10 +7,8 @@
 // public_html/index.php has already included core.php, sessions.php, etc.
 // so you don't need to include them explicitly here.
 
-// This variable must be defined for index.php to work! Must match class below.
-$delegate = new MakeKinSetupDelegate();
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
-class MakeKinSetupDelegate extends BasicDelegate {
+class makekin_setup_delegate extends BasicDelegate {
     
 #{{{ display - creates the UI for this page
 ############################################################################

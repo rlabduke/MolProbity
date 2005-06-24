@@ -2,10 +2,8 @@
 /*****************************************************************************
     Welcome/start page for MP3, with hints for new users about how to proceed.
 *****************************************************************************/
-// This variable must be defined for index.php to work! Must match class below.
-$delegate = new WelcomeDelegate();
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
-class WelcomeDelegate extends BasicDelegate {
+class welcome_delegate extends BasicDelegate {
     
 #{{{ display - creates the UI for this page
 ############################################################################

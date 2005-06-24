@@ -2,13 +2,10 @@
 /*****************************************************************************
     Welcome/start page for MP3, with hints for new users about how to proceed.
 *****************************************************************************/
-// No, doing this breaks the link to this page!!
-require_once(MP_BASE_DIR.'/pages/upload_pdb_setup.php'); // sets $delegate, then we overwrite it
+require_once(MP_BASE_DIR.'/pages/upload_pdb_setup.php');
 
-// This variable must be defined for index.php to work! Must match class below.
-$delegate = new Welcome2Delegate();
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
-class Welcome2Delegate extends BasicDelegate {
+class welcome2_delegate extends BasicDelegate {
     
 #{{{ display - creates the UI for this page
 ############################################################################
@@ -17,38 +14,42 @@ class Welcome2Delegate extends BasicDelegate {
 */
 function display($context)
 {
-    echo mpPageHeader("Welcome!", "welcome2");
-    echo "<center><h2>MolProbity:<br>Macromolecular Structure Validation</h2></center>\n";
+    //echo mpPageHeader("Welcome!", "welcome2");
+    //echo "<center><h2>MolProbity:<br>Macromolecular Structure Validation</h2></center>\n";
+    echo mpPageHeader("MolProbity:<br>Macromolecular Structure Validation", "welcome2");
+    echo makeEventForm("onAction", null, true) . "\n";
 ?>
 <table border='0' width='100%'>
 <tr><td align='center' width='35%'>PDB/NDB code</td><td align='center' width='35%'>Upload file</td><td width='10%'></td><td width='20%'></td></tr>
-<tr><?php echo makeEventForm("onGetPdbFile", null, true) . "\n"; ?>
+<tr>
     <td align='center'><input type="text" name="pdbCode" size="6" maxlength="10"></td>
     <td align='center'><input type="file" name="uploadFile"></td>
     <td><input type="submit" name="cmd" value="Go &gt;"></td>
     <td><?php echo "<a href='".makeEventURL("onNavBarCall", "upload_pdb_setup.php")."'>[more options]</a>"; ?></td>
-</form></tr>
+</tr>
 <tr><td height='12' colspan='4'><!-- vertical spacer --></td></tr>
 <?php
     if(count($_SESSION['models']) > 0)
     {
         echo "<tr>";
-        echo makeEventForm("onSetWorkingModel");
         echo "<td colspan='2'>Working model: ";
-        echo "<select name='workingModel'>\n";
+        $submit_script = 'document.forms[0].elements("cmd")[1].click();';
+        echo "<select name='workingModel' onchange='$submit_script'>\n";
         foreach($_SESSION['models'] as $id => $model)
         {
             if($_SESSION['lastUsedModelID'] == $id) $selected = "selected";
             else                                    $selected = "";
-            echo "  <option value='$id' $selected>$model[pdb] ... $model[history]</option>\n";
+            echo "  <option value='$id' $selected>$model[pdb] &nbsp; &nbsp; &nbsp; $model[history]</option>\n";
         }
         echo "</select>\n";
-        echo "</td><td><input type='submit' name='cmd' value='Set &gt;'></td><td></td></form></tr>\n";
+        echo "</td><td><input type='submit' name='cmd' value='Set'></td><td></td></tr>\n";
         
+        echo "<tr><td height='12' colspan='4'><!-- vertical spacer --></td></tr>\n";
+        $this->displayTools($context);
     }
 ?>
-<tr><td height='12' colspan='4'><!-- vertical spacer --></td></tr>
-</table>
+</table></form>
+<?php if(count($_SESSION['models']) > 0) echo "<hr>\n"; ?>
 
 
 <table border='0' width='100%'><tr valign='top'><td width='45%'>
@@ -79,19 +80,59 @@ from your web browser.</div>
 }
 #}}}########################################################################
 
-#{{{ onGetPdbFile
+#{{{ displayTools - lists links for all the different tools available
+############################################################################
+/**
+* Tool list is also customized for the currently active PDB model.
+*/
+function displayTools($context)
+{
+    $model = $_SESSION['models'][ $_SESSION['lastUsedModelID'] ];
+    
+    echo "<tr valign='top'><td colspan='2'>\n"; // start large icon column
+    if(!$model['isReduced'])
+        echo "<a href='".makeEventURL("onNavBarCall", "reduce_setup.php")."'><img src='img/add_h.png' alt='Add hydrogens' border='0' align='middle'> Add hydrogens</a><br>\n";
+    if(!$model['isReduced']) // should be just a test for H instead
+        echo "<a href='".makeEventURL("onNavBarCall", "aacgeom_setup.php")."'><img src='img/ramaplot.png' alt='Geometry analysis' border='0' align='middle'> Geometry analysis only</a><br>\n";
+    else
+        echo "<a href='".makeEventURL("onNavBarCall", "aacgeom_setup.php")."'><img src='img/clash_rama.png' alt='All-atom contacts and geometry' border='0' align='middle'> All-atom contacts &amp; geometry</a><br>\n";
+    echo "</td>\n";
+        
+        
+    echo "<td colspan='2'>\n"; // end large; start small text column
+    echo "<a href='".makeEventURL("onNavBarCall", "upload_other_setup.php")."'>Input other files</a><br />\n";
+    if($model['isReduced'])
+        echo "<a href='".makeEventURL("onNavBarGoto", "reduce_setup.php")."'>Add hydrogens</a><br />\n";
+    echo "<a href='".makeEventURL("onNavBarCall", "sswing_setup1.php")."'>Refit sidechains</a><br />\n";
+    echo "<a href='".makeEventURL("onNavBarCall", "makekin_setup.php")."'>Make simple kinemages</a><br />\n";
+    echo "<a href='".makeEventURL("onNavBarCall", "interface_setup1.php")."'>Visualize interface contacts</a><br />\n";
+    //echo "<br />\n";
+    echo "</td></tr>\n"; // end tools columns
+}
+#}}}########################################################################
+
+#{{{ onAction
 ############################################################################
 /**
 * FUNKY: This simulates being on the upload page and then calls the appropriate
 * event handler depending on whether a file has been uploaded or not...
 * Don't try this at home!
 */
-function onGetPdbFile($req, $arg)
+function onAction($arg, $req)
 {
-    pageCall("upload_pdb_setup.php"); // or else a later pageReturn() will screw us up!
-    $upload_delegate = new UploadSetupDelegate();
-    if(isset($_FILES['uploadFile']))    $upload_delegate->onUploadPdbFile($req, $arg);
-    else                                $upload_delegate->onFetchPdbFile($req, $arg);
+    if(startsWith($req['cmd'], 'Go'))
+    {
+        pageCall("upload_pdb_setup.php"); // or else a later pageReturn() will screw us up!
+        $upload_delegate = makeDelegateObject();
+        if(isset($_FILES['uploadFile']) && $_FILES['uploadFile']['error'] != UPLOAD_ERR_NO_FILE)
+            $upload_delegate->onUploadPdbFile($arg, $req);
+        else
+            $upload_delegate->onFetchPdbFile($arg, $req);
+    }
+    elseif(startsWith($req['cmd'], 'Set'))
+    {
+        $_SESSION['lastUsedModelID'] = $req['workingModel'];
+    }
 }
 #}}}########################################################################
 

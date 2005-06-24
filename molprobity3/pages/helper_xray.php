@@ -2,10 +2,8 @@
 /*****************************************************************************
     Welcome/start page for MP3, with hints for new users about how to proceed.
 *****************************************************************************/
-// This variable must be defined for index.php to work! Must match class below.
-$delegate = new HelperXrayDelegate();
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
-class HelperXrayDelegate extends BasicDelegate {
+class helper_xray_delegate extends BasicDelegate {
     
 #{{{ display - creates the UI for this page
 ############################################################################

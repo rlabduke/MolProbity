@@ -2,10 +2,8 @@
 /*****************************************************************************
     This page warns the user before they log out.
 *****************************************************************************/
-// This variable must be defined for index.php to work! Must match class below.
-$delegate = new LogoutDelegate();
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
-class LogoutDelegate extends BasicDelegate {
+class logout_delegate extends BasicDelegate {
     
 #{{{ display - creates the UI for this page
 ############################################################################

@@ -2,10 +2,8 @@
 /*****************************************************************************
     This page confirms to the user that they have sent a feedback email.
 *****************************************************************************/
-// This variable must be defined for index.php to work! Must match class below.
-$delegate = new FeedbackDoneDelegate();
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
-class FeedbackDoneDelegate extends BasicDelegate {
+class feedback_done_delegate extends BasicDelegate {
     
 #{{{ display - creates the UI for this page
 ############################################################################

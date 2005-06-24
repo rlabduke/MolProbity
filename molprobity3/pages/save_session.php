@@ -2,10 +2,8 @@
 /*****************************************************************************
     This page allows users to bookmark their session.
 *****************************************************************************/
-// This variable must be defined for index.php to work! Must match class below.
-$delegate = new SaveSessionDelegate();
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
-class SaveSessionDelegate extends BasicDelegate {
+class save_session_delegate extends BasicDelegate {
     
 #{{{ display - creates the UI for this page
 ############################################################################

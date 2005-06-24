@@ -5,10 +5,8 @@
 require_once(MP_BASE_DIR.'/lib/sswing.php');
 require_once(MP_BASE_DIR.'/lib/labbook.php');
 
-// This variable must be defined for index.php to work! Must match class below.
-$delegate = new SSwingChooseDelegate();
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
-class SSwingChooseDelegate extends BasicDelegate {
+class sswing_choose_delegate extends BasicDelegate {
     
 #{{{ display - creates the UI for this page
 ############################################################################

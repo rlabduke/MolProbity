@@ -3,10 +3,8 @@
     This page allows the user to upload files.
     It should be accessed by pageCall()
 *****************************************************************************/
-// This variable must be defined for index.php to work! Must match class below.
-$delegate = new UploadSetupDelegate();
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
-class UploadSetupDelegate extends BasicDelegate {
+class upload_pdb_setup_delegate extends BasicDelegate {
     
 #{{{ display - creates the UI for this page
 ############################################################################

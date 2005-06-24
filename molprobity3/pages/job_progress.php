@@ -3,10 +3,8 @@
     This is a job-progress-monitoring page.
     See also lib/core.php:launchBackground()
 *****************************************************************************/
-// This variable must be defined for index.php to work! Must match class below.
-$delegate = new JobProgressDelegate();
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
-class JobProgressDelegate extends BasicDelegate {
+class job_progress_delegate extends BasicDelegate {
     
 #{{{ display - creates the UI for this page
 ############################################################################

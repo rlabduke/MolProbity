@@ -4,10 +4,8 @@
     This page is for choosing the model and map; next is for choosing the res.
     It should be accessed by pageCall()
 *****************************************************************************/
-// This variable must be defined for index.php to work! Must match class below.
-$delegate = new SSwingSetup1Delegate();
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
-class SSwingSetup1Delegate extends BasicDelegate {
+class sswing_setup1_delegate extends BasicDelegate {
     
 #{{{ display - creates the UI for this page
 ############################################################################

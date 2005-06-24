@@ -2,10 +2,8 @@
 /*****************************************************************************
     This page displays statistics about the just-uploaded PDB model.
 *****************************************************************************/
-// This variable must be defined for index.php to work! Must match class below.
-$delegate = new UploadOtherDoneDelegate();
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
-class UploadOtherDoneDelegate extends BasicDelegate {
+class upload_other_done_delegate extends BasicDelegate {
     
 #{{{ display - creates the UI for this page
 ############################################################################
