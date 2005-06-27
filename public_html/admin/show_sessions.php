@@ -46,6 +46,7 @@ if($_REQUEST['cmd'] == "Destroy")
         echo "<td><a href='".basename($_SERVER['PHP_SELF'])."?sort=ttl'><b>Last touched</b></a></td>\n";
         echo "<td><b>Time-to-live</b></td>\n";
         echo "<td><a href='".basename($_SERVER['PHP_SELF'])."?sort=size'><b>Size on disk</b></a></td>\n";
+        echo "<td><!-- space for Debug cmd --></td>\n";
         echo "<td><!-- space for Enter cmd --></td>\n";
         echo "<td><!-- space for Destroy cmd --></td>\n";
         echo "</tr>\n";
@@ -56,6 +57,7 @@ if($_REQUEST['cmd'] == "Destroy")
             echo "<td>".formatMinutesElapsed(MP_SESSION_LIFETIME - $sess['ttl'])." ago</td>\n";
             echo "<td>".formatHoursElapsed($sess['ttl'])."</td>\n";
             echo "<td>".formatFilesize($sess['size'])."</td>\n";
+            echo "<td><a href='../viewdebug.php?".MP_SESSION_NAME."=$sess[id]' target='_blank'>Debug</a></td>\n";
             echo "<td><a href='../index.php?".MP_SESSION_NAME."=$sess[id]'>Enter</a></td>\n";
             // We use basename() to get "index.php" instead of the full path,
             // which is subject to corruption with URL forwarding thru kinemage.
