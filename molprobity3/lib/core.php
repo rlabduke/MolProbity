@@ -95,7 +95,6 @@ function mpNavigationBar($active)
 {
     $s = "";
     $s .= mpNavBar_goto('welcome.php', 'Welcome', ($active == 'welcome'));
-    $s .= mpNavBar_goto('welcome2.php', 'Welcome2', ($active == 'welcome2'));
     $s .= "<div class='minornav'>".mpNavBar_goto('helper_xray.php', 'Evaluate X-ray', ($active == 'helper_xray'))."</div>";
     $s .= "<div class='minornav'>".mpNavBar_goto('', 'Evaluate NMR')."</div>";
     $s .= "<div class='minornav'>".mpNavBar_goto('', 'Fix up structure')."</div>";
@@ -106,9 +105,9 @@ function mpNavigationBar($active)
     $s .= "<div class='minornav'>".mpNavBar_call('upload_other_setup.php', 'Input other files')."</div>";
     $s .= "<div class='minornav'>".mpNavBar_call('reduce_setup.php', 'Add hydrogens')."</div>";
     $s .= "<div class='minornav'>".mpNavBar_call('aacgeom_setup.php', 'All-atom contacts &amp; geometry')."</div>";
+    $s .= "<div class='minornav'>".mpNavBar_call('interface_setup1.php', 'Interface contacts')."</div>";
     $s .= "<div class='minornav'>".mpNavBar_call('sswing_setup1.php', 'Refit sidechains')."</div>";
     $s .= "<div class='minornav'>".mpNavBar_call('makekin_setup.php', 'Make simple kins')."</div>";
-    $s .= "<div class='minornav'>".mpNavBar_call('interface_setup1.php', 'Interface contacts')."</div>";
     $s .= "<br />\n";
     $s .= mpNavBar_goto('file_browser.php', 'View &amp; download files', ($active == 'files'));
     $s .= mpNavBar_goto('notebook_main.php', 'Lab notebook', ($active == 'notebook'));
