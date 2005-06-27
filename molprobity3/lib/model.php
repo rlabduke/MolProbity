@@ -48,7 +48,8 @@ function createModel($modelID, $pdbSuffix = "")
     return array(
         'id'        => $modelID,
         'prefix'    => $modelID.'-',
-        'pdb'       => $outname
+        'pdb'       => $outname,
+        'primaryDownloads'  => array()
     );
 }
 #}}}########################################################################

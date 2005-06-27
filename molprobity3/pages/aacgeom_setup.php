@@ -85,8 +85,9 @@ function checkSettingsBeforeSubmit()
         {
             // Determine which tasks should be selected by default,
             // and use an ONCLICK handler to set them.
-            $doAAC = ($model['isReduced'] ? "true" : "false");
+            //$doAAC = ($model['isReduced'] ? "true" : "false");
             $stats = $model['stats'];
+            $doAAC = ($stats['has_most_H'] || $model['isReduced'] ? "true" : "false");
             $hasProtein = ($stats['sidechains'] > 0 ? "true" : "false");
             $hasNucAcid = ($stats['nucacids'] > 0 ? "true" : "false");
             $pdbSize = filesize($_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$model['pdb']);

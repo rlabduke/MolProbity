@@ -2,7 +2,10 @@
 /*****************************************************************************
     Welcome/start page for MP3, with hints for new users about how to proceed.
 *****************************************************************************/
+require_once(MP_BASE_DIR.'/lib/labbook.php');
+
 require_once(MP_BASE_DIR.'/pages/upload_pdb_setup.php');
+require_once(MP_BASE_DIR.'/pages/file_browser.php');
 
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
 class welcome2_delegate extends BasicDelegate {
@@ -43,30 +46,38 @@ function display($context)
         }
         echo "</select>\n";
         echo "</td><td><input type='submit' name='cmd' value='Set'></td><td></td></tr>\n";
-        
-        echo "<tr><td height='12' colspan='4'><!-- vertical spacer --></td></tr>\n";
-        $this->displayTools($context);
     }
 ?>
 </table></form>
-<?php if(count($_SESSION['models']) > 0) echo "<hr>\n"; ?>
+<?php
+    if(count($_SESSION['models']) > 0 && $_SESSION['lastUsedModelID'])
+    {
+        echo "<hr>\n";
+        $this->displayTools($context);
+        echo "<hr>\n";
+        $this->displayFiles($context);
+        $this->displayEntries($context);
+        echo "<hr>\n";
+    }
+?>
 
 
 <table border='0' width='100%'><tr valign='top'><td width='45%'>
-<h3 class='nospaceafter'><?php echo "<a href='".makeEventURL("onNavBarGoto", "sitemap.php")."'>Site map</a>"; ?></h3>
-<div class='indent'>Minimum-guidance interface for experienced users.</div>
-<h3 class='nospaceafter'><?php echo "<a href='".makeEventURL("onNavBarGoto", "helper_xray.php")."'>Evaluate X-ray structure</a>"; ?></h3>
-<div class='indent'>Typical steps for a published X-ray crystal structure
-or one still undergoing refinement.</div>
-<h3 class='nospaceafter'>Evaluate NMR structure</h3>
-<div class='indent'>Typical steps for a published NMR ensemble
-or one still undergoing refinement.</div>
-<h3 class='nospaceafter'>Fix up structure</h3>
-<div class='indent'>Rebuild the model to remove outliers
-as part of the refinement cycle.</div>
-<h3 class='nospaceafter'>Work with kinemages</h3>
-<div class='indent'>Create and view interactive 3-D graphics
-from your web browser.</div>
+<h3>Walk-thrus &amp; tutorials:</h3>
+<p><u><?php echo "<a href='".makeEventURL("onNavBarGoto", "sitemap.php")."'>Site map</a>"; ?>:</u>
+Minimum-guidance interface for experienced users.</p>
+<p><u><?php echo "<a href='".makeEventURL("onNavBarGoto", "helper_xray.php")."'>Evaluate X-ray structure</a>"; ?>:</u>
+Typical steps for a published X-ray crystal structure
+or one still undergoing refinement.</p>
+<p><u>Evaluate NMR structure:</u>
+Typical steps for a published NMR ensemble
+or one still undergoing refinement.</p>
+<p><u>Fix up structure:</u>
+Rebuild the model to remove outliers
+as part of the refinement cycle.</p>
+<p><u>Work with kinemages:</u>
+Create and view interactive 3-D graphics
+from your web browser.</p>
 </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>
 <h3>Common questions:</h3>
 <p><a href='help/about.html' target='_blank'>Cite MolProbity</a>: references for use in documents and presentations.</p>
@@ -89,10 +100,11 @@ function displayTools($context)
 {
     $model = $_SESSION['models'][ $_SESSION['lastUsedModelID'] ];
     
+    echo "<table border='0' width='100%'>\n";
     echo "<tr valign='top'><td colspan='2'>\n"; // start large icon column
     if(!$model['isReduced'])
         echo "<a href='".makeEventURL("onNavBarCall", "reduce_setup.php")."'><img src='img/add_h.png' alt='Add hydrogens' border='0' align='middle'> Add hydrogens</a><br>\n";
-    if(!$model['isReduced']) // should be just a test for H instead
+    if(!$model['stats']['has_most_H']) // should be just a test for H instead
         echo "<a href='".makeEventURL("onNavBarCall", "aacgeom_setup.php")."'><img src='img/ramaplot.png' alt='Geometry analysis' border='0' align='middle'> Geometry analysis only</a><br>\n";
     else
         echo "<a href='".makeEventURL("onNavBarCall", "aacgeom_setup.php")."'><img src='img/clash_rama.png' alt='All-atom contacts and geometry' border='0' align='middle'> All-atom contacts &amp; geometry</a><br>\n";
@@ -100,14 +112,65 @@ function displayTools($context)
         
         
     echo "<td colspan='2'>\n"; // end large; start small text column
-    echo "<a href='".makeEventURL("onNavBarCall", "upload_other_setup.php")."'>Input other files</a><br />\n";
+    echo "<p><a href='".makeEventURL("onNavBarCall", "upload_other_setup.php")."'>Input other files</a></p>\n";
     if($model['isReduced'])
-        echo "<a href='".makeEventURL("onNavBarGoto", "reduce_setup.php")."'>Add hydrogens</a><br />\n";
-    echo "<a href='".makeEventURL("onNavBarCall", "sswing_setup1.php")."'>Refit sidechains</a><br />\n";
-    echo "<a href='".makeEventURL("onNavBarCall", "makekin_setup.php")."'>Make simple kinemages</a><br />\n";
-    echo "<a href='".makeEventURL("onNavBarCall", "interface_setup1.php")."'>Visualize interface contacts</a><br />\n";
-    //echo "<br />\n";
-    echo "</td></tr>\n"; // end tools columns
+        echo "<p><a href='".makeEventURL("onNavBarGoto", "reduce_setup.php")."'>Add hydrogens</a></p>\n";
+    echo "<p><a href='".makeEventURL("onNavBarCall", "sswing_setup1.php")."'>Refit sidechains</a></p>\n";
+    echo "<p><a href='".makeEventURL("onNavBarCall", "makekin_setup.php")."'>Make simple kinemages</a></p>\n";
+    echo "<p><a href='".makeEventURL("onNavBarCall", "interface_setup1.php")."'>Visualize interface contacts</a></p>\n";
+
+    echo "</td></tr></table>\n"; // end tools columns
+}
+#}}}########################################################################
+
+#{{{ displayFiles - lists most important files for current model
+############################################################################
+function displayFiles($context)
+{
+    $browser = new file_browser_delegate();
+    
+    $model = $_SESSION['models'][ $_SESSION['lastUsedModelID'] ];
+    $files = array(MP_DIR_MODELS.'/'.$model['pdb']);
+    $files = array_merge($files, $model['primaryDownloads']);
+    
+    echo "<h3 class='nospaceafter'>Popular downloads for $model[pdb]:</h3>\n";
+    echo "<table border='0' width='100%' cellspacing='0'>\n";
+    $fileListColor = MP_TABLE_ALT1;
+    foreach($files as $file)
+    {
+        echo "<tr bgcolor='$fileListColor'><td><small>".basename($file)."</small></td>";
+        echo $browser->makeFileCommands($_SESSION['dataDir'].'/'.$file, $_SESSION['dataURL'].'/'.$file);
+        echo "</tr>\n";
+        $fileListColor == MP_TABLE_ALT1 ? $fileListColor = MP_TABLE_ALT2 : $fileListColor = MP_TABLE_ALT1;
+    }
+    echo "</table>\n";
+}
+#}}}########################################################################
+
+#{{{ displayEntries - lists notebook entries for the current model
+############################################################################
+function displayEntries($context)
+{
+    // FUNKY: We use this URL to take us to the lab notebook page, and each
+    // header below appends an anchor (#entry123) onto the end of it...
+    // To get back here, the user must manually return to the welcome page.
+    $url = makeEventURL("onNavBarGoto", "notebook_main.php");
+
+    $modelID = $_SESSION['lastUsedModelID'];
+    $model = $_SESSION['models'][$modelID];
+    $labbook = openLabbook();
+    echo "<h3 class='nospaceafter'>Lab notebook entries for $model[pdb]:</h3>\n";
+    echo "<ul>\n";
+    foreach($labbook as $num => $entry)
+    {
+        if(in_array($modelID, explode("|", $entry['model'])))
+        {
+            $title = $entry['title'];
+            if($title == "") $title = "(no title)";
+            echo "<li><a href='$url#entry$num'>$title</a> [".formatDayTime($entry['modtime'])."]</li>\n";
+        }
+    }
+    echo "</ul>\n";
 }
 #}}}########################################################################
 

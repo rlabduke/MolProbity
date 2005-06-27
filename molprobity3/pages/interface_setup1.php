@@ -47,7 +47,7 @@ function warnNoH(obj)
             $c == MP_TABLE_ALT1 ? $c = MP_TABLE_ALT2 : $c = MP_TABLE_ALT1;
             echo " <tr bgcolor='$c'>\n";
             $checked = ($lastUsedID == $id ? "checked" : "");
-            if($model['isReduced'])
+            if($model['isReduced'] || $model['stats']['has_most_H'])
             {
                 echo "  <td><input type='radio' name='modelID' value='$id' $checked></td>\n";
                 echo "  <td><b>$model[pdb]</b></td>\n";

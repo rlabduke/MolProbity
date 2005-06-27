@@ -77,8 +77,10 @@ function describePdbStats($pdbstats, $useHTML = true)
 #   all_alts        total number of residues with alt conf defined
 #   mc_alts         number of protein residues with mc/CB alts
 #   nucacids        are nucleic acids present? (0/>0)
+#   heavyatoms      are "heavy" (non-H) atoms present? (0/>0)
 #   hnonpolar       are non-polar hydrogens present? (0/>0)
 #   hydrogens       are hydrogens of any kind present? (0/>0)
+#   has_most_H      are "all" hydrogens present, based on heavy/H ratio? (boolean)
 #   hets            number of non-water heterogens
 #   fromcns         headers look like CNS output? (0 < n < 7)
 #
@@ -101,6 +103,7 @@ function pdbstat($pdbfilename)
     $rescode = "";          # current res. ID
     $cbetas = 0;            # number of C-betas (for sidechains)
     $nucacids = 0;          # number of nucleic acids
+    $heavyatoms = 0;        # number of non-H atoms
     $hnonpolar = 0;         # number of non-polar Hs
     $hydrogens = 0;         # number of hydrogens (possibly polar)
     $hets = 0;              # number of non-water hets
@@ -166,15 +169,17 @@ function pdbstat($pdbfilename)
                 }
                 
                 # Atom name == CB?
-                if(preg_match("/ CB [ A1]/", $atom)) { $cbetas++; }
+                if(preg_match("/ CB [ A1]/", $atom)) { $cbetas++; $heavyatoms++; }
                 # Atom name == C5' or C5* ?
-                elseif(preg_match("/ C5[*'][ A1]/", $atom)) { $nucacids++; }
+                elseif(preg_match("/ C5[*'][ A1]/", $atom)) { $nucacids++; $heavyatoms++; }
                 # Atom is a beta hydrogen? Good flag for nonpolar H in proteins.
                 elseif(preg_match("/[ 1-9][HDTZ]B [ A1]/", $atom)) { $hnonpolar++; }
                 # Atom is a C5' hydrogen in RNA/DNA? Good flag for nonpolar H in nucleic acids.
                 elseif(preg_match("/[ 1-9][HDTZ]5[*'][ A1]/", $atom)) { $hnonpolar++; }
                 # Atom is a hydrogen?
                 elseif(preg_match("/[ 1-9][HDTZ][ A-Z][ 1-9][ A1]/", $atom)) { $hydrogens++; }
+                # Atom is non-descript
+                else { $heavyatoms++; }
                 
                 # Does this residue have alternate conformations?
                 if($atom{4} != ' ')
@@ -233,8 +238,10 @@ function pdbstat($pdbfilename)
     $ret['residues']        = $residues;
     $ret['sidechains']      = $cbetas;
     $ret['nucacids']        = $nucacids;
+    $ret['heavyatoms']      = $heavyatoms;
     $ret['hnonpolar']       = $hnonpolar;
     $ret['hydrogens']       = $hydrogens;
+    $ret['has_most_H']      = ($heavyatoms < 2*($hydrogens+$hnonpolar));
     $ret['hets']            = $hets;
     $ret['fromcns']         = $fromCNS;
     $ret['all_alts']        = count($allAlts);
