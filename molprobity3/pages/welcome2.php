@@ -4,6 +4,8 @@
 *****************************************************************************/
 require_once(MP_BASE_DIR.'/lib/labbook.php');
 
+// It may be bad form, but we hijack functions from these pages to avoid
+// duplicating the work they do. This must be done very carefully!
 require_once(MP_BASE_DIR.'/pages/upload_pdb_setup.php');
 require_once(MP_BASE_DIR.'/pages/file_browser.php');
 
@@ -17,9 +19,9 @@ class welcome2_delegate extends BasicDelegate {
 */
 function display($context)
 {
-    //echo mpPageHeader("Welcome!", "welcome2");
-    //echo "<center><h2>MolProbity:<br>Macromolecular Structure Validation</h2></center>\n";
-    echo mpPageHeader("MolProbity:<br>Macromolecular Structure Validation", "welcome2");
+    echo mpPageHeader("Welcome!", "welcome2");
+    echo "<center><h2>MolProbity:<br>Macromolecular Structure Validation</h2></center>\n";
+    //echo mpPageHeader("MolProbity:<br>Macromolecular Structure Validation", "welcome2");
     echo makeEventForm("onAction", null, true) . "\n";
 ?>
 <table border='0' width='100%'>
@@ -64,8 +66,6 @@ function display($context)
 
 <table border='0' width='100%'><tr valign='top'><td width='45%'>
 <h3>Walk-thrus &amp; tutorials:</h3>
-<p><u><?php echo "<a href='".makeEventURL("onNavBarGoto", "sitemap.php")."'>Site map</a>"; ?>:</u>
-Minimum-guidance interface for experienced users.</p>
 <p><u><?php echo "<a href='".makeEventURL("onNavBarGoto", "helper_xray.php")."'>Evaluate X-ray structure</a>"; ?>:</u>
 Typical steps for a published X-ray crystal structure
 or one still undergoing refinement.</p>
@@ -78,6 +78,8 @@ as part of the refinement cycle.</p>
 <p><u>Work with kinemages:</u>
 Create and view interactive 3-D graphics
 from your web browser.</p>
+<p><u><?php echo "<a href='".makeEventURL("onNavBarGoto", "sitemap.php")."'>Site map</a>"; ?>:</u>
+Minimum-guidance interface for experienced users.</p>
 </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>
 <h3>Common questions:</h3>
 <p><a href='help/about.html' target='_blank'>Cite MolProbity</a>: references for use in documents and presentations.</p>
@@ -99,26 +101,53 @@ from your web browser.</p>
 function displayTools($context)
 {
     $model = $_SESSION['models'][ $_SESSION['lastUsedModelID'] ];
+    $minor = array(
+        'upload'    => array('desc' => 'Input other files', 'page' => 'upload_other_setup.php', 'img' => ''),
+        'reduce'    => array('desc' => 'Add hydrogens', 'page' => 'reduce_setup.php', 'img' => 'add_h.png'),
+        'aacgeom'   => array('desc' => 'All-atom contacts and geometry', 'page' => 'aacgeom_setup.php', 'img' => 'clash_rama.png'),
+        'geomonly'  => array('desc' => 'Geometry analysis', 'page' => 'aacgeom_setup.php', 'img' => 'ramaplot.png'),
+        'iface'     => array('desc' => 'Visualize interface contacts', 'page' => 'interface_setup1.php', 'img' => ''),
+        'sswing'    => array('desc' => 'Refit sidechains', 'page' => 'sswing_setup1.php', 'img' => ''),
+        'makekins'  => array('desc' => 'Make simple kinemages', 'page' => 'makekin_setup.php', 'img' => ''),
+        //'' => array('desc' => '', 'page' => '', 'img' => ''),
+    );
+    $major = array();
+    
+    // Reduce
+    if($model['isReduced']) unset($minor['reduce']);
+    elseif($model['stats']['has_most_H']) {} // stay put
+    else { $major['reduce'] = $minor['reduce']; unset($minor['reduce']); }
+    
+    // All-atom contact analysis
+    if($model['isReduced'] || $model['stats']['has_most_H'])
+    {
+        $major['aacgeom'] = $minor['aacgeom'];
+        unset($minor['aacgeom']);
+        unset($minor['geomonly']);
+    }
+    else
+    {
+        $major['geomonly'] = $minor['geomonly'];
+        unset($minor['aacgeom']);
+        unset($minor['geomonly']);
+    }
     
     echo "<table border='0' width='100%'>\n";
-    echo "<tr valign='top'><td colspan='2'>\n"; // start large icon column
-    if(!$model['isReduced'])
-        echo "<a href='".makeEventURL("onNavBarCall", "reduce_setup.php")."'><img src='img/add_h.png' alt='Add hydrogens' border='0' align='middle'> Add hydrogens</a><br>\n";
-    if(!$model['stats']['has_most_H']) // should be just a test for H instead
-        echo "<a href='".makeEventURL("onNavBarCall", "aacgeom_setup.php")."'><img src='img/ramaplot.png' alt='Geometry analysis' border='0' align='middle'> Geometry analysis only</a><br>\n";
-    else
-        echo "<a href='".makeEventURL("onNavBarCall", "aacgeom_setup.php")."'><img src='img/clash_rama.png' alt='All-atom contacts and geometry' border='0' align='middle'> All-atom contacts &amp; geometry</a><br>\n";
+    echo "<tr valign='top'><td>\n"; // start large icon column
+    foreach($major as $item)
+    {
+        echo "<a href='".makeEventURL("onNavBarCall", $item['page'])."'>";
+        if($item['img']) echo "<img src='img/$item[img]' alt='$img[desc]' border='0' align='middle'> ";
+        echo "$item[desc]</a><br>\n";
+    }
     echo "</td>\n";
-        
-        
-    echo "<td colspan='2'>\n"; // end large; start small text column
-    echo "<p><a href='".makeEventURL("onNavBarCall", "upload_other_setup.php")."'>Input other files</a></p>\n";
-    if($model['isReduced'])
-        echo "<p><a href='".makeEventURL("onNavBarGoto", "reduce_setup.php")."'>Add hydrogens</a></p>\n";
-    echo "<p><a href='".makeEventURL("onNavBarCall", "sswing_setup1.php")."'>Refit sidechains</a></p>\n";
-    echo "<p><a href='".makeEventURL("onNavBarCall", "makekin_setup.php")."'>Make simple kinemages</a></p>\n";
-    echo "<p><a href='".makeEventURL("onNavBarCall", "interface_setup1.php")."'>Visualize interface contacts</a></p>\n";
-
+    
+    echo "<td>\n"; // end large; start small text column
+    foreach($minor as $item)
+    {
+        echo "<p><a href='".makeEventURL("onNavBarCall", $item['page'])."'>";
+        echo "$item[desc]</a></p>\n";
+    }
     echo "</td></tr></table>\n"; // end tools columns
 }
 #}}}########################################################################
@@ -144,6 +173,8 @@ function displayFiles($context)
         $fileListColor == MP_TABLE_ALT1 ? $fileListColor = MP_TABLE_ALT2 : $fileListColor = MP_TABLE_ALT1;
     }
     echo "</table>\n";
+    
+    if(count($files) > 1) echo "<p><u>Download these files as a ZIP archive</u></p>\n";
 }
 #}}}########################################################################
 
