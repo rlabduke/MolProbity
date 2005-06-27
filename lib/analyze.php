@@ -164,7 +164,12 @@ function runAnalysis($modelID, $opts)
         
         // EXPERIMENTAL: gzip compress large multikins
         if(filesize($outfile) > MP_KIN_GZIP_THRESHOLD)
+        {
             destructiveGZipFile($outfile);
+            $_SESSION['models'][$modelID]['primaryDownloads'][] = MP_DIR_KINS."/$model[prefix]multi.kin.gz";
+        }
+        else
+            $_SESSION['models'][$modelID]['primaryDownloads'][] = MP_DIR_KINS."/$model[prefix]multi.kin";
     }
     //}}} Build multi-criterion chart, kinemage
     

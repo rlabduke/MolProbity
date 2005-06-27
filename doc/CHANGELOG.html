@@ -66,8 +66,7 @@
     Oneline, all-in-one (kins, etc) for JCSG
     "outlier" column for multichart
     Move labbook.html to charts/ ?
-    Detect whether uploaded files have enough H by H/heavy ratio
-    for welcome: smarter tool list, more icons, notebook entries and files
+    for welcome: smarter tool list, more icons
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -80,6 +79,11 @@
   This required renaming all the classes in pages/ and updating devel docs.
 - continued development of new welcome page including working model selector
   with JavaScript autosubmit and list of tools with pretty new icons.
+- moved global var to class var for file_browser.php
+- improved formatting on welcome page; still needs work
+- added file downloads and lab notebook entries to welcome page for curr model
+- added "primaryDownloads" list per model
+- added "has_most_H" field to PDB-stat results
 
 ### 3beta16 ###
 - fixed bug in logout_destroy.php that kept the session ID out of the log file

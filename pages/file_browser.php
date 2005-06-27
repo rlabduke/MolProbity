@@ -2,12 +2,12 @@
 /*****************************************************************************
     This is a nice file/folder browser with collapsible folders.
 *****************************************************************************/
-// Needed for makeFileList() b/c we're already using the return value
-$fileListColor = MP_TABLE_ALT1;
-
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
 class file_browser_delegate extends BasicDelegate {
-    
+
+    // Needed for makeFileList() b/c we're already using the return value
+    var $fileListColor;
+
 #{{{ display - creates the UI for this page
 ############################################################################
 /**
@@ -39,14 +39,13 @@ function display($context)
 */
 function makeFileList($list, $basePath, $baseURL, $isExpanded, $depth = 0)
 {
-    global $fileListColor;
-    if($depth === 0) $fileListColor = MP_TABLE_ALT1;
+    if($depth === 0) $this->fileListColor = MP_TABLE_ALT1;
 
     $s = '';
     foreach($list as $dir => $file)
     {
-        $s .= "<tr bgcolor='$fileListColor'><td>";
-        $fileListColor == MP_TABLE_ALT1 ? $fileListColor = MP_TABLE_ALT2 : $fileListColor = MP_TABLE_ALT1;
+        $s .= "<tr bgcolor='".$this->fileListColor."'><td>";
+        $this->fileListColor == MP_TABLE_ALT1 ? $this->fileListColor = MP_TABLE_ALT2 : $this->fileListColor = MP_TABLE_ALT1;
         if(is_array($file))
         {
             $s .= "<img src='img/clear_1x1.gif' width='".(16*$depth)."' height='1'>";

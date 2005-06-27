@@ -72,9 +72,6 @@ instead ran forever.</li>
   <li><span style="font-weight: bold; font-family: monospace;">kingSize</span>:
 one of "tiny", "small", "default", or "large" - determines the size of
 the KiNG window.</li>
-  <li><span style="font-weight: bold; font-family: monospace;">moreOpts</span>:
-an array of flags for showing more options in various forms, described
-below.</li>
 </ul>
 <h2>Files present in the system data directory
 ($_SESSION[dataDir]/system):</h2>
@@ -179,13 +176,20 @@ true if the PDB is the result of a <span
  style="font-family: monospace;">-fix</span> run in Reduce, so the
 expert system has already changed all the Asn, Gln, and His that might
 need changing. This is a heritable property.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">primaryDownloads</span>:
+an array of file names, specified relative to <span
+ style="font-family: monospace;">dataDir</span>/<span
+ style="font-family: monospace;">dataURL</span>. These are files
+related to this model that users are very likely to want to download
+during or at the end of their session.<br>
+  </li>
 </ul>
 <h2>Files created for each model:</h2>
 All the actual file names are preceded by the model <span
  style="font-weight: bold; font-family: monospace;">prefix</span>.
 Listed below are the suffixes. Order is alphabetical by file type, then
 by file name. Not all files will necessarily be generated for every
-model.<br>
+model. [These are out of date and should be fixed...]<br>
 <ul>
   <li>multi.chart</li>
   <li>multiall.chart<br>
@@ -274,19 +278,6 @@ The context will automatically be set to <span
  style="font-family: monospace;">$_SESSION['bgjob']['whereNext'] =
 "sitemap.php"</span>.</li>
   <li>... plus other entries specific to the particular job at hand.<br>
-  </li>
-</ul>
-<h2>Contents of $_SESSION['moreOpts']:</h2>
-<ul>
-  <li><span style="font-weight: bold; font-family: monospace;">all</span>:
-true if we should always show extra options, regardless of any other
-settings below. If set, links to show more/fewer options are also
-supressed.<br>
-    <span style="font-weight: bold; font-family: monospace;"></span></li>
-  <li><span style="font-weight: bold; font-family: monospace;">pdbUpload</span>:
-true if we should show more options for uploading files.</li>
-  <li><span style="font-weight: bold; font-family: monospace;">analyze</span>:
-true if the user wants to choose which analysis jobs are run.<br>
   </li>
 </ul>
 <br>
