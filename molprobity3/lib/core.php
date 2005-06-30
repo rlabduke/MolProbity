@@ -36,8 +36,9 @@ require_once(MP_BASE_DIR.'/lib/event_page.php');// MVC/events architecture
 * $active       determines the state of the navigation panel
 *               "none" means no nav links will be present
 *               see mpNavigationBar() for other choices
-* $refresh      a string like "5; something.php?foo=bar&bar=nil"
+* $refresh      a string like "5; URL=something.php?foo=bar&bar=nil"
 *               would refresh that page with those vars every 5 sec.
+*               Leaving off the URL= part works for most browsers, but not IE!
 */
 function mpPageHeader($title, $active = "none", $refresh = "")
 {

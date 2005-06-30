@@ -19,13 +19,15 @@ function mpInitEnvirons()
     set_magic_quotes_runtime(0); // off
     
     // Make sure our pages aren't cached by the browser.
-    // Most browsers are OK without this, but not e.g. IE 6.x
+    // Most browsers are OK without this, but we're just being safe...
     // Taken from the PHP manual:
+    /*
     header("Expires: Mon, 26 Jul 1997 05:00:00 GMT");               // Date in the past
     header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");  // always modified
     header("Cache-Control: no-store, no-cache, must-revalidate");   // HTTP/1.1
     header("Cache-Control: post-check=0, pre-check=0", false);      // HTTP/1.1
     header("Pragma: no-cache");                                     // HTTP/1.0
+    */
     
     // Set umask for files, directories, etc. that are created
     umask(MP_UMASK);
