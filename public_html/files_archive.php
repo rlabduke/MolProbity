@@ -63,7 +63,7 @@ else
     
     
 // Start the page: produces <HTML>, <HEAD>, <BODY> tags
-echo mpPageHeader("Archive download", "files", "2; $url");
+echo mpPageHeader("Archive download", "files", "2; URL=$url");
 ############################################################################
 ?>
 

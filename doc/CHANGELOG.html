@@ -88,6 +88,12 @@
 - verified that IE 6.x doesn't work with MP3 at all, presumably due to weird
   caching behavior -- e.g. uploads just leave the user at the Welcome page.
 - added anti-caching header() calls to mpInitEnvirons() to combat IE6 bug.
+- not a page-caching issue. It looks like the background job never gets started,
+  because the system/errors file is never even created.
+- actually, the session ID doesn't get preserved during background job
+  processing -- IE doesn't like index.php?SESSION_ID... in the REFRESH tag.
+- added URL=... to all REFRESH tags. Google says this should fix the IE bug.
+- commented anti-caching commands out again. If it ain't broke...
 
 ### 3beta16 ###
 - fixed bug in logout_destroy.php that kept the session ID out of the log file
