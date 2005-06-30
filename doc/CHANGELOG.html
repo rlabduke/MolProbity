@@ -34,16 +34,11 @@
     Allow uploads of tarballs of NMR models?
     On upload of alt conf model, do table to choose which ones to use
     "nice" large jobs such as multi-model NMR runs
-    Write management and *monitoring* scripts for administrators
-        Create scripts for generating usage stats from molprobity.log
-        Selectable date range for analysis
-        Common header of links between pages...
     Allow simple comparison of bad residues in two models; see jobs/aacgeom.php
     Add documentation to the analysis results page (how to interpret)
     Add explanation of SSWING, Reduce, AAC, kins on setup pages
     Make sure Reduce doesn't shrink the PDB file (lost atoms/models, etc)
     Add coloring type drop box for -lots kins
-    Create Xray / NMR / Student Helper pages with suggested protocols
     Write command line scripts for common actions; remove junk from cmdline/
     Produce multi-model multicrit kinemages from the GUI
     Give NMR models a linking ID somehow
@@ -60,13 +55,14 @@
     Pick lowest resolution number mentioned in file; allow override?
     Biol. units use MODELs rather than chain IDs? Check and then email P. Bourne
     DANG is included in bin/ but we don't *use* it anywhere... / upgrade to 1.9
-    Create "geometrical" layout for icons on Site Map, like MP2 (JSR)
-    LIST of interacting (residues|*ATOMS*) across an interface
+    SEP(Gary): LIST of interacting (residues|*ATOMS*) across an interface
     IE 6.x has page-caching problems with MolProbity3?
     Oneline, all-in-one (kins, etc) for JCSG
     "outlier" column for multichart
     Move labbook.html to charts/ ?
     for welcome: more icons, clean out old unused images
+    Implement download-as-ZIP for "popular downloads" section
+    When NMR files are split, notebook assoc'd with first model only
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -88,6 +84,10 @@
 - cleaned up site map to be more bare-bones again
 - misc improvements to welcome page code
 - added debugging page that displays $_SESSION, linked from admin pages
+- added icons for making kinemages and interface contacts
+- verified that IE 6.x doesn't work with MP3 at all, presumably due to weird
+  caching behavior -- e.g. uploads just leave the user at the Welcome page.
+- added anti-caching header() calls to mpInitEnvirons() to combat IE6 bug.
 
 ### 3beta16 ###
 - fixed bug in logout_destroy.php that kept the session ID out of the log file

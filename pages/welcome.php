@@ -127,10 +127,10 @@ function displayTools($context)
         'upload'    => array('desc' => 'Input other files', 'page' => 'upload_other_setup.php', 'img' => ''),
         'reduce'    => array('desc' => 'Add hydrogens', 'page' => 'reduce_setup.php', 'img' => 'add_h.png'),
         'aacgeom'   => array('desc' => 'All-atom contacts and geometry', 'page' => 'aacgeom_setup.php', 'img' => 'clash_rama.png'),
-        'geomonly'  => array('desc' => 'Geometry analysis', 'page' => 'aacgeom_setup.php', 'img' => 'ramaplot.png'),
-        'iface'     => array('desc' => 'Visualize interface contacts', 'page' => 'interface_setup1.php', 'img' => ''),
+        'geomonly'  => array('desc' => 'Geometry analysis only', 'page' => 'aacgeom_setup.php', 'img' => 'ramaplot.png'),
+        'iface'     => array('desc' => 'Visualize interface contacts', 'page' => 'interface_setup1.php', 'img' => 'barnase_barstar.png'),
         'sswing'    => array('desc' => 'Refit sidechains', 'page' => 'sswing_setup1.php', 'img' => ''),
-        'makekins'  => array('desc' => 'Make simple kinemages', 'page' => 'makekin_setup.php', 'img' => ''),
+        'makekins'  => array('desc' => 'Make simple kinemages', 'page' => 'makekin_setup.php', 'img' => 'porin_barrel.png'),
         //'' => array('desc' => '', 'page' => '', 'img' => ''),
     );
     $major = array();
@@ -149,10 +149,23 @@ function displayTools($context)
     }
     else
     {
-        $major['geomonly'] = $minor['geomonly'];
+        //$major['geomonly'] = $minor['geomonly'];
         unset($minor['aacgeom']);
-        unset($minor['geomonly']);
+        //unset($minor['geomonly']);
     }
+    
+    // Suggest kin w/o H, suggest interface w/ H
+    if($model['isReduced'] || $model['stats']['has_most_H'])
+    {
+        $major['iface'] = $minor['iface'];
+        unset($minor['iface']);
+    }
+    else
+    {
+        $major['makekins'] = $minor['makekins'];
+        unset($minor['makekins']);
+    }
+    
     
     echo "<table border='0' width='100%'>\n";
     echo "<tr valign='top'><td>\n"; // start large icon column
