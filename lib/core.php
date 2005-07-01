@@ -55,6 +55,18 @@ function mpPageHeader($title, $active = "none", $refresh = "")
     if($refresh != "")
         $s .= "    <meta http-equiv='refresh' content='$refresh'>\n";
 
+    // Warn the user about bad events -- this could alternately be an alert div
+    // as the very first item in pagecontent (at the end of this function).
+    /*if($GLOBALS['badEventOccurred'])
+        $s .= '<script language="JavaScript">
+<!--
+window.alert("You cannot use your browser\'s back button in MolProbity,"
+    +" and you cannot have multiple windows of the same working session"
+    +" (except for kinemage views, charts, and the like).");
+-->
+</script>
+';*/
+
     $s .= '</head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -83,6 +95,13 @@ function mpPageHeader($title, $active = "none", $refresh = "")
     <div class="pagecontent">
 ';
     }
+    
+    // Warn the user about bad events. (Alternative JavaScript version above.)
+    if($GLOBALS['badEventOccurred'])
+        $s .= "<div class='alert'>You cannot use your browser's back button in MolProbity,
+            and you cannot have multiple windows of the same working session
+            (except for kinemage views, charts, and the like).</div>\n";
+
     return $s;
 }
 #}}}########################################################################

@@ -23,10 +23,8 @@
     User manual (do we need this in addition to page-by-page help?)
         Tutorial / walk-thru
         Write a decent document about installation of MolProbity for web and script use
-        Update Java install docs for end users; note on KiNG page
     Could make it a web service with XML-RPC (SOAP, CORBA too complex)
     Download ZIP archives of session files
-        Allow "hidden" user files; default download doesn't include these?
     Retrieve maps from the EDS
     Multicrit: views for trouble spots sorted by severity (also hypertext?)
     Estimate time for e.g. analysis jobs?
@@ -64,8 +62,6 @@
     for welcome: more icons, clean out old unused images
     Implement download-as-ZIP for "popular downloads" section
     When NMR files are split, notebook assoc'd with first model only
-    Warn users using MSIE, suggest Firefox?
-    JavaScript warning on bad events "Don't use Back button"
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -79,6 +75,10 @@
 - improved usage_history.php, added browser usage statistics
 - added human-readable error messages to upload error pages;
   modified welcome.php's upload form to work even when cmd is not set.
+- added JavaScript warning about using back button/multiple windows (bad events)
+- changed JS to alert div at start of page
+- added browser (MSIE) and no-Java (via JS) warnings to welcome.php
+- updated Java instructions page from MP2 and linked it from welcome + viewking
 
 ### 3beta17 ###
 - started on new welcome "all in wonder" page

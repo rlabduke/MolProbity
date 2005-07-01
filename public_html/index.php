@@ -56,7 +56,10 @@ elseif(isset($_REQUEST['eventID']))
         mpSaveSession(); 
     }
     else
+    {
+        $GLOBALS['badEventOccurred'] = true;
         mpLog("bad-event:Event ID '$eid' is unknown for page $page[delegate]. No action taken.");
+    }
 }
 
 // Clean up from event processing //////////////////////////////////////////////

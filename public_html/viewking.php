@@ -88,7 +88,9 @@ echo mpPageHeader("KiNG - $file");
 When finished, you should 
 <input type="button" value="close this window"
 language="JavaScript" onclick="self.close();">.
-</td><td align='right'>
+</td>
+<td><a href='help/java.html'>Don't see anything?</a></td>
+<td align='right'>
 <?php
 if($_SESSION['kingSize'] == "tiny") echo "tiny";
 else echo "<a href='viewking.php?$_SESSION[sessTag]&url=$url&size=tiny'>tiny</a>";
