@@ -1,0 +1,174 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+    <title>Java - MolProbity Help</title>
+    <link rel="StyleSheet" href="../css/default.css" TYPE="text/css">
+    <link rel="shortcut icon" href="../favicon.ico">
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+    <td width="150"><img src="../img/small-logo5.gif" alt="MolProbity logo"></td>
+    <td valign="bottom"><div class="pageheader">
+        <h1>Java help</h1>
+    </div></td>
+</tr>
+<tr><td valign="top" colspan="2">
+    <div class="pagecontent_alone">
+    
+<!------------------------------------------------------------------------------
+  --- "HELP!" section ----------------------------------------------------------
+  ----------------------------------------------------------------------------->
+<p><center><applet code="JavaCheck.class" width=500 height=70>
+<param name="version1" value="1.4">
+<param name="message1" value="You have an up-to-date Java - congratulations!">
+<param name="version2" value="1.3">
+<param name="message2" value="You have a reasonably new Java, but may want to upgrade.">
+<param name="default" value="Your Java is too old; please upgrade to a newer version.">
+    <div class='alert'>
+    You do not appear to have Java installed.
+    <br>You will not be able to use the KiNG interactive graphics in MolProbity.
+    <br><a href='http://java.sun.com/getjava/' target='_blank'>Click here to install Java for your browser.</a>
+    </div>
+</applet></center>
+
+<small><i>If you can see a version number above, you have Java installed.
+If you see a coffee cup, an animated star, or the like, just wait a minute for the applet to finish loading.
+If you don't see anything, or just see an error message, keep reading to learn how to get Java.</i></small>
+
+<script language='JavaScript'>
+<!--
+    if(!navigator.javaEnabled())
+    {
+        document.writeln("<div class='alert'>");
+        document.writeln("Java is disabled in your browser or is not installed.");
+        document.writeln("Please enable it through your browser's Preferences or Settings menu, and/or");
+        document.writeln("<a href='http://java.sun.com/getjava/' target='_blank'>click here to download and install Java.</a>");
+        document.writeln("</div><br>");
+    }
+// -->
+</script>
+
+<hr>
+<h2>For those in a hurry: <a href="http://java.sun.com/getjava/" target=_blank>get Java now</a>!</h2>
+<hr>
+
+<h2>What is Java?</h2>
+Java is a technology developed by <a href="http://www.sun.com" target=_blank>Sun Microsystems</a>
+that allows you to run small programs, called <i>applets</i>, inside your web browser.
+
+<h2>Who can use Java?</h2>
+Almost anyone with a reasonably modern web browser can use Java.
+Most browsers, like <a href="http://www.microsoft.com/" target=_blank>Microsoft Internet Explorer</a>,
+<a href="http://www.apple.com/safari/" target=_blank>Safari</a>,
+<a href="http://www.netscape.com/" target=_blank>Netscape Navigator</a>,
+<a href="http://www.mozilla.org/" target=_blank>Mozilla, and Firefox</a>,
+use the Java Virtual Machine (JVM) provided by Sun.
+This is sometimes called a "plug-in".
+<p>You may already have Java available on your computer -- 
+Macintosh OS X comes with Java built-in, and Netscape Navigator 6 includes Sun's JVM as part of the browser package. 
+Most Windows computers do not come with Java installed, but don't worry -- it's easy to do it yourself.
+
+<h2>How do I get Java?</h2>
+You may already have Java!
+If you've used MolProbity before and been able to see the interactive 3-D graphics in KiNG, you have Java.
+Or, check the message at the top of this page.
+<p>If you don't have Java or your version is too old, read on.
+<ul>
+<li><b>for Windows and Linux:</b>
+<p>Try going to this page (<a href="http://java.sun.com/getjava/" target=_blank>http://java.sun.com/getjava/</a>)
+to quickly obtain the latest version of Java.
+Sun has tried to make it easier, particularly for Windows users, but if you have trouble, come back to this page and keep reading.
+</li>
+<li><b>for the Macintosh:</b>
+<p>If you have a Mac running OS X, you have Java. Break out the champagne!
+In <em>rare circumstances</em>, you may have trouble getting Java to work in your browser.
+If you have trouble, come back to this page and keep reading.
+Mac OS 9 and earlier do not support modern versions of Java at all -- sorry.
+</li>
+</ul>
+
+<h2>Help! It didn't work...</h2>
+<ul>
+<li><i>for Windows:</i>
+<p>If you don't already have Java, go to <a href="http://java.sun.com/" target=_blank>java.sun.com</a>
+and download the Java 2, Standard Edition (J2SE) Java Runtime Environment (JRE).
+We recommend getting the newest version (1.5.0 as of this writing).
+<p>When prompted to save the file or open it, choose "Open" and follow the instructions that appear.
+Or, save the file and run it later, following the instructions it displays.
+<p>IE and Netscape should now make use of Java automatically, without further configuration.
+If you're running Mozilla, or another browser that uses plug-ins, consult that browser's documentation. Sorry!
+</li>
+<li><i>for Linux:</i>
+<p>If you don't already have Java, go to <a href="http://java.sun.com/" target=_blank>java.sun.com</a>
+and download the Java 2, Standard Edition (J2SE) Java Runtime Environment (JRE).
+We recommend getting the newest version (1.5.0 as of this writing).
+<p>Get either the RPM (RedHat) or the GNUZIP/Tar (any Linux) shell script, save it to disk, and execute it.
+For the GNUZIP/Tar script, make sure you're in the directory where you want Java installed before running it -- e.g. <code>/usr/local</code>.
+Sun provides more detailed instructions, but it should be straightforward.
+<p>The browsers will generally not use Java automatically; they have to be told about it in an additional step.
+<p>For Mozilla, do something like <code>ln&nbsp;-s /usr/local/jre/plugin/i386/ns610-gcc32/libjavaplugin_oji.so /usr/lib/mozilla/plugins/</code> as root.
+Setup for Firefox should be similar.
+<p>Java is broken in Konqueror 3.0 as of this writing.
+If it worked, you would go to <code>Settings&nbsp;|&nbsp;Configure&nbsp;Konqueror...&nbsp;|&nbsp;Konqueror Browser&nbsp;|&nbsp;Java</code>
+and set the path to Java executable to something like <code>/usr/local/jre/bin/java</code>, depending on where Java is installed.
+<p>For other browsers, you're on your own -- but you're smart enough to use Linux, you can figure it out.
+</li>
+<li><i>for the Macintosh:</i>
+<p>There are known issues with (1) the Netscape 7.0/Mozilla 1.1 browsers and Jaguar (OS X 10.2)
+and (2) the JDK 1.4.1 Developer Previews and any browser other than IE.
+<p>If you're using Netscape or Mozilla and blank space appears where you expect an applet,
+you may need to remove the default plugin from the application bundle.
+Using the Finder, control-click on the Netscape/Mozilla application, and choose
+"Show Package Contents". Navigate down to find the Java Plugin, and delete it.
+<p>If you've downloaded the JDK 1.4.1 and get only a box where you expect an applet,
+you'll need to change back to 1.3.1. To determine the version you're currently using,
+type <code>java -version</code> in a command shell. To change to version 1.3.1 if you're using
+something else, type <code>sudo /usr/local/bin/jsettestjdk 1.3.1</code>&nbsp;
+These commands are documented in materials that came with the JDK download.
+</li>
+</ul>
+
+<h2>What is KiNG?</h2>
+<a href="http://kinemage.biochem.duke.edu/software/king.php" target=_blank>KiNG</a>
+is a Java applet and application for displaying 3-D graphics, like macromolecular structures.
+It implements many of the features found in our primary display program,
+<a href="http://kinemage.biochem.duke.edu/software/mage.php" target=_blank>Mage</a> (coded in C).
+
+<h2>Why does MolProbity use Java?</h2>
+Java allows our users to view 3-D information in custom software (KiNG)
+without having to download, install, and configure that software manually.
+While for some users there is a "startup cost" in obtaining Java in the first place,
+that one-time cost is effectively shared by the many scientific sites that use Java.
+For instance, both the <a href="http://www.rcsb.org/pdb/" target=_blank>Protein Data Bank (PDB)</a>
+and the <a href="http://portray.bmc.uu.se/eds/" target=_blank>Electron Density Server (EDS)</a>
+offer Java viewing software.
+<p>Plus, Java is a great language for rapid program development, with a rich set of libraries
+and extensive documentation (check out the computer books wall at your local bookstore).
+The same code runs on many types of computers, which reduces our maintainance burden
+and allows us to spend more time creating features (and, oh yeah, doing <i>science</i>).
+
+<h2>How much does it cost?</h2>
+Nothing -- Sun gives Java away for free.
+
+<h2>Is is safe?</h2>
+We believe Java is a very safe way of running programs over the Net,
+and many protections are built into Java to prevent applets from making changes to your machine.
+That said, no piece of complex software (like Java or KiNG) can be guaranteed to be
+free from bugs and potential vulnerabilities.
+All use of this site is at your own risk.
+ 
+
+    </div>
+</td></tr>
+<tr><td colspan="2">
+    <div class="pagefooter">
+<a href="manual/index.html">User manual home</a>
+| <a href="tutorial/index.html">Tutorial home</a>
+| About <a href="http://kinemage.biochem.duke.edu" target="_blank">the Richardson Lab</a>
+    </div>
+</td></tr>
+</table>
+</body>
+</html>
+

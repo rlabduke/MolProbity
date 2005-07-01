@@ -3,6 +3,7 @@
     Welcome/start page for MP3, with hints for new users about how to proceed.
 *****************************************************************************/
 require_once(MP_BASE_DIR.'/lib/labbook.php');
+require_once(MP_BASE_DIR.'/lib/browser.php');
 
 // It may be bad form, but we hijack functions from these pages to avoid
 // duplicating the work they do. This must be done very carefully!
@@ -22,6 +23,7 @@ function display($context)
     echo mpPageHeader("Welcome!", "welcome");
     echo "<center><h2>MolProbity:<br>Macromolecular Structure Validation</h2></center>\n";
     //echo mpPageHeader("MolProbity:<br>Macromolecular Structure Validation", "welcome");
+    $this->displayWarnings($context);
     echo makeEventForm("onAction", null, true) . "\n";
 ?>
 <table border='0' width='100%'>
@@ -78,13 +80,50 @@ Minimum-guidance interface for experienced users.</p>
     <a href="http://kinemage.biochem.duke.edu/validation/valid.html" target="_blank">Structure
     validation by C-alpha geometry: phi, psi, and C-beta deviation.</a>
     Proteins: Structure, Function, and Genetics. <u>50</u>: 437-450.</small></p>
-<p><u>Installing Java</u>: how to make kinemage graphics work in your browser.</p>
+<p><a href='help/java.html' target='_blank'>Installing Java</a>: how to make kinemage graphics work in your browser.</p>
 <p><u>Lab notebook</u>: what's it for and how do I use it?</p>
 <p><u>Adding hydrogens</u>: why are H necessary for steric evaluations?</p>
 <p><u>My own MolProbity</u>: how can I run my own private MolProbity server?</p>
 </td></tr></table>
 <?php
     echo mpPageFooter();
+}
+#}}}########################################################################
+
+#{{{ displayWarnings - check browser, Java enabled
+############################################################################
+function displayWarnings($context)
+{
+    // 1. Check which browser the user is using...
+    $bad_browsers = array('MSIE');
+    $tested_browsers = array('Firefox', 'Safari');
+    $br = recognizeUserAgent();
+    if(in_array($br['browser'], $bad_browsers)) $err = "has bugs that keep it from working well with MolProbity";
+    //elseif(! in_array($br['browser'], $tested_browsers)) $err = "has not been tested with MolProbity";
+    
+    if($err)
+    {
+        echo "<div class='alert'>\n";
+        echo "Your browser, $br[browser] $br[version], $err.\n";
+        echo "If pages display incorrectly or you experience other problems, you may want to \n";
+        echo "try a browser like <a href='http://www.mozilla.org/' target='_blank'>Firefox</a> instead.\n";
+        echo "</div><br>\n";
+    }
+    
+    // 2. Check for Java being enabled.
+    // This doesn't verify the version, but is better than nothing...
+?><script language='JavaScript'>
+<!--
+    if(!navigator.javaEnabled())
+    {
+        document.writeln("<div class='alert'>");
+        document.writeln("Java is not enabled -- you will not be able to use KiNG interactive graphics.");
+        document.writeln("<br><a href='help/about.html' target='_blank'>Click here for help.</a>");
+        document.writeln("</div><br>");
+    }
+// -->
+</script>
+<?php
 }
 #}}}########################################################################
 
