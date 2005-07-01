@@ -35,7 +35,10 @@
 $page = end($_SESSION['pages']); // not a ref; read only
 $delegate = makeDelegateObject();
 if($isNewSess)
+{
     mpLog("new-session:New interactive user session started on the web");
+    mpLog("browser-detect:".$_SERVER['HTTP_USER_AGENT']);
+}
 elseif(isset($_REQUEST['eventID']))
 {
     $eid = $_REQUEST['eventID'] + 0;
