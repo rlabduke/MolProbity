@@ -249,18 +249,24 @@ function displayEntries($context)
 */
 function onAction($arg, $req)
 {
-    if(startsWith($req['cmd'], 'Go'))
+    $hasUpload = isset($_FILES['uploadFile']) && $_FILES['uploadFile']['error'] != UPLOAD_ERR_NO_FILE;
+    $hasFetch = isset($req['pdbCode']) && $req['pdbCode'] != "";
+    
+    if(startsWith($req['cmd'], 'Set'))
+    {
+        $_SESSION['lastUsedModelID'] = $req['workingModel'];
+    }
+    // The default action when cmd is not set, as in IE6 when you just hit Return
+    elseif(startsWith($req['cmd'], 'Go') || $hasUpload || $hasFetch)
     {
         pageCall("upload_pdb_setup.php"); // or else a later pageReturn() will screw us up!
         $upload_delegate = makeDelegateObject();
-        if(isset($_FILES['uploadFile']) && $_FILES['uploadFile']['error'] != UPLOAD_ERR_NO_FILE)
+        if($hasUpload)
             $upload_delegate->onUploadPdbFile($arg, $req);
-        else
+        elseif($hasFetch)
             $upload_delegate->onFetchPdbFile($arg, $req);
-    }
-    elseif(startsWith($req['cmd'], 'Set'))
-    {
-        $_SESSION['lastUsedModelID'] = $req['workingModel'];
+        else 
+            $upload_delegate->onUploadPdbFile($arg, $req);
     }
 }
 #}}}########################################################################

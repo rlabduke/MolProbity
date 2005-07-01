@@ -119,8 +119,18 @@ function onUploadPdbFile($arg, $req)
     {
         //echo $tmpfile;
         unlink($tmpfile);
-        if($_FILES['uploadFile']['error'])
-            $msg = "File upload failed with error code {$_FILES[uploadFile][error]}.";
+        $error_codes = array(
+            UPLOAD_ERR_INI_SIZE => 'upload size exceeded upload_max_filesize ('.formatFilesize(ini_get('upload_max_filesize')).') in php.ini',
+            UPLOAD_ERR_FORM_SIZE => 'upload size exceeded MAX_FILE_SIZE directive specified in the HTML form',
+            UPLOAD_ERR_PARTIAL => 'the file was only partially uploaded',
+            UPLOAD_ERR_NO_FILE => 'no file was specified for upload'
+        );
+            
+        $errno = $_FILES['uploadFile']['error'];
+        if($errno && $error_codes[$errno])
+            $msg = "File upload failed because ".$error_codes[$errno].".";
+        elseif($errno)
+            $msg = "File upload failed with unrecognized error code {$_FILES[uploadFile][error]}.";
         elseif($_FILES['uploadFile']['size'] <= 0)
             $msg = "File upload failed because of zero file size (no contents).";
         else
