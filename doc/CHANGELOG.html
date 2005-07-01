@@ -16,12 +16,14 @@
     Color by OCC/B still leaves SS as yellow (Prekin bug?)
     Prekin: dangling altB C--N for 1NBX B 29 (whenever i has all A and B alts)
     Prekin: unwanted @listcolordominant for multi-subunit ribbons
+    IE6: doesn't display transparent PNGs correctly (gray background)
+    IE6: hitting enter submits form without a cmd=[button name], breaks upload
 }}}
 {{{ Ideas, long-term goals, etc.
     User manual (do we need this in addition to page-by-page help?)
         Tutorial / walk-thru
         Write a decent document about installation of MolProbity for web and script use
-        Update Java install docs for end users
+        Update Java install docs for end users; note on KiNG page
     Could make it a web service with XML-RPC (SOAP, CORBA too complex)
     Download ZIP archives of session files
         Allow "hidden" user files; default download doesn't include these?
@@ -56,17 +58,26 @@
     Biol. units use MODELs rather than chain IDs? Check and then email P. Bourne
     DANG is included in bin/ but we don't *use* it anywhere... / upgrade to 1.9
     SEP(Gary): LIST of interacting (residues|*ATOMS*) across an interface
-    IE 6.x has page-caching problems with MolProbity3?
     Oneline, all-in-one (kins, etc) for JCSG
     "outlier" column for multichart
     Move labbook.html to charts/ ?
     for welcome: more icons, clean out old unused images
     Implement download-as-ZIP for "popular downloads" section
     When NMR files are split, notebook assoc'd with first model only
+    Warn users using MSIE, suggest Firefox?
+    JavaScript warning on bad events "Don't use Back button"
+    Fix file upload form to figure out which button was pressed...
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
+
+### 3beta18 ###
+- changing the REFRESH tags fixes MP3 to work with IE6 ... mostly ;)
+  See "Other people's bugs", above.
+- started logging the user-agent (browser identification) strings on sess start
+- added browser detection code from the web
+- improved usage_history.php, added browser usage statistics
 
 ### 3beta17 ###
 - started on new welcome "all in wonder" page

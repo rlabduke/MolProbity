@@ -8,6 +8,7 @@ Summarizes MolProbity usage over a specified date range.
     if(!defined('MP_BASE_DIR')) define('MP_BASE_DIR', realpath(dirname(__FILE__).'/../..'));
 // 2. Include core functionality - defines constants, etc.
     require_once(MP_BASE_DIR."/lib/core.php");
+    require_once(MP_BASE_DIR."/lib/browser.php");
 // 3. Restore session data. If you don't want to access the session
 // data for some reason, you must call mpInitEnvirons() instead.
     mpInitEnvirons();
@@ -27,7 +28,9 @@ function getRecords($start, $end)
     {
         $s = trim(fgets($in, 4096));
         if($s == "") continue;
-        $f = explode(':', $s); // $ip:$sess:$time:$msgcode[:$msgtext]
+        // 5 forces $msgtext to not split on internal colons
+        // $ip:$sess:$time:$msgcode[:$msgtext]
+        $f = explode(':', $s, 5);
         $f[2] += 0;
         if($start <= $f[2] && $f[2] <= $end)
             $records[] = $f;
@@ -143,12 +146,23 @@ function divideIntoYears($absStart, $absEnd)
 }
 #}}}########################################################################
 
-#{{{ a_function_definition - sumary_statement_goes_here
+#{{{ countBrowsers
 ############################################################################
-/**
-* Documentation for this function.
-*/
-//function someFunctionName() {}
+/** Array mapping browser names to counts of their occurance. */
+function countBrowsers($records)
+{
+    $browsers = array();
+    foreach($records as $rec)
+    {
+        if($rec[3] == "browser-detect")
+        {
+            $br = recognizeUserAgent($rec[4]);
+            $browsers[ $br['platform']." - ".$br['browser']] += 1;
+        }
+    }
+    ksort($browsers);
+    return $browsers;
+}
 #}}}########################################################################
 
 #{{{ a_function_definition - sumary_statement_goes_here
@@ -194,20 +208,20 @@ if($end_time > end($times))     $end_time   = end($times)+(60*60*24);
     echo "<form method='post' enctype='multipart/form-data' action='".basename($_SERVER['PHP_SELF'])."'>\n";
     echo "Start date (inclusive): <input type='text' size='15' name='start_date' value='".date('j M Y', $start_time)."'>\n";
     echo "End date (inclusive): <input type='text' size='15' name='end_date' value='".date('j M Y', $end_time)."'>\n";
-    echo "<br>Divide into \n";
-    echo "<select name='divide_into'>\n";
-    echo "  <option value='years'".($_REQUEST['divide_into'] == 'years' ? ' selected' : '').">years</option>\n";
-    echo "  <option value='months'".($_REQUEST['divide_into'] == 'months' ? ' selected' : '').">months</option>\n";
-    echo "  <option value='weeks'".($_REQUEST['divide_into'] == 'weeks' ? ' selected' : '').">weeks</option>\n";
-    echo "</select>\n";
-    echo "<input type='checkbox' name='show_action_pct' value='1'".($_REQUEST['show_action_pct'] ? ' checked' : '')."> Show percentage of sessions for each action\n";
-    echo "<br><input type='submit' name='cmd' value='Refresh'>\n";
+    echo "<input type='submit' name='cmd' value='Refresh'>\n";
+    echo "<p>\n";
+    echo "<br>".count($log)." records found in the log.\n";
+    echo "<br>".uniqueSessions($log)." unique sessions active during this timeframe.\n";
+    echo "<br>".uniqueIPs($log)." unique IP addresses active during this timeframe. This is an <i>estimate</i> of the unique users.\n";
+    echo "<p><table cellspacing='4'>\n";
+    foreach(countBrowsers($log) as $browser => $cnt)
+        echo "<tr><td>$browser</td><td align='right'>$cnt</td></tr>\n";
+    echo "</table></p>\n";
     echo "<hr>\n";
-    echo count($log)." records found in the log.<br>\n";
-    echo uniqueSessions($log)." unique sessions active during this timeframe.<br>\n";
-    echo uniqueIPs($log)." unique IP addresses active during this timeframe. This is an <i>estimate</i> of the unique users.<br>\n";
     
-    echo "<p>Grand summary, use checkboxes for detailed view below:<br>\n<table cellspacing='4'>\n";
+    echo "<h3>Grand summary</h3>\n";
+    echo "<i>Use checkboxes to select columns for detailed view, below.</i>\n";
+    echo "<table cellspacing='4'>\n";
     echo "<tr><td></td><td><u>Action name</u></td><td><u>Number of times</u></td><td><u>% of sessions</u></td></tr>\n";
     $active_sessions = uniqueSessions($log);
     $actions = countActions($log);
@@ -225,7 +239,19 @@ if($end_time > end($times))     $end_time   = end($times)+(60*60*24);
         echo "</td></tr>\n";
         $color == MP_TABLE_ALT1 ? $color = MP_TABLE_ALT2 : $color = MP_TABLE_ALT1;
     }
-    echo "</table></p>\n";
+    echo "</table>\n";
+    echo "<hr>\n";
+    
+    echo "<h3>Detailed view</h3>\n";
+    echo "<i>Use checkboxes above to select columns for detailed breakdown.</i>\n";
+    echo "<br>Divide into \n";
+    echo "<select name='divide_into'>\n";
+    echo "  <option value='years'".($_REQUEST['divide_into'] == 'years' ? ' selected' : '').">years</option>\n";
+    echo "  <option value='months'".($_REQUEST['divide_into'] == 'months' ? ' selected' : '').">months</option>\n";
+    echo "  <option value='weeks'".($_REQUEST['divide_into'] == 'weeks' ? ' selected' : '').">weeks</option>\n";
+    echo "</select>\n";
+    echo "<br><input type='checkbox' name='show_action_pct' value='1'".($_REQUEST['show_action_pct'] ? ' checked' : '')."> Show percentage of sessions for each action\n";
+    echo "<p><input type='submit' name='cmd' value='Refresh'>\n";
     
     if($_REQUEST['divide_into'] == 'weeks')         $time_ranges = divideIntoWeeks($start_time, $end_time);
     elseif($_REQUEST['divide_into'] == 'months')    $time_ranges = divideIntoMonths($start_time, $end_time);
