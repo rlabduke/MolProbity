@@ -157,7 +157,7 @@ function countBrowsers($records)
         if($rec[3] == "browser-detect")
         {
             $br = recognizeUserAgent($rec[4]);
-            $browsers[ $br['platform']." - ".$br['browser']] += 1;
+            $browsers[ $br['platform']." - ".$br['browser'] ] += 1;
         }
     }
     ksort($browsers);

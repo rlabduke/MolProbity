@@ -39,6 +39,8 @@ if($_REQUEST['cmd'] == "Destroy")
     {
         if($_REQUEST['sort'] == 'ttl')      usort($sessList, 'sortTTL');
         elseif($_REQUEST['sort'] == 'size') usort($sessList, 'sortSize');
+        else                                usort($sessList, 'sortTTL');
+        
         
         echo "<table width=100%>\n";
         echo "<tr>\n";

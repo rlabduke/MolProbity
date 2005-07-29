@@ -69,7 +69,6 @@
 function recognizeUserAgent($agent = null)
 {
     if($agent == null) $agent = $_SERVER['HTTP_USER_AGENT'];
-        $agent = $_SERVER['HTTP_USER_AGENT'];
 
     // initialize properties
     $bd['platform'] = "Unknown";
