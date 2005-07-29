@@ -3,21 +3,21 @@
 ===  TO DO  ==================================================================
 ==============================================================================
 {{{ Other people's bugs
-    Weird intra-sidechain clashes for 1BKR (low occ atoms in-chain)
-    Prekin: All balls are marked alt B (even those for alt A)
+    Reduce -nobuild: wrong protonation for 1gca His 152
+        Wrong placement for het O3 H wrt R141 and D215 in 2DRI
     Changes still made by Reduce -nobuild:
         Existing protonation state for His
         Existing Met CH3 and Lys NH3 orientation (don't want -norotnh3 and -norotmet)
     Probe: -NOVDWout switch missing from docs, duplicated ONLYBADOUT
+    Probe: Weird intra-sidechain clashes for 1BKR (low occ atoms in-chain)
+    NOEdisplay: NOEs thicker, esp. violations
     Prekin: doesn't mark pointmasters on the start of vectors (those flagged P)
-    Reduce -nobuild: wrong protonation for 1gca His 152
-        Wrong placement for het O3 H wrt R141 and D215 in 2DRI
-    NOEs thicker, esp. violations
-    Color by OCC/B still leaves SS as yellow (Prekin bug?)
-    Prekin: dangling altB C--N for 1NBX B 29 (whenever i has all A and B alts)
+    Prekin: dangling altB C--N for 1SWU B 29 (whenever i has all A and B alts)
     Prekin: unwanted @listcolordominant for multi-subunit ribbons
+    Prekin: Prekin/Win keeps kin file open continuously
+    Prekin: stray vectors on windows -- buffer flush issue?
     IE6: doesn't display transparent PNGs correctly (gray background)
-    IE6: hitting enter submits form without a cmd=[button name], breaks upload
+    IE6: hitting enter submits form without a cmd=[button name] (worked around)
 }}}
 {{{ Ideas, long-term goals, etc.
     User manual (do we need this in addition to page-by-page help?)
@@ -50,6 +50,7 @@
         Why did I want this? Redirect to action pages, maybe?
     analyze::findAltConfs() should also support nuc. acid mc/sc classification
     re-assort the functions from visualize.php and analyze.php
+    Make MP skinnable (multiple css files, directories under img/)
 }}}
     Develop "helper" pages; mark optional steps clearly
     Pick lowest resolution number mentioned in file; allow override?
@@ -62,6 +63,7 @@
     for welcome: more icons, clean out old unused images
     Implement download-as-ZIP for "popular downloads" section
     When NMR files are split, notebook assoc'd with first model only
+    Create robots.txt (see google.com/bot.html) to fend off Google
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -79,6 +81,8 @@
 - changed JS to alert div at start of page
 - added browser (MSIE) and no-Java (via JS) warnings to welcome.php
 - updated Java instructions page from MP2 and linked it from welcome + viewking
+- session view page now sorts by time-to-live by default
+- fixed typo bug in browser identification code
 
 ### 3beta17 ###
 - started on new welcome "all in wonder" page
