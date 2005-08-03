@@ -23,13 +23,10 @@
     User manual (do we need this in addition to page-by-page help?)
         Tutorial / walk-thru
         Write a decent document about installation of MolProbity for web and script use
-    Could make it a web service with XML-RPC (SOAP, CORBA too complex)
-    Download ZIP archives of session files
+    Could make it a web service with XML-RPC (SOAP, CORBA too complex) or REST
     Retrieve maps from the EDS
     Multicrit: views for trouble spots sorted by severity (also hypertext?)
     Estimate time for e.g. analysis jobs?
-    Cache commonly run (or all) standard PDB queries?
-    Cache feedback emails in MySQL database as well as filesystem?
     Add "priviledged" users who can e.g. run extra NMR models
     Allow uploads of tarballs of NMR models?
     On upload of alt conf model, do table to choose which ones to use
@@ -54,16 +51,15 @@
 }}}
     Develop "helper" pages; mark optional steps clearly
     Pick lowest resolution number mentioned in file; allow override?
-    Biol. units use MODELs rather than chain IDs? Check and then email P. Bourne
     DANG is included in bin/ but we don't *use* it anywhere... / upgrade to 1.9
     SEP(Gary): LIST of interacting (residues|*ATOMS*) across an interface
     Oneline, all-in-one (kins, etc) for JCSG
     "outlier" column for multichart
     Move labbook.html to charts/ ?
     for welcome: more icons, clean out old unused images
-    Implement download-as-ZIP for "popular downloads" section
     When NMR files are split, notebook assoc'd with first model only
-    Create robots.txt (see google.com/bot.html) to fend off Google
+    Save REMARK 42 data as XML file/fragment
+    Add whois query to session listing
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -83,6 +79,12 @@
 - updated Java instructions page from MP2 and linked it from welcome + viewking
 - session view page now sorts by time-to-live by default
 - fixed typo bug in browser identification code
+- chose not to create "robots.txt" b/c this must go in webserver root dir
+- added tests for bots/crawlers to browsers.php
+- added extra realpath() calls in viewtext/table to make sure check succeeds
+- added makeZipForFiles() to core.php
+- added download of ZIP of "popular" files from welcome.php
+- added configurable ZIP downloads for the file browser page
 
 ### 3beta17 ###
 - started on new welcome "all in wonder" page

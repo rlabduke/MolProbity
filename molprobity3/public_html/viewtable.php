@@ -24,7 +24,7 @@ INPUTS (via Get or Post):
 ############################################################################
 // Security check on filename
 $file = realpath($_REQUEST['file']);
-if(!$file || !startsWith($file, $_SESSION['dataDir']))
+if(!$file || !startsWith($file, realpath($_SESSION['dataDir'])))
 {
     mpLog("security:Attempt to access '$file' as '$_REQUEST[file]'");
     die("Security failure: illegal file request '$_REQUEST[file]'");
