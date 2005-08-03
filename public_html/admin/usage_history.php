@@ -152,14 +152,17 @@ function divideIntoYears($absStart, $absEnd)
 function countBrowsers($records)
 {
     $browsers = array();
+    //echo "<pre>\n";
     foreach($records as $rec)
     {
         if($rec[3] == "browser-detect")
         {
             $br = recognizeUserAgent($rec[4]);
             $browsers[ $br['platform']." - ".$br['browser'] ] += 1;
+            //if($br['platform'] == "Unknown") echo $rec[4] . "\n";
         }
     }
+    //echo "</pre>\n";
     ksort($browsers);
     return $browsers;
 }

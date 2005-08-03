@@ -86,6 +86,8 @@ function recognizeUserAgent($agent = null)
         $bd['platform'] = "OS/2";
     elseif (eregi("BeOS", $agent))
         $bd['platform'] = "BeOS";
+    elseif (eregi("bot|crawler", $agent))
+        $bd['platform'] = "Bot/Crawler";
 
     // test for Opera        
     if (eregi("opera",$agent)){
@@ -219,6 +221,16 @@ function recognizeUserAgent($agent = null)
     // test for Safari
     }elseif(eregi("safari", $agent)){
         $bd['browser'] = "Safari";
+        $bd['version'] = "";
+
+    // test for Googlebot
+    }elseif(eregi("googlebot", $agent)){
+        $bd['browser'] = "Googlebot";
+        $bd['version'] = "";
+
+    // test for MSN bot
+    }elseif(eregi("msnbot", $agent)){
+        $bd['browser'] = "MSN bot";
         $bd['version'] = "";
 
     // remaining two tests are for Netscape

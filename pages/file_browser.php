@@ -17,8 +17,10 @@ class file_browser_delegate extends BasicDelegate {
 function display($context)
 {
     echo mpPageHeader("View &amp; download files", "files");
+    echo makeEventForm('onDownloadMarkedZip');
     echo "<table width='100%' border='0' cellspacing='0'>\n";
     echo "<tr bgcolor='".MP_TABLE_HIGHLIGHT."'>";
+    echo "<td width='48'></td>";
     echo "<td><b>File name</b></td>";
     echo "<td><b>Size</b></td>";
     echo "<td colspan='2' align='center'><b>View...</b></td>";
@@ -27,6 +29,8 @@ function display($context)
     $list = sortFilesAlpha($list);
     echo $this->makeFileList($list, $_SESSION['dataDir'], $_SESSION['dataURL'], $context['isExpanded']);
     echo "</table>\n";
+    echo "<input type='submit' name='cmd' value='Download checked files and folders as a ZIP archive'>\n";
+    echo "</form>\n";
     echo mpPageFooter();
 }
 #}}}########################################################################
@@ -44,7 +48,8 @@ function makeFileList($list, $basePath, $baseURL, $isExpanded, $depth = 0)
     $s = '';
     foreach($list as $dir => $file)
     {
-        $s .= "<tr bgcolor='".$this->fileListColor."'><td>";
+        $s .= "<tr bgcolor='".$this->fileListColor."'>";
+        $s .= "<td><input type='checkbox' name='zipfiles[]' value='$basePath/".(is_array($file) ? $dir : $file)."'></td><td>";
         $this->fileListColor == MP_TABLE_ALT1 ? $this->fileListColor = MP_TABLE_ALT2 : $this->fileListColor = MP_TABLE_ALT1;
         if(is_array($file))
         {
@@ -143,6 +148,38 @@ function onFolderClose($arg, $req)
     $context = getContext();
     $context['isExpanded'][$arg] = false;
     setContext($context);
+}
+#}}}########################################################################
+
+#{{{ onDownloadMarkedZip
+############################################################################
+/**
+* FUNKY: This turns into a binary file download rather than an HTML page,
+* and then calls die(), leaving the user on the original HTML page.
+*
+* This code has been shown to cause cancer in lab rats.
+*/
+function onDownloadMarkedZip($arg, $req)
+{
+    // Input files come with absolute paths, so we have to check them against
+    // our session directory to avoid security holes!
+    $basedir = realpath($_SESSION['dataDir']);
+    $files = array();
+    foreach($req['zipfiles'] as $file)
+    {
+        $file = realpath($file);
+        if(!$file || !startsWith($file, $basedir)) continue;
+        $files[] = substr($file, strlen($basedir)+1);
+    }
+    //print_r($files);
+    
+    $zipfile = makeZipForFiles($basedir, $files);
+    // See PHP manual on header() for how this works.
+    header('Content-type: application/zip');
+    header('Content-Disposition: attachment; filename="molprobity.zip"');
+    readfile($zipfile);
+    unlink($zipfile);
+    die(); // don't output the HTML version of this page into that nice file!
 }
 #}}}########################################################################
 

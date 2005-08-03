@@ -422,12 +422,34 @@ function makeZipForFolder($inpath)
 }
 #}}}########################################################################
 
+#{{{ makeZipForFiles - packages selected files as a ZIP archive
+############################################################################
+/**
+* Creates a ZIP archive file containing all the listed files.
+* The archive is created as a temporary file and should be unlinked afterwards.
+* The name of the temporary file is returned.
+*   $basepath   the ZIP paths will be relative to this folder
+*   $filelist   an array of file paths, specified relative to $basepath
+*               both directories and files *should* be OK in here
+*/
+function makeZipForFiles($basepath, $filelist)
+{
+    $outpath = tempnam(MP_BASE_DIR."/tmp", "tmp_zip_");
+    $cwd = getcwd();
+    chdir($basepath);
+    // must compress to stdout b/c otherwise zip wants a .zip ending
+    exec("zip -qr - ".implode(' ', $filelist)." > $outpath");
+    chdir($cwd); // go back to our original working dir
+    return $outpath;
+}
+#}}}########################################################################
+
 #{{{ makeZipForSession - packages all session files as a ZIP
 ############################################################################
 /**
 * Creates a ZIP archive file containing all the current files in the session.
 * The archive is created in the main session directory, and any pre-existing
-* archives created by makeZipForModel() or makeZipForSession() are removed.
+* archives created by makeZipForSession() are removed.
 * The name of the archive file is returned.
 */
 function makeZipForSession()

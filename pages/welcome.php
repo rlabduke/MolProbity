@@ -248,7 +248,7 @@ function displayFiles($context)
     }
     echo "</table>\n";
     
-    if(count($files) > 1) echo "<p><u>Download these files as a ZIP archive</u></p>\n";
+    if(count($files) > 1) echo "<p><a href='".makeEventURL('onDownloadPopularZip')."'>Download these files as a ZIP archive</a></p>\n";
 }
 #}}}########################################################################
 
@@ -307,6 +307,30 @@ function onAction($arg, $req)
         else 
             $upload_delegate->onUploadPdbFile($arg, $req);
     }
+}
+#}}}########################################################################
+
+#{{{ onDownloadPopularZip
+############################################################################
+/**
+* FUNKY: This turns into a binary file download rather than an HTML page,
+* and then calls die(), leaving the user on the original HTML page.
+*
+* This code has been shown to cause cancer in lab rats.
+*/
+function onDownloadPopularZip($arg, $req)
+{
+    $model = $_SESSION['models'][ $_SESSION['lastUsedModelID'] ];
+    $files = array(MP_DIR_MODELS.'/'.$model['pdb']);
+    $files = array_merge($files, $model['primaryDownloads']);
+    
+    $zipfile = makeZipForFiles($_SESSION['dataDir'], $files);
+    // See PHP manual on header() for how this works.
+    header('Content-type: application/zip');
+    header('Content-Disposition: attachment; filename="' . $model['id'] . '.zip"');
+    readfile($zipfile);
+    unlink($zipfile);
+    die(); // don't output the HTML version of this page into that nice file!
 }
 #}}}########################################################################
 
