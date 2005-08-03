@@ -4,6 +4,14 @@
 # preserved by Subversion.
 #
 
+# Dumb check to make sure we're in the top-level MP directory
+if [ ! -f setup.sh ]; then
+    echo
+    echo "    You must run SETUP.SH from the main MolProbity directory!"
+    echo
+    exit
+fi
+
 # Set world-writable permisions on data/
 chmod 777 public_html/data
 touch public_html/data/molprobity.log

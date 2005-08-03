@@ -668,6 +668,74 @@ function getNdbModel($code)
 }
 #}}}########################################################################
 
+#{{{ getEdsMap - retrieves a map from the Electron Density Server at Uppsala
+############################################################################
+/**
+* Retrieves a map for the given PDB code from the Uppsala EDS
+*   pdbcode     the 4-character code identifying the model
+*   format      omap, cpp4, cns, or ezd
+*   type        2fofc or fofc
+* Returns the name of a temporary file, or null if download failed.
+*/
+function getEdsMap($pdbcode, $format, $type)
+{
+    $pdbcode = strtolower($pdbcode);
+    
+    // Create POST arguments to the HTML form
+    $args = array(
+        'pdbCode'       => $pdbcode,
+        'page'          => 'create',
+        'mapformat'     => $format,
+        'maptype'       => $type
+    );
+    foreach($args as $key => $value) $postfields[] = urlencode($key) . '=' . urlencode($value);
+    
+    // Set CURL options
+    $server = 'fsrv1.bmc.uu.se';
+    $c = curl_init("http://$server/cgi-bin/eds/gen_maps_zip.pl");
+    curl_setopt($c, CURLOPT_RETURNTRANSFER, true); // don't write results to stdout
+    //curl_setopt($c, CURLOPT_FOLLOWLOCATION, false);
+    curl_setopt($c, CURLOPT_TIMEOUT, 60);
+    //curl_setopt($c, CURLOPT_HEADER, true);
+    //curl_setopt($c, CURLOPT_NOBODY, true);
+    curl_setopt($c, CURLOPT_POST, true);
+    curl_setopt($c, CURLOPT_POSTFIELDS, implode('&', $postfields));
+    
+    // Retrieve the web page from EDS
+    $page = curl_exec($c);
+    curl_close($c);
+    
+    // Check for errors and find the file name
+    if(curl_errno($c))                                  // network failure
+    {
+        echo "CURL error: ".curl_error($c)."\n";
+        return null;
+    }
+    if(preg_match('/error/i', $page))                   // no map/xtal data available
+    {
+        echo "No $type map available for $pdbcode.\n";
+        return null;
+    }
+    if(!preg_match('/<a href="(.+?)">/i', $page, $m))    // unknown failure
+    {
+        echo "EDS page has no link on it!\n";
+        return null;
+    }
+    $url = "http://{$server}{$m[1]}";
+    
+    // Copy the file over the network in 8k chunks
+    $in = fopen($url, 'r');
+    $outpath = tempnam(MP_BASE_DIR."/tmp", "tmp_map_");
+    $out = fopen($outpath, 'w');
+    while(!feof($in))
+        fwrite($out, fread($in, 8192));
+    fclose($out);
+    fclose($in);
+    
+    return $outpath;
+}
+#}}}########################################################################
+
 #{{{ remapSegIDs - translates segIDs into chain IDs for ATOM and HETATM records
 ############################################################################
 /**

@@ -34,11 +34,16 @@ function display($context)
 <?php
     echo makeEventForm("onFetchPdbFile", null, true) . "\n";
 ?>
+<div class='side_options'>
+    <b>Advanced options:</b>
+    <br><label><input type="checkbox" name="eds_2fofc" value="1"> Get 2Fo-Fc map from EDS</label>
+    <br><label><input type="checkbox" name="eds_fofc" value="1"> Get Fo-Fc map from EDS</label>
+</div>
 <h3>Fetch model from network database</h3>
 <!-- Longer code field to allow NDB codes as well as PDB codes -->
 <label>PDB / NDB ID code:
 <input type="text" name="pdbCode" size="6" maxlength="10"></label>
-<br><table border='0' width='100%'><tr>
+<br clear='all'><table border='0' width='100%'><tr>
 <td><input type="submit" name="cmd" value="Retrieve this file &gt;"></td>
 <td align='right'><input type="submit" name="cmd" value="Cancel"></td>
 </tr></table>
@@ -157,6 +162,8 @@ function onFetchPdbFile($arg, $req)
     $_SESSION['bgjob']['pdbCode']       = $req['pdbCode'];
     $_SESSION['bgjob']['isCnsFormat']   = false;
     $_SESSION['bgjob']['ignoreSegID']   = false;
+    $_SESSION['bgjob']['eds_2fofc']     = $req['eds_2fofc'];
+    $_SESSION['bgjob']['eds_fofc']      = $req['eds_fofc'];
     
     mpLog("pdb-fetch:User requested file ".$req['pdbCode']." from PDB/NDB");
     
