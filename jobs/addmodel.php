@@ -11,6 +11,9 @@ INPUTS (via $_SESSION['bgjob']):
     
     isCnsFormat     true if the user thinks he has CNS atom names
     ignoreSegID     true if the user wants to never map segIDs to chainIDs
+    
+    eds_2fofc       true if the user wants the 2Fo-Fc map from EDS } for pdbCode
+    eds_fofc        true if the user wants the Fo-Fc map from EDS  } only...
 
 OUTPUTS (via $_SESSION['bgjob']):
     Adds a new entry to $_SESSION['models'].
@@ -39,7 +42,49 @@ OUTPUTS (via $_SESSION['bgjob']):
 // 6. Record this PHP script's PID in case it needs to be killed.
     $_SESSION['bgjob']['processID'] = posix_getpid();
     mpSaveSession();
+
+#{{{ getMaps
+############################################################################
+function getMaps($code)
+{
+    $mapDir = "$_SESSION[dataDir]/".MP_DIR_EDMAPS;
+    if(!file_exists($mapDir)) mkdir($mapDir, 0777);
     
+    if(isset($_SESSION['bgjob']['eds_2fofc']))
+    {
+        $mapName = "$code.ccp4.gz";
+        $mapPath = "$mapDir/$mapName";
+        if(!file_exists($mapPame))
+        {
+            $tmpMap = getEdsMap($code, 'ccp4', '2fofc');
+            if($tmpMap && copy($tmpMap, $mapPath))
+            {
+                unlink($tmpMap);
+                $_SESSION['edmaps'][$mapName] = $mapName;
+                mpLog("edmap-eds:User requested 2Fo-Fc map for $code from the EDS");
+            }
+            else "tmp = $tmpMap";
+        }
+        else echo "Map file already exists";
+    }
+    if(isset($_SESSION['bgjob']['eds_fofc']))
+    {
+        $mapName = "$code-diff.ccp4.gz";
+        $mapPath = "$mapDir/$mapName";
+        if(!file_exists($mapPame))
+        {
+            $tmpMap = getEdsMap($code, 'ccp4', 'fofc');
+            if($tmpMap && copy($tmpMap, $mapPath))
+            {
+                unlink($tmpMap);
+                $_SESSION['edmaps'][$mapName] = $mapName;
+                mpLog("edmap-eds:User requested Fo-Fc map for $code from the EDS");
+            }
+        }
+    }
+}
+#}}}########################################################################
+
 #{{{ a_function_definition - sumary_statement_goes_here
 ############################################################################
 /**
@@ -82,6 +127,13 @@ if(isset($_SESSION['bgjob']['pdbCode']))
         
         // Clean up temp files
         unlink($tmpfile);
+        
+        if(preg_match('/^[0-9A-Z]{4}$/i', $code)
+        &&(isset($_SESSION['bgjob']['eds_2fofc'])
+        || isset($_SESSION['bgjob']['eds_fofc'])))
+        {
+            getMaps($code);
+        }
     }
 }
 else

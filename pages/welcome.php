@@ -46,6 +46,7 @@ function display($context)
         $this->displayTools($context);
         echo "<hr>\n";
         $this->displayFiles($context);
+        echo "<hr>\n";
         $this->displayEntries($context);
         echo "<hr>\n";
     }
