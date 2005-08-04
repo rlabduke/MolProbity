@@ -60,9 +60,9 @@
     Save REMARK 42 data as XML file/fragment
     Add whois query to session listing
     Add log messages for download map files
-    Make ensembles actually work when splitting files
+  * Make ensembles actually work when splitting files
     splitModelsNMR(): talk to J about deprecating it
-    Look into IE workarounds for PHP redirected downloads
+  * Test IE workarounds for PHP redirected downloads
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -78,6 +78,7 @@
 - updated sitemap.php (all listed features are now implemented!)
 - added $_SESSION[ensembles] for managing NMR files
 - in model.php, wrote splitPdbModels() and joinPdbModels()
+- added IE specific headers for our tricky ZIP download in welcome and browser
 
 ### 3beta18 ###
 - changing the REFRESH tags fixes MP3 to work with IE6 ... mostly ;)
