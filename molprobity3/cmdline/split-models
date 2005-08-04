@@ -82,13 +82,23 @@ if($optVerbose)
 }
 
 $baseName = basename($inFile, ".pdb");
-foreach( splitModelsNMR($inFile) as $number => $outFile)
+$splitFiles = splitPdbModels($inFile);
+foreach($splitFiles as $number => $outFile)
 {
     $destFile = $baseName.'_'.trim($number).'.pdb';
     if($optVerbose) echo "$inFile > $destFile\n";
     copy($outFile, $outDir.'/'.$destFile);
     unlink($outFile);
 }
+// Test of file joining (comment out the unlink() above!)
+/*
+$joinedFile = joinPdbModels($splitFiles);
+copy($joinedFile, "$outDir/$baseName-joined.pdb");
+
+foreach($splitFiles as $number => $outFile)
+    unlink($outFile);
+unlink($joinedFile);
+*/
 
 ############################################################################
 // Clean up and go home

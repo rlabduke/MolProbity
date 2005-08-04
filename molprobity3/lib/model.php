@@ -90,7 +90,8 @@ function addModel($tmpPdb, $origName, $isCnsFormat = false, $ignoreSegID = false
         
         $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
         if(!file_exists($outpath)) mkdir($outpath, 0777);
-        $splitModels = splitModelsNMR($tmp2);
+        //$splitModels = splitModelsNMR($tmp2);
+        $splitModels = splitPdbModels($tmp2);
         foreach($splitModels as $modelNum => $tmp3)
         {
             //$model = createModel(sprintf("{$origID}_m%02d", $modelNum));
@@ -298,6 +299,125 @@ function splitModelsNMR($infile)
     fclose($pdbopen);
     
     return $modelFiles;
+}
+#}}}########################################################################
+
+#{{{ splitPdbModels - creates many PDBs from one multi-MODEL PDB file
+############################################################################
+/**
+* Returns an array of temp file names holding the split models.
+* The models appear in order, and the keys of the array are the model numbers.
+* Unlike splitModelsNMR, this function handles CONECT records properly, at
+* the expense of having to hold the whole file in memory at once (!)
+*/
+function splitPdbModels($infile)
+{
+    // Make places to store headers, footers, and ATOMs
+    // FUNKY: this uses PHP references to juggle arrays. See the manual.
+    $headers = array();     // REMARKs, etc.
+    $footers = array();     // CONECTs, etc.
+    $models = array();      // ATOMs, etc.
+    $sink =& $headers;      // where lines are currently deposited
+    
+    //Open PDB file, read line by line
+    $in = fopen($infile,"rb");
+    while(!feof($in))
+    {
+        $line = fgets($in);
+        $start = substr($line, 0, 6);
+        // Things before the first MODEL go in $headers,
+        // and things after any MODEL go in $models.
+        if($start == 'MODEL ')
+        {
+            $num = trim(substr($line, 5, 20)) + 0;
+            $models[$num] = array();
+            $sink =& $models[$num];
+        }
+        // Things after the last ENDMDL go in $footers.
+        elseif($start == 'ENDMDL')
+        {
+            $sink =& $footers;
+        }
+        else $sink[] = $line;
+    }
+    fclose($in);
+    
+    // Every model gets all headers and footers, plus its ATOMs, etc.
+    $modelFiles = array();
+    foreach($models as $num => $model)
+    {
+        $tmpFile = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
+        $modelFiles[$num] = $tmpFile;
+        
+        $out = fopen($tmpFile, "wb");
+        foreach($headers as $h) fwrite($out, $h);
+        fwrite($out, sprintf("REMARK  99 MODEL     %4d                                                       \n", $num));
+        foreach($model as $m) fwrite($out, $m);
+        fwrite($out, "REMARK  99 ENDMDL                                                               \n");
+        foreach($footers as $f) fwrite($out, $f);
+        fclose($out);
+    }
+    
+    return $modelFiles;
+}
+#}}}########################################################################
+
+#{{{ joinPdbModels - joins split PDBs into one multi-MODEL PDB file
+############################################################################
+/**
+* Given an array of PDB format files, this function merges them back together
+* into a reasonably coherent multi-model PDB file.
+* The order of models in the array is taken as their desired order and
+* numbering (1...N) in the file.
+* Returns a temp file name holding the joined models.
+*/
+function joinPdbModels($infiles)
+{
+    // Part 1: Scan all files to find all unique headers / footers
+    $headers = array();     // REMARKs, etc.
+    $footers = array();     // CONECTs, etc.
+    
+    foreach($infiles as $infile)
+    {
+        //Open PDB file, read line by line
+        $in = fopen($infile,"rb");
+        while(!feof($in))
+        {
+            $line = fgets($in);
+            if(preg_match('/^(ATOM|HETATM|TER|ANISOU|REMARK  99 MODEL|REMARK  99 ENDMDL)/', $line)) continue;
+            elseif(preg_match('/^(CONECT|MASTER|END)/', $line))
+                $footers[$line] = $line; // ensures each unique line appears only once
+            else
+                $headers[$line] = $line; // ensures each unique line appears only once
+        }
+        fclose($in);
+    }
+    
+    // Part 2: Re-scan all files and write their contents, in order.
+    $tmpFile = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
+    $out = fopen($tmpFile, "wb");
+    foreach($headers as $h) fwrite($out, $h);
+    
+    $i = 1;
+    foreach($infiles as $infile)
+    {
+        //Open PDB file, read line by line
+        $in = fopen($infile,"rb");
+        fwrite($out, sprintf("MODEL     %4d                                                                  \n", $i++));
+        while(!feof($in))
+        {
+            $line = fgets($in);
+            if(preg_match('/^(ATOM|HETATM|TER|ANISOU)/', $line))
+                fwrite($out, $line);
+        }
+        fwrite($out, "ENDMDL                                                                          \n");
+        fclose($in);
+    }
+    
+    foreach($footers as $f) fwrite($out, $f);
+    fclose($out);
+    
+    return $tmpFile;
 }
 #}}}########################################################################
 
