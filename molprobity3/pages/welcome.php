@@ -326,6 +326,9 @@ function onDownloadPopularZip($arg, $req)
     $files = array_merge($files, $model['primaryDownloads']);
     
     $zipfile = makeZipForFiles($_SESSION['dataDir'], $files);
+    // These lines may be required by Internet Explorer
+    header("Pragma: public");
+    header("Cache-Control: must-revalidate, post-check=0, pre-check=0");
     // See PHP manual on header() for how this works.
     header('Content-type: application/zip');
     header('Content-Disposition: attachment; filename="' . $model['id'] . '.zip"');
