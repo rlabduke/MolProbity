@@ -131,6 +131,11 @@ $ok = true;
     }
     else echo "<li><b>File uploads not enabled!</b> Please set <tt>file_uploads</tt> to 1 in your php.ini file (usually in /etc/php.ini).</li>\n";
 
+    if(ini_get('allow_url_fopen'))
+        echo "<li>URL fopen wrappers are allowed - good.</li>\n";
+    else
+        echo "<li><b>URL fopen is disallowed.</b> Please set <tt>allow_url_fopen</tt> to 'On' in your php.ini file (usually in /etc/php.ini).</li>\n";
+
     if(ini_get('safe_mode'))
         echo "<li><b>Safe mode enabled.</b> MolProbity cannot run when safe mode is enabled.</li>\n";
     else

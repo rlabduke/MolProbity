@@ -38,7 +38,6 @@
     Add coloring type drop box for -lots kins
     Write command line scripts for common actions; remove junk from cmdline/
     Produce multi-model multicrit kinemages from the GUI
-    Give NMR models a linking ID somehow
     How to handle multi-model Ramachandran plots when models are split out?
     Verb-centered (sitemap) vs. noun-centered (PDB "stable") interface
     The "0+3" concept: single model, chain-chain (interface), overlapped pairs
@@ -60,8 +59,10 @@
     When NMR files are split, notebook assoc'd with first model only
     Save REMARK 42 data as XML file/fragment
     Add whois query to session listing
-  * Add progress indicators for ED map download (size?); lab notebook entry
-    Config: check for fopen wrappers enabled
+    Add log messages for download map files
+    Make ensembles actually work when splitting files
+    splitModelsNMR(): what about CONECT, ANISOU, etc.??
+    Look into IE workarounds for PHP redirected downloads
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -71,6 +72,11 @@
 - added directory check to setup.sh
 - added getEdsMap() to lib/model.php
 - added UI for fetching maps from EDS
+- added backend for fetching maps, including progress steps and notebook entry
+- cosmetic changes to welcome.php
+- config now checks for fopen wrappers enabled
+- updated sitemap.php (all listed features are now implemented!)
+- added $_SESSION[ensembles] for managing NMR files
 
 ### 3beta18 ###
 - changing the REFRESH tags fixes MP3 to work with IE6 ... mostly ;)

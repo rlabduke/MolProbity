@@ -55,19 +55,19 @@ function display($context)
 
 <table border='0' width='100%'><tr valign='top'><td width='45%'>
 <h3>Walk-thrus &amp; tutorials:</h3>
-<p><u><?php echo "<a href='".makeEventURL("onNavBarGoto", "helper_xray.php")."'>Evaluate X-ray structure</a>"; ?>:</u>
+<p><b><?php echo "<a href='".makeEventURL("onNavBarGoto", "helper_xray.php")."'>Evaluate X-ray structure</a>"; ?>:</b>
 Typical steps for a published X-ray crystal structure
 or one still undergoing refinement.</p>
-<p><u>Evaluate NMR structure:</u>
+<p><b>Evaluate NMR structure:</b>
 Typical steps for a published NMR ensemble
 or one still undergoing refinement.</p>
-<p><u>Fix up structure:</u>
+<p><b>Fix up structure:</b>
 Rebuild the model to remove outliers
 as part of the refinement cycle.</p>
-<p><u>Work with kinemages:</u>
+<p><b>Work with kinemages:</b>
 Create and view interactive 3-D graphics
 from your web browser.</p>
-<p><u><?php echo "<a href='".makeEventURL("onNavBarGoto", "sitemap.php")."'>Site map</a>"; ?>:</u>
+<p><b><?php echo "<a href='".makeEventURL("onNavBarGoto", "sitemap.php")."'>Site map</a>"; ?>:</b>
 Minimum-guidance interface for experienced users.</p>
 
 
@@ -75,16 +75,16 @@ Minimum-guidance interface for experienced users.</p>
 
 
 <h3>Common questions:</h3>
-<p><a href='help/about.html' target='_blank'>Cite MolProbity</a>:
+<p><b><a href='help/about.html' target='_blank'>Cite MolProbity</a></b>:
     <small>Simon C. Lovell, Ian W. Davis, W. Bryan Arendall III, Paul I. W. de
     Bakker, J. Michael Word, Michael G. Prisant, Jane S. Richardson, David C. Richardson (2003)
     <a href="http://kinemage.biochem.duke.edu/validation/valid.html" target="_blank">Structure
     validation by C-alpha geometry: phi, psi, and C-beta deviation.</a>
-    Proteins: Structure, Function, and Genetics. <u>50</u>: 437-450.</small></p>
-<p><a href='help/java.html' target='_blank'>Installing Java</a>: how to make kinemage graphics work in your browser.</p>
-<p><u>Lab notebook</u>: what's it for and how do I use it?</p>
-<p><u>Adding hydrogens</u>: why are H necessary for steric evaluations?</p>
-<p><u>My own MolProbity</u>: how can I run my own private MolProbity server?</p>
+    Proteins: Structure, Function, and Genetics. <b>50</b>: 437-450.</small></p>
+<p><b><a href='help/java.html' target='_blank'>Installing Java</a></b>: how to make kinemage graphics work in your browser.</p>
+<p><b>Lab notebook</b>: what's it for and how do I use it?</p>
+<p><b>Adding hydrogens</b>: why are H necessary for steric evaluations?</p>
+<p><b>My own MolProbity</b>: how can I run my own private MolProbity server?</p>
 </td></tr></table>
 <?php
     echo mpPageFooter();
@@ -164,7 +164,7 @@ function displayTools($context)
 {
     $model = $_SESSION['models'][ $_SESSION['lastUsedModelID'] ];
     $minor = array(
-        'upload'    => array('desc' => 'Input other files', 'page' => 'upload_other_setup.php', 'img' => ''),
+        'upload'    => array('desc' => 'Input map / het dict / kin files', 'page' => 'upload_other_setup.php', 'img' => ''),
         'reduce'    => array('desc' => 'Add hydrogens', 'page' => 'reduce_setup.php', 'img' => 'add_h.png'),
         'aacgeom'   => array('desc' => 'All-atom contacts and geometry', 'page' => 'aacgeom_setup.php', 'img' => 'clash_rama.png'),
         'geomonly'  => array('desc' => 'Geometry analysis only', 'page' => 'aacgeom_setup.php', 'img' => 'ramaplot.png'),

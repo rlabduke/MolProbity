@@ -113,12 +113,13 @@ function mpStartSession($createIfNeeded = false)
             // Set up some session variables. See docs for explanation.
             $_SESSION['dataDir']        = $dataDir;
             $_SESSION['dataURL']        = "data/".session_id();
-            $_SESSION['models']         = array(); // no models to start with
             $_SESSION['sessTag']        = session_name() . "=" . session_id();
             $_SESSION['userIP']         = getVisitorIP();
             $_SESSION['timeZone']       = MP_DEFAULT_TIMEZONE;
             $_SESSION['kingSize']       = "default";
             $_SESSION['currEventID']    = 1; // used by (optional) MVC/event architecture
+            $_SESSION['models']         = array(); // no models to start with
+            $_SESSION['ensembles']      = array(); // no ensembles to start with
             
             // TODO: perform other tasks to start a session
             // Create databases, etc, etc.

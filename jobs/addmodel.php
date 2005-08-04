@@ -47,11 +47,18 @@ OUTPUTS (via $_SESSION['bgjob']):
 ############################################################################
 function getMaps($code)
 {
+    global $map_notebook_msg;
+    $map_notebook_msg = "";
+    $prog = array();
+    if($_SESSION['bgjob']['eds_2fofc']) $prog['2fofc'] = "Download 2Fo-Fc map from the EDS";
+    if($_SESSION['bgjob']['eds_fofc'])  $prog['fofc']  = "Download Fo-Fc (difference) map from the EDS";
+    
     $mapDir = "$_SESSION[dataDir]/".MP_DIR_EDMAPS;
     if(!file_exists($mapDir)) mkdir($mapDir, 0777);
     
-    if(isset($_SESSION['bgjob']['eds_2fofc']))
+    if($_SESSION['bgjob']['eds_2fofc'])
     {
+        setProgress($prog, '2fofc');
         $mapName = "$code.ccp4.gz";
         $mapPath = "$mapDir/$mapName";
         if(!file_exists($mapPame))
@@ -62,13 +69,15 @@ function getMaps($code)
                 unlink($tmpMap);
                 $_SESSION['edmaps'][$mapName] = $mapName;
                 mpLog("edmap-eds:User requested 2Fo-Fc map for $code from the EDS");
+                $map_notebook_msg .= "<p>The 2Fo-Fc map for $code was successfully retrieved from the EDS.</p>\n";
             }
-            else "tmp = $tmpMap";
+            else $map_notebook_msg .= "<p><div class='alert'>The 2Fo-Fc map for $code could not be retrieved from the EDS.</div></p>\n";
         }
         else echo "Map file already exists";
     }
-    if(isset($_SESSION['bgjob']['eds_fofc']))
+    if($_SESSION['bgjob']['eds_fofc'])
     {
+        setProgress($prog, 'fofc');
         $mapName = "$code-diff.ccp4.gz";
         $mapPath = "$mapDir/$mapName";
         if(!file_exists($mapPame))
@@ -79,9 +88,13 @@ function getMaps($code)
                 unlink($tmpMap);
                 $_SESSION['edmaps'][$mapName] = $mapName;
                 mpLog("edmap-eds:User requested Fo-Fc map for $code from the EDS");
+                $map_notebook_msg .= "<p>The Fo-Fc map for $code was successfully retrieved from the EDS.</p>\n";
             }
+            else $map_notebook_msg .= "<p><div class='alert'>The Fo-Fc map for $code could not be retrieved from the EDS.</div></p>\n";
         }
     }
+    
+    setProgress($prog, null);
 }
 #}}}########################################################################
 
@@ -129,8 +142,8 @@ if(isset($_SESSION['bgjob']['pdbCode']))
         unlink($tmpfile);
         
         if(preg_match('/^[0-9A-Z]{4}$/i', $code)
-        &&(isset($_SESSION['bgjob']['eds_2fofc'])
-        || isset($_SESSION['bgjob']['eds_fofc'])))
+        &&($_SESSION['bgjob']['eds_2fofc']
+        || $_SESSION['bgjob']['eds_fofc']))
         {
             getMaps($code);
         }
@@ -194,6 +207,8 @@ if(isset($idList))
     $s .= "<ul>\n";
     foreach($details as $detail) $s .= "<li>$detail</li>\n";
     $s .= "</ul>\n";
+    
+    $s .= $map_notebook_msg;
     
     if($model['segmap'])
     {
