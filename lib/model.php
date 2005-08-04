@@ -307,8 +307,8 @@ function splitModelsNMR($infile)
 /**
 * Returns an array of temp file names holding the split models.
 * The models appear in order, and the keys of the array are the model numbers.
-* Unlike splitModelsNMR, this function handles CONECT records properly, at
-* the expense of having to hold the whole file in memory at once (!)
+* Unlike splitModelsNMR, this function handles CONECT records properly, and
+* has minimal memory requirements.
 */
 function splitPdbModels($infile)
 {
@@ -316,47 +316,63 @@ function splitPdbModels($infile)
     // FUNKY: this uses PHP references to juggle arrays. See the manual.
     $headers = array();     // REMARKs, etc.
     $footers = array();     // CONECTs, etc.
-    $models = array();      // ATOMs, etc.
     $sink =& $headers;      // where lines are currently deposited
     
-    //Open PDB file, read line by line
+    // Part 1: extract headers and footers from the PDB file
+    $keeplines = true;
     $in = fopen($infile,"rb");
     while(!feof($in))
     {
         $line = fgets($in);
         $start = substr($line, 0, 6);
         // Things before the first MODEL go in $headers,
-        // and things after any MODEL go in $models.
+        // and things after go in $footers.
         if($start == 'MODEL ')
         {
-            $num = trim(substr($line, 5, 20)) + 0;
-            $models[$num] = array();
-            $sink =& $models[$num];
-        }
-        // Things after the last ENDMDL go in $footers.
-        elseif($start == 'ENDMDL')
-        {
+            $keeplines = false;
             $sink =& $footers;
         }
-        else $sink[] = $line;
+        elseif($start == 'ENDMDL')
+        {
+            $keeplines = true;
+        }
+        elseif($keeplines) $sink[] = $line;
     }
     fclose($in);
     
+    // Part 2: write the non-(header, footer) parts to separate files.
     // Every model gets all headers and footers, plus its ATOMs, etc.
     $modelFiles = array();
-    foreach($models as $num => $model)
+    $keeplines = false;
+    $in = fopen($infile,"rb");
+    while(!feof($in))
     {
-        $tmpFile = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
-        $modelFiles[$num] = $tmpFile;
-        
-        $out = fopen($tmpFile, "wb");
-        foreach($headers as $h) fwrite($out, $h);
-        fwrite($out, sprintf("REMARK  99 MODEL     %4d                                                       \n", $num));
-        foreach($model as $m) fwrite($out, $m);
-        fwrite($out, "REMARK  99 ENDMDL                                                               \n");
-        foreach($footers as $f) fwrite($out, $f);
-        fclose($out);
+        $line = fgets($in);
+        $start = substr($line, 0, 6);
+        // Things before the first MODEL go in $headers,
+        // and things after go in $footers.
+        if($start == 'MODEL ')
+        {
+            $keeplines = true;
+            $num = trim(substr($line, 5, 20)) + 0;
+            
+            $tmpFile = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
+            $modelFiles[$num] = $tmpFile;
+            $out = fopen($tmpFile, "wb");
+            foreach($headers as $h) fwrite($out, $h);
+            fwrite($out, sprintf("REMARK  99 MODEL     %4d                                                       \n", $num));
+        }
+        elseif($start == 'ENDMDL')
+        {
+            $keeplines = false;
+            
+            fwrite($out, "REMARK  99 ENDMDL                                                               \n");
+            foreach($footers as $f) fwrite($out, $f);
+            fclose($out);
+        }
+        elseif($keeplines) fwrite($out, $line);
     }
+    fclose($in);
     
     return $modelFiles;
 }
@@ -383,6 +399,8 @@ function joinPdbModels($infiles)
         $in = fopen($infile,"rb");
         while(!feof($in))
         {
+            // We decide based on record type rather than REMARK'd MODEL/ENDMDL
+            // records b/c this could be used to join xtalographic data sets too.
             $line = fgets($in);
             if(preg_match('/^(ATOM|HETATM|TER|ANISOU|REMARK  99 MODEL|REMARK  99 ENDMDL)/', $line)) continue;
             elseif(preg_match('/^(CONECT|MASTER|END)/', $line))
@@ -406,6 +424,8 @@ function joinPdbModels($infiles)
         fwrite($out, sprintf("MODEL     %4d                                                                  \n", $i++));
         while(!feof($in))
         {
+            // We decide based on record type rather than REMARK'd MODEL/ENDMDL
+            // records b/c this could be used to join xtalographic data sets too.
             $line = fgets($in);
             if(preg_match('/^(ATOM|HETATM|TER|ANISOU)/', $line))
                 fwrite($out, $line);
