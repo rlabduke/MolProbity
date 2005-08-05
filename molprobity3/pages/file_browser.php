@@ -29,8 +29,26 @@ function display($context)
     $list = sortFilesAlpha($list);
     echo $this->makeFileList($list, $_SESSION['dataDir'], $_SESSION['dataURL'], $context['isExpanded']);
     echo "</table>\n";
-    echo "<input type='submit' name='cmd' value='Download checked files and folders as a ZIP archive'>\n";
+    echo "<a href='#' onclick='checkAll(true); return false;'>Check all</a>\n";
+    echo "- <a href='#' onclick='checkAll(false); return false;'>Clear all</a>\n";
+    echo "<p><input type='submit' name='cmd' value='Download checked files and folders as a ZIP archive'></p>\n";
     echo "</form>\n";
+
+?><script language='JavaScript'>
+<!--
+function checkAll(checkSetting)
+{
+    for(var i = 0; i < document.forms[0].elements.length; i++)
+    {
+        if(document.forms[0].elements[i].type == "checkbox")
+        {
+            document.forms[0].elements[i].checked = checkSetting
+        }
+    }
+}
+// -->
+</script><?php
+
     echo mpPageFooter();
 }
 #}}}########################################################################

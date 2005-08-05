@@ -49,7 +49,7 @@ function getMaps($code)
 {
     global $map_notebook_msg;
     $map_notebook_msg = "";
-    $prog = array();
+    $prog = getProgressTasks();
     if($_SESSION['bgjob']['eds_2fofc']) $prog['2fofc'] = "Download 2Fo-Fc map from the EDS";
     if($_SESSION['bgjob']['eds_fofc'])  $prog['fofc']  = "Download Fo-Fc (difference) map from the EDS";
     
@@ -133,7 +133,7 @@ if(isset($_SESSION['bgjob']['pdbCode']))
     }
     else
     {
-        $idList = addModel($tmpfile,
+        $id = addModelOrEnsemble($tmpfile,
             strtolower("$code.pdb"), // lower case is nicer for readability
             $_SESSION['bgjob']['isCnsFormat'],
             $_SESSION['bgjob']['ignoreSegID']);
@@ -155,7 +155,7 @@ else
     $origName = censorFileName($_SESSION['bgjob']['origName']);
     $fileSource = "local disk";
     
-    $idList = addModel($_SESSION['bgjob']['tmpPdb'],
+    $id = addModelOrEnsemble($_SESSION['bgjob']['tmpPdb'],
         $origName,
         $_SESSION['bgjob']['isCnsFormat'],
         $_SESSION['bgjob']['ignoreSegID']);
@@ -165,12 +165,22 @@ else
 }
 
 // Automatic labbook entry
-if(isset($idList))
+if(isset($id))
 {
-    $id = reset($idList);
-    $_SESSION['lastUsedModelID'] = $id; // this is now the "working model" until overriden
-    $model = $_SESSION['models'][ $id ];
+    // this is now the "working model" until overriden (could also be an ensemble)
+    $_SESSION['lastUsedModelID'] = $id;
     $_SESSION['bgjob']['newModel'] = $id;
+    
+    if(isset($_SESSION['ensembles'][$id]))
+    {
+        $idList = $_SESSION['ensembles'][$id]['models'];
+        $model = $_SESSION['models'][ reset($idList) ];
+    }
+    else
+    {
+        $idList = array();
+        $model = $_SESSION['models'][ $id ];
+    }
     
     // Original task list set during addModel()
     $tasks = getProgressTasks();
@@ -194,8 +204,8 @@ if(isset($idList))
 
     if(count($idList) > 1) // NMR/multiple models
     {
-        $title = count($idList)." models added";
-        $s .= "Your file from $fileSource was uploaded as ".count($idList)." separate PDB files, one per MODEL contained in the original.\n";
+        $title = count($idList)."-model ensemble added";
+        $s .= "Your file from $fileSource was uploaded as an ensemble of ".count($idList)." separate models.\n";
         $s .= "The following description applies to the first of these models, which is shown in the thumbnail kinemage:\n";
     }
     else // xray/single model
@@ -218,10 +228,11 @@ if(isset($idList))
         $s .= "on the file upload page.</div></p>";
     }
     
+    $idList[] = $id; // make sure ensemble ID also appears in notebook
     $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
         $title,
         $s,
-        $id,
+        implode('|', $idList),
         "auto"
     );
     

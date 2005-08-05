@@ -43,7 +43,11 @@ function display($context)
     if(count($_SESSION['models']) > 0 && $_SESSION['lastUsedModelID'])
     {
         echo "<hr>\n";
-        $this->displayTools($context);
+        if(isset($_SESSION['ensembles'][ $_SESSION['lastUsedModelID'] ]))
+            $this->displayEnsembleTools($context);
+        else
+            $this->displayModelTools($context);
+        
         echo "<hr>\n";
         $this->displayFiles($context);
         echo "<hr>\n";
@@ -128,7 +132,7 @@ function displayWarnings($context)
 }
 #}}}########################################################################
 
-#{{{ displayModels - lists available model(s), if any
+#{{{ displayModels - lists available model(s) and ensemble(s), if any
 ############################################################################
 function displayModels($context)
 {
@@ -138,6 +142,12 @@ function displayModels($context)
         echo "<td colspan='2'>Working model: ";
         $submit_script = 'document.forms[0].elements("cmd")[1].click();';
         echo "<select name='workingModel' onchange='$submit_script'>\n";
+        foreach($_SESSION['ensembles'] as $id => $model)
+        {
+            if($_SESSION['lastUsedModelID'] == $id) $selected = "selected";
+            else                                    $selected = "";
+            echo "  <option value='$id' $selected>$model[pdb] &nbsp; &nbsp; &nbsp; $model[history]</option>\n";
+        }
         foreach($_SESSION['models'] as $id => $model)
         {
             if($_SESSION['lastUsedModelID'] == $id) $selected = "selected";
@@ -155,13 +165,14 @@ function displayModels($context)
 }
 #}}}########################################################################
 
-#{{{ displayTools - lists links for all the different tools available
+#{{{ displayModelTools - lists links for all the different tools available
 ############################################################################
 /**
 * Tool list is also customized for the currently active PDB model.
 */
-function displayTools($context)
+function displayModelTools($context)
 {
+    // We already know lastUsedModelID is set and refers to a model, not an ensemble
     $model = $_SESSION['models'][ $_SESSION['lastUsedModelID'] ];
     $minor = array(
         'upload'    => array('desc' => 'Input map / het dict / kin files', 'page' => 'upload_other_setup.php', 'img' => ''),
@@ -227,13 +238,93 @@ function displayTools($context)
 }
 #}}}########################################################################
 
+#{{{ displayEnsembleTools - lists links for all the different tools available
+############################################################################
+/**
+* Tool list is also customized for the currently active PDB model.
+*/
+function displayEnsembleTools($context)
+{
+    // We already know lastUsedModelID is set and refers to an ensemble, not a model
+    $model = $_SESSION['ensembles'][ $_SESSION['lastUsedModelID'] ];
+    echo "<i>No multi-model or ensemble tools have been implemented yet.</i>\n";
+    /*
+    $minor = array(
+        'upload'    => array('desc' => 'Input map / het dict / kin files', 'page' => 'upload_other_setup.php', 'img' => ''),
+        'reduce'    => array('desc' => 'Add hydrogens', 'page' => 'reduce_setup.php', 'img' => 'add_h.png'),
+        'aacgeom'   => array('desc' => 'All-atom contacts and geometry', 'page' => 'aacgeom_setup.php', 'img' => 'clash_rama.png'),
+        'geomonly'  => array('desc' => 'Geometry analysis only', 'page' => 'aacgeom_setup.php', 'img' => 'ramaplot.png'),
+        'iface'     => array('desc' => 'Visualize interface contacts', 'page' => 'interface_setup1.php', 'img' => 'barnase_barstar.png'),
+        'sswing'    => array('desc' => 'Refit sidechains', 'page' => 'sswing_setup1.php', 'img' => ''),
+        'makekins'  => array('desc' => 'Make simple kinemages', 'page' => 'makekin_setup.php', 'img' => 'porin_barrel.png'),
+        //'' => array('desc' => '', 'page' => '', 'img' => ''),
+    );
+    $major = array();
+    
+    // Reduce
+    if($model['isReduced']) unset($minor['reduce']);
+    elseif($model['stats']['has_most_H']) {} // stay put
+    else { $major['reduce'] = $minor['reduce']; unset($minor['reduce']); }
+    
+    // All-atom contact analysis
+    if($model['isReduced'] || $model['stats']['has_most_H'])
+    {
+        $major['aacgeom'] = $minor['aacgeom'];
+        unset($minor['aacgeom']);
+        unset($minor['geomonly']);
+    }
+    else
+    {
+        //$major['geomonly'] = $minor['geomonly'];
+        unset($minor['aacgeom']);
+        //unset($minor['geomonly']);
+    }
+    
+    // Suggest kin w/o H, suggest interface w/ H
+    if($model['isReduced'] || $model['stats']['has_most_H'])
+    {
+        $major['iface'] = $minor['iface'];
+        unset($minor['iface']);
+    }
+    else
+    {
+        $major['makekins'] = $minor['makekins'];
+        unset($minor['makekins']);
+    }
+    
+    
+    echo "<table border='0' width='100%'>\n";
+    echo "<tr valign='top'><td>\n"; // start large icon column
+    foreach($major as $item)
+    {
+        echo "<a href='".makeEventURL("onNavBarCall", $item['page'])."'>";
+        if($item['img']) echo "<img src='img/$item[img]' alt='$img[desc]' border='0' align='middle'> ";
+        echo "$item[desc]</a><br>\n";
+    }
+    echo "</td>\n";
+    
+    echo "<td>\n"; // end large; start small text column
+    foreach($minor as $item)
+    {
+        echo "<p><a href='".makeEventURL("onNavBarCall", $item['page'])."'>";
+        echo "$item[desc]</a></p>\n";
+    }
+    echo "</td></tr></table>\n"; // end tools columns
+    */
+}
+#}}}########################################################################
+
 #{{{ displayFiles - lists most important files for current model
 ############################################################################
 function displayFiles($context)
 {
     $browser = new file_browser_delegate();
     
-    $model = $_SESSION['models'][ $_SESSION['lastUsedModelID'] ];
+    if(isset($_SESSION['ensembles'][ $_SESSION['lastUsedModelID'] ]))
+        $model = $_SESSION['ensembles'][ $_SESSION['lastUsedModelID'] ];
+    else
+        $model = $_SESSION['models'][ $_SESSION['lastUsedModelID'] ];
+    
     $files = array(MP_DIR_MODELS.'/'.$model['pdb']);
     $files = array_merge($files, $model['primaryDownloads']);
     
@@ -263,7 +354,11 @@ function displayEntries($context)
     $url = makeEventURL("onNavBarGoto", "notebook_main.php");
 
     $modelID = $_SESSION['lastUsedModelID'];
-    $model = $_SESSION['models'][$modelID];
+    if(isset($_SESSION['ensembles'][ $_SESSION['lastUsedModelID'] ]))
+        $model = $_SESSION['ensembles'][$modelID];
+    else
+        $model = $_SESSION['models'][$modelID];
+    
     $labbook = openLabbook();
     echo "<h3 class='nospaceafter'>Lab notebook entries for $model[pdb]:</h3>\n";
     echo "<ul>\n";
@@ -321,7 +416,11 @@ function onAction($arg, $req)
 */
 function onDownloadPopularZip($arg, $req)
 {
-    $model = $_SESSION['models'][ $_SESSION['lastUsedModelID'] ];
+    if(isset($_SESSION['ensembles'][ $_SESSION['lastUsedModelID'] ]))
+        $model = $_SESSION['ensembles'][ $_SESSION['lastUsedModelID'] ];
+    else
+        $model = $_SESSION['models'][ $_SESSION['lastUsedModelID'] ];
+
     $files = array(MP_DIR_MODELS.'/'.$model['pdb']);
     $files = array_merge($files, $model['primaryDownloads']);
     
