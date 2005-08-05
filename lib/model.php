@@ -17,14 +17,15 @@ require_once(MP_BASE_DIR.'/lib/pdbstat.php');
 *   modelID     the desired model ID. A serial number may be appended.
 *   pdbSuffix   a suffix to apply to the PDB filename. Usually "".
 *
-* returns: an array containing keys 'id', 'pdb', and 'prefix'.
+* returns: an array containing 'id', 'pdb', 'prefix', and 'primaryDownloads'.
 */
 function createModel($modelID, $pdbSuffix = "")
 {
-    // Make sure this is a unique name
+    // Make sure this is a unique name among BOTH models AND ensembles.
     // FUNKY: Be careful here b/c HFS on OS X is not case-sensitive.
     // (It's case-PRESERVING.) This could screw up file naming.
     foreach($_SESSION['models'] as $k => $v) $lowercaseIDs[strtolower($k)] = $k;
+    foreach($_SESSION['ensembles'] as $k => $v) $lowercaseIDs[strtolower($k)] = $k;
     
     // If this is true, we're going to need to differentiate this model from an existing one
     if(isset($lowercaseIDs[strtolower($modelID)])
@@ -51,6 +52,125 @@ function createModel($modelID, $pdbSuffix = "")
         'pdb'       => $outname,
         'primaryDownloads'  => array()
     );
+}
+#}}}########################################################################
+
+#{{{ createEnsemble - returns a "ensemble" data structure for a given name.
+############################################################################
+/**
+* Creates a model data structure suitable for insertion into
+* $_SESSION[ensembles], but does not actually insert it.
+* The primary purpose of this function is to encapsulate requirements
+* for name- and prefix-uniqueness within the current session.
+* Likewise, a name for the PDB file is created, but the file itself is NOT
+* created and MP_DIR_MODELS may not even exist yet.
+*
+*   ensembleID      the desired ensemble ID. A serial number may be appended.
+*
+* returns: an array containing 'id', 'pdb', 'prefix', and 'primaryDownloads'.
+*/
+function createEnsemble($ensembleID)
+{
+    // Logic is exactly the same as above!
+    return createModel($ensembleID);
+}
+#}}}########################################################################
+
+#{{{ addModelOrEnsemble - adds an up/downloaded model to the session
+############################################################################
+/**
+* This is suitable for the traditional model addition, where the file
+* to add already exists as a separate PDB.
+* It *only* makes sense in the context of an active session.
+*   tmpPdb          the (temporary) file where the upload is stored.
+*   origName        the name of the file on the user's system.
+*   isCnsFormat     true if the user thinks he has CNS atom names
+*   ignoreSegID     true if the user wants to never map segIDs to chainIDs
+*
+* It returns either a model ID (for inputs with 0 or 1 MODEL records)
+* or an ensemble ID (for multi-MODEL input)
+* which of course then links to the individual model IDs.
+*/
+function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSegID = false)
+{
+    // Try stripping file extension
+    if(preg_match('/^(.+)\.(pdb|xyz|ent)$/i', $origName, $m))
+        $origID = $m[1];
+    else
+        $origID = $origName;
+    
+    // Process file to clean it up
+    $tmp2 = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
+    list($stats, $segmap) = preparePDB($tmpPdb, $tmp2, $isCnsFormat, $ignoreSegID);
+    
+    if($stats['models'] > 1) // NMR/theoretical with multiple models {{{
+    {
+        // Original task list set during preparePDB()
+        $tasks = getProgressTasks();
+        $tasks['splitNMR'] = "Split NMR models into separate PDB files";
+        setProgress($tasks, "splitNMR");
+        
+        $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
+        if(!file_exists($outpath)) mkdir($outpath, 0777);
+        $splitModels = splitPdbModels($tmp2);
+        unlink($tmp2);
+        $idList = array();
+        foreach($splitModels as $modelNum => $tmp3)
+        {
+            // Jane prefers the model number in front. This is good for kins,
+            // so mdl can be ID'd, but bad for sorting multiple structures...
+            $model = createModel(sprintf("m%02d_{$origID}", $modelNum));
+            $id = $model['id'];
+            $idList[] = $id;
+            
+            $file = $outpath.'/'.$model['pdb'];
+            copy($tmp3, $file);
+            unlink($tmp3);
+            
+            $model['stats']                 = pdbstat($file);
+            $model['history']               = "Model $modelNum from file uploaded by user";
+            if($segmap) $model['segmap']    = $segmap;
+            
+            // Create the model entry
+            $_SESSION['models'][$id] = $model;
+        }
+        
+        // Create the ensemble entry
+        $ensemble = createEnsemble("ens_$origID");
+        $ensemble['models'] = $idList;
+        $ensemble['history'] = "Ensemble of ".count($idList)." models uploaded by user";
+        
+        $pdbList = array();
+        foreach($idList as $id) $pdbList[] = $outpath.'/'.$_SESSION['models'][$id]['pdb'];
+        $joinedModel = joinPdbModels($pdbList);
+        copy($joinedModel, $outpath.'/'.$ensemble['pdb']);
+        unlink($joinedModel);
+        
+        // Create the ensemble entry
+        $id = $ensemble['id'];
+        $_SESSION['ensembles'][$id] = $ensemble;
+        return $id;
+    }//}}}
+    else // "standard" x-ray structure with one model {{{
+    {
+        $model = createModel($origID, "_clean"); // don't confuse user by re-using exact original PDB name        
+        $id = $model['id'];
+        
+        $outname    = $model['pdb'];
+        $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
+        if(!file_exists($outpath)) mkdir($outpath, 0777);
+        $outpath .= '/'.$outname;
+        copy($tmp2, $outpath);
+        unlink($tmp2);
+    
+        $model['stats']                 = $stats;
+        $model['history']               = 'Original file uploaded by user';
+        if($segmap) $model['segmap']    = $segmap;
+        
+        // Create the model entry
+        $_SESSION['models'][$id] = $model;
+        return $id;
+    }//}}}
 }
 #}}}########################################################################
 

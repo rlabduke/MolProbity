@@ -37,8 +37,6 @@
     Make sure Reduce doesn't shrink the PDB file (lost atoms/models, etc)
     Add coloring type drop box for -lots kins
     Write command line scripts for common actions; remove junk from cmdline/
-    Produce multi-model multicrit kinemages from the GUI
-    How to handle multi-model Ramachandran plots when models are split out?
     Verb-centered (sitemap) vs. noun-centered (PDB "stable") interface
     The "0+3" concept: single model, chain-chain (interface), overlapped pairs
         (NCS, etc), large ensembles (NMR/MD)
@@ -56,13 +54,13 @@
     "outlier" column for multichart
     Move labbook.html to charts/ ?
     for welcome: more icons, clean out old unused images
-    When NMR files are split, notebook assoc'd with first model only
     Save REMARK 42 data as XML file/fragment
     Add whois query to session listing
-    Add log messages for download map files
-  * Make ensembles actually work when splitting files
+    Make ensembles actually do something when splitting files
+        Produce multi-model multicrit kinemages from the GUI
+        Produce multi-model Ramachandran plots from the GUI
     splitModelsNMR(): talk to J about deprecating it
-  * Test IE workarounds for PHP redirected downloads
+    lib::addModel(): change cmdline scripts over to addModelOrEnsemble
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -79,6 +77,10 @@
 - added $_SESSION[ensembles] for managing NMR files
 - in model.php, wrote splitPdbModels() and joinPdbModels()
 - added IE specific headers for our tricky ZIP download in welcome and browser
+- PHP redirected downloads have been tested against IE 6.0 / WinXP
+- changed welcome.php to use lastUsedModelID safely (as model OR ensemble)
+- debugged addModelOrEnsemble() and converted jobs/addmodel.php to use it
+- added check all/clear all javascript to the file downloads page
 
 ### 3beta18 ###
 - changing the REFRESH tags fixes MP3 to work with IE6 ... mostly ;)
