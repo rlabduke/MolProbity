@@ -6,41 +6,242 @@
   <title>Installing and Configuring MolProbity</title>
 </head>
 <body>
-MolProbity often relies on symbolic links (symlinks), so it is critical
-that your webserver be configured to follow symlinks fot the MolProbity
-directories. For Apache, you should have a <span
- style="font-family: monospace;">Options FollowSymLinks</span>
-directive in the proper part of your <span
- style="font-family: monospace;">httpd.conf</span> file (usually in <span
- style="font-family: monospace;">/etc/httpd/httpd.conf</span>).<br>
+<h1 style="text-align: center;">Installing and Configuring MolProbity</h1>
+<div style="text-align: center;">Ian W. Davis (iwd@duke.edu), 24 Aug
+2005<br>
+</div>
 <br>
-(Is this bit about symlinks still true?)<br>
+This document describes how to install and configure MolProbity and its
+associated software. The MolProbity suite provides tools for
+macromolecular structure validation through either a command-line or
+web-browser interface.<br>
+<ul>
+  <li>System requirements</li>
+  <li>Steps for installation</li>
+  <ul>
+    <li>Configure the web server</li>
+    <li>Configure PHP</li>
+    <li>Unpack MolProbity</li>
+    <li>Configure MolProbity<br>
+    </li>
+    <li>Check configuration</li>
+    <li>Secure the admin pages and user data<br>
+    </li>
+  </ul>
+  <li>Troubleshooting / FAQ</li>
+</ul>
+<h2>System requirements</h2>
+MolProbity requires both a Unix runtime environment and a modern Java
+virtual machine (i.e. one from Sun Microsystems). It is known to run on
+x86 Linux systems and on Mac OS X. It is possible that with some
+modification MolProbity could be run on Windows under the Cygwin
+environment; if you'd like to try this project, please contact us.<br>
 <br>
-In order for the web server to be able to access MolProbity data
-correctly, it must have read, write, and execute permissions on the <span
- style="font-family: monospace;">public_html/data/</span> and <span
- style="font-family: monospace;">tmp/</span> directories. If someone
-other than the web server pseudo-user owns the files, this probably
-implies a permission mask of 777. The same thing goes for <span
- style="font-family: monospace;">public_html/data/molprobity.log</span>.<br>
+In the lab, we use a dual-processor AMD box running Fedora Cora 4 as
+the public server; we use the included versions of Apache and PHP. We
+use G4 Macs running OS X 10.4 (Tiger) for development, running the
+default Apache and PHP 5.0.4 from <a
+ href="http://www.entropy.ch/software/macosx/">entropy.ch</a>.<br>
+<h2>Configure the web server</h2>
+Although MolProbity can be used just as a collection of command-line
+tools, most people will also want access to the web interface, at least
+for the monitoring and maintainance functions. In theory, any web
+server that supports PHP should be fine. In practice, we've never used
+anything but Apache. The following tips should cover all the cases that
+occur in a "normal" httpd.conf file on RedHat or Mac systems. (This
+file often lives in /etc/httpd/.) If you've made significant changes,
+you'll need to consider how those might impact MolProbity.<br>
+<ul>
+  <li>Watch out for any <span style="font-family: monospace;">LimitRequestBody</span>
+directives. These can limit file uploads severely, which will make
+MolProbity much less useful. Most default configurations have no such
+limits, but I've seen a few that do. If there are multiple config
+files, use grep to make sure.</li>
+  <li>You should have an <span style="font-family: monospace;">Options
+FollowSymLinks</span>
+directive in the proper part of your httpd.conf file. A totally vanilla
+MolProbity installation shouldn't require this, but many of the
+proposed configurations covered later use symbolic links.</li>
+</ul>
+After these changes, you'll need to (re)start the webserver. You can do
+this from one of the graphical "services" tools in Linux, or from
+System Preferences | Sharing on the Mac.<br>
+<h2>Configure PHP</h2>
+You'll need a pretty recent version of PHP in order to run MolProbity
+correctly. Due to a long-standing bug in the printf() function (of all
+things), you must have version 4.3.7 or newer. We recommend the latest
+stable build in the 5.x line. If you have to install this package
+yourself in order to get a new enough version, make sure that Apache
+uses the correct version (see PHP documentation) and that MolProbity
+has the correct version on its PATH (see below).<br>
 <br>
-It's also important to be sure the programs in the <span
- style="font-family: monospace;">bin/</span> directory have their
-execute bit set for the web server pseudo-user.<br>
+The following settings often need to be changed in php.ini (usually
+found in /etc/):<br>
+<ul>
+  <li><span style="font-family: monospace;">post_max_size</span> and <span
+ style="font-family: monospace;">upload_max_filesize</span> both limit
+the size of uploaded files, and the default values are too small for
+many large PDB files. In some cases, <span
+ style="font-family: monospace;">memory_limit</span> may also need to
+be increased.</li>
+  <li>Of course, <span style="font-family: monospace;">file_uploads</span>
+must be set to 1 (true) in order for that to matter.</li>
+  <li><span style="font-family: monospace;">allow_url_fopen</span> must
+be on.</li>
+  <li><span style="font-family: monospace;">safe_mode</span> must be
+off.</li>
+  <li>"Magic quotes" should be disabled, or else your feedback emails
+will get garbled.</li>
+  <li><span style="font-family: monospace;">display_errors</span>
+should be enabled, at least until you have a working, debugged
+installation. After that, if you're paranoid, you can turn it back off,
+but it will make debugging future problems much harder.</li>
+</ul>
+<h2>Unpack MolProbity</h2>
+There are at least two possible scenarios here. For production use, we
+recommend creating a new user account (we call him "moler"). You then
+unpack the MolProbity bundle in moler's home directory, and you end up
+with a bin/ directory, a public_html/ directory, etc. in keeping with
+the usual Linux conventions. This way, Apache is already set up to
+access MolProbity's public_html as <span
+ style="font-family: monospace; text-decoration: underline;">http://your.web.server/~moler</span>,
+and the other directories (like config/) are protected from view. If
+you want a better URL later on, you can make a symbolic link from
+somewhere in <span style="font-family: monospace;">/var/www/html</span>
+(or wherever your root web directory is) to <span
+ style="font-family: monospace;">/home/moler/public_html</span>. In
+fact, you can make <span
+ style="text-decoration: underline; font-family: monospace;">http://your.web.server/</span>
+be the address for MolProbity like this:<br>
+&nbsp;&nbsp;&nbsp; <span style="font-family: monospace;">cd /var/www;
+rmdir html; ln -s /home/moler/public_html html</span><br>
+(Don't try actually <span style="font-style: italic;">moving</span>
+MolProbity's public_html somewhere else; it won't work. And don't
+install the whole MolProbity package under /var/www/html, or you'll
+also be exposing all the private data -- config/, bin/, etc. Not a huge
+risk, really, but don't do it.)<br>
 <br>
-It's critical that the absolute path to the directory where MolProbity
+For quick testing and personal use, you can install an (insecure) copy
+of MolProbity in your public_html (Linux) or Sites (Mac) folder. Just
+remember that's a public_html within a public_html, so the URL's going
+to look something like <span
+ style="font-family: monospace; text-decoration: underline;">http://your.web.server/~your.login/molprobity/public_html</span>.<br>
+<br>
+In either scenario, it's critical that the full path to the directory
+where MolProbity
 is installed not have any spaces or other funky characters in it.
 Alphanumerics, underscores, dashes, and dots are OK. Everything else is
 off limits. Those weird characters interfere both with passing paths in
-URLs (they have to be encoded and decoded) and with UNIX command line
-programs (all paths have to be enclosed in extra quote marks).<br>
+URLs (they have to be encoded and decoded) and with Unix command line
+programs (all paths have to be enclosed in extra quote marks). If you
+follow the suggestions above, you should be safe.<br>
 <br>
-<h2>Required software on the server</h2>
-<ul>
-  <li>rm</li>
-  <li>php (CLI version, 4.3.x and higher)</li>
-  <li>many more, see <span style="font-family: monospace;">public_html/admin/check_config.php</span>!<br>
-  </li>
-</ul>
+The latest stable release of MolProbity can be downloaded as a ZIP file
+from the Richardson lab website at <a
+ href="http://kinemage.biochem.duke.edu">http://kinemage.biochem.duke.edu</a>.
+If you like to live on the bleeding (and sometimes broken!) edge, we
+can arrange a Subversion account for you to have access to the
+development code.<br>
+<h2>Configure MolProbity</h2>
+After unpacking MolProbity, you should run the setup.sh script from the
+directory it resides in. It will create a few log files, ensure that
+the permissions are set properly on MolProbity directories, and make a
+few symlinks.<br>
+<br>
+By default, all data from user sessions is stored under
+public_html/data/. If you want to store data somewhere else, you can
+just replace the public_html/data/ directory with a symlink to your
+chosen location. For this to work, you <span
+ style="font-style: italic;">must</span> allow Apache to follow
+symlinks, as suggested above. Remember to check the permissions and
+re-run the setup.sh script. A suggestion: make sure the basic
+installation works before you try this variation.<br>
+<br>
+What configuration there is for MolProbity is stored in
+config/config.php, which you can edit with any text editor. All the
+settings are documented in the file, but most are fine the way they
+are. You will probably want to change MP_BIN_PATH, to make sure
+MolProbity can find all the necessary helper programs. (Setting moler's
+PATH environment variable will not accomplish anything, because
+MolProbity runs in a web server environment.) The configuration
+checking script will let you know if anything's missing.<br>
+<br>
+You may want to increase MP_REDUCE_LIMIT, which will let Reduce keep
+working on optimizing complicated H-bonding cliques at the cost of some
+additional processor time. Whether you can afford it depends on how
+many users you're supporting and how powerful your server is.<br>
+<br>
+You may also want to change the lifetime of a session before it's
+automatically garbage-collected, and you may want to allocate more/less
+disk space for each user session.<br>
+<h2>Check configuration</h2>
+If you skipped configuring your web server, you will now regret it. To
+make sure everything's configured properly, you should direct your
+browser to the check_config.php script under public_html/admin/. The
+URL will be something like <span
+ style="font-family: monospace; text-decoration: underline;">http://localhost/~moler/admin/check_config.php</span>.
+It will check the PHP settings suggested above and ensure it can find
+all the needed helper programs. It will also check and/or display
+version numbers for several of the core programs.<br>
+<br>
+While you're at it, look around at the other admin tools. You can
+monitoring usage of the site, remove or debug various working sessions,
+and more.<br>
+<br>
+If you try a file:// URL, you're just going to see the raw PHP source
+code. You must access this script via your web server in order for it
+to get executed by PHP.<br>
+<br>
+If you didn't configure a web server, you might try something like<br>
+&nbsp;&nbsp; <span style="font-family: monospace;">php -f
+public_html/admin/check_config.php &gt; tmp.html<br>
+</span>and then open tmp.html in a browser.<br>
+<h2>Secure the admin pages and user data</h2>
+The reason most people (drug companies) run their own copy of
+MolProbity is to protect their non-public structural data. Given that,
+you'll want to read this section carefully. We've made MolProbity as
+secure as we know how, but there are at least two big loopholes in an
+out-of-the-box installation.<br>
+<br>
+First, anyone can access the admin/ directory. This allows them to
+delete other users' sessions and get access to files within them. While
+this may occasionally be useful for an adminstrator, it's not the sort
+of thing you want everyone doing. If you're really paranoid, you'll
+want to delete that directory altogether, or at least move it somewhere
+that Apache doesn't have access to. Alternately, you could change the
+ownership and permissions to keep Apache out. If you want reasonable
+(though not airtight!) security <span style="font-style: italic;">and</span>
+the convenience of the admin tools, you can password protect the
+directory. See <a href="http://httpd.apache.org/docs/howto/auth.html">the
+Apache documentation</a> for a full discussion along with the important
+caveats, but the basic process looks like this:<br>
+<br>
+Create a file called .htaccess in the admin/ directory. Put something
+like this in it:<br>
+&nbsp;&nbsp;&nbsp; AuthType Basic<br>
+&nbsp;&nbsp;&nbsp; AuthName "My MolProbity server"<br>
+&nbsp;&nbsp;&nbsp; AuthUserFile /home/moler/public_html/admin/.htpasswd<br>
+&nbsp;&nbsp;&nbsp; Require user some_user_name<br>
+Then run a command like this to create the password:<br>
+&nbsp;&nbsp;&nbsp; <span style="font-family: monospace;">htpasswd -c
+/home/moler/public_html/admin/.htpasswd some_user_name</span><br>
+You may also have to enable password protection in your httpd.conf file
+with something like this:<br>
+&nbsp;&nbsp;&nbsp; &lt;Directory /home/*/public_html&gt;<br>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; AllowOverride AuthConfig<br>
+&nbsp;&nbsp;&nbsp; &lt;/Directory&gt; <br>
+Remember to restart the web server after making these changes.<br>
+<br>
+The second security problem comes from Apache. All the user data is
+stored in directories under public_html/data/. That directory has to be
+visible to the web so users can get at their files, but providing an
+index of the data directory (which most default Apache configurations
+will) allows someone to see all the sessions and browse through their
+contents. This is easy to fix; just remove "Indexes" from the
+appropriate Options line in your httpd.conf file. Again, restart the
+server when you're done.<br>
+<h2>Troubleshooting / FAQ</h2>
+There are no entries yet. Send your questions to iwd@duke.edu.<br>
+<br>
 </body>
 </html>
