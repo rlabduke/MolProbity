@@ -152,6 +152,30 @@ $ok = true;
 ?>
 </ul>
 
+<!-- <hr><h2>Security:</h2>
+<ul>
+<?php
+    /* -- DOESN'T WORK --
+    $server = $_SERVER['SERVER_NAME'];
+    $path = dirname($_SERVER['PHP_SELF']);
+    
+    $url = "http://$server$path/check_config.php";
+    echo "<li>Testing for access to $url ... ";
+    $c = curl_init($url);
+    curl_setopt($c, CURLOPT_RETURNTRANSFER, true); // don't write results to stdout
+    curl_setopt($c, CURLOPT_TIMEOUT, 10);
+    curl_exec($c);
+    if(curl_errno($c))
+        echo "CURL error ".curl_error($c)."</li>\n";
+    elseif(curl_getinfo($c, CURLINFO_HTTP_CODE) == 400)
+        echo "<b>NOT PROTECTED</b> - see installation instructions for how to secure this site!</li>";
+    else
+        echo "protected; HTTP code ".curl_getinfo($c, CURLINFO_HTTP_CODE)."</li>\n";
+    curl_close($c);
+    */
+?>
+</ul> -->
+
 <hr><h2>Directories on your PATH:</h2>
     <?php printPath(); ?>
 

@@ -12,8 +12,10 @@ INPUTS (via $_SESSION['bgjob']):
     isCnsFormat     true if the user thinks he has CNS atom names
     ignoreSegID     true if the user wants to never map segIDs to chainIDs
     
-    eds_2fofc       true if the user wants the 2Fo-Fc map from EDS } for pdbCode
-    eds_fofc        true if the user wants the Fo-Fc map from EDS  } only...
+    biolunit        true if we should get the biological, rather   }
+                    than asymmetric, unit from the PDB             } for pdbCode
+    eds_2fofc       true if the user wants the 2Fo-Fc map from EDS } only...
+    eds_fofc        true if the user wants the Fo-Fc map from EDS  }
 
 OUTPUTS (via $_SESSION['bgjob']):
     Adds a new entry to $_SESSION['models'].
@@ -116,12 +118,12 @@ if(isset($_SESSION['bgjob']['pdbCode']))
     if(preg_match('/^[0-9A-Z]{4}$/i', $code))
     {
         setProgress(array("pdb" => "Retrieve PDB file $code over the network"), "pdb");
-        $tmpfile = getPdbModel($code);
+        $tmpfile = getPdbModel($code, $_SESSION['bgjob']['biolunit']);
         $fileSource = "http://www.rcsb.org/pdb/";
     }
     else if(preg_match('/^[0-9A-Z]{6,10}$/i', $code))
     {
-        setProgress(array("pdb" => "Retrieve NDB file $code over the network (takes more than 30 sec)"), "pdb");
+        setProgress(array("pdb" => "Retrieve NDB file $code over the network (can take 30+ seconds)"), "pdb");
         $tmpfile = getNdbModel($code);
         $fileSource = "http://ndbserver.rutgers.edu/";
     }

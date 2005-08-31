@@ -33,9 +33,18 @@ echo mpPageHeader("Thanks!");
 
 ############################################################################
 ?>
-
+<center>
 Thanks for using MolProbity!
-
-<p><a href="index.php">Start over</a>
-
+All your data files have been erased.
+<br>
+<br>
+<br>
+<br>
+<a href="index.php"><img src="img/mplogo_clear.png"><br>Start another MolProbity session</a>
+<br>
+<br>
+<br>
+<br>
+<a href="http://kinemage.biochem.duke.edu/"><img src="img/kinhome.gif"><br>Return to the Richardson lab (Kinemage) home page</a>
+</center>
 <?php echo mpPageFooter(); ?>
