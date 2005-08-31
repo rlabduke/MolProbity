@@ -198,7 +198,7 @@ function onDownloadMarkedZip($arg, $req)
     // See PHP manual on header() for how this works.
     header('Content-type: application/zip');
     header('Content-Disposition: attachment; filename="molprobity.zip"');
-    readfile($zipfile);
+    mpReadfile($zipfile);
     unlink($zipfile);
     die(); // don't output the HTML version of this page into that nice file!
 }

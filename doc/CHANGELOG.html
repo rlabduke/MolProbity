@@ -25,7 +25,6 @@
         Write about maintaining MolProbity
         Write about features
     Could make it a web service with XML-RPC (SOAP, CORBA too complex) or REST
-    Retrieve maps from the EDS
     Multicrit: views for trouble spots sorted by severity (also hypertext?)
     Estimate time for e.g. analysis jobs?
     Add "priviledged" users who can e.g. run extra NMR models
@@ -46,26 +45,23 @@
     analyze::findAltConfs() should also support nuc. acid mc/sc classification
     re-assort the functions from visualize.php and analyze.php
     Make MP skinnable (multiple css files, directories under img/)
+    flatten "popular downloads" ZIP structure?
+    Get models from CASP web site? (where is it??)
+    Allow escape from job when no process number appears after x sec.
+    Add whois query to session listing
 }}}
     Develop "helper" pages; mark optional steps clearly
     Pick lowest resolution number mentioned in file; allow override?
     DANG is included in bin/ but we don't *use* it anywhere... / upgrade to 1.9
-    SEP(Gary): LIST of interacting (residues|*ATOMS*) across an interface
+  * SEP(Gary): LIST of interacting (residues|*ATOMS*) across an interface
     Oneline, all-in-one (kins, etc) for JCSG
     "outlier" column for multichart
     Move labbook.html to charts/ ?
     for welcome: more icons, clean out old unused images
-    Add whois query to session listing
-    Make ensembles actually do something when splitting files
-        Produce multi-model multicrit kinemages from the GUI
-        Produce multi-model Ramachandran plots from the GUI
+    Produce multi-model Ramachandran plots from the GUI
     splitModelsNMR(): talk to J about deprecating it
     lib::addModel(): change cmdline scripts over to addModelOrEnsemble
-    flatten "popular downloads" ZIP structure?
-    Usage stats (# unique IPs, etc) marred by hits from bots
-    Get models from CASP web site? (where is it??)
-    1MJH multichart -- not really 0 rotamer outliers
-    Allow escape from job when no process number appears after x sec.
+  ? Link multi-model analysis, etc. from sidebar and/or sitemap (how?)
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -75,6 +71,11 @@
 - can download the biol unit from the PDB, but it comes as MODELs
   can't just strip MODEL/ENDMDL -- breaks Rama, rota, other Java, multi chart...
 - added MODEL-to-chain mapping for download of biological units
+- fixed bogus "0 bad rotamers" in multi-chart header (a typo)
+- removed hits by bots and crawlers from the usage stats pages
+- wrote mpReadfile() to deal with readfile() bug in PHP 5.0.x for 2Mb+ files
+- created shell for doing multi-model multi kins
+- got a "rough draft" of the multi-model multi kin working
 
 ### 3beta19 ###
 - added directory check to setup.sh

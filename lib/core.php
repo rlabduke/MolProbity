@@ -490,6 +490,34 @@ function destructiveGZipFile($path)
 }
 #}}}########################################################################
 
+#{{{ mpReadfile - replacement for broken readfile in PHP 5
+############################################################################
+/**
+* Early releases of PHP 5 have a bug that keeps readfile() from
+* delivering more than about 2Mb.
+* Returns number of bytes read or false on failure.
+*/
+function mpReadfile($filepath)
+{
+    $chunksize = 1*(1024*1024); // how many bytes per chunk
+    $buffer = '';
+    $cnt = 0;
+    $handle = fopen($filepath, 'rb');
+    if($handle === false) return false;
+    while(!feof($handle))
+    {
+        $buffer = fread($handle, $chunksize);
+        echo $buffer;
+        // This makes sure data gets pushed on thru to the user:
+        ob_flush();
+        flush();
+        $cnt += strlen($buffer);
+    }
+    fclose($handle);
+    return $cnt; // return num. bytes delivered like readfile() does.
+}
+#}}}########################################################################
+
 #{{{ censorFileName - removes illegal and unusual characters from file name
 ############################################################################
 /**

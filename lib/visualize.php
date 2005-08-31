@@ -673,7 +673,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     $header2[] = array('html' => sprintf("Avg: %.2f", array_sum($Bfact)/count($Bfact)));
     if(is_array($clash))  $header2[] = array('html' => "Clashscore: $clash[scoreAll]");
     if(is_array($rama))   $header2[] = array('html' => "Outliers: ".count(findRamaOutliers($rama))." of ".count($rama));
-    if(is_array($rota))   $header2[] = array('html' => "Outliers: ".count(findRamaOutliers($rota))." of ".count($rota));
+    if(is_array($rota))   $header2[] = array('html' => "Outliers: ".count(findRotaOutliers($rota))." of ".count($rota));
     if(is_array($cbdev))  $header2[] = array('html' => "Outliers: ".count(findCbetaOutliers($cbdev))." of ".count($cbdev));
     if(is_array($pperp))  $header2[] = array('html' => "Outliers: ".count(findBasePhosPerpOutliers($pperp))." of ".count($pperp));
     
