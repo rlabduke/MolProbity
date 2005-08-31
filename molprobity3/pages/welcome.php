@@ -247,7 +247,6 @@ function displayEnsembleTools($context)
 {
     // We already know lastUsedModelID is set and refers to an ensemble, not a model
     $model = $_SESSION['ensembles'][ $_SESSION['lastUsedModelID'] ];
-    echo "<i>No multi-model or ensemble tools have been implemented yet.</i>\n";
     /*
     $minor = array(
         'upload'    => array('desc' => 'Input map / het dict / kin files', 'page' => 'upload_other_setup.php', 'img' => ''),
@@ -291,6 +290,13 @@ function displayEnsembleTools($context)
         $major['makekins'] = $minor['makekins'];
         unset($minor['makekins']);
     }
+    */
+    $minor = array(
+        'upload'    => array('desc' => 'Input map / het dict / kin files', 'page' => 'upload_other_setup.php', 'img' => ''),
+    );
+    $major = array(
+        'aacgeom'   => array('desc' => 'All-atom contacts and geometry', 'page' => 'ens_aacgeom_setup.php', 'img' => 'clash_rama.png'),
+    );
     
     
     echo "<table border='0' width='100%'>\n";
@@ -310,7 +316,6 @@ function displayEnsembleTools($context)
         echo "$item[desc]</a></p>\n";
     }
     echo "</td></tr></table>\n"; // end tools columns
-    */
 }
 #}}}########################################################################
 
@@ -431,7 +436,7 @@ function onDownloadPopularZip($arg, $req)
     // See PHP manual on header() for how this works.
     header('Content-type: application/zip');
     header('Content-Disposition: attachment; filename="' . $model['id'] . '.zip"');
-    readfile($zipfile);
+    mpReadfile($zipfile);
     unlink($zipfile);
     die(); // don't output the HTML version of this page into that nice file!
 }

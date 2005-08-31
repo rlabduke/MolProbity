@@ -146,7 +146,7 @@ function divideIntoYears($absStart, $absEnd)
 }
 #}}}########################################################################
 
-#{{{ countBrowsers
+#{{{ countBrowsers, removeBots
 ############################################################################
 /** Array mapping browser names to counts of their occurance. */
 function countBrowsers($records)
@@ -166,6 +166,32 @@ function countBrowsers($records)
     ksort($browsers);
     return $browsers;
 }
+
+/** Returns records from getRecords() minus those caused by bots. */
+function removeBots($records)
+{
+    $bots = array();
+    foreach($records as $r)
+    {
+        // Assume IP addr. + sess. ID = globally unique ID
+        $uid = $r[0].':'.$r[1];
+        if($r[3] == "browser-detect")
+        {
+            $br = recognizeUserAgent($rec[4]);
+            if($br['platform'] == "Bot/Crawler")
+                $bots[$uid] = 1;
+        }
+    }
+    $newrec = array();
+    foreach($records as $r)
+    {
+        // Assume IP addr. + sess. ID = globally unique ID
+        $uid = $r[0].':'.$r[1];
+        if(! $bots[$uid])
+            $newrec[] = $r;
+    }
+    return $newrec;
+}
 #}}}########################################################################
 
 #{{{ a_function_definition - sumary_statement_goes_here
@@ -184,6 +210,7 @@ if(isset($_REQUEST['end_date']) && strtotime($_REQUEST['end_date']) != -1)
 else $end_time = strtotime('1 Jan 2030');
 
 $log = getRecords($start_time, $end_time);
+$log = removeBots($log);
 $times = array();
 foreach($log as $record)
     $times[] = $record[2]+0;
@@ -214,7 +241,7 @@ if($end_time > end($times))     $end_time   = end($times)+(60*60*24);
     echo "<input type='submit' name='cmd' value='Refresh'>\n";
     echo "<p>\n";
     echo "<br>".count($log)." records found in the log.\n";
-    echo "<br>".uniqueSessions($log)." unique sessions active during this timeframe.\n";
+    echo "<br>".uniqueSessions($log)." unique sessions active during this timeframe. (Bots and crawlers not counted.)\n";
     echo "<br>".uniqueIPs($log)." unique IP addresses active during this timeframe. This is an <i>estimate</i> of the unique users.\n";
     echo "<p><table cellspacing='4'>\n";
     foreach(countBrowsers($log) as $browser => $cnt)

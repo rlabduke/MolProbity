@@ -1,0 +1,109 @@
+<?php # (jEdit options) :folding=explicit:collapseFolds=1:
+/*****************************************************************************
+    Runs all the all-atom contact and geometric analysis
+    tasks -- CB deviation, clashes, Ramachandran, etc.
+
+INPUTS (via $_SESSION['bgjob']):
+    ensID           ID code for ensemble to process
+    (for other options, see lib/analyze.php::runAnalysis())
+
+OUTPUTS (via $_SESSION['bgjob']):
+
+*****************************************************************************/
+// EVERY *top-level* page must start this way:
+// 1. Define it's relationship to the root of the MolProbity installation.
+// Pages in subdirectories of lib/ or public_html/ will need more "/.." 's.
+    if(!defined('MP_BASE_DIR')) define('MP_BASE_DIR', realpath(dirname(__FILE__).'/..'));
+// 2. Include core functionality - defines constants, etc.
+    require_once(MP_BASE_DIR.'/lib/core.php');
+    require_once(MP_BASE_DIR.'/lib/analyze.php');
+    require_once(MP_BASE_DIR.'/lib/labbook.php');
+// 3. Restore session data. If you don't want to access the session
+// data for some reason, you must call mpInitEnvirons() instead.
+    session_id( $_SERVER['argv'][1] );
+    mpStartSession();
+// 4. For pages that want to see the session but not change it, such as
+// pages that are refreshing periodically to monitor a background job.
+    #mpSessReadOnly();
+// 5. Set up reasonable values to emulate CLI behavior if we're CGI
+    set_time_limit(0); // don't want to bail after 30 sec!
+// 6. Record this PHP script's PID in case it needs to be killed.
+    $_SESSION['bgjob']['processID'] = posix_getpid();
+    mpSaveSession();
+
+#{{{ a_function_definition - sumary_statement_goes_here
+############################################################################
+/**
+* Documentation for this function.
+*/
+//function someFunctionName() {}
+#}}}########################################################################
+
+# MAIN - the beginning of execution for this page
+############################################################################
+$ensID = $_SESSION['bgjob']['ensID'];
+$ensemble = $_SESSION['ensembles'][$ensID];
+
+// TODO: This should be moved to analyze.php::runEnsembleAnalysis()
+//-----------------------------------------------------------------
+$opts = $_SESSION['bgjob'];
+if($opts['doMultiKin'])
+{
+    $modelDir   = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
+    $modelURL   = $_SESSION['dataURL'].'/'.MP_DIR_MODELS;
+    $kinDir     = $_SESSION['dataDir'].'/'.MP_DIR_KINS;
+    $kinURL     = $_SESSION['dataURL'].'/'.MP_DIR_KINS;
+        if(!file_exists($kinDir)) mkdir($kinDir, 0777);
+
+    $infile     = "$modelDir/$ensemble[pdb]";
+    $infiles    = array();
+    foreach($ensemble['models'] as $modelID)
+        $infiles[] = $modelDir.'/'.$_SESSION['models'][$modelID]['pdb'];
+    
+    $tasks = array();
+    $tasks['multikin'] = "Create multi-criterion kinemage";
+    
+    setProgress($tasks, 'multikin'); // updates the progress display if running as a background job
+    $mcKinOpts = array(
+        'ribbons'   =>  $opts['doRibbons'],
+        'Bscale'    =>  $opts['doBFactor'],
+        'Qscale'    =>  $opts['doOccupancy'],
+        'altconf'   =>  false,
+        'rama'      =>  $opts['doRama'],
+        'rota'      =>  $opts['doRota'],
+        'cbdev'     =>  $opts['doCbDev'],
+        'pperp'     =>  $opts['doBaseP'],
+        'dots'      =>  $opts['doAAC'],
+        'hbdots'    =>  $opts['showHbonds'],
+        'vdwdots'   =>  $opts['showContacts']
+    );
+    $outfile = "$kinDir/$ensemble[prefix]multi.kin";
+    makeMulticritKin($infiles, $outfile, $mcKinOpts);
+    
+    // EXPERIMENTAL: gzip compress large multikins
+    if(filesize($outfile) > MP_KIN_GZIP_THRESHOLD)
+    {
+        destructiveGZipFile($outfile);
+        $_SESSION['ensembles'][$ensID]['primaryDownloads'][] = MP_DIR_KINS."/$ensemble[prefix]multi.kin.gz";
+    }
+    else
+        $_SESSION['ensembles'][$ensID]['primaryDownloads'][] = MP_DIR_KINS."/$ensemble[prefix]multi.kin";
+
+    setProgress($tasks, null);
+    $labbookEntry .= "<i>Note: these kins are often too big to view in the browser. You may need to download it and view it off line.</i>\n";
+    $labbookEntry .= "<br>".linkKinemage("$ensemble[prefix]multi.kin", "Multi-criterion kinemage");
+}
+//-----------------------------------------------------------------
+
+$_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
+    "All-atom contact and geometric analyses: $ensemble[pdb]",
+    $labbookEntry,
+    $ensID,
+    "auto"
+);
+############################################################################
+// Clean up and go home
+unset($_SESSION['bgjob']['processID']);
+$_SESSION['bgjob']['endTime']   = time();
+$_SESSION['bgjob']['isRunning'] = false;
+?>

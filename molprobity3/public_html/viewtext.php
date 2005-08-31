@@ -62,7 +62,7 @@ if($mode == 'kin')
 }
 elseif($mode == 'html')
 {
-    readfile($file);
+    mpReadfile($file);
 }
 else // plain and/or mis-specified (default)
 {
