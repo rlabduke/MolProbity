@@ -55,7 +55,6 @@
     "outlier" column for multichart
     Move labbook.html to charts/ ?
     for welcome: more icons, clean out old unused images
-    Save REMARK 42 data as XML file/fragment
     Add whois query to session listing
     Make ensembles actually do something when splitting files
         Produce multi-model multicrit kinemages from the GUI
@@ -66,12 +65,16 @@
     Usage stats (# unique IPs, etc) marred by hits from bots
     Get models from CASP web site? (where is it??)
     1MJH multichart -- not really 0 rotamer outliers
-    Check config should look for indexing of data/ and passwords on admin/
-    Warn user with red box when they exceed disk space limits!
+    Allow escape from job when no process number appears after x sec.
     
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
+
+### 3beta20 ###
+- can download the biol unit from the PDB, but it comes as MODELs
+  can't just strip MODEL/ENDMDL -- breaks Rama, rota, other Java, multi chart...
+- added MODEL-to-chain mapping for download of biological units
 
 ### 3beta19 ###
 - added directory check to setup.sh
@@ -89,6 +92,10 @@
 - debugged addModelOrEnsemble() and converted jobs/addmodel.php to use it
 - added check all/clear all javascript to the file downloads page
 - wrote the installation instructions
+- standard page header is now INDEX,NOFOLLOW (so Google will see the front pg)
+- tried a warning page for users who exceed disk space; it's too expensive
+- improved Start Over link on logout and added link to Kinemage Home Page
+- simplified getPdb/NdbModel() by using copy() with URLs
 
 ### 3beta18 ###
 - changing the REFRESH tags fixes MP3 to work with IE6 ... mostly ;)

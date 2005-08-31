@@ -49,7 +49,7 @@ function mpPageHeader($title, $active = "none", $refresh = "")
     <title>'.$title.' - MolProbity</title>
     <link rel="StyleSheet" href="css/default.css" TYPE="text/css">
     <link rel="shortcut icon" href="favicon.ico">
-    <meta name="ROBOTS" content="NOINDEX, NOFOLLOW">
+    <meta name="ROBOTS" content="INDEX, NOFOLLOW">
 ';
     
     if($refresh != "")
@@ -101,6 +101,15 @@ window.alert("You cannot use your browser\'s back button in MolProbity,"
         $s .= "<div class='alert'>You cannot use your browser's back button in MolProbity,
             and you cannot have multiple windows of the same working session
             (except for kinemage views, charts, and the like).</div>\n";
+
+    // Warn the user about using too much disk space.
+    /* This doesn't work, b/c sometimes we're not in a session.
+    *  It's also pretty expensive to run du every time somebody clicks something.
+    if(mpSessSizeOnDisk(session_id()) > MP_SESSION_MAX_SIZE)
+        $s .= "<div class='alert'>You have exceeded the allowed disk space for this session;
+            please download your files and start a new session. If you continue to generate
+            more files, <b>your session will be deleted</b>.</div>\n";
+    */
 
     return $s;
 }

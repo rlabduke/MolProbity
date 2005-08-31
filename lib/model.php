@@ -561,6 +561,58 @@ function joinPdbModels($infiles)
 }
 #}}}########################################################################
 
+#{{{ convertModelsToChains - converts biol. unit MODELs to unique chain IDs
+############################################################################
+/**
+* Takes a PDB biological unit file, where copies of the asym. unit are stored
+* as MODEL records, and converts it into a "flat" PDB file by remapping the
+* chain IDs.
+* Returns a temp file with the remapped chain IDs.
+*/
+function convertModelsToChains($infile)
+{
+    // Generate a set of all possible usable IDs.
+    // These will be removed as they're used.
+    $possibleIDs = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890abcdefghijklmnopqrstuvwxyz ";
+    $unusedIDs = array();
+    for($i = 0; $i < strlen($possibleIDs); $i++)
+        $unusedIDs[ $possibleIDs{$i} ] = $possibleIDs{$i};
+    
+    // Maps old chain IDs to new chain IDs. Mappings are pulled from $unusedIDs.
+    // This is cleared out every time a new MODEL is encountered.
+    $idmap = array();
+    $tmpFile = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
+    $out = fopen($tmpFile, "wb");
+    $in = fopen($infile, "rb");
+    while(!feof($in))
+    {
+        $line = fgets($in);
+        if(preg_match('/^(ATOM|HETATM|TER|ANISOU)/', $line) && strlen($line) >= 22)
+        {
+            $cid = $line{21};
+            if(!isset($idmap[$cid]))
+            {
+                if(isset($ununsedIDs[$cid]))    $idmap[$cid] = $unusedIDs[$cid];
+                else                            $idmap[$cid] = reset($unusedIDs);
+                unset($unusedIDs[ $idmap[$cid] ]);
+            }
+            $line{21} = $idmap[$cid];
+            fwrite($out, $line);
+        }
+        elseif(preg_match('/^(MODEL|ENDMDL)/', $line))
+        {
+            $idmap = array();
+            echo "reset matching\n";
+        }
+        else fwrite($out, $line);
+    }
+    fclose($in);
+    fclose($out);
+    
+    return $tmpFile;
+}
+#}}}########################################################################
+
 #{{{ reduceNoBuild - adds missing H without changing existing atoms
 ############################################################################
 /**
@@ -821,35 +873,37 @@ function countReduceChanges($pdbfile)
 *   pdbcode     the 4-character code identifying the model
 * Returns the name of a temporary file, or null if download failed.
 */
-function getPdbModel($pdbcode)
+function getPdbModel($pdbcode, $biolunit = false)
 {
     // I think the PDB website is picky about case
     $pdbcode = strtoupper($pdbcode);
 
     // Copy in the newly uploaded file:
-    $src = fopen("http://www.rcsb.org/pdb/cgi/export.cgi/$pdbcode.pdb?format=PDB&pdbId=$pdbcode&compression=None", "rb");
-    if($src)
+    if($biolunit)
+        $src = "ftp://ftp.rcsb.org/pub/pdb/data/biounit/coordinates/all/".strtolower($pdbcode).".pdb1.gz";
+    else
+        $src = "http://www.rcsb.org/pdb/cgi/export.cgi/$pdbcode.pdb?format=PDB&pdbId=$pdbcode&compression=gz";
+        
+    $outpath = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
+    if(copy($src, $outpath) && filesize($outpath) > 1000)
     {
-        $outpath = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
-        $dst = fopen($outpath, "wb");
-
-        for($buf = fread($src, 8192); !feof($src); $buf = fread($src, 8192))
+        $outpath2 = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
+        exec("gunzip -c < $outpath > $outpath2"); // can't just gunzip without a .gz ending
+        unlink($outpath);
+        // Convert MODELs to chain IDs
+        if($biolunit)
         {
-            fwrite($dst, $buf);
+            $outpath = convertModelsToChains($outpath2);
+            unlink($outpath2);
+            return $outpath;
         }
-        if(strlen($buf) > 0) { fwrite($dst, $buf); }
-
-        fclose($src);
-        fclose($dst);
-
-        if( filesize($outpath) > 1000 ) return $outpath;
-        else
-        {
-            if(file_exists($outpath)) unlink($outpath);
-            return null;
-        }
+        else return $outpath2;
     }
-    else return null;
+    else
+    {
+        if(file_exists($outpath)) unlink($outpath);
+        return null;
+    }
 }
 #}}}########################################################################
 
@@ -894,20 +948,8 @@ function getNdbModel($code)
     if(!isset($url)) return null;
     
     // Download file...
-    $src = fopen($url, "rb");
-    if(! $src) return null;
-
     $Zfile = tempnam(MP_BASE_DIR."/tmp", "tmp_pdbZ_");
-    $dst = fopen($Zfile, "wb");
-    for($buf = fread($src, 8192); !feof($src); $buf = fread($src, 8192))
-    {
-        fwrite($dst, $buf);
-    }
-    if(strlen($buf) > 0) { fwrite($dst, $buf); }
-    fclose($src);
-    fclose($dst);
-
-    if( filesize($Zfile) < 1000 )
+    if(!copy($url, $Zfile) || filesize($Zfile < 1000))
     {
         if(file_exists($Zfile)) unlink($Zfile);
         return null;
