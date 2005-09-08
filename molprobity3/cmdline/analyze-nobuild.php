@@ -57,15 +57,34 @@ echo "$infile -> $outfile\n";
 // This way, we don't create a session unless our input is semi-valid.
 mpStartSession(true); // create a new session
 
-$modelID = addModel($infile, basename($infile));
-echo("Added '$infile' to session ".session_id()." as model '$modelID'\n");
-
-runAnalysis($modelID, array('doAll' => true));
-
-$tmpfile = makeZipForModel($modelID);
-copy($tmpfile, $outfile);
-unlink($tmpfile);
-
+$modelID = addModelOrEnsemble($infile, basename($infile));
+if(isset($_SESSION['ensembles'][$modelID]))
+{
+    echo "$infile contains multiple MODELs; aborting...\n";
+}
+else
+{
+    echo("Added '$infile' to session ".session_id()." as model '$modelID'\n");
+    
+    $opts = array(
+        'doAAC'             => true,
+        'showHbonds'        => true,
+        'showContacts'      => true,
+        'doRama'            => true,
+        'doRota'            => true,
+        'doCbDev'           => true,
+        'doBaseP'           => true,
+        'doSummaryStats'    => false,
+        'doMultiKin'        => true,
+        'multiKinExtras'    => true,
+        'doMultiChart'      => false,
+        'doRemark42'        => false,
+    );
+    runAnalysis($modelID, $opts);
+    
+    $tmpfile = $_SESSION['dataDir'] . '/' . makeZipForSession();
+    copy($tmpfile, $outfile);
+}
 ############################################################################
 // Clean up and go home
 mpDestroySession();

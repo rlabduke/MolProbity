@@ -29,22 +29,18 @@ OUTPUTS / RESULTS:
 /**
 * Uses one session per file processed to avoid overflowing space requirements.
 */
-function summaryAnalysis($infile)
+function summaryAnalysis($modelID)
 {
-    mpStartSession(true); // create a new session
     $out = "";
     
-    // Add model
-    $filename = basename($infile);
-    list($modelID) = addModel($infile, $filename);
     $model =& $_SESSION['models'][$modelID];
     $pdbstats = $model['stats'];
-    $out .= $filename;
+    $out .= basename($model['pdb']);
     $out .= ":$pdbstats[chains]:$pdbstats[residues]:$pdbstats[nucacids]:$pdbstats[resolution]:$pdbstats[rvalue]:$pdbstats[rfree]";
     
     // Run analysis; load data
     $pdbfile = $_SESSION['dataDir'].'/'.MP_DIR_MODELS."/$model[pdb]";
-    $rawDir     = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA;
+    $rawDir  = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA;
         if(!file_exists($rawDir)) mkdir($rawDir, 0777);
     runClashlist($pdbfile, "$rawDir/$model[prefix]clash.data");
     $clash = loadClashlist("$rawDir/$model[prefix]clash.data");
@@ -73,8 +69,6 @@ function summaryAnalysis($infile)
         $ramaScore[ $r['eval'] ] += 1;
     $out .= ":" . ($ramaScore['OUTLIER']+0) . ":" . ($ramaScore['Allowed']+0) . ":" . ($ramaScore['Favored']+0);
     
-    // Clean up and go home
-    mpDestroySession();
     $out .= "\n"; // end of this line
     return $out;
 }
@@ -116,7 +110,18 @@ if($optVerbose)
 
 foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
 {
-    echo summaryAnalysis($inDir.'/'.$inFile);
+    mpStartSession(true); // create a new session
+    $inpath = $inDir.'/'.$inFile;
+    $id = addModelOrEnsemble($inpath, basename($inpath));
+    if(isset($_SESSION['ensembles'][$id]))
+    {
+        foreach($_SESSION['ensembles'][$id]['models'] as $modelID)
+            echo summaryAnalysis($modelID);
+    }
+    else
+        echo summaryAnalysis($id);
+    // Clean up and go home
+    mpDestroySession();
 }
 
 ############################################################################
