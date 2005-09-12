@@ -575,11 +575,16 @@ function loadRotamer($datafile)
             'resNum'    => $decomp['resNum'],
             'insCode'   => $decomp['insCode'],
             'scorePct'  => $line[1] + 0,
-            'chi1'      => $line[2] + 0,
-            'chi2'      => $line[3] + 0,
-            'chi3'      => $line[4] + 0,
-            'chi4'      => $line[5] + 0
+            'chi1'      => $line[2],
+            'chi2'      => $line[3],
+            'chi3'      => $line[4],
+            'chi4'      => $line[5]
         );
+        // This converts numbers to numbers and leaves "" as it is.
+        if($ret['chi1'] !== '') $ret['chi1'] += 0;
+        if($ret['chi2'] !== '') $ret['chi2'] += 0;
+        if($ret['chi3'] !== '') $ret['chi3'] += 0;
+        if($ret['chi4'] !== '') $ret['chi4'] += 0;
     }
     return $ret;
 }

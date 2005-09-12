@@ -60,8 +60,9 @@
     for welcome: more icons, clean out old unused images
     Produce multi-model Ramachandran plots from the GUI
     splitModelsNMR(): talk to J about deprecating it
-  ? Link multi-model analysis, etc. from sidebar and/or sitemap (how?)
-    
+  ? JSR: The target percentages on the summary should be the same as in Remark 42
+        (so a more lenient 0.2% Rama outliers, and simply 98% not >98% favored).
+
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
@@ -78,6 +79,12 @@
 - fixed up some cmd line scripts: analyze-nobuild, oneline-analysis
 - removed lib::addModel()
 - added cmdline/multikin for Vince
+- made summary stats table more like remark 42
+- headers now repeat in multichart every 20 rows
+- SSWING is now accessible only from the sitemap page and is marked "alpha"
+- listed multi-model multikin on sitemap page
+- improved formatting of chi angles in multichart (n/a is now left off, not 0)
+- NOT REPR: JSR: Treat MSE as MET in Rota, Rama analysis (1NSF)
 
 ### 3beta19 ###
 - added directory check to setup.sh
