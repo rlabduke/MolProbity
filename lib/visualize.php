@@ -489,6 +489,21 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
     {
         $entry .= "<tr><td rowspan='$proteinRows' align='center'>Protein<br>Geometry</td>\n";
         $firstRow = true;
+        if(is_array($rota))
+        {
+            $rotaOut = count(findRotaOutliers($rota));
+            $rotaTot = count($rota);
+            $rotaOutPct = sprintf("%.2f", 100.0 * $rotaOut / $rotaTot);
+            
+            if($firstRow) $firstRow = false;
+            else $entry .= "<tr>";
+            
+            if($rotaOutPct+0 <= 1)      $bg = $bgGood;
+            elseif($rotaOutPct+0 <= 5)  $bg = $bgFair;
+            else                        $bg = $bgPoor;
+            $entry .= "<td>Rotamer outliers</td><td bgcolor='$bg'>$rotaOutPct%</td>\n";
+            $entry .= "<td>Goal: &lt;1%</td></tr>\n";
+        }
         if(is_array($rama))
         {
             $ramaOut = count(findRamaOutliers($rama));
@@ -504,27 +519,12 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             elseif($ramaOut == 1 || $ramaOutPct+0 <= 0.5) $bg = $bgFair;
             else $bg = $bgPoor;
             $entry .= "<td>Ramachandran outliers</td><td bgcolor='$bg'>$ramaOutPct%</td>\n";
-            $entry .= "<td>Goal: &lt;0.05%</td></tr>\n";
+            $entry .= "<td>Goal: &lt;0.2%</td></tr>\n";
             if($ramaFavPct+0 >= 98)     $bg = $bgGood;
             elseif($ramaFavPct+0 >= 95) $bg = $bgFair;
             else                        $bg = $bgPoor;
             $entry .= "<tr><td>Ramachandran favored</td><td bgcolor='$bg'>$ramaFavPct%</td>\n";
             $entry .= "<td>Goal: &gt;98%</td></tr>\n";
-        }
-        if(is_array($rota))
-        {
-            $rotaOut = count(findRotaOutliers($rota));
-            $rotaTot = count($rota);
-            $rotaOutPct = sprintf("%.2f", 100.0 * $rotaOut / $rotaTot);
-            
-            if($firstRow) $firstRow = false;
-            else $entry .= "<tr>";
-            
-            if($rotaOutPct+0 <= 1)      $bg = $bgGood;
-            elseif($rotaOutPct+0 <= 5)  $bg = $bgFair;
-            else                        $bg = $bgPoor;
-            $entry .= "<td>Rotamer outliers</td><td bgcolor='$bg'>$rotaOutPct%</td>\n";
-            $entry .= "<td>Goal: &lt;1%</td></tr>\n";
         }
         if(is_array($cbdev))
         {
@@ -616,11 +616,11 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
             $res[$item['resName']]['rota_val'] = $item['scorePct'];
             if($item['scorePct'] <= 1.0)
             {
-                $res[$item['resName']]['rota'] = "$item[scorePct]%<br><small>angles: $item[chi1],$item[chi2],$item[chi3],$item[chi4]</small>";
+                $res[$item['resName']]['rota'] = "$item[scorePct]%<br><small>angles: ".formatChiAngles($item)."</small>";
                 $res[$item['resName']]['rota_isbad'] = true;
             }
             else
-                $res[$item['resName']]['rota'] = "$item[scorePct]%<br><small>angles: $item[chi1],$item[chi2],$item[chi3],$item[chi4]</small>";
+                $res[$item['resName']]['rota'] = "$item[scorePct]%<br><small>angles: ".formatChiAngles($item)."</small>";
         }
     }
     if(is_array($cbdev))
@@ -726,6 +726,21 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
         fwrite($out, formatSortableTable($table, 'DUMMY_URL'));
         fclose($out);
     }
+}
+#}}}########################################################################
+
+#{{{ formatChiAngles - utility for printing 1 - 4 chi angles in a list
+############################################################################
+/**
+* item      an array with keys 'chi1' - 'chi4'
+*/
+function formatChiAngles($item)
+{
+    $ret = $item['chi1'];
+    if($item['chi2'] !== '') $ret .= ',' . $item['chi2'];
+    if($item['chi3'] !== '') $ret .= ',' . $item['chi3'];
+    if($item['chi4'] !== '') $ret .= ',' . $item['chi4'];
+    return $ret;
 }
 #}}}########################################################################
 

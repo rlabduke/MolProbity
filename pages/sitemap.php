@@ -46,6 +46,7 @@ function display($context)
     echo "</ul>\n";
 
     echo "<h3><a href='".makeEventURL("onNavBarCall", "sswing_setup1.php")."'>Refit sidechains</a></h3>\n<ul>\n";
+    echo "<li>ALPHA TEST - not for general public use.</li>\n";
     echo "<li>Automatically refit sidechains based on electron density and all-atom contacts.</li>\n";
     echo "</ul>\n";
 
@@ -53,6 +54,12 @@ function display($context)
     echo "<li>Make kinemages using basic Prekin scripts.</li>\n";
     echo "<li>Kinemages can be combined and edited in KiNG with File | Append.</li>\n";
     echo "<li>KiNG can save modified kinemages to the server with File | Save as.</li>\n";
+    echo "</ul>\n";
+
+    echo "<hr>\n";
+
+    echo "<h3><a href='".makeEventURL("onNavBarCall", "ens_aacgeom_setup.php")."'>All-atom contact and geometric analyses for ensembles</a></h3>\n<ul>\n";
+    echo "<li>Multi-criterion kinemage for multi-model ensembles</li>\n";
     echo "</ul>\n";
 
     echo "<hr>\n";

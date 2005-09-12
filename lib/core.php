@@ -135,7 +135,7 @@ function mpNavigationBar($active)
     $s .= "<div class='minornav'>".mpNavBar_call('reduce_setup.php', 'Add hydrogens')."</div>";
     $s .= "<div class='minornav'>".mpNavBar_call('aacgeom_setup.php', 'All-atom contacts &amp; geometry')."</div>";
     $s .= "<div class='minornav'>".mpNavBar_call('interface_setup1.php', 'Interface contacts')."</div>";
-    $s .= "<div class='minornav'>".mpNavBar_call('sswing_setup1.php', 'Refit sidechains')."</div>";
+    //$s .= "<div class='minornav'>".mpNavBar_call('sswing_setup1.php', 'Refit sidechains')."</div>";
     $s .= "<div class='minornav'>".mpNavBar_call('makekin_setup.php', 'Make simple kins')."</div>";
     $s .= "<br />\n";
     $s .= mpNavBar_goto('file_browser.php', 'View &amp; download files', ($active == 'files'));

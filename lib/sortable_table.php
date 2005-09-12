@@ -45,27 +45,35 @@ function formatSortableTable($table, $url, $col = -1, $direction = 1)
     $s .= $table['prequel'];
     $s .= "\n";
     $s .= "<table width='100%' cellspacing='1' border='0'>\n";
-    foreach($table['headers'] as $header)
-    {
-        $s .= "<tr align='center' bgcolor='".MP_TABLE_HIGHLIGHT."'>";
-        $i = 0;
-        foreach($header as $cell)
-        {
-            $s .= "<td>";
-            $sort_dir = ($i == $col ? -$direction : $cell['sort']);
-            if($cell['sort']) $s .= "<a href='{$url}sort_col=$i&sort_dir=$sort_dir'>";
-            $s .= $cell['html'];
-            if($cell['sort']) $s .= "</a>";
-            $s .= "</td>";
-            $i++;
-        }
-        $s .= "</tr>\n";
-    }
-
     
+    // Headers are mixed in with rows and so appear below.
+    
+    $row_counter = 0;
     $color = MP_TABLE_ALT1;
     foreach($table['rows'] as $row)
     {
+        // Repeat headers every so many rows:
+        if($row_counter++ % 20 == 0)
+        {
+            foreach($table['headers'] as $header)
+            {
+                $s .= "<tr align='center' bgcolor='".MP_TABLE_HIGHLIGHT."'>";
+                $i = 0;
+                foreach($header as $cell)
+                {
+                    $s .= "<td>";
+                    $sort_dir = ($i == $col ? -$direction : $cell['sort']);
+                    if($cell['sort']) $s .= "<a href='{$url}sort_col=$i&sort_dir=$sort_dir'>";
+                    $s .= $cell['html'];
+                    if($cell['sort']) $s .= "</a>";
+                    $s .= "</td>";
+                    $i++;
+                }
+                $s .= "</tr>\n";
+            }
+        }
+        
+        // Normal rows:
         $s .= "<tr align='center' bgcolor='$color'>";
         foreach($row as $key => $cell)
         {
@@ -80,7 +88,7 @@ function formatSortableTable($table, $url, $col = -1, $direction = 1)
         $color == MP_TABLE_ALT1 ? $color = MP_TABLE_ALT2 : $color = MP_TABLE_ALT1;
     }
     
-    
+    // Footers:
     foreach($table['footers'] as $footer)
     {
         $s .= "<tr align='center' bgcolor='".MP_TABLE_HIGHLIGHT."'>";

@@ -30,7 +30,12 @@ function warnNoH(obj)
     }
 }
 // -->
-</script><?php
+</script>
+<div class='alert'>
+<center><h3>ALPHA TEST</h3></center>
+Not suitable for use by the general public.
+</div>
+<?php
 
     if(count($_SESSION['models']) > 0 && count($_SESSION['edmaps']) > 0)
     {

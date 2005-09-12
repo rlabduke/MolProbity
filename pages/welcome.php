@@ -180,7 +180,7 @@ function displayModelTools($context)
         'aacgeom'   => array('desc' => 'All-atom contacts and geometry', 'page' => 'aacgeom_setup.php', 'img' => 'clash_rama.png'),
         'geomonly'  => array('desc' => 'Geometry analysis only', 'page' => 'aacgeom_setup.php', 'img' => 'ramaplot.png'),
         'iface'     => array('desc' => 'Visualize interface contacts', 'page' => 'interface_setup1.php', 'img' => 'barnase_barstar.png'),
-        'sswing'    => array('desc' => 'Refit sidechains', 'page' => 'sswing_setup1.php', 'img' => ''),
+        //'sswing'    => array('desc' => 'Refit sidechains', 'page' => 'sswing_setup1.php', 'img' => ''),
         'makekins'  => array('desc' => 'Make simple kinemages', 'page' => 'makekin_setup.php', 'img' => 'porin_barrel.png'),
         //'' => array('desc' => '', 'page' => '', 'img' => ''),
     );
