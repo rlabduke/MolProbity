@@ -568,9 +568,10 @@ function loadRotamer($datafile)
     foreach($data as $line)
     {
         $line = explode(':', rtrim($line));
-        $decomp = decomposeResName($line[0]);
-        $ret[$line[0]] = array(
-            'resName'   => $line[0],
+        $cnit = $line[0];
+        $decomp = decomposeResName($cnit);
+        $ret[$cnit] = array(
+            'resName'   => $cnit,
             'resType'   => $decomp['resType'],
             'chainID'   => $decomp['chainID'],
             'resNum'    => $decomp['resNum'],
@@ -582,10 +583,10 @@ function loadRotamer($datafile)
             'chi4'      => $line[5]
         );
         // This converts numbers to numbers and leaves "" as it is.
-        if($ret['chi1'] !== '') $ret['chi1'] += 0;
-        if($ret['chi2'] !== '') $ret['chi2'] += 0;
-        if($ret['chi3'] !== '') $ret['chi3'] += 0;
-        if($ret['chi4'] !== '') $ret['chi4'] += 0;
+        if($ret[$cnit]['chi1'] !== '') $ret[$cnit]['chi1'] += 0;
+        if($ret[$cnit]['chi2'] !== '') $ret[$cnit]['chi2'] += 0;
+        if($ret[$cnit]['chi3'] !== '') $ret[$cnit]['chi3'] += 0;
+        if($ret[$cnit]['chi4'] !== '') $ret[$cnit]['chi4'] += 0;
     }
     return $ret;
 }
@@ -646,9 +647,10 @@ function loadRamachandran($datafile)
     foreach($data as $line)
     {
         $line = explode(':', rtrim($line));
-        $decomp = decomposeResName($line[0]);
-        $ret[] = array(
-            'resName'   => $line[0],
+        $cnit = $line[0];
+        $decomp = decomposeResName($cnit);
+        $ret[$cnit] = array(
+            'resName'   => $cnit,
             'resType'   => $decomp['resType'],
             'chainID'   => $decomp['chainID'],
             'resNum'    => $decomp['resNum'],
