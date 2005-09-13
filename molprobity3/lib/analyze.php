@@ -543,7 +543,8 @@ function runRotamer($infile, $outfile)
 #{{{ loadRotamer - loads Rotamer output into an array
 ############################################################################
 /**
-* Returns an array of entries, one per residue. Their keys:
+* Returns an array of entries keyed on CNIT name, one per residue.
+* Each entry is an array with these keys:
 *   resName         a formatted name for the residue: 'cnnnnittt'
 *                       c: Chain ID, space for none
 *                       n: sequence number, right justified, space padded
@@ -568,7 +569,7 @@ function loadRotamer($datafile)
     {
         $line = explode(':', rtrim($line));
         $decomp = decomposeResName($line[0]);
-        $ret[] = array(
+        $ret[$line[0]] = array(
             'resName'   => $line[0],
             'resType'   => $decomp['resType'],
             'chainID'   => $decomp['chainID'],
