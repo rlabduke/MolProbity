@@ -25,7 +25,7 @@ define("MP_EMAIL_WEBMASTER", "webmaster@$_SERVER[SERVER_NAME]");
 //  Default: ""
 //  Example: "/usr/local/php/bin:/opt/j2/bin"
 //  Full absolute paths only -- no relative ones!
-define("MP_BIN_PATH", "/usr/local/php5/bin:/opt/j2/bin");
+define("MP_BIN_PATH", "/usr/local/php5/bin:/opt/j2/bin:/usr/java/jdk/bin");
 
 // MP_REDUCE_HET_DICT
 //  Path to Reduce's heterogen dictionary

@@ -14,50 +14,172 @@ require_once(MP_BASE_DIR.'/lib/strings.php');
 require_once(MP_BASE_DIR.'/lib/model.php');     // for running Reduce as needed
 require_once(MP_BASE_DIR.'/lib/visualize.php'); // for making kinemages
 require_once(MP_BASE_DIR.'/lib/labbook.php');
+require_once(MP_BASE_DIR.'/lib/pdbstat.php');  //for getting number of atoms
 
-#{{{ probestats - parses probe unformatted and does some counting
-############################################################################
-/**
-* This function will take probe unformatted output from individual models, and explode
-then count different parts of it.  These numbers will be drawn upon by dotstats.php to
-derive some statistical measures for packing assessment of models The probe unformated looks like this
-name:pat:type:srcAtom:targAtom:min-gap:gap:spX:spY:spZ:spikeLen:score:stype:ttype:x:y:z:sBval:tBval
-mc-mc dots:1->1:so:    7 PRO  C   :    9 SER  H   :-0.245:-0.096:-9.656:3.650:-11.464:0.048:-0.0300:C:N:-9.6
-45:3.670:-11.505:0.00:0.00
-*/
-probestats($infile) 
+#{{{ packingStats - reads in probe -ONELINE and calculates other values
+
+function packingStats($pdboneline, $onelinemod)
 {
 	
-	// mc unformated probe output command
 	
-	exec("probe -Unformated -stdbonds -quiet -noticks -name 'mc-mc dots' -mc -self 'mc alta' $pdb > 'mcprobeunformated'");
+	$out = fopen ($onelinemod, 'w');
+
+	$in = fopen ($pdboneline, 'r');
 	
-	//sc unformated probe output command
-	// exec("probe -Unformated -stdbonds -quiet -noticks -name 'sc-x dots' -self 'alta' $pdb >> 'scprobeunformated'");
-	
-	
-	$infile = 'mcprobeunformated';
-	
-	$h = fopen($infile, 'r');
-	while(! feof($h))
+	while (!feof ($in) )
 	{
-		//read the line, explode it into an array
-		$line = fgets($h);
-		$fields = explode(':',$line);
-		if $fields[] = 
-		{
+		$inline = trim(fgets ($in, 10000)); // trim() removes trailing newline
+		$inline = substr($inline, 1); // removes first character
+		if($inline == "") continue; // jumps back to start of loop
+		
+		fwrite ($out, $inline);
+		
+		$linefields = explode (':', $inline);		
+		
+		//H-bond values 33 - 37
+		$avgHbondperatomSUM = round(($linefields [29] / ($linefields [31] * 0.001)), 1);
+		fwrite ($out, ':'.$avgHbondperatomSUM);
+		
+		$avgHbondperatomMCMC = round(($linefields [5] / ($linefields [31] * 0.001)), 1);
+		fwrite ($out, ':'.$avgHbondperatomMCMC);
+		
+		$avgHbondperatomSCSC = round(($linefields [11] / ($linefields [31] * 0.001)), 1);
+		fwrite ($out, ':'.$avgHbondperatomSCSC);
+		
+		$avgHbondperatomMCSC = round(($linefields [17] / ($linefields [31] * 0.001)), 1);
+		fwrite ($out, ':'.$avgHbondperatomMCSC);
+		
+		$avgHbondperatomOTHER = round(($linefields [23] / ($linefields [31] * 0.001)), 1);
+		fwrite ($out, ':'.$avgHbondperatomOTHER);
+		
+		//Bad contact values 38 - 42
+		$avgBadperatomSUM = round(($linefields [28] / ($linefields [31] * 0.001)), 1);
+		fwrite ($out, ':'.$avgBadperatomSUM);
+		
+		$avgBadperatomMCMC = round(($linefields [4] / ($linefields [31] * 0.001)), 1);
+		fwrite ($out, ':'.$avgBadperatomMCMC);
+		
+		$avgBadperatomSCSC = round(($linefields [10] / ($linefields [31] * 0.001)), 1);
+		fwrite ($out, ':'.$avgBadperatomSCSC);
+		
+		$avgBadperatomMCSC = round(($linefields [16] / ($linefields [31] * 0.001)), 1);
+		fwrite ($out, ':'.$avgBadperatomMCSC);
+		
+		$avgBadperatomOTHER = round(($linefields [22] / ($linefields [31] * 0.001)), 1);
+		fwrite ($out, ':'.$avgBadperatomOTHER);
+		
+		//Small overlaps 43 - 47
+		
+		$avgSMperatomSUM = round(($linefields [27] / ($linefields [31] * 0.001)), 1);
+		fwrite ($out, ':'.$avgSMperatomSUM);
+		
+		$avgSMperatomMCMC = round(($linefields [3] / ($linefields [31] * 0.001)), 1);
+		fwrite ($out, ':'.$avgSMperatomMCMC);
+		
+		$avgSMperatomSCSC = round(($linefields [9] / ($linefields [31] * 0.001)), 1);
+		fwrite ($out, ':'.$avgSMperatomSCSC);
+		
+		$avgSMperatomMCSC = round(($linefields [15] / ($linefields [31] * 0.001)), 1);
+		fwrite ($out, ':'.$avgSMperatomMCSC);
+		
+		$avgSMperatomOTHER = round(($linefields [21] / ($linefields [31] * 0.001)), 1); 
+		fwrite ($out, ':'.$avgSMperatomOTHER);
+		
+		//Wide Contact Values 48 - 52
+		
+		$avgWperatomSUM = round(($linefields [25] / ($linefields [31] * 0.001)), 1);
+		fwrite ($out, ':'.$avgWperatomSUM);
+		
+		$avgWperatomMCMC = round(($linefields [1] / ($linefields [31] * 0.001)), 1);
+		fwrite ($out, ':'.$avgWperatomMCMC);
+		
+		$avgWperatomSCSC = round(($linefields [7] / ($linefields [31] * 0.001)), 1);
+		fwrite ($out, ':'.$avgWperatomSCSC);
+		
+		$avgWperatomMCSC = round(($linefields [13] / ($linefields [31] * 0.001)), 1);
+		fwrite ($out, ':'.$avgWperatomMCSC);
+		
+		$avgWperatomOTHER = round(($linefields [19] / ($linefields [31] * 0.001)), 1);
+		fwrite ($out, ':'.$avgWperatomOTHER);
+		
+		//Close Contact values 53 - 57
+		
+		$avgCperatomSUM = round(($linefields [2] / ($linefields [31] * 0.001)), 1);
+		fwrite ($out, ':'.$avgCperatomSUM);
+		
+		$avgCperatomMCMC = round(($linefields [8] / ($linefields [31] * 0.001)), 1);
+		fwrite ($out, ':'.$avgCperatomMCMC);
+		
+		$avgCperatomSCSC = round(($linefields [14] / ($linefields [31] * 0.001)), 1);
+		fwrite ($out, ':'.$avgCperatomSCSC);
+		
+		$avgCperatomMCSC = round(($linefields [20] / ($linefields [31] * 0.001)), 1);
+		fwrite ($out, ':'.$avgCperatomMCSC);
+		
+		$avgCperatomOTHER = round(($linefields [26] / ($linefields [31] * 0.001)) , 1);
+		fwrite ($out, ':'.$avgCperatomOTHER);
 		
 		
-		}
+		//Other contacts(hets, and waters)
+		
 		
 	
+		//other measures 58, 59
 		
-		//start counting different parts
+		$avgGOODperatomSUM = round( (( $linefields [25] + $linefields [26] + $linefields [29] ) / ($linefields [31] * 0.001)) , 1);
+		fwrite ($out, ':'.$avgGOODperatomSUM);
 		
+		$percentGOODdotSUM = round(( (($linefields [25] + $linefields [26] + $linefields [29]) / $linefields [30] ) * 100 ), 1); 
+		fwrite ($out, ':'.$percentGOODdotSUM);
+		
+		fwrite($out, "\n"); // put back the newline we trim() 'd
 	}
-
-
+	
+	fclose ($in);
+	fclose ($out);
 
 }
-#}}}########################################################################
 
+
+#}}}
+
+
+#{{{ onelinepack - dots all in subgroups, multimodel support
+
+// $pdbname - array of pdbs to be iterated and subsequently appended into the kin (all same file)
+// $pdbproberesult - name of output file
+
+
+
+function onelinepack($pdbname, $pdbproberesult)
+{
+	
+	$first = true;
+	 foreach($pdbname as $pdb)
+	 {
+		$pdbstatresults = pdbstat($pdb);
+	
+		// call out and figure out how many atoms are in the current model
+		$numAtoms = $pdbstatresults['heavyatoms'] + $pdbstatresults['hydrogens'];
+	
+		// call out and get number of residues
+		$numres = $pdbstatresults['residues'];
+		
+		//dots numbers  
+		$proberesult = shell_exec("probe -mc  -stdbonds -self 'ALL' -ONELINE $pdb ");
+
+		// open up the oneline and add in number of atoms and number of residues
+		
+		$proberesult = trim($proberesult) . $numAtoms . ':' . $numres . "\n";
+
+		$out = fopen ($pdbproberesult, 'a');
+	
+		fwrite ($out , $proberesult);
+		
+		fclose ($out);	 
+		
+	 }
+	 
+	 
+} //end of onelinepack
+#}}}
