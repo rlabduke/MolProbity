@@ -17,6 +17,8 @@ OUTPUTS (via $_SESSION['bgjob']):
 // 2. Include core functionality - defines constants, etc.
     require_once(MP_BASE_DIR.'/lib/core.php');
     require_once(MP_BASE_DIR.'/lib/analyze.php');
+    require_once(MP_BASE_DIR.'/lib/analyze_nmr.php');
+    require_once(MP_BASE_DIR.'/lib/visualize_nmr.php');
     require_once(MP_BASE_DIR.'/lib/labbook.php');
 // 3. Restore session data. If you don't want to access the session
 // data for some reason, you must call mpInitEnvirons() instead.
@@ -47,22 +49,24 @@ $ensemble = $_SESSION['ensembles'][$ensID];
 // TODO: This should be moved to analyze.php::runEnsembleAnalysis()
 //-----------------------------------------------------------------
 $opts = $_SESSION['bgjob'];
+
+$modelDir   = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
+$modelURL   = $_SESSION['dataURL'].'/'.MP_DIR_MODELS;
+$kinDir     = $_SESSION['dataDir'].'/'.MP_DIR_KINS;
+$kinURL     = $_SESSION['dataURL'].'/'.MP_DIR_KINS;
+if(!file_exists($kinDir)) mkdir($kinDir, 0777);
+
+$infile     = "$modelDir/$ensemble[pdb]";
+$infiles    = array();
+foreach($ensemble['models'] as $modelID)
+    $infiles[] = $modelDir.'/'.$_SESSION['models'][$modelID]['pdb'];
+    
+$tasks = array();
+if($opts['doMultiKin'])         $tasks['multikin'] = "Create multi-criterion kinemage";
+if($opts['doMultiGraph'])       $tasks['multigraph'] = "Create multi-criterion graph";
+    
 if($opts['doMultiKin'])
 {
-    $modelDir   = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
-    $modelURL   = $_SESSION['dataURL'].'/'.MP_DIR_MODELS;
-    $kinDir     = $_SESSION['dataDir'].'/'.MP_DIR_KINS;
-    $kinURL     = $_SESSION['dataURL'].'/'.MP_DIR_KINS;
-        if(!file_exists($kinDir)) mkdir($kinDir, 0777);
-
-    $infile     = "$modelDir/$ensemble[pdb]";
-    $infiles    = array();
-    foreach($ensemble['models'] as $modelID)
-        $infiles[] = $modelDir.'/'.$_SESSION['models'][$modelID]['pdb'];
-    
-    $tasks = array();
-    $tasks['multikin'] = "Create multi-criterion kinemage";
-    
     setProgress($tasks, 'multikin'); // updates the progress display if running as a background job
     $mcKinOpts = array(
         'ribbons'   =>  $opts['doRibbons'],
@@ -89,10 +93,18 @@ if($opts['doMultiKin'])
     else
         $_SESSION['ensembles'][$ensID]['primaryDownloads'][] = MP_DIR_KINS."/$ensemble[prefix]multi.kin";
 
-    setProgress($tasks, null);
     $labbookEntry .= "<i>Note: these kins are often too big to view in the browser. You may need to download it and view it off line.</i>\n";
     $labbookEntry .= "<br>".linkKinemage("$ensemble[prefix]multi.kin", "Multi-criterion kinemage");
 }
+if($opts['doMultiGraph'])
+{
+    setProgress($tasks, 'multigraph'); // updates the progress display if running as a background job
+    $outfile = "$kinDir/$ensemble[prefix]multigraph.kin";
+    makeChartKin($infiles, $outfile);
+    $labbookEntry .= "<p>".linkKinemage("$ensemble[prefix]multigraph.kin", "Multi-criterion graph");
+}
+
+setProgress($tasks, null);
 //-----------------------------------------------------------------
 
 $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(

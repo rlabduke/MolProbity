@@ -128,6 +128,7 @@ function checkSettingsBeforeSubmit()
     <br><label><input type='checkbox' name='doBFactor' value='1'> Sticks colored by B-factor</label>
     <br><label><input type='checkbox' name='doOccupancy' value='1'> Sticks colored by occupancy</label>
     </div>
+<h5 class='nospaceafter'><label><input type='checkbox' name='doMultiGraph' value='1' checked> Multi-criterion graph</label></h5>
 </div>
 
 <?php
@@ -196,7 +197,7 @@ function onRunAnalysis($arg, $req)
         
         //if($req['doSummaryStats'])  mpLog("aacgeom-sumary:AAC/geometry validation summary");
         if($req['doMultiKin'])      mpLog("aacgeom-mkin:Multi-criterion validation kinemage");
-        //if($req['doMultiChart'])    mpLog("aacgeom-mchart:Multi-criterion validation chart");
+        if($req['doMultiGraph'])    mpLog("aacgeom-mgraph:Multi-criterion validation graph kinemage");
         //if($req['doRemark42'])      mpLog("aacgeom-remark42:Generating REMARK 42 for PDB file");
         
         // launch background job

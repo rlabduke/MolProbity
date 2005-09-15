@@ -12,18 +12,21 @@ for subsequent in array
 run with @kinemage suppressed and make animatable for prekin
 */
 
+error_reporting(E_ALL ^ E_NOTICE);
+
 // EVERY *top-level* page must start this way:
 // 1. Define it's relationship to the root of the MolProbity installation.
 // Pages in subdirectories of lib/ or public_html/ will need more "/.." 's.
     if(!defined('MP_BASE_DIR')) define('MP_BASE_DIR', realpath(dirname(__FILE__).'/..'));
 // 2. Include core functionality - defines constants, etc.
     require_once(MP_BASE_DIR.'/lib/core.php');
+    require_once(MP_BASE_DIR.'/lib/visualize.php');
     require_once(MP_BASE_DIR.'/lib/visualize_nmr.php');
 // 5. Set up reasonable values to emulate CLI behavior if we're CGI
     set_time_limit(0); // don't want to bail after 30 sec!
 
 
-    
+   
 // First argument is the name of this script...
 if(is_array($_SERVER['argv']))
 {
@@ -33,19 +36,17 @@ if(is_array($_SERVER['argv']))
 	{
 	    if(!isset($inpdbdir))
 		$inpdbdir = $arg;
-	    elseif(!isset($inconstraint))
-		$inconstraint = $arg;
-	    elseif(!isset($outfile))
+	     elseif(!isset($outfile))
 		$outfile = $arg;
-	    else
+	     elseif(!isset($inconstraint))
+		$inconstraint = $arg;
+	     else
 	    	die("Too many or unrecognized arguments: '$arg'\n");
 	}
 }
 
 if(! isset($inpdbdir))
     die("No input pdb directory specified.\n");
-elseif(! isset($inconstraint))
-    die("No constraint file specified.\n");
 elseif(! isset($outfile))
     die("No output file specified. \n");
   
@@ -65,7 +66,20 @@ $file= $inpdbdir."/".$file;
 } 
 closedir($dirHandle);
 print_r($pdbname);
-nmrMultiKin($pdbname, $inconstraint, $outfile);
+//nmrMultiKin($pdbname, $inconstraint, $outfile);
+        $mcKinOpts = array(
+            'ribbons'  =>  true,
+            'altconf'   =>  true,
+            'rama'      =>  true,
+            'rota'      =>  true,
+            'cbdev'     =>  true,
+            'dots'      =>  true,
+            'hbdots'    =>  true,
+            'vdwdots'   =>  false
+	    
+	    
+        );
+        makeMulticritKin($pdbname, $outfile, $mcKinOpts, $inconstraint);
 
  ?>
  
