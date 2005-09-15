@@ -6,11 +6,19 @@
 
 # Dumb check to make sure we're in the top-level MP directory
 if [ ! -f setup.sh ]; then
-    echo
-    echo "    You must run SETUP.SH from the main MolProbity directory!"
-    echo
-    exit
+    # Try to change to the right directory
+    cd `dirname "$0"`
+    # If that doesn't work, just fail
+    if [ ! -f setup.sh ]; then
+        echo
+        echo "    You must run SETUP.SH from the main MolProbity directory!"
+        echo
+        exit
+    fi
 fi
+
+# Create config file
+cp config/config.php.defaults config/config.php
 
 # Set world-writable permisions on data/
 chmod 777 public_html/data
