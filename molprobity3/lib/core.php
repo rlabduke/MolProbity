@@ -18,7 +18,8 @@ if(!defined('MP_BASE_DIR')) die("MP_BASE_DIR is not defined.");
 // behaviors that this code counts on  ;)
 error_reporting(E_ALL ^ E_NOTICE);
 
-require_once(MP_BASE_DIR.'/config/config.php'); // Import all the constants we use
+include_once(MP_BASE_DIR.'/config/config.php'); // Import all the constants we use
+require_once(MP_BASE_DIR.'/config/defaults.php'); // Import all the constants we use
 if(!defined('MP_DEFAULT_TIMEZONE'))
 {
     require_once(MP_BASE_DIR.'/lib/timezones.php');

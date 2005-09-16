@@ -18,7 +18,7 @@ if [ ! -f setup.sh ]; then
 fi
 
 # Create config file
-cp config/config.php.defaults config/config.php
+cp config/config.php.sample config/config.php
 
 # Set world-writable permisions on data/
 chmod 777 public_html/data
