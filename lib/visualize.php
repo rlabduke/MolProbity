@@ -251,6 +251,11 @@ function makeAltConfKin($infile, $outfile, $mcColor = 'brown', $scColor = 'brown
 */
 function makeBadRamachandranKin($infile, $outfile, $rama = null, $color = 'green')
 {
+    // Put in subgroup to provide Rama master (not needed when using Prekin)
+    $out = fopen($outfile, 'a');
+    fwrite($out, "@subgroup {Rama outliers} master= {Rama outliers}\n");
+    fclose($out);
+    
     // Jane still likes this best.
     exec("java -cp ".MP_BASE_DIR."/lib/hless.jar hless.Ramachandran -nosummary -outliers $color < $infile >> $outfile");
     
