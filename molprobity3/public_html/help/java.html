@@ -96,8 +96,8 @@ and download the Java 2, Standard Edition (J2SE) Java Runtime Environment (JRE).
 We recommend getting the newest version (1.5.0 as of this writing).
 <p>When prompted to save the file or open it, choose "Open" and follow the instructions that appear.
 Or, save the file and run it later, following the instructions it displays.
-<p>IE and Netscape should now make use of Java automatically, without further configuration.
-If you're running Mozilla, or another browser that uses plug-ins, consult that browser's documentation. Sorry!
+<p>IE, Netscape, Mozilla, and Firefox should now make use of Java automatically, without further configuration.
+If you're running something else, consult that browser's documentation. Sorry!
 </li>
 <li><i>for Linux:</i>
 <p>If you don't already have Java, go to <a href="http://java.sun.com/" target=_blank>java.sun.com</a>
@@ -107,8 +107,9 @@ We recommend getting the newest version (1.5.0 as of this writing).
 For the GNUZIP/Tar script, make sure you're in the directory where you want Java installed before running it -- e.g. <code>/usr/local</code>.
 Sun provides more detailed instructions, but it should be straightforward.
 <p>The browsers will generally not use Java automatically; they have to be told about it in an additional step.
-<p>For Mozilla, do something like <code>ln&nbsp;-s /usr/local/jre/plugin/i386/ns610-gcc32/libjavaplugin_oji.so /usr/lib/mozilla/plugins/</code> as root.
-Setup for Firefox should be similar.
+<p>For Mozilla (and Firefox), do something like <code>ln&nbsp;-s /usr/local/jre/plugin/i386/ns7/libjavaplugin_oji.so /usr/lib/mozilla/plugins/</code> as root.
+Older Java installations (1.4.x) use <code>/usr/local/jre/plugin/i386/ns610-gcc32/libjavaplugin_oji.so</code> instead.
+Setup for Firefox should be similar, but using <code>/usr/lib/firefox/plugins/</code> instead.
 <p>Java is broken in Konqueror 3.0 as of this writing.
 If it worked, you would go to <code>Settings&nbsp;|&nbsp;Configure&nbsp;Konqueror...&nbsp;|&nbsp;Konqueror Browser&nbsp;|&nbsp;Java</code>
 and set the path to Java executable to something like <code>/usr/local/jre/bin/java</code>, depending on where Java is installed.
