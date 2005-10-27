@@ -20,43 +20,32 @@ class welcome_delegate extends BasicDelegate {
 */
 function display($context)
 {
-    echo mpPageHeader("Welcome!", "welcome");
-    echo "<center><h2>MolProbity:<br>Macromolecular Structure Validation</h2></center>\n";
-    //echo mpPageHeader("MolProbity:<br>Macromolecular Structure Validation", "welcome");
+    echo mpPageHeader("Main page", "welcome");
     $this->displayWarnings($context);
-    echo makeEventForm("onAction", null, true) . "\n";
-?>
-<table border='0' width='100%'>
-<tr><td align='center' width='35%'>PDB/NDB code</td><td align='center' width='35%'>Upload file</td><td width='10%'></td><td width='20%'></td></tr>
-<tr>
-    <td align='center'><input type="text" name="pdbCode" size="6" maxlength="10"></td>
-    <td align='center'><input type="file" name="uploadFile"></td>
-    <td><input type="submit" name="cmd" value="Go &gt;"></td>
-    <td><?php echo "<a href='".makeEventURL("onNavBarCall", "upload_pdb_setup.php")."'>[more options]</a>"; ?></td>
-</tr>
-<tr><td height='12' colspan='4'><!-- vertical spacer --></td></tr>
-<?php $this->displayModels($context); ?>
-</table></form>
 
-
-<?php
     if(count($_SESSION['models']) > 0 && $_SESSION['lastUsedModelID'])
     {
-        echo "<hr>\n";
+        echo "<h5 class='welcome'>Tools and Actions (<a href='".makeEventURL("onNavBarGoto", "sitemap.php")."'>more tools</a>)</h5>\n";
+        echo "<div class='indent'>\n";
+        echo makeEventForm("onSetWorkingModel", null, true) . "\n";
+        $this->displayModels($context);
+        echo "</form>\n";
+        
         if(isset($_SESSION['ensembles'][ $_SESSION['lastUsedModelID'] ]))
             $this->displayEnsembleTools($context);
         else
             $this->displayModelTools($context);
         
-        echo "<hr>\n";
-        $this->displayFiles($context);
-        echo "<hr>\n";
+        echo "</div></div>\n<br>\n<div class='pagecontent'>\n";
         $this->displayEntries($context);
-        echo "<hr>\n";
+        echo "</div>\n<br>\n<div class='pagecontent'>\n";
+        $this->displayFiles($context);
+        echo "</div>\n<br>\n<div class='pagecontent'>\n";
     }
+    
+    $this->displayUpload($context);
+    echo "</div>\n<br>\n<div class='pagecontent'>\n";
 ?>
-
-
 <table border='0' width='100%'><tr valign='top'><td width='45%'>
 <h3>Walk-thrus &amp; tutorials:</h3>
 <p><b><?php echo "<a href='".makeEventURL("onNavBarGoto", "helper_xray.php")."'>Evaluate X-ray structure</a>"; ?>:</b>
@@ -138,9 +127,8 @@ function displayModels($context)
 {
     if(count($_SESSION['models']) > 1)
     {
-        echo "<tr>";
-        echo "<td colspan='2'>Working model: ";
-        $submit_script = 'document.forms[0].elements("cmd")[1].click();';
+        echo "Currently working on: ";
+        $submit_script = 'document.forms[0].elements("cmd").click();';
         echo "<select name='workingModel' onchange='$submit_script'>\n";
         foreach($_SESSION['ensembles'] as $id => $model)
         {
@@ -155,12 +143,12 @@ function displayModels($context)
             echo "  <option value='$id' $selected>$model[pdb] &nbsp; &nbsp; &nbsp; $model[history]</option>\n";
         }
         echo "</select>\n";
-        echo "</td><td><input type='submit' name='cmd' value='Set'></td><td></td></tr>\n";
+        echo "<input type='submit' name='cmd' value='Set'>\n";
     }
     elseif(count($_SESSION['models']) > 0)
     {
         $model = reset($_SESSION['models']);
-        echo "<tr><td colspan='4'>Working model: $model[pdb]</td></tr>\n";
+        echo "Currently working on: <b>$model[pdb]</b>\n";
     }
 }
 #}}}########################################################################
@@ -175,7 +163,7 @@ function displayModelTools($context)
     // We already know lastUsedModelID is set and refers to a model, not an ensemble
     $model = $_SESSION['models'][ $_SESSION['lastUsedModelID'] ];
     $minor = array(
-        'upload'    => array('desc' => 'Input map / het dict / kin files', 'page' => 'upload_other_setup.php', 'img' => ''),
+        //'upload'    => array('desc' => 'Input map / het dict / kin files', 'page' => 'upload_other_setup.php', 'img' => ''),
         'reduce'    => array('desc' => 'Add hydrogens', 'page' => 'reduce_setup.php', 'img' => 'add_h.png'),
         'aacgeom'   => array('desc' => 'All-atom contacts and geometry', 'page' => 'aacgeom_setup.php', 'img' => 'clash_rama.png'),
         'geomonly'  => array('desc' => 'Geometry analysis only', 'page' => 'aacgeom_setup.php', 'img' => 'ramaplot.png'),
@@ -292,7 +280,7 @@ function displayEnsembleTools($context)
     }
     */
     $minor = array(
-        'upload'    => array('desc' => 'Input map / het dict / kin files', 'page' => 'upload_other_setup.php', 'img' => ''),
+        //'upload'    => array('desc' => 'Input map / het dict / kin files', 'page' => 'upload_other_setup.php', 'img' => ''),
     );
     $major = array(
         'aacgeom'   => array('desc' => 'All-atom contacts and geometry', 'page' => 'ens_aacgeom_setup.php', 'img' => 'clash_rama.png'),
@@ -333,7 +321,8 @@ function displayFiles($context)
     $files = array(MP_DIR_MODELS.'/'.$model['pdb']);
     $files = array_merge($files, $model['primaryDownloads']);
     
-    echo "<h3 class='nospaceafter'>Popular downloads for $model[pdb]:</h3>\n";
+    echo "<h5 class='welcome'>Popular Downloads (<a href='".makeEventURL('onNavBarCall', 'file_browser.php')."'>more downloads</a>)</h5>\n";
+    echo "<div class='indent'>\n";
     echo "<table border='0' width='100%' cellspacing='0'>\n";
     $fileListColor = MP_TABLE_ALT1;
     foreach($files as $file)
@@ -344,8 +333,9 @@ function displayFiles($context)
         $fileListColor == MP_TABLE_ALT1 ? $fileListColor = MP_TABLE_ALT2 : $fileListColor = MP_TABLE_ALT1;
     }
     echo "</table>\n";
-    
     if(count($files) > 1) echo "<p><a href='".makeEventURL('onDownloadPopularZip')."'>Download these files as a ZIP archive</a></p>\n";
+    
+    echo "</div>\n"; // end indent
 }
 #}}}########################################################################
 
@@ -365,7 +355,7 @@ function displayEntries($context)
         $model = $_SESSION['models'][$modelID];
     
     $labbook = openLabbook();
-    echo "<h3 class='nospaceafter'>Lab notebook entries for $model[pdb]:</h3>\n";
+    echo "<h5 class='welcome'>Recently Generated Results (<a href='$url'>more results</a>)</h5>\n";
     echo "<ul>\n";
     foreach($labbook as $num => $entry)
     {
@@ -380,30 +370,75 @@ function displayEntries($context)
 }
 #}}}########################################################################
 
-#{{{ onAction
+#{{{ displayUpload - outputs the file upload/fetch controls
+############################################################################
+function displayUpload($context)
+{
+    echo makeEventForm("onUploadOrFetch", null, true) . "\n"; 
+    echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onNavBarCall", "upload_pdb_setup.php")."'>more options</a>)</h5>";
+?>
+<div class='indent'><table border='0' width='100%'>
+<tr>
+    <td align='center'>PDB/NDB code</td><td align='center'>Upload
+        <select name='uploadType'>
+            <option value='pdb'>PDB file</option>
+            <option value='kin'>kinemage</option>
+            <option value='map'>ED map</option>
+            <option value='hetdict'>het dict</option>
+        </select></td>
+    <td></td>
+</tr><tr>
+    <td align='center'><input type="text" name="pdbCode" size="6" maxlength="10"></td>
+    <td align='center'><input type="file" name="uploadFile"></td>
+    <td><input type="submit" name="cmd" value="Go &gt;"></td>
+</tr>
+</table></div></form>
+<?php
+}
+#}}}########################################################################
+
+#{{{ onSetWorkingModel
+############################################################################
+function onSetWorkingModel($arg, $req)
+{
+    $_SESSION['lastUsedModelID'] = $req['workingModel'];
+}
+#}}}########################################################################
+
+#{{{ onUploadOrFetch
 ############################################################################
 /**
 * FUNKY: This simulates being on the upload page and then calls the appropriate
 * event handler depending on whether a file has been uploaded or not...
 * Don't try this at home!
 */
-function onAction($arg, $req)
+function onUploadOrFetch($arg, $req)
 {
     $hasUpload = isset($_FILES['uploadFile']) && $_FILES['uploadFile']['error'] != UPLOAD_ERR_NO_FILE;
     $hasFetch = isset($req['pdbCode']) && $req['pdbCode'] != "";
     
-    if(startsWith($req['cmd'], 'Set'))
+    if($hasUpload)
     {
-        $_SESSION['lastUsedModelID'] = $req['workingModel'];
+        if($req['uploadType'] == 'pdb')
+        {
+            pageCall("upload_pdb_setup.php"); // or else a later pageReturn() will screw us up!
+            $upload_delegate = makeDelegateObject();
+            $upload_delegate->onUploadPdbFile($arg, $req);
+        }
+        else
+        {
+            pageCall("upload_other_setup.php"); // or else a later pageReturn() will screw us up!
+            $upload_delegate = makeDelegateObject();
+            if($req['uploadType'] == 'kin')         $upload_delegate->onUploadKinemage($arg, $req);
+            elseif($req['uploadType'] == 'map')     $upload_delegate->onUploadMapFile($arg, $req);
+            elseif($req['uploadType'] == 'hetdict') $upload_delegate->onUploadHetDictFile($arg, $req);
+        }
     }
-    // The default action when cmd is not set, as in IE6 when you just hit Return
-    elseif(startsWith($req['cmd'], 'Go') || $hasUpload || $hasFetch)
+    else // no upload specified, must be a fetch
     {
         pageCall("upload_pdb_setup.php"); // or else a later pageReturn() will screw us up!
         $upload_delegate = makeDelegateObject();
-        if($hasUpload)
-            $upload_delegate->onUploadPdbFile($arg, $req);
-        elseif($hasFetch)
+        if($hasFetch)
             $upload_delegate->onFetchPdbFile($arg, $req);
         else 
             $upload_delegate->onUploadPdbFile($arg, $req);

@@ -69,7 +69,12 @@ function checkSettingsBeforeSubmit()
     else return true; // OK to submit
 }
 // -->
-</script><?php
+</script>
+<div class='alert'>
+<center><h3>ALPHA TEST</h3></center>
+Not suitable for use by the general public.
+</div>
+<?php
     //}}} Script to set default choices based on model properties.
 
     if(count($_SESSION['ensembles']) > 0)
