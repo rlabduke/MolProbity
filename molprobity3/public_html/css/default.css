@@ -119,6 +119,8 @@ div.indent {
 .inactive { color : #666666 ; }
 .nospaceafter { margin-bottom : 0 ; }
 
+h5.welcome { margin-top: 0 ; font-variant : small-caps ; }
+
 /* Inheritance is tighter than comma op. */
 div.help_info { color : #666666 ; }
 div.help_info h2, div.help_info h3, div.help_info h4, div.help_info h5, div.help_info h6 { color : #996666 ; }

@@ -124,13 +124,13 @@ window.alert("You cannot use your browser\'s back button in MolProbity,"
 function mpNavigationBar($active)
 {
     $s = "";
-    $s .= mpNavBar_goto('welcome.php', 'Welcome', ($active == 'welcome'));
+    $s .= mpNavBar_goto('welcome.php', 'Main page', ($active == 'welcome'));
     $s .= "<div class='minornav'>".mpNavBar_goto('helper_xray.php', 'Evaluate X-ray', ($active == 'helper_xray'))."</div>";
     $s .= "<div class='minornav'>".mpNavBar_goto('', 'Evaluate NMR')."</div>";
     $s .= "<div class='minornav'>".mpNavBar_goto('', 'Fix up structure')."</div>";
     $s .= "<div class='minornav'>".mpNavBar_goto('', 'Work with kins')."</div>";
     $s .= "<br />\n";
-    $s .= mpNavBar_goto('sitemap.php', 'Site map', ($active == 'sitemap'));
+    /*
     $s .= "<div class='minornav'>".mpNavBar_call('upload_pdb_setup.php', 'Input PDB files')."</div>";
     $s .= "<div class='minornav'>".mpNavBar_call('upload_other_setup.php', 'Input other files')."</div>";
     $s .= "<div class='minornav'>".mpNavBar_call('reduce_setup.php', 'Add hydrogens')."</div>";
@@ -139,12 +139,14 @@ function mpNavigationBar($active)
     //$s .= "<div class='minornav'>".mpNavBar_call('sswing_setup1.php', 'Refit sidechains')."</div>";
     $s .= "<div class='minornav'>".mpNavBar_call('makekin_setup.php', 'Make simple kins')."</div>";
     $s .= "<br />\n";
+    */
     $s .= mpNavBar_goto('file_browser.php', 'View &amp; download files', ($active == 'files'));
     $s .= mpNavBar_goto('notebook_main.php', 'Lab notebook', ($active == 'notebook'));
     //$s .= mpNavBar_goto('', 'Set preferences', ($active == 'preferences'));
     $s .= mpNavBar_goto('feedback_setup.php', 'Feedback &amp; bugs', ($active == 'feedback'));
-    $s .= mpNavBar_goto('save_session.php', 'Save session', ($active == 'savesession'));
+    $s .= mpNavBar_goto('sitemap.php', 'Site map', ($active == 'sitemap'));
     $s .= "<br />\n";
+    $s .= mpNavBar_goto('save_session.php', 'Save session', ($active == 'savesession'));
     $s .= mpNavBar_goto('logout.php', 'Log out', ($active == 'logout'));
     $s .= "<br />You are using ".round(100*mpSessSizeOnDisk(session_id())/MP_SESSION_MAX_SIZE);
     $s .= "% of your ".formatFilesize(MP_SESSION_MAX_SIZE)." of disk space.";
