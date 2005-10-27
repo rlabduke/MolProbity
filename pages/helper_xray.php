@@ -19,7 +19,7 @@ not all parts of all structures (published or not) are correct,
 and the errors could impact the biological conclusion you wish to draw.
 
 <ol>
-<li><b><?php echo "<a href='".makeEventURL("onNavBarCall", "upload_pdb_setup.php")."'>Choose a structure</a>"; ?>:</b>
+<li><b><?php echo "<a href='".makeEventURL("onNavBarCall", "upload_setup.php")."'>Choose a structure</a>"; ?>:</b>
     You need the coordinates for your model in PDB format.
     You can upload a file directly from your computer, or search for one at the
     <a href='http://www.pdb.org/' target='blank'>Protein Data Bank</a> or the
