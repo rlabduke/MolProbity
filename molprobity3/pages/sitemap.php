@@ -15,12 +15,9 @@ function display($context)
     echo mpPageHeader("Site map", "sitemap");
     echo "<i>Features in italics have not yet been implemented.</i>\n";
     
-    echo "<h3><a href='".makeEventURL("onNavBarCall", "upload_pdb_setup.php")."'>Input PDB files</a></h3>\n<ul>\n";
+    echo "<h3><a href='".makeEventURL("onNavBarCall", "upload_setup.php")."'>Input files</a></h3>\n<ul>\n";
     echo "<li>Upload PDB files from local disk.</li>\n";
     echo "<li>Retrieve PDB files from the PDB or NDB.</li>\n";
-    echo "</ul>\n";
-    
-    echo "<h3><a href='".makeEventURL("onNavBarCall", "upload_other_setup.php")."'>Input other files</a></h3>\n<ul>\n";
     echo "<li>Upload kinemages for viewing in KiNG.</li>\n";
     echo "<li>Upload electron density maps.</li>\n";
     echo "<li>Retrieve 2Fo-Fc and Fo-Fc (difference) maps from the EDS.</li>\n";

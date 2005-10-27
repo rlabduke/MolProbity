@@ -7,7 +7,7 @@ require_once(MP_BASE_DIR.'/lib/browser.php');
 
 // It may be bad form, but we hijack functions from these pages to avoid
 // duplicating the work they do. This must be done very carefully!
-require_once(MP_BASE_DIR.'/pages/upload_pdb_setup.php');
+require_once(MP_BASE_DIR.'/pages/upload_setup.php');
 require_once(MP_BASE_DIR.'/pages/file_browser.php');
 
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
@@ -163,7 +163,6 @@ function displayModelTools($context)
     // We already know lastUsedModelID is set and refers to a model, not an ensemble
     $model = $_SESSION['models'][ $_SESSION['lastUsedModelID'] ];
     $minor = array(
-        //'upload'    => array('desc' => 'Input map / het dict / kin files', 'page' => 'upload_other_setup.php', 'img' => ''),
         'reduce'    => array('desc' => 'Add hydrogens', 'page' => 'reduce_setup.php', 'img' => 'add_h.png'),
         'aacgeom'   => array('desc' => 'All-atom contacts and geometry', 'page' => 'aacgeom_setup.php', 'img' => 'clash_rama.png'),
         'geomonly'  => array('desc' => 'Geometry analysis only', 'page' => 'aacgeom_setup.php', 'img' => 'ramaplot.png'),
@@ -237,7 +236,6 @@ function displayEnsembleTools($context)
     $model = $_SESSION['ensembles'][ $_SESSION['lastUsedModelID'] ];
     /*
     $minor = array(
-        'upload'    => array('desc' => 'Input map / het dict / kin files', 'page' => 'upload_other_setup.php', 'img' => ''),
         'reduce'    => array('desc' => 'Add hydrogens', 'page' => 'reduce_setup.php', 'img' => 'add_h.png'),
         'aacgeom'   => array('desc' => 'All-atom contacts and geometry', 'page' => 'aacgeom_setup.php', 'img' => 'clash_rama.png'),
         'geomonly'  => array('desc' => 'Geometry analysis only', 'page' => 'aacgeom_setup.php', 'img' => 'ramaplot.png'),
@@ -280,7 +278,7 @@ function displayEnsembleTools($context)
     }
     */
     $minor = array(
-        //'upload'    => array('desc' => 'Input map / het dict / kin files', 'page' => 'upload_other_setup.php', 'img' => ''),
+        //'upload'    => array('desc' => 'Input map / het dict / kin files', 'page' => 'upload_setup.php', 'img' => ''),
     );
     $major = array(
         'aacgeom'   => array('desc' => 'All-atom contacts and geometry', 'page' => 'ens_aacgeom_setup.php', 'img' => 'clash_rama.png'),
@@ -375,7 +373,7 @@ function displayEntries($context)
 function displayUpload($context)
 {
     echo makeEventForm("onUploadOrFetch", null, true) . "\n"; 
-    echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onNavBarCall", "upload_pdb_setup.php")."'>more options</a>)</h5>";
+    echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onNavBarCall", "upload_setup.php")."'>more options</a>)</h5>";
 ?>
 <div class='indent'><table border='0' width='100%'>
 <tr>
@@ -417,32 +415,20 @@ function onUploadOrFetch($arg, $req)
     $hasUpload = isset($_FILES['uploadFile']) && $_FILES['uploadFile']['error'] != UPLOAD_ERR_NO_FILE;
     $hasFetch = isset($req['pdbCode']) && $req['pdbCode'] != "";
     
+    pageCall("upload_setup.php"); // or else a later pageReturn() will screw us up!
+    $upload_delegate = makeDelegateObject();
+
     if($hasUpload)
     {
-        if($req['uploadType'] == 'pdb')
-        {
-            pageCall("upload_pdb_setup.php"); // or else a later pageReturn() will screw us up!
-            $upload_delegate = makeDelegateObject();
-            $upload_delegate->onUploadPdbFile($arg, $req);
-        }
-        else
-        {
-            pageCall("upload_other_setup.php"); // or else a later pageReturn() will screw us up!
-            $upload_delegate = makeDelegateObject();
-            if($req['uploadType'] == 'kin')         $upload_delegate->onUploadKinemage($arg, $req);
-            elseif($req['uploadType'] == 'map')     $upload_delegate->onUploadMapFile($arg, $req);
-            elseif($req['uploadType'] == 'hetdict') $upload_delegate->onUploadHetDictFile($arg, $req);
-        }
+        if($req['uploadType'] == 'pdb')         $upload_delegate->onUploadPdbFile($arg, $req);
+        elseif($req['uploadType'] == 'kin')     $upload_delegate->onUploadKinemage($arg, $req);
+        elseif($req['uploadType'] == 'map')     $upload_delegate->onUploadMapFile($arg, $req);
+        elseif($req['uploadType'] == 'hetdict') $upload_delegate->onUploadHetDictFile($arg, $req);
     }
-    else // no upload specified, must be a fetch
-    {
-        pageCall("upload_pdb_setup.php"); // or else a later pageReturn() will screw us up!
-        $upload_delegate = makeDelegateObject();
-        if($hasFetch)
-            $upload_delegate->onFetchPdbFile($arg, $req);
-        else 
-            $upload_delegate->onUploadPdbFile($arg, $req);
-    }
+    elseif($hasFetch)
+        $upload_delegate->onFetchPdbFile($arg, $req);
+    else 
+        $upload_delegate->onUploadPdbFile($arg, $req);
 }
 #}}}########################################################################
 

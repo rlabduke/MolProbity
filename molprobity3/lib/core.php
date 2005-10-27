@@ -131,8 +131,8 @@ function mpNavigationBar($active)
     $s .= "<div class='minornav'>".mpNavBar_goto('', 'Work with kins')."</div>";
     $s .= "<br />\n";
     /*
-    $s .= "<div class='minornav'>".mpNavBar_call('upload_pdb_setup.php', 'Input PDB files')."</div>";
-    $s .= "<div class='minornav'>".mpNavBar_call('upload_other_setup.php', 'Input other files')."</div>";
+    $s .= "<div class='minornav'>".mpNavBar_call('upload_setup.php', 'Input PDB files')."</div>";
+    $s .= "<div class='minornav'>".mpNavBar_call('upload_setup.php', 'Input other files')."</div>";
     $s .= "<div class='minornav'>".mpNavBar_call('reduce_setup.php', 'Add hydrogens')."</div>";
     $s .= "<div class='minornav'>".mpNavBar_call('aacgeom_setup.php', 'All-atom contacts &amp; geometry')."</div>";
     $s .= "<div class='minornav'>".mpNavBar_call('interface_setup1.php', 'Interface contacts')."</div>";

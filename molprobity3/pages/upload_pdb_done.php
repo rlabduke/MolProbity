@@ -76,7 +76,7 @@ function onReturn($arg, $req)
 function onTryAgain($arg, $req)
 {
     if($req['cmd'] == '< Try again')
-        pageGoto("upload_pdb_setup.php");
+        pageGoto("upload_setup.php");
     else
         pageReturn();
 }
