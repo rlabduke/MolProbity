@@ -159,7 +159,7 @@ function onRunProbe($arg, $req)
     mpLog("interface:Visualizing interface contacts with complex Probe run");
     // launch background job
     pageGoto("job_progress.php");
-    launchBackground(MP_BASE_DIR."/jobs/interface-vis.php", "interface_done.php", 5);
+    launchBackground(MP_BASE_DIR."/jobs/interface-vis.php", "generic_done.php", 5);
 }
 #}}}########################################################################
 

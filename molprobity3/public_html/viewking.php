@@ -41,10 +41,12 @@ if(isset($_REQUEST['size']) && !$_SESSION['bgjob']['isRunning'])
     // (Note that changing size breaks the "Close" button, at least in Safari)
     $_SESSION['kingSize'] = $_REQUEST['size'];
 }
-if($_SESSION['kingSize']        == "tiny")  $size = "width=600 height=400"; //  640 x 480
-elseif($_SESSION['kingSize']    == "small") $size = "width=700 height=500"; //  800 x 600
-elseif($_SESSION['kingSize']    == "large") $size = "width=950 height=650"; // 1024 x 768
-else                                        $size = "width=750 height=600"; // Good for most people
+if($_SESSION['kingSize']        == "tiny")  $size = "width='600' height='400'"; //  640 x 480
+elseif($_SESSION['kingSize']    == "small") $size = "width='950' height='650'"; // 1024 x 768
+elseif($_SESSION['kingSize']    == "large") $size = "width='1300' height='950'"; // 1400 x 1050
+elseif($_SESSION['kingSize']    == "huge")  $size = "width='1500' height='1100'"; // 1600 x 1200
+else                                        $size = "width='950' height='650'"; // Good for most people
+// Unfortunately, percentage sizes don't work reliably, as that would be a nicer way to go for "default".
 
 $url = $_REQUEST['url'];
 $file = basename($url);
@@ -103,6 +105,9 @@ else echo "<a href='viewking.php?$_SESSION[sessTag]&url=$url&size=default'>defau
 echo " | ";
 if($_SESSION['kingSize'] == "large") echo "large";
 else echo "<a href='viewking.php?$_SESSION[sessTag]&url=$url&size=large'>large</a>";
+echo " | ";
+if($_SESSION['kingSize'] == "huge") echo "huge";
+else echo "<a href='viewking.php?$_SESSION[sessTag]&url=$url&size=huge'>huge</a>";
 ?>
 </td>
 </tr></table>

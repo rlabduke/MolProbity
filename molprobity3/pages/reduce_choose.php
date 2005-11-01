@@ -197,14 +197,15 @@ function onRerunReduce($arg, $req)
     if(strpos($userkeep, "<li>") !== false) $entry .= $userkeep;
     
     // Go ahead and make the notebook entry inline -- this can't take more than 1-2 sec.
-    if($rerun)  $title = "Adding H with Reduce -build and user overrides gives $model[pdb]";
-    else        $title = "Adding H with Reduce -build using default settings gives $model[pdb]";
+    if($rerun)  $title = "Added H with -build and user overrides to get $model[pdb]";
+    else        $title = "Added H with -build to get $model[pdb]";
     unset($_SESSION['bgjob']); // Clean up any old data
     $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
         $title,
         $entry,
         "$parent[id]|$modelID", // applies to both old and new model
-        "auto"
+        "auto",
+        "add_h.png"
     );
     $_SESSION['bgjob']['modelID']   = $_REQUEST['modelID'];
     $_SESSION['bgjob']['doflip']    = $_REQUEST['doflip'];
@@ -215,13 +216,13 @@ function onRerunReduce($arg, $req)
         mpLog("reduce-custom:User made changes to flips suggested by Reduce -build");
         // launch background job
         pageGoto("job_progress.php");
-        launchBackground(MP_BASE_DIR."/jobs/reduce-fix.php", "reduce_done.php", 5);
+        launchBackground(MP_BASE_DIR."/jobs/reduce-fix.php", "generic_done.php", 5);
     }
     // No changes to flip states; skip straight to end
     else
     {
         mpLog("reduce-accept:User accepted all flips proposed by Reduce -build as-is");
-        pageGoto("reduce_done.php", $_SESSION['bgjob']);
+        pageGoto("generic_done.php", $_SESSION['bgjob']);
     }
 }
 #}}}########################################################################

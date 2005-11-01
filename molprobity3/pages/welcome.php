@@ -25,7 +25,7 @@ function display($context)
 
     if(count($_SESSION['models']) > 0 && $_SESSION['lastUsedModelID'])
     {
-        echo "<h5 class='welcome'>Tools and Actions (<a href='".makeEventURL("onNavBarGoto", "sitemap.php")."'>more tools</a>)</h5>\n";
+        echo "<h5 class='welcome'>Suggested Tools (<a href='".makeEventURL("onNavBarGoto", "sitemap.php")."'>all tools</a>)</h5>\n";
         echo "<div class='indent'>\n";
         echo makeEventForm("onSetWorkingModel", null, true) . "\n";
         $this->displayModels($context);
@@ -162,66 +162,38 @@ function displayModelTools($context)
 {
     // We already know lastUsedModelID is set and refers to a model, not an ensemble
     $model = $_SESSION['models'][ $_SESSION['lastUsedModelID'] ];
-    $minor = array(
-        'reduce'    => array('desc' => 'Add hydrogens', 'page' => 'reduce_setup.php', 'img' => 'add_h.png'),
-        'aacgeom'   => array('desc' => 'All-atom contacts and geometry', 'page' => 'aacgeom_setup.php', 'img' => 'clash_rama.png'),
-        'geomonly'  => array('desc' => 'Geometry analysis only', 'page' => 'aacgeom_setup.php', 'img' => 'ramaplot.png'),
-        'iface'     => array('desc' => 'Visualize interface contacts', 'page' => 'interface_setup1.php', 'img' => 'barnase_barstar.png'),
-        //'sswing'    => array('desc' => 'Refit sidechains', 'page' => 'sswing_setup1.php', 'img' => ''),
-        'makekins'  => array('desc' => 'Make simple kinemages', 'page' => 'makekin_setup.php', 'img' => 'porin_barrel.png'),
-        //'' => array('desc' => '', 'page' => '', 'img' => ''),
+    // "rel" (relevance) is 2 for major, 1 for minor, 0 for not shown.
+    $tools = array(
+        'reduce'    => array('desc' => 'Add hydrogens', 'page' => 'reduce_setup.php', 'rel' => 1, 'img' => 'add_h.png'),
+        'aacgeom'   => array('desc' => 'Analyze all-atom contacts and geometry', 'page' => 'aacgeom_setup.php', 'rel' => 1, 'img' => 'clash_rama.png'),
+        'geomonly'  => array('desc' => 'Analyze geometry without all-atom contacts', 'page' => 'aacgeom_setup.php', 'rel' => 1, 'img' => 'ramaplot.png'),
+        'iface'     => array('desc' => 'Visualize interface contacts', 'page' => 'interface_setup1.php', 'rel' => 1, 'img' => 'barnase_barstar.png'),
+        //'sswing'    => array('desc' => 'Refit sidechains', 'page' => 'sswing_setup1.php', 'rel' => 1, 'img' => ''),
+        'makekins'  => array('desc' => 'Make simple kinemages', 'page' => 'makekin_setup.php', 'rel' => 1, 'img' => 'porin_barrel.png'),
+        //'' => array('desc' => '', 'page' => '', 'rel' => 1, 'img' => ''),
     );
-    $major = array();
     
     // Reduce
-    if($model['isReduced']) unset($minor['reduce']);
-    elseif($model['stats']['has_most_H']) {} // stay put
-    else { $major['reduce'] = $minor['reduce']; unset($minor['reduce']); }
+    if($model['isReduced'])                 $tools['reduce']['rel'] = 0;
+    elseif($model['stats']['has_most_H'])   $tools['reduce']['rel'] = 1;
+    else                                    $tools['reduce']['rel'] = 2;
     
-    // All-atom contact analysis
-    if($model['isReduced'] || $model['stats']['has_most_H'])
-    {
-        $major['aacgeom'] = $minor['aacgeom'];
-        unset($minor['aacgeom']);
-        unset($minor['geomonly']);
-    }
-    else
-    {
-        //$major['geomonly'] = $minor['geomonly'];
-        unset($minor['aacgeom']);
-        //unset($minor['geomonly']);
-    }
-    
+    // All-atom contact analysis, etc.
     // Suggest kin w/o H, suggest interface w/ H
     if($model['isReduced'] || $model['stats']['has_most_H'])
     {
-        $major['iface'] = $minor['iface'];
-        unset($minor['iface']);
+        $tools['aacgeom']['rel'] = 2;
+        $tools['iface']['rel'] = 2;
+        $tools['geomonly']['rel'] = 0;
     }
     else
     {
-        $major['makekins'] = $minor['makekins'];
-        unset($minor['makekins']);
+        $tools['aacgeom']['rel'] = 0;
+        $tools['iface']['rel'] = 0;
+        $tools['makekins']['rel'] = 2;
     }
     
-    
-    echo "<table border='0' width='100%'>\n";
-    echo "<tr valign='top'><td>\n"; // start large icon column
-    foreach($major as $item)
-    {
-        echo "<a href='".makeEventURL("onNavBarCall", $item['page'])."'>";
-        if($item['img']) echo "<img src='img/$item[img]' alt='$img[desc]' border='0' align='middle'> ";
-        echo "$item[desc]</a><br>\n";
-    }
-    echo "</td>\n";
-    
-    echo "<td>\n"; // end large; start small text column
-    foreach($minor as $item)
-    {
-        echo "<p><a href='".makeEventURL("onNavBarCall", $item['page'])."'>";
-        echo "$item[desc]</a></p>\n";
-    }
-    echo "</td></tr></table>\n"; // end tools columns
+    $this->formatTools($tools);
 }
 #}}}########################################################################
 
@@ -234,74 +206,54 @@ function displayEnsembleTools($context)
 {
     // We already know lastUsedModelID is set and refers to an ensemble, not a model
     $model = $_SESSION['ensembles'][ $_SESSION['lastUsedModelID'] ];
-    /*
-    $minor = array(
-        'reduce'    => array('desc' => 'Add hydrogens', 'page' => 'reduce_setup.php', 'img' => 'add_h.png'),
-        'aacgeom'   => array('desc' => 'All-atom contacts and geometry', 'page' => 'aacgeom_setup.php', 'img' => 'clash_rama.png'),
-        'geomonly'  => array('desc' => 'Geometry analysis only', 'page' => 'aacgeom_setup.php', 'img' => 'ramaplot.png'),
-        'iface'     => array('desc' => 'Visualize interface contacts', 'page' => 'interface_setup1.php', 'img' => 'barnase_barstar.png'),
-        'sswing'    => array('desc' => 'Refit sidechains', 'page' => 'sswing_setup1.php', 'img' => ''),
-        'makekins'  => array('desc' => 'Make simple kinemages', 'page' => 'makekin_setup.php', 'img' => 'porin_barrel.png'),
-        //'' => array('desc' => '', 'page' => '', 'img' => ''),
+    // "rel" (relevance) is 2 for major, 1 for minor, 0 for not shown.
+    $tools = array(
+        'aacgeom'   => array('desc' => 'Analyze all-atom contacts and geometry', 'page' => 'ens_aacgeom_setup.php', 'rel' => 2, 'img' => 'clash_rama.png'),
     );
+    
+    $this->formatTools($tools);
+}
+#}}}########################################################################
+
+#{{{ formatTools - helper function for display(Model/Ensemble)Tools
+############################################################################
+/**
+* Prints tools and their icons from $major and $minor
+* 'rel' (relevance) is 2 for major, 1 for minor, 0 for not shown.
+* Normal size icons are 80 x 80; we shrink them to 40 x 40 to de-emphasize.
+*/
+function formatTools($tools)
+{
     $major = array();
-    
-    // Reduce
-    if($model['isReduced']) unset($minor['reduce']);
-    elseif($model['stats']['has_most_H']) {} // stay put
-    else { $major['reduce'] = $minor['reduce']; unset($minor['reduce']); }
-    
-    // All-atom contact analysis
-    if($model['isReduced'] || $model['stats']['has_most_H'])
+    $minor = array();
+    foreach($tools as $item)
     {
-        $major['aacgeom'] = $minor['aacgeom'];
-        unset($minor['aacgeom']);
-        unset($minor['geomonly']);
+        if($item['rel'] == 2)   $major[] = $item;
+        if($item['rel'] == 1)   $minor[] = $item;
+        // other cases are thrown away
     }
-    else
-    {
-        //$major['geomonly'] = $minor['geomonly'];
-        unset($minor['aacgeom']);
-        //unset($minor['geomonly']);
-    }
-    
-    // Suggest kin w/o H, suggest interface w/ H
-    if($model['isReduced'] || $model['stats']['has_most_H'])
-    {
-        $major['iface'] = $minor['iface'];
-        unset($minor['iface']);
-    }
-    else
-    {
-        $major['makekins'] = $minor['makekins'];
-        unset($minor['makekins']);
-    }
-    */
-    $minor = array(
-        //'upload'    => array('desc' => 'Input map / het dict / kin files', 'page' => 'upload_setup.php', 'img' => ''),
-    );
-    $major = array(
-        'aacgeom'   => array('desc' => 'All-atom contacts and geometry', 'page' => 'ens_aacgeom_setup.php', 'img' => 'clash_rama.png'),
-    );
-    
     
     echo "<table border='0' width='100%'>\n";
-    echo "<tr valign='top'><td>\n"; // start large icon column
+    // Using a secondary table makes it easier to align icons and text
+    echo "<tr valign='top'><td><table border='0'>\n"; // start large icon column
     foreach($major as $item)
     {
-        echo "<a href='".makeEventURL("onNavBarCall", $item['page'])."'>";
-        if($item['img']) echo "<img src='img/$item[img]' alt='$img[desc]' border='0' align='middle'> ";
-        echo "$item[desc]</a><br>\n";
+        $a = "<a href='".makeEventURL("onNavBarCall", $item['page'])."'>";
+        if($item['img'])    echo "<tr><td>$a<img src='img/$item[img]' alt='$img[desc]' border='0'></a></td>";
+        else                echo "<tr><td></td>";
+        echo "<td>$a$item[desc]</a></td></tr>\n";
     }
-    echo "</td>\n";
+    echo "</table></td>\n";
     
-    echo "<td>\n"; // end large; start small text column
+    echo "<td><table border='0'>\n"; // end large; start small text column
     foreach($minor as $item)
     {
-        echo "<p><a href='".makeEventURL("onNavBarCall", $item['page'])."'>";
-        echo "$item[desc]</a></p>\n";
+        $a = "<a href='".makeEventURL("onNavBarCall", $item['page'])."'>";
+        if($item['img'])    echo "<tr><td>$a<img src='img/$item[img]' alt='$img[desc]' border='0' width='40' height='40'></a></td>";
+        else                echo "<tr><td></td>";
+        echo "<td>$a$item[desc]</a></td></tr>\n";
     }
-    echo "</td></tr></table>\n"; // end tools columns
+    echo "</table></td></tr></table>\n"; // end tools columns
 }
 #}}}########################################################################
 
@@ -319,7 +271,7 @@ function displayFiles($context)
     $files = array(MP_DIR_MODELS.'/'.$model['pdb']);
     $files = array_merge($files, $model['primaryDownloads']);
     
-    echo "<h5 class='welcome'>Popular Downloads (<a href='".makeEventURL('onNavBarCall', 'file_browser.php')."'>more downloads</a>)</h5>\n";
+    echo "<h5 class='welcome'>Popular Downloads (<a href='".makeEventURL('onNavBarCall', 'file_browser.php')."'>all downloads</a>)</h5>\n";
     echo "<div class='indent'>\n";
     echo "<table border='0' width='100%' cellspacing='0'>\n";
     $fileListColor = MP_TABLE_ALT1;
@@ -353,44 +305,105 @@ function displayEntries($context)
         $model = $_SESSION['models'][$modelID];
     
     $labbook = openLabbook();
-    echo "<h5 class='welcome'>Recently Generated Results (<a href='$url'>more results</a>)</h5>\n";
-    echo "<ul>\n";
+    $labbook = array_reverse($labbook, true); // make reverse chronological
+    echo "<h5 class='welcome'>Recently Generated Results (<a href='$url'>all results</a>)</h5>\n";
+    //echo "<h5 class='welcome'>Recently Generated Results</h5>\n";
+    echo "<div class='indent'>\n";
+    echo "<table border='0' width='100%'>\n";
+    $entry_count = 0;
     foreach($labbook as $num => $entry)
     {
-        if(in_array($modelID, explode("|", $entry['model'])))
+        // Show all entries so user isn't confused when they switch models...
+        //if(in_array($modelID, explode("|", $entry['model'])))
         {
+            if(++$entry_count > 3) break;
             $title = $entry['title'];
             if($title == "") $title = "(no title)";
-            echo "<li><a href='$url#entry$num'>$title</a> [".formatDayTime($entry['modtime'])."]</li>\n";
+            echo "<tr><td><img src='img/$entry[thumbnail]' border='0' width='40' height='40'></td>";
+            //echo "<td><a href='$url#entry$num'>$title</a></td>";
+            echo "<td><a href='viewentry.php?$_SESSION[sessTag]&entry_num=$num' target='_blank'>$title</a></td>";
+            echo "<td align='right'><i>".formatDayTimeBrief($entry['modtime'])."</i></td></tr>\n";
         }
     }
-    echo "</ul>\n";
+    echo "<tr><td colspan='3'><!-- vertical spacer --></td></tr>\n";
+    echo "<tr><td></td>";
+    if($entry_count > 3)    echo "<td><small><a href='$url'>[... more results ...]</a></small></td>";
+    else                    echo "<td></td>";
+    echo "<td align='right'><small><a href='$url'>[set time zone]</a></small></td></tr>\n";
+    echo "</table>\n</div>\n";
 }
 #}}}########################################################################
 
 #{{{ displayUpload - outputs the file upload/fetch controls
 ############################################################################
+/**
+* We use some clever JavaScript to show/hide the upload options in-line.
+* For users without JavaScript, the link will function normally and take
+* them to the upload/download page.
+*
+* That code is very clever and I'm quite fond of it, but I've also done
+* similar things in the past by setting/clearing a flag in $context and
+* simply reloading the page, as I do for e.g. file_browser.php.
+* If the current version proves too incompatible, I could fall back to that one.
+*/
 function displayUpload($context)
 {
     echo makeEventForm("onUploadOrFetch", null, true) . "\n"; 
-    echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onNavBarCall", "upload_setup.php")."'>more options</a>)</h5>";
+    //echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onNavBarCall", "upload_setup.php")."'>more options</a>)</h5>";
+    echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onNavBarCall", "upload_setup.php")."' onclick='toggleUploadOptions(); return false' id='upload_options_link'>more options</a>)</h5>";
 ?>
+<script language='JavaScript'>
+<!--
+function toggleUploadOptions()
+{
+    var block = document.getElementById('upload_options_block')
+    var link = document.getElementById('upload_options_link')
+    if(block.style.display == 'none')
+    {   
+        block.style.display = 'block'
+        link.innerHTML = 'hide options'
+    }
+    else
+    {
+        block.style.display = 'none'
+        link.innerHTML = 'more options'
+    }
+}
+// -->
+</script>
 <div class='indent'><table border='0' width='100%'>
 <tr>
-    <td align='center'>PDB/NDB code</td><td align='center'>Upload
+    <td width='40%' align='center'>PDB/NDB code</td>
+    <td width='40%' align='center'>Upload
         <select name='uploadType'>
             <option value='pdb'>PDB file</option>
             <option value='kin'>kinemage</option>
             <option value='map'>ED map</option>
             <option value='hetdict'>het dict</option>
         </select></td>
-    <td></td>
+    <td width='20%'></td>
 </tr><tr>
     <td align='center'><input type="text" name="pdbCode" size="6" maxlength="10"></td>
     <td align='center'><input type="file" name="uploadFile"></td>
-    <td><input type="submit" name="cmd" value="Go &gt;"></td>
+    <td align='center'><input type="submit" name="cmd" value="Upload/Fetch &gt;"></td>
 </tr>
-</table></div></form>
+</table>
+    <div style='display:none' id='upload_options_block'>
+    <!-- We have to start a new table because you can't show/hide <tr>'s, at least not in Safari -->
+        <table border='0' width='100%'><tr valign='top'>
+            <td width='40%'><div class='inline_options'>
+                <label><input type="checkbox" name="biolunit" value="1"> Biol. unit (PDB only)</label>
+                <br><label><input type="checkbox" name="eds_2fofc" value="1"> Get 2Fo-Fc map from EDS</label>
+                <br><label><input type="checkbox" name="eds_fofc" value="1"> Get Fo-Fc map from EDS</label>
+            </div></td>
+            <td width='40%'><div class='inline_options'>
+                <label><input type="checkbox" name="isCnsFormat" value="1"> File is from CNS refinement</label>
+                <br><label><input type="checkbox" name="ignoreSegID" value="1"> Ignore segID field</label>
+            </div></td>
+            <td width='20%'></td>
+        </tr></table>
+    </div>
+</div></form>
 <?php
 }
 #}}}########################################################################

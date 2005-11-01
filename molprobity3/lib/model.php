@@ -289,53 +289,14 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
 }
 #}}}########################################################################
 
-#{{{ splitModelsNMR - creates many PDBs from one multi-MODEL PDB file
+#{{{ splitModelsNMR [DEPRECATED] - an alias for splitPdbModels()
 ############################################################################
 /**
 * Returns an array of temp file names holding the split models.
 * The models appear in order, and the keys of the array are the model numbers.
 */
 function splitModelsNMR($infile)
-{
-	//Open PDB file
-	$pdbopen = fopen($infile,"rb");
-    while(! feof($pdbopen))
-    {
-        $line = fgets($pdbopen);
-		
-		if(preg_match('/^(MODEL)/', $line))
-		{
-            $mdline = $line;
-            $mdlnum = trim(substr($mdline, 5, 20));
-		}
-		elseif(preg_match('/^(ATOM|HETATM|TER)/', $line))
-		{
-            $model[] = $line;
-		}
-		elseif(preg_match('/^(ENDMDL)/', $line))
-		{
-            $endmodel = $line;
-            $tmpFile = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
-            $modelFiles[$mdlnum] = $tmpFile;
-            
-            $pdbnew = fopen($tmpFile, "wb");
-            foreach($header as $h) fwrite($pdbnew, $h);
-            fwrite($pdbnew, "REMARK  99 ".$mdline);
-            foreach($model as $m) fwrite($pdbnew, $m);
-            fwrite($pdbnew, "REMARK  99 ".$endmodel);
-            fclose($pdbnew);
-            
-            unset($model);
-		}
-		else
-		{
-            $header[] = $line;
-		}
-    }
-    fclose($pdbopen);
-    
-    return $modelFiles;
-}
+{ return splitPdbModels($infile); }
 #}}}########################################################################
 
 #{{{ splitPdbModels - creates many PDBs from one multi-MODEL PDB file

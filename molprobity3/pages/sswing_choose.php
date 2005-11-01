@@ -71,10 +71,10 @@ function onMakeFinalPDB($arg, $req)
     foreach($changed_res as $res) $text .= "<li>$res</li>\n";
     $text .= "</ul>\n";
     $text .= "<p>You can now <a href='$url'>download the optimized and annotated PDB file</a> (".formatFilesize(filesize($newPDB)).").</p>\n";
-    $entryNum = addLabbookEntry("SSWING refitting creates $newModel[pdb]", $text, "$oldModel[id]|$newModel[id]", 'auto');
+    $entryNum = addLabbookEntry("Refit sidechains with SSWING to get $newModel[pdb]", $text, "$oldModel[id]|$newModel[id]", 'auto');
 
     $ctx = array('labbookEntry' => $entryNum);
-    pageGoto("sswing_done.php", $ctx);
+    pageGoto("generic_done.php", $ctx);
 }
 #}}}########################################################################
 

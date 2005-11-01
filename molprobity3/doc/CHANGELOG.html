@@ -57,21 +57,13 @@
     Oneline, all-in-one (kins, etc) for JCSG
     "outlier" column for multichart
     Move labbook.html to charts/ ?
-    for welcome: more icons, clean out old unused images
     Produce multi-model Ramachandran plots from the GUI
-    splitModelsNMR(): talk to J about deprecating it
-  ? JSR: The target percentages on the summary should be the same as in Remark 42
-        (so a more lenient 0.2% Rama outliers, and simply 98% not >98% favored).
     Tool for building ensembles from arbitrary sets of models
-    Better variation in KiNG window sizes (default = 90%,90% ?)
-    Add SMTP support to feedback sending; cached feedback lacks email addresses!
     Kinemages are text/plain instead of downloaded
-    Users skipped past analysis page too fast and then couldn't go back
-        Make notebook entries more obviously labeled and add icons?
-  > Refine presentation of notebook entries and add single entry viewer (inline or pop-up?)
-        Reverse chronological
+    Convert "number of H added, etc" text into tables
+    Use popular downloads as a set, not a list (multiple multi-kins, etc)
         Simple kinemage should go into popular downloads list
-        Merge upload *setup* pages together
+        Do we really need a popular downloads feature at all?
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -81,6 +73,23 @@
 - merged upload_pdb_setup.php and upload_other_setup.php. This simplifies the
   site overall, and the overwhelmingness of the UI is less important b/c 90% of
   uploads will now happen from welcome.php
+- changed "Advanced options" styles to be less obtrusive
+- added upload options (e.g. EDS fetch) to welcome.php using JavaScript
+- fixed title on makekin_done.php; was "AAC and geometry"
+- reformatted notebook entries on welcome.php to be reverse chronological
+- added simple popup viewer for lab notebook entries
+- greatly simplified displayModel/EnsembleTools() code; added small icons
+- cleared out unused files from public_html/img
+- matched lab notebook TOC to the TOC in welcome.php
+- added (optional) icons to notebook entries to facilitate user recognition
+- changed feedback system to be able to use SMTP; it seems to work
+- made splitModelsNMR() an alias for splitPdbModels(); marked it as deprecated.
+- made KiNG window sizes a bit larger all around. Unfortunately, percentage
+  sizing doesn't work reliably in either Safari or Firefox. Too bad.
+- changed lab notebook titles to "Verbed name-of-tool for PDB file" style
+- changed "AAC analysis/analyses" to "Analyze AAC"
+- simplified pages/ with a generic "done" page that uses notebook entry title
+  All remaining specialty "done" pages have additional special code in them.
 
 ### 3beta21 ###
 - changed config.php to config.php.defaults; modified setup.sh appropriately

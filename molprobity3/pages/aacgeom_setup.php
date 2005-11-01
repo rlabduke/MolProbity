@@ -14,7 +14,7 @@ class aacgeom_setup_delegate extends BasicDelegate {
 */
 function display($context)
 {
-    echo mpPageHeader("All-atom contact and geometric analyses");
+    echo mpPageHeader("Analyze all-atom contacts and geometry");
     
     //{{{ Script to set default choices based on model properties.
 ?><script language='JavaScript'>
@@ -149,7 +149,7 @@ function checkSettingsBeforeSubmit()
 ?>
 <hr>
 <div class='help_info'>
-<h4>All-atom contact and geometric analyses</h4>
+<h4>Analyze all-atom contacts and geometry</h4>
 <i>TODO: Help text about analysis goes here</i>
 </div>
 <?php
@@ -211,7 +211,7 @@ function onRunAnalysis($arg, $req)
         
         // launch background job
         pageGoto("job_progress.php");
-        launchBackground(MP_BASE_DIR."/jobs/aacgeom.php", "aacgeom_done.php", 5);
+        launchBackground(MP_BASE_DIR."/jobs/aacgeom.php", "generic_done.php", 5);
     }
 }
 #}}}########################################################################

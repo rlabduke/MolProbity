@@ -108,10 +108,11 @@ setProgress($tasks, null);
 //-----------------------------------------------------------------
 
 $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
-    "All-atom contact and geometric analyses: $ensemble[pdb]",
+    "Analyzed all-atom contacts and geometry for $ensemble[pdb]",
     $labbookEntry,
     $ensID,
-    "auto"
+    "auto",
+    "clash_rama.png"
 );
 ############################################################################
 // Clean up and go home

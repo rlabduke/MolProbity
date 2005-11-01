@@ -118,7 +118,7 @@ function onRunPrekin($arg, $req)
         mpLog("makekin:Creating simple kinemages from built-in Prekin script '$req[scriptName]'");
         // launch background job
         pageGoto("job_progress.php");
-        launchBackground(MP_BASE_DIR."/jobs/makekin.php", "makekin_done.php", 3);
+        launchBackground(MP_BASE_DIR."/jobs/makekin.php", "generic_done.php", 3);
     }
     else
     {
