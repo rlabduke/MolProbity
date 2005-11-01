@@ -81,10 +81,11 @@ if($hcount)
 $entry .= "Asn/Gln/His flips were not optimized.\n";
 $entry .= "<p>You can now <a href='$url'>download the annotated PDB file</a> (".formatFilesize(filesize($pdb)).").</p>\n";
 $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
-    "Adding H with Reduce -nobuild gives $newModel[pdb]",
+    "Added H with -nobuild to get $newModel[pdb]",
     $entry,
     "$modelID|$newModel[id]", // applies to both old and new model
-    "auto"
+    "auto",
+    "add_h.png"
 );
 
 setProgress($tasks, null);

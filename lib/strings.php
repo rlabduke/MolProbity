@@ -33,11 +33,18 @@ function formatFilesize($size)
 }
 #}}}########################################################################
 
-#{{{ formatDayTime - formats the day and time from a Unix timestamp
+#{{{ formatDayTime(Brief) - formats the day and time from a Unix timestamp
 ############################################################################
 function formatDayTime($time)
 {
     return formatDayAdaptive($time) . " at " . formatTime($time);
+}
+
+function formatDayTimeBrief($time)
+{
+    $day = formatDayAdaptive($time);
+    if($day == 'Today') return formatTime($time);
+    else                return $day;
 }
 #}}}########################################################################
 

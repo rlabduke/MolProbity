@@ -159,10 +159,11 @@ $entry .= "<li><code>probe $flags $model[pdb] >> $outname</code></li>\n";
 $entry .= "</ul>\n";
 
 $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
-    "Interface contacts: $model[pdb]",
+    "Visualized interface contacts for $model[pdb]",
     $entry,
     $modelID,
-    "auto"
+    "auto",
+    "barnase_barstar.png"
 );
 
 setProgress($tasks, null);

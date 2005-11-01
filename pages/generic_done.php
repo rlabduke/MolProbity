@@ -1,11 +1,14 @@
 <?php # (jEdit options) :folding=explicit:collapseFolds=1:
 /*****************************************************************************
-    This page presents the kinemage created by the user.
+    This page sumarizes the results of some operation by displaying
+    a lab notebook entry. Afterwards, it will allow the user to pageReturn().
+    
+    This is a generic endpoint for most of the MolProbity tasks.
 *****************************************************************************/
 require_once(MP_BASE_DIR.'/lib/labbook.php');
 
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
-class interface_done_delegate extends BasicDelegate {
+class generic_done_delegate extends BasicDelegate {
     
 #{{{ display - creates the UI for this page
 ############################################################################
@@ -15,10 +18,10 @@ class interface_done_delegate extends BasicDelegate {
 */
 function display($context)
 {
-    echo mpPageHeader("Visualize interface contacts");
-
     $labbook = openLabbook();
     $num = $context['labbookEntry'];
+
+    echo mpPageHeader($labbook[$num]['title']);
     echo formatLabbookEntry($labbook[$num]);
     echo "<p><a href='".makeEventURL('onEditNotebook', $num)."'>Edit notebook entry</a></p>\n";
     echo "<p>" . makeEventForm("onReturn");

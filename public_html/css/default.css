@@ -98,17 +98,17 @@ div.alert {
 }
 
 div.side_options {
-    background-color : #ccccb2 ;
-    color : #000000 ;
-    border : 1px solid #999966 ;
+    /*background-color : #ccccb2 ;
+    color : #000000 ;*/
+    border : 1px dotted #999966 ;
     padding : 0.4em ;
     float : right ;
 }
 
 div.inline_options {
-    background-color : #ccccb2 ;
-    color : #000000 ;
-    border : 1px solid #999966 ;
+    /*background-color : #ccccb2 ;
+    color : #000000 ;*/
+    border : 1px dotted #999966 ;
     padding : 0.4em ;
 }
 

@@ -114,10 +114,11 @@ $entry = "";
 $entry .= "<p>Your kinemage is ready for viewing in KiNG: ".linkKinemage("$model[prefix]$scriptName.kin")."</p>\n";
 
 $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
-    "Simple kinemage: $model[pdb]",
+    "Made simple kinemage of $model[pdb]",
     $entry,
     $modelID,
-    "auto"
+    "auto",
+    "porin_barrel.png"
 );
 
 setProgress($tasks, null);

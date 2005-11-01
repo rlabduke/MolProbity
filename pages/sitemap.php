@@ -30,7 +30,7 @@ function display($context)
     echo "<li>Check for Asn, Gln, His flips.</li>\n";
     echo "</ul>\n";
 
-    echo "<h3><a href='".makeEventURL("onNavBarCall", "aacgeom_setup.php")."'>All-atom contact and geometric analyses</a></h3>\n<ul>\n";
+    echo "<h3><a href='".makeEventURL("onNavBarCall", "aacgeom_setup.php")."'>Analyze all-atom contacts and geometry</a></h3>\n<ul>\n";
     echo "<li>All-atom steric contacts (clashlist, clash score, contact dots)</li>\n";
     echo "<li>Protein geometry evaluation (Ramachandran plot, rotamers, C&beta; deviations)</li>\n";
     echo "<li>Nucleic acid geometry (base-phosphate perpendiculars)</li>\n";
@@ -55,7 +55,7 @@ function display($context)
 
     echo "<hr>\n";
 
-    echo "<h3><a href='".makeEventURL("onNavBarCall", "ens_aacgeom_setup.php")."'>All-atom contact and geometric analyses for ensembles</a></h3>\n<ul>\n";
+    echo "<h3><a href='".makeEventURL("onNavBarCall", "ens_aacgeom_setup.php")."'>Analyze all-atom contacts and geometry for ensembles</a></h3>\n<ul>\n";
     echo "<li>Multi-criterion kinemage for multi-model ensembles</li>\n";
     echo "</ul>\n";
 

@@ -21,18 +21,20 @@ function display($context)
     
     // Set time zone form
     echo makeEventForm("onSetTimezone");
-    echo "Now: " . formatTime(time());
-    echo "\n";
-    echo timeZonePicker('timezone', $_SESSION['timeZone']);
-    echo "<input type='submit' name='cmd' value='Set time zone'>\n";
-    echo "</form>\n";
-    echo "<hr />\n";
+    echo "<table border='0' width='100%'><tr>\n";
+    echo "<td>Current time: " . formatTime(time()) . "</td>\n";
+    echo "<td>" . timeZonePicker('timezone', $_SESSION['timeZone']);
+    echo "<input type='submit' name='cmd' value='Set time zone'></td>\n";
+    echo "</tr></table></form>\n";
+    echo "</div>\n<br>\n<div class='pagecontent'>\n";
     
     // Notebook table of contents
-    echo "<a name='top'>\n";
+    echo "<h3><a name='top'>Table of contents:</a></h3>\n";
+    echo "<div class='indent'>\n";
     $this->printTOC($labbook);
     echo makeEventForm("onNotebookEdit");
-    echo "<input type='submit' name='cmd' value='Create new entry'>\n</form>\n</a>\n<br clear='all' />\n";
+    echo "<input type='submit' name='cmd' value='Create new entry'>\n</form>\n";
+    echo "</div>\n";
     
     // Actual notebook entries
     foreach($labbook as $num => $entry)
@@ -66,14 +68,16 @@ function printTOC($book)
     }
     else
     {
-        echo "<ul>\n";
+        echo "<table border='0' width='100%'>\n";
         foreach($book as $num => $entry)
         {
-            $title = $entry['title'];
-            if($title == "") $title = "(no title)";
-            echo "<li><a href='#entry$num'>$title</a> [".formatDayTime($entry['modtime'])."]</li>\n";
+                $title = $entry['title'];
+                if($title == "") $title = "(no title)";
+                echo "<tr><td><img src='img/$entry[thumbnail]' border='0' width='20' height='20'></td>";
+                echo "<td><a href='#entry$num'>$title</a></td>";
+                echo "<td align='right'><i>".formatDayTimeBrief($entry['modtime'])."</i></td></tr>\n";
         }
-        echo "</ul>\n";
+        echo "</table>\n";
     }
 }
 #}}}########################################################################

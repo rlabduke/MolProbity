@@ -47,10 +47,11 @@ $model = $_SESSION['models'][$modelID];
 $labbookEntry = runAnalysis($modelID, $_SESSION['bgjob']);
 
 $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
-    "All-atom contact and geometric analyses: $model[pdb]",
+    "Analyzed ".($_SESSION['bgjob']['doAAC'] ? "all-atom contacts and " : "")."geometry for $model[pdb]",
     $labbookEntry,
     $modelID,
-    "auto"
+    "auto",
+    ($_SESSION['bgjob']['doAAC'] ? "clash_rama.png" : "ramaplot.png")
 );
 
 /*********************

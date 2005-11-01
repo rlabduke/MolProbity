@@ -11,6 +11,16 @@
 //  If you run this code, set this to your address.
 define("MP_EMAIL_WEBMASTER", "webmaster@$_SERVER[SERVER_NAME]");
 
+// MP_SMTP_SERVER / MP_SMTP_USER
+//  An SMTP server for sending feedback emails,
+//  and the email address they should be "from".
+//  It cannot require authentication if this is to work,
+//  but MP_SMTP_USER should be allowed to send mail on that server.
+//  If left undefined, email will be sent via the PHP mail() function.
+//  (Which usually mean via Unix sendmail on the web server.)
+//define("MP_SMTP_SERVER", "smtp.example.com");
+//define("MP_SMTP_USER", "john.doe@example.com");
+
 // MP_BIN_PATH
 //  Directory(s) where all MolProbity-specific binary
 //  executables are stored. Remember, apache must

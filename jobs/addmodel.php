@@ -206,13 +206,14 @@ if(isset($id))
 
     if(count($idList) > 1) // NMR/multiple models
     {
-        $title = count($idList)."-model ensemble added";
+        $ensemble = $_SESSION['ensembles'][$id];
+        $title = "Uploaded ".count($idList)."-model ensemble as $ensemble[pdb]";
         $s .= "Your file from $fileSource was uploaded as an ensemble of ".count($idList)." separate models.\n";
         $s .= "The following description applies to the first of these models, which is shown in the thumbnail kinemage:\n";
     }
     else // xray/single model
     {
-        $title = "$model[pdb] added";
+        $title = "Uploaded PDB file as $model[pdb]";
         $s .= "Your file from $fileSource was uploaded as $model[pdb]\n";
     }
     $details = describePdbStats($model['stats'], true);

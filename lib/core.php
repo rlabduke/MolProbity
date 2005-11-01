@@ -272,7 +272,7 @@ function setProgress($tasks, $active)
             $foundActive = true;
         }
         elseif($foundActive)
-            fwrite($f, "<br><img src='img/blank16.png' width='16' height='16'> $task\n");
+            fwrite($f, "<br><img src='img/clear_1x1.gif' width='16' height='16'> $task\n");
         else
             fwrite($f, "<br><img src='img/checkmark.png' width='16' height='16'> $task\n");
     }
