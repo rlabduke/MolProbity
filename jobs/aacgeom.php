@@ -43,15 +43,18 @@ OUTPUTS (via $_SESSION['bgjob']):
 ############################################################################
 $modelID = $_SESSION['bgjob']['modelID'];
 $model = $_SESSION['models'][$modelID];
+$opts = $_SESSION['bgjob'];
+$doAAC = ($opts['doKinemage'] && ($opts['kinClashes'] || $opts['kinHbonds'] || $opts['kinContacts']))
+    || ($opts['doCharts'] && ($opts['chartClashlist']));
 
-$labbookEntry = runAnalysis($modelID, $_SESSION['bgjob']);
+$labbookEntry = runAnalysis2($modelID, $_SESSION['bgjob']);
 
 $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
-    "Analyzed ".($_SESSION['bgjob']['doAAC'] ? "all-atom contacts and " : "")."geometry for $model[pdb]",
+    "Analyzed ".($doAAC ? "all-atom contacts and " : "")."geometry for $model[pdb]",
     $labbookEntry,
     $modelID,
     "auto",
-    ($_SESSION['bgjob']['doAAC'] ? "clash_rama.png" : "ramaplot.png")
+    ($doAAC ? "clash_rama.png" : "ramaplot.png")
 );
 
 /*********************

@@ -276,8 +276,9 @@ if($end_time > end($times))     $end_time   = end($times)+(60*60*24);
     echo "<input type='submit' name='cmd' value='Refresh'>\n";
     echo "<p>\n";
     echo "<br>".count($log)." records found in the log.\n";
-    echo "<br>".uniqueSessions($log)." unique sessions active during this timeframe. (Bots and crawlers not counted.)\n";
+    echo "<br>".uniqueSessions($log)." unique sessions active during this timeframe.\n";
     echo "<br>".uniqueIPs($log)." unique IP addresses active during this timeframe. This is an <i>estimate</i> of the unique users.\n";
+    echo "<br><i>All known bots and crawlers have been omitted from these statistics.</i>\n";
     echoBrowserTable($log);
     echo "<hr>\n";
     

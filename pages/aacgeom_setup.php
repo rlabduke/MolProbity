@@ -21,44 +21,49 @@ function display($context)
 <!--
 var selectionHasH = true
 
-function syncSubcontrols()
+function hideKinOpts()
 {
-    // Enable / disable subsettings based on state of contact dots button
-    // Notice radio buttons are accessed by name with a numeric index
-    var willMakeDots = document.forms[0].doAAC.checked && document.forms[0].doMultiKin.checked
-    document.forms[0].showHbonds.disabled       = !willMakeDots
-    document.forms[0].showContacts.disabled     = !willMakeDots
-    document.forms[0].multiKinExtras.disabled   = !document.forms[0].doMultiKin.checked
+    var block = document.getElementById('kin_opts')
+    if(document.forms[0].doKinemage.checked) block.style.display = 'block'
+    else block.style.display = 'none'
+}
+
+function hideChartOpts()
+{
+    var block = document.getElementById('chart_opts')
+    if(document.forms[0].doCharts.checked) block.style.display = 'block'
+    else block.style.display = 'none'
 }
 
 function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
 {
     selectionHasH = doAAC
     
-    document.forms[0].doAAC.checked             = doAAC
-    document.forms[0].showContacts.checked      = !isBig
+    document.forms[0].kinClashes.checked        = doAAC
+    document.forms[0].kinHbonds.checked         = doAAC
+    document.forms[0].kinContacts.checked       = doAAC && !isBig
+    document.forms[0].chartClashlist.checked    = doAAC
     
-    document.forms[0].doRama.checked            = hasProtein
-    document.forms[0].doRota.checked            = hasProtein
-    document.forms[0].doCbDev.checked           = hasProtein
+    document.forms[0].kinRama.checked           = hasProtein
+    document.forms[0].kinRota.checked           = hasProtein
+    document.forms[0].kinCBdev.checked          = hasProtein
+    document.forms[0].chartRama.checked         = hasProtein
+    document.forms[0].chartRota.checked         = hasProtein
+    document.forms[0].chartCBdev.checked        = hasProtein
     
-    document.forms[0].doBaseP.checked           = hasNucAcid
-    
-    syncSubcontrols() // enables/disables subsettings
+    document.forms[0].kinBaseP.checked          = hasNucAcid
+    document.forms[0].chartBaseP.checked        = hasNucAcid
 }
 
 // Try to make sure we have H if we're doing AAC
 function checkSettingsBeforeSubmit()
 {
-    if(!  (document.forms[0].doSummaryStats.checked
-        || document.forms[0].doMultiKin.checked
-        || document.forms[0].doMultiChart.checked))
-    {
-        window.alert("Please choose at least one form of output.");
-        return false; // don't submit
-    }
-    
-    if(!selectionHasH && document.forms[0].doAAC.checked)
+    var doAAC = (document.forms[0].kinClashes.checked
+        || document.forms[0].kinHbonds.checked
+        || document.forms[0].kinContacts.checked
+        || document.forms[0].chartClashlist.checked);
+        
+    if(!selectionHasH && doAAC)
     {
         return window.confirm("The file you choose may not have all its H atoms added."
         +" All-atom contacts requires all H atoms to function properly."
@@ -76,7 +81,6 @@ function checkSettingsBeforeSubmit()
         $lastUsedID = $context['modelID'];
         if(!$lastUsedID) $lastUsedID = $_SESSION['lastUsedModelID'];
         
-        $jsOnLoad = "syncSubcontrols()"; // cmd to run on page load -- may be changed below
         echo makeEventForm("onRunAnalysis", null, false, "checkSettingsBeforeSubmit()");
         echo "<h3>Select a model to work with:</h3>";
         echo "<p><table width='100%' border='0' cellspacing='0' cellpadding='2'>\n";
@@ -106,38 +110,29 @@ function checkSettingsBeforeSubmit()
         echo "</table></p>\n";
 ?>
 <hr>
-<h3>Choose which analyses to run:</h3>
+<h3>Choose the outputs you want:</h3>
 <div class='indent'>
-<h5>All-atom contact analysis</h5>
-    <div class='indent'>
-    <label><input type='checkbox' name='doAAC' value='1' onclick='syncSubcontrols()'> Clashscore, clash list, and/or contact dots (depending on output formats)</label>
-    <div class='indent'>
-        <label><input type='checkbox' name='showHbonds' value='1' checked> Show H-bonds in kinemage output</label>
-        <br><label><input type='checkbox' name='showContacts' value='1' checked> Show van der Waals contacts in kinemage output</label>
+<h5 class='nospaceafter'><label><input type='checkbox' name='doKinemage' value='1' checked onclick='hideKinOpts()'> 3-D kinemage graphics</label></h5>
+    <div class='indent' id='kin_opts'>
+    <br><label><input type='checkbox' name='kinClashes' value='1'> Clashes</label>
+    <br><label><input type='checkbox' name='kinHbonds' value='1'> Hydrogen bonds</label>
+    <br><label><input type='checkbox' name='kinContacts' value='1'> van der Waals contacts</label>
+    <br><label><input type='checkbox' name='kinRama' value='1'> Ramachandran plots</label>
+    <br><label><input type='checkbox' name='kinRota' value='1'> Rotamer evaluation</label>
+    <br><label><input type='checkbox' name='kinCBdev' value='1'> C&beta; deviations</label>
+    <br><label><input type='checkbox' name='kinBaseP' value='1'> Base-phosphate perpendiculars</label>
+    <br><label><input type='checkbox' name='kinAltConfs' value='1'> Alternate conformations</label>
+    <br><label><input type='checkbox' name='kinBQ' value='1'> B-factors and occupancy</label>
+    <br><label><input type='checkbox' name='kinRibbons' value='1'> Ribbons</label>
     </div>
+<h5 class='nospaceafter'><label><input type='checkbox' name='doCharts' value='1' checked onclick='hideChartOpts()'> Charts, plots, and tables</label></h5>
+    <div class='indent' id='chart_opts'>
+    <br><label><input type='checkbox' name='chartClashlist' value='1'> Clashes &amp; clashscore</label>
+    <br><label><input type='checkbox' name='chartRama' value='1'> Ramachandran plots</label>
+    <br><label><input type='checkbox' name='chartRota' value='1'> Rotamer evaluation</label>
+    <br><label><input type='checkbox' name='chartCBdev' value='1'> C&beta; deviations</label>
+    <br><label><input type='checkbox' name='chartBaseP' value='1'> Base-phosphate perpendiculars</label>
     </div>
-<h5>Protein geometry analysis</h5>
-    <div class='indent'>
-    <label><input type='checkbox' name='doRama' value='1'> Ramachandran plots</label>
-    <br><label><input type='checkbox' name='doRota' value='1'> Rotamer evaluation</label>
-    <br><label><input type='checkbox' name='doCbDev' value='1'> C&beta; deviations</label>
-    </div>
-<h5>Nucleic acid geometry analysis</h5>
-    <div class='indent'>
-    <label><input type='checkbox' name='doBaseP' value='1'> Base-phosphate perpendiculars</label>
-    </div>
-</div>
-
-<hr>
-<h3>Choose output formats for requested analysis:</h3>
-<div class='indent'>
-    <label><input type='checkbox' name='doSummaryStats' value='1' checked> <b>Summary statistics</b></label>
-    <br><label><input type='checkbox' name='doMultiKin' value='1' checked onclick='syncSubcontrols()'> <b>Visual/3-D</b>: multi-criterion kinemage + other plots and kinemages</label>
-    <div class='indent'>
-        <label><input type='checkbox' name='multiKinExtras' value='1' checked> Include ribbons, B-factor and occupancy colors, and alternate conformation markers.</label>
-    </div>
-    <label><input type='checkbox' name='doMultiChart' value='1' checked> <b>Tabular</b>: multi-criterion chart + other lists and tables</label>
-    <br><label><input type='checkbox' name='doRemark42' value='1' checked> <b>REMARK 42</b>: official summary of MolProbity validation embedded in PDB file</label>
 </div>
 <?php
         echo "<p><table width='100%' border='0'><tr>\n";
@@ -145,7 +140,8 @@ function checkSettingsBeforeSubmit()
         echo "<td align='right'><input type='submit' name='cmd' value='Cancel'></td>\n";
         echo "</tr></table></p></form>\n";
         // Rather than trying to put this in onload(), we'll do it after the form is defined.
-        echo "<script language='JavaScript'>\n<!--\n$jsOnLoad\n// -->\n</script>\n";
+        if($jsOnLoad)
+            echo "<script language='JavaScript'>\n<!--\n$jsOnLoad\n// -->\n</script>\n";
 ?>
 <hr>
 <div class='help_info'>

@@ -49,6 +49,7 @@
     Get models from CASP web site? (where is it??)
     Allow escape from job when no process number appears after x sec.
     Add whois query to session listing
+    Remove runAnalysis() and makeMulticritKin()
 }}}
     Develop "helper" pages; mark optional steps clearly
     Pick lowest resolution number mentioned in file; allow override?
@@ -60,7 +61,6 @@
     Tool for building ensembles from arbitrary sets of models
     Kinemages are text/plain instead of downloaded
     Convert "number of H added, etc" text into tables
-  * Clarify interface for unified validation (AAC + geom)
     Use popular downloads as a set, not a list (multiple multi-kins, etc)
         Simple kinemage should go into popular downloads list
         Do we really need a popular downloads feature at all?
@@ -80,6 +80,8 @@
 - added Gary's list of interacting atoms to interface vis pages
 - from welcome.php, skip over model-choice segment of interface vis
 - fixed bug in bot filtering for usage_history.php, listed more bot types
+- totally rearranged the main validation interface, which required making
+  runAnalysis2() and makeMulticritKin2(). Old versions should go away later.
 
 ### 3beta22 ###
 - merged upload_pdb_setup.php and upload_other_setup.php. This simplifies the
