@@ -73,7 +73,7 @@ function printTOC($book)
         {
                 $title = $entry['title'];
                 if($title == "") $title = "(no title)";
-                echo "<tr><td><img src='img/$entry[thumbnail]' border='0' width='20' height='20'></td>";
+                echo "<tr><td width='30'><img src='img/$entry[thumbnail]' border='0' width='20' height='20'></td>";
                 echo "<td><a href='#entry$num'>$title</a></td>";
                 echo "<td align='right'><i>".formatDayTimeBrief($entry['modtime'])."</i></td></tr>\n";
         }

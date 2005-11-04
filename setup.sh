@@ -20,14 +20,14 @@ fi
 # Create config file
 cp config/config.php.sample config/config.php
 
-# Set world-writable permisions on data/
+# Set world-writable permisions on data/ and tmp/
 chmod 777 public_html/data
-touch public_html/data/molprobity.log
-chmod 666 public_html/data/molprobity.log
-
-# Set world-writable permisions on feedback/ and tmp/
-chmod 777 feedback/
 chmod 777 tmp/
+
+# Set world-writable permisions on feedback/
+chmod 777 feedback/
+touch feedback/molprobity.log
+chmod 666 feedback/molprobity.log
 
 # Create symlinks for executables
 cd bin

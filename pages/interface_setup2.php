@@ -30,6 +30,11 @@ function display($context)
 ?>
 <table border='0' width='100%' cellspacing='0' cellpadding='4'><tr align='left' valign='top'>
 <td>
+<p>Type(s) of output: <select name="output_type">
+        <option value='both'>kinemage and list of contacts</option>
+        <option value='kin'>kinemage only</option>
+        <option value='list'>list of contacts only</option>
+    </select>
 <p>Mode of action: <select name="probe_mode">
     <option value="both" selected>both (src &lt;=&gt; targ)</option>
     <option value="once">once (src -&gt; targ)</option>
@@ -62,9 +67,9 @@ function display($context)
 <br><input type='checkbox' name='drop_flag' value='1'> Non-selected atoms don't exist (-drop)
 <br><input type="checkbox" name="elem_masters" value="1"> Masters for each element (C,H,O,...)
 <p>Output file: <?php echo $model['prefix']; ?><input type="text" name="kin_suffix" value="interface" size=10 maxlength=20>.kin
-<br><small>(Alphanumeric only, no spaces or symbols, &lt;20 chars)</small>
+    <br><small>(Will be overwritten, alphanumeric only, no spaces or symbols, &lt;20 chars)</small>
 </td>
-<!-- ##################################################################### -->
+<td width='20'><!-- ##################################################################### --></td>
 <td>
 Just as a reminder:
 <ul>
