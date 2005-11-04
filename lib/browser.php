@@ -41,6 +41,12 @@
         Microsoft Windows
         Apple Macintosh
         Linux
+        SGI
+        Sun
+        OS/2
+        BeOS
+        Java
+        Bot/Crawler
 
     Anything not determined to be one of the above is considered to by Unix
     because most Unix based browsers seem to not report the operating system.
@@ -82,11 +88,17 @@ function recognizeUserAgent($agent = null)
         $bd['platform'] = "Apple Macintosh";
     elseif (eregi("linux", $agent))
         $bd['platform'] = "Linux";
+    elseif (eregi("sgi|irix", $agent))
+        $bd['platform'] = "SGI";
+    elseif (eregi("sunos", $agent))
+        $bd['platform'] = "Sun";
     elseif (eregi("OS/2", $agent))
         $bd['platform'] = "OS/2";
     elseif (eregi("BeOS", $agent))
         $bd['platform'] = "BeOS";
-    elseif (eregi("bot|crawler", $agent))
+    elseif (eregi("java|jakarta", $agent))
+        $bd['platform'] = "Java";
+    elseif (eregi('bot|crawler|yahoo|ask|heritrix', $agent))
         $bd['platform'] = "Bot/Crawler";
 
     // test for Opera        

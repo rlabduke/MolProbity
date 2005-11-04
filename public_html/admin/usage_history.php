@@ -64,8 +64,8 @@ function removeBots($records)
         $uid = $r[0].':'.$r[1];
         if($r[3] == "browser-detect")
         {
-            $br = recognizeUserAgent($rec[4]);
-            if($br['platform'] == "Bot/Crawler")
+            $br = recognizeUserAgent($r[4]);
+            if($br['platform'] == "Bot/Crawler" || $br['platform'] == "Java")
                 $bots[$uid] = 1;
         }
     }
