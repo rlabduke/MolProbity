@@ -23,7 +23,7 @@ Summarizes MolProbity usage over a specified date range.
 function getRecords($start, $end)
 {
     $records = array();
-    $in = fopen(MP_BASE_DIR.'/public_html/data/molprobity.log', 'rb');
+    $in = fopen(MP_BASE_DIR.'/feedback/molprobity.log', 'rb');
     if($in) while(!feof($in))
     {
         $s = trim(fgets($in, 4096));
@@ -46,6 +46,35 @@ function selectRecords($records, $start, $end)
     foreach($records as $r)
     {
         if($start <= $r[2] && $r[2] <= $end)
+            $newrec[] = $r;
+    }
+    return $newrec;
+}
+#}}}########################################################################
+
+#{{{ removeBots
+############################################################################
+/** Returns records from getRecords() minus those caused by bots. */
+function removeBots($records)
+{
+    $bots = array();
+    foreach($records as $r)
+    {
+        // Assume IP addr. + sess. ID = globally unique ID
+        $uid = $r[0].':'.$r[1];
+        if($r[3] == "browser-detect")
+        {
+            $br = recognizeUserAgent($rec[4]);
+            if($br['platform'] == "Bot/Crawler")
+                $bots[$uid] = 1;
+        }
+    }
+    $newrec = array();
+    foreach($records as $r)
+    {
+        // Assume IP addr. + sess. ID = globally unique ID
+        $uid = $r[0].':'.$r[1];
+        if(! $bots[$uid])
             $newrec[] = $r;
     }
     return $newrec;
@@ -146,51 +175,57 @@ function divideIntoYears($absStart, $absEnd)
 }
 #}}}########################################################################
 
-#{{{ countBrowsers, removeBots
+#{{{ countBrowsers, echoBrowserTable
 ############################################################################
-/** Array mapping browser names to counts of their occurance. */
+/**
+* Three arrays mapping browser names to counts of their occurance:
+*   by platform, by browser, by "platform - browser"
+*/
 function countBrowsers($records)
 {
+    $platforms = array();
     $browsers = array();
+    $combos = array();
     //echo "<pre>\n";
     foreach($records as $rec)
     {
         if($rec[3] == "browser-detect")
         {
             $br = recognizeUserAgent($rec[4]);
-            $browsers[ $br['platform']." - ".$br['browser'] ] += 1;
+            $platforms[ $br['platform'] ] += 1;
+            $browsers[ $br['browser'] ] += 1;
+            $combos[ $br['platform']." - ".$br['browser'] ] += 1;
             //if($br['platform'] == "Unknown") echo $rec[4] . "\n";
         }
     }
     //echo "</pre>\n";
+    ksort($platforms);
     ksort($browsers);
-    return $browsers;
+    ksort($combos);
+    return array($platforms, $browsers, $combos);
 }
 
-/** Returns records from getRecords() minus those caused by bots. */
-function removeBots($records)
+function echoBrowserTable($records)
 {
-    $bots = array();
-    foreach($records as $r)
+    list($platforms, $browsers, $combos) = countBrowsers($records);
+    // Horizontal headers: platforms
+    echo "<p><table cellspacing='4'><tr align='center'><td></td>";
+    foreach($platforms as $p => $pCount) echo "<td><b>$p</b></td>";
+    echo "<td bgcolor='#ffff99'><b><i>total</i></b></td></tr>\n";
+    // Rows: browser types
+    $total = 0;
+    foreach($browsers as $b => $bCount)
     {
-        // Assume IP addr. + sess. ID = globally unique ID
-        $uid = $r[0].':'.$r[1];
-        if($r[3] == "browser-detect")
-        {
-            $br = recognizeUserAgent($rec[4]);
-            if($br['platform'] == "Bot/Crawler")
-                $bots[$uid] = 1;
-        }
+        echo "<tr align='center'><td><b>$b</b></td>";
+        foreach($platforms as $p => $pCount) echo "<td>".$combos["$p - $b"]."</td>";
+        echo "<td bgcolor='#ffff99'>$bCount</td></tr>\n";
+        $total += $bCount;
     }
-    $newrec = array();
-    foreach($records as $r)
-    {
-        // Assume IP addr. + sess. ID = globally unique ID
-        $uid = $r[0].':'.$r[1];
-        if(! $bots[$uid])
-            $newrec[] = $r;
-    }
-    return $newrec;
+    // Horizontal footers: platform counts
+    echo "<tr align='center' bgcolor='#ffff99'><td><b><i>total</i></b></td>";
+    foreach($platforms as $p => $pCount) echo "<td>$pCount</td>";
+    echo "<td>$total</td></tr>\n";
+    echo "</table></p>\n";
 }
 #}}}########################################################################
 
@@ -207,7 +242,7 @@ if(isset($_REQUEST['start_date']) && strtotime($_REQUEST['start_date']) != -1)
 else $start_time = strtotime('1 Jan 2000');
 if(isset($_REQUEST['end_date']) && strtotime($_REQUEST['end_date']) != -1)
     $end_time = strtotime($_REQUEST['end_date']);
-else $end_time = strtotime('1 Jan 2030');
+else $end_time = strtotime('1 Jan 2030'); // past this we exceed the Unix timestamp
 
 $log = getRecords($start_time, $end_time);
 $log = removeBots($log);
@@ -243,10 +278,7 @@ if($end_time > end($times))     $end_time   = end($times)+(60*60*24);
     echo "<br>".count($log)." records found in the log.\n";
     echo "<br>".uniqueSessions($log)." unique sessions active during this timeframe. (Bots and crawlers not counted.)\n";
     echo "<br>".uniqueIPs($log)." unique IP addresses active during this timeframe. This is an <i>estimate</i> of the unique users.\n";
-    echo "<p><table cellspacing='4'>\n";
-    foreach(countBrowsers($log) as $browser => $cnt)
-        echo "<tr><td>$browser</td><td align='right'>$cnt</td></tr>\n";
-    echo "</table></p>\n";
+    echoBrowserTable($log);
     echo "<hr>\n";
     
     echo "<h3>Grand summary</h3>\n";

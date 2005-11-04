@@ -167,7 +167,7 @@ function displayModelTools($context)
         'reduce'    => array('desc' => 'Add hydrogens', 'page' => 'reduce_setup.php', 'rel' => 1, 'img' => 'add_h.png'),
         'aacgeom'   => array('desc' => 'Analyze all-atom contacts and geometry', 'page' => 'aacgeom_setup.php', 'rel' => 1, 'img' => 'clash_rama.png'),
         'geomonly'  => array('desc' => 'Analyze geometry without all-atom contacts', 'page' => 'aacgeom_setup.php', 'rel' => 1, 'img' => 'ramaplot.png'),
-        'iface'     => array('desc' => 'Visualize interface contacts', 'page' => 'interface_setup1.php', 'rel' => 1, 'img' => 'barnase_barstar.png'),
+        'iface'     => array('desc' => 'Visualize interface contacts', 'handler' => 'onVisInterface', 'rel' => 1, 'img' => 'barnase_barstar.png'),
         //'sswing'    => array('desc' => 'Refit sidechains', 'page' => 'sswing_setup1.php', 'rel' => 1, 'img' => ''),
         'makekins'  => array('desc' => 'Make simple kinemages', 'page' => 'makekin_setup.php', 'rel' => 1, 'img' => 'porin_barrel.png'),
         //'' => array('desc' => '', 'page' => '', 'rel' => 1, 'img' => ''),
@@ -238,7 +238,8 @@ function formatTools($tools)
     echo "<tr valign='top'><td><table border='0'>\n"; // start large icon column
     foreach($major as $item)
     {
-        $a = "<a href='".makeEventURL("onNavBarCall", $item['page'])."'>";
+        if($item['handler'])    $a = "<a href='".makeEventURL($item['handler'])."'>";
+        else                    $a = "<a href='".makeEventURL("onNavBarCall", $item['page'])."'>";
         if($item['img'])    echo "<tr><td>$a<img src='img/$item[img]' alt='$img[desc]' border='0'></a></td>";
         else                echo "<tr><td></td>";
         echo "<td>$a$item[desc]</a></td></tr>\n";
@@ -248,7 +249,8 @@ function formatTools($tools)
     echo "<td><table border='0'>\n"; // end large; start small text column
     foreach($minor as $item)
     {
-        $a = "<a href='".makeEventURL("onNavBarCall", $item['page'])."'>";
+        if($item['handler'])    $a = "<a href='".makeEventURL($item['handler'])."'>";
+        else                    $a = "<a href='".makeEventURL("onNavBarCall", $item['page'])."'>";
         if($item['img'])    echo "<tr><td>$a<img src='img/$item[img]' alt='$img[desc]' border='0' width='40' height='40'></a></td>";
         else                echo "<tr><td></td>";
         echo "<td>$a$item[desc]</a></td></tr>\n";
@@ -319,7 +321,7 @@ function displayEntries($context)
             if(++$entry_count > 3) break;
             $title = $entry['title'];
             if($title == "") $title = "(no title)";
-            echo "<tr><td><img src='img/$entry[thumbnail]' border='0' width='40' height='40'></td>";
+            echo "<tr><td width='50'><img src='img/$entry[thumbnail]' border='0' width='40' height='40'></td>";
             //echo "<td><a href='$url#entry$num'>$title</a></td>";
             echo "<td><a href='viewentry.php?$_SESSION[sessTag]&entry_num=$num' target='_blank'>$title</a></td>";
             echo "<td align='right'><i>".formatDayTimeBrief($entry['modtime'])."</i></td></tr>\n";
@@ -473,6 +475,17 @@ function onDownloadPopularZip($arg, $req)
     mpReadfile($zipfile);
     unlink($zipfile);
     die(); // don't output the HTML version of this page into that nice file!
+}
+#}}}########################################################################
+
+#{{{ onVisInterface - allows us to skip file selection
+############################################################################
+function onVisInterface($arg, $req)
+{
+    if($_SESSION['lastUsedModelID'])
+        pageCall("interface_setup2.php", array('modelID' => $_SESSION['lastUsedModelID']));
+    else
+        pageCall("interface_setup1.php");
 }
 #}}}########################################################################
 

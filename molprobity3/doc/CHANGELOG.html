@@ -53,7 +53,6 @@
     Develop "helper" pages; mark optional steps clearly
     Pick lowest resolution number mentioned in file; allow override?
     DANG is included in bin/ but we don't *use* it anywhere... / upgrade to 1.9
-  * SEP(Gary): LIST of interacting (residues|*ATOMS*) across an interface
     Oneline, all-in-one (kins, etc) for JCSG
     "outlier" column for multichart
     Move labbook.html to charts/ ?
@@ -61,6 +60,7 @@
     Tool for building ensembles from arbitrary sets of models
     Kinemages are text/plain instead of downloaded
     Convert "number of H added, etc" text into tables
+  * Clarify interface for unified validation (AAC + geom)
     Use popular downloads as a set, not a list (multiple multi-kins, etc)
         Simple kinemage should go into popular downloads list
         Do we really need a popular downloads feature at all?
@@ -68,6 +68,17 @@
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
+
+### 3beta23 ###
+- fixed LONG-STANDING SECURITY EXPLOIT that has affected ALL previous versions
+  of MolProbity. Because molprobity.log was not protected from access via HTTP,
+  someone who knew it was there could pull it up in their browser and thereby
+  get a list of EVERYONE's session IDs. This would allow access to basically
+  all user files on the system. This has been fixed by moving the log to
+  the feedback/ folder instead.
+- rearranged list of browser usage into a table format instead
+- added Gary's list of interacting atoms to interface vis pages
+- from welcome.php, skip over model-choice segment of interface vis
 
 ### 3beta22 ###
 - merged upload_pdb_setup.php and upload_other_setup.php. This simplifies the

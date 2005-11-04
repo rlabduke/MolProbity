@@ -344,7 +344,7 @@ function mpEnumerateSessions()
 */
 function mpLog($msg)
 {
-    $f = fopen(MP_BASE_DIR."/public_html/data/molprobity.log", "a");
+    $f = fopen(MP_BASE_DIR."/feedback/molprobity.log", "a");
 
     $sess = session_id();
     $ip = getVisitorIP();
