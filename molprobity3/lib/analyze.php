@@ -231,6 +231,227 @@ function runAnalysis($modelID, $opts)
 }
 #}}}########################################################################
 
+#{{{ runAnalysis2 - generate (a subset of) all the validation criteria
+############################################################################
+/**
+* This is the uber-validation function that calls everything below.
+* It is suited for use from either the web or command line interface.
+* This only makes sense in terms of an active session.
+*   modelID             ID code for model to process
+*   opts                has the following keys mapped to boolean flags:
+*     doKinemage        make the multi-criterion kinemage at all?
+*       kinClashes      show clash dots?
+*       kinHbonds       show H-bond dots?
+*       kinContacts     show contact dots?
+*       kinRama         show Rama outliers?
+*       kinRota         show rotamer outliers?
+*       kinCBdev        show C-beta deviations?
+*       kinBaseP        show base-phosphate perpendiculars?
+*       kinAltConfs     show alternate conformations?
+*       kinBQ           show B-factor and occupancy color models?
+*       kinRibbons      show ribbons?
+*     doCharts          make the multi-criterion chart and other plots/tables/lists?
+*       chartClashlist  run clashlistcluster?
+*       chartRama       do Rama plots and analysis?
+*       chartRota       do rotamer analysis?
+*       chartCBdev      do CB dev plots and analysis?
+*       chartBaseP      check base-phosphate perpendiculars?
+*       
+* This function returns some HTML suitable for using in a lab notebook entry.
+*/
+function runAnalysis2($modelID, $opts)
+{
+    //{{{ Set up file/directory vars and the task list
+    // If doKinemage or doCharts is off, turn off all their subordinates
+    if(!$opts['doKinemage']) foreach($opts as $k => $v) if(startsWith($k, 'kin')) $opts[$k] = false;
+    if(!$opts['doCharts']) foreach($opts as $k => $v) if(startsWith($k, 'chart')) $opts[$k] = false;
+    
+    $model      = $_SESSION['models'][$modelID];
+    $modelDir   = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
+    $modelURL   = $_SESSION['dataURL'].'/'.MP_DIR_MODELS;
+    $kinDir     = $_SESSION['dataDir'].'/'.MP_DIR_KINS;
+    $kinURL     = $_SESSION['dataURL'].'/'.MP_DIR_KINS;
+        if(!file_exists($kinDir)) mkdir($kinDir, 0777);
+    $rawDir     = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA;
+        if(!file_exists($rawDir)) mkdir($rawDir, 0777);
+    $chartDir   = $_SESSION['dataDir'].'/'.MP_DIR_CHARTS;
+    $chartURL   = $_SESSION['dataURL'].'/'.MP_DIR_CHARTS;
+        if(!file_exists($chartDir)) mkdir($chartDir, 0777);
+    $infile     = "$modelDir/$model[pdb]";
+    
+    if($opts['chartRama'])      $tasks['rama'] = "Do Ramachandran analysis and make plots";
+    if($opts['chartRota'])      $tasks['rota'] = "Do rotamer analysis";
+    if($opts['chartCBdev'])     $tasks['cbeta'] = "Do C&beta; deviation analysis and make kins";
+    if($opts['chartBaseP'])     $tasks['base-phos'] = "Do base-phosphate perpendicular analysis";
+    
+    if($opts['chartClashlist']) $tasks['clashlist'] = "Run <code>clashlist</code> to find bad clashes and clashscore";
+    if($opts['doCharts'])       $tasks['multichart'] = "Create multi-criterion chart";
+    if($opts['doKinemage'])     $tasks['multikin'] = "Create multi-criterion kinemage";
+    
+    $doRem42 = $opts['chartClashlist'] || $opts['chartRama'] || $opts['chartRota'];
+    if($doRem42)                $tasks['remark42'] = "Create REMARK 42 record for the PDB file";
+    //}}} Set up file/directory vars and the task list
+    
+    //{{{ Run protein geometry programs and offer kins to user
+    // Ramachandran
+    if($opts['chartRama'])
+    {
+        setProgress($tasks, 'rama'); // updates the progress display if running as a background job
+        $outfile = "$rawDir/$model[prefix]rama.data";
+        runRamachandran($infile, $outfile);
+        $rama = loadRamachandran($outfile);
+        
+        makeRamachandranKin($infile, "$kinDir/$model[prefix]rama.kin");
+        $tasks['rama'] .= " - preview <a href='viewking.php?$_SESSION[sessTag]&url=$kinURL/$model[prefix]rama.kin' target='_blank'>kinemage</a>";
+        setProgress($tasks, 'rama'); // so the preview link is visible
+        makeRamachandranPDF($infile, "$chartDir/$model[prefix]rama.pdf");
+        $tasks['rama'] .= " | <a href='$chartURL/$model[prefix]rama.pdf' target='_blank'>PDF</a>\n";
+        setProgress($tasks, 'rama'); // so the preview link is visible
+    }
+    
+    // Rotamers
+    if($opts['chartRota'])
+    {
+        setProgress($tasks, 'rota'); // updates the progress display if running as a background job
+        $outfile = "$rawDir/$model[prefix]rota.data";
+        runRotamer($infile, $outfile);
+        $rota = loadRotamer($outfile);
+    }
+    
+    // C-beta deviations
+    if($opts['chartCBdev'])
+    {
+        setProgress($tasks, 'cbeta'); // updates the progress display if running as a background job
+        $outfile = "$rawDir/$model[prefix]cbdev.data";
+        runCbetaDev($infile, $outfile);
+        $cbdev = loadCbetaDev($outfile);
+        
+        makeCbetaDevPlot($infile, "$kinDir/$model[prefix]cb2d.kin");
+        $tasks['cbeta'] .= " - <a href='viewking.php?$_SESSION[sessTag]&url=$kinURL/$model[prefix]cb2d.kin' target='_blank'>preview</a>";
+        setProgress($tasks, 'cbeta'); // so the preview link is visible
+    }
+    //}}} Run programs and offer kins to user
+    
+    //{{{ Run nucleic acid geometry programs and offer kins to user
+    // Base-phosphate perpendiculars
+    if($opts['chartBaseP'])
+    {
+        setProgress($tasks, 'base-phos'); // updates the progress display if running as a background job
+        $outfile = "$rawDir/$model[prefix]pperp.data";
+        runBasePhosPerp($infile, $outfile);
+        $pperp = loadBasePhosPerp($outfile);
+    }
+    //}}} Run nucleic acid geometry programs and offer kins to user
+    
+    //{{{ Run all-atom contact programs and offer kins to user
+    // Clashes
+    if($opts['chartClashlist'])
+    {
+        setProgress($tasks, 'clashlist'); // updates the progress display if running as a background job
+        $outfile = "$chartDir/$model[prefix]clashlist.txt";
+        runClashlist($infile, $outfile);
+        $clash = loadClashlist($outfile);
+        //$clashPct = runClashStats($model['stats']['resolution'], $clash['scoreAll'], $clash['scoreBlt40']);
+        $tasks['clashlist'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=plain' target='_blank'>preview</a>\n";
+        setProgress($tasks, 'clashlist'); // so the preview link is visible
+    }
+    //}}} Run all-atom contact programs and offer kins to user
+    
+    //{{{ Build multi-criterion chart, kinemage
+    if($opts['doCharts'])
+    {
+        setProgress($tasks, 'multichart'); // updates the progress display if running as a background job
+        $outfile = "$rawDir/$model[prefix]multi.table";
+        $snapfile = "$chartDir/$model[prefix]multi.html";
+        writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota, $cbdev, $pperp);
+        $tasks['multichart'] .= " - <a href='viewtable.php?$_SESSION[sessTag]&file=$outfile' target='_blank'>preview</a>\n";
+        setProgress($tasks, 'multichart'); // so the preview link is visible
+    }
+    if($opts['doKinemage'])
+    {
+        setProgress($tasks, 'multikin'); // updates the progress display if running as a background job
+        $mcKinOpts = array(
+            'ribbons'   =>  $opts['kinRibbons'],
+            'Bscale'    =>  $opts['kinBQ'],
+            'Qscale'    =>  $opts['kinBQ'],
+            'altconf'   =>  $opts['kinAltConfs'],
+            'rama'      =>  $opts['kinRama'],
+            'rota'      =>  $opts['kinRota'],
+            'cbdev'     =>  $opts['kinCBdev'],
+            'pperp'     =>  $opts['kinBaseP'],
+            'clashdots' =>  $opts['kinClashes'],
+            'hbdots'    =>  $opts['kinHbonds'],
+            'vdwdots'   =>  $opts['kinContacts']
+        );
+        $outfile = "$kinDir/$model[prefix]multi.kin";
+        makeMulticritKin2(array($infile), $outfile, $mcKinOpts);
+        
+        // EXPERIMENTAL: gzip compress large multikins
+        if(filesize($outfile) > MP_KIN_GZIP_THRESHOLD)
+        {
+            destructiveGZipFile($outfile);
+            $_SESSION['models'][$modelID]['primaryDownloads'][] = MP_DIR_KINS."/$model[prefix]multi.kin.gz";
+        }
+        else
+            $_SESSION['models'][$modelID]['primaryDownloads'][] = MP_DIR_KINS."/$model[prefix]multi.kin";
+    }
+    //}}} Build multi-criterion chart, kinemage
+    
+    //{{{ Create REMARK 42 and insert into PDB file
+    if(is_array($clash) || is_array($rama) || is_array($rota))
+    {
+        setProgress($tasks, 'remark42'); // updates the progress display if running as a background job
+        $remark42 = makeRemark42($clash, $rama, $rota);
+        replacePdbRemark($infile, $remark42, 42);
+    }
+    //}}} Create REMARK 42 and insert into PDB file
+    
+    //{{{ Create lab notebook entry
+    $entry = "";
+    if(is_array($clash) || is_array($rama) || is_array($rota) || is_array($cbdev) || is_array($pperp))
+    {
+        $entry .= "<h3>Summary statistics</h3>\n";
+        $entry .= makeSummaryStatsTable($model['stats']['resolution'], $clash, $rama, $rota, $cbdev, $pperp);
+    }
+    if($opts['doKinemage'] || $opts['doCharts'])
+    {
+        $entry .= "<h3>Multi-criterion visualizations</h3>\n";
+        if($opts['doKinemage'])
+            $entry .= "<p>".linkKinemage("$model[prefix]multi.kin", "Multi-criterion kinemage")."</p>\n";
+        if($opts['doCharts'])
+            $entry .= "<p><a href='viewtable.php?$_SESSION[sessTag]&file=$rawDir/$model[prefix]multi.table' target='_blank'>Multi-criterion chart</a></p>\n";
+    }
+    
+    if($opts['chartClashlist'] || $opts['chartRama'] || $opts['chartCBdev'])
+    {
+        $entry .= "<h3>Single-criterion visualizations</h3>";
+        $entry .= "<ul>\n";
+        if($opts['chartClashlist'])
+            $entry .= "<li><a href='viewtext.php?$_SESSION[sessTag]&file=$chartDir/$model[prefix]clashlist.txt&mode=plain' target='_blank'>Clash list</a></li>\n";
+        if($opts['chartRama'])
+        {
+            $entry .= "<li>".linkKinemage("$model[prefix]rama.kin", "Ramachandran plot kinemage")."</li>\n";
+            $entry .= "<li><a href='$chartURL/$model[prefix]rama.pdf' target='_blank'>Ramachandran plot PDF</a></li>\n";
+        }
+        if($opts['chartCBdev'])
+            $entry .= "<li>".linkKinemage("$model[prefix]cb2d.kin", "C&beta; deviation scatter plot (2D)")."</li>\n";
+        $entry .= "</ul>\n";
+    }
+    
+    if($remark42)
+    {
+        $entry .= "<h3>REMARK 42</h3>";
+        $url = "$modelURL/$model[pdb]";
+        $entry .= "You can <a href='$url'>download your PDB file with REMARK 42</a> inserted.\n";
+        $entry .= "<p><pre>$remark42</pre></p>";
+    }
+    //}}} Create lab notebook entry
+    
+    setProgress($tasks, null); // everything is finished
+    return $entry;
+}
+#}}}########################################################################
+
 #{{{ runBasePhosPerp - generate tab file of base-phos perp distances
 ############################################################################
 function runBasePhosPerp($infile, $outfile)

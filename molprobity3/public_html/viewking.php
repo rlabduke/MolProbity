@@ -42,10 +42,10 @@ if(isset($_REQUEST['size']) && !$_SESSION['bgjob']['isRunning'])
     $_SESSION['kingSize'] = $_REQUEST['size'];
 }
 if($_SESSION['kingSize']        == "tiny")  $size = "width='600' height='400'"; //  640 x 480
-elseif($_SESSION['kingSize']    == "small") $size = "width='950' height='650'"; // 1024 x 768
+elseif($_SESSION['kingSize']    == "small") $size = "width='700' height='500'"; // 800 x 600
 elseif($_SESSION['kingSize']    == "large") $size = "width='1300' height='950'"; // 1400 x 1050
 elseif($_SESSION['kingSize']    == "huge")  $size = "width='1500' height='1100'"; // 1600 x 1200
-else                                        $size = "width='950' height='650'"; // Good for most people
+else                                        $size = "width='950' height='650'"; // Good for most people (1024 x 768)
 // Unfortunately, percentage sizes don't work reliably, as that would be a nicer way to go for "default".
 
 $url = $_REQUEST['url'];
