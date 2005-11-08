@@ -137,7 +137,7 @@ function onAddH($arg, $req)
             mpLog("reduce-nobuild:User ran Reduce without -build flag");
             // launch background job
             pageGoto("job_progress.php");
-            launchBackground(MP_BASE_DIR."/jobs/reduce-nobuild.php", "reduce_done.php", 5);
+            launchBackground(MP_BASE_DIR."/jobs/reduce-nobuild.php", "generic_done.php", 5);
         }
     }
     else
