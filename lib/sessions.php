@@ -84,6 +84,7 @@ function mpStartSession($createIfNeeded = false)
     // Cookies cause more trouble than they're worth
     ini_set("session.use_cookies", 0);
     // We want to control garbage collection more carefully
+    // (MP_SESSION_LIFETIME is a dummy -- lifetime is determined per-session)
     ini_set("session.gc_maxlifetime", MP_SESSION_LIFETIME);
     #ini_set("session.gc_probability", 100);
     // Set up our session name
@@ -102,6 +103,7 @@ function mpStartSession($createIfNeeded = false)
         if($createIfNeeded)
         {
             // Always do cleanup before starting a new session
+            // (MP_SESSION_LIFETIME is a dummy -- lifetime is determined per-session)
             mpSessGC(MP_SESSION_LIFETIME);
             
             // Main data directories
@@ -136,15 +138,7 @@ function mpStartSession($createIfNeeded = false)
     else $sessionCreated = false;
     
     // Mark the lifetime of this session
-    if($fp = @fopen("$dataDir/".MP_DIR_SYSTEM."/lifetime", "w"))
-    {
-        $time = time();
-        fwrite($fp, "$time\n");
-        fwrite($fp, "^^^ Unix timestamp for when this session was last used ^^^\n\n");
-        fwrite($fp, "Last-used date: ".date("j M Y \\a\\t g:ia", ($time))."\n");
-        fwrite($fp, "Destroy-on date: ".date("j M Y \\a\\t g:ia", ($time+MP_SESSION_LIFETIME))."\n");
-        @fclose($fp);
-    }
+    mpSessSetTTL(session_id(), MP_SESSION_LIFETIME);
     
     // Also set location of Reduce's heterogen dictionary,
     // overriding the value set up by mpInitEnvirons().
@@ -272,8 +266,28 @@ function mpSessGC($maxlifetime)
 }
 #}}}########################################################################
 
-#{{{ mpSessTimeToLive - returns the remaining lifetime of a session (sec)
+#{{{ mpSessSetTTL, mpSessTimeToLive, mpSessLifetime - session lifetimes
 ############################################################################
+/**
+* Sets the number of seconds remaining in the session's life
+* and updates its last-touched flag.
+*/
+function mpSessSetTTL($id, $timeToLive)
+{
+    mpCheckSessionID($id); // just in case something nasty is in there
+    $dataDir = MP_BASE_DIR."/public_html/data/$id";
+    if($fp = @fopen("$dataDir/".MP_DIR_SYSTEM."/lifetime", "w"))
+    {
+        $time = time();
+        if($timeToLive <= 0) $timeToLive = MP_SESSION_LIFETIME;
+        $destroy = $time + $timeToLive;
+        
+        fwrite($fp, $time."    # Last-used date: ".date("j M Y \\a\\t g:ia", ($time))."\n");
+        fwrite($fp, $destroy."    # Destroy-on date: ".date("j M Y \\a\\t g:ia", ($destroy))."\n");
+        @fclose($fp);
+    }
+}
+
 /**
 * Returns number of seconds remaining in this sessions life.
 * The number may be less than 0, indicating a session past its
@@ -281,15 +295,30 @@ function mpSessGC($maxlifetime)
 */
 function mpSessTimeToLive($id)
 {
+    $lifetime = mpSessLifetime($id);
+    return $lifetime['ttl'];
+}
+
+/**
+* Returns array('last' => last_touched, 'ttl' => time_to_live).
+*/
+function mpSessLifetime($id)
+{
     mpCheckSessionID($id); // just in case something nasty is in there
-    $dataDir    = MP_BASE_DIR."/public_html/data/$id";
+    $dataDir = MP_BASE_DIR."/public_html/data/$id";
     if($fp = @fopen("$dataDir/".MP_DIR_SYSTEM."/lifetime", "r"))
     {
-        $timestamp = trim(fgets($fp, 1024));
+        $lastTouched = trim(fgets($fp, 1024)) + 0;
+        $destroyOn = trim(fgets($fp, 1024)) + 0;
         @fclose($fp);
-        return ($timestamp + MP_SESSION_LIFETIME) - time();
+        
+        // For backwards compat: second line used to be text
+        // Use longest possible lifetime to give 'em benefit of the doubt
+        if($destroyOn == 0) $destroyOn = ($lastTouched + MP_SESSION_LIFETIME_EXT);
+        
+        return array('last' => $lastTouched, 'ttl' => ($destroyOn-time()));
     }
-    else return 0;
+    else return array('last' => 0, 'ttl' => 0);
 }
 #}}}########################################################################
 
@@ -308,6 +337,7 @@ function mpSessSizeOnDisk($id)
 /**
 * Returns an array (keyed on session ID) of arrays with the following fields:
 *   id      the session id
+*   last    last touched time (Unix timestamp)
 *   ttl     time to live, in seconds
 *   size    disk usage, in bytes
 */
@@ -323,8 +353,10 @@ function mpEnumerateSessions()
         && is_dir("$baseDataDir/$id"))
         {
             unset($sess);
+            $lifetime       = mpSessLifetime($id);
             $sess['id']     = $id;
-            $sess['ttl']    = mpSessTimeToLive($id);
+            $sess['last']   = $lifetime['last'];
+            $sess['ttl']    = $lifetime['ttl'];
             $sess['size']   = mpSessSizeOnDisk($id);
             $sesslist[$id]  = $sess;
         }

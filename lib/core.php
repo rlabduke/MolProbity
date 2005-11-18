@@ -182,7 +182,7 @@ function mpPageFooter()
 <tr><td colspan="2">
     <div class="pagefooter">
 About <a href="help/about.html" target="_blank">MolProbity</a>
-| About <a href="http://kinemage.biochem.duke.edu" target="_blank">the Richardson Lab</a>
+| Website for <a href="http://kinemage.biochem.duke.edu" target="_blank">the Richardson Lab</a>
 | Internal reference '.MP_VERSION.'
     </div>
 </td></tr>

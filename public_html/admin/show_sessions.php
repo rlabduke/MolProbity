@@ -12,7 +12,8 @@ Checks on prerequisites for running MolProbity and reports on their status.
 // data for some reason, you must call mpInitEnvirons() instead.
     mpInitEnvirons();
 
-function sortTTL($a, $b) { return $b['ttl'] - $a['ttl']; }
+function sortLast($a, $b) { return $b['last'] - $a['last']; }
+function sortTTL($a, $b) { return $a['ttl'] - $b['ttl']; }
 function sortSize($a, $b) { return $b['size'] - $a['size']; }
 
 if($_REQUEST['cmd'] == "Destroy")
@@ -37,16 +38,17 @@ if($_REQUEST['cmd'] == "Destroy")
     $sessList = mpEnumerateSessions();
     if(count($sessList) > 0)
     {
-        if($_REQUEST['sort'] == 'ttl')      usort($sessList, 'sortTTL');
+        if($_REQUEST['sort'] == 'last')     usort($sessList, 'sortLast');
+        elseif($_REQUEST['sort'] == 'ttl')  usort($sessList, 'sortTTL');
         elseif($_REQUEST['sort'] == 'size') usort($sessList, 'sortSize');
-        else                                usort($sessList, 'sortTTL');
+        else                                usort($sessList, 'sortLast');
         
         
         echo "<table width=100%>\n";
         echo "<tr>\n";
         echo "<td><b>Session ID</b></td>\n";
-        echo "<td><a href='".basename($_SERVER['PHP_SELF'])."?sort=ttl'><b>Last touched</b></a></td>\n";
-        echo "<td><b>Time-to-live</b></td>\n";
+        echo "<td><a href='".basename($_SERVER['PHP_SELF'])."?sort=last'><b>Last touched</b></a></td>\n";
+        echo "<td><a href='".basename($_SERVER['PHP_SELF'])."?sort=ttl'><b>Time to live</b></a></td>\n";
         echo "<td><a href='".basename($_SERVER['PHP_SELF'])."?sort=size'><b>Size on disk</b></a></td>\n";
         echo "<td><!-- space for Debug cmd --></td>\n";
         echo "<td><!-- space for Enter cmd --></td>\n";
@@ -56,7 +58,7 @@ if($_REQUEST['cmd'] == "Destroy")
         {
             echo "<tr>\n";
             echo "<td>$sess[id]</td>\n";
-            echo "<td>".formatMinutesElapsed(MP_SESSION_LIFETIME - $sess['ttl'])." ago</td>\n";
+            echo "<td>".formatMinutesElapsed(time() - $sess['last'])." ago</td>\n";
             echo "<td>".formatHoursElapsed($sess['ttl'])."</td>\n";
             echo "<td>".formatFilesize($sess['size'])."</td>\n";
             echo "<td><a href='../viewdebug.php?".MP_SESSION_NAME."=$sess[id]' target='_blank'>Debug</a></td>\n";

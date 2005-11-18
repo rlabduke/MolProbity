@@ -57,7 +57,11 @@ if(!defined("MP_UMASK"))
 
 // How long a session can go unused, in seconds
 if(!defined("MP_SESSION_LIFETIME"))
-    define("MP_SESSION_LIFETIME", 60*60*24*14); // 14 days
+    define("MP_SESSION_LIFETIME", 60*60*12); // 12 hours
+
+// How long a session can go unused if user requests extension, in seconds
+if(!defined("MP_SESSION_LIFETIME_EXT"))
+    define("MP_SESSION_LIFETIME_EXT", 60*60*24*14); // 14 days
 
 // How large a session can grow, in bytes
 if(!defined("MP_SESSION_MAX_SIZE"))

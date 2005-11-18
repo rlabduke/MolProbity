@@ -248,7 +248,8 @@ function runAnalysis($modelID, $opts)
 *       kinCBdev        show C-beta deviations?
 *       kinBaseP        show base-phosphate perpendiculars?
 *       kinAltConfs     show alternate conformations?
-*       kinBQ           show B-factor and occupancy color models?
+*       kinBfactor      show B-factor color model?
+*       kinOccupancy    show occupancy color model?
 *       kinRibbons      show ribbons?
 *     doCharts          make the multi-criterion chart and other plots/tables/lists?
 *       chartClashlist  run clashlistcluster?
@@ -372,8 +373,8 @@ function runAnalysis2($modelID, $opts)
         setProgress($tasks, 'multikin'); // updates the progress display if running as a background job
         $mcKinOpts = array(
             'ribbons'   =>  $opts['kinRibbons'],
-            'Bscale'    =>  $opts['kinBQ'],
-            'Qscale'    =>  $opts['kinBQ'],
+            'Bscale'    =>  $opts['kinBfactor'],
+            'Qscale'    =>  $opts['kinOccupancy'],
             'altconf'   =>  $opts['kinAltConfs'],
             'rama'      =>  $opts['kinRama'],
             'rota'      =>  $opts['kinRota'],

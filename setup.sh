@@ -18,7 +18,11 @@ if [ ! -f setup.sh ]; then
 fi
 
 # Create config file
-cp config/config.php.sample config/config.php
+if [ ! -f config/config.php ]; then
+    cp config/config.php.sample config/config.php
+else
+    echo "config.php already exists; no changes made"
+fi
 
 # Set world-writable permisions on data/ and tmp/
 chmod 777 public_html/data

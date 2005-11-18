@@ -202,6 +202,7 @@ if(isset($id))
     $s .= "  <param name='kinemage' value='$kinURL/$model[prefix]thumbnail.kin'>\n";
     $s .= "  <param name='buttonpanel' value='no'>\n";
     $s .= "</applet>\n";
+    $s .= "<center><small><i>drag to rotate</i></small></center>\n";
     $s .= "</div>\n";
 
     if(count($idList) > 1) // NMR/multiple models
