@@ -54,7 +54,10 @@ define("MP_UMASK", 0);
 //define("MP_DEFAULT_TIMEZONE", 'EST');
 
 // How long a session can go unused, in seconds
-define("MP_SESSION_LIFETIME", 60*60*24*14); // 14 days
+define("MP_SESSION_LIFETIME", 60*60*12); // 12 hours
+
+// How long a session can go unused if user requests extension, in seconds
+define("MP_SESSION_LIFETIME_EXT", 60*60*24*14); // 14 days
 
 // How large a session can grow, in bytes
 define("MP_SESSION_MAX_SIZE", 200*1000*1000); // 200 Mb

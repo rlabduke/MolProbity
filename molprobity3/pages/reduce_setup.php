@@ -59,15 +59,16 @@ function display($context)
         // Selects -BUILD by default unless the user changes it.
         if($context['method'] == 'nobuild') { $check1 = ""; $check2 = "checked"; }
         else                                { $check1 = "checked"; $check2 = ""; }
-        echo "<tr valign='top'><td><input type='radio' name='method' value='build' $check1> <b>Add &amp; Optimize</b><td>";
+        echo "<tr valign='top'><td><input type='radio' name='method' value='build' $check1> <b>Asn/Gln/His flips</b><td>";
         echo "<td><small>Add missing H, optimize H-bond networks, check for flipped Asn, Gln, His";
         echo " (<code>Reduce -build</code>)\n";
         echo "<div class='inline_options'><b>Advanced options:</b>\n";
         echo "<label><input type='checkbox' name='makeFlipkin' value='1' checked>\n";
         echo "Make Flipkin kinemages illustrating any Asn, Gln, or His flips</label></div>\n";
         echo "</small></td></tr>\n";
-        echo "<tr valign='top'><td><input type='radio' name='method' value='nobuild' $check2> <b>Add missing ONLY</b><td>";
-        echo "<td><small>Add missing H only, leave all other atoms alone (<code>Reduce -nobuild</code>)</small></td></tr>\n";
+        echo "<tr><td colspan='2'>&nbsp;</td></tr>\n"; // vertical spacer
+        echo "<tr valign='top'><td><input type='radio' name='method' value='nobuild' $check2> <b>No flips</b><td>";
+        echo "<td><small>Add missing H, optimize H-bond networks, leave other atoms alone (<code>Reduce -nobuild</code>)</small></td></tr>\n";
         echo "</table></p>\n";
 
         echo "<p><table width='100%' border='0'><tr>\n";

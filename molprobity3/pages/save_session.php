@@ -12,6 +12,12 @@ class save_session_delegate extends BasicDelegate {
 */
 function display($context)
 {
+    // FUNKY: this breaks the general rule of display() not modifying session data.
+    // Set session lifetime to a longer value.
+    // Will be overwritten each session restart (i.e. when we leave this page).
+    mpSessSetTTL(session_id(), MP_SESSION_LIFETIME_EXT);
+    
+    
     echo mpPageHeader("Save session", "savesession");
 ?>
 <p>To make MolProbity more convenient, you can bookmark this page and return to it later.

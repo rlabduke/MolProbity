@@ -69,11 +69,16 @@ Minimum-guidance interface for experienced users.</p>
 
 <h3>Common questions:</h3>
 <p><b><a href='help/about.html' target='_blank'>Cite MolProbity</a></b>:
-    <small>Simon C. Lovell, Ian W. Davis, W. Bryan Arendall III, Paul I. W. de
-    Bakker, J. Michael Word, Michael G. Prisant, Jane S. Richardson, David C. Richardson (2003)
+    <small>Lovell et al. (2003)
     <a href="http://kinemage.biochem.duke.edu/validation/valid.html" target="_blank">Structure
     validation by C-alpha geometry: phi, psi, and C-beta deviation.</a>
-    Proteins: Structure, Function, and Genetics. <b>50</b>: 437-450.</small></p>
+    Proteins 50:437-450
+    <b>OR</b>
+    Davis et al. (2004)
+    <a href="http://kinemage.biochem.duke.edu/lab/papers.php" target="_blank">MolProbity:
+    structure validation and all-atom contact analysis for nucleic acids and their complexes.</a>
+    Nucleic Acids Research 32:W615-W619.
+    </small></p>
 <p><b><a href='help/java.html' target='_blank'>Installing Java</a></b>: how to make kinemage graphics work in your browser.</p>
 <p><b>Lab notebook</b>: what's it for and how do I use it?</p>
 <p><b>Adding hydrogens</b>: why are H necessary for steric evaluations?</p>
@@ -112,7 +117,7 @@ function displayWarnings($context)
     {
         document.writeln("<div class='alert'>");
         document.writeln("Java is not enabled -- you will not be able to use KiNG interactive graphics.");
-        document.writeln("<br><a href='help/about.html' target='_blank'>Click here for help.</a>");
+        document.writeln("<br><a href='help/java.html' target='_blank'>Click here for help.</a>");
         document.writeln("</div><br>");
     }
 // -->
@@ -127,8 +132,13 @@ function displayModels($context)
 {
     if(count($_SESSION['models']) > 1)
     {
+        // This works on Safari but not Firefox:
+        //$submit_script = 'document.forms[0].elements("cmd").click();';
+        // Either of these works on both:
+        //$submit_script = 'document.forms[0].cmd.click();';
+        $submit_script = 'document.forms[0].submit();';
+        
         echo "Currently working on: ";
-        $submit_script = 'document.forms[0].elements("cmd").click();';
         echo "<select name='workingModel' onchange='$submit_script'>\n";
         foreach($_SESSION['ensembles'] as $id => $model)
         {
@@ -387,7 +397,7 @@ function toggleUploadOptions()
 </tr><tr>
     <td align='center'><input type="text" name="pdbCode" size="6" maxlength="10"></td>
     <td align='center'><input type="file" name="uploadFile"></td>
-    <td align='center'><input type="submit" name="cmd" value="Upload/Fetch &gt;"></td>
+    <td align='center'><input type="submit" name="cmd" value="Do it &gt;"></td>
 </tr>
 </table>
     <div style='display:none' id='upload_options_block'>
