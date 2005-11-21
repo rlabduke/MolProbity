@@ -38,7 +38,7 @@ define("MP_EMAIL_WEBMASTER", "webmaster@$_SERVER[SERVER_NAME]");
 define("MP_BIN_PATH", "/usr/local/php5/bin:/opt/j2/bin:/usr/java/jdk/bin");
 
 // Limit for Reduce's -limit flag
-define("MP_REDUCE_LIMIT", 10000);
+//define("MP_REDUCE_LIMIT", 10000);
 
 // MP_UMASK
 //  This is a standard Unix file umask, which means it
@@ -47,23 +47,23 @@ define("MP_REDUCE_LIMIT", 10000);
 //
 //  Default is 0000.
 //  For highest security, use 0077.
-define("MP_UMASK", 0);
+//define("MP_UMASK", 0);
 
 // Default timezone. See lib/timezones.php for allowed keys.
 // If left undefined (commented out), MolProbity can usually guess correctly.
 //define("MP_DEFAULT_TIMEZONE", 'EST');
 
 // How long a session can go unused, in seconds
-define("MP_SESSION_LIFETIME", 60*60*12); // 12 hours
+//define("MP_SESSION_LIFETIME", 60*60*12); // 12 hours
 
 // How long a session can go unused if user requests extension, in seconds
-define("MP_SESSION_LIFETIME_EXT", 60*60*24*14); // 14 days
+//define("MP_SESSION_LIFETIME_EXT", 60*60*24*14); // 14 days
 
 // How large a session can grow, in bytes
-define("MP_SESSION_MAX_SIZE", 200*1000*1000); // 200 Mb
+//define("MP_SESSION_MAX_SIZE", 200*1000*1000); // 200 Mb
 
 // Kinemages above this size will be gzipped (in most cases).
 // To disable, set to a very large value, like 100 Gb.
-define("MP_KIN_GZIP_THRESHOLD", 1*1000*1000); // 1 Mb
+//define("MP_KIN_GZIP_THRESHOLD", 1*1000*1000); // 1 Mb
 
 ?>

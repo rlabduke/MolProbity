@@ -215,7 +215,7 @@ if(isset($id))
     else // xray/single model
     {
         $title = "Uploaded PDB file as $model[pdb]";
-        $s .= "Your file from $fileSource was uploaded as $model[pdb]\n";
+        $s .= "Your file from $fileSource was uploaded as $model[pdb].\n";
     }
     $details = describePdbStats($model['stats'], true);
     $s .= "<ul>\n";

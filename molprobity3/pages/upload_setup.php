@@ -230,6 +230,32 @@ function onFetchPdbFile($arg, $req)
 }
 #}}}########################################################################
 
+#{{{ onFetchEdsMap
+############################################################################
+/**
+* Documentation for this function.
+*/
+function onFetchEdsMap($arg, $req)
+{
+    if($req['cmd'] == "Cancel")
+    {
+        pageReturn();
+        return;
+    }
+    
+    unset($_SESSION['bgjob']); // Clean up any old data
+    $_SESSION['bgjob']['pdbCode']       = $req['pdbCode'];
+    $_SESSION['bgjob']['eds_2fofc']     = $req['eds_2fofc'];
+    $_SESSION['bgjob']['eds_fofc']      = $req['eds_fofc'];
+    
+    // logging is done is background job
+    
+    // launch background job
+    pageGoto("job_progress.php");
+    launchBackground(MP_BASE_DIR."/jobs/fetch-edsmap.php", "generic_done.php", 3);
+}
+#}}}########################################################################
+
 #{{{ onUploadKinemage
 ############################################################################
 /**
