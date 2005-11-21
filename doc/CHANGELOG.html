@@ -50,6 +50,7 @@
     Allow escape from job when no process number appears after x sec.
     Add whois query to session listing
     Remove runAnalysis() and makeMulticritKin()
+    Change upload_setup's fetch of EDS map to be like welcome.php (a la carte)
 }}}
     Develop "helper" pages; mark optional steps clearly
     Pick lowest resolution number mentioned in file; allow override?
@@ -67,8 +68,6 @@
     Track $_SERVER[HTTP_REFERER] in log? (maybe Google Analytics instead?)
     Shutdown: no more sessions after X; system going down in X minutes notice
   * Try Dave's new Prekin with -name to eliminate NMR dumb masters
-        Clean out extra Prekin on molprobity.biochem.duke.edu
-    Java detect using JS broken in Firefox
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -84,6 +83,12 @@
   Added MP_SESSION_LIFETIME_EXT to config; use it in pages/save_session
   Fixed admin/show_sessions to use the new last-touched vs. TTL data
 - changed setup.sh to avoid clobbering config.php
+- left defaults in config.php.sample but commented them out to start
+- moved browser and java warnings to the bottom of welcome.php;
+  omitted the Java detect for Mozilla-like browsers on OS X (false negative)
+- stopped adding "ens_" or "_clean" to uploads, except for uploads that really
+  did need something cleaned up in them.
+- can now get maps from welcome without (re-)getting model (JSR)
 
 ### 3beta23 ###
 - fixed LONG-STANDING SECURITY EXPLOIT that has affected ALL previous versions

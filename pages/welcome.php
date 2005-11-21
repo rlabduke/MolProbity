@@ -21,7 +21,6 @@ class welcome_delegate extends BasicDelegate {
 function display($context)
 {
     echo mpPageHeader("Main page", "welcome");
-    $this->displayWarnings($context);
 
     if(count($_SESSION['models']) > 0 && $_SESSION['lastUsedModelID'])
     {
@@ -73,7 +72,7 @@ Minimum-guidance interface for experienced users.</p>
     <a href="http://kinemage.biochem.duke.edu/validation/valid.html" target="_blank">Structure
     validation by C-alpha geometry: phi, psi, and C-beta deviation.</a>
     Proteins 50:437-450
-    <b>OR</b>
+    <b>or</b>
     Davis et al. (2004)
     <a href="http://kinemage.biochem.duke.edu/lab/papers.php" target="_blank">MolProbity:
     structure validation and all-atom contact analysis for nucleic acids and their complexes.</a>
@@ -85,6 +84,9 @@ Minimum-guidance interface for experienced users.</p>
 <p><b>My own MolProbity</b>: how can I run my own private MolProbity server?</p>
 </td></tr></table>
 <?php
+    // These are too annoying to have at the top all the time
+    $this->displayWarnings($context);
+    
     echo mpPageFooter();
 }
 #}}}########################################################################
@@ -102,7 +104,7 @@ function displayWarnings($context)
     
     if($err)
     {
-        echo "<div class='alert'>\n";
+        echo "<br><div class='alert'>\n";
         echo "Your browser, $br[browser] $br[version], $err.\n";
         echo "If pages display incorrectly or you experience other problems, you may want to \n";
         echo "try a browser like <a href='http://www.mozilla.org/' target='_blank'>Firefox</a> instead.\n";
@@ -111,18 +113,24 @@ function displayWarnings($context)
     
     // 2. Check for Java being enabled.
     // This doesn't verify the version, but is better than nothing...
+    // javaEnabled() doesn't work in Mozilla-type browsers on OS X, so we exclude them
+    $bad_platforms = array('Apple Macintosh');
+    $bad_browsers = array('Firefox', 'Mozilla', 'Netscape');
+    if(!(in_array($br['platform'], $bad_platforms) && in_array($br['browser'], $bad_browsers)))
+    {
 ?><script language='JavaScript'>
 <!--
     if(!navigator.javaEnabled())
     {
-        document.writeln("<div class='alert'>");
-        document.writeln("Java is not enabled -- you will not be able to use KiNG interactive graphics.");
+        document.writeln("<br><div class='alert'>");
+        document.writeln("It appears that Java is not enabled in your browser, so you may not be able to use KiNG interactive graphics.");
         document.writeln("<br><a href='help/java.html' target='_blank'>Click here for help.</a>");
-        document.writeln("</div><br>");
+        document.writeln("</div>");
     }
 // -->
 </script>
 <?php
+    }
 }
 #}}}########################################################################
 
@@ -385,34 +393,41 @@ function toggleUploadOptions()
 </script>
 <div class='indent'><table border='0' width='100%'>
 <tr>
-    <td width='40%' align='center'>PDB/NDB code</td>
-    <td width='40%' align='center'>Upload
+    <td align='center' width='50%'>PDB/NDB code: <input type="text" name="pdbCode" size="6" maxlength="10"></td>
+    <td align='center' width='50%'><input type="file" name="uploadFile"></td>
+</tr><tr>
+    <td align='center'>
+        <select name='fetchType'>
+            <option value='pdb'>PDB/NDB file</option>
+            <option value='biolunit'>Biol. unit (PDB only)</option>
+            <option value='eds_2fofc'>2Fo-Fc map (EDS)</option>
+            <option value='eds_fofc'>Fo-Fc map (EDS)</option>
+        </select>
+        <input type="submit" name="cmd" value="Fetch &gt;">
+    </td>
+    <td align='center'>
         <select name='uploadType'>
             <option value='pdb'>PDB file</option>
             <option value='kin'>kinemage</option>
             <option value='map'>ED map</option>
             <option value='hetdict'>het dict</option>
-        </select></td>
-    <td width='20%'></td>
-</tr><tr>
-    <td align='center'><input type="text" name="pdbCode" size="6" maxlength="10"></td>
-    <td align='center'><input type="file" name="uploadFile"></td>
-    <td align='center'><input type="submit" name="cmd" value="Do it &gt;"></td>
+        </select>
+        <input type="submit" name="cmd" value="Upload &gt;">
+    </td>
 </tr>
 </table>
     <div style='display:none' id='upload_options_block'>
     <!-- We have to start a new table because you can't show/hide <tr>'s, at least not in Safari -->
         <table border='0' width='100%'><tr valign='top'>
-            <td width='40%'><div class='inline_options'>
+            <td width='50%'><!-- <div class='inline_options'>
                 <label><input type="checkbox" name="biolunit" value="1"> Biol. unit (PDB only)</label>
                 <br><label><input type="checkbox" name="eds_2fofc" value="1"> Get 2Fo-Fc map from EDS</label>
                 <br><label><input type="checkbox" name="eds_fofc" value="1"> Get Fo-Fc map from EDS</label>
-            </div></td>
-            <td width='40%'><div class='inline_options'>
+            </div> --></td>
+            <td width='50%'><div class='inline_options'>
                 <label><input type="checkbox" name="isCnsFormat" value="1"> File is from CNS refinement</label>
                 <br><label><input type="checkbox" name="ignoreSegID" value="1"> Ignore segID field</label>
             </div></td>
-            <td width='20%'></td>
         </tr></table>
     </div>
 </div></form>
@@ -451,7 +466,24 @@ function onUploadOrFetch($arg, $req)
         elseif($req['uploadType'] == 'hetdict') $upload_delegate->onUploadHetDictFile($arg, $req);
     }
     elseif($hasFetch)
-        $upload_delegate->onFetchPdbFile($arg, $req);
+    {
+        if($req['fetchType'] == 'pdb')          $upload_delegate->onFetchPdbFile($arg, $req);
+        elseif($req['fetchType'] == 'biolunit')
+        {
+            $req['biolunit'] = 1;
+            $upload_delegate->onFetchPdbFile($arg, $req);
+        }
+        elseif($req['fetchType'] == 'eds_2fofc')
+        {
+            $req['eds_2fofc'] = 1;
+            $upload_delegate->onFetchEdsMap($arg, $req);
+        }
+        elseif($req['fetchType'] == 'eds_fofc')
+        {
+            $req['eds_fofc'] = 1;
+            $upload_delegate->onFetchEdsMap($arg, $req);
+        }
+    }
     else 
         $upload_delegate->onUploadPdbFile($arg, $req);
 }

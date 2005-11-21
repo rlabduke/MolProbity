@@ -136,7 +136,8 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
         }
         
         // Create the ensemble entry
-        $ensemble = createEnsemble("ens_$origID");
+        //$ensemble = createEnsemble("ens_$origID"); // why add the "ens_" and confuse people?
+        $ensemble = createEnsemble($origID);
         $ensemble['models'] = $idList;
         $ensemble['history'] = "Ensemble of ".count($idList)." models uploaded by user";
         
@@ -153,9 +154,12 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
     }//}}}
     else // "standard" x-ray structure with one model {{{
     {
-        $model = createModel($origID, "_clean"); // don't confuse user by re-using exact original PDB name        
-        $id = $model['id'];
+        // If our cleaning procedure had no impact, then don't confuse by
+        // changing the name. If it DID change something, then append "_clean".
+        if(filesAreIdentical($tmpPdb, $tmp2))   $model = createModel($origID);        
+        else                                    $model = createModel($origID, "_clean");
         
+        $id         = $model['id'];
         $outname    = $model['pdb'];
         $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
         if(!file_exists($outpath)) mkdir($outpath, 0777);

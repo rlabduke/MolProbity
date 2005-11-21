@@ -521,6 +521,48 @@ function mpReadfile($filepath)
 }
 #}}}########################################################################
 
+#{{{ filesAreIdentical - checks two files to see if they're exactly the same
+############################################################################
+/**
+* Only expected to work for text files, right now.
+*/
+function filesAreIdentical($path1, $path2)
+{
+    //$t = time();
+    clearstatcache();
+    if(filesize($path1) != filesize($path2)) return false;
+    $h1 = @fopen($path1, 'rb');
+    $h2 = @fopen($path2, 'rb');
+    if($h1 === false || $h2 === false)
+    {
+        @fclose($h1);
+        @fclose($h2);
+        return false;
+    }
+    $areSame = true;
+    /*while($areSame)
+    {
+        $c1 = fgetc($h1);
+        $c2 = fgetc($h2);
+        if($c1 !== $c2) $areSame = false;
+        if($c1 === false) break;
+    }*/
+    // This version is ~20x faster than the character-by-charcter version.
+    // (5 sec for 1JJ2 vs. 119 sec!!)
+    while(!feof($h1))
+    {
+        $s1 = fgets($h1, 1024);
+        $s2 = fgets($h2, 1024);
+        if($s1 != $s2) { $areSame = false; break; }
+    }
+    fclose($h1);
+    fclose($h2);
+    //echo "File comparison took ".(time() - $t)." seconds\n";
+    return $areSame;
+}
+//function someFunctionName() {}
+#}}}########################################################################
+
 #{{{ censorFileName - removes illegal and unusual characters from file name
 ############################################################################
 /**
