@@ -22,45 +22,53 @@ function display($context)
 <!--
 var selectionHasH = true
 
-function syncSubcontrols()
+function hideKinOpts()
 {
-    // Enable / disable subsettings based on state of contact dots button
-    // Notice radio buttons are accessed by name with a numeric index
-    var on = document.forms[0].doMultiKin.checked
-    document.forms[0].doAAC.disabled        = !on
-    document.forms[0].doRama.disabled       = !on
-    document.forms[0].doRota.disabled       = !on
-    document.forms[0].doCbDev.disabled      = !on
-    document.forms[0].doBaseP.disabled      = !on
-    document.forms[0].doRibbons.disabled    = !on
-    document.forms[0].doBFactor.disabled    = !on
-    document.forms[0].doOccupancy.disabled  = !on
-    
-    on = on & document.forms[0].doAAC.checked
-    document.forms[0].showHbonds.disabled   = !on
-    document.forms[0].showContacts.disabled = !on
+    var block = document.getElementById('kin_opts')
+    if(document.forms[0].doKinemage.checked) block.style.display = 'block'
+    else block.style.display = 'none'
 }
+
+/*function hideChartOpts()
+{
+    var block = document.getElementById('chart_opts')
+    if(document.forms[0].doCharts.checked) block.style.display = 'block'
+    else block.style.display = 'none'
+}*/
 
 function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
 {
     selectionHasH = doAAC
     
-    document.forms[0].doAAC.checked             = doAAC
-    document.forms[0].showContacts.checked      = !isBig
+    document.forms[0].kinClashes.checked        = doAAC
+    if(!doAAC) // turn these off only
+    {
+        document.forms[0].kinHbonds.checked         = doAAC
+        document.forms[0].kinContacts.checked       = doAAC && !isBig
+    }
+    //document.forms[0].chartClashlist.checked    = doAAC
     
-    document.forms[0].doRama.checked            = hasProtein
-    document.forms[0].doRota.checked            = hasProtein
-    document.forms[0].doCbDev.checked           = hasProtein
+    document.forms[0].kinRama.checked           = hasProtein
+    document.forms[0].kinRota.checked           = hasProtein
+    document.forms[0].kinCBdev.checked          = hasProtein
+    //document.forms[0].chartRama.checked         = hasProtein
+    //document.forms[0].chartRota.checked         = hasProtein
+    //document.forms[0].chartCBdev.checked        = hasProtein
     
-    document.forms[0].doBaseP.checked           = hasNucAcid
-    
-    syncSubcontrols() // enables/disables subsettings
+    document.forms[0].kinBaseP.checked          = hasNucAcid
+    //document.forms[0].chartBaseP.checked        = hasNucAcid
 }
 
 // Try to make sure we have H if we're doing AAC
 function checkSettingsBeforeSubmit()
 {
-    if(!selectionHasH && document.forms[0].doAAC.checked)
+    var doAAC = (document.forms[0].kinClashes.checked
+        || document.forms[0].kinHbonds.checked
+        || document.forms[0].kinContacts.checked
+        //|| document.forms[0].chartClashlist.checked
+        );
+        
+    if(!selectionHasH && doAAC)
     {
         return window.confirm("The file you choose may not have all its H atoms added."
         +" All-atom contacts requires all H atoms to function properly."
@@ -83,7 +91,6 @@ Not suitable for use by the general public.
         $lastUsedID = $context['ensID'];
         if(!$lastUsedID) $lastUsedID = $_SESSION['lastUsedModelID'];
         
-        $jsOnLoad = "syncSubcontrols()"; // cmd to run on page load -- may be changed below
         echo makeEventForm("onRunAnalysis", null, false, "checkSettingsBeforeSubmit()");
         echo "<h3>Select an ensemble to work with:</h3>";
         echo "<p><table width='100%' border='0' cellspacing='0' cellpadding='2'>\n";
@@ -117,21 +124,19 @@ Not suitable for use by the general public.
 <hr>
 <h3>Choose which analyses to run:</h3>
 <div class='indent'>
-<h5 class='nospaceafter'><label><input type='checkbox' name='doMultiKin' value='1' checked onclick='syncSubcontrols()'> Multi-criterion kinemage</label></h5>
-    <div class='indent'>
-    <label><input type='checkbox' name='doAAC' value='1' onclick='syncSubcontrols()'> All-atom contact dots</label>
-    <div class='indent'>
-        <label><input type='checkbox' name='showHbonds' value='1' checked> Show H-bonds in kinemage output</label>
-        <br><label><input type='checkbox' name='showContacts' value='1' checked> Show van der Waals contacts in kinemage output</label>
-    </div>
-    <label><input type='checkbox' name='doRama' value='1'> Ramachandran plots</label>
-    <br><label><input type='checkbox' name='doRota' value='1'> Rotamer evaluation</label>
-    <br><label><input type='checkbox' name='doCbDev' value='1'> C&beta; deviations</label>
-    <br><label><input type='checkbox' name='doBaseP' value='1'> Base-phosphate perpendiculars</label>
-    
-    <p><label><input type='checkbox' name='doRibbons' value='1'> Ribbons colored by B-factor</label>
-    <br><label><input type='checkbox' name='doBFactor' value='1'> Sticks colored by B-factor</label>
-    <br><label><input type='checkbox' name='doOccupancy' value='1'> Sticks colored by occupancy</label>
+<h5 class='nospaceafter'><label><input type='checkbox' name='doKinemage' value='1' checked onclick='hideKinOpts()'> Multi-criterion kinemage</label></h5>
+    <div class='indent' id='kin_opts'>
+    <label><input type='checkbox' name='kinClashes' value='1'> Clashes</label>
+    <br><label><input type='checkbox' name='kinHbonds' value='1'> Hydrogen bonds</label>
+    <br><label><input type='checkbox' name='kinContacts' value='1'> van der Waals contacts</label>
+    <p><label><input type='checkbox' name='kinRama' value='1'> Ramachandran plots</label>
+    <br><label><input type='checkbox' name='kinRota' value='1'> Rotamer evaluation</label>
+    <br><label><input type='checkbox' name='kinCBdev' value='1'> C&beta; deviations</label>
+    <br><label><input type='checkbox' name='kinBaseP' value='1'> Base-phosphate perpendiculars</label>
+    <p><label><input type='checkbox' name='kinAltConfs' value='1'> Alternate conformations</label>
+    <br><label><input type='checkbox' name='kinBfactor' value='1'> B-factors</label>
+    <br><label><input type='checkbox' name='kinOccupancy' value='1'> Occupancy</label>
+    <br><label><input type='checkbox' name='kinRibbons' value='1'> Ribbons</label>
     </div>
 <h5 class='nospaceafter'><label><input type='checkbox' name='doMultiGraph' value='1' checked> Multi-criterion graph</label></h5>
 </div>
@@ -142,7 +147,8 @@ Not suitable for use by the general public.
         echo "<td align='right'><input type='submit' name='cmd' value='Cancel'></td>\n";
         echo "</tr></table></p></form>\n";
         // Rather than trying to put this in onload(), we'll do it after the form is defined.
-        echo "<script language='JavaScript'>\n<!--\n$jsOnLoad\n// -->\n</script>\n";
+        if($jsOnLoad)
+            echo "<script language='JavaScript'>\n<!--\n$jsOnLoad\n// -->\n</script>\n";
 ?>
 <hr>
 <div class='help_info'>
@@ -194,16 +200,19 @@ function onRunAnalysis($arg, $req)
         $_SESSION['bgjob'] = $req;
         
         mpLog("aacgeom:Running all-atom contact and geometric analyses");
-        if($req['doAAC'])   mpLog("aacgeom-aac:Generataing all-atom contact data of some type");
-        if($req['doRama'])  mpLog("aacgeom-rama:Doing Ramachandran analysis");
-        if($req['doRota'])  mpLog("aacgeom-rota:Doing rotamer analysis");
-        if($req['doCbDev']) mpLog("aacgeom-cbdev:Doing C-beta deviation analysis");
-        if($req['doBaseP']) mpLog("aacgeom-basep:Validating base-phosphate distances vs sugar puckers");
         
-        //if($req['doSummaryStats'])  mpLog("aacgeom-sumary:AAC/geometry validation summary");
-        if($req['doMultiKin'])      mpLog("aacgeom-mkin:Multi-criterion validation kinemage");
-        if($req['doMultiGraph'])    mpLog("aacgeom-mgraph:Multi-criterion validation graph kinemage");
-        //if($req['doRemark42'])      mpLog("aacgeom-remark42:Generating REMARK 42 for PDB file");
+        // The chartXXX vars aren't defined in this interface (yet), but they don't hurt anything...
+        if($req['kinClashes'] || $req['kinHbonds'] || $req['kinContacts'] || $req['chartClashlist'])
+            mpLog("aacgeom-aac:Generataing all-atom contact data of some type");
+        if($req['kinRama'] || $req['chartRama'])    mpLog("aacgeom-rama:Doing Ramachandran analysis");
+        if($req['kinRota'] || $req['chartRota'])    mpLog("aacgeom-rota:Doing rotamer analysis");
+        if($req['kinCBdev'] || $req['chartCBdev'])  mpLog("aacgeom-cbdev:Doing C-beta deviation analysis");
+        if($req['kinBaseP'] || $req['chartBaseP'])  mpLog("aacgeom-basep:Validating base-phosphate distances vs sugar puckers");
+        
+        // doMultiGraph hasn't been renamed to doCharts yet...
+        if($req['doKinemage'])      mpLog("aacgeom-mkin:Multi-criterion validation kinemage");
+        //if($req['doCharts'])        mpLog("aacgeom-mchart:Multi-criterion validation chart");
+        if($req['doMultiGraph'])    mpLog("aacgeom-mchart:Multi-criterion validation chart");
         
         // launch background job
         pageGoto("job_progress.php");

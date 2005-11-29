@@ -82,6 +82,7 @@ function describePdbStats($pdbstats, $useHTML = true)
 #   hydrogens       are hydrogens of any kind present? (0/>0)
 #   has_most_H      are "all" hydrogens present, based on heavy/H ratio? (boolean)
 #   hets            number of non-water heterogens
+#   waters          number of waters
 #   fromcns         headers look like CNS output? (0 < n < 7)
 #
 # Optional keys:
@@ -107,6 +108,7 @@ function pdbstat($pdbfilename)
     $hnonpolar = 0;         # number of non-polar Hs
     $hydrogens = 0;         # number of hydrogens (possibly polar)
     $hets = 0;              # number of non-water hets
+    $waters = 0;            # number of water hets
     $hetcode = "";          # current het ID
     $fromCNS = 0;           # counter for CNS-style header records
     $mcAlts = array();      # mainchain/CB alternates (set of res)
@@ -193,9 +195,12 @@ function pdbstat($pdbfilename)
             {
                 $chainids[$chain] = $chain; # record chain IDs used
                 # Start of a new residue?
-                if($id != $hetcode and !preg_match("/HOH|DOD|H20|D20|WAT|SOL|TIP|TP3|MTO|HOD|DOH/", $restype))
+                if($id != $hetcode)
                 {
-                    $hets++;
+                    if(preg_match("/HOH|DOD|H20|D20|WAT|SOL|TIP|TP3|MTO|HOD|DOH/", $restype))
+                        $waters++;
+                    else
+                        $hets++;
                     $hetcode = $id;
                 }
             }
@@ -243,6 +248,7 @@ function pdbstat($pdbfilename)
     $ret['hydrogens']       = $hydrogens;
     $ret['has_most_H']      = ($heavyatoms < 2*($hydrogens+$hnonpolar));
     $ret['hets']            = $hets;
+    $ret['waters']          = $waters;
     $ret['fromcns']         = $fromCNS;
     $ret['all_alts']        = count($allAlts);
     $ret['mc_alts']         = count($mcAlts);

@@ -248,7 +248,8 @@ function makeMulticritKin2($infiles, $outfile, $opt, $nmrConstraints = null)
 {
     if(file_exists($outfile)) unlink($outfile);
     
-    $stats = describePdbStats( pdbstat(reset($infiles)), false );
+    $pdbstats = pdbstat(reset($infiles));
+    $stats = describePdbStats($pdbstats, false);
     $h = fopen($outfile, 'a');
     fwrite($h, "@text\n");
     foreach($stats as $stat)
@@ -262,96 +263,59 @@ function makeMulticritKin2($infiles, $outfile, $opt, $nmrConstraints = null)
     
     foreach($infiles as $infile)
     {
-        // Animate is used only for multi-model kins.
-        exec("prekin -quiet -lots -append ".($isMultiModel ? "-animate" : "")." -onegroup $infile >> $outfile");
+        // Animate is used even for single models, so they can be appended later.
+        exec("prekin -quiet -lots -append -animate -onegroup $infile >> $outfile");
         
         if($opt['ribbons'])
         {
-            if($isMultiModel) makeRainbowRibbons($infile, $outfile);
-            else
-            {
-                $h = fopen($outfile, 'a');
-                fwrite($h, "@group {ribbon} off dominant\n");
-                fclose($h);
-                makeBfactorRibbons($infile, $outfile);
-            }
+            if($isMultiModel)   makeRainbowRibbons($infile, $outfile);
+            else                makeBfactorRibbons($infile, $outfile);
         }
         if($nmrConstraints)
-        {
-            if(!$isMultiModel) { $h = fopen($outfile, 'a'); fwrite($h, "@group {NOEs} dominant\n"); fclose($h); }
             exec("noe-display -cv -s viol -ds+ -fs -k $infile $nmrConstraints < /dev/null >> $outfile");
-        }
         if($opt['clashdots'] || $opt['hbdots'] || $opt['vdwdots'])
-        {
-            if(!$isMultiModel) { $h = fopen($outfile, 'a'); fwrite($h, "@group {Probe dots} dominant\n"); fclose($h); }
             makeProbeDots($infile, $outfile, $opt['hbdots'], $opt['vdwdots'], $opt['clashdots']);
-        }
         if($opt['rama'])
-        {
-            if(!$isMultiModel) { $h = fopen($outfile, 'a'); fwrite($h, "@group {Rama outliers} dominant\n"); fclose($h); }
             makeBadRamachandranKin($infile, $outfile);
-        }
         if($opt['rota'])
-        {
-            if(!$isMultiModel) { $h = fopen($outfile, 'a'); fwrite($h, "@group {rotamer outliers} dominant\n"); fclose($h); }
             makeBadRotamerKin($infile, $outfile);
-        }
         if($opt['cbdev'])
-        {
-            if(!$isMultiModel) { $h = fopen($outfile, 'a'); fwrite($h, "@group {Cb deviations} dominant\n"); fclose($h); }
             makeBadCbetaBalls($infile, $outfile);
-        }
         if($opt['pperp'])
-        {
-            if(!$isMultiModel) { $h = fopen($outfile, 'a'); fwrite($h, "@group {base-P outliers} dominant\n"); fclose($h); }
             makeBadPPerpKin($infile, $outfile);
-        }
         if($opt['Bscale'])
-        {
-            if(!$isMultiModel) { $h = fopen($outfile, 'a'); fwrite($h, "@group {B factors} off recessiveon\n"); fclose($h); }
             makeBfactorScale($infile, $outfile);
-        }
         if($opt['Qscale'])
-        {
-            if(!$isMultiModel) { $h = fopen($outfile, 'a'); fwrite($h, "@group {occupancy} off recessiveon\n"); fclose($h); }
             makeOccupancyScale($infile, $outfile);
-        }
         if($opt['altconf'])
-        {
-            if(!$isMultiModel) { $h = fopen($outfile, 'a'); fwrite($h, "@group {alt confs} off recessiveon\n"); fclose($h); }
             makeAltConfKin($infile, $outfile);
-        }
     }
 
     // KiNG allows us to do this to control what things are visible
     $h = fopen($outfile, 'a');
     fwrite($h, "@master {mainchain} off\n");
     fwrite($h, "@master {sidechain} off\n");
-    fwrite($h, "@master {H's} off\n");
-    fwrite($h, "@master {water} off\n");
+    if($pdbstats['hydrogens'] > 0)  fwrite($h, "@master {H's} off\n");
+    if($pdbstats['waters'] > 0)     fwrite($h, "@master {water} off\n");
     fwrite($h, "@master {Calphas} on\n");
 
-    if($opt['dots'])
+    if($opt['vdwdots'])
     {
         fwrite($h, "@master {wide contact} off\n");
         fwrite($h, "@master {close contact} off\n");
-        fwrite($h, "@master {small overlap} off\n");
-        fwrite($h, "@master {H-bonds} off\n");
     }
+    if($opt['clashdots'])   fwrite($h, "@master {small overlap} off\n");
+    if($opt['hbdots'])      fwrite($h, "@master {H-bonds} off\n");
 
-    if($isMultiModel)
+    if($opt['ribbons'])     fwrite($h, "@master {ribbon} off\n");
+    if($opt['Bscale'])      fwrite($h, "@master {B factors} off\n");
+    if($opt['Qscale'])      fwrite($h, "@master {occupancy} off\n");
+    if($opt['altconf'] && $pdbstats['all_alts'] > 0)
     {
-        // Turns ribbons off but makes sure alpha/beta/coil are on,
-        // so it just takes one click to make ribbons visible.
-        if($opt['ribbons'])     fwrite($h, "@master {alpha} on\n");
-        if($opt['ribbons'])     fwrite($h, "@master {beta} on\n");
-        if($opt['ribbons'])     fwrite($h, "@master {coil} on\n");
-        if($opt['ribbons'])     fwrite($h, "@master {ribbon} off\n");
-        if($opt['Bscale'])      fwrite($h, "@master {B factors} off\n");
-        if($opt['Qscale'])      fwrite($h, "@master {occupancy} off\n");
-        if($opt['altconf'])     fwrite($h, "@master {mc alt confs} off\n");
-        if($opt['altconf'])     fwrite($h, "@master {sc alt confs} off\n");
+        fwrite($h, "@master {mc alt confs} off\n");
+        fwrite($h, "@master {sc alt confs} off\n");
     }
+    
     fclose($h);
 }
 #}}}########################################################################

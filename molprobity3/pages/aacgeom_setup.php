@@ -114,14 +114,14 @@ function checkSettingsBeforeSubmit()
 <div class='indent'>
 <h5 class='nospaceafter'><label><input type='checkbox' name='doKinemage' value='1' checked onclick='hideKinOpts()'> 3-D kinemage graphics</label></h5>
     <div class='indent' id='kin_opts'>
-    <br><label><input type='checkbox' name='kinClashes' value='1'> Clashes</label>
+    <label><input type='checkbox' name='kinClashes' value='1'> Clashes</label>
     <br><label><input type='checkbox' name='kinHbonds' value='1'> Hydrogen bonds</label>
     <br><label><input type='checkbox' name='kinContacts' value='1'> van der Waals contacts</label>
-    <br><label><input type='checkbox' name='kinRama' value='1'> Ramachandran plots</label>
+    <p><label><input type='checkbox' name='kinRama' value='1'> Ramachandran plots</label>
     <br><label><input type='checkbox' name='kinRota' value='1'> Rotamer evaluation</label>
     <br><label><input type='checkbox' name='kinCBdev' value='1'> C&beta; deviations</label>
     <br><label><input type='checkbox' name='kinBaseP' value='1'> Base-phosphate perpendiculars</label>
-    <br><label><input type='checkbox' name='kinAltConfs' value='1'> Alternate conformations</label>
+    <p><label><input type='checkbox' name='kinAltConfs' value='1'> Alternate conformations</label>
     <br><label><input type='checkbox' name='kinBfactor' value='1'> B-factors</label>
     <br><label><input type='checkbox' name='kinOccupancy' value='1'> Occupancy</label>
     <br><label><input type='checkbox' name='kinRibbons' value='1'> Ribbons</label>
@@ -195,16 +195,16 @@ function onRunAnalysis($arg, $req)
         $_SESSION['bgjob'] = $req;
         
         mpLog("aacgeom:Running all-atom contact and geometric analyses");
-        if($req['doAAC'])   mpLog("aacgeom-aac:Generataing all-atom contact data of some type");
-        if($req['doRama'])  mpLog("aacgeom-rama:Doing Ramachandran analysis");
-        if($req['doRota'])  mpLog("aacgeom-rota:Doing rotamer analysis");
-        if($req['doCbDev']) mpLog("aacgeom-cbdev:Doing C-beta deviation analysis");
-        if($req['doBaseP']) mpLog("aacgeom-basep:Validating base-phosphate distances vs sugar puckers");
         
-        if($req['doSummaryStats'])  mpLog("aacgeom-sumary:AAC/geometry validation summary");
-        if($req['doMultiKin'])      mpLog("aacgeom-mkin:Multi-criterion validation kinemage");
-        if($req['doMultiChart'])    mpLog("aacgeom-mchart:Multi-criterion validation chart");
-        if($req['doRemark42'])      mpLog("aacgeom-remark42:Generating REMARK 42 for PDB file");
+        if($req['kinClashes'] || $req['kinHbonds'] || $req['kinContacts'] || $req['chartClashlist'])
+            mpLog("aacgeom-aac:Generataing all-atom contact data of some type");
+        if($req['kinRama'] || $req['chartRama'])    mpLog("aacgeom-rama:Doing Ramachandran analysis");
+        if($req['kinRota'] || $req['chartRota'])    mpLog("aacgeom-rota:Doing rotamer analysis");
+        if($req['kinCBdev'] || $req['chartCBdev'])  mpLog("aacgeom-cbdev:Doing C-beta deviation analysis");
+        if($req['kinBaseP'] || $req['chartBaseP'])  mpLog("aacgeom-basep:Validating base-phosphate distances vs sugar puckers");
+        
+        if($req['doKinemage'])      mpLog("aacgeom-mkin:Multi-criterion validation kinemage");
+        if($req['doCharts'])        mpLog("aacgeom-mchart:Multi-criterion validation chart");
         
         // launch background job
         pageGoto("job_progress.php");

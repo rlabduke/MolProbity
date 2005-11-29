@@ -111,7 +111,8 @@ $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
     $title,
     $s,
     "",
-    "auto"
+    "auto",
+    "phe_ed.png"
 );
 
 setProgress($tasks, null);

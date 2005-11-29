@@ -13,7 +13,6 @@
     NOEdisplay: NOEs thicker, esp. violations
     Prekin: doesn't mark pointmasters on the start of vectors (those flagged P)
     Prekin: dangling altB C--N for 1SWU B 29 (whenever i has all A and B alts)
-    Prekin: unwanted @listcolordominant for multi-subunit ribbons
     Prekin: Prekin/Win keeps kin file open continuously
     Prekin: stray vectors on windows -- buffer flush issue?
     IE6: doesn't display transparent PNGs correctly (gray background)
@@ -51,15 +50,16 @@
     Add whois query to session listing
     Remove runAnalysis() and makeMulticritKin()
     Change upload_setup's fetch of EDS map to be like welcome.php (a la carte)
-}}}
     Develop "helper" pages; mark optional steps clearly
     Pick lowest resolution number mentioned in file; allow override?
     DANG is included in bin/ but we don't *use* it anywhere... / upgrade to 1.9
     Oneline, all-in-one (kins, etc) for JCSG
     "outlier" column for multichart
     Move labbook.html to charts/ ?
+}}}
     Produce multi-model Ramachandran plots from the GUI
     Tool for building ensembles from arbitrary sets of models
+    Tool for deleting chain(s) from a PDB file
     Kinemages are text/plain instead of downloaded
     Convert "number of H added, etc" text into tables
     Use popular downloads as a set, not a list (multiple multi-kins, etc)
@@ -67,12 +67,14 @@
         Do we really need a popular downloads feature at all?
     Track $_SERVER[HTTP_REFERER] in log? (maybe Google Analytics instead?)
     Shutdown: no more sessions after X; system going down in X minutes notice
-  * Try Dave's new Prekin with -name to eliminate NMR dumb masters
+    List of results pages should appear with 1+ results, even if models == 0
+    thumbnail is no longer rainbow colored -- Prekin bug
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
 
+### 3beta24 ###
 ### 3beta24 ###
 - changed "reduce_done" to "generic_done" in reduce_setup.php: this was
   breaking the "Add missing H only" command.
@@ -89,6 +91,12 @@
 - stopped adding "ens_" or "_clean" to uploads, except for uploads that really
   did need something cleaned up in them.
 - can now get maps from welcome without (re-)getting model (JSR)
+- upgraded to Prekin 6.42.051128
+- reworked code for multi-criterion kinemages using new Prekin features
+- modified pbdstat to count waters
+- fixed logging cmds in aacgeom_setup that broke when form fields were renamed
+- updated KiNG (automatically removes unused groups/masters)
+- added repeating headers to usage_history.php (needed for long histories!)
 
 ### 3beta23 ###
 - fixed LONG-STANDING SECURITY EXPLOIT that has affected ALL previous versions
