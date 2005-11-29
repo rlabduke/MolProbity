@@ -323,15 +323,21 @@ if($end_time > end($times))     $end_time   = end($times)+(60*60*24);
 
     if(isset($time_ranges))
     {
-        echo "<p><table cellspacing='4'>\n";
-        echo "<tr align='right'><td align='left'><u>Window</u></td>";
-        echo "<td><u>Unique IPs</u></td>";
-        foreach($detail_actions as $action)
-            echo "<td><u>$action</u></td>";
-        echo "</tr>\n";
+        echo "<p><table cellspacing='2'>\n";
         $color = MP_TABLE_ALT1;
+        $i = 0;
         foreach($time_ranges as $time_range)
         {
+            // Repeat table headers every N rows
+            if($i++ % 16 == 0)
+            {
+                echo "<tr align='right' bgcolor='$color'><td align='left'><u>Window</u></td>";
+                echo "<td><u>Unique IPs</u></td>";
+                foreach($detail_actions as $action)
+                    echo "<td><u>$action</u></td>";
+                echo "</tr>\n";
+                $color == MP_TABLE_ALT1 ? $color = MP_TABLE_ALT2 : $color = MP_TABLE_ALT1;
+            }
             $sublog = selectRecords($log, $time_range['start'], $time_range['end']);
             $active_sessions = uniqueSessions($sublog);
             $actions = countActions($sublog);

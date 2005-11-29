@@ -62,28 +62,28 @@ foreach($ensemble['models'] as $modelID)
     $infiles[] = $modelDir.'/'.$_SESSION['models'][$modelID]['pdb'];
     
 $tasks = array();
-if($opts['doMultiKin'])         $tasks['multikin'] = "Create multi-criterion kinemage";
+if($opts['doKinemage'])         $tasks['multikin'] = "Create multi-criterion kinemage";
 if($opts['doMultiGraph'])       $tasks['multigraph'] = "Create multi-criterion graph";
     
-if($opts['doMultiKin'])
+if($opts['doKinemage'])
 {
     setProgress($tasks, 'multikin'); // updates the progress display if running as a background job
     $mcKinOpts = array(
-        'ribbons'   =>  $opts['doRibbons'],
-        'Bscale'    =>  $opts['doBFactor'],
-        'Qscale'    =>  $opts['doOccupancy'],
-        'altconf'   =>  false,
-        'rama'      =>  $opts['doRama'],
-        'rota'      =>  $opts['doRota'],
-        'cbdev'     =>  $opts['doCbDev'],
-        'pperp'     =>  $opts['doBaseP'],
-        'dots'      =>  $opts['doAAC'],
-        'hbdots'    =>  $opts['showHbonds'],
-        'vdwdots'   =>  $opts['showContacts']
+        'ribbons'   =>  $opts['kinRibbons'],
+        'Bscale'    =>  $opts['kinBfactor'],
+        'Qscale'    =>  $opts['kinOccupancy'],
+        'altconf'   =>  $opts['kinAltConfs'],
+        'rama'      =>  $opts['kinRama'],
+        'rota'      =>  $opts['kinRota'],
+        'cbdev'     =>  $opts['kinCBdev'],
+        'pperp'     =>  $opts['kinBaseP'],
+        'clashdots' =>  $opts['kinClashes'],
+        'hbdots'    =>  $opts['kinHbonds'],
+        'vdwdots'   =>  $opts['kinContacts']
     );
     $outfile = "$kinDir/$ensemble[prefix]multi.kin";
-    makeMulticritKin($infiles, $outfile, $mcKinOpts);
-    
+    makeMulticritKin2($infiles, $outfile, $mcKinOpts);
+
     // EXPERIMENTAL: gzip compress large multikins
     if(filesize($outfile) > MP_KIN_GZIP_THRESHOLD)
     {
