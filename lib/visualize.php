@@ -67,6 +67,7 @@ function makeFlipkin($inpath, $outpathAsnGln, $outpathHis)
 *   -chainid _ -range "1-2,4-5,10-10"
 *   -chainid A -range "1-47,100-101"
 * etc.
+* The array keys are the chainIDs, using _ for blank.
 */
 function resGroupsForPrekin($data)
 {
@@ -257,6 +258,15 @@ function makeMulticritKin2($infiles, $outfile, $opt, $nmrConstraints = null)
     $isMultiModel = (count($infiles) > 1);
     if($isMultiModel)
         fwrite($h, "Statistics for first model only; ".count($infiles)." total models included in kinemage.\n");
+    
+    // For Dave and Jane: version numbers!
+    // This *is* useful for looking at old multikins...
+    fwrite($h, "\n\n\n");
+    fwrite($h, exec("prekin -version")."\n");
+    $reduce_help = explode("\n", shell_exec("reduce -help 2>&1"));
+    fwrite($h, "$reduce_help[0]\n");
+    //fwrite($h, "Probe: ".exec("probe -version")."\n"); -- Probe puts its version in the @caption
+    
     fwrite($h, "@kinemage 1\n");
     fwrite($h, "@onewidth\n");
     fclose($h);
@@ -264,6 +274,7 @@ function makeMulticritKin2($infiles, $outfile, $opt, $nmrConstraints = null)
     foreach($infiles as $infile)
     {
         // Animate is used even for single models, so they can be appended later.
+        //echo("prekin -quiet -lots -append -animate -onegroup $infile >> $outfile\n");
         exec("prekin -quiet -lots -append -animate -onegroup $infile >> $outfile");
         
         if($opt['ribbons'])
@@ -401,10 +412,13 @@ function makeBadRotamerKin($infile, $outfile, $rota = null, $color = 'gold', $cu
     }
     $sc = resGroupsForPrekin(groupAdjacentRes($worst));
     
-    foreach($sc as $scRange)
+    $h = fopen($outfile, 'a');
+    fwrite($h, "@subgroup {rotamer outliers} dominant\n");
+    fclose($h);
+    
+    foreach($sc as $chainID => $scRange)
     {
-        //echo("prekin -quiet -append -nogroup -listmaster 'rotamer outliers' -bval -scope $scRange -show 'sc($color)' $infile >> $outfile\n");
-        exec("prekin -quiet -append -nogroup -listmaster 'rotamer outliers' -bval -scope $scRange -show 'sc($color)' $infile >> $outfile");
+        exec("prekin -quiet -append -nogroup -nosubgroup -listname 'chain $chainID' -listmaster 'rotamer outliers' -bval -scope $scRange -show 'sc($color)' $infile >> $outfile");
     }
 }
 #}}}########################################################################

@@ -68,13 +68,17 @@
     Track $_SERVER[HTTP_REFERER] in log? (maybe Google Analytics instead?)
     Shutdown: no more sessions after X; system going down in X minutes notice
     List of results pages should appear with 1+ results, even if models == 0
-    thumbnail is no longer rainbow colored -- Prekin bug
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
 
-### 3beta24 ###
+### 3beta25 ###
+- upgraded prekin again (051130/051129)
+- changed output of bad rotamers so they're all under one subgroup
+- updated prekin again (051201) - fixes weird masters bug, adds -version
+- put probe/reduce/prekin version numbers in multikin text (DCR/JSR)
+
 ### 3beta24 ###
 - changed "reduce_done" to "generic_done" in reduce_setup.php: this was
   breaking the "Add missing H only" command.
