@@ -38,7 +38,8 @@ function display($context)
         echo "</div></div>\n<br>\n<div class='pagecontent'>\n";
         $this->displayEntries($context);
         echo "</div>\n<br>\n<div class='pagecontent'>\n";
-        $this->displayFiles($context);
+        //$this->displayFiles($context);
+        $this->displayFilesJS($context);
         echo "</div>\n<br>\n<div class='pagecontent'>\n";
     }
     
@@ -304,7 +305,137 @@ function displayFiles($context)
     }
     echo "</table>\n";
     if(count($files) > 1) echo "<p><a href='".makeEventURL('onDownloadPopularZip')."'>Download these files as a ZIP archive</a></p>\n";
+    echo "</div>\n"; // end indent
+}
+#}}}########################################################################
+
+#{{{ displayFilesJS - lists most important files for current model
+############################################################################
+function displayFilesJS($context)
+{
+    echo "<h5 class='welcome'>Popular Downloads (<a href='".makeEventURL('onNavBarCall', 'file_browser.php')."'>all downloads</a>)</h5>\n";
+    echo "<div class='indent'>\n";
     
+    $files = listRecursive($_SESSION['dataDir']);
+    unset($files[MP_DIR_SYSTEM]);
+    unset($files[MP_DIR_WORK]);
+    unset($files[MP_DIR_RAWDATA]);
+    echo "<table border='0' width='100%' cellspacing='0'><tr valign='top'>\n";
+    foreach($files as $dirName => $dirContents)
+    {
+        echo "<td>\n";
+        foreach($dirContents as $fileName => $fileContents)
+        {
+            if(is_array($fileContents)) continue; // not a file -- a directory
+            echo "<a href='$_SESSION[dataURL]/$dirName/$fileName' onmouseover='showFileTools(this, \"$dirName/$fileName\", event)' onmouseout='hideFileTools()'>$fileName</a><br>";
+        }
+        echo "</td>\n";
+    }
+    echo "</tr></table>\n";
+    //{{{ Magical mystery code that makes the popup menus work
+?>
+<div id='filetools' style='display:none; position:absolute; z-index:10; background:white; padding:0.2em; border: 1px solid red' onmouseover='showFileTools(null, null, event)' onmouseout='hideFileTools()'>Hello</div>
+<script language='JavaScript'>
+<!--
+    var sessTag = <?php echo "\"".$_SESSION['sessTag']."\"\n"; ?>
+    var dataDir = <?php echo "\"".$_SESSION['dataDir']."\"\n"; ?>
+    var dataURL = <?php echo "\"".$_SESSION['dataURL']."\"\n"; ?>
+    var timerID = 0
+    var lastLink = null
+    
+    function showFileTools(link, fileName, event)
+    {
+        // MSIE is different...
+        if(!event) event = window.event
+        
+        if(timerID != 0)
+        {
+            window.clearTimeout(timerID)
+            timerID = 0
+        }
+        
+        var tools = document.getElementById("filetools")
+        if(link != null)// && link != lastLink)
+        {
+            var html = ""
+            if(/\.kin$/.exec(fileName))
+            {
+                html += "<a href='viewking.php?"+sessTag+"&url="+dataURL+"/"+fileName+"' target='_blank'>View in KiNG</a><br>\n"
+                html += "<a href='viewtext.php?"+sessTag+"&file="+dataDir+"/"+fileName+"&mode=plain' target='_blank'>View as text</a><br>\n"
+            }
+            else if(/\.kin\.gz$/.exec(fileName))
+                html += "<a href='viewking.php?"+sessTag+"&url="+dataURL+"/"+fileName+"' target='_blank'>View in KiNG</a><br>\n"
+            else if(/\.table$/.exec(fileName))
+                html += "<a href='viewtable.php?"+sessTag+"&file="+dataDir+"/"+fileName+"' target='_blank'>View as table</a><br>\n"
+            else if(/\.html$/.exec(fileName))
+            {
+                html += "<a href='viewtext.php?"+sessTag+"&file="+dataDir+"/"+fileName+"&mode=html' target='_blank'>View as HTML</a><br>\n"
+                html += "<a href='viewtext.php?"+sessTag+"&file="+dataDir+"/"+fileName+"&mode=plain' target='_blank'>View as text</a><br>\n"
+            }
+            else if(/\.(gz|tgz|zip|pdf))$/.exec(fileName))
+                html += "" // no-op
+            else // the default: assume plain text
+                html += "<a href='viewtext.php?"+sessTag+"&file="+dataDir+"/"+fileName+"&mode=plain' target='_blank'>View as text</a><br>\n"
+            html += "<a href='"+dataURL+"/"+fileName+"'><img src='img/download.gif'> Download</a>"
+            tools.innerHTML = html
+            
+            //var x = event.clientX
+            //var y = event.clientY
+            var x = findPosX(link) + link.offsetWidth + 4
+            var y = findPosY(link) + (link.offsetHeight/2) - (tools.offsetHeight/2)
+            tools.style.left = x+"px"
+            tools.style.top = y+"px"
+            tools.style.display = "block"
+            
+            lastLink = link
+        }
+    }
+    function hideFileTools()
+    {
+        timerID = window.setTimeout("reallyHideFileTools()", 500)
+    }
+    function reallyHideFileTools()
+    {
+        var tools = document.getElementById("filetools")
+        tools.style.display = "none"
+        lastLink = null
+    }
+
+// Borrowed from http://www.quirksmode.org/js/findpos.html
+function findPosX(obj)
+{
+    var curleft = 0;
+    if (obj.offsetParent)
+    {
+        while (obj.offsetParent)
+        {
+            curleft += obj.offsetLeft
+            obj = obj.offsetParent;
+        }
+    }
+    else if (obj.x)
+        curleft += obj.x;
+    return curleft;
+}
+function findPosY(obj)
+{
+    var curtop = 0;
+    if (obj.offsetParent)
+    {
+        while (obj.offsetParent)
+        {
+            curtop += obj.offsetTop
+            obj = obj.offsetParent;
+        }
+    }
+    else if (obj.y)
+        curtop += obj.y;
+    return curtop;
+}
+// -->
+</script>
+<?php
+    //}}}
     echo "</div>\n"; // end indent
 }
 #}}}########################################################################
