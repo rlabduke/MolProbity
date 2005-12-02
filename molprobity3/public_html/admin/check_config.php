@@ -200,7 +200,7 @@ $ok = true;
     $noe_version = $m[0];
 
     echo "<li>Java (cmd line): $java_help[0]</li>\n";
-    echo "<li>Prekin: ".exec("prekin -help")."</li>\n";
+    echo "<li>Prekin: ".exec("prekin -version")."</li>\n";
     echo "<li>Reduce: $reduce_help[0]</li>\n";
     echo "<li>Probe: ".exec("probe -version")."</li>\n";
     echo "<li>NOE-display: $noe_version</li>\n";
