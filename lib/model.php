@@ -494,6 +494,40 @@ function convertModelsToChains($infile)
 }
 #}}}########################################################################
 
+#{{{ removeChains - deletes specified chains from a PDB file
+############################################################################
+/**
+* Takes an array of chain IDs to delete. Blank may be given as _
+*/
+function removeChains($inpath, $outpath, $idsToRemove)
+{
+    $ids = "";
+    foreach($idsToRemove as $id)
+    {
+        if($id == '_') $id = ' ';
+        $ids .= $id;
+    }
+    
+    if(strlen($ids) == 0)
+    {
+        copy($inpath, $outpath);
+        return;
+    }
+    
+    $in = fopen($inpath, 'rb');
+    $out = fopen($outpath, 'wb');
+    $regex = "/^(ATOM  |HETATM|TER   |ANISOU|SIGATM|SIGUIJ).{15}[$ids]/";
+    while(!feof($in))
+    {
+        $s = fgets($in, 4096);
+        if(! preg_match($regex, $s))
+            fwrite($out, $s);
+    }
+    fclose($out);
+    fclose($in);
+}
+#}}}########################################################################
+
 #{{{ reduceNoBuild - adds missing H without changing existing atoms
 ############################################################################
 /**

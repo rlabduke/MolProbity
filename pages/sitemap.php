@@ -24,6 +24,10 @@ function display($context)
     echo "<li>Upload custom heterogen dictionaries (for adding hydrogens).</li>\n";
     echo "</ul>\n";
     
+    echo "<h3><a href='".makeEventURL("onNavBarCall", "editpdb_setup1.php")."'>Edit PDB files</a></h3>\n<ul>\n";
+    echo "<li>Remove unwanted chains.</li>\n";
+    echo "</ul>\n";
+    
     echo "<h3><a href='".makeEventURL("onNavBarCall", "reduce_setup.php")."'>Add hydrogens</a></h3>\n<ul>\n";
     echo "<li>Add missing hydrogens.</li>\n";
     echo "<li>Optimize H-bond networks.</li>\n";

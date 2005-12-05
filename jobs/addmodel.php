@@ -237,7 +237,8 @@ if(isset($id))
         $title,
         $s,
         implode('|', $idList),
-        "auto"
+        "auto",
+        "pdb_icon.png"
     );
     
     setProgress($tasks, null);

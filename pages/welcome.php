@@ -11,7 +11,7 @@ require_once(MP_BASE_DIR.'/pages/upload_setup.php');
 require_once(MP_BASE_DIR.'/pages/file_browser.php');
 
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
-class welcome_delegate extends BasicDelegate {
+class welcome_delegate extends file_browser_delegate {
     
 #{{{ display - creates the UI for this page
 ############################################################################
@@ -36,10 +36,19 @@ function display($context)
             $this->displayModelTools($context);
         
         echo "</div></div>\n<br>\n<div class='pagecontent'>\n";
-        $this->displayEntries($context);
-        echo "</div>\n<br>\n<div class='pagecontent'>\n";
+    }
+    
+    // Entries / files should display if we have any entries.
+    // We can have entries with no models -- e.g., uploading a het dictionary first thing.
+    $labbook = openLabbook();
+    if(count($labbook) > 0)
+    {
+        $this->displayEntries($context, $labbook);
+        echo "<br>\n";
+        //echo "</div>\n<br>\n<div class='pagecontent'>\n";
         //$this->displayFiles($context);
-        $this->displayFilesJS($context);
+        //$this->displayFilesJS($context);
+        $this->displayAllFiles($context);
         echo "</div>\n<br>\n<div class='pagecontent'>\n";
     }
     
@@ -189,6 +198,7 @@ function displayModelTools($context)
         'iface'     => array('desc' => 'Visualize interface contacts', 'handler' => 'onVisInterface', 'rel' => 1, 'img' => 'barnase_barstar.png'),
         //'sswing'    => array('desc' => 'Refit sidechains', 'page' => 'sswing_setup1.php', 'rel' => 1, 'img' => ''),
         'makekins'  => array('desc' => 'Make simple kinemages', 'page' => 'makekin_setup.php', 'rel' => 1, 'img' => 'porin_barrel.png'),
+        'editpdb' => array('desc' => 'Edit PDB file', 'page' => 'editpdb_setup1.php', 'rel' => 1, 'img' => 'scissors.png'),
         //'' => array('desc' => '', 'page' => '', 'rel' => 1, 'img' => ''),
     );
     
@@ -278,7 +288,7 @@ function formatTools($tools)
 }
 #}}}########################################################################
 
-#{{{ displayFiles - lists most important files for current model
+#{{{ [NOT USED] displayFiles - lists most important files for current model
 ############################################################################
 function displayFiles($context)
 {
@@ -309,7 +319,7 @@ function displayFiles($context)
 }
 #}}}########################################################################
 
-#{{{ displayFilesJS - lists most important files for current model
+#{{{ [NOT USED] displayFilesJS - lists most important files for current model
 ############################################################################
 function displayFilesJS($context)
 {
@@ -324,6 +334,7 @@ function displayFilesJS($context)
     foreach($files as $dirName => $dirContents)
     {
         echo "<td>\n";
+        echo "<b>$dirName</b><br>\n";
         foreach($dirContents as $fileName => $fileContents)
         {
             if(is_array($fileContents)) continue; // not a file -- a directory
@@ -334,7 +345,7 @@ function displayFilesJS($context)
     echo "</tr></table>\n";
     //{{{ Magical mystery code that makes the popup menus work
 ?>
-<div id='filetools' style='display:none; position:absolute; z-index:10; background:white; padding:0.2em; border: 1px solid red' onmouseover='showFileTools(null, null, event)' onmouseout='hideFileTools()'>Hello</div>
+<div id='filetools' style='display:none; position:absolute; z-index:10; background:#bbe; padding:0.2em; border: 1px #006 dotted' onmouseover='showFileTools(null, null, event)' onmouseout='hideFileTools()'>Hello</div>
 <script language='JavaScript'>
 <!--
     var sessTag = <?php echo "\"".$_SESSION['sessTag']."\"\n"; ?>
@@ -440,13 +451,32 @@ function findPosY(obj)
 }
 #}}}########################################################################
 
+#{{{ displayAllFiles - lists files for download and viewing
+############################################################################
+function displayAllFiles($context)
+{
+    echo "<h5 class='welcome'>Popular Downloads (<a href='".makeEventURL('onNavBarCall', 'file_browser.php')."'>all downloads</a>)</h5>\n";
+    echo "<div class='indent'>\n";
+    
+    $list = listRecursive($_SESSION['dataDir']);
+    unset($list[MP_DIR_SYSTEM]);
+    unset($list[MP_DIR_WORK]);
+    unset($list[MP_DIR_RAWDATA]);
+    $list = sortFilesAlpha($list);
+    $this->displayDownloadForm($list, $context['isExpanded']);
+    
+    echo "</div>\n"; // end indent
+}
+#}}}########################################################################
+
 #{{{ displayEntries - lists notebook entries for the current model
 ############################################################################
-function displayEntries($context)
+function displayEntries($context, $labbook)
 {
     // FUNKY: We use this URL to take us to the lab notebook page, and each
     // header below appends an anchor (#entry123) onto the end of it...
     // To get back here, the user must manually return to the welcome page.
+    // [This describes the old, commented out code.]
     $url = makeEventURL("onNavBarGoto", "notebook_main.php");
 
     $modelID = $_SESSION['lastUsedModelID'];
@@ -455,7 +485,7 @@ function displayEntries($context)
     else
         $model = $_SESSION['models'][$modelID];
     
-    $labbook = openLabbook();
+    //$labbook = openLabbook();
     $labbook = array_reverse($labbook, true); // make reverse chronological
     echo "<h5 class='welcome'>Recently Generated Results (<a href='$url'>all results</a>)</h5>\n";
     //echo "<h5 class='welcome'>Recently Generated Results</h5>\n";
@@ -467,7 +497,7 @@ function displayEntries($context)
         // Show all entries so user isn't confused when they switch models...
         //if(in_array($modelID, explode("|", $entry['model'])))
         {
-            if(++$entry_count > 3) break;
+            if(++$entry_count > 2) break;
             $title = $entry['title'];
             if($title == "") $title = "(no title)";
             echo "<tr><td width='50'><img src='img/$entry[thumbnail]' border='0' width='40' height='40'></td>";
@@ -478,7 +508,7 @@ function displayEntries($context)
     }
     echo "<tr><td colspan='3'><!-- vertical spacer --></td></tr>\n";
     echo "<tr><td></td>";
-    if($entry_count > 3)    echo "<td><small><a href='$url'>[... more results ...]</a></small></td>";
+    if($entry_count > 2)    echo "<td><small><a href='$url'>[... more results ...]</a></small></td>";
     else                    echo "<td></td>";
     echo "<td align='right'><small><a href='$url'>[set time zone]</a></small></td></tr>\n";
     echo "</table>\n</div>\n";
@@ -620,7 +650,7 @@ function onUploadOrFetch($arg, $req)
 }
 #}}}########################################################################
 
-#{{{ onDownloadPopularZip
+#{{{ [NOT USED] onDownloadPopularZip
 ############################################################################
 /**
 * FUNKY: This turns into a binary file download rather than an HTML page,
