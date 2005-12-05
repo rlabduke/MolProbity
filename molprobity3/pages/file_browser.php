@@ -17,7 +17,25 @@ class file_browser_delegate extends BasicDelegate {
 function display($context)
 {
     echo mpPageHeader("View &amp; download files", "files");
+
+    $list = listRecursive($_SESSION['dataDir']);
+    $list = sortFilesAlpha($list);
+    $this->displayDownloadForm($list, $context['isExpanded']);
+
+    echo mpPageFooter();
+}
+#}}}########################################################################
+
+#{{{ displayDownloadForm - also used by welcome.php
+############################################################################
+/**
+* list              like the output of core :: listRecursive()
+* isExpanded        an array of absolute dir names mapped to booleans
+*/
+function displayDownloadForm($list, $isExpanded)
+{
     echo makeEventForm('onDownloadMarkedZip');
+    echo "<a name='filelist'>\n"; // allows open/close links to snap us to here
     echo "<table width='100%' border='0' cellspacing='0'>\n";
     echo "<tr bgcolor='".MP_TABLE_HIGHLIGHT."'>";
     echo "<td width='48'></td>";
@@ -25,31 +43,37 @@ function display($context)
     echo "<td><b>Size</b></td>";
     echo "<td colspan='2' align='center'><b>View...</b></td>";
     echo "<td align='right'><b>Download</b></td>";
-    $list = listRecursive($_SESSION['dataDir']);
-    $list = sortFilesAlpha($list);
-    echo $this->makeFileList($list, $_SESSION['dataDir'], $_SESSION['dataURL'], $context['isExpanded']);
-    echo "</table>\n";
+    echo $this->makeFileList($list, $_SESSION['dataDir'], $_SESSION['dataURL'], $isExpanded);
+
+    echo "<tr><td colspan='2'>";
     echo "<a href='#' onclick='checkAll(true); return false;'>Check all</a>\n";
     echo "- <a href='#' onclick='checkAll(false); return false;'>Clear all</a>\n";
-    echo "<p><input type='submit' name='cmd' value='Download checked files and folders as a ZIP archive'></p>\n";
+    echo "</td><td colspan='4' align='right'>";
+    echo "<input type='submit' name='cmd' value='Download checked files and folders as a ZIP archive'>\n";
+    echo "</td></tr>\n";
+
+    echo "</table>\n";
     echo "</form>\n";
 
 ?><script language='JavaScript'>
 <!--
 function checkAll(checkSetting)
 {
-    for(var i = 0; i < document.forms[0].elements.length; i++)
+    // This works even when embedded in a multi-form document
+    var boxes = document.getElementsByName("zipfiles[]")
+    for(var i = 0; i < boxes.length; i++) boxes[i].checked = checkSetting
+    
+    // This only works for the simple file-browser page
+    /*for(var i = 0; i < document.forms[0].elements.length; i++)
     {
         if(document.forms[0].elements[i].type == "checkbox")
         {
             document.forms[0].elements[i].checked = checkSetting
         }
-    }
+    }*/
 }
 // -->
 </script><?php
-
-    echo mpPageFooter();
 }
 #}}}########################################################################
 
@@ -71,17 +95,19 @@ function makeFileList($list, $basePath, $baseURL, $isExpanded, $depth = 0)
         $this->fileListColor == MP_TABLE_ALT1 ? $this->fileListColor = MP_TABLE_ALT2 : $this->fileListColor = MP_TABLE_ALT1;
         if(is_array($file))
         {
+            // Using #filelist in here means we snap back to the table on page reload,
+            // rather than having to scroll all the way back down... (matters more for welcome.php)
             $s .= "<img src='img/clear_1x1.gif' width='".(16*$depth)."' height='1'>";
             if($isExpanded["$basePath/$dir"])
             {
-                $s .= "<a href='".makeEventURL("onFolderClose", "$basePath/$dir")."'>";
+                $s .= "<a href='".makeEventURL("onFolderClose", "$basePath/$dir")."#filelist'>";
                 $s .= "<img src='img/openfolder.gif'></a> ";
                 $s .= "<b>$dir</b></td><td colspan='4'></td></tr>\n";
                 $s .= $this->makeFileList($file, "$basePath/$dir", "$baseURL/$dir", $isExpanded, $depth+1);
             }
             else
             {
-                $s .= "<a href='".makeEventURL("onFolderOpen", "$basePath/$dir")."'>";
+                $s .= "<a href='".makeEventURL("onFolderOpen", "$basePath/$dir")."#filelist'>";
                 $s .= "<img src='img/closedfolder.gif'></a> ";
                 $s .= "<b>$dir</b></td><td colspan='4'></td></tr>\n";
             }
