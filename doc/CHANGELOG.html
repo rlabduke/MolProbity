@@ -48,7 +48,6 @@
     Get models from CASP web site? (where is it??)
     Allow escape from job when no process number appears after x sec.
     Add whois query to session listing
-    Remove runAnalysis() and makeMulticritKin()
     Change upload_setup's fetch of EDS map to be like welcome.php (a la carte)
     Develop "helper" pages; mark optional steps clearly
     Pick lowest resolution number mentioned in file; allow override?
@@ -64,9 +63,9 @@
     Use popular downloads as a set, not a list (multiple multi-kins, etc)
         Simple kinemage should go into popular downloads list
         Do we really need a popular downloads feature at all?
-    Track $_SERVER[HTTP_REFERER] in log? (maybe Google Analytics instead?)
     Shutdown: no more sessions after X; system going down in X minutes notice
     xxx-fix.flips goes in coordinates; should go in rawdata?
+    Do something for tracking user pathways thru the pages?
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -82,6 +81,10 @@
 - tried plugging in the folding file browser; with a few tweaks, this isn't bad
 - added interface for deleting chains from a PDB file
 - fixed welcome.php to show list of results even if there aren't any models
+- added $_SERVER[HTTP_REFERER] to log
+- extended cmdline/oneline-analysis to include clashscore percentile rankings
+- collapsed runAnalysis() and runAnalysis2() back into one function
+- added mpTempfile() and converted all of lib/ and cmdline/ to use it
 
 ### 3beta24 ###
 - changed "reduce_done" to "generic_done" in reduce_setup.php: this was

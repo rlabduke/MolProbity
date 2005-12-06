@@ -160,7 +160,7 @@ function onUploadPdbFile($arg, $req)
     
     // Don't try running shell cmds, etc on the uploaded file directly b/c
     // it's name could have space, .. , or other illegal chars in it!
-    $tmpfile = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
+    $tmpfile = mpTempfile("tmp_pdb_");
     if( !$_FILES['uploadFile']['error'] && $_FILES['uploadFile']['size'] > 0
     &&  move_uploaded_file($_FILES['uploadFile']['tmp_name'], $tmpfile))
     {

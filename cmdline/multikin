@@ -38,17 +38,17 @@ OUTPUTS / RESULTS:
 $optVerbose = true;
 $optGzipKin = true;
 $optMultikin = array(
-    'Bscale'        => true,
-    'Qscale'        => true,
-    'altconf'       => true,
-    'ribbons'       => true,
-    'rama'          => true,
-    'rota'          => true,
-    'cbdev'         => true,
-    'pperp'         => false,
-    'dots'          => true,
-        'hbdots'    => true,
-        'vdwdots'   => true,
+    'ribbons'   => true,
+    'Bscale'    => true,
+    'Qscale'    => true,
+    'altconf'   => true,
+    'rama'      => true,
+    'rota'      => true,
+    'cbdev'     => true,
+    'pperp'     => true,
+    'clashdots' => true,
+    'hbdots'    => true,
+    'vdwdots'   => true,
 );
 
 // First argument is the name of this script...
@@ -75,7 +75,7 @@ foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
 {
     if($optVerbose) echo "Making multi-criterion kinemage for $inFile ...\n";
     $outFile = basename($inFile, ".pdb") . ".kin";
-    makeMulticritKin(
+    makeMulticritKin2(
         array($inDir.'/'.$inFile),
         $outDir.'/'.$outFile,
         $optMultikin);

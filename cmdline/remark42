@@ -43,7 +43,7 @@ if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
 if(!isset($inFile))         die("No input file specified.\n");
 elseif(!is_file($inFile))   die("Input file '$inFile' does not exist.\n");
 
-$tmp = tempnam(MP_BASE_DIR.'/tmp', "tmp_remark42_");
+$tmp = mpTempfile("tmp_remark42_");
 
 runRotamer($inFile, $tmp);
 $rota = loadRotamer($tmp);

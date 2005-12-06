@@ -47,7 +47,7 @@ $opts = $_SESSION['bgjob'];
 $doAAC = ($opts['doKinemage'] && ($opts['kinClashes'] || $opts['kinHbonds'] || $opts['kinContacts']))
     || ($opts['doCharts'] && ($opts['chartClashlist']));
 
-$labbookEntry = runAnalysis2($modelID, $_SESSION['bgjob']);
+$labbookEntry = runAnalysis($modelID, $_SESSION['bgjob']);
 
 $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
     "Analyzed ".($doAAC ? "all-atom contacts and " : "")."geometry for $model[pdb]",

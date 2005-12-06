@@ -1,9 +1,10 @@
+#!/usr/bin/env php
 <?php # (jEdit options) :folding=explicit:collapseFolds=1:
 /*****************************************************************************
     Processes a directory full of PDB files non-recursively and outputs
-    a one-line summary of how many Asn/Gln/His flips there were
+    a list of all the Ramachanadran/rotamer/C-beta dev./clash outliers
     
- -> We assume all files have already been processed with Reduce -build or -fix <-
+ -> We assume all files already have H's added! <-
 
 INPUTS (via $_SERVER['argv']):
     the path to a directory; *.pdb will be processed
@@ -19,6 +20,7 @@ OUTPUTS:
     require_once(MP_BASE_DIR.'/lib/core.php');
     require_once(MP_BASE_DIR.'/lib/model.php');
     require_once(MP_BASE_DIR.'/lib/analyze.php');
+    require_once(MP_BASE_DIR.'/lib/visualize.php');
 // 5. Set up reasonable values to emulate CLI behavior if we're CGI
     set_time_limit(0); // don't want to bail after 30 sec!
 
@@ -46,14 +48,6 @@ if(! isset($pdbFolder))
 elseif(! is_dir($pdbFolder))
     die("Input directory '$pdbFolder' does not exist or is not a directory.\n");
     
-// 3. Restore session data. If you don't want to access the session
-// data for some reason, you must call mpInitEnvirons() instead.
-// This way, we don't create a session unless our input is semi-valid.
-mpStartSession(true); // create a new session
-
-// Describe the output of this script
-echo "#pdbFileName:nqhTotalFlipped:nqhTotalKept:nqhClashFlipped:nqhClashKept:nqhError\n";
-
 // Loop through all PDBs in the provided directory
 $h = opendir($pdbFolder);
 while(($infile = readdir($h)) !== false)
@@ -62,22 +56,42 @@ while(($infile = readdir($h)) !== false)
     if(is_file($infile) && endsWith($infile, ".pdb"))
     {
         $filename = basename($infile);
-        echo $filename;
+        $tmp = mpTempfile();
         
         // Run analysis; load data
-        $nqh = decodeReduceUsermods($infile);
+        runClashlist($infile, $tmp);
+        $clash = loadClashlist($tmp);
+        runCbetaDev($infile, $tmp);
+        $cbdev = loadCbetaDev($tmp);
+        $badCbeta = findCbetaOutliers($cbdev);
+        runRotamer($infile, $tmp);
+        $rota = loadRotamer($tmp);
+        $badRota = findRotaOutliers($rota);
+        runRamachandran($infile, $tmp);
+        $rama = loadRamachandran($tmp);
+        unlink($tmp);
         
-        unset($cnt);
-        if(is_array($nqh)) foreach($nqh[4] as $label)
-            $cnt[$label]++;
-        echo ":".(0+$cnt['FLIP']+$cnt['CLS-FL']).":".(0+$cnt['KEEP']+$cnt['CLS-KP']+$cnt['UNSURE']).":".(0+$cnt['CLS-FL']).":".(0+$cnt['CLS-KP']).":".(0+$cnt['???']);
-
-        echo "\n"; // end of this line
+        // Clash scores
+        echo "$filename:clashscore:$clash[scoreAll]\n";
+        echo "$filename:clashscoreB<40:$clash[scoreBlt40]\n";
+        foreach($clash['clashes'] as $res => $overlap)
+            echo "$filename:clash:$res:$overlap\n";
+        
+        // Cbetas
+        foreach($badCbeta as $res => $dist)
+            echo "$filename:cbdev:$res:$dist\n";
+        
+        // Rotamers
+        foreach($badRota as $res => $score)
+            echo "$filename:rotamer:$res:$score\n";
+        
+        // Rama outliers - count each type
+        foreach($rama as $r)
+            if($r['eval'] == "OUTLIER") echo "$filename:ramachandran:$r[resName]:$r[type]\n";
     }
 }
 closedir($h);
 
 ############################################################################
 // Clean up and go home
-mpDestroySession();
 ?>

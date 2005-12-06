@@ -6,7 +6,7 @@ INPUTS / SWITCHES (via $_SERVER['argv']):
     inFile2         a PDB file to operate on
 
 OUTPUTS / RESULTS:
-    Dump of rotamer info for debugging
+    A difference-dihedral plot for phi and psi in kinemage format
 
 *****************************************************************************/
 // EVERY *top-level* page must start this way:
