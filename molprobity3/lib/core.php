@@ -420,7 +420,7 @@ function linkKinemage($fname, $name = null)
 */
 function makeZipForFolder($inpath)
 {
-    $outpath = tempnam(MP_BASE_DIR."/tmp", "tmp_zip_");
+    $outpath = mpTempfile("tmp_zip_");
     // Do the song and dance to get just the last dir of $inpath in the ZIP
     // instead of all the dirs, starting from the filesystem root (/).
     $inbase = basename($inpath);
@@ -446,7 +446,7 @@ function makeZipForFolder($inpath)
 */
 function makeZipForFiles($basepath, $filelist)
 {
-    $outpath = tempnam(MP_BASE_DIR."/tmp", "tmp_zip_");
+    $outpath = mpTempfile("tmp_zip_");
     $cwd = getcwd();
     chdir($basepath);
     // must compress to stdout b/c otherwise zip wants a .zip ending
@@ -490,6 +490,14 @@ function destructiveGZipFile($path)
     clearstatcache();       // so we don't still think $path exists
     if(is_file($path))      // this *should* never be true...
         echo "destructiveGZipFile: $path was not overwritten\n";
+}
+#}}}########################################################################
+
+#{{{ mpTempfile - creates a temp file in the site-wide temp folder
+############################################################################
+function mpTempfile($prefix = 'tmp_misc')
+{
+    return tempnam(MP_BASE_DIR."/tmp", $prefix);
 }
 #}}}########################################################################
 

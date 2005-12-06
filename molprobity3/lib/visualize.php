@@ -368,7 +368,7 @@ function makeBadRamachandranKin($infile, $outfile, $rama = null, $color = 'green
     // This uses Prekin, but just produces chunks of mainchain. Hard to see.
     /*if(!$rama)
     {
-        $tmp = tempnam(MP_BASE_DIR."/tmp", "tmp_rama_");
+        $tmp = mpTempfile("tmp_rama_");
         runRamachandran($infile, $tmp);
         $rama = loadRamachandran($tmp);
         unlink($tmp);
@@ -399,7 +399,7 @@ function makeBadRotamerKin($infile, $outfile, $rota = null, $color = 'gold', $cu
 {
     if(!$rota)
     {
-        $tmp = tempnam(MP_BASE_DIR."/tmp", "tmp_rota_");
+        $tmp = mpTempfile("tmp_rota_");
         runRotamer($infile, $tmp);
         $rota = loadRotamer($tmp);
         unlink($tmp);
@@ -532,7 +532,7 @@ mode==2 && match($0, /(^\{ *[^ ]+ ([^}]+))(\} *[PL] )(.+$)/, frag) {
 }
 mode==2 { print $0; }';
 
-    $tmp = tempnam(MP_BASE_DIR."/tmp", "tmp_kin_");
+    $tmp = mpTempfile("tmp_kin_");
     exec("prekin -append -bestribbon -nogroup $infile > $tmp");
     exec("gawk '$bbB_ribbon_script' $infile $tmp >> $outfile");
     unlink($tmp);

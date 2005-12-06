@@ -38,6 +38,7 @@ if($isNewSess)
 {
     mpLog("new-session:New interactive user session started on the web");
     mpLog("browser-detect:".$_SERVER['HTTP_USER_AGENT']);
+    mpLog("refered-by:".$_SERVER['HTTP_REFERER']);
 }
 elseif(isset($_REQUEST['eventID']))
 {

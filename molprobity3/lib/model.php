@@ -100,7 +100,7 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
         $origID = $origName;
     
     // Process file to clean it up
-    $tmp2 = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
+    $tmp2 = mpTempfile("tmp_pdb_");
     list($stats, $segmap) = preparePDB($tmpPdb, $tmp2, $isCnsFormat, $ignoreSegID);
     
     if($stats['models'] > 1) // NMR/theoretical with multiple models {{{
@@ -210,8 +210,8 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
 */
 function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
 {
-    $tmp1   = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
-    $tmp2   = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
+    $tmp1   = mpTempfile("tmp_pdb_");
+    $tmp2   = mpTempfile("tmp_pdb_");
     
     // List of tasks for running as a background job
     $tasks['scrublines'] = "Convert linefeeds to UNIX standard (\\n)";
@@ -357,7 +357,7 @@ function splitPdbModels($infile)
             $keeplines = true;
             $num = trim(substr($line, 5, 20)) + 0;
             
-            $tmpFile = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
+            $tmpFile = mpTempfile("tmp_pdb_");
             $modelFiles[$num] = $tmpFile;
             $out = fopen($tmpFile, "wb");
             foreach($headers as $h) fwrite($out, $h);
@@ -413,7 +413,7 @@ function joinPdbModels($infiles)
     }
     
     // Part 2: Re-scan all files and write their contents, in order.
-    $tmpFile = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
+    $tmpFile = mpTempfile("tmp_pdb_");
     $out = fopen($tmpFile, "wb");
     foreach($headers as $h) fwrite($out, $h);
     
@@ -462,7 +462,7 @@ function convertModelsToChains($infile)
     // Maps old chain IDs to new chain IDs. Mappings are pulled from $unusedIDs.
     // This is cleared out every time a new MODEL is encountered.
     $idmap = array();
-    $tmpFile = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
+    $tmpFile = mpTempfile("tmp_pdb_");
     $out = fopen($tmpFile, "wb");
     $in = fopen($infile, "rb");
     while(!feof($in))
@@ -799,10 +799,10 @@ function getPdbModel($pdbcode, $biolunit = false)
     else
         $src = "http://www.rcsb.org/pdb/cgi/export.cgi/$pdbcode.pdb?format=PDB&pdbId=$pdbcode&compression=gz";
         
-    $outpath = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
+    $outpath = mpTempfile("tmp_pdb_");
     if(copy($src, $outpath) && filesize($outpath) > 1000)
     {
-        $outpath2 = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
+        $outpath2 = mpTempfile("tmp_pdb_");
         exec("gunzip -c < $outpath > $outpath2"); // can't just gunzip without a .gz ending
         unlink($outpath);
         // Convert MODELs to chain IDs
@@ -836,7 +836,7 @@ function getNdbModel($code)
     
     // Fake POST a user query to the NDB homepage
     $ch = curl_init('http://ndbserver.rutgers.edu/servlet/IDSearch.NDBSearch1');
-    $webpage = tempnam(MP_BASE_DIR."/tmp", "tmp_html_");
+    $webpage = mpTempfile("tmp_html_");
     $fp = fopen($webpage, "wb");
     
     curl_setopt($ch, CURLOPT_FILE, $fp);    // output to specified file
@@ -863,7 +863,7 @@ function getNdbModel($code)
     if(!isset($url)) return null;
     
     // Download file...
-    $Zfile = tempnam(MP_BASE_DIR."/tmp", "tmp_pdbZ_");
+    $Zfile = mpTempfile("tmp_pdbZ_");
     if(!copy($url, $Zfile) || filesize($Zfile < 1000))
     {
         if(file_exists($Zfile)) unlink($Zfile);
@@ -872,7 +872,7 @@ function getNdbModel($code)
     
     // Use gunzip to decompress it
     // -S forces gunzip to recognize file by magic number rather than .Z ending
-    $outpath = tempnam(MP_BASE_DIR."/tmp", "tmp_pdb_");
+    $outpath = mpTempfile("tmp_pdb_");
     exec("gunzip -c -S '' $Zfile > $outpath");
     unlink($Zfile);
     
@@ -942,7 +942,7 @@ function getEdsMap($pdbcode, $format, $type)
     
     // Copy the file over the network in 8k chunks
     $in = fopen($url, 'r');
-    $outpath = tempnam(MP_BASE_DIR."/tmp", "tmp_map_");
+    $outpath = mpTempfile("tmp_map_");
     $out = fopen($outpath, 'w');
     while(!feof($in))
         fwrite($out, fread($in, 8192));
@@ -1000,7 +1000,7 @@ function replacePdbRemark($inpath, $remarkText, $remarkNumber)
 {
     // Make a copy of the starting PDB file into the tmp dir
     $outpath = $inpath;
-    $inpath = tempnam(MP_BASE_DIR."/tmp", "tmp_remark_");
+    $inpath = mpTempfile("tmp_remark_");
     copy($outpath, $inpath);
     // Open input and output streams
     $in = fopen($inpath, 'r');

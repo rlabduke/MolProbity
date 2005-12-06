@@ -44,6 +44,7 @@ function summaryAnalysis($modelID)
         if(!file_exists($rawDir)) mkdir($rawDir, 0777);
     runClashlist($pdbfile, "$rawDir/$model[prefix]clash.data");
     $clash = loadClashlist("$rawDir/$model[prefix]clash.data");
+    $clashstats = runClashStats($pdbstats['resolution'], $clash['scoreAll'], $clash['scoreBlt40']);
     runCbetaDev($pdbfile, "$rawDir/$model[prefix]cbdev.data");
     $cbdev = loadCbetaDev("$rawDir/$model[prefix]cbdev.data");
     $badCbeta = findCbetaOutliers($cbdev);
@@ -56,10 +57,11 @@ function summaryAnalysis($modelID)
     
     // Clash scores
     $out .= ":" . $clash['scoreAll'] . ":" . $clash['scoreBlt40'];
+    $out .= ":$clashstats[minresol]:$clashstats[maxresol]:$clashstats[n_samples]:$clashstats[pct_rank]:$clashstats[pct_rank40]";
     
     // Cbetas
     $out .= ":" . count($badCbeta) . ":" . count($cbdev);
-    $out .= ":$cbStats[max]:$cbStats[median]:$cbStats[mean]";
+    $out .= ":$cbStats[max]:$cbStats[median]:".round($cbStats['mean'], 3);
     
     // Rotamers
     $out .= ":" . count($badRota) . ":" . count($rota);
@@ -101,10 +103,10 @@ elseif(!is_dir($inDir))     die("Input directory '$inDir' does not exist.\n");
 if($optVerbose)
 {
     echo "#INPUT  : ".realpath($inDir)."\n";
-    echo "#OUTPUT : ".realpath($outDir)."\n";
 
     // Describe the output of this script
-    echo "#pdbFileName:chains:residues:nucacids:resolution:rvalue:rfree:clashscore:clashscoreB<40";
+    echo "#pdbFileName:chains:residues:nucacids:resolution:rvalue:rfree";
+    echo ":clashscore:clashscoreB<40:minresol:maxresol:n_samples:pct_rank:pct_rank40";
     echo ":cbeta>0.25:numCbeta:maxCbeta:medianCbeta:meanCbeta:rota<1%:numRota:ramaOutlier:ramaAllowed:ramaFavored\n";
 }
 
