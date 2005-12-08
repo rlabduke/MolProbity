@@ -32,6 +32,8 @@ chmod 777 tmp/
 chmod 777 feedback/
 touch feedback/molprobity.log
 chmod 666 feedback/molprobity.log
+touch feedback/user_paths.log
+chmod 666 feedback/user_paths.log
 
 # Create symlinks for executables
 cd bin

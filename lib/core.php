@@ -495,7 +495,7 @@ function destructiveGZipFile($path)
 
 #{{{ mpTempfile - creates a temp file in the site-wide temp folder
 ############################################################################
-function mpTempfile($prefix = 'tmp_misc')
+function mpTempfile($prefix = 'tmp_misc_')
 {
     return tempnam(MP_BASE_DIR."/tmp", $prefix);
 }

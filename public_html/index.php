@@ -79,4 +79,5 @@ $delegate = makeDelegateObject();
 // Not a variable function name; UI function is always 'display()'
 $delegate->display($page['context']); // creates a HTML UI
 
+mpLogPath($page['delegate']); // for tracking the user's path thru the system later
 ?>
