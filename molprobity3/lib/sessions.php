@@ -389,6 +389,28 @@ function mpLog($msg)
 }
 #}}}########################################################################
 
+#{{{ mpLogPath - used for logging a users path thru the system
+############################################################################
+/**
+* Writes the message, along with IP number, session ID, and current time.
+* Fields are colon-delimited, so the recommended format is a short identifying string
+* followed by a colon and a longer, more human-readable description.
+*/
+function mpLogPath($pageOrUrl)
+{
+    $f = fopen(MP_BASE_DIR."/feedback/user_paths.log", "a");
+
+    $sess = session_id();
+    $ip = getVisitorIP();
+    $time = time(); // seconds since the Epoch (1 Jan 1970 midnight GMT)
+
+    fwrite($f, "$ip:$sess:$time:$pageOrUrl");
+    if(! endsWith($pageOrUrl, "\n")) fwrite($f, "\n");
+
+    fclose($f);
+}
+#}}}########################################################################
+
 #{{{ postSessionID - makes a hidden <INPUT> for forms
 ############################################################################
 function postSessionID()
