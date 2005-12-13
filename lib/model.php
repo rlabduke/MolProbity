@@ -966,11 +966,11 @@ function remapSegIDs($inpath, $outpath, $mapString)
     // Create a segID -> chainID map for lookup
     $mapString = str_replace("_", " ", $mapString);
     $tmp = explode(',', $mapString);
-    echo(count($tmp));
-    print_r($tmp);
+    #echo(count($tmp));
+    #print_r($tmp);
     for($i = 0; $i < count($tmp); $i += 2)
         $map[strtoupper($tmp[$i])] = strtoupper($tmp[$i+1]);
-    print_r($map);
+    #print_r($map);
     
     $in = fopen($inpath, 'rb');
     $out = fopen($outpath, 'wb');

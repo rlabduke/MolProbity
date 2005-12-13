@@ -114,7 +114,8 @@ foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
 {
     mpStartSession(true); // create a new session
     $inpath = $inDir.'/'.$inFile;
-    $id = addModelOrEnsemble($inpath, basename($inpath));
+    // Need to ignore segIDs for stupid Top500 with seg new_ for all H
+    $id = addModelOrEnsemble($inpath, basename($inpath), false, true);
     if(isset($_SESSION['ensembles'][$id]))
     {
         foreach($_SESSION['ensembles'][$id]['models'] as $modelID)
