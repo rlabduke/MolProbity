@@ -69,7 +69,7 @@ function summaryAnalysis($modelID)
     // Rama outliers - count each type
     foreach($rama as $r)
         $ramaScore[ $r['eval'] ] += 1;
-    $out .= ":" . ($ramaScore['OUTLIER']+0) . ":" . ($ramaScore['Allowed']+0) . ":" . ($ramaScore['Favored']+0);
+    $out .= ":" . ($ramaScore['OUTLIER']+0) . ":" . ($ramaScore['Allowed']+0) . ":" . ($ramaScore['Favored']+0) . ":" . count($rama);
     
     $out .= "\n"; // end of this line
     return $out;
@@ -107,7 +107,7 @@ if($optVerbose)
     // Describe the output of this script
     echo "#pdbFileName:chains:residues:nucacids:resolution:rvalue:rfree";
     echo ":clashscore:clashscoreB<40:minresol:maxresol:n_samples:pct_rank:pct_rank40";
-    echo ":cbeta>0.25:numCbeta:maxCbeta:medianCbeta:meanCbeta:rota<1%:numRota:ramaOutlier:ramaAllowed:ramaFavored\n";
+    echo ":cbeta>0.25:numCbeta:maxCbeta:medianCbeta:meanCbeta:rota<1%:numRota:ramaOutlier:ramaAllowed:ramaFavored:numRama\n";
 }
 
 foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
