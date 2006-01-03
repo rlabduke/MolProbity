@@ -113,6 +113,8 @@ function pdbstat($pdbfilename)
     $fromCNS = 0;           # counter for CNS-style header records
     $mcAlts = array();      # mainchain/CB alternates (set of res)
     $allAlts = array();     # total number of alternates (set of res)
+    $rValue = array();      # various kinds of R value
+    $rFree = array();       # various kinds of Rfree
     
     $file = fopen($pdbfilename, "r");
     while(!feof($file))
@@ -136,8 +138,22 @@ function pdbstat($pdbfilename)
         elseif(startsWith($s, "REMARK"))
         {
             if(startsWith($s, 'REMARK   3   PROGRAM')) { $refiProg = trim(substr($s, 26, 44)); }
-            elseif(!isset($rValue) && preg_match('/^REMARK   3   R VALUE.*?[ :](0?\.\d+)/', $s, $match)) { $rValue = $match[1]; }
-            elseif(!isset($rFree) && preg_match('/^REMARK   3   FREE R VALUE .+?: *(0?\.\d+)/', $s, $match)) { $rFree = $match[1]; }
+            elseif(startsWith($s, 'REMARK   3   R VALUE'))
+            {
+                if(preg_match('/^REMARK   3   R VALUE +?\(WORKING SET, NO CUTOFF\) : (0?\.0*[1-9][0-9]+)/', $s, $match)) { $rValue['work_nocut'] = $match[1]; }
+                elseif(preg_match('/^REMARK   3   R VALUE +?\(WORKING SET \+ TEST SET, NO CUTOFF\) : (0?\.0*[1-9][0-9]+)/', $s, $match)) { $rValue['cryst_nocut'] = $match[1]; }
+                elseif(preg_match('/^REMARK   3   R VALUE +?\(WORKING SET, F>4SIG\(F\)\) : (0?\.0*[1-9][0-9]+)/', $s, $match)) { $rValue['work_4sig'] = $match[1]; }
+                elseif(preg_match('/^REMARK   3   R VALUE +?\(WORKING SET \+ TEST SET, F>4SIG\(F\)\) : (0?\.0*[1-9][0-9]+)/', $s, $match)) { $rValue['cryst_4sig'] = $match[1]; }
+                elseif(!$rValue['work'] && preg_match('/^REMARK   3   R VALUE +?\(WORKING SET\) : (0?\.0*[1-9][0-9]+)/', $s, $match)) { $rValue['work'] = $match[1]; }
+                elseif(!$rValue['cryst'] && preg_match('/^REMARK   3   R VALUE +?\(WORKING SET \+ TEST SET\) : (0?\.0*[1-9][0-9]+)/', $s, $match)) { $rValue['cryst'] = $match[1]; }
+                elseif(!$rValue['generic'] && preg_match('/^REMARK   3   R VALUE.*?[ :](0?\.0*[1-9][0-9]+)/', $s, $match)) { $rValue['generic'] = $match[1]; }
+            }
+            elseif(startsWith($s, 'REMARK   3   FREE R VALUE'))
+            {
+                if(preg_match('/^REMARK   3   FREE R VALUE +?\(NO CUTOFF\) : (0?\.0*[1-9][0-9]+)/', $s, $match)) { $rFree['nocut'] = $match[1]; }
+                elseif(preg_match('/^REMARK   3   FREE R VALUE +?\(F>4SIG\(F\)\) : (0?\.0*[1-9][0-9]+)/', $s, $match)) { $rFree['4sig'] = $match[1]; }
+                elseif(!$rFree['generic'] && !preg_match('/^REMARK   3   FREE R VALUE TEST SET/', $s) && preg_match('/^REMARK   3   FREE R VALUE .+?: *(0?\.0*[1-9][0-9]+)/', $s, $match)) { $rFree['generic'] = $match[1]; }
+            }
             elseif(preg_match('/^REMARK 200  TEMPERATURE           \(KELVIN\) : +(\d+\.\d+)/', $s, $match)) { $refiTemp = $match[1]; }
             elseif(!isset($resolution) && preg_match("/^REMARK   2/", $s) && !preg_match('/NOT APPLICABLE/', $s)
                 && preg_match('/ (\d+\.\d*|0?\.\d+)/', substr($s,10,60), $match)) { $resolution = $match[1]; }
@@ -256,8 +272,16 @@ function pdbstat($pdbfilename)
     if(isset($resolution))  $ret['resolution']  = $resolution;
     if(isset($refiProg))    $ret['refiprog']    = $refiProg;
     if(isset($refiTemp))    $ret['refitemp']    = $refiTemp;
-    if(isset($rValue))      $ret['rvalue']      = $rValue;
-    if(isset($rFree))       $ret['rfree']       = $rFree;
+    
+    if($rValue['work_nocut'] && $rFree['nocut']) { $ret['rvalue'] = $rValue['work_nocut']; $ret['rfree'] = $rFree['nocut']; }
+    elseif($rValue['cryst_nocut'] && $rFree['nocut']) { $ret['rvalue'] = $rValue['cryst_nocut']; $ret['rfree'] = $rFree['nocut']; }
+    elseif($rValue['work_4sig'] && $rFree['4sig']) { $ret['rvalue'] = $rValue['work_4sig']; $ret['rfree'] = $rFree['4sig']; }
+    elseif($rValue['cryst_4sig'] && $rFree['4sig']) { $ret['rvalue'] = $rValue['cryst_4sig']; $ret['rfree'] = $rFree['4sig']; }
+    else
+    {
+        if(count($rValue) > 0)  $ret['rvalue'] = min($rValue);
+        if(count($rFree) > 0)   $ret['rfree'] = min($rFree);
+    }
     
     return $ret;
 }

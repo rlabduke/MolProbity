@@ -2,7 +2,7 @@
 #
 # This script analyzes the output of a command like
 #
-#   (while true; do uptime >> uptime.log; sleep 60; done) &
+#   (while true; do echo -n `date` '::' >> uptime.log; uptime >> uptime.log; sleep 60; done) &
 #
 # given on stdin and writes a kinemage plot to stdout.
 #
@@ -14,7 +14,7 @@ $sysload_15 = array();
 
 foreach($lines as $line)
 {
-    if(preg_match('/^\s*(\d+:\d+).+load average:\s+(\d+\.\d+),\s+(\d+\.\d+),\s+(\d+\.\d+)/', $line, $f))
+    if(preg_match('/^\s*(\d+:\d+).+load average:\s+(\d+\.\d+),?\s+(\d+\.\d+),?\s+(\d+\.\d+)/', $line, $f))
     {
         #echo "time $f[1]    load $f[2]\n";
         $timestamps[]   = $f[1];

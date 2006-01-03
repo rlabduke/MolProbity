@@ -88,10 +88,7 @@ if($opts['doKinemage'])
     if(filesize($outfile) > MP_KIN_GZIP_THRESHOLD)
     {
         destructiveGZipFile($outfile);
-        $_SESSION['ensembles'][$ensID]['primaryDownloads'][] = MP_DIR_KINS."/$ensemble[prefix]multi.kin.gz";
     }
-    else
-        $_SESSION['ensembles'][$ensID]['primaryDownloads'][] = MP_DIR_KINS."/$ensemble[prefix]multi.kin";
 
     $labbookEntry .= "<i>Note: these kins are often too big to view in the browser. You may need to download it and view it off line.</i>\n";
     $labbookEntry .= "<br>".linkKinemage("$ensemble[prefix]multi.kin", "Multi-criterion kinemage");

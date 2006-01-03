@@ -30,22 +30,32 @@ INPUTS (via Get or Post):
 
 # MAIN - the beginning of execution for this page
 ############################################################################
-// I can't remember why I was thinking this page could interfere with
-// background jobs, but I think (at the moment) that this should be safe.
-//
-// You could get in trouble if a background job was running (hence the check here)
-// or if you somehow hit the size-change link while another page was loading (unlikely).
-if(isset($_REQUEST['size']) && !$_SESSION['bgjob']['isRunning'])
+// Note that changing size breaks the "Close" button, at least in Safari, b/c the page reloads.
+if(isset($_REQUEST['size']))
 {
-    mpSessReadOnly(false);
-    // (Note that changing size breaks the "Close" button, at least in Safari)
-    $_SESSION['kingSize'] = $_REQUEST['size'];
+    $kingSize = $_REQUEST['size'];
+    setcookie('viewking_kingSize', $kingSize);
+    
+    // You could get in trouble if a background job was running (hence the check here)
+    // or if you somehow hit the size-change link while another page was loading (unlikely),
+    // because this update would be overwriten when the background job exited (hopefully),
+    // or this update would overwrite the results of the background job just as it ended (disaster).
+    if(!$_SESSION['bgjob']['isRunning'])
+    {
+        mpSessReadOnly(false);
+        $_SESSION['kingSize'] = $kingSize;
+    }
 }
-if($_SESSION['kingSize']        == "tiny")  $size = "width='600' height='400'"; //  640 x 480
-elseif($_SESSION['kingSize']    == "small") $size = "width='700' height='500'"; // 800 x 600
-elseif($_SESSION['kingSize']    == "large") $size = "width='1300' height='950'"; // 1400 x 1050
-elseif($_SESSION['kingSize']    == "huge")  $size = "width='1500' height='1100'"; // 1600 x 1200
-else                                        $size = "width='950' height='650'"; // Good for most people (1024 x 768)
+// By favoring cookies over session data, we can change size even while a background job is running.
+elseif(isset($_COOKIE['viewking_kingSize']))    $kingSize = $_COOKIE['viewking_kingSize'];
+elseif(isset($_SESSION['kingSize']))            $kingSize = $_SESSION['kingSize'];
+else                                            $kingSize = 'default';
+
+if($kingSize        == "tiny")  $size = "width='600' height='400'"; //  640 x 480
+elseif($kingSize    == "small") $size = "width='700' height='500'"; // 800 x 600
+elseif($kingSize    == "large") $size = "width='1300' height='950'"; // 1400 x 1050
+elseif($kingSize    == "huge")  $size = "width='1500' height='1100'"; // 1600 x 1200
+else                            $size = "width='950' height='650'"; // Good for most people (1024 x 768)
 // Unfortunately, percentage sizes don't work reliably, as that would be a nicer way to go for "default".
 
 $url = $_REQUEST['url'];
@@ -56,7 +66,7 @@ echo mpPageHeader("KiNG - $file");
 ############################################################################
 ?>
 <center>
-<applet code="king/Kinglet.class" archive="king.jar" <?php echo $size; ?>>
+<applet id="king_applet" code="king/Kinglet.class" archive="king.jar" <?php echo $size; ?>>
 <param name="mode" value="flat">
 <?php
     echo "    <param name='kinSource' value='$url'>\n";
@@ -94,24 +104,73 @@ language="JavaScript" onclick="self.close();">.
 <td><a href='help/java.html'>Don't see anything?</a></td>
 <td align='right'>
 <?php
-if($_SESSION['kingSize'] == "tiny") echo "tiny";
+if($kingSize == "tiny") echo "tiny";
 else echo "<a href='viewking.php?$_SESSION[sessTag]&url=$url&size=tiny'>tiny</a>";
 echo " | ";
-if($_SESSION['kingSize'] == "small") echo "small";
+if($kingSize == "small") echo "small";
 else echo "<a href='viewking.php?$_SESSION[sessTag]&url=$url&size=small'>small</a>";
 echo " | ";
-if($_SESSION['kingSize'] == "default") echo "default";
+if($kingSize == "default") echo "default";
 else echo "<a href='viewking.php?$_SESSION[sessTag]&url=$url&size=default'>default</a>";
 echo " | ";
-if($_SESSION['kingSize'] == "large") echo "large";
+if($kingSize == "large") echo "large";
 else echo "<a href='viewking.php?$_SESSION[sessTag]&url=$url&size=large'>large</a>";
 echo " | ";
-if($_SESSION['kingSize'] == "huge") echo "huge";
+if($kingSize == "huge") echo "huge";
 else echo "<a href='viewking.php?$_SESSION[sessTag]&url=$url&size=huge'>huge</a>";
 ?>
 </td>
 </tr></table>
 </form>
+
+<script language="JavaScript">
+<!--
+// {{{ This is for widening the browser window as necessary.
+function widenBrowser()
+{
+    if(!window.outerHeight) return // only works for Netscape family
+
+    king_applet = document.getElementById("king_applet")
+    newOuterWidth = findPosX(king_applet) + king_applet.offsetWidth + 32
+    if(newOuterWidth > 600 && newOuterWidth < screen.width)
+        window.resizeTo(newOuterWidth, window.outerHeight)
+}
+
+// Borrowed from http://www.quirksmode.org/js/findpos.html
+function findPosX(obj)
+{
+    var curleft = 0;
+    if (obj.offsetParent)
+    {
+        while (obj.offsetParent)
+        {
+            curleft += obj.offsetLeft
+            obj = obj.offsetParent;
+        }
+    }
+    else if (obj.x)
+        curleft += obj.x;
+    return curleft;
+}
+function findPosY(obj)
+{
+    var curtop = 0;
+    if (obj.offsetParent)
+    {
+        while (obj.offsetParent)
+        {
+            curtop += obj.offsetTop
+            obj = obj.offsetParent;
+        }
+    }
+    else if (obj.y)
+        curtop += obj.y;
+    return curtop;
+}
+
+window.onload = widenBrowser
+// }}} -->
+</script>
 
 
 </center>
