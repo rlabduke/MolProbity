@@ -17,7 +17,7 @@ require_once(MP_BASE_DIR.'/lib/pdbstat.php');
 *   modelID     the desired model ID. A serial number may be appended.
 *   pdbSuffix   a suffix to apply to the PDB filename. Usually "".
 *
-* returns: an array containing 'id', 'pdb', 'prefix', and 'primaryDownloads'.
+* returns: an array containing 'id', 'pdb', 'prefix'
 */
 function createModel($modelID, $pdbSuffix = "")
 {
@@ -50,7 +50,6 @@ function createModel($modelID, $pdbSuffix = "")
         'id'        => $modelID,
         'prefix'    => $modelID.'-',
         'pdb'       => $outname,
-        'primaryDownloads'  => array()
     );
 }
 #}}}########################################################################
@@ -67,7 +66,7 @@ function createModel($modelID, $pdbSuffix = "")
 *
 *   ensembleID      the desired ensemble ID. A serial number may be appended.
 *
-* returns: an array containing 'id', 'pdb', 'prefix', and 'primaryDownloads'.
+* returns: an array containing 'id', 'pdb', 'prefix'
 */
 function createEnsemble($ensembleID)
 {

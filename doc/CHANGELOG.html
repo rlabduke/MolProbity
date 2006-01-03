@@ -8,8 +8,10 @@
     Changes still made by Reduce -nobuild:
         Existing protonation state for His
         Existing Met CH3 and Lys NH3 orientation (don't want -norotnh3 and -norotmet)
+    Reduce: protonates S in Cys--Fe bond (1jb0)
     Probe: -NOVDWout switch missing from docs, duplicated ONLYBADOUT
     Probe: Weird intra-sidechain clashes for 1BKR (low occ atoms in-chain)
+    Probe: clashes in 1F7L het because Cs named (sort of) like Ps
     NOEdisplay: NOEs thicker, esp. violations
     Prekin: doesn't mark pointmasters on the start of vectors (those flagged P)
     Prekin: dangling altB C--N for 1SWU B 29 (whenever i has all A and B alts)
@@ -55,21 +57,35 @@
     Oneline, all-in-one (kins, etc) for JCSG
     "outlier" column for multichart
     Move labbook.html to charts/ ?
-    Modify cmdline/oneline-analysis so only particular subsets may be run
+    xxx-fix.flips goes in coordinates; should go in rawdata?
+    Auto-uniquify chain IDs on file upload?
 }}}
     Produce multi-model Ramachandran plots from the GUI
     Tool for building ensembles from arbitrary sets of models
     Kinemages are text/plain instead of downloaded
     Convert "number of H added, etc" text into tables
-    Use popular downloads as a set, not a list (multiple multi-kins, etc)
-        Simple kinemage should go into popular downloads list
-        Do we really need a popular downloads feature at all?
     Shutdown: no more sessions after X; system going down in X minutes notice
-    xxx-fix.flips goes in coordinates; should go in rawdata?
+    "Close this window" breaks navigation? (Firefox 1.0.7 on Windows)
+    Use cookies to remember settings for optional buttons on validation page?
+        (use setcookie(); $_COOKIES[] is read-only; see viewking.php for example)
+    Create better uptime management tools, including memory usage (and jobs?)
+    What's the difference between old and new SwingSet? (Bob)
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
+
+### 3beta26 ###
+- updated KiNG to 1.49
+- changed table highlight color to coordinate better with site color scheme
+- tried to make pdbstat do a better job of getting R and Rfree; seems to help
+- added -noXXX flags to oneline-analysis
+- KiNG viewer page tries to auto-widen the browser window using JavaScript
+- Craig Jolley complains that multicrit chart generation is slow for large
+  structures. He's right: his 7113 residues take 57 sec on my laptop. However,
+  the serialized PHP array is 5 Mb (!) and doing much better would (I think)
+  take a LOT of work. Sorry, Craig -- not worth it.
+- removed "primaryDownloads" feature entirely. Just let user pick, instead.
 
 ### 3beta25 ###
 - upgraded prekin again (051130/051129)

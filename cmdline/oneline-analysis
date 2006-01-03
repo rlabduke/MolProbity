@@ -31,45 +31,54 @@ OUTPUTS / RESULTS:
 */
 function summaryAnalysis($modelID)
 {
+    global $optStats, $optClash, $optCbeta, $optRota, $optRama;
     $out = "";
     
     $model =& $_SESSION['models'][$modelID];
-    $pdbstats = $model['stats'];
-    $out .= basename($model['pdb']);
-    $out .= ":$pdbstats[chains]:$pdbstats[residues]:$pdbstats[nucacids]:$pdbstats[resolution]:$pdbstats[rvalue]:$pdbstats[rfree]";
+    
+    if($optStats)
+    {
+        $pdbstats = $model['stats'];
+        $out .= ":$pdbstats[chains]:$pdbstats[residues]:$pdbstats[nucacids]:$pdbstats[resolution]:$pdbstats[rvalue]:$pdbstats[rfree]";
+    }
     
     // Run analysis; load data
     $pdbfile = $_SESSION['dataDir'].'/'.MP_DIR_MODELS."/$model[pdb]";
     $rawDir  = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA;
         if(!file_exists($rawDir)) mkdir($rawDir, 0777);
-    runClashlist($pdbfile, "$rawDir/$model[prefix]clash.data");
-    $clash = loadClashlist("$rawDir/$model[prefix]clash.data");
-    $clashstats = runClashStats($pdbstats['resolution'], $clash['scoreAll'], $clash['scoreBlt40']);
-    runCbetaDev($pdbfile, "$rawDir/$model[prefix]cbdev.data");
-    $cbdev = loadCbetaDev("$rawDir/$model[prefix]cbdev.data");
-    $badCbeta = findCbetaOutliers($cbdev);
-    $cbStats = calcCbetaStats($cbdev);
-    runRotamer($pdbfile, "$rawDir/$model[prefix]rota.data");
-    $rota = loadRotamer("$rawDir/$model[prefix]rota.data");
-    $badRota = findRotaOutliers($rota);
-    runRamachandran($pdbfile, "$rawDir/$model[prefix]rama.data");
-    $rama = loadRamachandran("$rawDir/$model[prefix]rama.data");
     
-    // Clash scores
-    $out .= ":" . $clash['scoreAll'] . ":" . $clash['scoreBlt40'];
-    $out .= ":$clashstats[minresol]:$clashstats[maxresol]:$clashstats[n_samples]:$clashstats[pct_rank]:$clashstats[pct_rank40]";
-    
-    // Cbetas
-    $out .= ":" . count($badCbeta) . ":" . count($cbdev);
-    $out .= ":$cbStats[max]:$cbStats[median]:".round($cbStats['mean'], 3);
-    
-    // Rotamers
-    $out .= ":" . count($badRota) . ":" . count($rota);
-    
-    // Rama outliers - count each type
-    foreach($rama as $r)
-        $ramaScore[ $r['eval'] ] += 1;
-    $out .= ":" . ($ramaScore['OUTLIER']+0) . ":" . ($ramaScore['Allowed']+0) . ":" . ($ramaScore['Favored']+0) . ":" . count($rama);
+    if($optClash)
+    {
+        runClashlist($pdbfile, "$rawDir/$model[prefix]clash.data");
+        $clash = loadClashlist("$rawDir/$model[prefix]clash.data");
+        $clashstats = runClashStats($pdbstats['resolution'], $clash['scoreAll'], $clash['scoreBlt40']);
+        $out .= ":" . $clash['scoreAll'] . ":" . $clash['scoreBlt40'];
+        $out .= ":$clashstats[minresol]:$clashstats[maxresol]:$clashstats[n_samples]:$clashstats[pct_rank]:$clashstats[pct_rank40]";
+    }
+    if($optCbeta)
+    {
+        runCbetaDev($pdbfile, "$rawDir/$model[prefix]cbdev.data");
+        $cbdev = loadCbetaDev("$rawDir/$model[prefix]cbdev.data");
+        $badCbeta = findCbetaOutliers($cbdev);
+        $cbStats = calcCbetaStats($cbdev);
+        $out .= ":" . count($badCbeta) . ":" . count($cbdev);
+        $out .= ":$cbStats[max]:$cbStats[median]:".round($cbStats['mean'], 3);
+    }
+    if($optRota)
+    {
+        runRotamer($pdbfile, "$rawDir/$model[prefix]rota.data");
+        $rota = loadRotamer("$rawDir/$model[prefix]rota.data");
+        $badRota = findRotaOutliers($rota);
+        $out .= ":" . count($badRota) . ":" . count($rota);
+    }
+    if($optRama)
+    {
+        runRamachandran($pdbfile, "$rawDir/$model[prefix]rama.data");
+        $rama = loadRamachandran("$rawDir/$model[prefix]rama.data");
+        foreach($rama as $r)
+            $ramaScore[ $r['eval'] ] += 1;
+        $out .= ":" . ($ramaScore['OUTLIER']+0) . ":" . ($ramaScore['Allowed']+0) . ":" . ($ramaScore['Favored']+0) . ":" . count($rama);
+    }
     
     $out .= "\n"; // end of this line
     return $out;
@@ -88,11 +97,21 @@ function summaryAnalysis($modelID)
 ############################################################################
 // Default options
 $optVerbose = true;
+$optStats   = true;
+$optClash   = true;
+$optCbeta   = true;
+$optRota    = true;
+$optRama    = true;
 
 // First argument is the name of this script...
 if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
 {
     if($arg == '-q')            $optVerbose = false;
+    elseif($arg == '-nostats')  $optStats = false;
+    elseif($arg == '-noclash')  $optClash = false;
+    elseif($arg == '-nocbeta')  $optCbeta = false;
+    elseif($arg == '-norota')   $optRota = false;
+    elseif($arg == '-norama')   $optRama = false;
     elseif(!isset($inDir))      $inDir = $arg;
     else                        die("Too many or unrecognized arguments: '$arg'\n");
 }
@@ -105,9 +124,13 @@ if($optVerbose)
     echo "#INPUT  : ".realpath($inDir)."\n";
 
     // Describe the output of this script
-    echo "#pdbFileName:chains:residues:nucacids:resolution:rvalue:rfree";
-    echo ":clashscore:clashscoreB<40:minresol:maxresol:n_samples:pct_rank:pct_rank40";
-    echo ":cbeta>0.25:numCbeta:maxCbeta:medianCbeta:meanCbeta:rota<1%:numRota:ramaOutlier:ramaAllowed:ramaFavored:numRama\n";
+    echo "#pdbFileName";
+    if($optStats)   echo ":chains:residues:nucacids:resolution:rvalue:rfree";
+    if($optClash)   echo ":clashscore:clashscoreB<40:minresol:maxresol:n_samples:pct_rank:pct_rank40";
+    if($optCbeta)   echo ":cbeta>0.25:numCbeta:maxCbeta:medianCbeta:meanCbeta";
+    if($optRota)    echo ":rota<1%:numRota";
+    if($optRama)    echo ":ramaOutlier:ramaAllowed:ramaFavored:numRama";
+    echo "\n";
 }
 
 foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
@@ -119,10 +142,16 @@ foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
     if(isset($_SESSION['ensembles'][$id]))
     {
         foreach($_SESSION['ensembles'][$id]['models'] as $modelID)
+        {
+            echo basename($_SESSION['models'][$modelID]['pdb']);
             echo summaryAnalysis($modelID);
+        }
     }
     else
+    {
+        echo basename($inFile);
         echo summaryAnalysis($id);
+    }
     // Clean up and go home
     mpDestroySession();
 }

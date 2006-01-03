@@ -79,7 +79,7 @@ if(!defined("MP_TABLE_ALT2"))
     define("MP_TABLE_ALT2", "#f0f0f0");
 // Highlight color for striped tables
 if(!defined("MP_TABLE_HIGHLIGHT"))
-    define("MP_TABLE_HIGHLIGHT", "#cc9999");
+    define("MP_TABLE_HIGHLIGHT", "#9999cc");
 
 // Subdirectories for things to be stored in.
 if(!defined("MP_DIR_SYSTEM"))
@@ -114,6 +114,6 @@ if(!defined("MP_DIR_CHARTS"))
     define("MP_SESSION_NAME", "MolProbSID");
 
 // Current "internal reference" version number. Please DO NOT change.
-    define("MP_VERSION", "3beta25");
+    define("MP_VERSION", "3beta26");
 
 ?>
