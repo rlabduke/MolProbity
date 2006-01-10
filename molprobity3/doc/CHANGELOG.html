@@ -19,6 +19,7 @@
     Prekin: stray vectors on windows -- buffer flush issue?
     IE6: doesn't display transparent PNGs correctly (gray background)
     IE6: hitting enter submits form without a cmd=[button name] (worked around)
+    Firefox [1.0.7/Win32/can't repr]: "Close this window" breaks navigation?
 }}}
 {{{ Ideas, long-term goals, etc.
     User manual (do we need this in addition to page-by-page help?)
@@ -46,13 +47,11 @@
     analyze::findAltConfs() should also support nuc. acid mc/sc classification
     re-assort the functions from visualize.php and analyze.php
     Make MP skinnable (multiple css files, directories under img/)
-    flatten "popular downloads" ZIP structure?
     Get models from CASP web site? (where is it??)
     Allow escape from job when no process number appears after x sec.
     Add whois query to session listing
     Change upload_setup's fetch of EDS map to be like welcome.php (a la carte)
     Develop "helper" pages; mark optional steps clearly
-    Pick lowest resolution number mentioned in file; allow override?
     DANG is included in bin/ but we don't *use* it anywhere... / upgrade to 1.9
     Oneline, all-in-one (kins, etc) for JCSG
     "outlier" column for multichart
@@ -65,11 +64,11 @@
     Kinemages are text/plain instead of downloaded
     Convert "number of H added, etc" text into tables
     Shutdown: no more sessions after X; system going down in X minutes notice
-    "Close this window" breaks navigation? (Firefox 1.0.7 on Windows)
     Use cookies to remember settings for optional buttons on validation page?
         (use setcookie(); $_COOKIES[] is read-only; see viewking.php for example)
     Create better uptime management tools, including memory usage (and jobs?)
-    What's the difference between old and new SwingSet? (Bob)
+    SwingSet: auto-select res that are outliers (store in SESSION/modelID/__?__)
+    Chart -- show only outliers?
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -86,6 +85,8 @@
   the serialized PHP array is 5 Mb (!) and doing much better would (I think)
   take a LOT of work. Sorry, Craig -- not worth it.
 - removed "primaryDownloads" feature entirely. Just let user pick, instead.
+- added ability to set/change resolution while editing a PDB file
+- tried yet another layout for the upload boxes
 
 ### 3beta25 ###
 - upgraded prekin again (051130/051129)

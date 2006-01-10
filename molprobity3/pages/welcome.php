@@ -554,6 +554,77 @@ function toggleUploadOptions()
 </script>
 <div class='indent'><table border='0' width='100%'>
 <tr>
+    <td>PDB/NDB code: <input type="text" name="pdbCode" size="6" maxlength="10"></td>
+    <td>type:
+        <select name='fetchType'>
+            <option value='pdb'>PDB coords</option>
+            <option value='biolunit'>Biol. unit (PDB only)</option>
+            <option value='eds_2fofc'>2Fo-Fc map (EDS)</option>
+            <option value='eds_fofc'>Fo-Fc map (EDS)</option>
+        </select>
+    </td>
+    <td><input type="submit" name="cmd" value="Fetch &gt;"></td>
+</tr><tr><td colspan='3'><hr></td></tr><tr>
+    <td><input type="file" name="uploadFile"></td>
+    <td>type:
+        <select name='uploadType'>
+            <option value='pdb'>PDB coords</option>
+            <option value='kin'>kinemage</option>
+            <option value='map'>ED map</option>
+            <option value='hetdict'>het dict</option>
+        </select>
+    </td>
+    <td><input type="submit" name="cmd" value="Upload &gt;"></td>
+</tr>
+</table>
+    <div class='inline_options' style='display:none' id='upload_options_block'>
+        <label><input type="checkbox" name="isCnsFormat" value="1"> File is from CNS refinement</label>
+        <br><label><input type="checkbox" name="ignoreSegID" value="1"> Ignore segID field</label>
+    </div>
+</div></form>
+<?php
+}
+#}}}########################################################################
+
+#{{{ displayUploadOld - outputs the file upload/fetch controls
+############################################################################
+/**
+* We use some clever JavaScript to show/hide the upload options in-line.
+* For users without JavaScript, the link will function normally and take
+* them to the upload/download page.
+*
+* That code is very clever and I'm quite fond of it, but I've also done
+* similar things in the past by setting/clearing a flag in $context and
+* simply reloading the page, as I do for e.g. file_browser.php.
+* If the current version proves too incompatible, I could fall back to that one.
+*/
+function displayUploadOld($context)
+{
+    echo makeEventForm("onUploadOrFetch", null, true) . "\n"; 
+    //echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onNavBarCall", "upload_setup.php")."'>more options</a>)</h5>";
+    echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onNavBarCall", "upload_setup.php")."' onclick='toggleUploadOptions(); return false' id='upload_options_link'>more options</a>)</h5>";
+?>
+<script language='JavaScript'>
+<!--
+function toggleUploadOptions()
+{
+    var block = document.getElementById('upload_options_block')
+    var link = document.getElementById('upload_options_link')
+    if(block.style.display == 'none')
+    {   
+        block.style.display = 'block'
+        link.innerHTML = 'hide options'
+    }
+    else
+    {
+        block.style.display = 'none'
+        link.innerHTML = 'more options'
+    }
+}
+// -->
+</script>
+<div class='indent'><table border='0' width='100%'>
+<tr>
     <td align='center' width='50%'>PDB/NDB code: <input type="text" name="pdbCode" size="6" maxlength="10"></td>
     <td align='center' width='50%'><input type="file" name="uploadFile"></td>
 </tr><tr>
