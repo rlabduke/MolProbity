@@ -58,6 +58,7 @@
     Move labbook.html to charts/ ?
     xxx-fix.flips goes in coordinates; should go in rawdata?
     Auto-uniquify chain IDs on file upload?
+    Bob: add % favored/allowed directly to kinemage graphics?
 }}}
     Produce multi-model Ramachandran plots from the GUI
     Tool for building ensembles from arbitrary sets of models
@@ -69,10 +70,19 @@
     Create better uptime management tools, including memory usage (and jobs?)
     SwingSet: auto-select res that are outliers (store in SESSION/modelID/__?__)
     Chart -- show only outliers?
+    Chart/sort by Rama: not all outliers together b/c cutoffs are different (!)
+  * Uncheck JNB's chart by default and move the "alpha test" notice around it
+    Interface: (prot|nuca|wat|het) !== (all) // we should EXclude, not INclude
+    Analysis: rename to "COLOR BY b-factors|occupancy"
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
+
+### 3beta27 ###
+- updated Probe to 060129
+- added "dots" master for (original) Probe dots in the multikin
+- changed small/wide contact masters in multikin to "vdw contact"
 
 ### 3beta26 ###
 - updated KiNG to 1.49

@@ -95,7 +95,7 @@ function resGroupsForPrekin($data)
 
 
 
-#{{{ makeMulticritKin - display all quality metrics at once in 3-D
+#{{{ [deprecated] makeMulticritKin - display all quality metrics at once in 3-D
 ############################################################################
 /**
 * $infiles is an array of one or more PDB files to process
@@ -310,11 +310,7 @@ function makeMulticritKin2($infiles, $outfile, $opt, $nmrConstraints = null)
     if($pdbstats['waters'] > 0)     fwrite($h, "@master {water} off\n");
     fwrite($h, "@master {Calphas} on\n");
 
-    if($opt['vdwdots'])
-    {
-        fwrite($h, "@master {wide contact} off\n");
-        fwrite($h, "@master {close contact} off\n");
-    }
+    if($opt['vdwdots'])     fwrite($h, "@master {vdw contact} off\n");
     if($opt['clashdots'])   fwrite($h, "@master {small overlap} off\n");
     if($opt['hbdots'])      fwrite($h, "@master {H-bonds} off\n");
 
@@ -469,7 +465,8 @@ function makeProbeDots($infile, $outfile, $hbDots = false, $vdwDots = false, $cl
     if(!$vdwDots)   $options .= " -novdwout";
     if(!$clashDots) $options .= " -noclashout";
     
-    exec("probe $options -4H -quiet -noticks -nogroup -mc -self 'alta' $infile >> $outfile");
+    // -dotmaster adds a "dots" master -- useful when using this kin with Probe remote update
+    exec("probe $options -4H -quiet -noticks -nogroup -dotmaster -mc -self 'alta' $infile >> $outfile");
 }
 #}}}########################################################################
 
