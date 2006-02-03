@@ -71,9 +71,7 @@
     SwingSet: auto-select res that are outliers (store in SESSION/modelID/__?__)
     Chart -- show only outliers?
     Chart/sort by Rama: not all outliers together b/c cutoffs are different (!)
-  * Uncheck JNB's chart by default and move the "alpha test" notice around it
-    Interface: (prot|nuca|wat|het) !== (all) // we should EXclude, not INclude
-    Analysis: rename to "COLOR BY b-factors|occupancy"
+    Alex: MolProbity gives too few outliers on -pperptoline?
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -83,6 +81,11 @@
 - updated Probe to 060129
 - added "dots" master for (original) Probe dots in the multikin
 - changed small/wide contact masters in multikin to "vdw contact"
+- unchecked JNB's chart by default and moved the "alpha test" notice around it
+- added "Models colored by" to B-factor/occupancy boxes in analysis setup
+- changed logic of Interface selections because (prot|nuca|wat|het) !== (all)
+  That is, some atoms were excluded even when all boxes were checked.
+  Now we EXclude classes that are unchecked rather than INcluding checked ones.
 
 ### 3beta26 ###
 - updated KiNG to 1.49

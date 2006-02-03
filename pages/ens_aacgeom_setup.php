@@ -78,10 +78,6 @@ function checkSettingsBeforeSubmit()
 }
 // -->
 </script>
-<div class='alert'>
-<center><h3>ALPHA TEST</h3></center>
-Not suitable for use by the general public.
-</div>
 <?php
     //}}} Script to set default choices based on model properties.
 
@@ -134,11 +130,11 @@ Not suitable for use by the general public.
     <br><label><input type='checkbox' name='kinCBdev' value='1'> C&beta; deviations</label>
     <br><label><input type='checkbox' name='kinBaseP' value='1'> Base-phosphate perpendiculars</label>
     <p><label><input type='checkbox' name='kinAltConfs' value='1'> Alternate conformations</label>
-    <br><label><input type='checkbox' name='kinBfactor' value='1'> B-factors</label>
-    <br><label><input type='checkbox' name='kinOccupancy' value='1'> Occupancy</label>
+    <br><label><input type='checkbox' name='kinBfactor' value='1'> Models colored by B-factors</label>
+    <br><label><input type='checkbox' name='kinOccupancy' value='1'> Models colored by occupancy</label>
     <br><label><input type='checkbox' name='kinRibbons' value='1'> Ribbons</label>
     </div>
-<h5 class='nospaceafter'><label><input type='checkbox' name='doMultiGraph' value='1' checked> Multi-criterion graph</label></h5>
+<h5 class='nospaceafter'><label><input type='checkbox' name='doMultiGraph' value='1'> Multi-criterion graph [ALPHA TEST]</label></h5>
 </div>
 
 <?php

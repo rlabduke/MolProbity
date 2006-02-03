@@ -98,7 +98,9 @@ if($opts['doMultiGraph'])
     setProgress($tasks, 'multigraph'); // updates the progress display if running as a background job
     $outfile = "$kinDir/$ensemble[prefix]multigraph.kin";
     makeChartKin($infiles, $outfile);
-    $labbookEntry .= "<p>".linkKinemage("$ensemble[prefix]multigraph.kin", "Multi-criterion graph");
+    $labbookEntry .= "<div class='alert'>\n<center><h3>ALPHA TEST</h3></center>\n";
+    $labbookEntry .= "Not suitable for use by the general public: ".linkKinemage("$ensemble[prefix]multigraph.kin", "Multi-criterion graph");
+    $labbookEntry .= "</div>\n";
 }
 
 setProgress($tasks, null);

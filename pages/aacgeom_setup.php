@@ -122,8 +122,8 @@ function checkSettingsBeforeSubmit()
     <br><label><input type='checkbox' name='kinCBdev' value='1'> C&beta; deviations</label>
     <br><label><input type='checkbox' name='kinBaseP' value='1'> Base-phosphate perpendiculars</label>
     <p><label><input type='checkbox' name='kinAltConfs' value='1'> Alternate conformations</label>
-    <br><label><input type='checkbox' name='kinBfactor' value='1'> B-factors</label>
-    <br><label><input type='checkbox' name='kinOccupancy' value='1'> Occupancy</label>
+    <br><label><input type='checkbox' name='kinBfactor' value='1'> Model colored by B-factors</label>
+    <br><label><input type='checkbox' name='kinOccupancy' value='1'> Model colored by occupancy</label>
     <br><label><input type='checkbox' name='kinRibbons' value='1'> Ribbons</label>
     </div>
 <h5 class='nospaceafter'><label><input type='checkbox' name='doCharts' value='1' checked onclick='hideChartOpts()'> Charts, plots, and tables</label></h5>
