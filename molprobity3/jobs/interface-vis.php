@@ -74,18 +74,28 @@ function getProbeFlags($opt)
     
     // Calculate both patterns with respect to protein/water/hets
     $allowedGroups = array('protein', 'dna', 'rna', 'water', 'het');
-    $src_groups = implode(',', array_intersect($allowedGroups, explode(',', implode(',', 
+    
+    // This version INcludes the various classes -- but some atoms are none of the above.
+    //$src_groups = implode(',', array_intersect($allowedGroups, explode(',', implode(',', 
+    //    array($opt['src_prot'], $opt['src_nucacid'], $opt['src_waters'], $opt['src_hets'])))));
+    //$targ_groups = implode(',', array_intersect($allowedGroups, explode(',', implode(',', 
+    //    array($opt['targ_prot'], $opt['targ_nucacid'], $opt['targ_waters'], $opt['targ_hets'])))));
+    //$flags .= " '(".$src_chains.") (".$src_groups.") ".$pat_suffix."'";
+    //    $flags .= " '(".$targ_chains.") (".$targ_groups.") ".$pat_suffix."'";
+    
+    // This version EXcludes the classes that are not selected, making it more robust.
+    $src_groups = implode('|', array_diff($allowedGroups, explode(',', implode(',', 
         array($opt['src_prot'], $opt['src_nucacid'], $opt['src_waters'], $opt['src_hets'])))));
-    $targ_groups = implode(',', array_intersect($allowedGroups, explode(',', implode(',', 
+    $targ_groups = implode('|', array_diff($allowedGroups, explode(',', implode(',', 
         array($opt['targ_prot'], $opt['targ_nucacid'], $opt['targ_waters'], $opt['targ_hets'])))));
     
     // Set source pattern
-    $flags .= " '(".$src_chains.") (".$src_groups.") ".$pat_suffix."'";
+    $flags .= " '(".$src_chains.") ".($src_groups == "" ? "" : "(not ($src_groups))")." ".$pat_suffix."'";
     
     // Set target pattern
     if($opt['probe_mode'] == "both" || $opt['probe_mode'] == "once")
     {
-        $flags .= " '(".$targ_chains.") (".$targ_groups.") ".$pat_suffix."'";
+        $flags .= " '(".$targ_chains.") ".($targ_groups == "" ? "" : "(not ($targ_groups))")." ".$pat_suffix."'";
     }
     
     return $flags;
