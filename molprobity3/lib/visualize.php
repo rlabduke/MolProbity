@@ -414,6 +414,7 @@ function makeBadRotamerKin($infile, $outfile, $rota = null, $color = 'gold', $cu
     
     foreach($sc as $chainID => $scRange)
     {
+        //echo("prekin -quiet -append -nogroup -nosubgroup -listname 'chain $chainID' -listmaster 'rotamer outliers' -bval -scope $scRange -show 'sc($color)' $infile >> $outfile\n");
         exec("prekin -quiet -append -nogroup -nosubgroup -listname 'chain $chainID' -listmaster 'rotamer outliers' -bval -scope $scRange -show 'sc($color)' $infile >> $outfile");
     }
 }
