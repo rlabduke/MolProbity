@@ -101,7 +101,8 @@ window.alert("You cannot use your browser\'s back button in MolProbity,"
     if($GLOBALS['badEventOccurred'])
         $s .= "<div class='alert'>You cannot use your browser's back button in MolProbity,
             and you cannot have multiple windows of the same working session
-            (except for kinemage views, charts, and the like).</div>\n";
+            (except for kinemage views, charts, and the like).
+            <br><br>Please continue on from here; no damage was done to your session.</div>\n";
 
     // Warn the user about using too much disk space.
     /* This doesn't work, b/c sometimes we're not in a session.

@@ -198,11 +198,12 @@ if(isset($id))
     
     $s = "";
     $s .= "<div class='side_options'>\n";
+    $s .= "<center><small><i>drag to rotate</i></small></center>\n";
     $s .= "<applet code='Magelet.class' archive='magejava.jar' width='150' height='150'>\n";
     $s .= "  <param name='kinemage' value='$kinURL/$model[prefix]thumbnail.kin'>\n";
     $s .= "  <param name='buttonpanel' value='no'>\n";
     $s .= "</applet>\n";
-    $s .= "<center><small><i>drag to rotate</i></small></center>\n";
+    $s .= "<center><small><a href='help/java.html' target='_blank'>Don't see anything?</a></i></small></center>\n";
     $s .= "</div>\n";
 
     if(count($idList) > 1) // NMR/multiple models

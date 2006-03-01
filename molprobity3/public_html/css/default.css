@@ -95,6 +95,7 @@ div.alert {
     text-align : justify ;
     border : 1px solid #330000 ;
     padding : 0.4em ;
+    margin: 0.4em;
 }
 
 div.side_options {
