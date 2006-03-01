@@ -71,8 +71,9 @@
     SwingSet: auto-select res that are outliers (store in SESSION/modelID/__?__)
     Chart -- show only outliers?
     Chart/sort by Rama: not all outliers together b/c cutoffs are different (!)
-    Note about missing Java under thumbnail?
-    Interface selections: can be both het and nuc acid (how to solve?)
+    Auto-expand coords, kins folders?
+  * usage history out-of-memory on public server
+  * multikin: {Virtual BB} master needs to be turned on
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -89,6 +90,16 @@
   Now we EXclude classes that are unchecked rather than INcluding checked ones.
 - updated Prekin (new P perp to line code)
 - updated Prekin to 6.43.060216; fixes -range bug from last update
+- reworked interface selections once more -- does this now cover all cases?
+- added link back to the old MolProbity site
+- added note to welcome.php about not using the back button
+- no back button warning now has a "no harm done" message too
+- fixed upload error bug (no $this)
+- added "don't see anything?" link to thumbnail on upload page
+- bug fix: notebook edit deletes icon
+- added join-models cmdline tool
+- added distance checks to Java phi/psi code -- caused spurious Rama outliers
+  at internal chain breaks.
 
 ### 3beta26 ###
 - updated KiNG to 1.49

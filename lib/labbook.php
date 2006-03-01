@@ -194,6 +194,7 @@ function formEditLabbook($entry, $width = 90, $height = 30)
     $s .= "<input type='hidden' name='labbookEntry[modtime]' value='$entry[modtime]'>\n";
     $s .= "<input type='hidden' name='labbookEntry[model]' value='$entry[model]'>\n";
     $s .= "<input type='hidden' name='labbookEntry[keywords]' value='$entry[keywords]'>\n";
+    $s .= "<input type='hidden' name='labbookEntry[thumbnail]' value='$entry[thumbnail]'>\n";
     
     $s .= "<br><table border=0 cellpadding=0 cellspacing=3>\n";
     $s .= "<tr align=left valign=top><td>Entry begun:</td><td>".formatDayTime($entry['ctime'])."</td></tr>\n";

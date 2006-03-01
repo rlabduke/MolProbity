@@ -75,47 +75,78 @@ function getProbeFlags($opt)
     // Calculate both patterns with respect to protein/water/hets
     $allowedGroups = array('protein', 'dna', 'rna', 'water', 'het');
     
-    // This version INcludes the various classes -- but some atoms are none of the above.
+    // 1.  This version INcludes the various classes -- but some atoms are none of the above.
     //$src_groups = implode(',', array_intersect($allowedGroups, explode(',', implode(',', 
     //    array($opt['src_prot'], $opt['src_nucacid'], $opt['src_waters'], $opt['src_hets'])))));
     //$targ_groups = implode(',', array_intersect($allowedGroups, explode(',', implode(',', 
     //    array($opt['targ_prot'], $opt['targ_nucacid'], $opt['targ_waters'], $opt['targ_hets'])))));
     //$flags .= " '(".$src_chains.") (".$src_groups.") ".$pat_suffix."'";
+    //if($opt['probe_mode'] == "both" || $opt['probe_mode'] == "once")
     //    $flags .= " '(".$targ_chains.") (".$targ_groups.") ".$pat_suffix."'";
     
-    // This version EXcludes the classes that are not selected, making it more robust.
-    $src_groups = implode('|', array_diff($allowedGroups, explode(',', implode(',', 
-        array($opt['src_prot'], $opt['src_nucacid'], $opt['src_waters'], $opt['src_hets'])))));
-    $targ_groups = implode('|', array_diff($allowedGroups, explode(',', implode(',', 
-        array($opt['targ_prot'], $opt['targ_nucacid'], $opt['targ_waters'], $opt['targ_hets'])))));
+    // 2.  This version EXcludes the classes that are not selected, making it more robust.
+    //$src_groups = implode('|', array_diff($allowedGroups, explode(',', implode(',', 
+    //    array($opt['src_prot'], $opt['src_nucacid'], $opt['src_waters'], $opt['src_hets'])))));
+    //$targ_groups = implode('|', array_diff($allowedGroups, explode(',', implode(',', 
+    //    array($opt['targ_prot'], $opt['targ_nucacid'], $opt['targ_waters'], $opt['targ_hets'])))));
+    //$flags .= " '(".$src_chains.") ".($src_groups == "" ? "" : "(not ($src_groups))")." ".$pat_suffix."'";
+    //if($opt['probe_mode'] == "both" || $opt['probe_mode'] == "once")
+    //    $flags .= " '(".$targ_chains.") ".($targ_groups == "" ? "" : "(not ($targ_groups))")." ".$pat_suffix."'";
     
-    // Set source pattern
-    $flags .= " '(".$src_chains.") ".($src_groups == "" ? "" : "(not ($src_groups))")." ".$pat_suffix."'";
+    // 3.  Some things are BOTH e.g. nucleic acid AND het (e.g. ATP)
+    // So in that case, the exclusion removes dots that we expect to be there.
+    // One way of addressing that is given in createProbeSelection.
     
-    // Set target pattern
+    $flags .= " '(".$src_chains.") ".createProbeSelection('src', $opt)." ".$pat_suffix."'";
     if($opt['probe_mode'] == "both" || $opt['probe_mode'] == "once")
-    {
-        $flags .= " '(".$targ_chains.") ".($targ_groups == "" ? "" : "(not ($targ_groups))")." ".$pat_suffix."'";
-    }
+        $flags .= " '(".$targ_chains.") ".createProbeSelection('targ', $opt)." ".$pat_suffix."'";
+    
     
     return $flags;
 }
 #}}}########################################################################
 
-#{{{ a_function_definition - sumary_statement_goes_here
+#{{{ createProbeSelection
 ############################################################################
 /**
-* Documentation for this function.
+* prefix is "src" or "targ"
 */
-//function someFunctionName() {}
-#}}}########################################################################
+function createProbeSelection($prefix, $opt)
+{
+    /* The "exclusive" version of this code */
+    $to_exclude = array();
+    // Single excludes handle most cases, but some entities fall into multiple
+    // categories (e.g. ATP is both a het and a nucleic acid).
+    if(!$opt[$prefix.'_prot'])      $to_exclude[] = '(protein not het)';
+    if(!$opt[$prefix.'_nucacid'])   $to_exclude[] = '((dna,rna) not het)';
+    if(!$opt[$prefix.'_waters'])    $to_exclude[] = 'water';
+    if(!$opt[$prefix.'_hets'])      $to_exclude[] = '(het not (dna,rna,protein))';
+    // Double excludes handles hets like ATP and LYS
+    if(!$opt[$prefix.'_prot'] && !$opt[$prefix.'_hets'])
+        $to_exclude[] = '(het protein)';
+    if(!$opt[$prefix.'_nucacid'] && !$opt[$prefix.'_hets'])
+        $to_exclude[] = '(het (dna,rna))';
+    
+    if(count($to_exclude) == 0) return "";
+    else return "(not (".implode('|', $to_exclude)."))";
+    /* The "exclusive" version of this code */
 
-#{{{ a_function_definition - sumary_statement_goes_here
-############################################################################
-/**
-* Documentation for this function.
-*/
-//function someFunctionName() {}
+
+    /* The "inclusive" version of this code * /
+    $to_include = array();
+    // Single includes handle most cases, but miss hets without HETATM cards.
+    if($opt[$prefix.'_prot'])       $to_include[] = 'protein';
+    if($opt[$prefix.'_nucacid'])    $to_include[] = '(dna,rna)';
+    if($opt[$prefix.'_waters'])     $to_include[] = 'water';
+    if($opt[$prefix.'_hets'])       $to_include[] = 'het';
+    // The catch-all always includes things that don't fit one of the above groups.
+    // For this to really work, it needs an "other" checkbox.
+    $to_include[] = '(not (protein,dna,rna,water,het))';
+    
+    if(count($to_exclude) == 0) return "(not all)";
+    else return '('.implode(',' $to_include).')';
+    /* The "inclusive" version of this code */
+}
 #}}}########################################################################
 
 #{{{ a_function_definition - sumary_statement_goes_here

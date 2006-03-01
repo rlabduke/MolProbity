@@ -281,7 +281,7 @@ function onUploadKinemage($arg, $req)
             mpLog("kin-upload:User uploaded a kinemage file");
             pageGoto("upload_other_done.php", array('type' => 'kin', 'kinName' => $kinName));
         }
-        else doUploadError('kin', $kinPath);
+        else $this->doUploadError('kin', $kinPath);
     }
 }
 #}}}########################################################################
@@ -312,7 +312,7 @@ function onUploadMapFile($arg, $req)
             mpLog("edmap-upload:User uploaded an electron density map file");
             pageGoto("upload_other_done.php", array('type' => 'map', 'mapName' => $mapName));
         }
-        else doUploadError('map', $mapPath);
+        else $this->doUploadError('map', $mapPath);
     }
 }
 #}}}########################################################################
@@ -352,7 +352,7 @@ function onUploadHetDictFile($arg, $req)
             mpLog("hetdict-upload:User uploaded an custom het dictionary file");
             pageGoto("upload_other_done.php", array('type' => 'hetdict'));
         }
-        else doUploadError('hetdict');
+        else $this->doUploadError('hetdict');
     }
 }
 #}}}########################################################################

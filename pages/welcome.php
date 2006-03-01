@@ -71,7 +71,7 @@ Create and view interactive 3-D graphics
 from your web browser.</p>
 <p><b><?php echo "<a href='".makeEventURL("onNavBarGoto", "sitemap.php")."'>Site map</a>"; ?>:</b>
 Minimum-guidance interface for experienced users.</p>
-
+<p><small><i>NB: the back button doesn't work inside MolProbity</i></small></p><!-- by request of DCR -->
 
 </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>
 
@@ -89,8 +89,9 @@ Minimum-guidance interface for experienced users.</p>
     Nucleic Acids Research 32:W615-W619.
     </small></p>
 <p><b><a href='help/java.html' target='_blank'>Installing Java</a></b>: how to make kinemage graphics work in your browser.</p>
-<p><b>Lab notebook</b>: what's it for and how do I use it?</p>
+<!-- <p><b>Lab notebook</b>: what's it for and how do I use it?</p> -->
 <p><b>Adding hydrogens</b>: why are H necessary for steric evaluations?</p>
+<p><b><a href='http://kinemage.biochem.duke.edu/molprobity/index2.html' target='_blank'>Old MolProbity</a></b>: click here to get to the old site.</p>
 <p><b>My own MolProbity</b>: how can I run my own private MolProbity server?</p>
 </td></tr></table>
 <?php
