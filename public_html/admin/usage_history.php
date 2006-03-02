@@ -12,6 +12,9 @@ Summarizes MolProbity usage over a specified date range.
 // 3. Restore session data. If you don't want to access the session
 // data for some reason, you must call mpInitEnvirons() instead.
     mpInitEnvirons();
+    
+// Have to do this for big log files ... we'll need a better solution one day.
+    ini_set('memory_limit', '128M');
 
 #{{{ getRecords, selectRecords
 ############################################################################
@@ -226,6 +229,17 @@ function echoBrowserTable($records)
     foreach($platforms as $p => $pCount) echo "<td>$pCount</td>";
     echo "<td>$total</td></tr>\n";
     echo "</table></p>\n";
+
+    echo "<p><small>Unknown browsers:\n<pre>\n";
+    foreach($records as $rec)
+    {
+        if($rec[3] == "browser-detect")
+        {
+            $br = recognizeUserAgent($rec[4]);
+            if($br['platform'] == "Unknown") echo $rec[4] . "\n";
+        }
+    }
+    echo "</pre></small></p>\n";
 }
 #}}}########################################################################
 
@@ -358,6 +372,10 @@ if($end_time > end($times))     $end_time   = end($times)+(60*60*24);
     }
     
     echo "</form>\n";
+    if(function_exists('memory_get_usage'))
+    {
+        echo "<hr><small><center>Memory usage: ".formatFilesize(memory_get_usage())." / ".ini_get('memory_limit')."</center></small>\n";
+    }
 ?>
 </body>
 </html>
