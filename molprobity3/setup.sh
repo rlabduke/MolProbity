@@ -39,8 +39,7 @@ chmod 666 feedback/user_paths.log
 cd bin
 # Nothing to do here...
 cd macosx/
-ln -s gawk-3.1.3 gawk
-ln -s gawk-3.1.3 awk
+ln -s gawk awk
 cd ..
 cd linux/
 # Nothing to do here...

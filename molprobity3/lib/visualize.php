@@ -6,6 +6,7 @@
 require_once(MP_BASE_DIR.'/lib/pdbstat.php');
 require_once(MP_BASE_DIR.'/lib/analyze.php');
 require_once(MP_BASE_DIR.'/lib/sortable_table.php');
+require_once(MP_BASE_DIR.'/lib/eff_resol.php');
 
 #{{{ makeRamachandranKin - creates a kinemage-format Ramachandran plot
 ############################################################################
@@ -598,6 +599,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
     if(is_array($rama))    $proteinRows += 2;
     if(is_array($rota))    $proteinRows += 1;
     if(is_array($cbdev))   $proteinRows += 1;
+    if(is_array($clash) && is_array($rota) && is_array($rama)) $proteinRows += 1;
     if($proteinRows > 0)
     {
         $entry .= "<tr><td rowspan='$proteinRows' align='center'>Protein<br>Geometry</td>\n";
@@ -649,6 +651,22 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             else            $bg = $bgFair;
             $entry .= "<td>C&beta; deviations &gt;0.25&Aring;</td><td bgcolor='$bg'>$cbOut</td>\n";
             $entry .= "<td>Goal: 0</td></tr>\n";
+        }
+        if(is_array($clash) && is_array($rota) && is_array($rama))
+        {
+            if($firstRow) $firstRow = false;
+            else $entry .= "<tr>";
+            
+            $axr = $resolution;                                     // Actual Xtalographic Resolution
+            $mer = getEffectiveResolution($clash, $rota, $rama);    // MolProbity Effective Resolution
+            if(!$axr)                               $bg = $bgFair;  // unknown AXR
+            elseif(abs(($mer-$axr)/$axr) <= 0.10)   $bg = $bgFair;  // within 10% of actual
+            elseif($mer < $axr)                     $bg = $bgGood;  // more than 10% below
+            else                                    $bg = $bgPoor;  // more than 10% above
+            
+            $entry .= "<td>MER (what's this?)</td><td bgcolor='$bg'>";
+            $entry .= sprintf('%.2f', $mer);
+            $entry .= "</td><td>Goal: &lt;$axr</td></tr>\n";
         }
     }// end of protein-specific stats
     if(is_array($pperp))
