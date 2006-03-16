@@ -9,9 +9,10 @@
         Existing protonation state for His
         Existing Met CH3 and Lys NH3 orientation (don't want -norotnh3 and -norotmet)
     Reduce: protonates S in Cys--Fe bond (1jb0)
-    Probe: -NOVDWout switch missing from docs, duplicated ONLYBADOUT
+    Reduce: H not added to end of MSE in std PDB files [Daniel Farrell]
     Probe: Weird intra-sidechain clashes for 1BKR (low occ atoms in-chain)
     Probe: clashes in 1F7L het because Cs named (sort of) like Ps
+        Clashes in Coenzyme A ligands (A/P atom names, eg 1bo4)
     NOEdisplay: NOEs thicker, esp. violations
     Prekin: doesn't mark pointmasters on the start of vectors (those flagged P)
     Prekin: dangling altB C--N for 1SWU B 29 (whenever i has all A and B alts)
@@ -59,6 +60,7 @@
     xxx-fix.flips goes in coordinates; should go in rawdata?
     Auto-uniquify chain IDs on file upload?
     Bob: add % favored/allowed directly to kinemage graphics?
+    compile all Mac binaries as Universal (old versions seem to work for now)
 }}}
     Produce multi-model Ramachandran plots from the GUI
     Tool for building ensembles from arbitrary sets of models
@@ -73,6 +75,7 @@
     Chart/sort by Rama: not all outliers together b/c cutoffs are different (!)
     Auto-expand coords, kins folders?
   * multikin: {Virtual BB} master needs to be turned on
+*** check appropriateness of link to PhD Posters
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -81,6 +84,10 @@
 ### 3beta28 ###
 - added temporary work-around to out-of-memory during usage history
 - added more stats about memory usage
+- compiled (non-static) Intel binaries for Mac: probe, prekin, gawk
+- combined them with old versions to get universal binaries (using lipo -create)
+- "effective resolution" calc is now running -- perhaps even correctly
+- added PhD Posters link in page footer; check this w/ Dave and Jane
 
 ### 3beta27 ###
 - updated Probe to 060129

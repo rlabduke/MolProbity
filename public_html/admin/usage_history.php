@@ -68,7 +68,7 @@ function removeBots($records)
         if($r[3] == "browser-detect")
         {
             $br = recognizeUserAgent($r[4]);
-            if($br['platform'] == "Bot/Crawler" || $br['platform'] == "Java")
+            if($br['platform'] == "Bot/Crawler" || $br['platform'] == "Java" || $br['platform'] == "Unknown")
                 $bots[$uid] = 1;
         }
     }
@@ -189,7 +189,6 @@ function countBrowsers($records)
     $platforms = array();
     $browsers = array();
     $combos = array();
-    //echo "<pre>\n";
     foreach($records as $rec)
     {
         if($rec[3] == "browser-detect")
@@ -198,10 +197,8 @@ function countBrowsers($records)
             $platforms[ $br['platform'] ] += 1;
             $browsers[ $br['browser'] ] += 1;
             $combos[ $br['platform']." - ".$br['browser'] ] += 1;
-            //if($br['platform'] == "Unknown") echo $rec[4] . "\n";
         }
     }
-    //echo "</pre>\n";
     ksort($platforms);
     ksort($browsers);
     ksort($combos);
@@ -230,16 +227,16 @@ function echoBrowserTable($records)
     echo "<td>$total</td></tr>\n";
     echo "</table></p>\n";
 
-    echo "<p><small>Unknown browsers:\n<pre>\n";
-    foreach($records as $rec)
-    {
-        if($rec[3] == "browser-detect")
-        {
-            $br = recognizeUserAgent($rec[4]);
-            if($br['platform'] == "Unknown") echo $rec[4] . "\n";
-        }
-    }
-    echo "</pre></small></p>\n";
+    //echo "<p><small>Unknown browsers:\n<pre>\n";
+    //foreach($records as $rec)
+    //{
+    //    if($rec[3] == "browser-detect")
+    //    {
+    //        $br = recognizeUserAgent($rec[4]);
+    //        if($br['platform'] == "Unknown") echo $rec[4] . "\n";
+    //    }
+    //}
+    //echo "</pre></small></p>\n";
 }
 #}}}########################################################################
 
