@@ -66,4 +66,7 @@ define("MP_BIN_PATH", "/usr/local/php5/bin:/opt/j2/bin:/usr/java/jdk/bin");
 // To disable, set to a very large value, like 100 Gb.
 //define("MP_KIN_GZIP_THRESHOLD", 1*1000*1000); // 1 Mb
 
+// If defined, this banner will display at the top of all pages!
+//define("MP_BANNER", "The system will go down for maintainance in ".(int)((strtotime("12pm today")-time())/60)." minutes.  Please download your data and log off.");
+
 ?>

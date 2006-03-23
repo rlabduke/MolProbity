@@ -538,7 +538,8 @@ function runClashStats($resol, $clashscore, $clashscoreBlt40)
 ############################################################################
 function runRotamer($infile, $outfile)
 {
-    exec("java -cp ".MP_BASE_DIR."/lib/hless.jar hless.Rotamer -raw $infile > $outfile");
+    // Very large files (1htq) need extra memory
+    exec("java -Xmx128m -cp ".MP_BASE_DIR."/lib/hless.jar hless.Rotamer -raw $infile > $outfile");
 }
 #}}}########################################################################
 

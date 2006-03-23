@@ -23,11 +23,13 @@
 // Default is welcome page unless URL is like index.php?start=____
     if($isNewSess)
     {
-        switch($_REQUEST['start'])
+        if(date('F j') == 'April 1') pageGoto("april_fools.php");
+        else switch($_REQUEST['start'])
         {
             case "sitemap":     pageGoto("sitemap.php"); break;
             case "xray":        pageGoto("helper_xray.php"); break;
             default:            pageGoto("welcome.php"); break;
+            //default:            pageGoto("april_fools.php"); break;
         }
     }
 

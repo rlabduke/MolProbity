@@ -18,6 +18,7 @@
     Prekin: dangling altB C--N for 1SWU B 29 (whenever i has all A and B alts)
     Prekin: Prekin/Win keeps kin file open continuously
     Prekin: stray vectors on windows -- buffer flush issue?
+    Prekin: (Linux) seg faults on Josh's structures (316_king_refmac/tsanl)
     IE6: doesn't display transparent PNGs correctly (gray background)
     IE6: hitting enter submits form without a cmd=[button name] (worked around)
     Firefox [1.0.7/Win32/can't repr]: "Close this window" breaks navigation?
@@ -66,7 +67,6 @@
     Tool for building ensembles from arbitrary sets of models
     Kinemages are text/plain instead of downloaded
     Convert "number of H added, etc" text into tables
-    Shutdown: no more sessions after X; system going down in X minutes notice
     Use cookies to remember settings for optional buttons on validation page?
         (use setcookie(); $_COOKIES[] is read-only; see viewking.php for example)
     Create better uptime management tools, including memory usage (and jobs?)
@@ -74,8 +74,8 @@
     Chart -- show only outliers?
     Chart/sort by Rama: not all outliers together b/c cutoffs are different (!)
     Auto-expand coords, kins folders?
-  * multikin: {Virtual BB} master needs to be turned on
-*** check appropriateness of link to PhD Posters
+    clashlist fails on 1iw7 (only in oneline?)
+        too many names, increase -Max# value
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -88,6 +88,15 @@
 - combined them with old versions to get universal binaries (using lipo -create)
 - "effective resolution" calc is now running -- perhaps even correctly
 - added PhD Posters link in page footer; check this w/ Dave and Jane
+- added "banner" for msgs about system going down, etc.
+- added effective resolution to oneline-analysis script.
+  Top500 shows little correlation to actual resolution -- is there a bug?
+- multikin: {Virtual BB} master needed to be turned on for nuc acid structures
+- extended file lifetime on main server to 3 days (for bug report use)
+- fixed local setup bug (missing symlink for awk used system awk)
+- upped Java memory for rotamer eval. b/c 1htq caused OOMErr
+- removed PhD Posters link before checking w/ D and J; we have enough business
+- added electron density, restriction sites questions for April Fool's
 
 ### 3beta27 ###
 - updated Probe to 060129
