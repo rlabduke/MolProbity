@@ -89,11 +89,22 @@ div.pagecontent_alone h2, div.pagecontent_alone h3, div.pagecontent_alone h4, di
     color : #660000 ;
 }
 
+/* Used for warnings about bad events, etc */
 div.alert {
     background-color : #ff9999 ;
     color : #330000 ;
     text-align : justify ;
     border : 1px solid #330000 ;
+    padding : 0.4em ;
+    margin: 0.4em;
+}
+
+/* Used for the system "banner" message, about e.g. the server going down. */
+div.banner {
+    background-color : #ffcc99 ;
+    color : #663300 ;
+    text-align : justify ;
+    border : 1px dotted #663300 ;
     padding : 0.4em ;
     margin: 0.4em;
 }

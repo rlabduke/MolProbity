@@ -4,6 +4,11 @@
 INPUTS / SWITCHES (via $_SERVER['argv']):
     inDir           the a directory of files ending in ".pdb"
     -q              quiet mode (no progress messages)
+    -nostats        don't output info from PDB headers
+    -noclash        don't output/calc clashscore, etc.
+    -nocbeta        don't output/calc C-beta deviations
+    -norota         don't output/calc rotamer outliers
+    -norama         don't output/calc Ramachandran outliers
 
 OUTPUTS / RESULTS:
     Runs clash, Rama, rota, Cb dev analysis on all input files.
@@ -17,6 +22,7 @@ OUTPUTS / RESULTS:
     require_once(MP_BASE_DIR.'/lib/core.php');
     require_once(MP_BASE_DIR.'/lib/model.php');
     require_once(MP_BASE_DIR.'/lib/analyze.php');
+    require_once(MP_BASE_DIR.'/lib/eff_resol.php');
 // 3. Restore session data. If you don't want to access the session
 // data for some reason, you must call mpInitEnvirons() instead.
     mpInitEnvirons();       // use std PATH, etc.
@@ -79,6 +85,10 @@ function summaryAnalysis($modelID)
             $ramaScore[ $r['eval'] ] += 1;
         $out .= ":" . ($ramaScore['OUTLIER']+0) . ":" . ($ramaScore['Allowed']+0) . ":" . ($ramaScore['Favored']+0) . ":" . count($rama);
     }
+    if($optClash && $optRota && $optRama)
+    {
+        $out .= sprintf(':%.3f', getEffectiveResolution($clash, $rota, $rama));
+    }
     
     $out .= "\n"; // end of this line
     return $out;
@@ -130,6 +140,7 @@ if($optVerbose)
     if($optCbeta)   echo ":cbeta>0.25:numCbeta:maxCbeta:medianCbeta:meanCbeta";
     if($optRota)    echo ":rota<1%:numRota";
     if($optRama)    echo ":ramaOutlier:ramaAllowed:ramaFavored:numRama";
+    if($optClash && $optRota && $optRama) echo ":eff_resol";
     echo "\n";
 }
 

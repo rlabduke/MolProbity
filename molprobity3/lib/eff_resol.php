@@ -27,6 +27,10 @@
 */
 function getEffectiveResolution($clash, $rota, $rama)
 {
+    // Use of count(...) may occasionally lead to divide-by-zero if you have
+    // non-protein PDB files.  I don't try to trap it b/c the PHP error msg
+    // then becomes a useful diagnostic.  (Then $ro or $ra evaluates to unset,
+    // and so acts as zero in arithmetic expressions, FWIW.)
     $cs = $clash['scoreAll'];
     $ro = 100.0 * count(findRotaOutliers($rota)) / count($rota);
     $ramaScore = array();
@@ -34,8 +38,7 @@ function getEffectiveResolution($clash, $rota, $rama)
         $ramaScore[ $r['eval'] ] += 1;
     $ra = 100.0 - (100.0 * $ramaScore['Favored'] / count($rama));
     
-    echo " cs=$cs, ro=$ro, ra=$ra ";
-    
+    //echo " cs=$cs, ro=$ro, ra=$ra ";
     return 0.24907*log(1+$cs) + 0.16893*log(1+$ro) + 0.18946*log(1+$ra) + 0.62224;
 }
 ?>

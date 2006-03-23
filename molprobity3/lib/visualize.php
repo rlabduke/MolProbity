@@ -310,6 +310,7 @@ function makeMulticritKin2($infiles, $outfile, $opt, $nmrConstraints = null)
     if($pdbstats['hydrogens'] > 0)  fwrite($h, "@master {H's} off\n");
     if($pdbstats['waters'] > 0)     fwrite($h, "@master {water} off\n");
     fwrite($h, "@master {Calphas} on\n");
+    fwrite($h, "@master {Virtual BB} on\n"); // for protein + DNA/RNA structures
 
     if($opt['vdwdots'])     fwrite($h, "@master {vdw contact} off\n");
     if($opt['clashdots'])   fwrite($h, "@master {small overlap} off\n");
