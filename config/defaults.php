@@ -114,6 +114,6 @@ if(!defined("MP_DIR_CHARTS"))
     define("MP_SESSION_NAME", "MolProbSID");
 
 // Current "internal reference" version number. Please DO NOT change.
-    define("MP_VERSION", "3beta28");
+    define("MP_VERSION", "3beta29");
 
 ?>
