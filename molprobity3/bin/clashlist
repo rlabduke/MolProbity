@@ -4,6 +4,7 @@
 #date written: 6/6/99
 #modified 8/15/02 by JSR to leave out -3 flag for probe
 #modified 5/5/04 by IWD to avoid divide-by-zero when no atoms have B < 40
+#modified 3/24/06 by IWD to increase -Max for cluster (bombs on PDB file 1iw7)
 #purpose: generate tables of clusters of large bumps with a summary line
 # parameters: input.pdb identifier
 # format-
@@ -95,7 +96,7 @@ awk -F: '
    a = substr($3, 1, 9)
    b = substr($4, 1, 9)
    printf("%s:%s\n",a, b)
-} ' $tmpf2 | cluster -single -N "*CLUSTER*" -F : -O : - | \
+} ' $tmpf2 | cluster -Max20000 single -N "*CLUSTER*" -F : -O : - | \
 awk -F: '
 /^[^#]/ {
    if ($3 == "*CLUSTER*") {

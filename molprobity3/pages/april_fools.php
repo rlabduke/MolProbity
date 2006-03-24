@@ -56,7 +56,7 @@ founded on basic knowledge of biochemistry and structural biology.
 <div class='indent'>
 <?php
     // Display a question randomly
-    $qFunc = "question".mt_rand(1,3); // min,max (inclusive)
+    $qFunc = "question".mt_rand(1,4); // min,max (inclusive)
     $this->$qFunc(); // call the function whose name is in $qFunc
     
     echo "</div>\n";
@@ -119,6 +119,17 @@ function question3()
     <?php echo "<p><tt>5'-$seq-3'</tt>\n"; ?>
     <p>According to the NEB catalog, how many restriction sites are there in the sequence above?
     <input type='text' size='5' name='dummy'>
+<?php
+}
+#}}}########################################################################
+
+#{{{ question4 - meaning of life
+############################################################################
+function question4()
+{
+?>
+    <p>What is answer to life, the Universe, and everything?
+    <input type='text' size='2' maxlength='2' name='dummy'>
 <?php
 }
 #}}}########################################################################
