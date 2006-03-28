@@ -855,7 +855,8 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     if($snapfile)
     {
         $out = fopen($snapfile, 'wb');
-        fwrite($out, formatSortableTable($table, 'DUMMY_URL'));
+        //fwrite($out, formatSortableTable($table, 'DUMMY_URL'));
+        fwrite($out, formatSortableTableJS($table, 'DUMMY_URL'));
         fclose($out);
     }
 }
