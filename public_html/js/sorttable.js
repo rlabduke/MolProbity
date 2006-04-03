@@ -49,7 +49,7 @@ function ts_makeSortable(table) {
         {
             var cell = row.cells[c];
             // This works in Safari *and* Firefox (and hopefully IE)
-            if(cell.hasAttribute('sv'))
+            if(hasAttr(cell, 'sv'))
                 cell.fsv = parseFloat(cell.getAttribute('sv'))
         }
     }
@@ -99,7 +99,7 @@ function ts_resortTable(lnk, cellIdx) {
     var sortfn = ts_sort_fsv_up;
     // Sort determined by column
     var sortdir = 1;
-    if(td.hasAttribute('sortdir')) sortdir = parseInt(td.getAttribute('sortdir'));
+    if(hasAttr(td, 'sortdir')) sortdir = parseInt(td.getAttribute('sortdir'));
     if(sortdir == -1) {
         ARROW = '&nbsp;&nbsp;&uarr;';
         sortfn = ts_sort_fsv_down; //IWD
@@ -212,4 +212,10 @@ function addEvent(elm, evType, fn, useCapture)
   } else {
     alert("Handler could not be removed");
   }
-} 
+}
+
+//IWD: IE6 doesn't support the hasAttribute() method
+function hasAttr(obj, attr)
+{
+    return !!(obj[attr] || attr in obj || (obj.hasAttribute && obj.hasAttribute(attr)));
+}
