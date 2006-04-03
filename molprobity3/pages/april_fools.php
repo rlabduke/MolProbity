@@ -128,7 +128,7 @@ function question3()
 function question4()
 {
 ?>
-    <p>What is answer to life, the Universe, and everything?
+    <p>What is the answer to life, the Universe, and everything?
     <input type='text' size='2' maxlength='2' name='dummy'>
 <?php
 }
