@@ -73,7 +73,15 @@
     Chart -- show only outliers?
     Chart/sort by Rama: not all outliers together b/c cutoffs are different (!)
     Auto-expand coords, kins folders?
-  * update Mac prekin and create Universal binary
+    update Mac prekin and create Universal binary
+    add real HTML head/foot to downloadable multichart? look into viewer issues
+    Convert multichart to format (CSV) that would work with KiNG, Excel, etc.
+        Maybe this is an addition rather than a conversion...
+    For unrecognized hets, determine connectivity using Molikin, write HET dict,
+        allow user to remove H using HTML textbox, save to server.
+    When a multi-model biological unit PDB is *uploaded*, it gets treated as an
+        NMR file, and there's no way to add H to all models at once. (1l6b, 1nvy)
+        When fetched as biol unit, MolProbity converts models to chains automat.
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -86,6 +94,14 @@
 - started work on JavaScript sortable table; it doesn't work so far
 - finally got JS sortable table working; it's only used for the static copy
 - fixed sortable table for IE -- hasAttribute() wasn't supported by IE
+- 1BKR has abnormal "INF" values for waters 1085, 1087
+  This is a PHP serialize bug in 4.4.1 (and earlier?); fixed in/before 5.1.2
+  No known work-arounds that I can find.
+- clashlist, line 99: changed "single" to "-single"; makes no difference?
+- added clashlist.annotated.sh with comments on how it works
+- added process ID ($$) to clashlist tmpfiles to avoid collisions
+- copied annotated clashlist over the original
+- updated chiropraxis.jar (Rama PDF pct fav,out and citation)
 
 ### 3beta28 ###
 - added temporary work-around to out-of-memory during usage history
