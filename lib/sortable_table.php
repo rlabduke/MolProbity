@@ -110,11 +110,10 @@ function formatSortableTable($table, $url, $col = -1, $direction = 1)
 ############################################################################
 /**
 * $table        the data structure
-* $url          base URL to use for links
 * $col          column to sort on, -1 (the default) means no sort
 * $direction    sort direction, 1 is ascending (the default), -1 is descending.
 */
-function formatSortableTableJS($table, $url, $col = -1, $direction = 1)
+function formatSortableTableJS($table, $col = -1, $direction = 1)
 {
     // Needs to actually insert the file for it to be self contained
     //$s = '<script src="js/sorttable.js" type="text/javascript"></script>';
@@ -137,9 +136,7 @@ function formatSortableTableJS($table, $url, $col = -1, $direction = 1)
         {
             $s .= "<td sortdir='$cell[sort]'>";
             $sort_dir = ($i == $col ? -$direction : $cell['sort']);
-            //if($cell['sort']) $s .= "<a href='{$url}sort_col=$i&sort_dir=$sort_dir'>";
             $s .= $cell['html'];
-            //if($cell['sort']) $s .= "</a>";
             $s .= "</td>";
             $i++;
         }
