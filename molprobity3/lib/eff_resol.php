@@ -10,11 +10,21 @@
     scores that should be available for *any* macromolecular model, including
     homology models, NMR structures, etc.
     
+    # Scott Schmidler, SCOP 2000 -- has bias by real resolution
     MolProbity Effection Resolution (MER) =
         0.24907 * log(1 + clashscoreAllAtoms)
       + 0.16893 * log(1 + pctRotamersLessThan_1pct)
       + 0.18946  * log(1 + 100-pctRamachandranFavored)
       + 0.62224
+    ("log" is the natural logarithm, not base 10)
+    
+    # Ian Davis, all-PDB -- fit to quartile points
+    # Could add 1.0 to get a ~ "best possible" score.
+    MolProbity Effection Resolution (MER) =
+        0.4548 * log(1 + clashscoreAllAtoms)
+      + 0.4205 * log(1 + pctRotamersLessThan_1pct)
+      + 0.3186  * log(1 + 100-pctRamachandranFavored)
+      - 0.5001
     ("log" is the natural logarithm, not base 10)
     
     When contrasted to the actual crystallographic resolution (AXR), this
@@ -39,6 +49,6 @@ function getEffectiveResolution($clash, $rota, $rama)
     $ra = 100.0 - (100.0 * $ramaScore['Favored'] / count($rama));
     
     //echo " cs=$cs, ro=$ro, ra=$ra ";
-    return 0.24907*log(1+$cs) + 0.16893*log(1+$ro) + 0.18946*log(1+$ra) + 0.62224;
+    return 0.4548*log(1+$cs) + 0.4205*log(1+$ro) + 0.3186*log(1+$ra) - 0.5001;
 }
 ?>
