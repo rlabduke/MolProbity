@@ -150,6 +150,8 @@ function runAnalysis($modelID, $opts)
         writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota, $cbdev, $pperp);
         $tasks['multichart'] .= " - <a href='viewtable.php?$_SESSION[sessTag]&file=$outfile' target='_blank'>preview</a>\n";
         setProgress($tasks, 'multichart'); // so the preview link is visible
+        $outfile = "$chartDir/$model[prefix]multi-coot.scm";
+        makeCootMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pperp);
     }
     if($opts['doKinemage'])
     {
@@ -200,7 +202,10 @@ function runAnalysis($modelID, $opts)
         if($opts['doKinemage'])
             $entry .= "<p>".linkKinemage("$model[prefix]multi.kin", "Multi-criterion kinemage")."</p>\n";
         if($opts['doCharts'])
+        {
             $entry .= "<p><a href='viewtable.php?$_SESSION[sessTag]&file=$rawDir/$model[prefix]multi.table' target='_blank'>Multi-criterion chart</a></p>\n";
+            $entry .= "<p><a href='$chartURL/$model[prefix]multi-coot.scm'>Download multi-criterion chart for COOT</a> [ALPHA TEST]<br><small><i>Open this in COOT using Calculate | Run Script...</i></small></p>\n";
+        }
     }
     
     if($opts['chartClashlist'] || $opts['chartRama'] || $opts['chartCBdev'])
