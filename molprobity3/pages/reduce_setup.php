@@ -42,8 +42,11 @@ function display($context)
             }
             else
             {
+                $stats = $model['stats'];
+                $hasProtein = ($stats['sidechains'] > 0 ? "true" : "false");
+                $hasNucAcid = ($stats['nucacids'] > 0 ? "true" : "false");
                 $checked = ($lastUsedID == $id ? "checked" : "");
-                echo "  <td><input type='radio' name='modelID' value='$id' $checked></td>\n";
+                echo "  <td><input type='radio' name='modelID' value='$id' $checked onclick='setFlipkins($hasProtein)'></td>\n";
                 echo "  <td><b>$model[pdb]</b></td>\n";
                 echo "  <td><small>$model[history]</small></td>\n";
             }
@@ -63,7 +66,7 @@ function display($context)
         echo "<td><small>Add missing H, optimize H-bond networks, check for flipped Asn, Gln, His";
         echo " (<code>Reduce -build</code>)\n";
         echo "<div class='inline_options'><b>Advanced options:</b>\n";
-        echo "<label><input type='checkbox' name='makeFlipkin' value='1' checked>\n";
+        echo "<label><input type='checkbox' name='makeFlipkin' id='makeFlipkin' value='1' checked>\n";
         echo "Make Flipkin kinemages illustrating any Asn, Gln, or His flips</label></div>\n";
         echo "</small></td></tr>\n";
         echo "<tr><td colspan='2'>&nbsp;</td></tr>\n"; // vertical spacer
@@ -76,6 +79,29 @@ function display($context)
         echo "<td align='right'><input type='submit' name='cmd' value='Cancel'></td>\n";
         echo "</tr></table></p></form>\n";
 ?>
+<script type='text/javascript'>
+function setFlipkins(hasProtein)
+{
+    flipkin = document.getElementById("makeFlipkin");
+    flipkin.checked = hasProtein;
+}
+
+// This nifty function means we won't override other ONLOAD handlers
+function windowOnload(f)
+{
+    var prev = window.onload;
+    window.onload = function() { if(prev) prev(); f(); }
+}
+
+// On page load, find the selected model and sync us to its state
+windowOnload(function() {
+    var models = document.getElementsByName('modelID');
+    for(var i = 0; i < models.length; i++)
+    {
+        if(models[i].checked) models[i].onclick();
+    }
+});
+</script>
 <hr>
 <div class='help_info'>
 <h4>Adding hydrogens</h4>
