@@ -49,6 +49,53 @@ function getEffectiveResolution($clash, $rota, $rama)
     $ra = 100.0 - (100.0 * $ramaScore['Favored'] / count($rama));
     
     //echo " cs=$cs, ro=$ro, ra=$ra ";
-    return 0.4548*log(1+$cs) + 0.4205*log(1+$ro) + 0.3186*log(1+$ra) - 0.5001;
+    //return 0.4548*log(1+$cs) + 0.4205*log(1+$ro) + 0.3186*log(1+$ra) - 0.5001;
+    
+    // We are now working based on a "best feasible structure for your resolution" scale,
+    // so all scores = 0 corresponds to a resolution of 0.5 A
+    return 0.4548*log(1+$cs) + 0.4205*log(1+$ro) + 0.3186*log(1+$ra) + 0.5;
+}
+
+function getEffectiveResolutionPercentile($effRes, $actualRes = 0)
+{
+    $windowHalfwidth = 0.25;
+    if($actualRes)
+    {
+        $minRes = min($actualRes, 3.50) - $windowHalfwidth;
+        $maxRes = max($actualRes, 0.75) + $windowHalfwidth;
+    }
+    else
+    {
+        $minRes = 0;
+        $maxRes = 99;
+    }
+    
+    $nSamples = 0;
+    $nWorse = 0;
+    $in = fopen(MP_BASE_DIR.'/lib/eff_resol_lib.csv', 'rb');
+    while(!feof($in))
+    {
+        
+        $x = fgets($in, 1024);
+        if($x{0} == '#') continue;
+        
+        $x = explode(',', $x);
+        $ar = $x[1]+0;
+        $er = $x[2]+0;
+        
+        if($minRes <= $ar && $ar <= $maxRes)
+        {
+            $nSamples++;
+            if($er > $effRes) $nWorse++;
+        }
+    }
+    fclose($in);
+    
+    return array(
+        'minresol' => $minRes,
+        'maxresol' => $maxRes,
+        'n_samples' => $nSamples,
+        'pct_rank' => round(100 * $nWorse / $nSamples),
+    );
 }
 ?>

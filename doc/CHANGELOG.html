@@ -73,7 +73,6 @@
     Chart -- show only outliers?
     Chart/sort by Rama: not all outliers together b/c cutoffs are different (!)
     Auto-expand coords, kins folders?
-    update Mac prekin and create Universal binary
     add real HTML head/foot to downloadable multichart? look into viewer issues
     Convert multichart to format (CSV) that would work with KiNG, Excel, etc.
         Maybe this is an addition rather than a conversion...
@@ -84,16 +83,21 @@
         When fetched as biol unit, MolProbity converts models to chains automat.
     H not recognized on RNA (maybe also not recognized after removing chains?)
     Don't default to making flipkins if only nucleic acid is present
+        See pages/aacgeom_setup.php
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
+
+### 3.02 ###
+- updated effective resolution code, including a new percentile rank score
 
 ### 3.01 ###
 - we've been in production mode for a long time now, so I changed to a more
   normal version numbering scheme.
 - created Scheme script for COOT that lists all multi-crit outliers.
 - updated numbers used in effective resolution calculation.
+- made pdbstat find other nuc. acid H; changed criteria for has_most_H
 
 ### 3beta29 ###
 - added Life, the Universe, and Everything question to april_fools.php
