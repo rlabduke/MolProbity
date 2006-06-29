@@ -81,9 +81,6 @@
     When a multi-model biological unit PDB is *uploaded*, it gets treated as an
         NMR file, and there's no way to add H to all models at once. (1l6b, 1nvy)
         When fetched as biol unit, MolProbity converts models to chains automat.
-    H not recognized on RNA (maybe also not recognized after removing chains?)
-    Don't default to making flipkins if only nucleic acid is present
-        See pages/aacgeom_setup.php
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -91,6 +88,7 @@
 
 ### 3.02 ###
 - updated effective resolution code, including a new percentile rank score
+- add H no longer suggests making flipkins if no protein is present
 
 ### 3.01 ###
 - we've been in production mode for a long time now, so I changed to a more
