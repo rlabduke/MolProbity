@@ -195,7 +195,8 @@ function pdbstat($pdbfilename)
                 # Atom is a C5' hydrogen in RNA/DNA? Good flag for nonpolar H in nucleic acids.
                 elseif(preg_match("/[ 1-9][HDTZ]5[*'][ A1]/", $atom)) { $hnonpolar++; }
                 # Atom is a hydrogen?
-                elseif(preg_match("/[ 1-9][HDTZ][ A-Z][ 1-9][ A1]/", $atom)) { $hydrogens++; }
+                //elseif(preg_match("/[ 1-9][HDTZ][ A-Z][ 1-9*'][ A1]/", $atom)) { $hydrogens++; }
+                elseif(preg_match("/[ 1-9][HDTZ]..[ A1]/", $atom)) { $hydrogens++; }
                 # Atom is non-descript
                 else { $heavyatoms++; }
                 
@@ -262,7 +263,9 @@ function pdbstat($pdbfilename)
     $ret['heavyatoms']      = $heavyatoms;
     $ret['hnonpolar']       = $hnonpolar;
     $ret['hydrogens']       = $hydrogens;
-    $ret['has_most_H']      = ($heavyatoms < 2*($hydrogens+$hnonpolar));
+    // Doesn't work for RNA -- too few H.  New criteria:  3+ per residue.
+    //$ret['has_most_H']      = ($heavyatoms < 2*($hydrogens+$hnonpolar));
+    $ret['has_most_H']      = (3*$residues < ($hydrogens+$hnonpolar));
     $ret['hets']            = $hets;
     $ret['waters']          = $waters;
     $ret['fromcns']         = $fromCNS;
