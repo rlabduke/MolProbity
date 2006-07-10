@@ -54,8 +54,10 @@ function makeFlipkin($inpath, $outpathAsnGln, $outpathHis)
 {
     // $_SESSION[hetdict] is used to set REDUCE_HET_DICT environment variable,
     // so it doesn't need to appear on the command line here.
-    exec("flipkin -limit" . MP_REDUCE_LIMIT . " $inpath > $outpathAsnGln");
-    exec("flipkin -limit" . MP_REDUCE_LIMIT . " -h $inpath > $outpathHis");
+    //exec("flipkin -limit" . MP_REDUCE_LIMIT . " $inpath > $outpathAsnGln");
+    //exec("flipkin -limit" . MP_REDUCE_LIMIT . " -h $inpath > $outpathHis");
+    exec("flipkin $inpath > $outpathAsnGln");
+    exec("flipkin -h $inpath > $outpathHis");
 }
 #}}}########################################################################
 

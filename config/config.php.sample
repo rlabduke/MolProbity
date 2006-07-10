@@ -38,6 +38,7 @@ define("MP_EMAIL_WEBMASTER", "webmaster@$_SERVER[SERVER_NAME]");
 define("MP_BIN_PATH", "/usr/local/php5/bin:/opt/j2/bin:/usr/java/jdk/bin");
 
 // Limit for Reduce's -limit flag
+// As of Reduce 3.03, this does nothing -- will be restored in future?
 //define("MP_REDUCE_LIMIT", 10000);
 
 // MP_UMASK

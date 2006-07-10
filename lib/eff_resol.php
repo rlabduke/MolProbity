@@ -27,6 +27,16 @@
       - 0.5001
     ("log" is the natural logarithm, not base 10)
     
+    # Ian Davis, all-PDB "clip12" -- fit to quartile points.
+    # Does not reward structures for less than 1% rotamer outliers
+    # or more than 98% Ramachandran favored.
+    # Use 0.5 as the intercept to get a ~ "best possible" score.
+    MolProbity Effection Resolution (MER) =
+        0.42574 * ln(1 + clashscoreAllAtoms)
+      + 0.32996 * ln(1 + max(0, pctRotamersLessThan_1pct - 1))
+      + 0.24979 * ln(1 + max(0, 100-pctRamachandranFavored - 2))
+      + 0.08755
+    
     When contrasted to the actual crystallographic resolution (AXR), this
     should provide a reasonable measure of the global quality of the structure.
 *****************************************************************************/
@@ -53,7 +63,8 @@ function getEffectiveResolution($clash, $rota, $rama)
     
     // We are now working based on a "best feasible structure for your resolution" scale,
     // so all scores = 0 corresponds to a resolution of 0.5 A
-    return 0.4548*log(1+$cs) + 0.4205*log(1+$ro) + 0.3186*log(1+$ra) + 0.5;
+    //return 0.4548*log(1+$cs) + 0.4205*log(1+$ro) + 0.3186*log(1+$ra) + 0.5;
+    return 0.42574*log(1+$cs) + 0.32996*log(1+max(0,$ro-1)) + 0.24979*log(1+max(0,$ra-2)) + 0.5;
 }
 
 function getEffectiveResolutionPercentile($effRes, $actualRes = 0)

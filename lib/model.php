@@ -482,7 +482,7 @@ function convertModelsToChains($infile)
         elseif(preg_match('/^(MODEL|ENDMDL)/', $line))
         {
             $idmap = array();
-            echo "reset matching\n";
+            //echo "reset matching\n";
         }
         else fwrite($out, $line);
     }
@@ -543,7 +543,8 @@ function reduceNoBuild($inpath, $outpath)
     // so it doesn't need to appear on the command line here.
     // High penalty means no flips happen, but they must be considered to get networks right.
     // "-build" is these 3 plus -rotexoh:         /------------\
-    exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -oh -his -flip -pen9999 -keep -allalt $inpath > $outpath");
+    //exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -oh -his -flip -pen9999 -keep -allalt $inpath > $outpath");
+    exec("reduce -quiet -oh -his -flip -pen9999 -keep -allalt $inpath > $outpath");
 }
 #}}}########################################################################
 
@@ -560,7 +561,8 @@ function reduceBuild($inpath, $outpath)
 {
     // $_SESSION[hetdict] is used to set REDUCE_HET_DICT environment variable,
     // so it doesn't need to appear on the command line here.
-    exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -build -allalt $inpath > $outpath");
+    //exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -build -allalt $inpath > $outpath");
+    exec("reduce -quiet -build -allalt $inpath > $outpath");
 }
 #}}}########################################################################
 
@@ -580,7 +582,8 @@ function reduceFix($inpath, $outpath, $flippath)
 {
     // $_SESSION[hetdict] is used to set REDUCE_HET_DICT environment variable,
     // so it doesn't need to appear on the command line here.
-    exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -build -fix $flippath -allalt $inpath > $outpath");
+    //exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -build -fix $flippath -allalt $inpath > $outpath");
+    exec("reduce -quiet -build -fix $flippath -allalt $inpath > $outpath");
 }
 #}}}########################################################################
 

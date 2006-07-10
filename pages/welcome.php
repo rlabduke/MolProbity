@@ -4,6 +4,8 @@
 *****************************************************************************/
 require_once(MP_BASE_DIR.'/lib/labbook.php');
 require_once(MP_BASE_DIR.'/lib/browser.php');
+require_once(MP_BASE_DIR.'/lib/model.php');
+require_once(MP_BASE_DIR.'/lib/pdbstat.php');
 
 // It may be bad form, but we hijack functions from these pages to avoid
 // duplicating the work they do. This must be done very carefully!
@@ -239,6 +241,7 @@ function displayEnsembleTools($context)
     // "rel" (relevance) is 2 for major, 1 for minor, 0 for not shown.
     $tools = array(
         'aacgeom'   => array('desc' => 'Analyze all-atom contacts and geometry', 'page' => 'ens_aacgeom_setup.php', 'rel' => 2, 'img' => 'clash_rama.png'),
+        'biolunit'  => array('desc' => 'Biol. unit, not NMR', 'handler' => 'onConvertToBiolUnit', 'rel' => 1, 'img' => 'scissors.png'),
     );
     
     $this->formatTools($tools);
@@ -761,6 +764,35 @@ function onVisInterface($arg, $req)
         pageCall("interface_setup2.php", array('modelID' => $_SESSION['lastUsedModelID']));
     else
         pageCall("interface_setup1.php");
+}
+#}}}########################################################################
+
+#{{{ onConvertToBiolUnit - for uploaded multi-model files
+############################################################################
+function onConvertToBiolUnit($arg, $req)
+{
+    if($_SESSION['lastUsedModelID'])
+    {
+        $oldID      = $_SESSION['lastUsedModelID'];
+        $model      = $_SESSION['ensembles'][$oldID];
+        if(!$model) return;
+        
+        $modelDir   = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
+        $infile     = "$modelDir/$model[pdb]";
+        $tmpfile    = convertModelsToChains($infile);
+        
+        $newModel = createModel("$oldID-biolunit");
+        $newID = $newModel['id'];
+        $newModel['stats'] = pdbstat($tmpfile);
+        $newModel['history'] = 'Converted from ensemble to biological unit';
+
+        if(!file_exists($modelDir)) mkdir($modelDir, 0777);
+        copy($tmpfile, "$modelDir/$newModel[pdb]");
+        unlink($tmpfile);
+
+        $_SESSION['models'][$newID] = $newModel;
+        $_SESSION['lastUsedModelID'] = $newID;
+    }
 }
 #}}}########################################################################
 
