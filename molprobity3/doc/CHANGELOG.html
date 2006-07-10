@@ -78,9 +78,8 @@
         Maybe this is an addition rather than a conversion...
     For unrecognized hets, determine connectivity using Molikin, write HET dict,
         allow user to remove H using HTML textbox, save to server.
-    When a multi-model biological unit PDB is *uploaded*, it gets treated as an
-        NMR file, and there's no way to add H to all models at once. (1l6b, 1nvy)
-        When fetched as biol unit, MolProbity converts models to chains automat.
+  * Convert to biol. unit should produce and display a notebook entry
+    New Reduce (Linux);  remove -limit flag
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -89,6 +88,14 @@
 ### 3.02 ###
 - updated effective resolution code, including a new percentile rank score
 - add H no longer suggests making flipkins if no protein is present
+- added tool to convert apparent NMR ensemble to a biological unit file
+  (i.e. convert MODELs to chains), because there's no way to recognize an
+  uploaded biological unit file.
+- updated effective resolution code and library to use floors for rotamers
+  and Ramachandran -- no reward past "expected" values.
+- updated Mac Reduce to 3.02, the Snoeyink lab version
+- updated Mac and Linux Reduce to 3.03
+- removed -limit flag temporarily, until it gets re-implemented in Reduce
 
 ### 3.01 ###
 - we've been in production mode for a long time now, so I changed to a more

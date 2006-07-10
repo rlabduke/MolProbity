@@ -38,6 +38,7 @@ if(!defined("MP_REDUCE_HET_DICT"))
     define("MP_REDUCE_HET_DICT", MP_BASE_DIR."/lib/reduce_het_dict.txt");
 
 // Limit for Reduce's -limit flag
+// As of Reduce 3.03, this does nothing -- will be restored in future?
 if(!defined("MP_REDUCE_LIMIT"))
     define("MP_REDUCE_LIMIT", 10000);
 
