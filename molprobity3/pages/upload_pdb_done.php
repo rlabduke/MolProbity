@@ -23,14 +23,14 @@ function display($context)
     {
         if(isset($context['errorMsg']))
         {
-            echo mpPageHeader("Model upload failed");
+            echo $this->pageHeader("Model upload failed");
             echo "For some reason, your file could not be uploaded.\n<ul>\n";
             echo "<li>$context[errorMsg]</li>\n";
             echo "</ul>\n";
         }
         else
         {
-            echo mpPageHeader("Model retrieval failed");
+            echo $this->pageHeader("Model retrieval failed");
             echo "For some reason, your file could not be pulled from the network.\n<ul>\n";
             echo "<li>Check the PDB/NDB identifier code and try again.</li>\n";
             echo "<li>Check the PDB/NDB web site - their server may be down.</li>\n";
@@ -47,24 +47,13 @@ function display($context)
         $num = $context['labbookEntry'];
 
         // Start the page: produces <HTML>, <HEAD>, <BODY> tags
-        echo mpPageHeader($labbook[$num]['title']);
+        echo $this->pageHeader($labbook[$num]['title']);
         echo formatLabbookEntry($labbook[$num]);
         echo "<p><a href='".makeEventURL('onEditNotebook', $num)."'>Edit notebook entry</a></p>\n";
         echo "<p>" . makeEventForm("onReturn");
         echo "<input type='submit' name='cmd' value='Continue &gt;'>\n</form></p>\n";
     }
-    echo mpPageFooter();
-}
-#}}}########################################################################
-
-#{{{ onReturn
-############################################################################
-/**
-* Documentation for this function.
-*/
-function onReturn($arg, $req)
-{
-    pageReturn();
+    echo $this->pageFooter();
 }
 #}}}########################################################################
 
@@ -73,9 +62,9 @@ function onReturn($arg, $req)
 /**
 * Documentation for this function.
 */
-function onTryAgain($arg, $req)
+function onTryAgain()
 {
-    if($req['cmd'] == '< Try again')
+    if($_REQUEST['cmd'] == '< Try again')
         pageGoto("upload_setup.php");
     else
         pageReturn();
@@ -87,7 +76,7 @@ function onTryAgain($arg, $req)
 /**
 * Documentation for this function.
 */
-function onEditNotebook($arg, $req)
+function onEditNotebook($arg)
 {
     pageCall("notebook_edit.php", array('entryNumber' => $arg));
 }

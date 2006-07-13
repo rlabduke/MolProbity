@@ -12,15 +12,15 @@ class logout_delegate extends BasicDelegate {
 */
 function display($context)
 {
-    echo mpPageHeader("Log out &amp; end session", "logout");
+    echo $this->pageHeader("Log out &amp; end session", "logout");
 ?>
 <p>We appreciate your help in freeing up disk space for other users.
 By clicking the button below, you will <b>permanently delete</b> all the files you generated during this session.
 Before logging out, you may wish to
-<a href='<?php echo makeEventURL('onNavBarGoto', 'file_browser.php'); ?>'>download</a>
+<a href='<?php echo makeEventURL('onGoto', 'file_browser.php'); ?>'>download</a>
 some of your files.
 It is also possible to 
-<a href='<?php echo makeEventURL('onNavBarGoto', 'save_session.php'); ?>'>save this session</a>
+<a href='<?php echo makeEventURL('onGoto', 'save_session.php'); ?>'>save this session</a>
 and return to do more work with these files later.
 
 <p><form method="post" action="logout_destroy.php">
@@ -30,7 +30,7 @@ and return to do more work with these files later.
 <input type="submit" name="cmd" value="Destroy all my files and log me out &gt;">
 </form>
 <?php
-    echo mpPageFooter();
+    echo $this->pageFooter();
 }
 #}}}########################################################################
 

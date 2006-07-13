@@ -17,7 +17,7 @@ function display($context)
     mpLog("notebook-view:User visited Lab Notebook page");
     
     $labbook = openLabbook();
-    echo mpPageHeader("Lab notebook", "notebook");
+    echo $this->pageHeader("Lab notebook", "notebook");
     
     // Set time zone form
     echo makeEventForm("onSetTimezone");
@@ -42,7 +42,7 @@ function display($context)
         $this->printEntry($num, $entry);
     }
 
-    echo mpPageFooter();
+    echo $this->pageFooter();
 }// end of display
 #}}}########################################################################
 
@@ -87,8 +87,9 @@ function printTOC($book)
 /**
 * Documentation for this function.
 */
-function onSetTimezone($arg, $req)
+function onSetTimezone()
 {
+    $req = $_REQUEST;
     if(isset($req['timezone']))
     {
         $_SESSION['timeZone'] = $req['timezone'];
@@ -102,7 +103,7 @@ function onSetTimezone($arg, $req)
 /**
 * $arg is the entry number to be edited
 */
-function onNotebookEdit($arg, $req)
+function onNotebookEdit($arg)
 {
     pageCall("notebook_edit.php", array('entryNumber' => $arg));
 }

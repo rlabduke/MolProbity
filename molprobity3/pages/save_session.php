@@ -18,17 +18,17 @@ function display($context)
     mpSessSetTTL(session_id(), MP_SESSION_LIFETIME_EXT);
     
     
-    echo mpPageHeader("Save session", "savesession");
+    echo $this->pageHeader("Save session", "savesession");
 ?>
 <p>To make MolProbity more convenient, you can bookmark this page and return to it later.
 We will do our best to preserve all your files, but the unexpected does sometimes happen --
 so we recommend that you
-<a href='<?php echo makeEventURL('onNavBarGoto', 'file_browser.php'); ?>'>download</a>
+<a href='<?php echo makeEventURL('onGoto', 'file_browser.php'); ?>'>download</a>
 anything really important.
 </p>
 
 <p>If you're not going to use these files anymore, please
-<a href='<?php echo makeEventURL('onNavBarGoto', 'logout.php'); ?>'>log out</a>
+<a href='<?php echo makeEventURL('onGoto', 'logout.php'); ?>'>log out</a>
 instead.
 We appreciate your help in freeing up disk space for other users.
 </p>
@@ -37,7 +37,7 @@ We appreciate your help in freeing up disk space for other users.
 <br><b><?php echo formatDayTime( time() + mpSessTimeToLive(session_id()) ); ?></b>
 </p></center>
 <?php
-    echo mpPageFooter();
+    echo $this->pageFooter();
 }
 #}}}########################################################################
 

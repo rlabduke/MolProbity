@@ -16,13 +16,13 @@ class file_browser_delegate extends BasicDelegate {
 */
 function display($context)
 {
-    echo mpPageHeader("View &amp; download files", "files");
+    echo $this->pageHeader("View &amp; download files", "files");
 
     $list = listRecursive($_SESSION['dataDir']);
     $list = sortFilesAlpha($list);
     $this->displayDownloadForm($list, $context['isExpanded']);
 
-    echo mpPageFooter();
+    echo $this->pageFooter();
 }
 #}}}########################################################################
 
@@ -180,14 +180,14 @@ function makeFileCommands($path, $url)
 
 #{{{ onFolderOpen, onFolderClose
 ############################################################################
-function onFolderOpen($arg, $req)
+function onFolderOpen($arg)
 {
     $context = getContext();
     $context['isExpanded'][$arg] = true;
     setContext($context);
 }
 
-function onFolderClose($arg, $req)
+function onFolderClose($arg)
 {
     $context = getContext();
     $context['isExpanded'][$arg] = false;
@@ -203,13 +203,13 @@ function onFolderClose($arg, $req)
 *
 * This code has been shown to cause cancer in lab rats.
 */
-function onDownloadMarkedZip($arg, $req)
+function onDownloadMarkedZip()
 {
     // Input files come with absolute paths, so we have to check them against
     // our session directory to avoid security holes!
     $basedir = realpath($_SESSION['dataDir']);
     $files = array();
-    foreach($req['zipfiles'] as $file)
+    foreach($_REQUEST['zipfiles'] as $file)
     {
         $file = realpath($file);
         if(!$file || !startsWith($file, $basedir)) continue;

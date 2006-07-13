@@ -22,13 +22,13 @@ class welcome_delegate extends file_browser_delegate {
 */
 function display($context)
 {
-    echo mpPageHeader("Main page", "welcome");
+    echo $this->pageHeader("Main page", "welcome");
 
     if(count($_SESSION['models']) > 0 && $_SESSION['lastUsedModelID'])
     {
-        echo "<h5 class='welcome'>Suggested Tools (<a href='".makeEventURL("onNavBarGoto", "sitemap.php")."'>all tools</a>)</h5>\n";
+        echo "<h5 class='welcome'>Suggested Tools (<a href='".makeEventURL("onGoto", "sitemap.php")."'>all tools</a>)</h5>\n";
         echo "<div class='indent'>\n";
-        echo makeEventForm("onSetWorkingModel", null, true) . "\n";
+        echo makeEventForm("onSetWorkingModel") . "\n";
         $this->displayModels($context);
         echo "</form>\n";
         
@@ -59,7 +59,7 @@ function display($context)
 ?>
 <table border='0' width='100%'><tr valign='top'><td width='45%'>
 <h3>Walk-thrus &amp; tutorials:</h3>
-<p><b><?php echo "<a href='".makeEventURL("onNavBarGoto", "helper_xray.php")."'>Evaluate X-ray structure</a>"; ?>:</b>
+<p><b><?php echo "<a href='".makeEventURL("onGoto", "helper_xray.php")."'>Evaluate X-ray structure</a>"; ?>:</b>
 Typical steps for a published X-ray crystal structure
 or one still undergoing refinement.</p>
 <p><b>Evaluate NMR structure:</b>
@@ -71,7 +71,7 @@ as part of the refinement cycle.</p>
 <p><b>Work with kinemages:</b>
 Create and view interactive 3-D graphics
 from your web browser.</p>
-<p><b><?php echo "<a href='".makeEventURL("onNavBarGoto", "sitemap.php")."'>Site map</a>"; ?>:</b>
+<p><b><?php echo "<a href='".makeEventURL("onGoto", "sitemap.php")."'>Site map</a>"; ?>:</b>
 Minimum-guidance interface for experienced users.</p>
 <p><small><i>NB: the back button doesn't work inside MolProbity</i></small></p><!-- by request of DCR -->
 
@@ -100,7 +100,7 @@ Minimum-guidance interface for experienced users.</p>
     // These are too annoying to have at the top all the time
     $this->displayWarnings($context);
     
-    echo mpPageFooter();
+    echo $this->pageFooter();
 }
 #}}}########################################################################
 
@@ -272,7 +272,7 @@ function formatTools($tools)
     foreach($major as $item)
     {
         if($item['handler'])    $a = "<a href='".makeEventURL($item['handler'])."'>";
-        else                    $a = "<a href='".makeEventURL("onNavBarCall", $item['page'])."'>";
+        else                    $a = "<a href='".makeEventURL("onCall", $item['page'])."'>";
         if($item['img'])    echo "<tr><td>$a<img src='img/$item[img]' alt='$img[desc]' border='0'></a></td>";
         else                echo "<tr><td></td>";
         echo "<td>$a$item[desc]</a></td></tr>\n";
@@ -283,7 +283,7 @@ function formatTools($tools)
     foreach($minor as $item)
     {
         if($item['handler'])    $a = "<a href='".makeEventURL($item['handler'])."'>";
-        else                    $a = "<a href='".makeEventURL("onNavBarCall", $item['page'])."'>";
+        else                    $a = "<a href='".makeEventURL("onCall", $item['page'])."'>";
         if($item['img'])    echo "<tr><td>$a<img src='img/$item[img]' alt='$img[desc]' border='0' width='40' height='40'></a></td>";
         else                echo "<tr><td></td>";
         echo "<td>$a$item[desc]</a></td></tr>\n";
@@ -306,7 +306,7 @@ function displayFiles($context)
     $files = array(MP_DIR_MODELS.'/'.$model['pdb']);
     $files = array_merge($files, $model['primaryDownloads']);
     
-    echo "<h5 class='welcome'>Popular Downloads (<a href='".makeEventURL('onNavBarCall', 'file_browser.php')."'>all downloads</a>)</h5>\n";
+    echo "<h5 class='welcome'>Popular Downloads (<a href='".makeEventURL('onCall', 'file_browser.php')."'>all downloads</a>)</h5>\n";
     echo "<div class='indent'>\n";
     echo "<table border='0' width='100%' cellspacing='0'>\n";
     $fileListColor = MP_TABLE_ALT1;
@@ -327,7 +327,7 @@ function displayFiles($context)
 ############################################################################
 function displayFilesJS($context)
 {
-    echo "<h5 class='welcome'>Popular Downloads (<a href='".makeEventURL('onNavBarCall', 'file_browser.php')."'>all downloads</a>)</h5>\n";
+    echo "<h5 class='welcome'>Popular Downloads (<a href='".makeEventURL('onCall', 'file_browser.php')."'>all downloads</a>)</h5>\n";
     echo "<div class='indent'>\n";
     
     $files = listRecursive($_SESSION['dataDir']);
@@ -459,7 +459,7 @@ function findPosY(obj)
 ############################################################################
 function displayAllFiles($context)
 {
-    echo "<h5 class='welcome'>Popular Downloads (<a href='".makeEventURL('onNavBarCall', 'file_browser.php')."'>all downloads</a>)</h5>\n";
+    echo "<h5 class='welcome'>Popular Downloads (<a href='".makeEventURL('onCall', 'file_browser.php')."'>all downloads</a>)</h5>\n";
     echo "<div class='indent'>\n";
     
     $list = listRecursive($_SESSION['dataDir']);
@@ -481,7 +481,7 @@ function displayEntries($context, $labbook)
     // header below appends an anchor (#entry123) onto the end of it...
     // To get back here, the user must manually return to the welcome page.
     // [This describes the old, commented out code.]
-    $url = makeEventURL("onNavBarGoto", "notebook_main.php");
+    $url = makeEventURL("onGoto", "notebook_main.php");
 
     $modelID = $_SESSION['lastUsedModelID'];
     if(isset($_SESSION['ensembles'][ $_SESSION['lastUsedModelID'] ]))
@@ -533,9 +533,9 @@ function displayEntries($context, $labbook)
 */
 function displayUpload($context)
 {
-    echo makeEventForm("onUploadOrFetch", null, true) . "\n"; 
-    //echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onNavBarCall", "upload_setup.php")."'>more options</a>)</h5>";
-    echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onNavBarCall", "upload_setup.php")."' onclick='toggleUploadOptions(); return false' id='upload_options_link'>more options</a>)</h5>";
+    echo makeEventForm("onUploadOrFetch") . "\n"; 
+    //echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onCall", "upload_setup.php")."'>more options</a>)</h5>";
+    echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onCall", "upload_setup.php")."' onclick='toggleUploadOptions(); return false' id='upload_options_link'>more options</a>)</h5>";
 ?>
 <script language='JavaScript'>
 <!--
@@ -604,9 +604,9 @@ function toggleUploadOptions()
 */
 function displayUploadOld($context)
 {
-    echo makeEventForm("onUploadOrFetch", null, true) . "\n"; 
-    //echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onNavBarCall", "upload_setup.php")."'>more options</a>)</h5>";
-    echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onNavBarCall", "upload_setup.php")."' onclick='toggleUploadOptions(); return false' id='upload_options_link'>more options</a>)</h5>";
+    echo makeEventForm("onUploadOrFetch") . "\n"; 
+    //echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onCall", "upload_setup.php")."'>more options</a>)</h5>";
+    echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onCall", "upload_setup.php")."' onclick='toggleUploadOptions(); return false' id='upload_options_link'>more options</a>)</h5>";
 ?>
 <script language='JavaScript'>
 <!--
@@ -673,9 +673,9 @@ function toggleUploadOptions()
 
 #{{{ onSetWorkingModel
 ############################################################################
-function onSetWorkingModel($arg, $req)
+function onSetWorkingModel()
 {
-    $_SESSION['lastUsedModelID'] = $req['workingModel'];
+    $_SESSION['lastUsedModelID'] = $_REQUEST['workingModel'];
 }
 #}}}########################################################################
 
@@ -686,8 +686,9 @@ function onSetWorkingModel($arg, $req)
 * event handler depending on whether a file has been uploaded or not...
 * Don't try this at home!
 */
-function onUploadOrFetch($arg, $req)
+function onUploadOrFetch()
 {
+    $req = $_REQUEST;
     $hasUpload = isset($_FILES['uploadFile']) && $_FILES['uploadFile']['error'] != UPLOAD_ERR_NO_FILE;
     $hasFetch = isset($req['pdbCode']) && $req['pdbCode'] != "";
     
@@ -696,32 +697,32 @@ function onUploadOrFetch($arg, $req)
 
     if($hasUpload)
     {
-        if($req['uploadType'] == 'pdb')         $upload_delegate->onUploadPdbFile($arg, $req);
-        elseif($req['uploadType'] == 'kin')     $upload_delegate->onUploadKinemage($arg, $req);
-        elseif($req['uploadType'] == 'map')     $upload_delegate->onUploadMapFile($arg, $req);
-        elseif($req['uploadType'] == 'hetdict') $upload_delegate->onUploadHetDictFile($arg, $req);
+        if($req['uploadType'] == 'pdb')         $upload_delegate->onUploadPdbFile();
+        elseif($req['uploadType'] == 'kin')     $upload_delegate->onUploadKinemage();
+        elseif($req['uploadType'] == 'map')     $upload_delegate->onUploadMapFile();
+        elseif($req['uploadType'] == 'hetdict') $upload_delegate->onUploadHetDictFile();
     }
     elseif($hasFetch)
     {
-        if($req['fetchType'] == 'pdb')          $upload_delegate->onFetchPdbFile($arg, $req);
+        if($req['fetchType'] == 'pdb')          $upload_delegate->onFetchPdbFile();
         elseif($req['fetchType'] == 'biolunit')
         {
             $req['biolunit'] = 1;
-            $upload_delegate->onFetchPdbFile($arg, $req);
+            $upload_delegate->onFetchPdbFile();
         }
         elseif($req['fetchType'] == 'eds_2fofc')
         {
             $req['eds_2fofc'] = 1;
-            $upload_delegate->onFetchEdsMap($arg, $req);
+            $upload_delegate->onFetchEdsMap();
         }
         elseif($req['fetchType'] == 'eds_fofc')
         {
             $req['eds_fofc'] = 1;
-            $upload_delegate->onFetchEdsMap($arg, $req);
+            $upload_delegate->onFetchEdsMap();
         }
     }
     else 
-        $upload_delegate->onUploadPdbFile($arg, $req);
+        $upload_delegate->onUploadPdbFile();
 }
 #}}}########################################################################
 
@@ -733,7 +734,7 @@ function onUploadOrFetch($arg, $req)
 *
 * This code has been shown to cause cancer in lab rats.
 */
-function onDownloadPopularZip($arg, $req)
+function onDownloadPopularZip()
 {
     if(isset($_SESSION['ensembles'][ $_SESSION['lastUsedModelID'] ]))
         $model = $_SESSION['ensembles'][ $_SESSION['lastUsedModelID'] ];
@@ -758,7 +759,7 @@ function onDownloadPopularZip($arg, $req)
 
 #{{{ onVisInterface - allows us to skip file selection
 ############################################################################
-function onVisInterface($arg, $req)
+function onVisInterface()
 {
     if($_SESSION['lastUsedModelID'])
         pageCall("interface_setup2.php", array('modelID' => $_SESSION['lastUsedModelID']));
@@ -769,7 +770,7 @@ function onVisInterface($arg, $req)
 
 #{{{ onConvertToBiolUnit - for uploaded multi-model files
 ############################################################################
-function onConvertToBiolUnit($arg, $req)
+function onConvertToBiolUnit()
 {
     if($_SESSION['lastUsedModelID'])
     {

@@ -14,7 +14,7 @@ class interface_setup1_delegate extends BasicDelegate {
 ############################################################################
 function display($context)
 {
-    echo mpPageHeader("Visualize interface contacts");
+    echo $this->pageHeader("Visualize interface contacts");
     
 ?><script language='JavaScript'>
 <!--
@@ -78,13 +78,13 @@ function warnNoH(obj)
     }
     else
     {
-        echo "No models are available. Please <a href='".makeEventURL("onNavBarCall", "upload_setup.php")."'>upload or fetch a PDB file</a> in order to continue.\n";
+        echo "No models are available. Please <a href='".makeEventURL("onCall", "upload_setup.php")."'>upload or fetch a PDB file</a> in order to continue.\n";
         echo makeEventForm("onChooseOptions");
         echo "<p><input type='submit' name='cmd' value='Cancel'></p></form>\n";
         
     }
 
-    echo mpPageFooter();
+    echo $this->pageFooter();
 }
 #}}}########################################################################
 
@@ -93,8 +93,9 @@ function warnNoH(obj)
 /**
 * Launches Prekin when the user submits the form.
 */
-function onChooseOptions($arg, $req)
+function onChooseOptions()
 {
+    $req = $_REQUEST;
     if($req['cmd'] == 'Cancel')
     {
         pageReturn();

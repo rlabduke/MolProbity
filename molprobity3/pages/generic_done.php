@@ -21,24 +21,13 @@ function display($context)
     $labbook = openLabbook();
     $num = $context['labbookEntry'];
 
-    echo mpPageHeader($labbook[$num]['title']);
+    echo $this->pageHeader($labbook[$num]['title']);
     echo formatLabbookEntry($labbook[$num]);
     echo "<p><a href='".makeEventURL('onEditNotebook', $num)."'>Edit notebook entry</a></p>\n";
     echo "<p>" . makeEventForm("onReturn");
     echo "<input type='submit' name='cmd' value='Continue &gt;'>\n</form></p>\n";
 
-    echo mpPageFooter();
-}
-#}}}########################################################################
-
-#{{{ onReturn
-############################################################################
-/**
-* Documentation for this function.
-*/
-function onReturn($arg, $req)
-{
-    pageReturn();
+    echo $this->pageFooter();
 }
 #}}}########################################################################
 
@@ -47,7 +36,7 @@ function onReturn($arg, $req)
 /**
 * Documentation for this function.
 */
-function onEditNotebook($arg, $req)
+function onEditNotebook($arg)
 {
     pageCall("notebook_edit.php", array('entryNumber' => $arg));
 }

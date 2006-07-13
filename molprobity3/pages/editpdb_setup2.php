@@ -16,7 +16,7 @@ class editpdb_setup2_delegate extends BasicDelegate {
 */
 function display($context)
 {
-    echo mpPageHeader("Edit PDB file");
+    echo $this->pageHeader("Edit PDB file");
     
     $modelID = $context['modelID'];
     echo makeEventForm("onEditPDB");
@@ -52,14 +52,15 @@ function display($context)
 </div>
 <?php
 
-    echo mpPageFooter();
+    echo $this->pageFooter();
 }
 #}}}########################################################################
 
 #{{{ onEditPDB
 ############################################################################
-function onEditPDB($arg, $req)
+function onEditPDB()
 {
+    $req = $_REQUEST;
     //if($req['cmd'] == 'Cancel')
     if($req['cmd'] == 'Go back')
     {

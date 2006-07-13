@@ -23,7 +23,7 @@ class reduce_choose_delegate extends BasicDelegate {
 */
 function display($context)
 {
-    echo mpPageHeader("Review flips");
+    echo $this->pageHeader("Review flips");
     
     $id = $context['modelID'];
     $model = $_SESSION['models'][$id];
@@ -118,7 +118,7 @@ function display($context)
     }
     
     echo "</form>\n";
-    echo mpPageFooter();
+    echo $this->pageFooter();
 }
 #}}}########################################################################
 
@@ -127,8 +127,9 @@ function display($context)
 /**
 * Documentation for this function.
 */
-function onRerunReduce($arg, $req)
+function onRerunReduce()
 {
+    $req        = $_REQUEST;
     $doflip     = $req['doflip'];
     $modelID    = $req['modelID'];
     $model      = $_SESSION['models'][$modelID];
@@ -232,11 +233,12 @@ function onRerunReduce($arg, $req)
 /**
 * Documentation for this function.
 */
-function onShowAllNQH($arg, $req)
+function onShowAllNQH($arg)
 {
-    $ctx = getContext();
-    $ctx['showAllNQH'] = $arg;
-    setContext($ctx);
+    //$ctx = getContext();
+    //$ctx['showAllNQH'] = $arg;
+    //setContext($ctx);
+    setContext('showAllNQH', $arg);
 }
 #}}}########################################################################
 

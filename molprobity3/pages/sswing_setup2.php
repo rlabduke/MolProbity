@@ -23,7 +23,7 @@ class sswing_setup2_delegate extends BasicDelegate {
 */
 function display($context)
 {
-    echo mpPageHeader("Refit sidechains");
+    echo $this->pageHeader("Refit sidechains");
     $modelID = $context['modelID'];
     $model = $_SESSION['models'][$modelID];
     $all_res = listProteinResidues($_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$model['pdb']);
@@ -63,7 +63,7 @@ function display($context)
 </div>
 <?php
     
-    echo mpPageFooter();
+    echo $this->pageFooter();
 }
 #}}}########################################################################
 
@@ -72,8 +72,9 @@ function display($context)
 /**
 * Documentation for this function.
 */
-function onStartSSwing($arg, $req)
+function onStartSSwing()
 {
+    $req = $_REQUEST;
     if($req['cmd'] == 'Go back')
     {
         $c = getContext();

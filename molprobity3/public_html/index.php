@@ -48,9 +48,11 @@ elseif(isset($_REQUEST['eventID']))
     if(isset($page['handlers'][$eid]))
     {
         $funcName   = $page['handlers'][$eid]['funcName'];
-        $funcArg    = $page['handlers'][$eid]['funcArg'];
+        $funcArgs   = $page['handlers'][$eid]['funcArgs'];
         // We use a variable function name here to call the handler.
-        $delegate->$funcName($funcArg, $_REQUEST);
+        //$delegate->$funcName($funcArg, $_REQUEST);
+        // Now this is *real* voodoo:
+        call_user_func_array(array(&$delegate, $funcName), $funcArgs);
         
         // In case we changed $_SESSION but display() calls mpSessReadOnly()
         // This won't stop the session from being automatically saved again

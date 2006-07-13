@@ -41,7 +41,7 @@ require_once(MP_BASE_DIR.'/lib/event_page.php');// MVC/events architecture
 *               would refresh that page with those vars every 5 sec.
 *               Leaving off the URL= part works for most browsers, but not IE!
 */
-function mpPageHeader($title, $active = "none", $refresh = "")
+function mpPageHeader($title, $active = "none", $refresh = "", $headContent = "")
 {
     $s = "";
     $s .= '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
@@ -67,6 +67,8 @@ window.alert("You cannot use your browser\'s back button in MolProbity,"
 -->
 </script>
 ';*/
+    
+    if($headContent) $s .= "\n$headContent\n";
 
     $s .= '</head>
 <body>
