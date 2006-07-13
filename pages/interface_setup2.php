@@ -17,7 +17,7 @@ class interface_setup2_delegate extends BasicDelegate {
 */
 function display($context)
 {
-    echo mpPageHeader("Visualize interface contacts");
+    echo $this->pageHeader("Visualize interface contacts");
     $modelID = $context['modelID'];
     $model = $_SESSION['models'][$modelID];
     
@@ -138,7 +138,7 @@ foreach($model['stats']['chainids'] as $cid) {
 </div>
 <?php
 
-    echo mpPageFooter();
+    echo $this->pageFooter();
 }
 #}}}########################################################################
 
@@ -147,8 +147,9 @@ foreach($model['stats']['chainids'] as $cid) {
 /**
 * Launches Prekin when the user submits the form.
 */
-function onRunProbe($arg, $req)
+function onRunProbe()
 {
+    $req = $_REQUEST;
     //if($req['cmd'] == 'Cancel')
     if($req['cmd'] == 'Go back')
     {

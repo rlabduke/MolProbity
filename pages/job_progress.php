@@ -54,7 +54,7 @@ function display($context)
         elseif($ellapsed > 1200 && $rate < 30)  $rate = 30; // after 20 min, refresh every 30 sec
         
         $refresh    = "$rate; URL=$url";
-        echo mpPageHeader("Job is running...", "none", $refresh);
+        echo $this->pageHeader("Job is running...", "none", $refresh);
         echo "<p><center>\n";
         echo "<table border='0'><tr><td>\n";
         echo "<img src='img/2sod-anim.gif'></td><td>\n";
@@ -64,19 +64,19 @@ function display($context)
         echo "<br><small>If this page doesn't update after $rate seconds, <a href='$url'>click here</a>.</small>\n";
         if(isset($_SESSION['bgjob']['processID']))
             echo "<br><small>If needed, you can <a href='$url&abort={$_SESSION[bgjob][processID]}'>abort this job</a>.\n";
-        echo mpPageFooter();
+        echo $this->pageFooter();
     }
     else
     {
         $url        = makeEventURL("onJobFinished", $_SESSION['bgjob']['whereNext']);
         $refresh    = "3; URL=$url";
-        echo mpPageHeader("Job is finished", "none", $refresh);
+        echo $this->pageHeader("Job is finished", "none", $refresh);
         echo "<p><center>Your job ran for ".$this->fmtTime($_SESSION['bgjob']['endTime'] - $_SESSION['bgjob']['startTime']).".\n";
         echo "<p><table border='0'><tr><td>\n";
         @readfile("$_SESSION[dataDir]/".MP_DIR_SYSTEM."/progress");
         echo "</td></tr></table></center>\n";
           echo "<p><small>If nothing happens after 3 seconds, <a href='$url'>click here</a>.<small>\n";
-        echo mpPageFooter();
+        echo $this->pageFooter();
     }
 }
 #}}}########################################################################
@@ -100,7 +100,7 @@ function fmtTime($sec)
 /**
 * Documentation for this function.
 */
-function onJobFinished($arg, $req)
+function onJobFinished($arg)
 {
     pageGoto($arg, $_SESSION['bgjob']);
 }

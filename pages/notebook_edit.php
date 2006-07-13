@@ -35,7 +35,7 @@ function display($context)
     }
     
     // Start the page
-    echo mpPageHeader("Edit notebook entry");
+    echo $this->pageHeader("Edit notebook entry");
     
     // Make the form
     echo makeEventForm("onSaveEntry");
@@ -52,7 +52,7 @@ function display($context)
     echo "<p><i>Hint: you can use HTML tags in your lab notebook entries.</i></p>\n";
     
     // End the page
-    echo mpPageFooter();
+    echo $this->pageFooter();
 }// end of display
 #}}}########################################################################
 
@@ -61,8 +61,9 @@ function display($context)
 /**
 * If the user requested to save changes, make sure we do that before returning.
 */
-function onSaveEntry($arg, $req)
+function onSaveEntry()
 {
+    $req = $_REQUEST;
     // Did we get an edit request?
     if($req['labbookEditCmd'] == "Save")
     {

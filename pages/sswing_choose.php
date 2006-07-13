@@ -18,7 +18,7 @@ class sswing_choose_delegate extends BasicDelegate {
 */
 function display($context)
 {
-    echo mpPageHeader("Review SSwing changes");
+    echo $this->pageHeader("Review SSwing changes");
     
     $modelID = $context['newModel'];
     $model = $_SESSION['models'][$modelID];
@@ -35,7 +35,7 @@ Residues that are not selected will be restored to their original conformation.
     echo "</p><p><input type='submit' name='cmd' value='Generate modified PDB file &gt;'></p>\n";
     echo "</form>\n";
     
-    echo mpPageFooter();
+    echo $this->pageFooter();
 }
 #}}}########################################################################
 
@@ -44,7 +44,7 @@ Residues that are not selected will be restored to their original conformation.
 /**
 * Documentation for this function.
 */
-function onMakeFinalPDB($arg, $req)
+function onMakeFinalPDB()
 {
     $context = getContext();
     $newModel   = $_SESSION['models'][$context['newModel']];
@@ -55,7 +55,7 @@ function onMakeFinalPDB($arg, $req)
     
     // Put our money where our mouth is and calculate that new PDB file
     $all_changes = $context['sswingChanges'];
-    $usercnit = $req['cnit'];
+    $usercnit = $_REQUEST['cnit'];
     // Remove changes for residues that weren't selected
     foreach($all_changes as $k => $v)
     {

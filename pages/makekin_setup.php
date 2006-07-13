@@ -14,7 +14,7 @@ class makekin_setup_delegate extends BasicDelegate {
 ############################################################################
 function display($context)
 {
-    echo mpPageHeader("Make simple kinemages");
+    echo $this->pageHeader("Make simple kinemages");
     
     if(count($_SESSION['models']) > 0)
     {
@@ -85,13 +85,13 @@ function display($context)
     }
     else
     {
-        echo "No models are available. Please <a href='".makeEventURL("onNavBarCall", "upload_setup.php")."'>upload or fetch a PDB file</a> in order to continue.\n";
+        echo "No models are available. Please <a href='".makeEventURL("onCall", "upload_setup.php")."'>upload or fetch a PDB file</a> in order to continue.\n";
         echo makeEventForm("onRunPrekin");
         echo "<p><input type='submit' name='cmd' value='Cancel'></p></form>\n";
         
     }
 
-    echo mpPageFooter();
+    echo $this->pageFooter();
 }
 #}}}########################################################################
 
@@ -100,8 +100,9 @@ function display($context)
 /**
 * Launches Prekin when the user submits the form.
 */
-function onRunPrekin($arg, $req)
+function onRunPrekin()
 {
+    $req = $_REQUEST;
     if($req['cmd'] == 'Cancel')
     {
         pageReturn();

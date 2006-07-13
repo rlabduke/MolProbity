@@ -13,9 +13,9 @@ class upload_setup_delegate extends BasicDelegate {
 */
 function display($context)
 {
-    echo mpPageHeader("Input PDB files");
+    echo $this->pageHeader("Input PDB files");
     
-    echo makeEventForm("onUploadPdbFile", null, true) . "\n";
+    echo makeEventForm("onUploadPdbFile") . "\n";
 ?>
 <div class='side_options'>
     <b>Advanced options:</b>
@@ -32,7 +32,7 @@ function display($context)
 </form>
 </div><br><div class='pagecontent_alone'>
 <?php
-    echo makeEventForm("onFetchPdbFile", null, true) . "\n";
+    echo makeEventForm("onFetchPdbFile") . "\n";
 ?>
 <div class='side_options'>
     <b>Advanced options:</b>
@@ -51,7 +51,7 @@ function display($context)
 </form>
 </div><br><div class='pagecontent_alone'>
 <?php
-    echo makeEventForm("onUploadKinemage", null, true) . "\n";
+    echo makeEventForm("onUploadKinemage") . "\n";
 ?>
 <h3>Upload kinemage</h3>
 <label>Kinemage file:
@@ -63,7 +63,7 @@ function display($context)
 </form>
 </div><br><div class='pagecontent_alone'>
 <?php
-    echo makeEventForm("onUploadMapFile", null, true) . "\n";
+    echo makeEventForm("onUploadMapFile") . "\n";
 ?>
 <h3>Upload electron density map</h3>
 <label>Map file:
@@ -75,7 +75,7 @@ function display($context)
 </form>
 </div><br><div class='pagecontent_alone'>
 <?php
-    echo makeEventForm("onUploadHetDictFile", null, true) . "\n";
+    echo makeEventForm("onUploadHetDictFile") . "\n";
 ?>
 <h3>Upload het dictionary</h3>
 <label>Heterogen dictionary file:
@@ -141,7 +141,7 @@ version 1.3 or newer. See the user manual for more details.</li>
 </ul>
 </div>
 <?php
-    echo mpPageFooter();
+    echo $this->pageFooter();
 }
 #}}}########################################################################
 
@@ -150,8 +150,9 @@ version 1.3 or newer. See the user manual for more details.</li>
 /**
 * Documentation for this function.
 */
-function onUploadPdbFile($arg, $req)
+function onUploadPdbFile()
 {
+    $req = $_REQUEST;
     if($req['cmd'] == "Cancel")
     {
         pageReturn();
@@ -206,8 +207,9 @@ function onUploadPdbFile($arg, $req)
 /**
 * Documentation for this function.
 */
-function onFetchPdbFile($arg, $req)
+function onFetchPdbFile()
 {
+    $req = $_REQUEST;
     if($req['cmd'] == "Cancel")
     {
         pageReturn();
@@ -235,8 +237,9 @@ function onFetchPdbFile($arg, $req)
 /**
 * Documentation for this function.
 */
-function onFetchEdsMap($arg, $req)
+function onFetchEdsMap()
 {
+    $req = $_REQUEST;
     if($req['cmd'] == "Cancel")
     {
         pageReturn();
@@ -261,9 +264,10 @@ function onFetchEdsMap($arg, $req)
 /**
 * Documentation for this function.
 */
-function onUploadKinemage($arg, $req)
+function onUploadKinemage()
 {
-    if($req['cmd'] == "Cancel")
+    $req = $_REQUEST;
+    if($_REQUEST['cmd'] == "Cancel")
     {
         pageReturn();
     }
@@ -291,9 +295,9 @@ function onUploadKinemage($arg, $req)
 /**
 * Documentation for this function.
 */
-function onUploadMapFile($arg, $req)
+function onUploadMapFile()
 {
-    if($req['cmd'] == "Cancel")
+    if($_REQUEST['cmd'] == "Cancel")
     {
         pageReturn();
     }
@@ -322,9 +326,9 @@ function onUploadMapFile($arg, $req)
 /**
 * Documentation for this function.
 */
-function onUploadHetDictFile($arg, $req)
+function onUploadHetDictFile()
 {
-    if($req['cmd'] == "Cancel")
+    if($_REQUEST['cmd'] == "Cancel")
     {
         pageReturn();
     }

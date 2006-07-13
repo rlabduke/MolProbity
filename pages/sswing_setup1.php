@@ -16,7 +16,7 @@ class sswing_setup1_delegate extends BasicDelegate {
 */
 function display($context)
 {
-    echo mpPageHeader("Refit sidechains");
+    echo $this->pageHeader("Refit sidechains");
     
     // Script to discourage people from choosing models without H
 ?><script language='JavaScript'>
@@ -98,30 +98,19 @@ Not suitable for use by the general public.
     }
     elseif(count($_SESSION['models']) == 0)
     {
-        echo "No models are available. Please <a href='".makeEventURL("onNavBarCall", "upload_setup.php")."'>upload or fetch a PDB file</a> in order to continue.\n";
+        echo "No models are available. Please <a href='".makeEventURL("onCall", "upload_setup.php")."'>upload or fetch a PDB file</a> in order to continue.\n";
         echo makeEventForm("onReturn");
         echo "<p><input type='submit' name='cmd' value='Cancel'></p></form>\n";
         
     }
     else
     {
-        echo "No electron density maps are available. Please <a href='".makeEventURL("onNavBarCall", "upload_setup.php")."'>upload a CCP4-format map</a> in order to continue.\n";
+        echo "No electron density maps are available. Please <a href='".makeEventURL("onCall", "upload_setup.php")."'>upload a CCP4-format map</a> in order to continue.\n";
         echo makeEventForm("onReturn");
         echo "<p><input type='submit' name='cmd' value='Cancel'></p></form>\n";
     }
     
-    echo mpPageFooter();
-}
-#}}}########################################################################
-
-#{{{ onReturn
-############################################################################
-/**
-* Documentation for this function.
-*/
-function onReturn($arg, $req)
-{
-    pageReturn();
+    echo $this->pageFooter();
 }
 #}}}########################################################################
 
@@ -130,8 +119,9 @@ function onReturn($arg, $req)
 /**
 * Documentation for this function.
 */
-function onChooseResidues($arg, $req)
+function onChooseResidues()
 {
+    $req = $_REQUEST;
     if($req['cmd'] == 'Cancel')
     {
         pageReturn();

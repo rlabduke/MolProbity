@@ -14,7 +14,7 @@ class april_fools_delegate extends BasicDelegate {
 function display($context)
 {
     // Completely Automated Public Turing test to tell Computers and Humans Apart
-    echo mpPageHeader("Welcome!");
+    echo $this->pageHeader("Welcome!");
     echo makeEventForm("onSubmitAnswer");
 ?>
 <script language="JavaScript">
@@ -65,13 +65,13 @@ founded on basic knowledge of biochemistry and structural biology.
     echo "<span id='hint2' style='display:none; color:#990000'>It's a joke. Funny ha ha. Just press the button to continue.</span>\n";
     echo "<br><input id='submit_btn' type='submit' name='cmd' value='Submit answer &gt;'>\n";
     echo "</form>\n";
-    echo mpPageFooter();
+    echo $this->pageFooter();
 }
 #}}}########################################################################
 
 #{{{ onSubmitAnswer
 ############################################################################
-function onSubmitAnswer($arg, $req)
+function onSubmitAnswer()
 {
     // Start session regardless of the answer
     pageGoto("welcome.php");

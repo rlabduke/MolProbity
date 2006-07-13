@@ -84,6 +84,18 @@
 ===  CHANGE LOG  =============================================================
 ==============================================================================
 
+### 3.03 ###
+- many upgrades to page handling from PhD Posters work: setContext(),
+  makeEventURL/Form(), makeDelegateObject(), mpControllerDie()
+- removed $req from all event handler functions
+- removed extra arguments from makeEventForm() -- file upload, onsubmit=
+- removed unused $arg parameters
+- moved onReturn() handler into BasicDelegate
+- moved mpPageHeader/Footer() into BasicDelegate
+- changed onNavBarCall/Goto to onCall/Goto
+- oops! mpPageHeader/Footer() must (also) be in core.php; added $headContent tho
+- ... and after all that, MolProbity still seems to work (mostly)
+
 ### 3.02 ###
 - updated effective resolution code, including a new percentile rank score
 - add H no longer suggests making flipkins if no protein is present

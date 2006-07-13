@@ -16,7 +16,7 @@
     handlers[]      an array of arrays. First key is event ID.
                     Second keys (i.e. for each handler) are:
         funcName    the name of an event handler in the current delegate
-        funcArg     some sort of argument to be passed to the handler
+        funcArgs    array of arguments to be passed to the handler (maybe empty)
 }}}
 {{{ Division of responsibilities
 
@@ -94,13 +94,16 @@ function getContext()
     return $page['context'];
 }
 
-function setContext($context)
+function setContext($context_or_key, $value = null)
 {
     end($_SESSION['pages']);
     $key = key($_SESSION['pages']);
     $page =& $_SESSION['pages'][$key];
     
-    $page['context'] = $context;
+    if(func_num_args() == 1 && is_array($context_or_key))
+        $page['context'] = $context_or_key;
+    else
+        $page['context'][$context_or_key] = $value;
 }
 #}}}########################################################################
 
@@ -112,9 +115,11 @@ function setContext($context)
 * Returns a string like
 *   "index.php?session=123ABC&eventID=456789"
 */
-function makeEventURL($funcName, $funcArg = null)
+function makeEventURL($funcName /* and other function args, as desired */)
 {
-    $id = addEventHandler($funcName, $funcArg);
+    $funcArgs = func_get_args();
+    array_shift($funcArgs); // remove $funcName
+    $id = addEventHandler($funcName, $funcArgs);
     // What's the difference b/t this and $_SERVER[SCRIPT_NAME] ? None I can see.
     // We use basename() to get "index.php" instead of the full path,
     // which is subject to corruption with URL forwarding thru kinemage.
@@ -130,12 +135,17 @@ function makeEventURL($funcName, $funcArg = null)
 *   <input type='hidden' name='session' value='123ABC'>
 *   <input type='hidden' name='eventID' value='456789'>
 */
-function makeEventForm($funcName, $funcArg = null, $hasFileUpload = false, $onSubmit = null)
+function makeEventForm($funcName /* and other function args, as desired */)
 {
-    $id = addEventHandler($funcName, $funcArg);
+    $funcArgs = func_get_args();
+    array_shift($funcArgs); // remove $funcName
+    $id = addEventHandler($funcName, $funcArgs);
     $s = "<form method='post' ";
-    if($hasFileUpload)  $s .= "enctype='multipart/form-data' ";
-    if($onSubmit)       $s .= "onsubmit='return $onSubmit' ";
+    // This is needed for forms that have file uploads,
+    // but it doesn't do any harm for other forms (?)
+    $s .= "enctype='multipart/form-data' ";
+    // Better to do this via the button's onclick= handler
+    //if($onSubmit)       $s .= "onsubmit='return $onSubmit' ";
     // What's the difference b/t this and $_SERVER[SCRIPT_NAME] ? None I can see.
     // We use basename() to get "index.php" instead of the full path,
     // which is subject to corruption with URL forwarding thru kinemage.
@@ -153,18 +163,18 @@ function makeEventForm($funcName, $funcArg = null, $hasFileUpload = false, $onSu
 /**
 * Returns the eventID for the handler.
 */
-function addEventHandler($funcName, $funcArg)
+function addEventHandler($funcName, $funcArgs)
 {
     end($_SESSION['pages']);
     $key = key($_SESSION['pages']);
     $page =& $_SESSION['pages'][$key];
     
-    $eid = $_SESSION['currEventID']++;
+    $eid = ++$_SESSION['currEventID']; // using preinc works even when the var is unset
     if($_SESSION['currEventID'] >= 1<<30) $_SESSION['currEventID'] = 1;
     
     $page['handlers'][$eid] = array(
         'funcName' => $funcName,
-        'funcArg' => $funcArg
+        'funcArgs' => $funcArgs
     );
     
     return $eid;
@@ -197,19 +207,45 @@ function clearEventHandlers()
 function makeDelegateObject()
 {
     $page = end($_SESSION['pages']); // not a ref; read only
-    if(! $page['delegate']) die("No page delegate defined for events"); // else cryptic error from require_once()
+    if(! $page['delegate']) mpControllerDie("No page delegate defined"); // else cryptic error from require_once()
     
     // FUNKY: Must use require_once() b/c UI delegate (below) may be the same,
     // or may be different, and we can't redefine classes or functions.
     $page_file = MP_BASE_DIR."/pages/$page[delegate]";
+    if(!file_exists($page_file)) mpControllerDie("Cannot find page delegate file at $page_file");
     require_once($page_file);
     
     $page_class = basename($page['delegate'], '.php') . '_delegate';
-    if(! class_exists($page_class)) die("Class $page_class not defined in $page_file");
+    if(! class_exists($page_class)) mpControllerDie("Class $page_class not defined in $page_file");
     // Now we instantiate a variably-named class:
     $delegate = new $page_class();
     
+    // Now we set elements of $context as instance vars, using variable variables
+    // I'm not sure this is safe in MolProbity, as we didn't design for it.
+    //if(is_array($page['context'])) foreach($page['context'] as $k => $v)
+    //    $delegate->$k = $v;
+    
     return $delegate;
+}
+#}}}########################################################################
+
+#{{{ mpControllerDie - prints helpful error msg and wipes the session
+############################################################################
+/**
+* For unrecoverable errors (like misnamed target pages), this is easier than
+* having to kill the browser and come back in!
+*/
+function mpControllerDie($msg = "")
+{
+    echo "<html><body><b>$msg</b><p><pre>";
+    echo '$_REQUEST = ';
+    var_export($_REQUEST);
+    echo "\n\n\n";
+    echo '$_SESSION = ';
+    var_export($_SESSION);
+    echo "</pre></body></html>";
+    session_destroy();
+    die($msg); // in case this is logged somewhere?
 }
 #}}}########################################################################
 
@@ -224,26 +260,45 @@ function makeDelegateObject()
 
 // This is the base class that all delegate classes should extend.
 // It implements certain common event handlers that work with core/mpNavBar().
-#{{{ class BasicDelegate
-############################################################################
 class BasicDelegate {
+
+    /** All page classes must implement display() to render a web page. */
+    function display()
+    { die("All page classes must override display()"); }
+    
+    function pageHeader($title, $active = "none", $refresh = "")
+    { return mpPageHeader($title, $active, $refresh, $this->headContent()); }
+    
+    #{{{ headContent - scripts, etc that should appear in <HEAD>
+    ############################################################################
+    function headContent()
+    {
+        $s = "";
+        return $s;
+    }
+    #}}}########################################################################
+    
+    function pageFooter()
+    { return mpPageFooter(); }
+
+    //{{{ onGoto, onCall, onReturn
     /**
     * $arg is the name of the page to go to.
-    * The context for the goto is assumed to be null.
     */
-    function onNavBarGoto($arg, $req)
-    {
-        pageGoto($arg);
-    }
+    function onGoto($page, $ctx = null)
+    { pageGoto($page, $ctx); }
     
     /**
     * $arg is the name of the page to call.
-    * The context for the call is assumed to be null.
     */
-    function onNavBarCall($arg, $req)
-    {
-        pageCall($arg);
-    }
+    function onCall($page, $ctx = null)
+    { pageCall($page, $ctx); }
+    
+    function onReturn()
+    { pageReturn(); }
+    //}}}
+
+    function onNavBarGoto($arg) { $this->onGoto($arg); }
+    function onNavBarCall($arg) { $this->onCall($arg); }
 }
-#}}}########################################################################
 ?>

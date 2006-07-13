@@ -14,7 +14,7 @@ class feedback_setup_delegate extends BasicDelegate {
 */
 function display($context)
 {
-    echo mpPageHeader("Feedback &amp; bugs", "feedback");
+    echo $this->pageHeader("Feedback &amp; bugs", "feedback");
     echo makeEventForm("onFeedbackSend");
 ?>
 <table border='0' cellspacing='0'>
@@ -46,7 +46,7 @@ function display($context)
 </table>
 </form>
 <?php
-    echo mpPageFooter();
+    echo $this->pageFooter();
 }
 #}}}########################################################################
 
@@ -95,8 +95,9 @@ function makeTemplateText()
 /**
 * Documentation for this function.
 */
-function onFeedbackSend($arg, $req)
+function onFeedbackSend()
 {
+    $req = $_REQUEST;
     $subject = "MolProbity feedback: $req[inRegardTo]";
     $msg_text = "\n"
         . "User name     : $req[senderName]\n"

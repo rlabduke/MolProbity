@@ -17,7 +17,7 @@ function display($context)
 {
     if(isset($context['errorMsg']))
     {
-        echo mpPageHeader("File upload failed");
+        echo $this->pageHeader("File upload failed");
         echo "For some reason, your file could not be uploaded.\n<ul>\n";
         echo "<li>$context[errorMsg]</li>\n";
         echo "</ul>\n";
@@ -26,7 +26,7 @@ function display($context)
         echo "<td align='left'><input type='submit' name='cmd' value='&lt; Try again'></td>\n";
         echo "<td align='right'><input type='submit' name='cmd' value='Cancel'></td>\n";
         echo "</tr></table>\n</form></p>\n";
-        echo mpPageFooter();
+        echo $this->pageFooter();
     }
     else // upload was OK
     {
@@ -42,12 +42,12 @@ function display($context)
 ############################################################################
 function displayKin($context)
 {
-    echo mpPageHeader("Kinemage $context[kinName] added");
+    echo $this->pageHeader("Kinemage $context[kinName] added");
     echo "Your kinemage has been uploaded. You may now view it in KiNG:\n";
     echo "<ul><li>".linkKinemage($context['kinName'])."</li></ul>\n";
     echo "<p>" . makeEventForm("onReturn");
     echo "<input type='submit' name='cmd' value='Continue &gt;'>\n</form></p>\n";
-    echo mpPageFooter();
+    echo $this->pageFooter();
 }
 #}}}########################################################################
 
@@ -55,7 +55,7 @@ function displayKin($context)
 ############################################################################
 function displayMap($context)
 {
-    echo mpPageHeader("Map $context[mapName] added");
+    echo $this->pageHeader("Map $context[mapName] added");
     echo "<p>The following electron density maps are now available:\n";
     echo "<ul>\n";
     foreach($_SESSION['edmaps'] as $map)
@@ -66,7 +66,7 @@ function displayMap($context)
     echo "</ul>\n</p>\n";
     echo "<p>" . makeEventForm("onReturn");
     echo "<input type='submit' name='cmd' value='Continue &gt;'>\n</form></p>\n";
-    echo mpPageFooter();
+    echo $this->pageFooter();
 }
 #}}}########################################################################
 
@@ -74,22 +74,11 @@ function displayMap($context)
 ############################################################################
 function displayHetDict($context)
 {
-    echo mpPageHeader("Custom het dictionary added");
+    echo $this->pageHeader("Custom het dictionary added");
     echo "<p>Your custom heterogen dictionary will be used for all future work in this session.</p>\n";
     echo "<p>" . makeEventForm("onReturn");
     echo "<input type='submit' name='cmd' value='Continue &gt;'>\n</form></p>\n";
-    echo mpPageFooter();
-}
-#}}}########################################################################
-
-#{{{ onReturn
-############################################################################
-/**
-* Documentation for this function.
-*/
-function onReturn($arg, $req)
-{
-    pageReturn();
+    echo $this->pageFooter();
 }
 #}}}########################################################################
 
@@ -98,9 +87,9 @@ function onReturn($arg, $req)
 /**
 * Documentation for this function.
 */
-function onTryAgain($arg, $req)
+function onTryAgain()
 {
-    if($req['cmd'] == '< Try again')
+    if($_REQUEST['cmd'] == '< Try again')
         pageGoto("upload_setup.php");
     else
         pageReturn();

@@ -15,7 +15,7 @@ class ens_aacgeom_setup_delegate extends BasicDelegate {
 */
 function display($context)
 {
-    echo mpPageHeader("Analyze all-atom contacts and geometry");
+    echo $this->pageHeader("Analyze all-atom contacts and geometry");
     
     //{{{ Script to set default choices based on model properties.
 ?><script language='JavaScript'>
@@ -87,7 +87,7 @@ function checkSettingsBeforeSubmit()
         $lastUsedID = $context['ensID'];
         if(!$lastUsedID) $lastUsedID = $_SESSION['lastUsedModelID'];
         
-        echo makeEventForm("onRunAnalysis", null, false, "checkSettingsBeforeSubmit()");
+        echo makeEventForm("onRunAnalysis");
         echo "<h3>Select an ensemble to work with:</h3>";
         echo "<p><table width='100%' border='0' cellspacing='0' cellpadding='2'>\n";
         $c = MP_TABLE_ALT1;
@@ -139,7 +139,7 @@ function checkSettingsBeforeSubmit()
 
 <?php
         echo "<p><table width='100%' border='0'><tr>\n";
-        echo "<td><input type='submit' name='cmd' value='Run programs to perform these analyses &gt;'></td>\n";
+        echo "<td><input type='submit' name='cmd' value='Run programs to perform these analyses &gt;' onclick='return checkSettingsBeforeSubmit()'></td>\n";
         echo "<td align='right'><input type='submit' name='cmd' value='Cancel'></td>\n";
         echo "</tr></table></p></form>\n";
         // Rather than trying to put this in onload(), we'll do it after the form is defined.
@@ -155,23 +155,12 @@ function checkSettingsBeforeSubmit()
     }
     else
     {
-        echo "No ensembles are available. Please <a href='".makeEventURL("onNavBarCall", "upload_setup.php")."'>upload or fetch a PDB file</a> in order to continue.\n";
+        echo "No ensembles are available. Please <a href='".makeEventURL("onCall", "upload_setup.php")."'>upload or fetch a PDB file</a> in order to continue.\n";
         echo makeEventForm("onReturn");
         echo "<p><input type='submit' name='cmd' value='Cancel'></p></form>\n";
     }
     
-    echo mpPageFooter();
-}
-#}}}########################################################################
-
-#{{{ onReturn
-############################################################################
-/**
-* Documentation for this function.
-*/
-function onReturn($arg, $req)
-{
-    pageReturn();
+    echo $this->pageFooter();
 }
 #}}}########################################################################
 
@@ -180,8 +169,9 @@ function onReturn($arg, $req)
 /**
 * Documentation for this function.
 */
-function onRunAnalysis($arg, $req)
+function onRunAnalysis()
 {
+    $req = $_REQUEST;
     if($req['cmd'] == 'Cancel')
     {
         pageReturn();

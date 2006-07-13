@@ -12,7 +12,7 @@ class feedback_done_delegate extends BasicDelegate {
 */
 function display($context)
 {
-    echo mpPageHeader("Email sent", "feedback");
+    echo $this->pageHeader("Email sent", "feedback");
     echo "<p>Your email was successfully sent to the author(s) and maintainer(s) of MolProbity.\n";
     echo "You should receive a response, if needed, within a few days.</p>\n";
 
@@ -25,7 +25,7 @@ function display($context)
     echo nl2br(htmlspecialchars($context));
     echo "</tt>\n";
 
-    echo mpPageFooter();
+    echo $this->pageFooter();
 }
 #}}}########################################################################
 

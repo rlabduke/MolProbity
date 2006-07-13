@@ -17,7 +17,7 @@ class reduce_setup_delegate extends BasicDelegate {
 */
 function display($context)
 {
-    echo mpPageHeader("Add hydrogens");
+    echo $this->pageHeader("Add hydrogens");
     
     if(count($_SESSION['models']) > 0)
     {
@@ -111,24 +111,13 @@ windowOnload(function() {
     }
     else
     {
-        echo "No models are available. Please <a href='".makeEventURL("onNavBarCall", "upload_setup.php")."'>upload or fetch a PDB file</a> in order to continue.\n";
+        echo "No models are available. Please <a href='".makeEventURL("onCall", "upload_setup.php")."'>upload or fetch a PDB file</a> in order to continue.\n";
         echo makeEventForm("onReturn");
         echo "<p><input type='submit' name='cmd' value='Cancel'></p></form>\n";
         
     }
     
-    echo mpPageFooter();
-}
-#}}}########################################################################
-
-#{{{ onReturn
-############################################################################
-/**
-* Documentation for this function.
-*/
-function onReturn($arg, $req)
-{
-    pageReturn();
+    echo $this->pageFooter();
 }
 #}}}########################################################################
 
@@ -137,8 +126,9 @@ function onReturn($arg, $req)
 /**
 * Documentation for this function.
 */
-function onAddH($arg, $req)
+function onAddH()
 {
+    $req = $_REQUEST;
     if($req['cmd'] == 'Cancel')
     {
         pageReturn();
