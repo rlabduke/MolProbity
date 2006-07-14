@@ -93,7 +93,6 @@ Minimum-guidance interface for experienced users.</p>
 <p><b><a href='help/java.html' target='_blank'>Installing Java</a></b>: how to make kinemage graphics work in your browser.</p>
 <!-- <p><b>Lab notebook</b>: what's it for and how do I use it?</p> -->
 <p><b>Adding hydrogens</b>: why are H necessary for steric evaluations?</p>
-<p><b><a href='http://kinemage.biochem.duke.edu/molprobity/index2.html' target='_blank'>Old MolProbity</a></b>: click here to get to the old site.</p>
 <p><b>My own MolProbity</b>: how can I run my own private MolProbity server?</p>
 </td></tr></table>
 <?php

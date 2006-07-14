@@ -55,21 +55,26 @@ to "makekin_setup_delegate".<br>
 The template contains a fair bit of junk that we don't need, but there
 are a lot of other <span style="font-family: monospace;"><span
  style="font-style: italic;">xxx</span>_setup.php</span> scripts that
-can be plundered for example code. We're going to start in the <span
- style="font-family: monospace;">display()</span> function, which is
+can be plundered for example code. It also inherits some functionality
+from the <span style="font-family: monospace;">BasicDelegate</span>
+class, which is definted in <span style="font-family: monospace;">event_page.php</span>.&nbsp;
+We're going to start in the <span style="font-family: monospace;">display()</span>
+function, which is
 responsible for outputing the HTML web page that the user sees when
 they get here. (We'll discuss <span style="font-style: italic;">how</span>
 they get here later on.)<br>
 <br>
-Display should start with <span style="font-family: monospace;">mpPageHeader()</span>
-and end with <span style="font-family: monospace;">mpPageFooter()</span>.
+Display should start with <span style="font-family: monospace;">$this-&gt;pageHeader()</span>
+and end with <span style="font-family: monospace;">$this-&gt;pageFooter()</span>.
 These two functions take care of creating the &lt;HTML&gt; and
 &lt;BODY&gt; tags, including stylesheets, etc. The header can
 optionally generate a sidebar of links, timed commands to refresh the
-page, and other things. Look it up in <span
+page, and other things. By default, these functions are just wrappers
+for <span style="font-family: monospace;">mpPageHeader()</span> and <span
+ style="font-family: monospace;">mpPageFooter()</span> in <span
  style="font-family: monospace;">core.php</span>.<br>
 <br>
-<span style="color: rgb(255, 0, 0);"></span>The core content of the
+<span style="color: rgb(255, 0, 0);"></span>The working content of the
 page is quite simple: a list of radio buttons
 for selecting the model (PDB file) to work with, a similar list of
 buttons for the Prekin scripts, and a &lt;FORM&gt; to hold them. In
@@ -108,24 +113,22 @@ The other thing we need to declare is a function to handle the
 form-submission event. We call it <span style="font-family: monospace;">onRunPrekin()</span>,
 because that's the name we passed to <span
  style="font-family: monospace;">makeEventForm()</span> back in <span
- style="font-family: monospace;">display()</span>. It gets two
-arguments. The first one, <span style="font-family: monospace;">$arg</span>,
-has no meaningful value, because we didn't specify it in <span
- style="font-family: monospace;">makeEventForm()</span>. This feature
+ style="font-family: monospace;">display()</span>. It could take one or
+more
+arguments as well; this feature
 exists to allow one function to handle many related &lt;FORM&gt;s, but
-we only have one form that needs to be handled. The argument <span
- style="font-family: monospace;">$req</span>, on the other hand, is
-identical to the PHP superglobal <span style="font-family: monospace;">$_REQUEST</span>:
-it holds all the data submitted by the user in the form. The keys of <span
- style="font-family: monospace;">$req</span> are the <span
+we only have one form that needs to be handled. All the data submitted
+by the user in the form is available through the PHP superglobal <span
+ style="font-family: monospace;">$_REQUEST</span>. The keys of <span
+ style="font-family: monospace;">$_REQUEST</span> are the <span
  style="font-family: monospace;">name</span>s of things in the form, so
 our keys are <span style="font-family: monospace;">scriptName</span>
 (from the radio buttons) and <span style="font-family: monospace;">cmd</span>
 (from the submit buttons). The values in <span
- style="font-family: monospace;">$req</span> are the <span
+ style="font-family: monospace;">$_REQUEST</span> are the <span
  style="font-family: monospace;">value</span>s specified in the form.<br>
 <br>
-Thus, we first use <span style="font-family: monospace;">$req['cmd']</span>
+Thus, we first use <span style="font-family: monospace;">$_REQUEST['cmd']</span>
 to decide if the user pressed the Cancel button or the Make Kinemage
 button. Pressing Cancel leads us to return to the previous page using <span
  style="font-family: monospace;">pageReturn()</span>. (This requires
@@ -151,7 +154,7 @@ There are lots of links here, so it's easy to copy &amp; paste a good
 example. The key call is this one:<br>
 <br>
 <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; <span
- style="font-family: monospace;">makeEventURL("onNavBarCall",
+ style="font-family: monospace;">makeEventURL("onCall",
 "makekin_setup.php")</span><br style="font-family: monospace;">
 <br>
 </span>Unlike other uses of <span style="font-family: monospace;">makeEventURL()</span>
@@ -159,9 +162,9 @@ we've seen, this one has <span style="font-style: italic;">two</span>
 arguments. The first is still the name of the function that will be
 called when the user clicks on the link. The second one will be passed
 to that function as it's <span style="font-family: monospace;">$arg</span>.
-This allows one function (<span style="font-family: monospace;">onNavBarCall()</span>)
+This allows one function (<span style="font-family: monospace;">onCall()</span>)
 to handle jumping off in any number of directions. Incidentally, <span
- style="font-family: monospace;">onNavBarCall()</span> is defined in
+ style="font-family: monospace;">onCall()</span> is defined in
 the <span style="font-family: monospace;">BasicDelegate</span> class,
 which is declared in <span style="font-family: monospace;">lib/event_page.php</span>.
 If you go look at it, you'll see it just uses <span
@@ -169,7 +172,7 @@ If you go look at it, you'll see it just uses <span
 to the named delegate page:<br>
 <br>
 <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; function
-onNavBarCall($arg, $req)</span><br style="font-family: monospace;">
+onCall($arg)</span><br style="font-family: monospace;">
 <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; {</span><br
  style="font-family: monospace;">
 <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
@@ -177,7 +180,7 @@ pageCall($arg);</span><br style="font-family: monospace;">
 <span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; }</span><br
  style="font-family: monospace;">
 <br>
-The very similar <span style="font-family: monospace;">onNavBarGoto()</span>
+The very similar <span style="font-family: monospace;">onGoto()</span>
 event handling function uses <span style="font-family: monospace;">pageGoto()</span>
 instead, but is otherwise identical. It's not appropriate here, because
 we want to be able to "call" the Prekin page from anywhere and always
@@ -316,12 +319,46 @@ results page delegate.<br>
 <hr style="width: 100%; height: 2px;">
 <h2>Results page</h2>
 The results page is very, very simple, because there are lots of
-results pages already written that just display a lab notebook entry. I
-simply copied <span style="font-family: monospace;">pages/aacgeom_done.php</span>
-to <span style="font-family: monospace;">makekin_done.php</span>. The
-only changes needed were (1) the name of the class (now <span
- style="font-family: monospace;">MakeKinDoneDelegate</span>) and (2)
-the page title.<br>
+jobs already written that just need to display a lab notebook entry as
+their results. All those jobs use <span style="font-family: monospace;">generic_done.php</span>
+as the results&nbsp; page.<br>
+<br>
+This introduces the <span style="font-family: monospace;">$context</span>
+variable for delegate pages.&nbsp; <span
+ style="font-family: monospace;">$context</span> is a place to put data
+that configures how a page looks, or to save data between views of this
+same page -- sort of like member variable in an object.&nbsp; In fact,
+that's how I should have implemented it, but I didn't, and it's too
+scary to change it now, because they could collide with other member
+variables.&nbsp; Anyway, the <span style="font-family: monospace;">setContext()</span>
+and <span style="font-family: monospace;">getContext()</span>
+functions can be used to retrieve and replace this data.&nbsp; The<span
+ style="font-family: monospace;"> setContext()</span> function can
+either be passed the whole context as an array, or a key and value to
+be updated.&nbsp; That is,<br>
+<br>
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;
+setContext("foo", "bar");</span><br style="font-family: monospace;">
+<br>
+is a shortcut for<br>
+<br>
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; $ctx =
+getContext();</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; $ctx["foo"] =
+"bar";</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;
+setContext($ctx);</span><br style="font-family: monospace;">
+<br>
+Context persists while a delegate is on the stack.&nbsp; That is, it
+will persist through a <span style="font-family: monospace;">pageCall()</span>
+to a subroutine and the corresponding <span
+ style="font-family: monospace;">pageReturn()</span>, but it will
+disappear when <span style="font-style: italic;">this</span> delegate
+does a <span style="font-family: monospace;">pageReturn()</span> or a <span
+ style="font-family: monospace;">pageGoto()</span>.&nbsp; Context gets
+used for things like flags that determine whether the "advanced
+options" are visible or hidden, or for recording which folders are open
+and which are closed in the file browser page.<br>
 <br>
 Notice that the data from <span style="font-family: monospace;">$_SESSION['bgjob']</span>
 has been transferred to this page's <span
@@ -343,7 +380,8 @@ and make sure that when the user presses the "Make kinemage" button,
 something actually happens. This involves three steps:<br>
 <ol>
   <li>Pass all the data the user submitted in the HTML form (in <span
- style="font-family: monospace;">$req</span>) to the background job, by
+ style="font-family: monospace;">$_REQUEST</span>) to the background
+job, by
 storing that data in the <span style="font-family: monospace;">$_SESSION['bgjob']</span>
 variable. In this case, there are only two pieces of data (which model
 to act on, and which script to run) but a complicated input page might
