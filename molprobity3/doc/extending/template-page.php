@@ -26,7 +26,7 @@ class template_delegate extends BasicDelegate {
 */
 function display($context)
 {
-    echo mpPageHeader("NAME OF YOUR PAGE GOES HERE");
+    echo $this->pageHeader("NAME OF YOUR PAGE GOES HERE");
     
     // Here's a sample page that displays a notebook entry.
     // The notebook entry number was specified in $context['labbookEntry']
@@ -47,27 +47,7 @@ function display($context)
     echo "<input type='submit' name='cmd' value='Continue &gt;'>\n</form></p>\n";
     // Note the explicit </form> to end the form!
 
-    echo mpPageFooter();
-}
-#}}}########################################################################
-
-#{{{ onReturn
-############################################################################
-/**
-* This function returns control back to the page that pageCall()'d to get here.
-* This assumes that this page or its predecesor was accessed by pageCall()
-* rather than pageGoto(). If that's not the case, you should be using
-* pageGoto() here instead.
-*
-* This function gets called when the user submits the form made by display()
-*
-* Notice that $arg isn't used--the call to makeEventForm() didn't specify an arg
-* $req is filled in with the usually info from the form submission, but
-* we don't need to use it for anything here.
-*/
-function onReturn($arg, $req)
-{
-    pageReturn();
+    echo $this->pageFooter();
 }
 #}}}########################################################################
 
@@ -86,7 +66,7 @@ function onReturn($arg, $req)
 * $req is filled in with the usually info from the form submission, but
 * we don't need to use it for anything here.
 */
-function onEditNotebook($arg, $req)
+function onEditNotebook($arg)
 {
     pageCall("notebook_edit.php", array('entryNumber' => $arg));
 }
