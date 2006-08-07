@@ -73,6 +73,12 @@ if(!defined("MP_SESSION_MAX_SIZE"))
 if(!defined("MP_KIN_GZIP_THRESHOLD"))
     define("MP_KIN_GZIP_THRESHOLD", 1*1000*1000); // 1 Mb
 
+// Web hits tracking code; appears in pageFooter().
+// Use for e.g. tracking with Google Analytics.
+// Defaults to nothing to protect privacy of 3rd party users.
+if(!defined("MP_TRACKING_CODE"))
+    define("MP_TRACKING_CODE", '');
+
 // Alternating colors for striped tables
 if(!defined("MP_TABLE_ALT1"))
     define("MP_TABLE_ALT1", "#ffffff");

@@ -191,17 +191,10 @@ function mpPageFooter()
 About <a href="help/about.html" target="_blank">MolProbity</a>
 | Website for <a href="http://kinemage.biochem.duke.edu" target="_blank">the Richardson Lab</a>
 | Internal reference '.MP_VERSION.'
-<!-- <br>Also by IWD: cheap research poster printing at <a href="http://phdposters.com/" target="_blank">PhD Posters.com</a> -->
     </div>
 </td></tr>
 </table>
-<!-- Google Analytics tracking code for IWD -->
-<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
-</script>
-<script type="text/javascript">
-_uacct = "UA-327385-3";
-urchinTracker();
-</script>
+'.MP_TRACKING_CODE.'
 </body>
 </html>
 ';
