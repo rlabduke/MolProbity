@@ -656,7 +656,11 @@ function decodeReduceUsermods($file)
             $changes[11][$c] = trim(eregi_replace("^sc=......... ..o=([^!]+)(!?),f=([^!]+)(!?).*$", "\\4", $field[3]));
             $changes[12][$c] = trim(eregi_replace("^sc=......... ([FXCK]).*$", "\\1", $field[3]));
             /** Original, highly inefficient code! */
-            preg_match('/^(.)(....)(....)/', $field[1], $f1);
+            
+            // Better to group ins code with number than res type.
+            // I don't *think* anything depended on the old behavior.
+            // CNIT:       C  NNNNI  TTT
+            preg_match('/^(.)(.....)(...)/', $field[1], $f1);
             $changes[1][$c] = trim($f1[1]);
             $changes[2][$c] = trim($f1[2]);
             $changes[3][$c] = trim($f1[3]);
