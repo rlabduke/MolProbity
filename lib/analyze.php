@@ -204,7 +204,7 @@ function runAnalysis($modelID, $opts)
         if($opts['doCharts'])
         {
             $entry .= "<p><a href='viewtable.php?$_SESSION[sessTag]&file=$rawDir/$model[prefix]multi.table' target='_blank'>Multi-criterion chart</a></p>\n";
-            $entry .= "<p><a href='$chartURL/$model[prefix]multi-coot.scm'>Download multi-criterion chart for COOT</a> [ALPHA TEST]<br><small><i>Open this in COOT using Calculate | Run Script...</i></small></p>\n";
+            $entry .= "<p><a href='$chartURL/$model[prefix]multi-coot.scm'>Download multi-criterion to-do list for Coot</a> [ALPHA TEST]<br><small><i>Open this in Coot using Calculate | Run Script...</i></small></p>\n";
         }
     }
     
