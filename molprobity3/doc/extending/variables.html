@@ -121,13 +121,21 @@ foo</span> then <span style="font-family: monospace;">file_exists("Foo")
   <li>Users love to upload files with "weird" characters in their
 names, especially spaces. See the <span style="font-family: monospace;">censorFileName()</span>
 function in lib/core.php.</li>
-  <li>Hackers would love to upload a file named <span
+  <li>Attackers would love to upload a file named <span
  style="font-family: monospace;">session</span> and overwrite your
 session data, or to pass <span style="font-family: monospace;">/etc/passwd</span>
 to a script that displays files. Remember that the <span
  style="font-family: monospace;">apache</span> account -- which runs
 PHP -- has pretty generous permissions on your server. Think security
 first when dealing with the file system!</li>
+  <li>For that matter, attackers would be happy to upload .php or other
+web-executable files (Perl, Python, Ruby, CGI, ...) to the server --
+MolProbity allowed this for a long time.&nbsp; This basically allows
+shell-level access to the web server as the Apache user.&nbsp; The <span
+ style="font-family: monospace;">censorFileName()</span>
+function can also guard against this by whitelisting allowed file
+extensions.<br>
+  </li>
   <li>Permissions of files created by PHP are controlled by the <span
  style="font-family: monospace;">umask()</span> function; permissions
 of directories are set at create time by <span

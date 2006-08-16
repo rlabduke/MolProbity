@@ -154,7 +154,7 @@ if(isset($_SESSION['bgjob']['pdbCode']))
 else
 {
     // Remove illegal chars from the upload file name
-    $origName = censorFileName($_SESSION['bgjob']['origName']);
+    $origName = censorFileName($_SESSION['bgjob']['origName'], array("pdb", "ent", "xyz"));
     $fileSource = "local disk";
     
     $id = addModelOrEnsemble($_SESSION['bgjob']['tmpPdb'],

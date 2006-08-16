@@ -35,8 +35,7 @@ if(!isset($_REQUEST['fileName']) || !isset($_REQUEST['fileContents']))
     die("This page for file uploads only");
 
 // First make sure this is a legal file name with no weird chars, ending in .kin
-$outname = censorFileName($_REQUEST['fileName']);
-if(!endsWith($outname, ".kin")) $outname .= ".kin";
+$outname = censorFileName($_REQUEST['fileName'], "kin");
 // Now make sure we have a directory to put it in
 $outpath = $_SESSION['dataDir'].'/'.MP_DIR_KINS;
 if(!file_exists($outpath)) mkdir($outpath, 0777);

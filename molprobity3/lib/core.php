@@ -582,9 +582,18 @@ function filesAreIdentical($path1, $path2)
 #{{{ censorFileName - removes illegal and unusual characters from file name
 ############################################################################
 /**
-* Documentation for this function.
+* Given a proposed file name, returns a sanitized file name without odd characters in it.
+*
+* allowedExt can be either a string or an array of strings that
+* defines suitable extensions for the file.
+* If the file name does not end in said extension, it is appended.
+* The first one from the list is used if there are multiple.
+*
+* Extensions on uploaded files are a security concern, as an attacker
+* could upload a PHP file to a publicly reachable directory.
+* This essentially gives command-line access to the server as the Apache user.
 */
-function censorFileName($origName)
+function censorFileName($origName, $allowedExt = null)
 {
     // Remove illegal chars from the upload file name:
     // two or more dots or any non- alphanumeric/dash/dot/underscore
@@ -592,7 +601,17 @@ function censorFileName($origName)
     // Remove multiple underscores, for consistency/aesthetics
     $origName = preg_replace('/_{2,}/', '_', $origName);
     if($origName == '') $origName = "null_name"; // I don't think this is possible...
-    return $origName;
+    
+    // Extension testing
+    if($allowedExt != null)
+    {
+        if(!is_array($allowedExt))
+            $allowedExt = array($allowedExt);
+        if(preg_match('/\.('.implode('|', $allowedExt).')$/i', $origName))
+            return $origName;
+        else return "$origName.$allowedExt[0]";
+    }
+    else return $origName;
 }
 #}}}########################################################################
 

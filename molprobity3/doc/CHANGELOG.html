@@ -80,6 +80,8 @@
         allow user to remove H using HTML textbox, save to server.
     Refactor stats page to use less memory!
   * Convert to biol. unit should produce and display a notebook entry
+  * add public_html/data/index.html to thwart directory listing attacks
+    Reduce doesn't recognize HSD (as HIS) or ILE _CD_
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -103,6 +105,8 @@
 - added cmdline/multichart-coot for Mitch Miller
 - moved Google Analytics code to be part of the config files
 - fixed bug seen for 1CEQ where insertion codes hit res types (BGLN, EASN)
+- closed a major security vulnerability that allowed upload of PHP files!
+- updated documentation to mention this type of hole
 
 ### 3.02 ###
 - updated effective resolution code, including a new percentile rank score
