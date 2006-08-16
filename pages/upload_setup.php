@@ -273,7 +273,7 @@ function onUploadKinemage()
     }
     else
     {
-        $kinName = censorFileName($_FILES['uploadFile']['name']); // make sure no spaces, etc.
+        $kinName = censorFileName($_FILES['uploadFile']['name'], array('kin', 'kip')); // make sure no spaces, etc.
         $kinPath = "$_SESSION[dataDir]/".MP_DIR_KINS;
         if(!file_exists($kinPath)) mkdir($kinPath, 0777);
         $kinPath .= "/$kinName";
@@ -303,7 +303,9 @@ function onUploadMapFile()
     }
     else
     {
-        $mapName = censorFileName($_FILES['uploadFile']['name']); // make sure no spaces, etc.
+        // List of allowed map extensions taken from KiNG's EDMapPlugin
+        $mapName = censorFileName($_FILES['uploadFile']['name'],
+            array('map', 'omap', 'xmap', 'dn6', 'dsn6', 'ccp4', 'mbk', 'xplor', 'brix')); // make sure no spaces, etc.
         $mapPath = "$_SESSION[dataDir]/".MP_DIR_EDMAPS;
         if(!file_exists($mapPath)) mkdir($mapPath, 0777);
         $mapPath .= "/$mapName";
