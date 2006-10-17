@@ -244,7 +244,7 @@ function mpControllerDie($msg = "")
     echo '$_SESSION = ';
     var_export($_SESSION);
     echo "</pre></body></html>";
-    session_destroy();
+    //session_destroy(); # only necessary if using cookies for sessID
     die($msg); // in case this is logged somewhere?
 }
 #}}}########################################################################

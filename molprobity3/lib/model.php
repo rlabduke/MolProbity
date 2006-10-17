@@ -926,12 +926,15 @@ function getEdsMap($pdbcode, $format, $type)
     
     // Retrieve the web page from EDS
     $page = curl_exec($c);
+    // Can't get these once we close the connection:
+    $curlErrno = curl_errno($c);
+    $curlError = curl_error($c);
     curl_close($c);
     
     // Check for errors and find the file name
-    if(curl_errno($c))                                  // network failure
+    if($curlErrno)                                      // network failure
     {
-        echo "CURL error: ".curl_error($c)."\n";
+        echo "CURL error: $curlError\n";
         return null;
     }
     if(preg_match('/error/i', $page))                   // no map/xtal data available

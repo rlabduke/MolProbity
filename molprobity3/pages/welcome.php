@@ -687,36 +687,36 @@ function onSetWorkingModel()
 */
 function onUploadOrFetch()
 {
-    $req = $_REQUEST;
+    //$req = $_REQUEST;
     $hasUpload = isset($_FILES['uploadFile']) && $_FILES['uploadFile']['error'] != UPLOAD_ERR_NO_FILE;
-    $hasFetch = isset($req['pdbCode']) && $req['pdbCode'] != "";
+    $hasFetch = isset($_REQUEST['pdbCode']) && $_REQUEST['pdbCode'] != "";
     
     pageCall("upload_setup.php"); // or else a later pageReturn() will screw us up!
     $upload_delegate = makeDelegateObject();
 
     if($hasUpload)
     {
-        if($req['uploadType'] == 'pdb')         $upload_delegate->onUploadPdbFile();
-        elseif($req['uploadType'] == 'kin')     $upload_delegate->onUploadKinemage();
-        elseif($req['uploadType'] == 'map')     $upload_delegate->onUploadMapFile();
-        elseif($req['uploadType'] == 'hetdict') $upload_delegate->onUploadHetDictFile();
+        if($_REQUEST['uploadType'] == 'pdb')         $upload_delegate->onUploadPdbFile();
+        elseif($_REQUEST['uploadType'] == 'kin')     $upload_delegate->onUploadKinemage();
+        elseif($_REQUEST['uploadType'] == 'map')     $upload_delegate->onUploadMapFile();
+        elseif($_REQUEST['uploadType'] == 'hetdict') $upload_delegate->onUploadHetDictFile();
     }
     elseif($hasFetch)
     {
-        if($req['fetchType'] == 'pdb')          $upload_delegate->onFetchPdbFile();
-        elseif($req['fetchType'] == 'biolunit')
+        if($_REQUEST['fetchType'] == 'pdb')          $upload_delegate->onFetchPdbFile();
+        elseif($_REQUEST['fetchType'] == 'biolunit')
         {
-            $req['biolunit'] = 1;
+            $_REQUEST['biolunit'] = 1;
             $upload_delegate->onFetchPdbFile();
         }
-        elseif($req['fetchType'] == 'eds_2fofc')
+        elseif($_REQUEST['fetchType'] == 'eds_2fofc')
         {
-            $req['eds_2fofc'] = 1;
+            $_REQUEST['eds_2fofc'] = 1;
             $upload_delegate->onFetchEdsMap();
         }
-        elseif($req['fetchType'] == 'eds_fofc')
+        elseif($_REQUEST['fetchType'] == 'eds_fofc')
         {
-            $req['eds_fofc'] = 1;
+            $_REQUEST['eds_fofc'] = 1;
             $upload_delegate->onFetchEdsMap();
         }
     }
