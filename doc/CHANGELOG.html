@@ -80,12 +80,27 @@
         allow user to remove H using HTML textbox, save to server.
     Refactor stats page to use less memory!
   * Convert to biol. unit should produce and display a notebook entry
-  * add public_html/data/index.html to thwart directory listing attacks
     Reduce doesn't recognize HSD (as HIS) or ILE _CD_
+    Apache config:  deny **/.svn/**
+  * Multi-chart:  sort by residue type (e.g. ARG)
+    we don't correctly auto-detect CNS format nucleic acid PDBs on upload
+{{{ Ideas from PHENIX
+    Residue by residue list of outliers (y/n) -- CSV?  standalone?
+    Look at Java on SGI and DEC alpha Tru64
+    SVN checkout for Paul for Reduce and Probe (anonymous)
+}}}
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
+
+### 3.04 ###
+- added public_html/data/index.html to thwart directory listing attacks
+- added HTML "style guide" page as documentation for our CSS stylesheet
+- fixed presumed PDBCNS typo bug in handling nucleic acids (\\047 vs. \047)
+- failed event_page stuff no longer wipes out session data
+- fixed calls to curl_errno() in model::getEdsMap()
+- fixed $req/$_REQUEST assignment bug in welcome.php::onUploadOrFetch()
 
 ### 3.03 ###
 - many upgrades to page handling from PhD Posters work: setContext(),

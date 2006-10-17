@@ -7,8 +7,8 @@
 </head>
 <body>
 <h1 style="text-align: center;">Installing and Configuring MolProbity</h1>
-<div style="text-align: center;">Ian W. Davis (iwd@duke.edu), 24 Aug
-2005<br>
+<div style="text-align: center;">Ian W. Davis (iwd@duke.edu), 12 Oct
+2006<br>
 </div>
 <br>
 This document describes how to install and configure MolProbity and its
@@ -37,11 +37,20 @@ x86 Linux systems and on Mac OS X. It is possible that with some
 modification MolProbity could be run on Windows under the Cygwin
 environment; if you'd like to try this project, please contact us.<br>
 <br>
+It is important that you run <span style="font-weight: bold;">Sun Java</span>,
+and <span style="font-weight: bold;">not GNU Java</span>. GNU Java is
+not a complete or fully-compliant Java implementation, and in our tests
+it does not run the programs MolProbity needs.&nbsp; Be warned that
+many modern Linux distributions have GNU Java pre-installed (e.g. as
+/usr/bin/java). You should download and install the "real" Java from <a
+ href="http://java.sun.com">java.sun.com</a>. Mac OS X, on the other
+hand, has Sun Java pre-installed.<br>
+<br>
 In the lab, we use a dual-processor AMD box running Fedora Cora 4 as
 the public server; we use the included versions of Apache and PHP. We
 use G4 Macs running OS X 10.4 (Tiger) for development, running the
-default Apache and PHP 5.0.4 from <a
- href="http://www.entropy.ch/software/macosx/">entropy.ch</a>.<br>
+default Apache and the default PHP (or PHP 5.0.4 from <a
+ href="http://www.entropy.ch/software/macosx/">entropy.ch</a>).<br>
 <h2>Configure the web server</h2>
 Although MolProbity can be used just as a collection of command-line
 tools, most people will also want access to the web interface, at least

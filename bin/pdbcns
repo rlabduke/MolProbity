@@ -36,6 +36,7 @@
 #                               error on some new SGI IRIX systems with all-in-one
 #
 #     5/4/01 - JM Word - v2.0 - perl version
+#    9/29/06 - IW Davis - v2.0.1 - changed \\047 to \047 - probable typo in original
 
 use strict;
 
@@ -368,15 +369,15 @@ my @NucleicAcid = (@gNA, @aNA, @cNA, @uNA, @tNA);
 
 # note: in the DNA section \047 stands for a single prime character
 
-&multi(\@NucleicAcid, '', ' C1*', 0, " C1\\047", 0);
-&multi(\@NucleicAcid, '', ' O2*', 0, " O2\\047", 0);
-&multi(\@NucleicAcid, '', ' C2*', 0, " C2\\047", 0);
-&multi(\@NucleicAcid, '', ' O3*', 0, " O3\\047", 0);
-&multi(\@NucleicAcid, '', ' C3*', 0, " C3\\047", 0);
-&multi(\@NucleicAcid, '', ' O4*', 0, " O4\\047", 0);
-&multi(\@NucleicAcid, '', ' C4*', 0, " C4\\047", 0);
-&multi(\@NucleicAcid, '', ' O5*', 0, " O5\\047", 0);
-&multi(\@NucleicAcid, '', ' C5*', 0, " C5\\047", 0);
+&multi(\@NucleicAcid, '', ' C1*', 0, " C1\047", 0);
+&multi(\@NucleicAcid, '', ' O2*', 0, " O2\047", 0);
+&multi(\@NucleicAcid, '', ' C2*', 0, " C2\047", 0);
+&multi(\@NucleicAcid, '', ' O3*', 0, " O3\047", 0);
+&multi(\@NucleicAcid, '', ' C3*', 0, " C3\047", 0);
+&multi(\@NucleicAcid, '', ' O4*', 0, " O4\047", 0);
+&multi(\@NucleicAcid, '', ' C4*', 0, " C4\047", 0);
+&multi(\@NucleicAcid, '', ' O5*', 0, " O5\047", 0);
+&multi(\@NucleicAcid, '', ' C5*', 0, " C5\047", 0);
 
 # comment: Unfortunately, there is not a one-to-one mapping between
 #          pdb and xplor/cns atom names. This is especially true in
@@ -390,10 +391,10 @@ my @NucleicAcid = (@gNA, @aNA, @cNA, @uNA, @tNA);
 # In pdb, DNA sugar deoxy 2prime CH name != RNA sugar oxy 2prime OH name
 
 my $tExcludeStr = join(':', @tNA);
-&multi(\@NucleicAcid, $tExcludeStr, '2HO*', 2, " H2\\047", 2);## rna
+&multi(\@NucleicAcid, $tExcludeStr, '2HO*', 2, " H2\047", 2);## rna
 
 my $uExcludeStr = join(':', @tNA);
-&multi(\@NucleicAcid, $uExcludeStr, '2H2*', 2, " H2\\047", 2);## dna
+&multi(\@NucleicAcid, $uExcludeStr, '2H2*', 2, " H2\047", 2);## dna
 
 if ($DIRECTION eq 'cns -> pdb') {
     ## for special purpose code lower down when scanning records
@@ -402,14 +403,14 @@ if ($DIRECTION eq 'cns -> pdb') {
 }
 # -------------
 
-&multi(\@NucleicAcid, '', ' H2*', 2, "H2\\047\\047", 1);##Two name styles in PDB
-&multi(\@NucleicAcid, '', '1H2*', 2, "H2\\047\\047", 1);
+&multi(\@NucleicAcid, '', ' H2*', 2, "H2\047\047", 1);##Two name styles in PDB
+&multi(\@NucleicAcid, '', '1H2*', 2, "H2\047\047", 1);
 
-&multi(\@NucleicAcid, '', ' H1*', 2, " H1\\047", 2);
-&multi(\@NucleicAcid, '', ' H3*', 2, " H3\\047", 2);
-&multi(\@NucleicAcid, '', ' H4*', 2, " H4\\047", 2);
-&multi(\@NucleicAcid, '', '2H5*', 2, " H5\\047", 2);
-&multi(\@NucleicAcid, '', '1H5*', 2, "H5\\047\\047", 1);
+&multi(\@NucleicAcid, '', ' H1*', 2, " H1\047", 2);
+&multi(\@NucleicAcid, '', ' H3*', 2, " H3\047", 2);
+&multi(\@NucleicAcid, '', ' H4*', 2, " H4\047", 2);
+&multi(\@NucleicAcid, '', '2H5*', 2, " H5\047", 2);
+&multi(\@NucleicAcid, '', '1H5*', 2, "H5\047\047", 1);
 
 &multi(\@NucleicAcid, '', '3HO*', 2, ' H3T', 2);## common misnames
 &multi(\@NucleicAcid, '', '*HO3', 2, ' H3T', 2);## with
@@ -517,10 +518,10 @@ while (<>) {
             $lastRes = $theRes;
             $hasO2prime = 0;
 	 }
-	 if ($inputAtomName eq " O2\\047") {
+	 if ($inputAtomName eq " O2\047") {
             $hasO2prime = 1;
 	 }
-	 if ($inputAtomName eq " H2\\047") {
+	 if ($inputAtomName eq " H2\047") {
             $atomName = ($hasO2prime ? $hNameIfHasO2Prime : $hNameWithNoO2Prime);
 	 }
 
