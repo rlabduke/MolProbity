@@ -119,7 +119,7 @@ if(isset($_SESSION['bgjob']['pdbCode']))
     {
         setProgress(array("pdb" => "Retrieve PDB file $code over the network"), "pdb");
         $tmpfile = getPdbModel($code, $_SESSION['bgjob']['biolunit']);
-        $fileSource = "http://www.rcsb.org/pdb/";
+        $fileSource = "http://www.pdb.org/";
     }
     else if(preg_match('/^[0-9A-Z]{6,10}$/i', $code))
     {
