@@ -801,9 +801,11 @@ function getPdbModel($pdbcode, $biolunit = false)
 
     // Copy in the newly uploaded file:
     if($biolunit)
-        $src = "ftp://ftp.rcsb.org/pub/pdb/data/biounit/coordinates/all/".strtolower($pdbcode).".pdb1.gz";
+        //$src = "ftp://ftp.rcsb.org/pub/pdb/data/biounit/coordinates/all/".strtolower($pdbcode).".pdb1.gz";
+        $src = "http://www.pdb.org/pdb/files/".strtolower($pdbcode).".pdb1.gz";
     else
-        $src = "http://www.rcsb.org/pdb/cgi/export.cgi/$pdbcode.pdb?format=PDB&pdbId=$pdbcode&compression=gz";
+        //$src = "http://www.rcsb.org/pdb/cgi/export.cgi/$pdbcode.pdb?format=PDB&pdbId=$pdbcode&compression=gz";
+        $src = "http://www.pdb.org/pdb/files/".strtolower($pdbcode).".pdb.gz";
         
     $outpath = mpTempfile("tmp_pdb_");
     if(copy($src, $outpath) && filesize($outpath) > 1000)
