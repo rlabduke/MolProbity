@@ -241,6 +241,9 @@ function launchBackground($script, $whereNext, $delay = 5)
     // Make sure session variables are written to disk.
     // session_write_close() doesn't take effect until end of script
     mpSaveSession();
+    // Otherwise, end-of-script write can truncate the file to nothing
+    // just as the background job is starting, leading to random failure (?)
+    mpSessReadOnly(true);
     
     // Save current dir so we can exec script in it's own dir.
     $pwd = getcwd();

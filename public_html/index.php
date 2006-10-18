@@ -55,10 +55,13 @@ elseif(isset($_REQUEST['eventID']))
         call_user_func_array(array(&$delegate, $funcName), $funcArgs);
         
         // In case we changed $_SESSION but display() calls mpSessReadOnly()
-        // This won't stop the session from being automatically saved again
+        // This save won't stop the session from being automatically saved again
         // after display() and the end of the page.
         // (Though display() shouldn't write to $_SESSION anyway, except events!)
-        mpSaveSession(); 
+        // However: this can truncate the session file just as a background job
+        // is starting, so launchBackground() makes the session read-only,
+        // so this call does nothing in that case.
+        mpSaveSession();
     }
     else
     {
