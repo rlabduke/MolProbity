@@ -3,8 +3,7 @@
 ===  TO DO  ==================================================================
 ==============================================================================
 {{{ Other people's bugs
-    Reduce -nobuild: wrong protonation for 1gca His 152
-        Wrong placement for het O3 H wrt R141 and D215 in 2DRI
+    Reduce -nobuild: wrong placement for het O3 H wrt R141 and D215 in 2DRI
     Changes still made by Reduce -nobuild:
         Existing protonation state for His
         Existing Met CH3 and Lys NH3 orientation (don't want -norotnh3 and -norotmet)
@@ -20,7 +19,6 @@
     Prekin: stray vectors on windows -- buffer flush issue?
     IE6: doesn't display transparent PNGs correctly (gray background)
     IE6: hitting enter submits form without a cmd=[button name] (worked around)
-    Firefox [1.0.7/Win32/can't repr]: "Close this window" breaks navigation?
 }}}
 {{{ Ideas, long-term goals, etc.
     User manual (do we need this in addition to page-by-page help?)
@@ -79,18 +77,15 @@
     For unrecognized hets, determine connectivity using Molikin, write HET dict,
         allow user to remove H using HTML textbox, save to server.
     Refactor stats page to use less memory!
-  * Convert to biol. unit should produce and display a notebook entry
+    Convert to biol. unit should produce and display a notebook entry
     Reduce doesn't recognize HSD (as HIS) or ILE _CD_
     Apache config:  deny **/.svn/**
-  * Multi-chart:  sort by residue type (e.g. ARG)
+    Multi-chart:  sort by residue type (e.g. ARG)
     we don't correctly auto-detect CNS format nucleic acid PDBs on upload
-    allow upload of gzipped maps without changing file extension
-    wacky unique ID in flipkin filename shows up in pointID
- ** "Analyzed ___"  =>  "Analysis output: ___"
+    views for the multikin requires multichart selected to run
 {{{ Ideas from PHENIX
     Residue by residue list of outliers (y/n) -- CSV?  standalone?
     Look at Java on SGI and DEC alpha Tru64
-    SVN checkout for Paul for Reduce and Probe (anonymous)
 }}}
 
 ==============================================================================
@@ -108,6 +103,13 @@
 - fixed race condition in launchBackground() that could truncate the session
   data file before the background process could read it in, leading to
   random failure of the background process.
+- added per-residue views in the multikin
+- minor formatting changes to job_progress, generic_done
+- changed "Analyzed ___" to "Analysis output: ___"
+- added -code to Prekin in Flipkin to remove name of tmp file from pointIDs
+- fixed map upload code to allow gzipped maps
+- Reduce update fixed one longstanding bug (wrong protonation for 1gca His 152)
+- changed from using CCP4 maps for fetch to using O maps (.omap.gz) [JSR]
 
 ### 3.03 ###
 - many upgrades to page handling from PhD Posters work: setContext(),

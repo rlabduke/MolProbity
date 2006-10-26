@@ -50,7 +50,7 @@ $doAAC = ($opts['doKinemage'] && ($opts['kinClashes'] || $opts['kinHbonds'] || $
 $labbookEntry = runAnalysis($modelID, $_SESSION['bgjob']);
 
 $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
-    "Analyzed ".($doAAC ? "all-atom contacts and " : "")."geometry for $model[pdb]",
+    "Analysis output: ".($doAAC ? "all-atom contacts and " : "")."geometry for $model[pdb]",
     $labbookEntry,
     $modelID,
     "auto",

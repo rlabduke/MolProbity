@@ -246,9 +246,11 @@ function makeMulticritKin($infiles, $outfile, $opt, $nmrConstraints = null)
 *   clashdots           small and bad overlap dots
 *   hbdots              H-bond dots
 *   vdwdots             van der Waals (contact) dots
+* $viewRes is a list of 9-char "CNIT" names of residues for which there should views
+*   (e.g. outliers that someone should inspect, etc.)
 * $nmrConstraints is optional, and if present will generate lines for violated NOEs
 */
-function makeMulticritKin2($infiles, $outfile, $opt, $nmrConstraints = null)
+function makeMulticritKin2($infiles, $outfile, $opt, $viewRes = array(), $nmrConstraints = null)
 {
     if(file_exists($outfile)) unlink($outfile);
     
@@ -273,6 +275,8 @@ function makeMulticritKin2($infiles, $outfile, $opt, $nmrConstraints = null)
     fwrite($h, "@kinemage 1\n");
     fwrite($h, "@onewidth\n");
     fclose($h);
+    
+    makeResidueViews(reset($infiles), $outfile, $viewRes);
     
     foreach($infiles as $infile)
     {
@@ -327,6 +331,25 @@ function makeMulticritKin2($infiles, $outfile, $opt, $nmrConstraints = null)
         fwrite($h, "@master {sc alt confs} off\n");
     }
     
+    fclose($h);
+}
+#}}}########################################################################
+
+#{{{ makeResidueViews - creates @view entries for all listed residue
+############################################################################
+function makeResidueViews($infile, $outfile, $cnits, $excludeWaters = true)
+{
+    $h = fopen($outfile, 'a');
+    fwrite($h, "@1viewid {Overview}\n"); // auto-determine center, span, etc.
+    $centers = computeResCenters($infile);
+    $i = 2;
+    foreach($cnits as $res)
+    {
+        if($excludeWaters && preg_match('/(HOH|DOD|H20|D20|WAT|SOL|TIP|TP3|MTO|HOD|DOH)$/', $res)) continue;
+        $c = $centers[$res];
+        fwrite($h, "@{$i}viewid {{$res}}\n@{$i}span 12\n@{$i}zslab 100\n@{$i}center $c[x] $c[y] $c[z]\n");
+        $i++;
+    }
     fclose($h);
 }
 #}}}########################################################################

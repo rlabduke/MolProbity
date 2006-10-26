@@ -170,7 +170,8 @@ function runAnalysis($modelID, $opts)
             'vdwdots'   =>  $opts['kinContacts']
         );
         $outfile = "$kinDir/$model[prefix]multi.kin";
-        makeMulticritKin2(array($infile), $outfile, $mcKinOpts);
+        makeMulticritKin2(array($infile), $outfile, $mcKinOpts,
+            findAllOutliers($clash, $rama, $rota, $cbdev, $pperp));
         
         // EXPERIMENTAL: gzip compress large multikins
         if(filesize($outfile) > MP_KIN_GZIP_THRESHOLD)
@@ -691,6 +692,25 @@ function findRamaOutliers($rama)
     }
     ksort($worst); // Put the residues into a sensible order
     return $worst;
+}
+#}}}########################################################################
+
+#{{{ findAllOutliers - clash, Rama, rota, Cb, P-perp
+############################################################################
+/**
+* Composites the results of the find___Outliers() functions into a simple,
+* non-redundant list of 9-char residues names.
+*/
+function findAllOutliers($clash, $rama, $rota, $cbdev, $pperp)
+{
+    $worst = array();
+    $worst = array_merge($worst, findClashOutliers($clash));
+    $worst = array_merge($worst, findRamaOutliers($rama));
+    $worst = array_merge($worst, findRotaOutliers($rota));
+    $worst = array_merge($worst, findCbetaOutliers($cbdev));
+    $worst = array_merge($worst, findBasePhosPerpOutliers($pperp));
+    ksort($worst); // Put the residues into a sensible order
+    return array_keys($worst);
 }
 #}}}########################################################################
 

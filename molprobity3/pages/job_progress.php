@@ -71,11 +71,12 @@ function display($context)
         $url        = makeEventURL("onJobFinished", $_SESSION['bgjob']['whereNext']);
         $refresh    = "3; URL=$url";
         echo $this->pageHeader("Job is finished", "none", $refresh);
-        echo "<p><center>Your job ran for ".$this->fmtTime($_SESSION['bgjob']['endTime'] - $_SESSION['bgjob']['startTime']).".\n";
+        echo "<p><center>\n";
         echo "<p><table border='0'><tr><td>\n";
         @readfile("$_SESSION[dataDir]/".MP_DIR_SYSTEM."/progress");
         echo "</td></tr></table></center>\n";
-          echo "<p><small>If nothing happens after 3 seconds, <a href='$url'>click here</a>.<small>\n";
+        echo "<p><small>Your job ran for ".$this->fmtTime($_SESSION['bgjob']['endTime'] - $_SESSION['bgjob']['startTime']).".</small>\n";
+        echo "<br><small>If nothing happens after 3 seconds, <a href='$url'>click here</a>.<small>\n";
         echo $this->pageFooter();
     }
 }
