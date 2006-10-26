@@ -305,7 +305,8 @@ function onUploadMapFile()
     {
         // List of allowed map extensions taken from KiNG's EDMapPlugin
         $mapName = censorFileName($_FILES['uploadFile']['name'],
-            array('map', 'omap', 'xmap', 'dn6', 'dsn6', 'ccp4', 'mbk', 'xplor', 'brix')); // make sure no spaces, etc.
+            array('map', 'omap', 'xmap', 'dn6', 'dsn6', 'ccp4', 'mbk', 'xplor', 'brix',
+            'map.gz', 'omap.gz', 'xmap.gz', 'dn6.gz', 'dsn6.gz', 'ccp4.gz', 'mbk.gz', 'xplor.gz', 'brix.gz')); // make sure no spaces, etc.
         $mapPath = "$_SESSION[dataDir]/".MP_DIR_EDMAPS;
         if(!file_exists($mapPath)) mkdir($mapPath, 0777);
         $mapPath .= "/$mapName";

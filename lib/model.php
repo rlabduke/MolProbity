@@ -898,7 +898,7 @@ function getNdbModel($code)
 /**
 * Retrieves a map for the given PDB code from the Uppsala EDS
 *   pdbcode     the 4-character code identifying the model
-*   format      omap, cpp4, cns, or ezd
+*   format      omap, ccp4, cns, or ezd
 *   type        2fofc or fofc
 * Returns the name of a temporary file, or null if download failed.
 */

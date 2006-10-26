@@ -61,11 +61,11 @@ function getMaps($code)
     if($_SESSION['bgjob']['eds_2fofc'])
     {
         setProgress($prog, '2fofc');
-        $mapName = "$code.ccp4.gz";
+        $mapName = "$code.omap.gz";
         $mapPath = "$mapDir/$mapName";
         if(!file_exists($mapPame))
         {
-            $tmpMap = getEdsMap($code, 'ccp4', '2fofc');
+            $tmpMap = getEdsMap($code, 'omap', '2fofc');
             if($tmpMap && copy($tmpMap, $mapPath))
             {
                 unlink($tmpMap);
@@ -80,11 +80,11 @@ function getMaps($code)
     if($_SESSION['bgjob']['eds_fofc'])
     {
         setProgress($prog, 'fofc');
-        $mapName = "$code-diff.ccp4.gz";
+        $mapName = "$code-diff.omap.gz";
         $mapPath = "$mapDir/$mapName";
         if(!file_exists($mapPame))
         {
-            $tmpMap = getEdsMap($code, 'ccp4', 'fofc');
+            $tmpMap = getEdsMap($code, 'omap', 'fofc');
             if($tmpMap && copy($tmpMap, $mapPath))
             {
                 unlink($tmpMap);
