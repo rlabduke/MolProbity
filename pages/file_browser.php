@@ -35,7 +35,7 @@ function display($context)
 function displayDownloadForm($list, $isExpanded)
 {
     echo makeEventForm('onDownloadMarkedZip');
-    echo "<a name='filelist'>\n"; // allows open/close links to snap us to here
+    echo "<a name='filelist'></a>\n"; // allows open/close links to snap us to here
     echo "<table width='100%' border='0' cellspacing='0'>\n";
     echo "<tr bgcolor='".MP_TABLE_HIGHLIGHT."'>";
     echo "<td width='48'></td>";
@@ -43,9 +43,10 @@ function displayDownloadForm($list, $isExpanded)
     echo "<td><b>Size</b></td>";
     echo "<td colspan='2' align='center'><b>View...</b></td>";
     echo "<td align='right'><b>Download</b></td>";
+    echo "</tr>\n";
     echo $this->makeFileList($list, $_SESSION['dataDir'], $_SESSION['dataURL'], $isExpanded);
 
-    echo "<tr><td colspan='2'>";
+    echo "<tr filetreedepth='0'><td colspan='2'>";
     echo "<a href='#' onclick='checkAll(true); return false;'>Check all</a>\n";
     echo "- <a href='#' onclick='checkAll(false); return false;'>Clear all</a>\n";
     echo "</td><td colspan='4' align='right'>";
@@ -72,8 +73,53 @@ function checkAll(checkSetting)
         }
     }*/
 }
+
+function expando(linkNode)
+{
+    // Find the TR that contains this link (up to TD, then up to TR):
+    var trNode = linkNode.parentNode.parentNode;
+    var trDepth = parseInt(trNode.getAttribute('filetreedepth'));
+    
+    // Check current expansion state, based on icon:
+    var folderRE = /closedfolder\.gif$/;
+    var folderImg = linkNode.firstChild;
+    if(folderRE.test(folderImg.src.toString()))
+    {
+        folderImg.src = "img/openfolder.gif";
+        var setDisplay = '';
+    }
+    else
+    {
+        folderImg.src = "img/closedfolder.gif";
+        var setDisplay = 'none';
+    }
+    
+    // Iterate over rows until we  hit one at our level:
+    var next = trNode;
+    while(true)
+    {
+        var next = next.nextSibling;
+        if(!next) break;
+        if(next.nodeType != 1) continue; // text node, etc; not an element
+        var nextDepth = parseInt(next.getAttribute('filetreedepth'));
+        if(nextDepth <= trDepth) break;
+        // on/off controlled by arrow icon of dir:
+        next.style.display = setDisplay;
+        // on/off controlled as a toggle, row by row:
+        //if(next.style.display)
+        //{
+        //    if(nextDepth == trDepth+1)
+        //        next.style.display = '';
+        //}
+        //else
+        //{
+        //    next.style.display = 'none';
+        //}
+    }
+}
 // -->
-</script><?php
+</script>
+<?php
 }
 #}}}########################################################################
 
@@ -83,14 +129,17 @@ function checkAll(checkSetting)
 * Takes the output of listRecursive()
 * $isExpanded has absolute directory names as its keys and booleans as values.
 */
-function makeFileList($list, $basePath, $baseURL, $isExpanded, $depth = 0)
+function makeFileList($list, $basePath, $baseURL, $isExpanded, $depth = 0, $hidden = false)
 {
     if($depth === 0) $this->fileListColor = MP_TABLE_ALT1;
 
     $s = '';
     foreach($list as $dir => $file)
     {
-        $s .= "<tr bgcolor='".$this->fileListColor."'>";
+        $s .= "<tr bgcolor='".$this->fileListColor."'";
+        $s .= " filetreedepth='$depth'";
+        if($hidden) $s .= " style='display:none;'";
+        $s .= ">"; // end of the <TR>
         $s .= "<td><input type='checkbox' name='zipfiles[]' value='$basePath/".(is_array($file) ? $dir : $file)."'></td><td>";
         $this->fileListColor == MP_TABLE_ALT1 ? $this->fileListColor = MP_TABLE_ALT2 : $this->fileListColor = MP_TABLE_ALT1;
         if(is_array($file))
@@ -100,16 +149,17 @@ function makeFileList($list, $basePath, $baseURL, $isExpanded, $depth = 0)
             $s .= "<img src='img/clear_1x1.gif' width='".(16*$depth)."' height='1'>";
             if($isExpanded["$basePath/$dir"])
             {
-                $s .= "<a href='".makeEventURL("onFolderClose", "$basePath/$dir")."#filelist'>";
+                $s .= "<a href='".makeEventURL("onFolderClose", "$basePath/$dir")."#filelist' onclick='expando(this); return false;'>";
                 $s .= "<img src='img/openfolder.gif'></a> ";
                 $s .= "<b>$dir</b></td><td colspan='4'></td></tr>\n";
-                $s .= $this->makeFileList($file, "$basePath/$dir", "$baseURL/$dir", $isExpanded, $depth+1);
+                $s .= $this->makeFileList($file, "$basePath/$dir", "$baseURL/$dir", $isExpanded, $depth+1, $hidden);
             }
             else
             {
-                $s .= "<a href='".makeEventURL("onFolderOpen", "$basePath/$dir")."#filelist'>";
+                $s .= "<a href='".makeEventURL("onFolderOpen", "$basePath/$dir")."#filelist' onclick='expando(this); return false;'>";
                 $s .= "<img src='img/closedfolder.gif'></a> ";
                 $s .= "<b>$dir</b></td><td colspan='4'></td></tr>\n";
+                $s .= $this->makeFileList($file, "$basePath/$dir", "$baseURL/$dir", $isExpanded, $depth+1, true);
             }
         }
         else

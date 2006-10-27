@@ -79,10 +79,11 @@
     Refactor stats page to use less memory!
     Convert to biol. unit should produce and display a notebook entry
     Reduce doesn't recognize HSD (as HIS) or ILE _CD_
-    Apache config:  deny **/.svn/**
     Multi-chart:  sort by residue type (e.g. ARG)
     we don't correctly auto-detect CNS format nucleic acid PDBs on upload
     views for the multikin requires multichart selected to run
+    -fix.flips file should go in raw_data or temporary
+    .cb2d file needs better name
 {{{ Ideas from PHENIX
     Residue by residue list of outliers (y/n) -- CSV?  standalone?
     Look at Java on SGI and DEC alpha Tru64
@@ -110,6 +111,8 @@
 - fixed map upload code to allow gzipped maps
 - Reduce update fixed one longstanding bug (wrong protonation for 1gca His 152)
 - changed from using CCP4 maps for fetch to using O maps (.omap.gz) [JSR]
+- tried getting rid of subfolders -- file become to messy
+- added JavaScript to the file browser; use JS if enabled, page refresh if not
 
 ### 3.03 ###
 - many upgrades to page handling from PhD Posters work: setContext(),
