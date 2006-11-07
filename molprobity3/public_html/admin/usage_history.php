@@ -16,6 +16,138 @@ Summarizes MolProbity usage over a specified date range.
 // Have to do this for big log files ... we'll need a better solution one day.
     ini_set('memory_limit', '128M');
 
+#{{{ class LogIter
+############################################################################
+class LogIter
+{
+    var $totalRecords = 0;
+    var $uniqueSessions = 0;
+    var $uniqueIPs = 0;
+    var $actions = array();
+    var $uniqueActions = array();
+    
+    var $endTime = 0;
+    var $startTime = 1e99;
+    
+    var $platforms = array();
+    var $browsers = array();
+    var $combos = array();
+    
+    function LogIter($start, $end) //{{{
+    {
+        $bots = $this->listBots();
+        $uSess = array();
+        $uIPs = array();
+        $tmpActions = array();
+        
+        $in = fopen(MP_BASE_DIR.'/feedback/molprobity.log', 'rb');
+        if($in) while(!feof($in))
+        {
+            $s = trim(fgets($in, 4096));
+            if($s == "") continue;
+            // 5 forces $msgtext to not split on internal colons
+            // $ip:$sess:$time:$msgcode[:$msgtext]
+            $f = explode(':', $s, 5);
+            $timestamp = $f[2] + 0;
+            if($timestamp < $start) continue; // skip these
+            elseif($timestamp > $end) break; // guaranteed chronological order
+            // Assume IP addr. + sess. ID = globally unique ID
+            $uid = $f[0].':'.$f[1];
+            if($bots[$uid]) continue; // don't count bots and crawlers
+            // Track browser usage
+            if($f[3] == "browser-detect")
+            {
+                $br = recognizeUserAgent($f[4]);
+                $this->platforms[ $br['platform'] ] += 1;
+                $this->browsers[ $br['browser'] ] += 1;
+                $this->combos[ $br['platform']." - ".$br['browser'] ] += 1;
+            }
+            // Track actual date range
+            $this->totalRecords += 1;
+            $this->startTime = min($timestamp, $this->startTime);
+            $this->endTime = max($timestamp, $this->endTime);
+            // Track unique IP numbers and session IDs
+            $uSess[$f[1]] = 1;
+            $uIPs[ $f[0]] = 1;
+            // Track user actions
+            $this->actions[$f[3]] += 1;
+            $tmpActions[$f[3]][$f[1]] = 1;
+        }
+        fclose($in);
+        
+        $this->uniqueSessions = count($uSess);
+        $this->uniqueIPs = count($uIPs);
+        foreach($tmpActions as $action => $sesslist) $this->uniqueActions[$action] = count($sesslist);
+        ksort($this->uniqueActions);
+        ksort($this->platforms);
+        ksort($this->browsers);
+        ksort($this->combos);
+        //$this->endTime += (60*60*24);
+    }//}}}
+
+    function listBots() //{{{
+    {
+        if(!$GLOBALS['LogIter_allBotIDs'])
+        {
+            $bots = array();
+            $in = fopen(MP_BASE_DIR.'/feedback/molprobity.log', 'rb');
+            if($in) while(!feof($in))
+            {
+                $s = trim(fgets($in, 4096));
+                if($s == "") continue;
+                // 5 forces $msgtext to not split on internal colons
+                // $ip:$sess:$time:$msgcode[:$msgtext]
+                $f = explode(':', $s, 5);
+                // Assume IP addr. + sess. ID = globally unique ID
+                $uid = $f[0].':'.$f[1];
+                if($f[3] == "browser-detect")
+                {
+                    $br = recognizeUserAgent($f[4]);
+                    if($br['platform'] == "Bot/Crawler" || $br['platform'] == "Java" || $br['platform'] == "Unknown")
+                        $bots[$uid] = 1;
+                }
+            }
+            fclose($in);
+            $GLOBALS['LogIter_allBotIDs'] =& $bots;
+        }
+        return $GLOBALS['LogIter_allBotIDs'];
+    }//}}}
+    
+    function echoBrowserTable() //{{{
+    {
+        // Horizontal headers: platforms
+        echo "<p><table cellspacing='4'><tr align='center'><td></td>";
+        foreach($this->platforms as $p => $pCount) echo "<td><b>$p</b></td>";
+        echo "<td bgcolor='#ffff99'><b><i>total</i></b></td></tr>\n";
+        // Rows: browser types
+        $total = 0;
+        foreach($this->browsers as $b => $bCount)
+        {
+            echo "<tr align='center'><td><b>$b</b></td>";
+            foreach($this->platforms as $p => $pCount) echo "<td>".$this->combos["$p - $b"]."</td>";
+            echo "<td bgcolor='#ffff99'>$bCount</td></tr>\n";
+            $total += $bCount;
+        }
+        // Horizontal footers: platform counts
+        echo "<tr align='center' bgcolor='#ffff99'><td><b><i>total</i></b></td>";
+        foreach($this->platforms as $p => $pCount) echo "<td>$pCount</td>";
+        echo "<td>$total</td></tr>\n";
+        echo "</table></p>\n";
+    
+        //echo "<p><small>Unknown browsers:\n<pre>\n";
+        //foreach($records as $rec)
+        //{
+        //    if($rec[3] == "browser-detect")
+        //    {
+        //        $br = recognizeUserAgent($rec[4]);
+        //        if($br['platform'] == "Unknown") echo $rec[4] . "\n";
+        //    }
+        //}
+        //echo "</pre></small></p>\n";
+    }//}}}
+}
+#}}}########################################################################
+
 #{{{ getRecords, selectRecords
 ############################################################################
 /**
@@ -255,14 +387,9 @@ if(isset($_REQUEST['end_date']) && strtotime($_REQUEST['end_date']) != -1)
     $end_time = strtotime($_REQUEST['end_date']);
 else $end_time = strtotime('1 Jan 2030'); // past this we exceed the Unix timestamp
 
-$log = getRecords($start_time, $end_time);
-$log = removeBots($log);
-$times = array();
-foreach($log as $record)
-    $times[] = $record[2]+0;
-sort($times);
-if($start_time < reset($times)) $start_time = reset($times);
-if($end_time > end($times))     $end_time   = end($times)+(60*60*24);
+$log = new LogIter($start_time, $end_time);
+if($start_time < $log->startTime) $start_time = $log->startTime;
+if($end_time > $log->endTime)     $end_time   = $log->endTime+(60*60*24);
 
 ?><!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html>
@@ -286,20 +413,20 @@ if($end_time > end($times))     $end_time   = end($times)+(60*60*24);
     echo "End date (inclusive): <input type='text' size='15' name='end_date' value='".date('j M Y', $end_time)."'>\n";
     echo "<input type='submit' name='cmd' value='Refresh'>\n";
     echo "<p>\n";
-    echo "<br>".count($log)." records found in the log.\n";
-    echo "<br>".uniqueSessions($log)." unique sessions active during this timeframe.\n";
-    echo "<br>".uniqueIPs($log)." unique IP addresses active during this timeframe. This is an <i>estimate</i> of the unique users.\n";
+    echo "<br>".$log->totalRecords." records found in the log.\n";
+    echo "<br>".$log->uniqueSessions." unique sessions active during this timeframe.\n";
+    echo "<br>".$log->uniqueIPs." unique IP addresses active during this timeframe. This is an <i>estimate</i> of the unique users.\n";
     echo "<br><i>All known bots and crawlers have been omitted from these statistics.</i>\n";
-    echoBrowserTable($log);
+    $log->echoBrowserTable();
     echo "<hr>\n";
     
     echo "<h3>Grand summary</h3>\n";
     echo "<i>Use checkboxes to select columns for detailed view, below.</i>\n";
     echo "<table cellspacing='4'>\n";
     echo "<tr><td></td><td><u>Action name</u></td><td><u>Number of times</u></td><td><u>% of sessions</u></td></tr>\n";
-    $active_sessions = uniqueSessions($log);
-    $actions = countActions($log);
-    $unique_actions = countActionsBySession($log);
+    $active_sessions = $log->uniqueSessions;
+    $actions =& $log->actions;
+    $unique_actions =& $log->uniqueActions;
     $detail_actions = array();
     $color = MP_TABLE_ALT1;
     foreach($actions as $action => $num)
@@ -349,12 +476,12 @@ if($end_time > end($times))     $end_time   = end($times)+(60*60*24);
                 echo "</tr>\n";
                 $color == MP_TABLE_ALT1 ? $color = MP_TABLE_ALT2 : $color = MP_TABLE_ALT1;
             }
-            $sublog = selectRecords($log, $time_range['start'], $time_range['end']);
-            $active_sessions = uniqueSessions($sublog);
-            $actions = countActions($sublog);
-            $unique_actions = countActionsBySession($sublog);
+            $sublog = new LogIter($time_range['start'], $time_range['end']);
+            $active_sessions = $sublog->uniqueSessions;
+            $actions =& $sublog->actions;
+            $unique_actions =& $sublog->uniqueActions;
             echo "  <tr align='right' bgcolor='$color'><td align='left'>$time_range[range_text]</td>";
-            echo "<td>".uniqueIPs($sublog)."</td>";
+            echo "<td>".$sublog->uniqueIPs."</td>";
             foreach($detail_actions as $action)
             {
                 echo "<td>".$actions[$action];

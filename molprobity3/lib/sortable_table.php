@@ -41,7 +41,6 @@ function formatSortableTable($table, $url, $col = -1, $direction = 1)
     if($col != -1)
         uasort($rows, $mySortFunc);
     
-    
     $s .= $table['prequel'];
     $s .= "\n";
     $s .= "<table width='100%' cellspacing='1' border='0'>\n";
@@ -77,9 +76,9 @@ function formatSortableTable($table, $url, $col = -1, $direction = 1)
         $s .= "<tr align='center' bgcolor='$color'>";
         foreach($row as $key => $cell)
         {
-            // For some odd reason, 0 == '@@NATIVE' in PHP 5.0.4, so we use ===
+            // For some odd reason, 0 == '@@NATIVE@@' in PHP 5.0.4, so we use ===
             // Ah, because the string is being coerced to a number, which becomes zero...
-            if($key === '@@NATIVE') continue;
+            if($key === '@@NATIVE@@') continue;
             $s .= "<td";
             if($cell['color']) $s .= " bgcolor='$cell[color]'";
             $s .= ">$cell[html]</td>";

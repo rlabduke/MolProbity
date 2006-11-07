@@ -110,8 +110,8 @@ function runAnalysis($modelID, $opts)
         runCbetaDev($infile, $outfile);
         $cbdev = loadCbetaDev($outfile);
         
-        makeCbetaDevPlot($infile, "$kinDir/$model[prefix]cb2d.kin");
-        $tasks['cbeta'] .= " - <a href='viewking.php?$_SESSION[sessTag]&url=$kinURL/$model[prefix]cb2d.kin' target='_blank'>preview</a>";
+        makeCbetaDevPlot($infile, "$kinDir/$model[prefix]cbetadev.kin");
+        $tasks['cbeta'] .= " - <a href='viewking.php?$_SESSION[sessTag]&url=$kinURL/$model[prefix]cbetadev.kin' target='_blank'>preview</a>";
         setProgress($tasks, 'cbeta'); // so the preview link is visible
     }
     //}}} Run programs and offer kins to user
@@ -221,7 +221,7 @@ function runAnalysis($modelID, $opts)
             $entry .= "<li><a href='$chartURL/$model[prefix]rama.pdf' target='_blank'>Ramachandran plot PDF</a></li>\n";
         }
         if($opts['chartCBdev'])
-            $entry .= "<li>".linkKinemage("$model[prefix]cb2d.kin", "C&beta; deviation scatter plot (2D)")."</li>\n";
+            $entry .= "<li>".linkKinemage("$model[prefix]cbetadev.kin", "C&beta; deviation scatter plot (2D)")."</li>\n";
         $entry .= "</ul>\n";
     }
     

@@ -26,7 +26,7 @@
         Write about maintaining MolProbity
         Write about features
     Could make it a web service with XML-RPC (SOAP, CORBA too complex) or REST
-    Multicrit: views for trouble spots sorted by severity (also hypertext?)
+    Create better uptime management tools, including memory usage (and jobs?)
     Estimate time for e.g. analysis jobs?
     Add "priviledged" users who can e.g. run extra NMR models
     Allow uploads of tarballs of NMR models?
@@ -37,53 +37,39 @@
     Add explanation of SSWING, Reduce, AAC, kins on setup pages
     Make sure Reduce doesn't shrink the PDB file (lost atoms/models, etc)
     Add coloring type drop box for -lots kins
-    Write command line scripts for common actions; remove junk from cmdline/
-    Verb-centered (sitemap) vs. noun-centered (PDB "stable") interface
     The "0+3" concept: single model, chain-chain (interface), overlapped pairs
         (NCS, etc), large ensembles (NMR/MD)
     Support "permevents" for notebook pages - eval() or just a pageCall() target
         Why did I want this? Redirect to action pages, maybe?
     analyze::findAltConfs() should also support nuc. acid mc/sc classification
-    re-assort the functions from visualize.php and analyze.php
-    Make MP skinnable (multiple css files, directories under img/)
     Get models from CASP web site? (where is it??)
     Allow escape from job when no process number appears after x sec.
     Add whois query to session listing
     Change upload_setup's fetch of EDS map to be like welcome.php (a la carte)
     Develop "helper" pages; mark optional steps clearly
     DANG is included in bin/ but we don't *use* it anywhere... / upgrade to 1.9
-    Oneline, all-in-one (kins, etc) for JCSG
-    "outlier" column for multichart
     Move labbook.html to charts/ ?
-    xxx-fix.flips goes in coordinates; should go in rawdata?
     Auto-uniquify chain IDs on file upload?
     Bob: add % favored/allowed directly to kinemage graphics?
-    compile all Mac binaries as Universal (old versions seem to work for now)
 }}}
     Produce multi-model Ramachandran plots from the GUI
     Tool for building ensembles from arbitrary sets of models
     Kinemages are text/plain instead of downloaded
     Convert "number of H added, etc" text into tables
-    Use cookies to remember settings for optional buttons on validation page?
-        (use setcookie(); $_COOKIES[] is read-only; see viewking.php for example)
-    Create better uptime management tools, including memory usage (and jobs?)
     SwingSet: auto-select res that are outliers (store in SESSION/modelID/__?__)
-    Chart -- show only outliers?
-    Chart/sort by Rama: not all outliers together b/c cutoffs are different (!)
+  * Chart -- show only outliers? / "outlier" column for multichart
+  * Chart/sort by Rama: not all outliers together b/c cutoffs are different (!)
+  * chart too slow [only too slow to display in browser]
     Auto-expand coords, kins folders?
     add real HTML head/foot to downloadable multichart? look into viewer issues
     Convert multichart to format (CSV) that would work with KiNG, Excel, etc.
         Maybe this is an addition rather than a conversion...
     For unrecognized hets, determine connectivity using Molikin, write HET dict,
         allow user to remove H using HTML textbox, save to server.
-    Refactor stats page to use less memory!
     Convert to biol. unit should produce and display a notebook entry
     Reduce doesn't recognize HSD (as HIS) or ILE _CD_
-    Multi-chart:  sort by residue type (e.g. ARG)
     we don't correctly auto-detect CNS format nucleic acid PDBs on upload
     views for the multikin requires multichart selected to run
-    -fix.flips file should go in raw_data or temporary
-    .cb2d file needs better name
 {{{ Ideas from PHENIX
     Residue by residue list of outliers (y/n) -- CSV?  standalone?
     Look at Java on SGI and DEC alpha Tru64
@@ -113,6 +99,10 @@
 - changed from using CCP4 maps for fetch to using O maps (.omap.gz) [JSR]
 - tried getting rid of subfolders -- file become to messy
 - added JavaScript to the file browser; use JS if enabled, page refresh if not
+- changed "cb2d" kinemage name to more intuitive "cbetadev"
+- moved fix.flips file from coordinates dir to raw_data
+- multichart can now be sorted by residue type as well as residue number
+- rewrote usage_history to use much less memory (I hope)
 
 ### 3.03 ###
 - many upgrades to page handling from PhD Posters work: setContext(),
