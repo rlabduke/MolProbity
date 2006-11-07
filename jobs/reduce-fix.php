@@ -52,7 +52,9 @@ $changes = decodeReduceUsermods($pdb);
 // If all changes were accepted, we will not need to re-run Reduce.
 $rerun = false;
 // Make a file of flip-noflip commands for Reduce
-$flipfile = $_SESSION['dataDir'].'/'.MP_DIR_MODELS."/$model[prefix]fix.flips";
+$rawDir = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA;
+if(!file_exists($rawDir)) mkdir($rawDir, 0777);
+$flipfile = "$rawDir/$model[prefix]fix.flips";
 $fp = fopen($flipfile, "wb");
 $n = count($changes[0]); // How many changes are in the table?
 for($c = 0; $c < $n; $c++)

@@ -136,7 +136,9 @@ function makeFileList($list, $basePath, $baseURL, $isExpanded, $depth = 0, $hidd
     $s = '';
     foreach($list as $dir => $file)
     {
-        $s .= "<tr bgcolor='".$this->fileListColor."'";
+        // With new JS toggles, the rows don't reliably alternate color in any given state
+        //$s .= "<tr bgcolor='".$this->fileListColor."'";
+        $s .= "<tr bgcolor='".MP_TABLE_ALT1."'";
         $s .= " filetreedepth='$depth'";
         if($hidden) $s .= " style='display:none;'";
         $s .= ">"; // end of the <TR>

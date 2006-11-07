@@ -820,6 +820,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     $table['prequel'] = makeSummaryStatsTable($pdbstats['resolution'], $clash, $rama, $rota, $cbdev, $pperp);
     
     $header1 = array();
+    $header1[] = array('html' => "<b>#</b>",                                            'sort' => 1);
     $header1[] = array('html' => "<b>Res</b>",                                          'sort' => 1);
     $header1[] = array('html' => "<b>High B</b>",                                       'sort' => -1);
     if(is_array($clash))  $header1[] = array('html' => "<b>Clash &gt; 0.4&Aring;</b>",  'sort' => -1);
@@ -829,6 +830,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     if(is_array($pperp))  $header1[] = array('html' => "<b>Base-P perp. dist.</b>",     'sort' => -1);
     
     $header2 = array();
+    $header2[] = array('html' => "");
     $header2[] = array('html' => "");
     $header2[] = array('html' => sprintf("Avg: %.2f", array_sum($Bfact)/count($Bfact)));
     if(is_array($clash))  $header2[] = array('html' => "Clashscore: $clash[scoreAll]");
@@ -844,8 +846,12 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     $rows = array();
     foreach($res as $cnit => $eval)
     {
+        $cni = substr($cnit, 0, 6);
+        $type = substr($cnit, 6, 3);
         $row = array();
-        $row[] = array('html' => $cnit,             'sort_val' => $eval['order']+0);
+        //$row[] = array('html' => $cnit,             'sort_val' => $eval['order']+0);
+        $row[] = array('html' => $cni,              'sort_val' => $eval['order']+0);
+        $row[] = array('html' => $type,             'sort_val' => $type);
         $row[] = array('html' => $eval['resHiB'],   'sort_val' => $eval['resHiB']+0);
         foreach(array('clash', 'rama', 'rota', 'cbdev', 'pperp') as $type)
         {
