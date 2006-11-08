@@ -59,7 +59,7 @@
     SwingSet: auto-select res that are outliers (store in SESSION/modelID/__?__)
   * Chart -- show only outliers? / "outlier" column for multichart
   * Chart/sort by Rama: not all outliers together b/c cutoffs are different (!)
-  * chart too slow [only too slow to display in browser]
+  * views for the multikin requires multichart selected to run
     Auto-expand coords, kins folders?
     add real HTML head/foot to downloadable multichart? look into viewer issues
     Convert multichart to format (CSV) that would work with KiNG, Excel, etc.
@@ -69,7 +69,6 @@
     Convert to biol. unit should produce and display a notebook entry
     Reduce doesn't recognize HSD (as HIS) or ILE _CD_
     we don't correctly auto-detect CNS format nucleic acid PDBs on upload
-    views for the multikin requires multichart selected to run
 {{{ Ideas from PHENIX
     Residue by residue list of outliers (y/n) -- CSV?  standalone?
     Look at Java on SGI and DEC alpha Tru64
@@ -78,6 +77,10 @@
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
+
+### 3.05 ###
+- fixed up some rare weirdnesses about guessing the user's IP address
+- multi-chart generation is not too slow:  only 17 sec for the ribosome
 
 ### 3.04 ###
 - added public_html/data/index.html to thwart directory listing attacks
