@@ -34,6 +34,7 @@ require_once(MP_BASE_DIR.'/lib/model.php'); // for making kinemages
 *       kinBfactor      show B-factor color model?
 *       kinOccupancy    show occupancy color model?
 *       kinRibbons      show ribbons?
+*       kinForceViews   force running clashlist, etc to provide @views of bad spots?
 *     doCharts          make the multi-criterion chart and other plots/tables/lists?
 *       chartClashlist  run clashlistcluster?
 *       chartRama       do Rama plots and analysis?
@@ -50,6 +51,7 @@ function runAnalysis($modelID, $opts)
     // If doKinemage or doCharts is off, turn off all their subordinates
     if(!$opts['doKinemage']) foreach($opts as $k => $v) if(startsWith($k, 'kin')) $opts[$k] = false;
     if(!$opts['doCharts']) foreach($opts as $k => $v) if(startsWith($k, 'chart')) $opts[$k] = false;
+    if($opts['kinForceViews']) foreach($opts as $k => $v) if(startsWith($k, 'chart')) $opts[$k] = true;
     
     $model      = $_SESSION['models'][$modelID];
     $modelDir   = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
@@ -201,13 +203,22 @@ function runAnalysis($modelID, $opts)
     if($opts['doKinemage'] || $opts['doCharts'])
     {
         $entry .= "<h3>Multi-criterion visualizations</h3>\n";
+        //$entry .= "<div class='indent'>\n";
+        //$entry .= "<table width='100%' border='0'>\n";
+        $entry .= "<ul>\n";
         if($opts['doKinemage'])
-            $entry .= "<p>".linkKinemage("$model[prefix]multi.kin", "Multi-criterion kinemage")."</p>\n";
+            //$entry .= "<tr><td><img src='img/mkin_icon.png' alt='Multi-kin icon'></td><td>".linkAnyFile("$model[prefix]multi.kin", "Multi-criterion kinemage")."</td></tr>\n";
+            $entry .= "<li>".linkAnyFile("$model[prefix]multi.kin", "Kinemage")."</li>\n";
         if($opts['doCharts'])
         {
-            $entry .= "<p><a href='viewtable.php?$_SESSION[sessTag]&file=$rawDir/$model[prefix]multi.table' target='_blank'>Multi-criterion chart</a></p>\n";
-            $entry .= "<p><a href='$chartURL/$model[prefix]multi-coot.scm'>Download multi-criterion to-do list for Coot</a> [ALPHA TEST]<br><small><i>Open this in Coot using Calculate | Run Script...</i></small></p>\n";
+            //$entry .= "<tr><td><img src='img/mchart_icon.png' alt='Multi-chart icon'></td><td>".linkAnyFile("$model[prefix]multi.table", "Multi-criterion chart")."</td></tr>\n";
+            //$entry .= "<tr><td></td><td>".linkAnyFile("$model[prefix]multi-coot.scm", "Multi-criterion to-do list for Coot")."<br><small><i>Open this in Coot using Calculate | Run Script...</i></small></td></tr>\n";
+            $entry .= "<li>".linkAnyFile("$model[prefix]multi.table", "Chart")."</li>\n";
+            $entry .= "<li>".linkAnyFile("$model[prefix]multi-coot.scm", "To-do list for Coot")."<br><small><i>Open this in Coot using Calculate | Run Script...</i></small></li>\n";
         }
+        //$entry .= "</table>\n";
+        //$entry .= "</div>\n";
+        $entry .= "</ul>\n";
     }
     
     if($opts['chartClashlist'] || $opts['chartRama'] || $opts['chartCBdev'])
@@ -215,14 +226,14 @@ function runAnalysis($modelID, $opts)
         $entry .= "<h3>Single-criterion visualizations</h3>";
         $entry .= "<ul>\n";
         if($opts['chartClashlist'])
-            $entry .= "<li><a href='viewtext.php?$_SESSION[sessTag]&file=$chartDir/$model[prefix]clashlist.txt&mode=plain' target='_blank'>Clash list</a></li>\n";
+            $entry .= "<li>".linkAnyFile("$model[prefix]clashlist.txt", "Clash list")."</li>\n";
         if($opts['chartRama'])
         {
-            $entry .= "<li>".linkKinemage("$model[prefix]rama.kin", "Ramachandran plot kinemage")."</li>\n";
-            $entry .= "<li><a href='$chartURL/$model[prefix]rama.pdf' target='_blank'>Ramachandran plot PDF</a></li>\n";
+            $entry .= "<li>".linkAnyFile("$model[prefix]rama.kin", "Ramachandran plot kinemage")."</li>\n";
+            $entry .= "<li>".linkAnyFile("$model[prefix]rama.pdf", "Ramachandran plot PDF")."</li>\n";
         }
         if($opts['chartCBdev'])
-            $entry .= "<li>".linkKinemage("$model[prefix]cbetadev.kin", "C&beta; deviation scatter plot (2D)")."</li>\n";
+            $entry .= "<li>".linkAnyFile("$model[prefix]cbetadev.kin", "C&beta; deviation scatter plot")."</li>\n";
         $entry .= "</ul>\n";
     }
     

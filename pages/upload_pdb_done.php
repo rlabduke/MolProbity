@@ -48,8 +48,9 @@ function display($context)
 
         // Start the page: produces <HTML>, <HEAD>, <BODY> tags
         echo $this->pageHeader($labbook[$num]['title']);
-        echo formatLabbookEntry($labbook[$num]);
-        echo "<p><a href='".makeEventURL('onEditNotebook', $num)."'>Edit notebook entry</a></p>\n";
+        //echo formatLabbookEntry($labbook[$num]);
+        echo $labbook[$num]['entry']; // avoid date stamp, title clutter
+        //echo "<p><a href='".makeEventURL('onEditNotebook', $num)."'>Edit notebook entry</a></p>\n";
         echo "<p>" . makeEventForm("onReturn");
         echo "<input type='submit' name='cmd' value='Continue &gt;'>\n</form></p>\n";
     }
