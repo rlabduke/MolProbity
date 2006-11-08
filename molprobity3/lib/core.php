@@ -396,28 +396,65 @@ function sortFilesAlpha($list)
 }
 #}}}########################################################################
 
-#{{{ linkKinemage - creates a kinemage open/download link tailored to this session
+#{{{ [DEPRECATED]  linkKinemage - dummy for linkAnyFile()
 ############################################################################
 /**
 * $fname    the kinemage filename, relative to MP_DIR_KINS
 * $name     an optional name to use in place of the filename
 */
 function linkKinemage($fname, $name = null)
+{ return linkAnyFile($fname, $name); }
+#}}}########################################################################
+
+#{{{ linkAnyFile - creates a file open/download link tailored to this session
+############################################################################
+/**
+* $fname    the filename, relative to __?__
+* $name     an optional name to use in place of the filename
+*/
+function linkAnyFile($fname, $name = null)
 {
-    $file = $_SESSION['dataDir'].'/'.MP_DIR_KINS.'/'.$fname;
-        /* Experimental: detect if kinemage has been gzipped */
-        if(!is_file($file) && filesize($file.".gz") > 0)
+    // Find the file of this name -- all names should actually be unique
+    foreach(array(MP_DIR_MODELS, MP_DIR_KINS, MP_DIR_CHARTS, MP_DIR_EDMAPS, MP_DIR_TOPPAR, MP_DIR_RAWDATA) as $dir)
+    {
+        if(is_file("$_SESSION[dataDir]/$dir/$fname"))
         {
-            $fname  .= ".gz";
-            $file   .= ".gz";
+            $subdir = $dir;
+            break;
         }
-        /* Experimental: detect if kinemage has been gzipped */
-    $link = $_SESSION['dataURL'].'/'.MP_DIR_KINS.'/'.$fname;
+    }
+    // Can't find it?  Check if it's a kinemage that was gzipped.
+    if(!$subdir && is_file($_SESSION['dataDir'].'/'.MP_DIR_KINS.'/'.$fname.'.gz'))
+    {
+        $fname .= ".gz";
+        $subdir = MP_DIR_KINS;
+    }
+    if(!$subdir) return;
+    
+    // Link the file
+    $path = "$_SESSION[dataDir]/$subdir/$fname";
+    $link = "$_SESSION[dataURL]/$subdir/$fname";
     if($name == null) $name = $fname;
     $s = "";
-    $s .= "<b>$name</b> (" . formatFilesize(filesize($file)) . "): ";
-    $s .= "<a href='viewking.php?$_SESSION[sessTag]&url=$link' target='_blank'>View in KiNG</a> | ";
-    $s .= "<a href='$link'>Download</a>";
+    $s .= "<b>$name</b> (" . formatFilesize(filesize($path)) . "): ";
+    
+    // Choose the right action(s) -- see pages/file_browser.php for origin
+    if(endsWith($fname, ".kin") || endsWith($fname, ".kin.gz"))
+    {
+        $s .= "<a href='viewking.php?$_SESSION[sessTag]&url=$link' target='_blank'>View in KiNG</a> | ";
+        $s .= "<a href='$link'>Download</a>";
+    }
+    elseif(endsWith($fname, ".table"))
+        $s .= "<a href='viewtable.php?$_SESSION[sessTag]&file=$path' target='_blank'>View</a>";
+    elseif(endsWith($fname, ".html"))
+        $s .= "<a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=html' target='_blank'>View</a>";
+    elseif(endsWith($fname, ".txt"))
+        $s .= "<a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=plain' target='_blank'>View</a>";
+    elseif(endsWith($fname, ".pdf"))
+        $s .= "<a href='$link' target='_blank'>View</a>";
+    else
+        $s .= "<a href='$link'>Download</a>";
+    
     return $s;
 }
 #}}}########################################################################

@@ -795,7 +795,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
             $res[$item['resName']]['cbdev_val'] = $item['dev'];
             if($item['dev'] >= 0.25)
             {
-                $res[$item['resName']]['cbdev'] = "$item[dev]A</small>";
+                $res[$item['resName']]['cbdev'] = "$item[dev]&Aring;</small>";
                 $res[$item['resName']]['cbdev_isbad'] = true;
                 $res[$item['resName']]['any_isbad'] = true;
             }

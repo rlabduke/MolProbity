@@ -123,7 +123,8 @@ function checkSettingsBeforeSubmit()
     <br><label><input type='checkbox' name='kinRota' value='1'> Rotamer evaluation</label>
     <br><label><input type='checkbox' name='kinCBdev' value='1'> C&beta; deviations</label>
     <br><label><input type='checkbox' name='kinBaseP' value='1'> Base-phosphate perpendiculars</label>
-    <p><label><input type='checkbox' name='kinAltConfs' value='1'> Alternate conformations</label>
+    <p><label><input type='checkbox' name='kinForceViews' value='1'> Make views of trouble spots even if it takes longer</label>
+    <br><label><input type='checkbox' name='kinAltConfs' value='1'> Alternate conformations</label>
     <br><label><input type='checkbox' name='kinBfactor' value='1'> Model colored by B-factors</label>
     <br><label><input type='checkbox' name='kinOccupancy' value='1'> Model colored by occupancy</label>
     <br><label><input type='checkbox' name='kinRibbons' value='1'> Ribbons</label>
