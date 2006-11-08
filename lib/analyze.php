@@ -40,6 +40,7 @@ require_once(MP_BASE_DIR.'/lib/model.php'); // for making kinemages
 *       chartRota       do rotamer analysis?
 *       chartCBdev      do CB dev plots and analysis?
 *       chartBaseP      check base-phosphate perpendiculars?
+*       chartNotJustOut include residues that have no problems in the list?
 *       
 * This function returns some HTML suitable for using in a lab notebook entry.
 */
@@ -147,7 +148,7 @@ function runAnalysis($modelID, $opts)
         setProgress($tasks, 'multichart'); // updates the progress display if running as a background job
         $outfile = "$rawDir/$model[prefix]multi.table";
         $snapfile = "$chartDir/$model[prefix]multi.html";
-        writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota, $cbdev, $pperp);
+        writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota, $cbdev, $pperp, !$opts['chartNotJustOut']);
         $tasks['multichart'] .= " - <a href='viewtable.php?$_SESSION[sessTag]&file=$outfile' target='_blank'>preview</a>\n";
         setProgress($tasks, 'multichart'); // so the preview link is visible
         $outfile = "$chartDir/$model[prefix]multi-coot.scm";
@@ -545,7 +546,7 @@ function runClashStats($resol, $clashscore, $clashscoreBlt40)
 function runRotamer($infile, $outfile)
 {
     // Very large files (1htq) need extra memory
-    exec("java -Xmx128m -cp ".MP_BASE_DIR."/lib/hless.jar hless.Rotamer -raw $infile > $outfile");
+    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/hless.jar hless.Rotamer -raw $infile > $outfile");
 }
 #}}}########################################################################
 
@@ -625,7 +626,7 @@ function findRotaOutliers($rota)
 ############################################################################
 function runRamachandran($infile, $outfile)
 {
-    exec("java -cp ".MP_BASE_DIR."/lib/hless.jar hless.Ramachandran -nokin -raw $infile > $outfile");
+    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/hless.jar hless.Ramachandran -nokin -raw $infile > $outfile");
 }
 #}}}########################################################################
 

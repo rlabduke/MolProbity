@@ -53,6 +53,8 @@ function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
     
     document.forms[0].kinBaseP.checked          = hasNucAcid
     document.forms[0].chartBaseP.checked        = hasNucAcid
+    
+    document.forms[0].chartNotJustOut.checked   = !isBig
 }
 
 // Try to make sure we have H if we're doing AAC
@@ -128,11 +130,12 @@ function checkSettingsBeforeSubmit()
     </div>
 <h5 class='nospaceafter'><label><input type='checkbox' name='doCharts' value='1' checked onclick='hideChartOpts()'> Charts, plots, and tables</label></h5>
     <div class='indent' id='chart_opts'>
-    <br><label><input type='checkbox' name='chartClashlist' value='1'> Clashes &amp; clashscore</label>
+    <label><input type='checkbox' name='chartClashlist' value='1'> Clashes &amp; clashscore</label>
     <br><label><input type='checkbox' name='chartRama' value='1'> Ramachandran plots</label>
     <br><label><input type='checkbox' name='chartRota' value='1'> Rotamer evaluation</label>
     <br><label><input type='checkbox' name='chartCBdev' value='1'> C&beta; deviations</label>
     <br><label><input type='checkbox' name='chartBaseP' value='1'> Base-phosphate perpendiculars</label>
+    <p><label><input type='checkbox' name='chartNotJustOut' value='1'> List all residues in multi-chart, not just outliers</label>
     </div>
 </div>
 <?php
