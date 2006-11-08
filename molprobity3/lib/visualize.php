@@ -12,7 +12,7 @@ require_once(MP_BASE_DIR.'/lib/eff_resol.php');
 ############################################################################
 function makeRamachandranKin($infile, $outfile)
 {
-    exec("java -cp ".MP_BASE_DIR."/lib/hless.jar hless.Ramachandran -nosummary $infile > $outfile");
+    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/hless.jar hless.Ramachandran -nosummary $infile > $outfile");
 }
 #}}}########################################################################
 
@@ -20,7 +20,7 @@ function makeRamachandranKin($infile, $outfile)
 ############################################################################
 function makeRamachandranPDF($infile, $outfile)
 {
-    exec("java -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -pdf $infile $outfile");
+    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -pdf $infile $outfile");
 }
 #}}}########################################################################
 
@@ -386,7 +386,7 @@ function makeBadRamachandranKin($infile, $outfile, $rama = null, $color = 'green
     fclose($out);
     
     // Jane still likes this best.
-    exec("java -cp ".MP_BASE_DIR."/lib/hless.jar hless.Ramachandran -nosummary -outliers $color < $infile >> $outfile");
+    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/hless.jar hless.Ramachandran -nosummary -outliers $color < $infile >> $outfile");
     
     // This uses Prekin, but just produces chunks of mainchain. Hard to see.
     /*if(!$rama)
@@ -730,7 +730,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
 * $pperp    is the data structure from loadBasePhosPerp()
 * Any of them can be set to null if the data is unavailable.
 */
-function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota, $cbdev, $pperp)
+function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota, $cbdev, $pperp, $outliersOnly = false)
 {
     //{{{ Process validation data
     // Make sure all residues are represented, and in the right order.
@@ -752,6 +752,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
             $res[$cnit]['clash_val'] = $worst;
             $res[$cnit]['clash'] = "$worst&Aring;<br><small>".$with[$cnit]['srcatom']." with ".$with[$cnit]['dstcnit']." ".$with[$cnit]['dstatom']."</small>";
             $res[$cnit]['clash_isbad'] = true;
+            $res[$cnit]['any_isbad'] = true;
         }
     }
     if(is_array($rama))
@@ -762,8 +763,11 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
             $phipsi = sprintf("%.1f,%.1f", $item['phi'], $item['psi']);
             if($item['eval'] == "OUTLIER")
             {
-                $res[$item['resName']]['rama'] = "$item[eval] ($item[scorePct]%)<br><small>$item[type] - $phipsi</small>";
+                $res[$item['resName']]['rama'] = "$item[eval] ($item[scorePct]%)<br><small>$item[type] / $phipsi</small>";
                 $res[$item['resName']]['rama_isbad'] = true;
+                $res[$item['resName']]['any_isbad'] = true;
+                // ensures that all outliers sort to the top, b/c 0.2 is a Gly outlier but not a General outlier
+                $res[$item['resName']]['rama_val'] -= 100.0;
             }
             else
                 $res[$item['resName']]['rama'] = "$item[eval] ($item[scorePct]%)<br><small>$item[type] / $phipsi</small>";
@@ -778,6 +782,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
             {
                 $res[$item['resName']]['rota'] = "$item[scorePct]%<br><small>angles: ".formatChiAngles($item)."</small>";
                 $res[$item['resName']]['rota_isbad'] = true;
+                $res[$item['resName']]['any_isbad'] = true;
             }
             else
                 $res[$item['resName']]['rota'] = "$item[scorePct]%<br><small>angles: ".formatChiAngles($item)."</small>";
@@ -792,6 +797,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
             {
                 $res[$item['resName']]['cbdev'] = "$item[dev]A</small>";
                 $res[$item['resName']]['cbdev_isbad'] = true;
+                $res[$item['resName']]['any_isbad'] = true;
             }
             else
                 $res[$item['resName']]['cbdev'] = "$item[dev]&Aring;</small>";
@@ -806,6 +812,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
                 $res[$item['resName']]['pperp_val'] = 1; // no way to quantify this
                 $res[$item['resName']]['pperp'] = "wrong pucker?";
                 $res[$item['resName']]['pperp_isbad'] = true;
+                $res[$item['resName']]['any_isbad'] = true;
             }
         }
     }
@@ -846,6 +853,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     $rows = array();
     foreach($res as $cnit => $eval)
     {
+        if($outliersOnly && !$eval['any_isbad']) continue;
         $cni = substr($cnit, 0, 6);
         $type = substr($cnit, 6, 3);
         $row = array();
