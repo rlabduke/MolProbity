@@ -15,6 +15,7 @@ Summarizes MolProbity usage over a specified date range.
     
 // Have to do this for big log files ... we'll need a better solution one day.
     ini_set('memory_limit', '128M');
+    $exec_time = time();
 
 #{{{ class LogIter
 ############################################################################
@@ -78,6 +79,7 @@ class LogIter
         $this->uniqueSessions = count($uSess);
         $this->uniqueIPs = count($uIPs);
         foreach($tmpActions as $action => $sesslist) $this->uniqueActions[$action] = count($sesslist);
+        ksort($this->actions);
         ksort($this->uniqueActions);
         ksort($this->platforms);
         ksort($this->browsers);
@@ -148,116 +150,6 @@ class LogIter
 }
 #}}}########################################################################
 
-#{{{ getRecords, selectRecords
-############################################################################
-/**
-* Returns an array with one entry for each line in molprobity.log.
-* Each entry is an array of the fields on that line, converted to numbers
-* where appropriate.
-*/
-function getRecords($start, $end)
-{
-    $records = array();
-    $in = fopen(MP_BASE_DIR.'/feedback/molprobity.log', 'rb');
-    if($in) while(!feof($in))
-    {
-        $s = trim(fgets($in, 4096));
-        if($s == "") continue;
-        // 5 forces $msgtext to not split on internal colons
-        // $ip:$sess:$time:$msgcode[:$msgtext]
-        $f = explode(':', $s, 5);
-        $f[2] += 0;
-        if($start <= $f[2] && $f[2] <= $end)
-            $records[] = $f;
-    }
-    fclose($in);
-    return $records;
-}
-
-/** Returns records from getRecords() in the specified interval. */
-function selectRecords($records, $start, $end)
-{
-    $newrec = array();
-    foreach($records as $r)
-    {
-        if($start <= $r[2] && $r[2] <= $end)
-            $newrec[] = $r;
-    }
-    return $newrec;
-}
-#}}}########################################################################
-
-#{{{ removeBots
-############################################################################
-/** Returns records from getRecords() minus those caused by bots. */
-function removeBots($records)
-{
-    $bots = array();
-    foreach($records as $r)
-    {
-        // Assume IP addr. + sess. ID = globally unique ID
-        $uid = $r[0].':'.$r[1];
-        if($r[3] == "browser-detect")
-        {
-            $br = recognizeUserAgent($r[4]);
-            if($br['platform'] == "Bot/Crawler" || $br['platform'] == "Java" || $br['platform'] == "Unknown")
-                $bots[$uid] = 1;
-        }
-    }
-    $newrec = array();
-    foreach($records as $r)
-    {
-        // Assume IP addr. + sess. ID = globally unique ID
-        $uid = $r[0].':'.$r[1];
-        if(! $bots[$uid])
-            $newrec[] = $r;
-    }
-    return $newrec;
-}
-#}}}########################################################################
-
-#{{{ uniqueSessions, uniqueIPs, countActions, countActionsBySession
-############################################################################
-/** Number of unique session identifiers in log records. */
-function uniqueSessions($records)
-{
-    $unique = array();
-    foreach($records as $rec) $unique[$rec[1]] = 1;
-    return count($unique);
-}
-
-/** Number of unique IP numbers in log records. */
-function uniqueIPs($records)
-{
-    $unique = array();
-    foreach($records as $rec) $unique[$rec[0]] = 0;
-    return count($unique);
-}
-
-/** Array mapping action IDs to counts of their occurance. */
-function countActions($records)
-{
-    $actions = array();
-    foreach($records as $rec) $actions[$rec[3]] = $actions[$rec[3]]+1;
-    ksort($actions);
-    //asort($actions);
-    //$actions = array_reverse($actions, true);
-    return $actions;
-}
-
-/** Array mapping action IDs to counts of their occurance, max one per session. */
-function countActionsBySession($records)
-{
-    $tmp = array();
-    foreach($records as $rec) $tmp[$rec[3]][$rec[1]] = 1;
-
-    $actions = array();
-    foreach($tmp as $action => $sesslist) $actions[$action] = count($sesslist);
-    ksort($actions);
-    return $actions;
-}
-#}}}########################################################################
-
 #{{{ divideIntoWeeks, divideIntoMonths, divideIntoYears
 ############################################################################
 /** Returns an array of (start, end, range_text) entries for Sun-Sat divisions. */
@@ -307,68 +199,6 @@ function divideIntoYears($absStart, $absEnd)
         $d = getdate($start);
     }
     return $divs;
-}
-#}}}########################################################################
-
-#{{{ countBrowsers, echoBrowserTable
-############################################################################
-/**
-* Three arrays mapping browser names to counts of their occurance:
-*   by platform, by browser, by "platform - browser"
-*/
-function countBrowsers($records)
-{
-    $platforms = array();
-    $browsers = array();
-    $combos = array();
-    foreach($records as $rec)
-    {
-        if($rec[3] == "browser-detect")
-        {
-            $br = recognizeUserAgent($rec[4]);
-            $platforms[ $br['platform'] ] += 1;
-            $browsers[ $br['browser'] ] += 1;
-            $combos[ $br['platform']." - ".$br['browser'] ] += 1;
-        }
-    }
-    ksort($platforms);
-    ksort($browsers);
-    ksort($combos);
-    return array($platforms, $browsers, $combos);
-}
-
-function echoBrowserTable($records)
-{
-    list($platforms, $browsers, $combos) = countBrowsers($records);
-    // Horizontal headers: platforms
-    echo "<p><table cellspacing='4'><tr align='center'><td></td>";
-    foreach($platforms as $p => $pCount) echo "<td><b>$p</b></td>";
-    echo "<td bgcolor='#ffff99'><b><i>total</i></b></td></tr>\n";
-    // Rows: browser types
-    $total = 0;
-    foreach($browsers as $b => $bCount)
-    {
-        echo "<tr align='center'><td><b>$b</b></td>";
-        foreach($platforms as $p => $pCount) echo "<td>".$combos["$p - $b"]."</td>";
-        echo "<td bgcolor='#ffff99'>$bCount</td></tr>\n";
-        $total += $bCount;
-    }
-    // Horizontal footers: platform counts
-    echo "<tr align='center' bgcolor='#ffff99'><td><b><i>total</i></b></td>";
-    foreach($platforms as $p => $pCount) echo "<td>$pCount</td>";
-    echo "<td>$total</td></tr>\n";
-    echo "</table></p>\n";
-
-    //echo "<p><small>Unknown browsers:\n<pre>\n";
-    //foreach($records as $rec)
-    //{
-    //    if($rec[3] == "browser-detect")
-    //    {
-    //        $br = recognizeUserAgent($rec[4]);
-    //        if($br['platform'] == "Unknown") echo $rec[4] . "\n";
-    //    }
-    //}
-    //echo "</pre></small></p>\n";
 }
 #}}}########################################################################
 
@@ -496,10 +326,12 @@ if($end_time > $log->endTime)     $end_time   = $log->endTime+(60*60*24);
     }
     
     echo "</form>\n";
+    echo "<hr>\n<small><center>Time elapsed: ".(time() - $exec_time)." sec";
     if(function_exists('memory_get_usage'))
     {
-        echo "<hr><small><center>Memory usage: ".formatFilesize(memory_get_usage())." / ".ini_get('memory_limit')."</center></small>\n";
+        echo " | Memory usage: ".formatFilesize(memory_get_usage())." / ".ini_get('memory_limit');
     }
+    echo "</center></small>\n";
 ?>
 </body>
 </html>

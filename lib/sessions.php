@@ -429,6 +429,15 @@ function postSessionID()
 //
 // Note that this was taken from the net BUT MODIFIED; the original
 // reference is still given below.
+//
+// This wrapper avoids things with underscores, etc. that don't really look like IPs
+function getVisitorIP()
+{
+    $ip = getVisitorIP_impl();
+    if(preg_match('/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$/', $ip)) return $ip;
+    else return $_SERVER['REMOTE_ADDR'];
+}
+
 /***********************************************
 * Copyright:
 *
@@ -441,7 +450,7 @@ function postSessionID()
 * --- dropping a note to the author:
 *     Marc.Meurrens@ACM.org
 **********************************************/
-function getVisitorIP()
+function getVisitorIP_impl()
 {
     // These aren't registered globally by default anymore -- IWD
     //global  $HTTP_VIA, $HTTP_X_COMING_FROM, $HTTP_X_FORWARDED_FOR, $HTTP_X_FORWARDED,
