@@ -62,12 +62,12 @@
     Convert "number of H added, etc" text into tables
     Auto-expand coords, kins folders?
     add real HTML head/foot to downloadable multichart? look into viewer issues
-    Convert multichart to format (CSV) that would work with KiNG, Excel, etc.
-        Maybe this is an addition rather than a conversion...
+    Add multichart to format (CSV) that would work with KiNG, Excel, etc.
     Convert to biol. unit should produce and display a notebook entry
     Reduce doesn't recognize HSD (as HIS) or ILE _CD_
     we don't correctly auto-detect CNS format nucleic acid PDBs on upload
     Can upload_xxx_done pages be converted to work with generic_done?
+    Add documentation at the bottom of all pages
 {{{ Ideas from PHENIX
     Residue by residue list of outliers (y/n) -- CSV?  standalone?
     Look at Java on SGI and DEC alpha Tru64
@@ -88,6 +88,13 @@
 - changed notebook entry display in upload_pdb_done to match generic_done
 - reformatted links in main analysis results page
 - fixed A / A-ring mixup in multichart
+- made pdbstat.php more able to recognize CNS-style REMARKs
+- updated KiNG in hopes of not leaking applet memory
+- updated Probe, Reduce, Cluster to universal binaries by WBA
+- added mpSerialize() and mpUnserialize() to solve float bugs in multi-table:
+    CBdev sort bug, PHP only, 1E8C
+    Rama sort bug, PHP only, 1AS4 (B 390 ASN)
+    High B calculations sometimes produces "INF" (1ECF A 143 ARG; 1as4 a 274 arg)
 
 ### 3.04 ###
 - added public_html/data/index.html to thwart directory listing attacks

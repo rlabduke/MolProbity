@@ -160,9 +160,17 @@ function pdbstat($pdbfilename)
             # Alternative location for resolution info:
             elseif(!isset($resolution) && preg_match('/^REMARK   3   RESOLUTION RANGE HIGH .+?: +(\d+\.\d+)/', $s, $match)) { $resolution = $match[1]; }
             # CNS-style resolution record:
-            elseif(preg_match("/^REMARK refinement resolution: \\d+\\.\\d+ - (\\d+\\.\\d+) A/", $s, $match))
+            elseif(preg_match('/^REMARK (at|map|refinement) resolution: \d+(\.\d+)? - (\d+(\.\d+)?) A/', $s, $match))
             {
-                $resolution = $match[1];
+                $resolution = $match[3];
+                $fromCNS++;
+            }
+            # CNS-style R record:
+            elseif(preg_match('/^REMARK final +r *= *(0\.\d+)( +free_r *= *(0\.\d+))?/', $s, $match))
+            {
+                $rValue['generic'] = $match[1];
+                if($match[3])
+                    $rFree['generic'] = $match[3];
                 $fromCNS++;
             }
             # Other CNS-type records (markers for being from CNS)

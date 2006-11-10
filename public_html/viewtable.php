@@ -50,7 +50,7 @@ echo mpPageHeader("Viewing $name");
 $in = fopen($file, 'rb');
 clearstatcache();
 $data = fread($in, filesize($file));
-$table = unserialize($data);
+$table = mpUnserialize($data);
 fclose($in);
 
     // Sort table rows according to user request
