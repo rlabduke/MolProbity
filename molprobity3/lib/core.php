@@ -577,6 +577,42 @@ function mpReadfile($filepath)
 }
 #}}}########################################################################
 
+#{{{ mpSerialize, mpUnserialize - replacements for broken (un)serialize
+############################################################################
+// In some versions of PHP, serialize and unserialize munge some floating-point
+// values, in some cases converting them to Inf or NaN.
+// This wreaks havoc on parts of MolProbity that use decimal values...
+function mpSerialize($data)
+{
+    // pro: fast and standard; con: sometimes mangles floats
+    #return serialize($data);
+    // pro: fast, human-readable, and float-safe; con: uses somewhat (~20%?) more space
+    return var_export($data, true);
+    // pro: standards-based; con: done in pure PHP so slow as hell
+    # ...PHP-JSON library call here...
+}
+function mpUnserialize($text)
+{
+    // pro: fast, standard, and safe; con: sometimes mangles floats
+    #return unserialize($text);
+    
+    // pro: fast and float-safe; con: opens vulnerability for arbitrary code injection
+    // The startsWith() call is just a sanity check, and is easily evaded:
+    //  array(0 => exec('rm -rf /'), ...)
+    //
+    //***********************************************************************
+    // It is critically important to ensure that users never have a chance to
+    // overwrite files that will be unserialized, via upload or some editing function.
+    //***********************************************************************
+    //
+    if(startsWith($text, 'array')) return eval("return $text;");
+    else return false;
+    
+    // pro: standards-based and safe; con: done in pure PHP so slow as hell
+    # ...PHP-JSON library call here...
+}
+#}}}########################################################################
+
 #{{{ filesAreIdentical - checks two files to see if they're exactly the same
 ############################################################################
 /**

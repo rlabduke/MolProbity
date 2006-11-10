@@ -891,8 +891,34 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     //}}} Table body
     
     $out = fopen($outfile, 'wb');
-    fwrite($out, serialize($table));
+    fwrite($out, mpSerialize($table));
     fclose($out);
+    
+    // serialize() and unserialize() screw up floating point numbers sometimes.
+    // Not only is there a change in precision, but sometimes numbers become INF
+    // in some versions of PHP 4, like those shipped with Mac OS X.
+    //
+    #$tmpfile = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA.'/table_dump';
+    #$out = fopen($tmpfile.'1', 'wb');
+    #fwrite($out, var_export($table, true));
+    #fclose($out);
+    #$time = time();
+    #    $out = fopen($tmpfile.'2', 'wb');
+    #    fwrite($out, var_export(unserialize(serialize($table)), true));
+    #    fclose($out);
+    #echo "Dump+load time for serialize: ".(time() - $time)." seconds\n";
+    #$time = time();
+    #    $out = fopen($tmpfile.'3', 'wb');
+    #    fwrite($out, var_export(eval("return ".var_export($table, true).";"), true));
+    #    fclose($out);
+    #echo "Dump+load time for var_export: ".(time() - $time)." seconds\n";
+    # WAY TOO SLOW (all in PHP, no C code):
+    #$time = time();
+    #    $json = new Services_JSON();
+    #    $out = fopen($tmpfile.'4', 'wb');
+    #    fwrite($out, var_export($json->decode($json->encode($table)), true));
+    #    fclose($out);
+    #echo "Dump+load time for JSON: ".(time() - $time)." seconds\n";
     
     if($snapfile)
     {
