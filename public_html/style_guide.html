@@ -5,6 +5,14 @@
     <link rel="StyleSheet" href="css/default.css" TYPE="text/css">
     <link rel="shortcut icon" href="favicon.ico">
     <meta name="ROBOTS" content="INDEX, NOFOLLOW">
+    <script>
+function toggle(elName)
+{
+    var el = document.getElementById(elName);
+    if(el.style.display) el.style.display = ""
+    else el.style.display = "none"
+}
+    </script>
 </head>
 <body>
 <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -25,13 +33,16 @@
 </td>
 <td valign="top">
     <div class="pagecontent">
-This is div class = pagecontent
-<br>Use div class = pagecontent_alone if no sidebar
-<div class='alert'>div class = alert</div>
-<div class='banner'>div class = banner</div>
+<div style='display:none' id='alert1' class='alert'>div class = alert</div>
+<div style='display:none' id='banner1' class='banner'>div class = banner</div>
+<br>Toggle <a href='#' onclick='toggle("alert1");'>alert</a> &amp; <a href='#' onclick='toggle("banner1");'>banner</a>
 
-Normal text for the page...
+<br>This is div class = pagecontent
+<br>Use div class = pagecontent_alone if no sidebar
+
+<p>Normal text for the page ... <a href='#'>and a link</a>.
 <br><span class='inactive'>span class = inactive</span>
+</p>
 
 <ol>
 <li><b>Ordered list (OL) 1:</b> with bolded lead-in</li>
@@ -42,6 +53,8 @@ Normal text for the page...
 <li>Unordered list (UL) item 1</li>
 <li>Unordered list (UL) item 2</li>
 </ul>
+
+<div class='feature'>div class = feature with <a href='#'>a link</a></div>
 
 <div class='side_options'>
     div class = side_options

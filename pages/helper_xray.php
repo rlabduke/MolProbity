@@ -14,6 +14,11 @@ function display($context)
 {
     echo $this->pageHeader("Evaluate X-ray structure", "helper_xray");
 ?>
+<div class='feature'>
+    <b>For a more detailed tutorial</b>, including references, see our
+    <a href='http://kinemage.biochem.duke.edu/teaching/csh/' target='_blank'>Cold Spring Harbor tutorial on MolProbity</a>!
+</div>
+
 Use this guide to help you evaluate the reliablity of a structural model determined by X-ray crystallography --
 not all parts of all structures (published or not) are correct,
 and the errors could impact the biological conclusion you wish to draw.
@@ -67,7 +72,7 @@ and the errors could impact the biological conclusion you wish to draw.
 
 <p>Want to [fix some of the problems] you've discovered here?
 
-<p>For more information:
+<!--
 <ul>
 <li>XXX-TODO: About coordinate files</li>
 <li>XXX-TODO: About adding H, flips, and flipkins (Reduce)</li>
@@ -77,6 +82,7 @@ and the errors could impact the biological conclusion you wish to draw.
 <li>XXX-TODO: About base-P measurement</li>
 <li>XXX-TODO: How to use multi-criterion kinemages</li>
 </ul>
+-->
 <?php
     echo $this->pageFooter();
 }
