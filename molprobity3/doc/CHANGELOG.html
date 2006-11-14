@@ -68,6 +68,8 @@
     we don't correctly auto-detect CNS format nucleic acid PDBs on upload
     Can upload_xxx_done pages be converted to work with generic_done?
     Add documentation at the bottom of all pages
+    Mitch Miller: how should Rama stats respond to alternate conformations?
+        Don't over-count alts; maybe weight by occupancy?
 {{{ Ideas from PHENIX
     Residue by residue list of outliers (y/n) -- CSV?  standalone?
     Look at Java on SGI and DEC alpha Tru64
@@ -95,6 +97,10 @@
     CBdev sort bug, PHP only, 1E8C
     Rama sort bug, PHP only, 1AS4 (B 390 ASN)
     High B calculations sometimes produces "INF" (1ECF A 143 ARG; 1as4 a 274 arg)
+- added "feature" CSS class for divs -- to be used in tutorial pages
+- tweaked around with the colors a lot and ended up back at the same place
+- started working on helper_xray page
+- upgraded to a newer Universal binary of Probe 2.11.061018
 
 ### 3.04 ###
 - added public_html/data/index.html to thwart directory listing attacks

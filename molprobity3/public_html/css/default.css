@@ -91,8 +91,8 @@ div.pagecontent_alone h2, div.pagecontent_alone h3, div.pagecontent_alone h4, di
 
 /* Used for warnings about bad events, etc */
 div.alert {
-    background-color : #ff9999 ;
-    color : #330000 ;
+    background-color : #993333 ;
+    color : #ffffff ;
     text-align : justify ;
     border : 1px solid #330000 ;
     padding : 0.4em ;
@@ -101,25 +101,32 @@ div.alert {
 
 /* Used for the system "banner" message, about e.g. the server going down. */
 div.banner {
-    background-color : #ffcc99 ;
-    color : #663300 ;
+    background-color : #999966 ;
+    color : #ffffff ;
     text-align : justify ;
-    border : 1px dotted #663300 ;
+    padding : 0.4em ;
+    margin: 0.4em;
+}
+
+/* Used for ___. */
+div.feature {
+    background-color : #ddddeb ;
+    color : #000000 ;
+    text-align : justify ;
+    border : 1px dotted #666699 ;
     padding : 0.4em ;
     margin: 0.4em;
 }
 
 div.side_options {
-    /*background-color : #ccccb2 ;
-    color : #000000 ;*/
+    background-color: #f0f0dd ;
     border : 1px dotted #999966 ;
     padding : 0.4em ;
     float : right ;
 }
 
 div.inline_options {
-    /*background-color : #ccccb2 ;
-    color : #000000 ;*/
+    background-color: #f0f0dd ;
     border : 1px dotted #999966 ;
     padding : 0.4em ;
 }
