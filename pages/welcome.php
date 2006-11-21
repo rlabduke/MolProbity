@@ -62,17 +62,15 @@ function display($context)
 <p><b><?php echo "<a href='".makeEventURL("onGoto", "helper_xray.php")."'>Evaluate X-ray structure</a>"; ?>:</b>
 Typical steps for a published X-ray crystal structure
 or one still undergoing refinement.</p>
-<p><b>Evaluate NMR structure:</b>
+<p><b><?php echo "<a href='".makeEventURL("onGoto", "helper_nmr.php")."'>Evaluate NMR structure</a>"; ?>:</b>
 Typical steps for a published NMR ensemble
 or one still undergoing refinement.</p>
-<p><b>Fix up structure:</b>
+<p><b><?php echo "<a href='".makeEventURL("onGoto", "helper_rebuild.php")."'>Fix up structure</a>"; ?>:</b>
 Rebuild the model to remove outliers
 as part of the refinement cycle.</p>
-<p><b>Work with kinemages:</b>
+<p><b><?php echo "<a href='".makeEventURL("onGoto", "helper_rebuild.php")."'>Work with kinemages</a>"; ?>:</b>
 Create and view interactive 3-D graphics
 from your web browser.</p>
-<p><b><?php echo "<a href='".makeEventURL("onGoto", "sitemap.php")."'>Site map</a>"; ?>:</b>
-Minimum-guidance interface for experienced users.</p>
 <p><small><i>NB: the back button doesn't work inside MolProbity</i></small></p><!-- by request of DCR -->
 
 </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>
@@ -91,8 +89,6 @@ Minimum-guidance interface for experienced users.</p>
     Nucleic Acids Research 32:W615-W619.
     </small></p>
 <p><b><a href='help/java.html' target='_blank'>Installing Java</a></b>: how to make kinemage graphics work in your browser.</p>
-<!-- <p><b>Lab notebook</b>: what's it for and how do I use it?</p> -->
-<p><b>Adding hydrogens</b>: why are H necessary for steric evaluations?</p>
 <p><b>My own MolProbity</b>: how can I run my own private MolProbity server?</p>
 </td></tr></table>
 <?php

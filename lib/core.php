@@ -133,9 +133,9 @@ function mpNavigationBar($active)
     $s = "";
     $s .= mpNavBar_goto('welcome.php', 'Main page', ($active == 'welcome'));
     $s .= "<div class='minornav'>".mpNavBar_goto('helper_xray.php', 'Evaluate X-ray', ($active == 'helper_xray'))."</div>";
-    $s .= "<div class='minornav'>".mpNavBar_goto('', 'Evaluate NMR')."</div>";
-    $s .= "<div class='minornav'>".mpNavBar_goto('', 'Fix up structure')."</div>";
-    $s .= "<div class='minornav'>".mpNavBar_goto('', 'Work with kins')."</div>";
+    $s .= "<div class='minornav'>".mpNavBar_goto('helper_nmr.php', 'Evaluate NMR', ($active == 'helper_nmr'))."</div>";
+    $s .= "<div class='minornav'>".mpNavBar_goto('helper_rebuild.php', 'Fix up structure', ($active == 'helper_rebuild'))."</div>";
+    $s .= "<div class='minornav'>".mpNavBar_goto('helper_kinemage.php', 'Work with kins', ($active == 'helper_kinemage'))."</div>";
     $s .= "<br />\n";
     /*
     $s .= "<div class='minornav'>".mpNavBar_call('upload_setup.php', 'Input PDB files')."</div>";
