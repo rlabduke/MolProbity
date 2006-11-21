@@ -68,10 +68,10 @@ or one still undergoing refinement.</p>
 <p><b><?php echo "<a href='".makeEventURL("onGoto", "helper_rebuild.php")."'>Fix up structure</a>"; ?>:</b>
 Rebuild the model to remove outliers
 as part of the refinement cycle.</p>
-<p><b><?php echo "<a href='".makeEventURL("onGoto", "helper_rebuild.php")."'>Work with kinemages</a>"; ?>:</b>
+<p><b><?php echo "<a href='".makeEventURL("onGoto", "helper_kinemage.php")."'>Work with kinemages</a>"; ?>:</b>
 Create and view interactive 3-D graphics
 from your web browser.</p>
-<p><small><i>NB: the back button doesn't work inside MolProbity</i></small></p><!-- by request of DCR -->
+
 
 </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>
 
@@ -89,7 +89,8 @@ from your web browser.</p>
     Nucleic Acids Research 32:W615-W619.
     </small></p>
 <p><b><a href='help/java.html' target='_blank'>Installing Java</a></b>: how to make kinemage graphics work in your browser.</p>
-<p><b>My own MolProbity</b>: how can I run my own private MolProbity server?</p>
+<p><b><a href='get_molprobity.php' target='_blank'>My own MolProbity</a></b>: how can I run my own private MolProbity server?</p>
+<p><small><i>NB: the back button doesn't work inside MolProbity</i></small></p><!-- by request of DCR -->
 </td></tr></table>
 <?php
     // These are too annoying to have at the top all the time
