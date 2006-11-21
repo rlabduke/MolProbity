@@ -3,7 +3,7 @@
     Welcome/start page for MP3, with hints for new users about how to proceed.
 *****************************************************************************/
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
-class helper_xray_delegate extends BasicDelegate {
+class helper_nmr_delegate extends BasicDelegate {
     
 #{{{ display - creates the UI for this page
 ############################################################################
@@ -12,14 +12,16 @@ class helper_xray_delegate extends BasicDelegate {
 */
 function display($context)
 {
-    echo $this->pageHeader("Evaluate X-ray structure", "helper_xray");
+    echo $this->pageHeader("Evaluate NMR structure", "helper_nmr");
 ?>
 <div class='feature'>
-    <b>For a more detailed tutorial</b>, including references, see our
-    <a href='http://kinemage.biochem.duke.edu/teaching/csh/' target='_blank'>Cold Spring Harbor tutorial on MolProbity</a>!
+    We currently have no tutorials for NMR structures, but many of the principles of analyzing crystal structures still apply.
+    See our
+    <a href='http://kinemage.biochem.duke.edu/teaching/csh/' target='_blank'>Cold Spring Harbor tutorial on MolProbity</a>
+    as well as our <a href='<?php echo makeEventURL("onGoto", "helper_xray.php") ?>'>guide to analyzing X-ray structures</a>.
 </div>
 
-Use this guide to help you evaluate the reliablity of a structural model determined by X-ray crystallography --
+Use this guide to help you evaluate the reliablity of a structural model determined by Nuclear Magnetic Resonance (NMR) spectroscopy --
 not all parts of all structures (published or not) are correct,
 and the errors could impact the biological conclusion you wish to draw.
 
@@ -30,15 +32,15 @@ and the errors could impact the biological conclusion you wish to draw.
     <a href='http://www.pdb.org/' target='blank'>Protein Data Bank</a> or the
     <a href='http://ndbserver.rutgers.edu/' target='blank'>Nucleic Acid Data Bank</a>.
 </li>
-<li><b><?php echo "<a href='".makeEventURL("onCall", "reduce_setup.php")."'>Add hydrogens (strongly recommended)</a>"; ?>:</b>
-    Explicit hydrogens are needed for many of MolProbity's analyses to function correctly, and
-    structures determined by crystallography almost never include them.
-    In most cases, we also recommend letting MolProbity flip Asn, Gln, and His residues that are fit 180 degrees backwards;
-    this will give the most reliable view of H-bonding and steric interactions.
-    You'll have a chance to review and override those flips, of course.
+<li><b><?php echo "<a href='".makeEventURL("onCall", "reduce_setup.php")."'>Add hydrogens (usually unnecessary)</a>"; ?>:</b>
+    Explicit hydrogens are needed for many of MolProbity's analyses to function correctly, but
+    structures determined by NMR almost always include them.
 </li>
-<li><b><?php echo "<a href='".makeEventURL("onCall", "aacgeom_setup.php")."'>Analyze sterics &amp; geometry</a>"; ?>:</b>
-    Don't be daunted by the array of <b>options</b> here --
+<li><b><?php echo "<a href='".makeEventURL("onCall", "aacgeom_setup.php")."'>Analyze sterics &amp; geometry for single models</a>"; ?>:</b>
+    Most NMR structures are reported as ensembles of models.
+    At the moment, MolProbity has limited tools for analyzing ensembles,
+    but it can easily analyze each model individually.
+    <p>Don't be daunted by the array of <b>options</b> here --
     MolProbity automatically selects appropriate settings for your structure,
     so it's not necessary for you to change them unless you want to.
     Running all the various analyses may take a few minutes, so please be patient.
@@ -59,6 +61,11 @@ and the errors could impact the biological conclusion you wish to draw.
     These tools can help structural biologists reduce the number of problems in their structures, however,
     and can help other scientists know whether a particular model offers a believable view of a specific area.
 </li>
+<li><b><?php echo "<a href='".makeEventURL("onCall", "ens_aacgeom_setup.php")."'>Analyze sterics &amp; geometry for the ensemble</a>"; ?>:</b>
+    At the moment, MolProbity has limited tools for analyzing ensembles.
+    It can produce multi-model multi-criterion kinemages, but not much else (yet).
+    Feature requests to Jeremy Block (jeremy.block@duke.edu).
+</li>
 <li><b><?php echo "<a href='".makeEventURL("onGoto", "file_browser.php")."'>Download files</a>"; ?>:</b>
     Before you leave, you may want to download some of the files you've created,
     like the PDB file with hydrogens added, or the multi-criterion kinemage.
@@ -69,20 +76,6 @@ and the errors could impact the biological conclusion you wish to draw.
     This will permanenty remove your files from our server, freeing up space for other users.
 </li>
 </ol>
-
-<p>Want to <?php echo "<a href='".makeEventURL("onGoto", "helper_rebuild.php")."'>fix some of the problems</a>"; ?> you've discovered here?
-
-<!--
-<ul>
-<li>XXX-TODO: About coordinate files</li>
-<li>XXX-TODO: About adding H, flips, and flipkins (Reduce)</li>
-<li>XXX-TODO: About all-atom contacts</li>
-<li>XXX-TODO: About Ramachandran/rotamer</li>
-<li>XXX-TODO: About C-beta deviations</li>
-<li>XXX-TODO: About base-P measurement</li>
-<li>XXX-TODO: How to use multi-criterion kinemages</li>
-</ul>
--->
 <?php
     echo $this->pageFooter();
 }

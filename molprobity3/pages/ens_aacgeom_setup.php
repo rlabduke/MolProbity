@@ -134,7 +134,9 @@ function checkSettingsBeforeSubmit()
     <br><label><input type='checkbox' name='kinOccupancy' value='1'> Models colored by occupancy</label>
     <br><label><input type='checkbox' name='kinRibbons' value='1'> Ribbons</label>
     </div>
+<!--
 <h5 class='nospaceafter'><label><input type='checkbox' name='doMultiGraph' value='1'> Multi-criterion graph [ALPHA TEST]</label></h5>
+-->
 </div>
 
 <?php
