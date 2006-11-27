@@ -26,6 +26,7 @@ function display($context)
     
     echo "<h3><a href='".makeEventURL("onCall", "editpdb_setup1.php")."'>Edit PDB files</a></h3>\n<ul>\n";
     echo "<li>Remove unwanted chains.</li>\n";
+    echo "<li>Specify crystallographic resolution.</li>\n";
     echo "</ul>\n";
     
     echo "<h3><a href='".makeEventURL("onCall", "reduce_setup.php")."'>Add hydrogens</a></h3>\n<ul>\n";
