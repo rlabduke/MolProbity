@@ -30,11 +30,23 @@ function display($context)
         // It no longer makes sense to continue -- needed vars may be undefined.
         // All we can do is return to the main page!
         //pageGoto("sitemap.php"); No, b/c we're already in display()
-        $_SESSION['bgjob']['whereNext'] = "sitemap.php";
+        $_SESSION['bgjob']['whereNext'] = "welcome.php";
         mpSaveSession();
     }
     
-    if($_SESSION['bgjob']['isRunning'])
+    $ellapsed = time() - $_SESSION['bgjob']['startTime'];
+    if($_SESSION['bgjob']['isRunning'] && !$_SESSION['bgjob']['processID'] && $ellapsed > 5)
+    {
+        $url        = makeEventURL("onGoto", "welcome.php");
+        $refresh    = "10; URL=$url";
+        echo $this->pageHeader("Job failed to start");//, "none", $refresh);
+        echo "<p>It appears that your background job failed to start.\n";
+        echo "<br>This is probably due to a syntax error in one of the PHP scripts.\n";
+        echo "<br>See the session error log for hints.\n";
+        echo "<p><a href='$url'>Click here</a> to continue.\n";
+        echo $this->pageFooter();
+    }
+    elseif($_SESSION['bgjob']['isRunning'])
     {
         // We have to be very careful to not overwrite $_SESSION while the
         // background job is running, or data could be lost!!!
@@ -42,7 +54,6 @@ function display($context)
         // A simple counter to make sure browsers think each reload
         // is a "unique" page...
         $count      = $_REQUEST['count']+1;
-        $ellapsed   = time() - $_SESSION['bgjob']['startTime'];
         // We use basename() to get "index.php" instead of the full path,
         // which is subject to corruption with URL forwarding thru kinemage.
         $url        = basename($_SERVER['PHP_SELF'])."?$_SESSION[sessTag]&count=$count";
@@ -68,7 +79,7 @@ function display($context)
     }
     else
     {
-        $url        = makeEventURL("onJobFinished", $_SESSION['bgjob']['whereNext']);
+        $url        = makeEventURL("onGoto", $_SESSION['bgjob']['whereNext'], $_SESSION['bgjob']);
         $refresh    = "3; URL=$url";
         echo $this->pageHeader("Job is finished", "none", $refresh);
         echo "<p><center>\n";
@@ -93,17 +104,6 @@ function fmtTime($sec)
         return "$sec seconds";
     else
         return floor($sec/60)." minutes and ".($sec%60)." seconds";
-}
-#}}}########################################################################
-
-#{{{ onJobFinished - moves on to the next page
-############################################################################
-/**
-* Documentation for this function.
-*/
-function onJobFinished($arg)
-{
-    pageGoto($arg, $_SESSION['bgjob']);
 }
 #}}}########################################################################
 

@@ -1071,6 +1071,180 @@ REMARK  42  MOLPROBITY OUTPUT SCORES:
 }
 #}}}########################################################################
 
+
+
+#{{{ writeMultimodelChart - kinemage format multichart for NMR structures
+############################################################################
+/**
+* $infiles      array of single model PDB files to process
+* $outfile      will be overwritten with a kinemage
+*/
+function writeMultimodelChart($infiles, $outfile)
+{
+    $infiles    = array_values($infiles); // re-indexes from 0 ... n-1
+    $clashes    = array();
+    $clashOuts  = array();
+    $clashCount = array();
+    $rotas      = array();
+    $rotaOuts   = array();
+    $rotaCount  = array();
+    $ramas      = array();
+    $ramaOuts   = array();
+    $ramaCount  = array();
+    $tmpfile    = mpTempfile();
+    
+    for($i = 0; $i < count($infiles); $i++)
+    {
+        runClashlist($infiles[$i], $tmpfile);
+        $clashes[$i] = loadClashlist($tmpfile);
+        $clashOuts[$i] = findClashOutliers($clashes[$i]);
+        foreach($clashOuts[$i] as $cnit => $junk) $clashCount[$cnit] += 1;
+        runRotamer($infiles[$i], $tmpfile);
+        $rotas[$i] = loadRotamer($tmpfile);
+        $rotaOuts[$i] = findRotaOutliers($rotas[$i]);
+        foreach($rotaOuts[$i] as $cnit => $junk) $rotaCount[$cnit] += 1;
+        runRamachandran($infiles[$i], $tmpfile);
+        $ramas[$i] = loadRamachandran($tmpfile);
+        $ramaOuts[$i] = findRamaOutliers($ramas[$i]);
+        foreach($ramaOuts[$i] as $cnit => $junk) $ramaCount[$cnit] += 1;
+    }
+    
+    $allRes = array_values(listResidues($infiles[0])); // for now, assume all files have same res
+    $out = fopen($outfile, 'wb');
+    fwrite($out, "@kinemage 1\n");
+    fwrite($out, "@flatland\n");
+
+    fwrite($out, "@group {models} animate collapsable\n");
+    fwrite($out, "@labellist {res names}\n");
+    for($j = 0; $j < count($allRes); $j++)
+        fwrite($out, "{".$allRes[$j]."} 0 -$j 0\n");
+    fwrite($out, "@balllist {grid} radius= 0.02 nohighlight color= gray\n");
+    for($j = 0; $j < count($allRes); $j++)
+        for($i = 0; $i < count($infiles); $i++)
+            fwrite($out, "{} ".(-$i-1)." -$j 0\n");
+
+    for($i = 0; $i < count($infiles); $i++)
+    {
+        fwrite($out, "@subgroup {".basename($infiles[$i])."} dominant\n");
+        
+        fwrite($out, "@ringlist {clashes} master= {clashes} radius= 0.3 width= 2 color= hotpink\n");
+        for($j = 0; $j < count($allRes); $j++)
+            if($clashOuts[$i][ $allRes[$j] ]) fwrite($out, "{".$allRes[$j]."} ".(-$i-1)." -$j 0\n");
+        
+        fwrite($out, "@ringlist {rotamers} master= {rotamers} radius= 0.1 width= 2 color= gold\n");
+        for($j = 0; $j < count($allRes); $j++)
+            if($rotaOuts[$i][ $allRes[$j] ]) fwrite($out, "{".$allRes[$j]."} ".(-$i-1)." -$j 0\n");
+        
+        fwrite($out, "@ringlist {Ramachandran} master= {Ramachandran} radius= 0.2 width= 2 color= green\n");
+        for($j = 0; $j < count($allRes); $j++)
+            if($ramaOuts[$i][ $allRes[$j] ]) fwrite($out, "{".$allRes[$j]."} ".(-$i-1)." -$j 0\n");
+    }
+
+    
+    fwrite($out, "@group {criteria (rings)} animate collapsable\n");
+    fwrite($out, "@labellist {res names}\n");
+    for($j = 0; $j < count($allRes); $j++)
+        fwrite($out, "{".$allRes[$j]."} 0 -$j ".(-0.1*$i)."\n");
+
+    for($i = 0; $i < count($infiles); $i++)
+    {
+        fwrite($out, "@subgroup {".basename($infiles[$i])."} dominant\n");
+        $xpos = 0;
+        
+        fwrite($out, "@ringlist {clashes} radius= ".(0.50 * ($i+1)/count($infiles))." width= 1 color= hotpink\n");
+        $xpos -= 1.5;
+        for($j = 0; $j < count($allRes); $j++)
+            if($clashOuts[$i][ $allRes[$j] ]) fwrite($out, "{".$allRes[$j]."} $xpos -$j ".(-0.1*$i)."\n");
+        
+        fwrite($out, "@ringlist {rotamers} radius= ".(0.50 * ($i+1)/count($infiles))." width= 1 color= gold\n");
+        $xpos -= 1.5;
+        for($j = 0; $j < count($allRes); $j++)
+            if($rotaOuts[$i][ $allRes[$j] ]) fwrite($out, "{".$allRes[$j]."} $xpos -$j ".(-0.1*$i)."\n");
+        
+        fwrite($out, "@ringlist {Ramachandran} radius= ".(0.50 * ($i+1)/count($infiles))." width= 1 color= green\n");
+        $xpos -= 1.5;
+        for($j = 0; $j < count($allRes); $j++)
+            if($ramaOuts[$i][ $allRes[$j] ]) fwrite($out, "{".$allRes[$j]."} $xpos -$j ".(-0.1*$i)."\n");
+    }
+    
+    
+    fwrite($out, "@group {criteria (lines)} animate collapsable\n");
+    fwrite($out, "@labellist {res names}\n");
+    for($j = 0; $j < count($allRes); $j++)
+        fwrite($out, "{".$allRes[$j]."} 0 -$j ".(-0.1*$i)."\n");
+    $xpos = 0;
+    
+    fwrite($out, "@vectorlist {clashes} color= hotpink\n");
+    $xpos -= 1;
+    writeMultimodelChart_bars($out, $allRes, $clashCount, count($infiles), $xpos);
+
+    fwrite($out, "@vectorlist {rotamers} color= gold\n");
+    $xpos -= 1;
+    writeMultimodelChart_bars($out, $allRes, $rotaCount, count($infiles), $xpos);
+
+    fwrite($out, "@vectorlist {Ramachandran} color= green\n");
+    $xpos -= 1;
+    writeMultimodelChart_bars($out, $allRes, $ramaCount, count($infiles), $xpos);
+    
+    
+    fwrite($out, "@group {criteria (worms)} animate collapsable\n");
+    fwrite($out, "@labellist {res names}\n");
+    for($j = 0; $j < count($allRes); $j++)
+        fwrite($out, "{".$allRes[$j]."} 0 -$j ".(-0.1*$i)."\n");
+    $xpos = 0;
+    
+    fwrite($out, "@trianglelist {clashes} color= hotpink\n");
+    $xpos -= 1;
+    writeMultimodelChart_boxes($out, $allRes, $clashCount, count($infiles), $xpos);
+
+    fwrite($out, "@trianglelist {rotamers} color= gold\n");
+    $xpos -= 1;
+    writeMultimodelChart_boxes($out, $allRes, $rotaCount, count($infiles), $xpos);
+
+    fwrite($out, "@trianglelist {Ramachandran} color= green\n");
+    $xpos -= 1;
+    writeMultimodelChart_boxes($out, $allRes, $ramaCount, count($infiles), $xpos);
+
+    fclose($out);
+}
+
+function writeMultimodelChart_boxes($out, $allRes, $outlierCounts, $numModels, $xpos)
+{
+    for($j = 0; $j < count($allRes); $j++)
+    {
+        $cnit = $allRes[$j];
+        if(!$outlierCounts[$cnit]) continue;
+        $x1 = $xpos - 0.5*($outlierCounts[$cnit] / $numModels);
+        $x2 = $xpos + 0.5*($outlierCounts[$cnit] / $numModels);
+        $y1 = -($j - 0.5);
+        $y2 = -($j + 0.5);
+        fwrite($out, "{{$cnit}}X $x1 $y1 0 {\"} $x2 $y1 0\n");
+        fwrite($out, "{{$cnit}}P $x1 $y2 0 {\"} $x2 $y2 0\n");
+    }
+    fwrite($out, "@vectorlist {dividers} color= gray width= 1 nobutton master= {dividers}\n");
+    fwrite($out, "{}P $xpos 0 0 {} $xpos ".(1-count($allRes))." -0.1\n");
+}
+
+function writeMultimodelChart_bars($out, $allRes, $outlierCounts, $numModels, $xpos)
+{
+    for($j = 0; $j < count($allRes); $j++)
+    {
+        $cnit = $allRes[$j];
+        $x1 = $xpos - 0.5*($outlierCounts[$cnit] / $numModels);
+        $x2 = $xpos + 0.5*($outlierCounts[$cnit] / $numModels);
+        $y1 = -($j - 0.5);
+        $y2 = -($j + 0.5);
+        fwrite($out, "{{$cnit}}P $x1 $y1 0 {\"} $x2 $y1 0\n");
+        fwrite($out, "{{$cnit}}P $x1 $y2 0 {\"} $x2 $y2 0\n");
+    }
+    $x1 = $xpos - 0.5;
+    $x2 = $xpos + 0.5;
+    fwrite($out, "@vectorlist {dividers} color= gray width= 1 nobutton master= {dividers}\n");
+    fwrite($out, "{}P $x1 0 0 {} $x1 ".(1-count($allRes))." -0.1\n");
+    fwrite($out, "{}P $x2 0 0 {} $x2 ".(1-count($allRes))." -0.1\n");
+}
+#}}}########################################################################
+
 #{{{ a_function_definition - sumary_statement_goes_here
 ############################################################################
 /**

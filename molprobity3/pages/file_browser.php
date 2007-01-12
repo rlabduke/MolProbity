@@ -151,16 +151,16 @@ function makeFileList($list, $basePath, $baseURL, $isExpanded, $depth = 0, $hidd
             $s .= "<img src='img/clear_1x1.gif' width='".(16*$depth)."' height='1'>";
             if($isExpanded["$basePath/$dir"])
             {
-                $s .= "<a href='".makeEventURL("onFolderClose", "$basePath/$dir")."#filelist' onclick='expando(this); return false;'>";
-                $s .= "<img src='img/openfolder.gif'></a> ";
-                $s .= "<b>$dir</b></td><td colspan='4'></td></tr>\n";
+                $s .= "<a class='file_browser' href='".makeEventURL("onFolderClose", "$basePath/$dir")."#filelist' onclick='expando(this); return false;'>";
+                $s .= "<img src='img/openfolder.gif'> ";
+                $s .= "<b>$dir</b></a></td><td colspan='4'></td></tr>\n";
                 $s .= $this->makeFileList($file, "$basePath/$dir", "$baseURL/$dir", $isExpanded, $depth+1, $hidden);
             }
             else
             {
-                $s .= "<a href='".makeEventURL("onFolderOpen", "$basePath/$dir")."#filelist' onclick='expando(this); return false;'>";
-                $s .= "<img src='img/closedfolder.gif'></a> ";
-                $s .= "<b>$dir</b></td><td colspan='4'></td></tr>\n";
+                $s .= "<a class='file_browser' href='".makeEventURL("onFolderOpen", "$basePath/$dir")."#filelist' onclick='expando(this); return false;'>";
+                $s .= "<img src='img/closedfolder.gif'> ";
+                $s .= "<b>$dir</b></a></td><td colspan='4'></td></tr>\n";
                 $s .= $this->makeFileList($file, "$basePath/$dir", "$baseURL/$dir", $isExpanded, $depth+1, true);
             }
         }

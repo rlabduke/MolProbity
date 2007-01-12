@@ -17,6 +17,9 @@ a:visited { color : #000099 ; }
 a:hover { text-decoration : underline ; color : #0000ff ; }
 a:active { color : #0000ff ; }
 
+/* So you can click the file browser dir names without them looking like links. */
+a.file_browser { color: #000000 ; text-decoration : none ; }
+
 /* Better formatting for the "helper" pages. */
 ol li { padding : 0.5em 0 0.5em 0 ; }
 
