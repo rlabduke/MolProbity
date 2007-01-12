@@ -84,6 +84,10 @@
 ===  CHANGE LOG  =============================================================
 ==============================================================================
 
+### 3.06 ###
+- changed file download so clicking on dir names is as good as on triangles.
+  This may help keep users from getting confused about how to work it.
+
 ### 3.05 ###
 - fixed up some rare weirdnesses about guessing the user's IP address
 - multi-chart generation is not too slow:  only 17 sec for the ribosome
@@ -111,6 +115,8 @@
 - added page for downloading MolProbity
 - added LICENSE file (BSD license)
 - updated KiNG to newest parallel coords code for use by Bodan
+- added debugging code to job_progress for cases where PHP syntax error causes
+  the background job to abort before it ever begins running.
 
 ### 3.04 ###
 - added public_html/data/index.html to thwart directory listing attacks

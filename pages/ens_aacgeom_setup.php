@@ -137,6 +137,7 @@ function checkSettingsBeforeSubmit()
 <!--
 <h5 class='nospaceafter'><label><input type='checkbox' name='doMultiGraph' value='1'> Multi-criterion graph [ALPHA TEST]</label></h5>
 -->
+<h5 class='nospaceafter'><label><input type='checkbox' name='doMultiModelChart' value='1'> Multi-criterion kinemage chart [ALPHA TEST]</label></h5>
 </div>
 
 <?php

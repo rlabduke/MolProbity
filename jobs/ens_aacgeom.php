@@ -64,6 +64,7 @@ foreach($ensemble['models'] as $modelID)
 $tasks = array();
 if($opts['doKinemage'])         $tasks['multikin'] = "Create multi-criterion kinemage";
 if($opts['doMultiGraph'])       $tasks['multigraph'] = "Create multi-criterion graph";
+if($opts['doMultiModelChart'])  $tasks['multichart'] = "Create multi-criterion chart";
     
 if($opts['doKinemage'])
 {
@@ -100,6 +101,15 @@ if($opts['doMultiGraph'])
     makeChartKin($infiles, $outfile);
     $labbookEntry .= "<div class='alert'>\n<center><h3>ALPHA TEST</h3></center>\n";
     $labbookEntry .= "Not suitable for use by the general public: ".linkKinemage("$ensemble[prefix]multigraph.kin", "Multi-criterion graph");
+    $labbookEntry .= "</div>\n";
+}
+if($opts['doMultiModelChart'])
+{
+    setProgress($tasks, 'multichart'); // updates the progress display if running as a background job
+    $outfile = "$kinDir/$ensemble[prefix]mmmcc.kin"; // Multi-Model Multi-Criterion Chart
+    writeMultimodelChart($infiles, $outfile);
+    $labbookEntry .= "<div class='alert'>\n<center><h3>ALPHA TEST</h3></center>\n";
+    $labbookEntry .= "Not suitable for use by the general public: ".linkKinemage("$ensemble[prefix]mmmcc.kin", "Multi-chart mockup");
     $labbookEntry .= "</div>\n";
 }
 
