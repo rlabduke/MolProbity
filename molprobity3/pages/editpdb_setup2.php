@@ -96,8 +96,9 @@ function onEditPDB()
         mpLog("editpdb:Changed/set resolution for a PDB file");
     }
 
-    $newModel['stats']      = pdbstat($outpath);
-    $newModel['history']    = "Edited $oldModel[pdb]";
+    $newModel['stats']          = pdbstat($outpath);
+    $newModel['history']        = "Edited $oldModel[pdb]";
+    $newModel['isUserSupplied'] = $oldModel['isUserSupplied'];
     $_SESSION['models'][$newID] = $newModel;
     $_SESSION['lastUsedModelID'] = $newID; // this is now the current model
     

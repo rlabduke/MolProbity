@@ -138,7 +138,8 @@ if(isset($_SESSION['bgjob']['pdbCode']))
         $id = addModelOrEnsemble($tmpfile,
             strtolower("$code.pdb"), // lower case is nicer for readability
             $_SESSION['bgjob']['isCnsFormat'],
-            $_SESSION['bgjob']['ignoreSegID']);
+            $_SESSION['bgjob']['ignoreSegID'],
+            false /* came from public database */);
         
         // Clean up temp files
         unlink($tmpfile);
@@ -160,7 +161,8 @@ else
     $id = addModelOrEnsemble($_SESSION['bgjob']['tmpPdb'],
         $origName,
         $_SESSION['bgjob']['isCnsFormat'],
-        $_SESSION['bgjob']['ignoreSegID']);
+        $_SESSION['bgjob']['ignoreSegID'],
+        true /* came from upload */);
     
     // Clean up temp files
     unlink($_SESSION['bgjob']['tmpPdb']);

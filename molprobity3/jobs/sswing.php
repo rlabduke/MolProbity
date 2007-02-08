@@ -51,11 +51,12 @@ $oldID = $_SESSION['bgjob']['modelID'];
 $oldModel = $_SESSION['models'][$oldID];
 
 $newModel = createModel($oldID."S");
-$newModel['stats']      = $oldModel['stats'];
-$newModel['parent']     = $oldID;
-$newModel['history']    = "Derived from $oldModel[pdb] by SSwing";
-$newModel['isReduced']  = $oldModel['isReduced'];
-$newModel['isBuilt']    = $oldModel['isBuilt'];
+$newModel['stats']          = $oldModel['stats'];
+$newModel['parent']         = $oldID;
+$newModel['history']        = "Derived from $oldModel[pdb] by SSwing";
+$newModel['isUserSupplied'] = $oldModel['isUserSupplied'];
+$newModel['isReduced']      = $oldModel['isReduced'];
+$newModel['isBuilt']        = $oldModel['isBuilt'];
 $_SESSION['models'][ $newModel['id'] ] = $newModel;
 
 $pdbin  = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$oldModel['pdb'];

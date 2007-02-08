@@ -782,6 +782,7 @@ function onConvertToBiolUnit()
         $newID = $newModel['id'];
         $newModel['stats'] = pdbstat($tmpfile);
         $newModel['history'] = 'Converted from ensemble to biological unit';
+        $newModel['isUserSupplied'] = $model['isUserSupplied'];
 
         if(!file_exists($modelDir)) mkdir($modelDir, 0777);
         copy($tmpfile, "$modelDir/$newModel[pdb]");

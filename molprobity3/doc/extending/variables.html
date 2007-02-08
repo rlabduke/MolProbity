@@ -185,6 +185,10 @@ model representing the results of <span style="font-family: monospace;">reduce
 PDB. This key is not set for models supplied by the user.</li>
   <li><span style="font-weight: bold; font-family: monospace;">history</span>:
 human-readable one-line statement about where this model came from.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">isUserSupplied</span>:&nbsp;
+true if the PDB file was supplied by the user (uploaded), rather than
+retrieved from a public database.<br>
+  </li>
   <li><span style="font-family: monospace; font-weight: bold;">isReduced</span>:
 true if the PDB file has been processed by Reduce, so we know at a
 minimum that all hydrogens are present. This is a heritable property.</li>
@@ -283,6 +287,9 @@ models.<br>
   </li>
   <li><span style="font-weight: bold; font-family: monospace;">history</span>:
 human-readable one-line statement about where this ensemble came from.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">isUserSupplied</span>:&nbsp;
+true if the PDB file was supplied by the user (uploaded), rather than
+retrieved from a public database.</li>
   <li><span style="font-weight: bold; font-family: monospace;">parent</span>:
 the ensemble ID of the ensemble this one is "derived" from. For
 instance, an ensemble representing the results of <span
