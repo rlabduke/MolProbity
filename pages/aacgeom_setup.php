@@ -54,6 +54,7 @@ function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
     document.forms[0].kinBaseP.checked          = hasNucAcid
     document.forms[0].chartBaseP.checked        = hasNucAcid
     
+    document.forms[0].chartImprove.checked      = (hasProtein && doAAC)
     document.forms[0].chartNotJustOut.checked   = !isBig
 }
 
@@ -136,7 +137,8 @@ function checkSettingsBeforeSubmit()
     <br><label><input type='checkbox' name='chartRota' value='1'> Rotamer evaluation</label>
     <br><label><input type='checkbox' name='chartCBdev' value='1'> C&beta; deviations</label>
     <br><label><input type='checkbox' name='chartBaseP' value='1'> Base-phosphate perpendiculars</label>
-    <p><label><input type='checkbox' name='chartNotJustOut' value='1'> List all residues in multi-chart, not just outliers</label>
+    <p><label><input type='checkbox' name='chartImprove' value='1'> Suggest / report on automatic structure fix-ups</label>
+    <br><label><input type='checkbox' name='chartNotJustOut' value='1'> List all residues in multi-chart, not just outliers</label>
     </div>
 </div>
 <?php
