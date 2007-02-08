@@ -217,13 +217,13 @@ function onRerunReduce()
         mpLog("reduce-custom:User made changes to flips suggested by Reduce -build");
         // launch background job
         pageGoto("job_progress.php");
-        launchBackground(MP_BASE_DIR."/jobs/reduce-fix.php", "generic_done.php", 5);
+        launchBackground(MP_BASE_DIR."/jobs/reduce-fix.php", "reduce_done.php", 5);
     }
     // No changes to flip states; skip straight to end
     else
     {
         mpLog("reduce-accept:User accepted all flips proposed by Reduce -build as-is");
-        pageGoto("generic_done.php", $_SESSION['bgjob']);
+        pageGoto("reduce_done.php", $_SESSION['bgjob']);
     }
 }
 #}}}########################################################################
