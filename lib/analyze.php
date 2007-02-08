@@ -167,12 +167,14 @@ function runAnalysis($modelID, $opts)
                 $altRotaCount = count(findRotaOutliers($altrota));
                 if($altRotaCount > $mainRotaCount)
                     $improvementList[] = "fixed ".($altRotaCount - $mainRotaCount)." bad rotamers";
+                unlink($outfile);
             // Clashes
                 $outfile = mpTempfile("tmp_clashlist_");
                 runClashlist($altpdb, $outfile);
                 $altclash = loadClashlist($outfile);
                 if($altclash['scoreAll'] > $mainClashscore)
                     $improvementList[] = "improved your clashscore by ".($altclash['scoreAll'] - $mainClashscore)." points";
+                unlink($outfile);
             if(count($improvementList) > 0)
             {
                 $improveText .= "<div class='feature'>By adding H to this model and allowing Asn/Gln/His flips, you have already ";
@@ -194,7 +196,8 @@ function runAnalysis($modelID, $opts)
                 $altRotaCount = count(findRotaOutliers($altrota));
                 if($altRotaCount < $mainRotaCount)
                     $improvementList[] = "fix ".($mainRotaCount - $altRotaCount)." bad rotamers";
-            }
+                 unlink($outfile);
+           }
             if($mainClashscore > 0)
             {
                 $outfile = mpTempfile("tmp_clashlist_");
@@ -202,6 +205,7 @@ function runAnalysis($modelID, $opts)
                 $altclash = loadClashlist($outfile);
                 if($altclash['scoreAll'] < $mainClashscore)
                     $improvementList[] = "improve your clashscore by ".($mainClashscore - $altclash['scoreAll'])." points";
+                unlink($outfile);
             }
             if(count($improvementList) > 0)
             {
@@ -210,6 +214,7 @@ function runAnalysis($modelID, $opts)
                 $improveText .= ".</div>\n";
             }
         }
+        unlink($altpdb);
     }
     //}}} Report on improvements (that could be) made by by MolProbity
     
