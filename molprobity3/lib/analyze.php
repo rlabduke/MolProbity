@@ -42,6 +42,7 @@ require_once(MP_BASE_DIR.'/lib/model.php'); // for making kinemages
 *       chartCBdev      do CB dev plots and analysis?
 *       chartBaseP      check base-phosphate perpendiculars?
 *       chartNotJustOut include residues that have no problems in the list?
+*       chartImprove    compare to reduce -(no)build results to show improvement?
 *       
 * This function returns some HTML suitable for using in a lab notebook entry.
 */
@@ -72,6 +73,7 @@ function runAnalysis($modelID, $opts)
     if($opts['chartBaseP'])     $tasks['base-phos'] = "Do base-phosphate perpendicular analysis";
     
     if($opts['chartClashlist']) $tasks['clashlist'] = "Run <code>clashlist</code> to find bad clashes and clashscore";
+    if($opts['chartImprove'])   $tasks['improve'] = "Suggest / report on fixes";
     if($opts['doCharts'])       $tasks['multichart'] = "Create multi-criterion chart";
     if($opts['doKinemage'])     $tasks['multikin'] = "Create multi-criterion kinemage";
     
@@ -144,6 +146,67 @@ function runAnalysis($modelID, $opts)
     }
     //}}} Run all-atom contact programs and offer kins to user
     
+    //{{{ Report on improvements (that could be) made by MolProbity
+    $improveText = "";
+    if($opts['chartImprove'] && ($clash || $rota))
+    {
+        setProgress($tasks, 'improve'); // updates the progress display if running as a background job
+        $altpdb = mpTempfile("tmp_altH_pdb_");
+        $mainClashscore = ($clash ? $clash['scoreAll'] : 0);
+        $mainRotaCount = ($rota ? count(findRotaOutliers($rota)) : 0);
+        $improvementList = array();
+        
+        if($model['isBuilt']) // file has been through reduce -build or reduce -fix
+        {
+            $altInpath = $modelDir . '/'. $_SESSION['models'][ $model['parent'] ]['pdb'];
+            reduceNoBuild($altInpath, $altpdb);
+            // Rotamers
+                $outfile = mpTempfile("tmp_rotamer_");
+                runRotamer($altpdb, $outfile);
+                $altrota = loadRotamer($outfile);
+                $altRotaCount = count(findRotaOutliers($altrota));
+                if($altRotaCount > $mainRotaCount)
+                    $improvementList[] = "fixed ".($altRotaCount - $mainRotaCount)." bad rotamers";
+            // Clashes
+                $outfile = mpTempfile("tmp_clashlist_");
+                runClashlist($altpdb, $outfile);
+                $altclash = loadClashlist($outfile);
+                if($altclash['scoreAll'] > $mainClashscore)
+                    $improvementList[] = "improved your clashscore by ".($altclash['scoreAll'] - $mainClashscore)." points";
+            $improveText .= "<div class='feature'>By adding H to this model and allowing Asn/Gln/His flips, you have already ";
+            $improveText .= implode(" and ", $improvementList);
+            $improveText .= ".  <b>Make sure you download the modified PDB to take advantage of these improvements!</b></div>\n";
+        }
+        elseif($mainClashscore > 0 || $mainRotaCount > 0) // if file was run through reduce at all, flips were not allowed
+        {
+            if($model['parent']) $altInpath = $_SESSION['models'][ $model['parent'] ]['pdb'];
+            else $altInpath = $model['pdb'];
+            $altInpath = "$modelDir/$altInpath";
+            reduceBuild($altInpath, $altpdb);
+            if($mainRotaCount > 0)
+            {
+                $outfile = mpTempfile("tmp_rotamer_");
+                runRotamer($altpdb, $outfile);
+                $altrota = loadRotamer($outfile);
+                $altRotaCount = count(findRotaOutliers($altrota));
+                if($altRotaCount < $mainRotaCount)
+                    $improvementList[] = "fix ".($mainRotaCount - $altRotaCount)." bad rotamers";
+            }
+            if($mainClashscore > 0)
+            {
+                $outfile = mpTempfile("tmp_clashlist_");
+                runClashlist($altpdb, $outfile);
+                $altclash = loadClashlist($outfile);
+                if($altclash['scoreAll'] < $mainClashscore)
+                    $improvementList[] = "improve your clashscore by ".($mainClashscore - $altclash['scoreAll'])." points";
+            }
+            $improveText .= "<div class='feature'>By adding H to this model and allowing Asn/Gln/His flips, we could <i>automatically</i> ";
+            $improveText .= implode(" and ", $improvementList);
+            $improveText .= ".</div>\n";
+        }
+    }
+    //}}} Report on improvements (that could be) made by by MolProbity
+    
     //{{{ Build multi-criterion chart, kinemage
     if($opts['doCharts'])
     {
@@ -200,6 +263,7 @@ function runAnalysis($modelID, $opts)
         $entry .= "<h3>Summary statistics</h3>\n";
         $entry .= makeSummaryStatsTable($model['stats']['resolution'], $clash, $rama, $rota, $cbdev, $pperp);
     }
+    $entry .= $improveText;
     if($opts['doKinemage'] || $opts['doCharts'])
     {
         $entry .= "<h3>Multi-criterion visualizations</h3>\n";

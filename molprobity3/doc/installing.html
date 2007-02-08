@@ -71,6 +71,12 @@ FollowSymLinks</span>
 directive in the proper part of your httpd.conf file. A totally vanilla
 MolProbity installation shouldn't require this, but many of the
 proposed configurations covered later use symbolic links.</li>
+  <li>You may want to add a line that says "<span
+ style="font-family: monospace;">text/kinemage&nbsp;&nbsp; kin</span>"
+to your mime.types file (often /etc/mime.types or
+/etc/httpd/mime.types).&nbsp; This helps browsers to download kinemage
+files correctly rather than show them as text.<br>
+  </li>
 </ul>
 After these changes, you'll need to (re)start the webserver. You can do
 this from one of the graphical "services" tools in Linux, or from

@@ -34,15 +34,11 @@
     "nice" large jobs such as multi-model NMR runs
     Allow simple comparison of bad residues in two models; see jobs/aacgeom.php
     Add documentation to the analysis results page (how to interpret)
-    Add explanation of SSWING, Reduce, AAC, kins on setup pages
     Make sure Reduce doesn't shrink the PDB file (lost atoms/models, etc)
     Add coloring type drop box for -lots kins
-    The "0+3" concept: single model, chain-chain (interface), overlapped pairs
-        (NCS, etc), large ensembles (NMR/MD)
     Support "permevents" for notebook pages - eval() or just a pageCall() target
-        Why did I want this? Redirect to action pages, maybe?
+        Wanted this so e.g. analysis results notebook could link to Reduce or SSWING
     analyze::findAltConfs() should also support nuc. acid mc/sc classification
-    Get models from CASP web site? (where is it??)
     Allow escape from job when no process number appears after x sec.
     Add whois query to session listing
     Change upload_setup's fetch of EDS map to be like welcome.php (a la carte)
@@ -58,7 +54,6 @@
 }}}
     Produce multi-model Ramachandran plots from the GUI
     Tool for building ensembles from arbitrary sets of models
-    Kinemages are text/plain instead of downloaded
     Convert "number of H added, etc" text into tables
     Auto-expand coords, kins folders?
     add real HTML head/foot to downloadable multichart? look into viewer issues
@@ -87,6 +82,7 @@
 ### 3.06 ###
 - changed file download so clicking on dir names is as good as on triangles.
   This may help keep users from getting confused about how to work it.
+- added info to analysis page about how much reduce could / did improve the mdl
 
 ### 3.05 ###
 - fixed up some rare weirdnesses about guessing the user's IP address
