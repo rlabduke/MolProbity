@@ -85,12 +85,13 @@ function createEnsemble($ensembleID)
 *   origName        the name of the file on the user's system.
 *   isCnsFormat     true if the user thinks he has CNS atom names
 *   ignoreSegID     true if the user wants to never map segIDs to chainIDs
+*   isUserSupplied  false if the file was fetched from a public database
 *
 * It returns either a model ID (for inputs with 0 or 1 MODEL records)
 * or an ensemble ID (for multi-MODEL input)
 * which of course then links to the individual model IDs.
 */
-function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSegID = false)
+function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSegID = false, $isUserSupplied = true)
 {
     // Try stripping file extension
     if(preg_match('/^(.+)\.(pdb|xyz|ent)$/i', $origName, $m))
@@ -128,6 +129,7 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
             
             $model['stats']                 = pdbstat($file);
             $model['history']               = "Model $modelNum from file uploaded by user";
+            $model['isUserSupplied']        = $isUserSupplied;
             if($segmap) $model['segmap']    = $segmap;
             
             // Create the model entry
@@ -139,6 +141,7 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
         $ensemble = createEnsemble($origID);
         $ensemble['models'] = $idList;
         $ensemble['history'] = "Ensemble of ".count($idList)." models uploaded by user";
+        $ensemble['isUserSupplied'] = $isUserSupplied;
         
         $pdbList = array();
         foreach($idList as $id) $pdbList[] = $outpath.'/'.$_SESSION['models'][$id]['pdb'];
@@ -168,6 +171,7 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
     
         $model['stats']                 = $stats;
         $model['history']               = 'Original file uploaded by user';
+        $model['isUserSupplied']        = $isUserSupplied;
         if($segmap) $model['segmap']    = $segmap;
         
         // Create the model entry

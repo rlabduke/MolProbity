@@ -59,10 +59,11 @@ if(!file_exists($outpath)) mkdir($outpath, 0777); // shouldn't ever happen, but 
 $outpath .= '/'.$outname;
 reduceNoBuild($pdb, $outpath);
 
-$newModel['stats']      = pdbstat($outpath);
-$newModel['parent']     = $modelID;
-$newModel['history']    = "Derived from $model[pdb] by Reduce -nobuild";
-$newModel['isReduced']  = true;
+$newModel['stats']          = pdbstat($outpath);
+$newModel['parent']         = $modelID;
+$newModel['history']        = "Derived from $model[pdb] by Reduce -nobuild";
+$newModel['isUserSupplied'] = $model['isUserSupplied'];
+$newModel['isReduced']      = true;
 $_SESSION['models'][ $newModel['id'] ] = $newModel;
 $_SESSION['bgjob']['modelID'] = $newModel['id'];
 $_SESSION['lastUsedModelID'] = $newModel['id']; // this is now the current model

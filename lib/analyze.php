@@ -173,9 +173,12 @@ function runAnalysis($modelID, $opts)
                 $altclash = loadClashlist($outfile);
                 if($altclash['scoreAll'] > $mainClashscore)
                     $improvementList[] = "improved your clashscore by ".($altclash['scoreAll'] - $mainClashscore)." points";
-            $improveText .= "<div class='feature'>By adding H to this model and allowing Asn/Gln/His flips, you have already ";
-            $improveText .= implode(" and ", $improvementList);
-            $improveText .= ".  <b>Make sure you download the modified PDB to take advantage of these improvements!</b></div>\n";
+            if(count($improvementList) > 0)
+            {
+                $improveText .= "<div class='feature'>By adding H to this model and allowing Asn/Gln/His flips, you have already ";
+                $improveText .= implode(" and ", $improvementList);
+                $improveText .= ".  <b>Make sure you download the modified PDB to take advantage of these improvements!</b></div>\n";
+            }
         }
         elseif($mainClashscore > 0 || $mainRotaCount > 0) // if file was run through reduce at all, flips were not allowed
         {
@@ -200,9 +203,12 @@ function runAnalysis($modelID, $opts)
                 if($altclash['scoreAll'] < $mainClashscore)
                     $improvementList[] = "improve your clashscore by ".($mainClashscore - $altclash['scoreAll'])." points";
             }
-            $improveText .= "<div class='feature'>By adding H to this model and allowing Asn/Gln/His flips, we could <i>automatically</i> ";
-            $improveText .= implode(" and ", $improvementList);
-            $improveText .= ".</div>\n";
+            if(count($improvementList) > 0)
+            {
+                $improveText .= "<div class='feature'>By adding H to this model and allowing Asn/Gln/His flips, we could <i>automatically</i> ";
+                $improveText .= implode(" and ", $improvementList);
+                $improveText .= ".</div>\n";
+            }
         }
     }
     //}}} Report on improvements (that could be) made by by MolProbity
