@@ -780,12 +780,12 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
             $res[$item['resName']]['rota_val'] = $item['scorePct'];
             if($item['scorePct'] <= 1.0)
             {
-                $res[$item['resName']]['rota'] = "$item[scorePct]%<br><small>angles: ".formatChiAngles($item)."</small>";
+                $res[$item['resName']]['rota'] = "$item[scorePct]%<br><small>chi angles: ".formatChiAngles($item)."</small>";
                 $res[$item['resName']]['rota_isbad'] = true;
                 $res[$item['resName']]['any_isbad'] = true;
             }
             else
-                $res[$item['resName']]['rota'] = "$item[scorePct]%<br><small>angles: ".formatChiAngles($item)."</small>";
+                $res[$item['resName']]['rota'] = "$item[scorePct]%<br><small>chi angles: ".formatChiAngles($item)."</small>";
         }
     }
     if(is_array($cbdev))
