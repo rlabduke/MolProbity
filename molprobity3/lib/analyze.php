@@ -632,7 +632,8 @@ function runClashStats($resol, $clashscore, $clashscoreBlt40)
 function runRotamer($infile, $outfile)
 {
     // Very large files (1htq) need extra memory
-    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/hless.jar hless.Rotamer -raw $infile > $outfile");
+    //exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/hless.jar hless.Rotamer -raw $infile > $outfile");
+    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.rotarama.Rotalyze $infile > $outfile");
 }
 #}}}########################################################################
 
@@ -656,6 +657,7 @@ function runRotamer($infile, $outfile)
 *   chi2            the chi-2 angle ("" for none)
 *   chi3            the chi-3 angle ("" for none)
 *   chi4            the chi-4 angle ("" for none)
+*   rotamer         the rotamer name from the Penultimate Rotamer Library
 */
 function loadRotamer($datafile)
 {
@@ -676,7 +678,8 @@ function loadRotamer($datafile)
             'chi1'      => $line[2],
             'chi2'      => $line[3],
             'chi3'      => $line[4],
-            'chi4'      => $line[5]
+            'chi4'      => $line[5],
+            'rotamer'   => $line[6]
         );
         // This converts numbers to numbers and leaves "" as it is.
         if($ret[$cnit]['chi1'] !== '') $ret[$cnit]['chi1'] += 0;
