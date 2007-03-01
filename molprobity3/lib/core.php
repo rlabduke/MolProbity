@@ -558,10 +558,22 @@ function mpTempfile($prefix = 'tmp_misc_')
 /**
 * Early releases of PHP 5 have a bug that keeps readfile() from
 * delivering more than about 2Mb.
+* Even in the 4.x releases used by Yahoo, there must be enough memory
+* available for readfile() to load the whole thing in memory or it fails
+* with a HTTP 500 code and no error message.
 * Returns number of bytes read or false on failure.
 */
 function mpReadfile($filepath)
 {
+    // Downloads can take a long time for big files, so PHP could time out.
+    // According to notes in the manual, this should return the value from
+    // the last call to set_time_limit() if it was called previously.
+    $old_limit = ini_get('max_execution_time')+0;
+    set_time_limit(0); // no limit
+    // It's not enough to extend the time; we may need more memory too.
+    // In theory we shouldn't, but I guess the garbage collector leaks.
+    ini_set('memory_limit', -1); // no limit
+    
     $chunksize = 1*(1024*1024); // how many bytes per chunk
     $buffer = '';
     $cnt = 0;
@@ -577,6 +589,8 @@ function mpReadfile($filepath)
         $cnt += strlen($buffer);
     }
     fclose($handle);
+    
+    set_time_limit($old_limit); // restore prev. limit
     return $cnt; // return num. bytes delivered like readfile() does.
 }
 #}}}########################################################################
