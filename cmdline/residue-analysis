@@ -1,0 +1,97 @@
+#!/usr/bin/env php
+<?php # (jEdit options) :folding=explicit:collapseFolds=1:
+/*****************************************************************************
+    Processes one or more PDB files and outputs a list of all the
+    Ramachanadran/rotamer/C-beta dev./clash outliers
+    
+ -> We assume all files already have H's added! <-
+
+INPUTS (via $_SERVER['argv']):
+    one or more PDB files
+
+OUTPUTS:
+
+*****************************************************************************/
+// EVERY *top-level* page must start this way:
+// 1. Define it's relationship to the root of the MolProbity installation.
+// Pages in subdirectories of lib/ or public_html/ will need more "/.." 's.
+    if(!defined('MP_BASE_DIR')) define('MP_BASE_DIR', realpath(dirname(__FILE__).'/..'));
+// 2. Include core functionality - defines constants, etc.
+    require_once(MP_BASE_DIR.'/lib/core.php');
+    require_once(MP_BASE_DIR.'/lib/model.php');
+    require_once(MP_BASE_DIR.'/lib/analyze.php');
+    require_once(MP_BASE_DIR.'/lib/visualize.php');
+// 5. Set up reasonable values to emulate CLI behavior if we're CGI
+    set_time_limit(0); // don't want to bail after 30 sec!
+
+#{{{ a_function_definition - sumary_statement_goes_here
+############################################################################
+/**
+* Documentation for this function.
+*/
+//function someFunctionName() {}
+#}}}########################################################################
+
+# MAIN - the beginning of execution for this page
+############################################################################
+// First argument is the name of this script...
+if(is_array($_SERVER['argv']))
+{
+    $pdbFileList = array_slice($_SERVER['argv'], 1);
+    if(count($pdbFileList) == 0)
+        die("Must provide at least one PDB file on the command line!\n");
+}
+    
+// Loop through all PDBs
+echo "#file_name,residue,high_B,worst_clash,src_atom,dst_atom,dst_residue,CB_dev,rotamer_score,rotamer_eval,rama_score,rama_eval,rama_type\n";
+foreach($pdbFileList as $infile)
+{
+    if(is_file($infile))
+    {
+        $filename = basename($infile);
+        $tmp = mpTempfile();
+        
+        // Make sure all residues are represented, and in the right order.
+        $res = listResidues($infile);
+        $Bfact = listResidueBfactors($infile);
+        $Bfact = $Bfact['res'];
+        // Run analysis; load data
+        runClashlist($infile, $tmp);
+        $clash = loadClashlist($tmp);
+        runCbetaDev($infile, $tmp);
+        $cbdev = loadCbetaDev($tmp);
+        $badCbeta = findCbetaOutliers($cbdev);
+        runRotamer($infile, $tmp);
+        $rota = loadRotamer($tmp);
+        $badRota = findRotaOutliers($rota);
+        runRamachandran($infile, $tmp);
+        $rama = loadRamachandran($tmp);
+        unlink($tmp);
+        
+        foreach($res as $cnit)
+        {
+            echo "$filename,$cnit,$Bfact[$cnit]";
+            if(isset($clash['clashes'][$cnit]))
+                echo ",".$clash['clashes'][$cnit].",".$clash['clashes-with'][$cnit]['srcatom'].",".$clash['clashes-with'][$cnit]['dstatom'].",".$clash['clashes-with'][$cnit]['dstcnit'];
+            else echo ",,,,";
+            if(isset($badCbeta[$cnit]))
+                echo ",".$badCbeta[$cnit];
+            else echo ",";
+            if(isset($rota[$cnit]))
+            {
+                echo ",".$rota[$cnit]['scorePct'];
+                if($rota[$cnit]['scorePct']+0 <= 1.0) echo ",OUTLIER";
+                else echo ",".$rota[$cnit]['rotamer'];
+            }
+            else echo ",,";
+            if(isset($rama[$cnit]))
+                echo ",".$rama[$cnit]['scorePct'].",".$rama[$cnit]['eval'].",".$rama[$cnit]['type'];
+            else echo ",,,";
+            echo "\n";
+        }
+    }
+}
+
+############################################################################
+// Clean up and go home
+?>
