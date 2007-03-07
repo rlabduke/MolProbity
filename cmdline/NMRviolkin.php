@@ -22,6 +22,10 @@ error_reporting(E_ALL ^ E_NOTICE);
     require_once(MP_BASE_DIR.'/lib/core.php');
     require_once(MP_BASE_DIR.'/lib/visualize.php');
     require_once(MP_BASE_DIR.'/lib/visualize_nmr.php');
+// 3. Restore session data. If you don't want to access the session
+// data for some reason, you must call mpInitEnvirons() instead.
+    mpInitEnvirons();       // use std PATH, etc.
+    //mpStartSession(true);   // create session dir
 // 5. Set up reasonable values to emulate CLI behavior if we're CGI
     set_time_limit(0); // don't want to bail after 30 sec!
 
