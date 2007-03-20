@@ -276,7 +276,7 @@ function makeMulticritKin2($infiles, $outfile, $opt, $viewRes = array(), $nmrCon
     fwrite($h, "@onewidth\n");
     fclose($h);
     
-    makeResidueViews(reset($infiles), $outfile, $viewRes);
+    $view_info = makeResidueViews(reset($infiles), $outfile, $viewRes);
     
     foreach($infiles as $infile)
     {
@@ -307,6 +307,8 @@ function makeMulticritKin2($infiles, $outfile, $opt, $viewRes = array(), $nmrCon
             makeOccupancyScale($infile, $outfile);
         if($opt['altconf'])
             makeAltConfKin($infile, $outfile);
+        if($view_info)
+            makeResidueViewMarkers($outfile, $view_info);
     }
 
     // KiNG allows us to do this to control what things are visible
@@ -337,20 +339,61 @@ function makeMulticritKin2($infiles, $outfile, $opt, $viewRes = array(), $nmrCon
 
 #{{{ makeResidueViews - creates @view entries for all listed residue
 ############################################################################
+/* Returns a data structure with view info. */
 function makeResidueViews($infile, $outfile, $cnits, $excludeWaters = true)
 {
     $h = fopen($outfile, 'a');
     fwrite($h, "@1viewid {Overview}\n"); // auto-determine center, span, etc.
     $centers = computeResCenters($infile);
+    $views = array();
     $i = 2;
     foreach($cnits as $res)
     {
         if($excludeWaters && preg_match('/(HOH|DOD|H20|D20|WAT|SOL|TIP|TP3|MTO|HOD|DOH)$/', $res)) continue;
         $c = $centers[$res];
         fwrite($h, "@{$i}viewid {{$res}}\n@{$i}span 20\n@{$i}zslab 100\n@{$i}center $c[x] $c[y] $c[z]\n");
+        $views[$i] = array(
+            'num'   => $i,
+            'id'    => $res,
+            'x'     => $c['x'],
+            'y'     => $c['y'],
+            'z'     => $c['z'],
+        );
         $i++;
     }
     fclose($h);
+    return $views;
+}
+#}}}########################################################################
+
+#{{{ makeResidueViewMarkers - creates objects marking each view center
+############################################################################
+/* Takes a data structure with view info, as returned by makeResidueViews(). */
+function makeResidueViewMarkers($outfile, $views)
+{
+    $h = fopen($outfile, 'a');
+    fwrite($h, "@subgroup {view markers} dominant master= {view markers}\n");
+    fwrite($h, "@vectorlist {view markers} color= gray\n");
+    foreach($views as $v)
+    {
+        # Cross:
+        #fwrite($h, "{View $v[num]: $v[id]}P ".($v['x']-0.25)." $v[y] $v[z] {\"} ".($v['x']+0.25)." $v[y] $v[z]\n");
+        #fwrite($h, "{View $v[num]: $v[id]}P $v[x] ".($v['y']-0.25)." $v[z] {\"} $v[x] ".($v['y']+0.25)." $v[z]\n");
+        #fwrite($h, "{View $v[num]: $v[id]}P $v[x] $v[y] ".($v['z']-0.25)." {\"} $v[x] $v[y] ".($v['z']+0.25)."\n");
+        # Box:
+        fwrite($h, "{View $v[num]: $v[id]}P ".($v['x']-0.25)." ".($v['y']-0.25)." ".($v['z']-0.25)." {\"} ".($v['x']+0.25)." ".($v['y']-0.25)." ".($v['z']-0.25)."\n");
+        fwrite($h, "{\"} ".($v['x']+0.25)." ".($v['y']+0.25)." ".($v['z']-0.25)." {\"} ".($v['x']-0.25)." ".($v['y']+0.25)." ".($v['z']-0.25)."\n");
+        fwrite($h, "{\"} ".($v['x']-0.25)." ".($v['y']-0.25)." ".($v['z']-0.25)."\n");
+        fwrite($h, "{View $v[num]: $v[id]}P ".($v['x']-0.25)." ".($v['y']-0.25)." ".($v['z']+0.25)." {\"} ".($v['x']+0.25)." ".($v['y']-0.25)." ".($v['z']+0.25)."\n");
+        fwrite($h, "{\"} ".($v['x']+0.25)." ".($v['y']+0.25)." ".($v['z']+0.25)." {\"} ".($v['x']-0.25)." ".($v['y']+0.25)." ".($v['z']+0.25)."\n");
+        fwrite($h, "{\"} ".($v['x']-0.25)." ".($v['y']-0.25)." ".($v['z']+0.25)."\n");
+        fwrite($h, "{View $v[num]: $v[id]}P ".($v['x']-0.25)." ".($v['y']-0.25)." ".($v['z']-0.25)." {\"} ".($v['x']-0.25)." ".($v['y']-0.25)." ".($v['z']+0.25)."\n");
+        fwrite($h, "{View $v[num]: $v[id]}P ".($v['x']-0.25)." ".($v['y']+0.25)." ".($v['z']-0.25)." {\"} ".($v['x']-0.25)." ".($v['y']+0.25)." ".($v['z']+0.25)."\n");
+        fwrite($h, "{View $v[num]: $v[id]}P ".($v['x']+0.25)." ".($v['y']-0.25)." ".($v['z']-0.25)." {\"} ".($v['x']+0.25)." ".($v['y']-0.25)." ".($v['z']+0.25)."\n");
+        fwrite($h, "{View $v[num]: $v[id]}P ".($v['x']+0.25)." ".($v['y']+0.25)." ".($v['z']-0.25)." {\"} ".($v['x']+0.25)." ".($v['y']+0.25)." ".($v['z']+0.25)."\n");
+    }
+    fclose($h);
+    return $views;
 }
 #}}}########################################################################
 
