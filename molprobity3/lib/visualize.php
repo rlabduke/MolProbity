@@ -351,7 +351,7 @@ function makeResidueViews($infile, $outfile, $cnits, $excludeWaters = true)
     {
         if($excludeWaters && preg_match('/(HOH|DOD|H20|D20|WAT|SOL|TIP|TP3|MTO|HOD|DOH)$/', $res)) continue;
         $c = $centers[$res];
-        fwrite($h, "@{$i}viewid {{$res}}\n@{$i}span 20\n@{$i}zslab 100\n@{$i}center $c[x] $c[y] $c[z]\n");
+        fwrite($h, "@{$i}viewid {{$res}}\n@{$i}span 20\n@{$i}zslab 200\n@{$i}center $c[x] $c[y] $c[z]\n");
         $views[$i] = array(
             'num'   => $i,
             'id'    => $res,
