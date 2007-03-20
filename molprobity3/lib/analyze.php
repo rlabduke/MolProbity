@@ -317,7 +317,7 @@ function runAnalysis($modelID, $opts)
     {
         $entry .= "<h3>REMARK 42</h3>";
         $url = "$modelURL/$model[pdb]";
-        $entry .= "You can <a href='$url'>download your PDB file with REMARK 42</a> inserted.\n";
+        $entry .= "You can <a href='$url'>download your PDB file with REMARK 42</a> inserted, or the same <a href='download_trimmed.php?$_SESSION[sessTag]&file=$infile'> without hydrogens</a>.\n";
         $entry .= "<p><pre>$remark42</pre></p>";
     }
     //}}} Create lab notebook entry

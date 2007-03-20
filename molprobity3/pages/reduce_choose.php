@@ -179,7 +179,8 @@ function onRerunReduce()
         if($hcount['std']) $entry .= "$hcount[std] H were repositioned to standardize bond lengths.\n";
         if($hcount['adj']) $entry .= "The positions of $hcount[adj] hydrogens were adjusted to optimize H-bonding.\n";
     }
-    $entry .= "<p>You can now <a href='$url'>download the optimized and annotated PDB file</a> (".formatFilesize(filesize($pdb)).").</p>\n";
+    $entry .= "<p>You can now download the optimized and annotated <a href='$url'>PDB file with hydrogens</a>";
+    $entry .= " or <a href='download_trimmed.php?$_SESSION[sessTag]&file=$pdb'>without hydrogens (flips only)</a>.</p>\n";
 
     $nqkin = $_SESSION['dataDir'].'/'.MP_DIR_KINS."/$model[prefix]flipnq.kin";
     $hiskin = $_SESSION['dataDir'].'/'.MP_DIR_KINS."/$model[prefix]fliphis.kin";
