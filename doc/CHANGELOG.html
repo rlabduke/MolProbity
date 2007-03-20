@@ -51,17 +51,11 @@
     Use ELBOW to add H to unknown hets
         Alternately: For unrecognized hets, determine connectivity using Molikin,
         write HET dict, allow user to remove H using HTML textbox, save to server.
-}}}
     Produce multi-model Ramachandran plots from the GUI
     Tool for building ensembles from arbitrary sets of models
     Convert "number of H added, etc" text into tables
     Auto-expand coords, kins folders?
     add real HTML head/foot to downloadable multichart? look into viewer issues
-    Add multichart to format (CSV) that would work with KiNG, Excel, etc.
-        Residue by residue list of outliers (y/n) -- CSV?  standalone? [PHENIX]
-    Convert to biol. unit should produce and display a notebook entry
-    Reduce doesn't recognize HSD (as HIS) or ILE _CD_
-    we don't correctly auto-detect CNS format nucleic acid PDBs on upload
     Can upload_xxx_done pages be converted to work with generic_done?
     Add documentation at the bottom of all pages:
         Add H
@@ -72,9 +66,23 @@
         View and download files
     Mitch Miller: how should Rama stats respond to alternate conformations?
         Don't over-count alts; maybe weight by occupancy?
+    add "ini_set('memory_limit', -1)" to scripts in cmdline to remove mem limit?
+    convert USER  MOD to REMARK USER MOD
+}}}
+    Add multichart to format (CSV) that would work with KiNG, Excel, etc.
+        Residue by residue list of outliers (y/n) -- CSV?  standalone? [PHENIX]
+    Convert to biol. unit should produce and display a notebook entry
+    Reduce doesn't recognize HSD (as HIS) or ILE _CD_
+    we don't correctly auto-detect CNS format nucleic acid PDBs on upload
     Change "Go back" buttons to "Cancel" buttons?
     Note that NMR models should be done one at a time to get multichart, etc
-  * Change "MER" to "MolProbity Score", with explanatory hyperlink
+    Add page to explain meaning of MolProbity score
+    record file contents: protein, nuc. acid, or both (?)
+  * cluster errors and write improved to-do list for Coot
+        add view-center markers
+  * allow users to download PDB file with and without H
+    add *option* to make REMARK 42 into an unnumbered REMARK
+    email new MolP tarball to Joe Moran at GSK
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -85,6 +93,16 @@
 - fixed bug introduced by new rotamer analysis that counted truncated sidechains
   as rotamer outliers (reported missing chi angles as NaN).
 - added cmdline/residue-analysis to make CSV version of multi-chart
+- changed semantics of analyze::findAllOutliers()
+- many scripts in cmdline were missing mpInitEnvirons() call!
+  This caused messages like "sh: prekin not found"
+- added analyze::calcLocalBadness() to cluster validation flags spatially
+- fixed hless.jar so it's compatible with older Javas (-target 1.3 -source 1.3)
+- changed "MER" to "MolProbity Score"
+- dropped "B lt 40" line from multi-chart
+- fixed bug in model.php::replacePdbRemark() that dropped a line from the file.
+  Thanks to Boaz Shaanan for reporting it!
+- tried to make "my own MolProbity" link make more sense
 
 ### 3.06 ###
 - changed file download so clicking on dir names is as good as on triangles.

@@ -347,7 +347,7 @@ function makeResidueViews($infile, $outfile, $cnits, $excludeWaters = true)
     {
         if($excludeWaters && preg_match('/(HOH|DOD|H20|D20|WAT|SOL|TIP|TP3|MTO|HOD|DOH)$/', $res)) continue;
         $c = $centers[$res];
-        fwrite($h, "@{$i}viewid {{$res}}\n@{$i}span 12\n@{$i}zslab 100\n@{$i}center $c[x] $c[y] $c[z]\n");
+        fwrite($h, "@{$i}viewid {{$res}}\n@{$i}span 20\n@{$i}zslab 100\n@{$i}center $c[x] $c[y] $c[z]\n");
         $i++;
     }
     fclose($h);
@@ -615,11 +615,12 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
         $entry .= "<td>Clashscore, all atoms:</td><td bgcolor='$bg'>$clash[scoreAll]</td>\n";
         $entry .= "<td>$clashPct[pct_rank]<sup>".ordinalSuffix($clashPct['pct_rank'])."</sup> percentile<sup>*</sup> (N=$clashPct[n_samples], $clashPct[minresol]&Aring; - $clashPct[maxresol]&Aring;)</td></tr>\n";
         
-        if($clashPct['pct_rank40'] <= 33)       $bg = $bgPoor;
-        elseif($clashPct['pct_rank40'] <= 66)   $bg = $bgFair;
-        else                                    $bg = $bgGood;
-        $entry .= "<tr><td>Clashscore, B&lt;40:</td><td bgcolor='$bg'>$clash[scoreBlt40]</td>\n";
-        $entry .= "<td>$clashPct[pct_rank40]<sup>".ordinalSuffix($clashPct['pct_rank40'])."</sup> percentile<sup>*</sup> (N=$clashPct[n_samples], $clashPct[minresol]&Aring; - $clashPct[maxresol]&Aring;)</td></tr>\n";
+        $entry .= "<tr><td colspan='3'>Clashscore is the number of serious steric overlaps (&gt; 0.4 &Aring;) per 1000 atoms.</td></tr>\n";
+        //if($clashPct['pct_rank40'] <= 33)       $bg = $bgPoor;
+        //elseif($clashPct['pct_rank40'] <= 66)   $bg = $bgFair;
+        //else                                    $bg = $bgGood;
+        //$entry .= "<tr><td>Clashscore, B&lt;40:</td><td bgcolor='$bg'>$clash[scoreBlt40]</td>\n";
+        //$entry .= "<td>$clashPct[pct_rank40]<sup>".ordinalSuffix($clashPct['pct_rank40'])."</sup> percentile<sup>*</sup> (N=$clashPct[n_samples], $clashPct[minresol]&Aring; - $clashPct[maxresol]&Aring;)</td></tr>\n";
     }
     $proteinRows = 0;
     if(is_array($rama))    $proteinRows += 2;
@@ -692,7 +693,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             elseif(abs(($mer-$axr)/$axr) <= 0.20)   $bg = $bgFair;  // within 20% of actual
             else                                    $bg = $bgPoor;  // more than 20% above
             
-            $entry .= "<td>MER [ALPHA TEST - don't ask]</td><td bgcolor='$bg'>";
+            $entry .= "<td>MolProbity score</td><td bgcolor='$bg'>";
             $entry .= sprintf('%.2f', $mer);
             //$entry .= "</td><td>Goal: &lt;$axr</td></tr>\n";
             $entry .= "</td><td>$mer_pct[pct_rank]<sup>".ordinalSuffix($mer_pct['pct_rank'])."</sup> percentile<sup>*</sup> (N=$mer_pct[n_samples], $mer_pct[minresol]&Aring; - $mer_pct[maxresol]&Aring;)</td></tr>\n";
