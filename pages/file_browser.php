@@ -195,6 +195,12 @@ function makeFileCommands($path, $url)
         $s .= "<td></td>";
         $s .= "<td><small><a href='viewking.php?$_SESSION[sessTag]&url=$url' target='_blank'>in KiNG</a></small></td>";
     }
+    // PDB files with H
+    if(endsWith($path, "H.pdb")) // have to use $path b/c the capital letter matters!
+    {
+        $s .= "<td></td>";
+        $s .= "<td><small><a href='download_trimmed.php?$_SESSION[sessTag]&file=$path'>without H</a></small></td>";
+    }
     // PHP-encoded-array chart or table (e.g. the multicriterion chart)
     elseif(endsWith($lcPath, ".table"))
     {

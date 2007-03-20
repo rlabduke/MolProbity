@@ -531,6 +531,21 @@ function removeChains($inpath, $outpath, $idsToRemove)
 }
 #}}}########################################################################
 
+#{{{ reduceTrim - removes H from a PDB file
+############################################################################
+/**
+* Removes all ATOM and HETATM records for hydrogens.
+*
+* $inpath       the full filename for the PDB file to be processed
+* $outpath      the full filename for the destination PDB. Will be overwritten.
+*/
+function reduceTrim($inpath, $outpath)
+{
+    // USER  MOD is fatal to Coot and other programs, so we strip them ALL.
+    exec("reduce -quiet -trim -allalt $inpath | awk '\$0 !~ /^USER  MOD/' > $outpath");
+}
+#}}}########################################################################
+
 #{{{ reduceNoBuild - adds missing H without changing existing atoms
 ############################################################################
 /**
