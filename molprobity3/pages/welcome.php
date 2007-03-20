@@ -89,7 +89,7 @@ from your web browser.</p>
     Nucleic Acids Research 32:W615-W619.
     </small></p>
 <p><b><a href='help/java.html' target='_blank'>Installing Java</a></b>: how to make kinemage graphics work in your browser.</p>
-<p><b><a href='get_molprobity.php' target='_blank'>My own MolProbity</a></b>: how can I run my own private MolProbity server?</p>
+<p><b><a href='get_molprobity.php' target='_blank'>Download MolProbity</a></b>: how can I run a private MolProbity server, or run from the command line?</p>
 <p><small><i>NB: the back button doesn't work inside MolProbity</i></small></p><!-- by request of DCR -->
 </td></tr></table>
 <?php

@@ -248,7 +248,8 @@ function runAnalysis($modelID, $opts)
         );
         $outfile = "$kinDir/$model[prefix]multi.kin";
         makeMulticritKin2(array($infile), $outfile, $mcKinOpts,
-            findAllOutliers($clash, $rama, $rota, $cbdev, $pperp));
+        #    array_keys(findAllOutliers($clash, $rama, $rota, $cbdev, $pperp)));
+            array_keys(calcLocalBadness($infile, 7, $clash, $rama, $rota, $cbdev, $pperp)));
         
         // EXPERIMENTAL: gzip compress large multikins
         if(filesize($outfile) > MP_KIN_GZIP_THRESHOLD)
@@ -789,18 +790,109 @@ function findRamaOutliers($rama)
 ############################################################################
 /**
 * Composites the results of the find___Outliers() functions into a simple,
-* non-redundant list of 9-char residues names.
+* non-redundant list of 9-char residues names (keys)
+* and counts of outliers (values).
 */
 function findAllOutliers($clash, $rama, $rota, $cbdev, $pperp)
 {
     $worst = array();
-    $worst = array_merge($worst, findClashOutliers($clash));
-    $worst = array_merge($worst, findRamaOutliers($rama));
-    $worst = array_merge($worst, findRotaOutliers($rota));
-    $worst = array_merge($worst, findCbetaOutliers($cbdev));
-    $worst = array_merge($worst, findBasePhosPerpOutliers($pperp));
+    #$worst = array_merge($worst, findClashOutliers($clash));
+    #$worst = array_merge($worst, findRamaOutliers($rama));
+    #$worst = array_merge($worst, findRotaOutliers($rota));
+    #$worst = array_merge($worst, findCbetaOutliers($cbdev));
+    #$worst = array_merge($worst, findBasePhosPerpOutliers($pperp));
+    foreach(array(
+        findClashOutliers($clash),
+        findRamaOutliers($rama),
+        findRotaOutliers($rota),
+        findCbetaOutliers($cbdev),
+        findBasePhosPerpOutliers($pperp),
+        ) as $criterion)
+    {
+        if(is_array($criterion)) foreach($criterion as $cnit => $dummy)
+            $worst[$cnit] += 1;
+    }
     ksort($worst); // Put the residues into a sensible order
-    return array_keys($worst);
+    #return array_keys($worst);
+    return $worst;
+}
+#}}}########################################################################
+
+#{{{ calcLocalBadness - number of outliers "near" each residue
+############################################################################
+/**
+* Count the number of outliers that occur for this residue and other
+* residues whose centroid is within some number of Anstroms of this one.
+*
+* $range    is the max distance between two residue centroids
+* $clash    is the data structure from loadClashlist()
+* $rama     is the data structure from loadRamachandran()
+* $rota     is the data structure from loadRotamer()
+* $cbdev    is the data structure from loadCbetaDev()
+* $pperp    is the data structure from loadBasePhosPerp()
+* Any of them can be set to null if the data is unavailable.
+*/
+function calcLocalBadness($infile, $range, $clash, $rama, $rota, $cbdev, $pperp)
+{
+    $res_xyz = computeResCenters($infile);
+    $self_bads = findAllOutliers($clash, $rama, $rota, $cbdev, $pperp);
+    $range2 = $range * $range;
+    $worst_res = array();
+    while(true)
+    {
+        $local_bads = array();
+        foreach($res_xyz as $cnit => $xyz)
+        {
+            #$local_bads[$cnit] = 0;
+            foreach($self_bads as $cnit2 => $bads)
+            {
+                $xyz2 = $res_xyz[$cnit2];
+                $dx = $xyz['x'] - $xyz2['x'];
+                $dy = $xyz['y'] - $xyz2['y'];
+                $dz = $xyz['z'] - $xyz2['z'];
+                if($dx*$dx + $dy*$dy + $dz*$dz <= $range2)
+                    $local_bads[$cnit] += $bads;
+            }
+        }
+        // Get worst residue from list and its count of bads
+        asort($local_bads); // put worst residue last
+        end($local_bads); // go to last element
+        list($worst_cnit, $bad_count) = each($local_bads); // get last element
+        // Only singletons left (for efficiency)
+        // Also ensures that singletons are listed under their "owner"
+        if($bad_count == 1)
+        {
+            foreach($self_bads as $cnit => $bads)
+                if($bads > 0) $worst_res[$cnit] = $bads;
+            break;
+        }
+        // else ...
+        #var_export($local_bads);
+        #echo "\nRemoving $worst_cnit with $bad_count bads...\n==========\n";
+        $worst_res[$worst_cnit] = $bad_count; // record it as the worst one this pass
+        // Discard all bads that went to making the worst, the worst;
+        // then re-run the algorithm to find the next worst, until no bads left.
+        $cnit = $worst_cnit;
+        $xyz = $res_xyz[$cnit];
+        $leftover_bads = 0;
+        foreach($self_bads as $cnit2 => $bads)
+        {
+            $xyz2 = $res_xyz[$cnit2];
+            $dx = $xyz['x'] - $xyz2['x'];
+            $dy = $xyz['y'] - $xyz2['y'];
+            $dz = $xyz['z'] - $xyz2['z'];
+            if($dx*$dx + $dy*$dy + $dz*$dz <= $range2)
+                #$self_bads[$cnit2] = 0;
+                unset($self_bads[$cnit2]); // faster than 0 -- won't traverse again
+            else
+                $leftover_bads += $bads;
+        }
+        if($leftover_bads == 0) break;
+        #$cycles++;
+        #if($cycles > 100) break;
+    }
+    var_export($worst_res); echo "\n==========\n";
+    return $worst_res;
 }
 #}}}########################################################################
 

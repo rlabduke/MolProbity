@@ -1028,19 +1028,31 @@ function replacePdbRemark($inpath, $remarkText, $remarkNumber)
         if($start == 'REMARK')
         {
             $num = substr($line, 7, 3) + 0;
-            if($num >= $remarkNumber) break;
-            else fwrite($out, $line);
+            if($num >= $remarkNumber)
+            {
+                if($num == $remarkNumber)
+                    $line = null; // mark line as written -- we don't want to write it later!
+                break;
+            }
+            else
+            {
+                fwrite($out, $line);
+                $line = null; // mark line as written
+            }
         }
         elseif($start == 'USER  ' || $start == 'HEADER' || $start == 'OBSLTE' || $start == 'TITLE ' || $start == 'CAVEAT'
         || $start == 'COMPND' || $start == 'SOURCE' || $start == 'KEYWDS' || $start == 'EXPDTA' || $start == 'AUTHOR'
         || $start == 'REVDAT' || $start == 'SPRSDE' || $start == 'JRNL  ')
         {
             fwrite($out, $line);
+            $line = null; // mark line as written
         }
         else break; // abort loop for any other type of record
     }
     // Write our remark
     fwrite($out, $remarkText);
+    // Write the line that made us break, if applicable:
+    if($line) fwrite($out, $line);
     // Copy remaining records, skipping any with our same remark number
     while(!feof($in))
     {
