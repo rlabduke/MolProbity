@@ -23,32 +23,32 @@ INPUTS / SWITCHES (via $_SERVER['argv']):
 *****************************************************************************/
 $workers = array(
     // Local machine is dual core
-    "sh -c", // a local worker
-    "sh -c", // a local worker
+    'local 1' => "sh -c", // a local worker
+    'local 2' => "sh -c", // a local worker
     
     // Rarely in use, dual core
-    "ssh iwd@quiddity.biochem.duke.edu ssh quirk",      // back room public Q-client
-    "ssh iwd@quiddity.biochem.duke.edu ssh quirk",
-    "ssh iwd@quiddity.biochem.duke.edu ssh quake",      // Vince's Q-client
-    "ssh iwd@quiddity.biochem.duke.edu ssh quake",
-    "ssh iwd@quiddity.biochem.duke.edu ssh slide",      // Gary's Q-client
-    "ssh iwd@quiddity.biochem.duke.edu ssh slide",
+    'quirk 1' => "ssh iwd@quiddity.biochem.duke.edu ssh quirk",     // back room public Q-client
+    'quirk 2' => "ssh iwd@quiddity.biochem.duke.edu ssh quirk",
+    'quake 1' => "ssh iwd@quiddity.biochem.duke.edu ssh quake",     // Vince's Q-client
+    'quake 2' => "ssh iwd@quiddity.biochem.duke.edu ssh quake",
+    'slide 1' => "ssh iwd@quiddity.biochem.duke.edu ssh slide",     // Gary's Q-client
+    'slide 2' => "ssh iwd@quiddity.biochem.duke.edu ssh slide",
     
     // Rarely in use, single core
-    "ssh iwd@richardsons.biochem.duke.edu ssh soar",    // back room public R-client
-    "ssh iwd@richardsons.biochem.duke.edu ssh song",    // Sandra's R-client / public
+    'soar'    => "ssh iwd@richardsons.biochem.duke.edu ssh soar",   // back room public R-client
+    'song'    => "ssh iwd@richardsons.biochem.duke.edu ssh song",   // Sandra's R-client / public
     
     // Generally in use, dual core
-    #"ssh iwd@richardsons.biochem.duke.edu ssh sack",    // Laura's R-client
-    #"ssh iwd@richardsons.biochem.duke.edu ssh sack",
-    #"ssh iwd@richardsons.biochem.duke.edu ssh slip",    // Gary's R-client
-    #"ssh iwd@richardsons.biochem.duke.edu ssh slip",
-    #"ssh iwd@richardsons.biochem.duke.edu ssh seed",    // Vince's R-client
-    #"ssh iwd@richardsons.biochem.duke.edu ssh seed",
-    #"ssh iwd@richardsons.biochem.duke.edu ssh sail",    // Bob's R-client
-    #"ssh iwd@richardsons.biochem.duke.edu ssh sail",
-    #"ssh iwd@richardsons.biochem.duke.edu ssh soot",    // Jane's R-client
-    #"ssh iwd@richardsons.biochem.duke.edu ssh soot",
+    #'sack 1'  => "ssh iwd@richardsons.biochem.duke.edu ssh sack",   // Laura's R-client
+    #'sack 2'  => "ssh iwd@richardsons.biochem.duke.edu ssh sack",
+    #'slip 1'  => "ssh iwd@richardsons.biochem.duke.edu ssh slip",   // Gary's R-client
+    #'slip 2'  => "ssh iwd@richardsons.biochem.duke.edu ssh slip",
+    #'seed 1'  => "ssh iwd@richardsons.biochem.duke.edu ssh seed",   // Vince's R-client
+    #'seed 2'  => "ssh iwd@richardsons.biochem.duke.edu ssh seed",
+    #'sail 1'  => "ssh iwd@richardsons.biochem.duke.edu ssh sail",   // Bob's R-client
+    #'sail 2'  => "ssh iwd@richardsons.biochem.duke.edu ssh sail",
+    #'soot 1'  => "ssh iwd@richardsons.biochem.duke.edu ssh soot",   // Jane's R-client
+    #'soot 2'  => "ssh iwd@richardsons.biochem.duke.edu ssh soot",
 );
 
 // EVERY *top-level* page must start this way:
@@ -84,8 +84,8 @@ function dispatchJob($inpath, $outpath)
                 $lockfile = mpTempfile("tmp_gridlock_");
                 $workers[$idx]['lockfile'] = $lockfile;
                 $cmd = "(touch $lockfile; cat $inpath | $worker[ssh] '$worker[cmd]'; rm $lockfile) > $outpath 2>&1 &";
-                #echo $cmd . "\n";
                 echo "[".str_pad($idx, 14)."]    ".basename($inpath)."\n";
+                #echo $cmd . "\n";
                 exec($cmd);
                 return;
             }
