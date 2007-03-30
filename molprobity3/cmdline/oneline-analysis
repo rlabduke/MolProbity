@@ -4,6 +4,7 @@
 INPUTS / SWITCHES (via $_SERVER['argv']):
     inDir           the a directory of files ending in ".pdb"
     -q              quiet mode (no progress messages)
+    -filter         operate in Unix filter mode (stdin to stdout)
     -nostats        don't output info from PDB headers
     -noclash        don't output/calc clashscore, etc.
     -nocbeta        don't output/calc C-beta deviations
@@ -109,6 +110,7 @@ function summaryAnalysis($modelID)
 ############################################################################
 // Default options
 $optVerbose = true;
+$optMode    = 'batch';
 $optStats   = true;
 $optClash   = true;
 $optCbeta   = true;
@@ -119,6 +121,7 @@ $optRama    = true;
 if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
 {
     if($arg == '-q')            $optVerbose = false;
+    elseif($arg == '-filter')   $optMode = 'filter';
     elseif($arg == '-nostats')  $optStats = false;
     elseif($arg == '-noclash')  $optClash = false;
     elseif($arg == '-nocbeta')  $optCbeta = false;
@@ -126,6 +129,32 @@ if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
     elseif($arg == '-norama')   $optRama = false;
     elseif(!isset($inDir))      $inDir = $arg;
     else                        die("Too many or unrecognized arguments: '$arg'\n");
+}
+
+if($optMode == 'filter')
+{
+    $inpath = mpTempfile("tmp_pdb_");
+    copy("php://stdin", $inpath);
+    mpStartSession(true); // create a new session
+    // Need to ignore segIDs for stupid Top500 with seg new_ for all H
+    $id = addModelOrEnsemble($inpath, basename($inpath), false, true);
+    if(isset($_SESSION['ensembles'][$id]))
+    {
+        foreach($_SESSION['ensembles'][$id]['models'] as $modelID)
+        {
+            echo basename($_SESSION['models'][$modelID]['pdb']);
+            echo summaryAnalysis($modelID);
+        }
+    }
+    else
+    {
+        echo basename($inFile);
+        echo summaryAnalysis($id);
+    }
+    // Clean up and go home
+    mpDestroySession();
+    unlink($inpath);
+    die(); // remaining code is for "batch" mode
 }
 
 if(!isset($inDir))          die("No input directory specified.\n");

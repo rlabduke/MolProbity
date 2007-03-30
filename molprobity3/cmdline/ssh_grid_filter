@@ -26,19 +26,19 @@ $workers = array(
     "sh -c", // a local worker
     "sh -c", // a local worker
     
-    // Rarely in use
+    // Rarely in use, dual core
     "ssh iwd@quiddity.biochem.duke.edu ssh quirk",      // back room public Q-client
     "ssh iwd@quiddity.biochem.duke.edu ssh quirk",
     "ssh iwd@quiddity.biochem.duke.edu ssh quake",      // Vince's Q-client
     "ssh iwd@quiddity.biochem.duke.edu ssh quake",
     "ssh iwd@quiddity.biochem.duke.edu ssh slide",      // Gary's Q-client
     "ssh iwd@quiddity.biochem.duke.edu ssh slide",
-
-    // Older machines (single core), rarely in use
+    
+    // Rarely in use, single core
     "ssh iwd@richardsons.biochem.duke.edu ssh soar",    // back room public R-client
     "ssh iwd@richardsons.biochem.duke.edu ssh song",    // Sandra's R-client / public
     
-    // Generally in use
+    // Generally in use, dual core
     #"ssh iwd@richardsons.biochem.duke.edu ssh sack",    // Laura's R-client
     #"ssh iwd@richardsons.biochem.duke.edu ssh sack",
     #"ssh iwd@richardsons.biochem.duke.edu ssh slip",    // Gary's R-client
@@ -84,7 +84,8 @@ function dispatchJob($inpath, $outpath)
                 $lockfile = mpTempfile("tmp_gridlock_");
                 $workers[$idx]['lockfile'] = $lockfile;
                 $cmd = "(touch $lockfile; cat $inpath | $worker[ssh] '$worker[cmd]'; rm $lockfile) > $outpath 2>&1 &";
-                echo $cmd . "\n";
+                #echo $cmd . "\n";
+                echo "[".str_pad($idx, 14)."]    ".basename($inpath)."\n";
                 exec($cmd);
                 return;
             }
