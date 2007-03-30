@@ -595,6 +595,29 @@ function mpReadfile($filepath)
 }
 #}}}########################################################################
 
+#{{{ mpCopy - reimplementation of copy() in pure PHP
+############################################################################
+/**
+* For some reason, this works
+*   mpCopy("php://stdin", $outpath);
+*
+* but this doesn't (truncated file)
+*   copy("php://stdin", $outpath);
+*/
+function mpCopy($inpath, $outpath)
+{
+    $in = fopen($inpath, 'rb');
+    $out = fopen($outpath, 'wb');
+    while(!feof($in))
+    {
+        $data = fread($in, 4096);
+        fwrite($out, $data);
+    }
+    fclose($in);
+    fclose($out);
+}
+#}}}########################################################################
+
 #{{{ mpSerialize, mpUnserialize - replacements for broken (un)serialize
 ############################################################################
 // In some versions of PHP, serialize and unserialize munge some floating-point

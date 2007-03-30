@@ -134,7 +134,8 @@ if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
 if($optMode == 'filter')
 {
     $inpath = mpTempfile("tmp_pdb_");
-    copy("php://stdin", $inpath);
+    #copy("php://stdin", $inpath); -- for some reason, this truncates the file
+    mpCopy("php://stdin", $inpath);
     mpStartSession(true); // create a new session
     // Need to ignore segIDs for stupid Top500 with seg new_ for all H
     $id = addModelOrEnsemble($inpath, basename($inpath), false, true);
