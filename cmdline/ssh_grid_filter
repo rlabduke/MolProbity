@@ -5,13 +5,8 @@
     Each job should act as a Unix filter,
     accepting input on stdin and writing output to stdout.
     
-    Before running, fill in values below for $workers.
-    
-    Local workers are "sh -c".
-    Remote workers are (for example) "ssh user@host.com".
-    Two-hop workers can be given as "ssh user1@gateway ssh user2@internal".
-    SSH passwords should be supplied by RSA or DSA keys,
-    with ssh-agent already running if the keys are password protected.
+    Before running, fill in values for $ssh_grid_workers
+    in config/ssh_grid_workers.php !
     
 INPUTS / SWITCHES (via $_SERVER['argv']):
     inDir           a directory of input files to pass through the filter
@@ -21,42 +16,13 @@ INPUTS / SWITCHES (via $_SERVER['argv']):
                     to protect it from the shell.
 
 *****************************************************************************/
-$workers = array(
-    // Local machine is dual core
-    'local 1' => "sh -c", // a local worker
-    'local 2' => "sh -c", // a local worker
-    
-    // Rarely in use, dual core
-    'quirk 1' => "ssh iwd@quiddity.biochem.duke.edu ssh quirk",     // back room public Q-client
-    'quirk 2' => "ssh iwd@quiddity.biochem.duke.edu ssh quirk",
-    'quake 1' => "ssh iwd@quiddity.biochem.duke.edu ssh quake",     // Vince's Q-client
-    'quake 2' => "ssh iwd@quiddity.biochem.duke.edu ssh quake",
-    'slide 1' => "ssh iwd@quiddity.biochem.duke.edu ssh slide",     // Gary's Q-client
-    'slide 2' => "ssh iwd@quiddity.biochem.duke.edu ssh slide",
-    
-    // Rarely in use, single core
-    'soar'    => "ssh iwd@richardsons.biochem.duke.edu ssh soar",   // back room public R-client
-    'song'    => "ssh iwd@richardsons.biochem.duke.edu ssh song",   // Sandra's R-client / public
-    
-    // Generally in use, dual core
-    #'sack 1'  => "ssh iwd@richardsons.biochem.duke.edu ssh sack",   // Laura's R-client
-    #'sack 2'  => "ssh iwd@richardsons.biochem.duke.edu ssh sack",
-    #'slip 1'  => "ssh iwd@richardsons.biochem.duke.edu ssh slip",   // Gary's R-client
-    #'slip 2'  => "ssh iwd@richardsons.biochem.duke.edu ssh slip",
-    #'seed 1'  => "ssh iwd@richardsons.biochem.duke.edu ssh seed",   // Vince's R-client
-    #'seed 2'  => "ssh iwd@richardsons.biochem.duke.edu ssh seed",
-    #'sail 1'  => "ssh iwd@richardsons.biochem.duke.edu ssh sail",   // Bob's R-client
-    #'sail 2'  => "ssh iwd@richardsons.biochem.duke.edu ssh sail",
-    #'soot 1'  => "ssh iwd@richardsons.biochem.duke.edu ssh soot",   // Jane's R-client
-    #'soot 2'  => "ssh iwd@richardsons.biochem.duke.edu ssh soot",
-);
-
 // EVERY *top-level* page must start this way:
 // 1. Define it's relationship to the root of the MolProbity installation.
 // Pages in subdirectories of lib/ or public_html/ will need more "/.." 's.
     if(!defined('MP_BASE_DIR')) define('MP_BASE_DIR', realpath(dirname(__FILE__).'/..'));
 // 2. Include core functionality - defines constants, etc.
     require_once(MP_BASE_DIR.'/lib/core.php');
+    require_once(MP_BASE_DIR.'/config/ssh_grid_workers.php');
 // 3. Restore session data. If you don't want to access the session
 // data for some reason, you must call mpInitEnvirons() instead.
     mpInitEnvirons();       // use std PATH, etc.
@@ -74,15 +40,15 @@ $workers = array(
 */
 function dispatchJob($inpath, $outpath)
 {
-    global $workers, $sleepTime;
+    global $ssh_grid_workers, $sleepTime;
     while(true)
     {
-        foreach($workers as $idx => $worker)
+        foreach($ssh_grid_workers as $idx => $worker)
         {
             if(!isset($worker['lockfile']) || !file_exists($worker['lockfile']))
             {
                 $lockfile = mpTempfile("tmp_gridlock_");
-                $workers[$idx]['lockfile'] = $lockfile;
+                $ssh_grid_workers[$idx]['lockfile'] = $lockfile;
                 $cmd = "(touch $lockfile; cat $inpath | $worker[ssh] '$worker[cmd]'; rm $lockfile) > $outpath 2>&1 &";
                 echo "[".str_pad($idx, 14)."]    ".basename($inpath)."\n";
                 #echo $cmd . "\n";
@@ -104,11 +70,11 @@ function dispatchJob($inpath, $outpath)
 */
 function waitForJobs()
 {
-    global $workers, $sleepTime;
+    global $ssh_grid_workers, $sleepTime;
     while(true)
     {
         $still_going = 0;
-        foreach($workers as $idx => $worker)
+        foreach($ssh_grid_workers as $idx => $worker)
         {
             if(isset($worker['lockfile']) && file_exists($worker['lockfile']))
                 $still_going++;
@@ -151,18 +117,13 @@ elseif(realpath($inDir) == realpath($outDir))
     dir("Input and output directories point to the same place.\n");
 elseif(!isset($filterCmd))  die("No filter command was provided.\n");
 
-// Convert $workers into a more detailed data structure.
-foreach($workers as $idx => $ssh_cmd)
+// Convert $ssh_grid_workers into a more detailed data structure.
+foreach($ssh_grid_workers as $idx => $ssh_cmd)
 {
-    // Workers can also be given as arrays with 'ssh', 'cmd'
-    // instead of simple strings, in case 'cmd' varies by host.
-    if(!is_array($ssh_cmd))
-    {
-        $workers[$idx] = array(
-            'ssh' => $ssh_cmd,
-            'cmd' => $filterCmd,
-        );
-    }
+    $ssh_grid_workers[$idx] = array(
+        'ssh' => $ssh_cmd,
+        'cmd' => $filterCmd,
+    );
 }
 
 foreach(listDir($inDir) as $inFile) //if(endsWith($inFile, ".pdb"))
