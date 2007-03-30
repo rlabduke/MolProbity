@@ -24,6 +24,13 @@ else
     echo "config.php already exists; no changes made"
 fi
 
+# Create ssh_grid_workers file
+if [ ! -f config/ssh_grid_workers.php ]; then
+    cp config/ssh_grid_workers.php.sample config/ssh_grid_workers.php
+else
+    echo "ssh_grid_workers.php already exists; no changes made"
+fi
+
 # Set world-writable permisions on data/ and tmp/
 chmod 777 public_html/data
 chmod 777 tmp/
