@@ -13,7 +13,7 @@ if [ ! -f setup.sh ]; then
         echo
         echo "    You must run SETUP.SH from the main MolProbity directory!"
         echo
-        exit
+        exit 1
     fi
 fi
 
@@ -46,9 +46,29 @@ chmod 666 feedback/user_paths.log
 cd bin
 # Nothing to do here...
 cd macosx/
-ln -s gawk awk
+[ -f awk ] || ln -s gawk awk
 cd ..
 cd linux/
 # Nothing to do here...
 cd ..
 cd ..
+
+# Try to find PHP
+if ! type -p php > /dev/null; then
+    echo
+    echo "    Can't find PHP.  You must have PHP on your PATH to run MolProbity."
+    echo
+    exit 1
+fi
+php -C -f public_html/admin/check_config.php > tmp/check_config.html
+
+# Run setup check and show results
+if type -p open > /dev/null; then
+    open tmp/check_config.html
+elif type -p firefox > /dev/null; then
+    firefox tmp/check_config.html
+elif type -p mozilla > /dev/null; then
+    mozilla tmp/check_config.html
+else
+    echo "Please open ./tmp/check_config.html in a web browser."
+fi
