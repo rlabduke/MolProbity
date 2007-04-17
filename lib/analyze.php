@@ -1037,12 +1037,15 @@ function listProteinResidues($infile)
 * Returns NULL if the file could not be read.
 * Otherwise, an array with one key ('res') which points to another array
 * mapping CNIT codes to highest B-factor in any atom of the residue.
-* In the future, other top-level keys may be added, like 'mc' and 'sc'.
+* Another top-level key ('mc') has been added, with the highest B for
+* (protein) mainchain atoms.
+* In the future, other top-level keys may be added, like 'sc'.
 * Does not account for the possibility of multiple MODELs.
 */
 function listResidueBfactors($infile)
 {
-    $out = array();
+    $res = array();
+    $mc = array();
     
     $in = fopen($infile, "r");
     if(!$in) return NULL;
@@ -1051,14 +1054,17 @@ function listResidueBfactors($infile)
         $s = fgets($in, 1024);
         if(startsWith($s, "ATOM") || startsWith($s, "HETATM"))
         {
-            $res = pdbComposeResName($s);
+            $cnit = pdbComposeResName($s);
             $Bfact = substr($s, 60, 6) + 0;
-            $out[$res] = max($Bfact, $out[$res]);
+            $res[$cnit] = max($Bfact, $res[$cnit]);
+            $atom = substr($s, 12, 4);
+            if(preg_match('/ N  | CA | C  | O  /', $atom))
+                $mc[$cnit] = max($Bfact, $mc[$cnit]);
         }
     }
     fclose($in);
 
-    return array('res' => $out);
+    return array('res' => $res, 'mc' => $mc);
 }
 #}}}########################################################################
 

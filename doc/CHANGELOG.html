@@ -81,6 +81,8 @@
   * write improved to-do list for Coot w/ clustered errors (waiting on Paul)
     add *option* to make REMARK 42 into an unnumbered REMARK
     email new MolP tarball to Joe Moran at GSK
+    error cluster fails at 0,0,0 for certain pdbs e.g. 1lg7
+  * setup should run PHP check script and open it in a browser
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -94,6 +96,8 @@
 - added -filter mode to oneline-analysis
 - fixed truncation on stdin on copy for oneline-analysis
 - moved ssh_grid_workers definition into a new config file
+- fixed bug in file listing (came from using if instead of elseif)
+- added multi-model Rama plot (PDF) for Pei et al.
 
 ### 3.07 ###
 - updated mpReadfile() with provisions for very large files
