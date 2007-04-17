@@ -13,7 +13,8 @@ INPUTS / SWITCHES (via $_SERVER['argv']):
     outDir          a directory to put the output files in
     filterCmd       a command to run on all the files, assuming input from
                     stdin and output to stdout. Should be enclosed in quotes
-                    to protect it from the shell.
+                    to protect it from the shell.  Hint: put the word "nice"
+                    before the command to run it at lower priority.
 
 *****************************************************************************/
 // EVERY *top-level* page must start this way:
@@ -50,7 +51,7 @@ function dispatchJob($inpath, $outpath)
                 $lockfile = mpTempfile("tmp_gridlock_");
                 $ssh_grid_workers[$idx]['lockfile'] = $lockfile;
                 $cmd = "(touch $lockfile; cat $inpath | $worker[ssh] '$worker[cmd]'; rm $lockfile) > $outpath 2>&1 &";
-                echo "[".str_pad($idx, 14)."]    ".basename($inpath)."\n";
+                echo str_pad($idx, 20).basename($inpath)."\n";
                 #echo $cmd . "\n";
                 exec($cmd);
                 return;

@@ -40,16 +40,33 @@ OUTPUTS:
 
 # MAIN - the beginning of execution for this page
 ############################################################################
+// Default options
+$optClash   = true;
+$optCbeta   = true;
+$optRota    = true;
+$optRama    = true;
+
+$pdbFileList = array();
 // First argument is the name of this script...
-if(is_array($_SERVER['argv']))
+if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
 {
-    $pdbFileList = array_slice($_SERVER['argv'], 1);
-    if(count($pdbFileList) == 0)
-        die("Must provide at least one PDB file on the command line!\n");
+    if($arg == '-noclash')      $optClash = false;
+    elseif($arg == '-nocbeta')  $optCbeta = false;
+    elseif($arg == '-norota')   $optRota = false;
+    elseif($arg == '-norama')   $optRama = false;
+    else                        $pdbFileList[] = $arg;
 }
+if(count($pdbFileList) == 0)
+    die("Must provide at least one PDB file on the command line!\n");
     
+echo "#file_name,residue,res_high_B,mc_high_B";
+if($optClash)   echo ",worst_clash,src_atom,dst_atom,dst_residue";
+if($optCbeta)   echo ",CB_dev";
+if($optRota)    echo ",rotamer_score,rotamer_eval";
+if($optRama)    echo ",rama_score,rama_eval,rama_type";
+echo "\n";
+
 // Loop through all PDBs
-echo "#file_name,residue,high_B,worst_clash,src_atom,dst_atom,dst_residue,CB_dev,rotamer_score,rotamer_eval,rama_score,rama_eval,rama_type\n";
 foreach($pdbFileList as $infile)
 {
     if(is_file($infile))
@@ -60,39 +77,64 @@ foreach($pdbFileList as $infile)
         // Make sure all residues are represented, and in the right order.
         $res = listResidues($infile);
         $Bfact = listResidueBfactors($infile);
-        $Bfact = $Bfact['res'];
+        $resB = $Bfact['res'];
+        $mcB = $Bfact['mc'];
         // Run analysis; load data
-        runClashlist($infile, $tmp);
-        $clash = loadClashlist($tmp);
-        runCbetaDev($infile, $tmp);
-        $cbdev = loadCbetaDev($tmp);
-        $badCbeta = findCbetaOutliers($cbdev);
-        runRotamer($infile, $tmp);
-        $rota = loadRotamer($tmp);
-        $badRota = findRotaOutliers($rota);
-        runRamachandran($infile, $tmp);
-        $rama = loadRamachandran($tmp);
+        if($optClash)
+        {
+            runClashlist($infile, $tmp);
+            $clash = loadClashlist($tmp);
+        }
+        if($optCbeta)
+        {
+            runCbetaDev($infile, $tmp);
+            $cbdev = loadCbetaDev($tmp);
+            $badCbeta = findCbetaOutliers($cbdev);
+        }
+        if($optRota)
+        {
+            runRotamer($infile, $tmp);
+            $rota = loadRotamer($tmp);
+            $badRota = findRotaOutliers($rota);
+        }
+        if($optRama)
+        {
+            runRamachandran($infile, $tmp);
+            $rama = loadRamachandran($tmp);
+        }
         unlink($tmp);
         
         foreach($res as $cnit)
         {
-            echo "$filename,$cnit,$Bfact[$cnit]";
-            if(isset($clash['clashes'][$cnit]))
-                echo ",".$clash['clashes'][$cnit].",".$clash['clashes-with'][$cnit]['srcatom'].",".$clash['clashes-with'][$cnit]['dstatom'].",".$clash['clashes-with'][$cnit]['dstcnit'];
-            else echo ",,,,";
-            if(isset($badCbeta[$cnit]))
-                echo ",".$badCbeta[$cnit];
-            else echo ",";
-            if(isset($rota[$cnit]))
+            echo "$filename,$cnit,$resB[$cnit],$mcB[$cnit]";
+            if($optClash)
             {
-                echo ",".$rota[$cnit]['scorePct'];
-                if($rota[$cnit]['scorePct']+0 <= 1.0) echo ",OUTLIER";
-                else echo ",".$rota[$cnit]['rotamer'];
+                if(isset($clash['clashes'][$cnit]))
+                    echo ",".$clash['clashes'][$cnit].",".$clash['clashes-with'][$cnit]['srcatom'].",".$clash['clashes-with'][$cnit]['dstatom'].",".$clash['clashes-with'][$cnit]['dstcnit'];
+                else echo ",,,,";
             }
-            else echo ",,";
-            if(isset($rama[$cnit]))
-                echo ",".$rama[$cnit]['scorePct'].",".$rama[$cnit]['eval'].",".$rama[$cnit]['type'];
-            else echo ",,,";
+            if($optCbeta)
+            {
+                if(isset($badCbeta[$cnit]))
+                    echo ",".$badCbeta[$cnit];
+                else echo ",";
+            }
+            if($optRota)
+            {
+                if(isset($rota[$cnit]))
+                {
+                    echo ",".$rota[$cnit]['scorePct'];
+                    if($rota[$cnit]['scorePct']+0 <= 1.0) echo ",OUTLIER";
+                    else echo ",".$rota[$cnit]['rotamer'];
+                }
+                else echo ",,";
+            }
+            if($optRama)
+            {
+                if(isset($rama[$cnit]))
+                    echo ",".$rama[$cnit]['scorePct'].",".$rama[$cnit]['eval'].",".$rama[$cnit]['type'];
+                else echo ",,,";
+            }
             echo "\n";
         }
     }

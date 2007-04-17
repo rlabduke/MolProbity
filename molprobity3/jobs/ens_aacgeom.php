@@ -55,6 +55,9 @@ $modelURL   = $_SESSION['dataURL'].'/'.MP_DIR_MODELS;
 $kinDir     = $_SESSION['dataDir'].'/'.MP_DIR_KINS;
 $kinURL     = $_SESSION['dataURL'].'/'.MP_DIR_KINS;
 if(!file_exists($kinDir)) mkdir($kinDir, 0777);
+$chartDir   = $_SESSION['dataDir'].'/'.MP_DIR_CHARTS;
+$chartURL   = $_SESSION['dataURL'].'/'.MP_DIR_CHARTS;
+if(!file_exists($chartDir)) mkdir($chartDir, 0777);
 
 $infile     = "$modelDir/$ensemble[pdb]";
 $infiles    = array();
@@ -63,6 +66,7 @@ foreach($ensemble['models'] as $modelID)
     
 $tasks = array();
 if($opts['doKinemage'])         $tasks['multikin'] = "Create multi-criterion kinemage";
+if($opts['doRamaPDF'])          $tasks['ramapdf'] = "Create multi-model Ramachandran plot (PDF)";
 if($opts['doMultiGraph'])       $tasks['multigraph'] = "Create multi-criterion graph";
 if($opts['doMultiModelChart'])  $tasks['multichart'] = "Create multi-criterion chart";
     
@@ -91,8 +95,20 @@ if($opts['doKinemage'])
         destructiveGZipFile($outfile);
     }
 
+    $labbookEntry .= "<h3>Multi-criterion kinemage</h3>\n";
+    $labbookEntry .= "<p>\n";
     $labbookEntry .= "<i>Note: these kins are often too big to view in the browser. You may need to download it and view it off line.</i>\n";
     $labbookEntry .= "<br>".linkKinemage("$ensemble[prefix]multi.kin", "Multi-criterion kinemage");
+    $labbookEntry .= "</p>\n";
+}
+if($opts['doRamaPDF'])
+{
+    setProgress($tasks, 'ramapdf'); // updates the progress display if running as a background job
+    $outfile = "$chartDir/$ensemble[prefix]rama.pdf";
+    makeRamachandranPDF($infile, $outfile);
+    
+    $labbookEntry .= "<h3>Multi-model Ramachandran plot</h3>\n";
+    $labbookEntry .= "<p>".linkAnyFile("$ensemble[prefix]rama.pdf", "Ramachandran plot PDF")."</p>\n";
 }
 if($opts['doMultiGraph'])
 {
