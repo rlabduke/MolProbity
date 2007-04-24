@@ -50,7 +50,8 @@ function dispatchJob($inpath, $outpath)
             {
                 $lockfile = mpTempfile("tmp_gridlock_");
                 $ssh_grid_workers[$idx]['lockfile'] = $lockfile;
-                $cmd = "(touch $lockfile; cat $inpath | $worker[ssh] '$worker[cmd]'; rm $lockfile) > $outpath 2>&1 &";
+                //$cmd = "(touch $lockfile; cat $inpath | $worker[ssh] '$worker[cmd]'; rm $lockfile) > $outpath 2>&1 &"; // out and err to same place
+                $cmd = "(touch $lockfile; cat $inpath | $worker[ssh] '$worker[cmd]'; rm $lockfile) > $outpath 2> $outpath.stderr &"; // out and err to separate files
                 echo str_pad($idx, 20).basename($inpath)."\n";
                 #echo $cmd . "\n";
                 exec($cmd);
