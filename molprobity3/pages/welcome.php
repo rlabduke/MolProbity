@@ -233,13 +233,30 @@ function displayModelTools($context)
 function displayEnsembleTools($context)
 {
     // We already know lastUsedModelID is set and refers to an ensemble, not a model
-    $model = $_SESSION['ensembles'][ $_SESSION['lastUsedModelID'] ];
+    $ensemble = $_SESSION['ensembles'][ $_SESSION['lastUsedModelID'] ];
+    // Use the first model of each ensemble as representative.
+    $modelID = reset($ensemble['models']);
+    $model = $_SESSION['models'][$modelID];
+            
     // "rel" (relevance) is 2 for major, 1 for minor, 0 for not shown.
     $tools = array(
         'aacgeom'   => array('desc' => 'Analyze all-atom contacts and geometry', 'page' => 'ens_aacgeom_setup.php', 'rel' => 2, 'img' => 'clash_rama.png'),
         'biolunit'  => array('desc' => 'Biol. unit, not NMR', 'handler' => 'onConvertToBiolUnit', 'rel' => 1, 'img' => 'scissors.png'),
+        'reduce'    => array('desc' => 'Add hydrogens', 'page' => 'ens_reduce_setup.php', 'rel' => 1, 'img' => 'add_h.png'),
     );
     
+    // Reduce
+    if($ensemble['isReduced'])
+        $tools['reduce']['rel'] = 0;
+    elseif($model['stats']['has_most_H'])
+        $tools['reduce']['rel'] = 1;
+    else
+    {
+        $tools['reduce']['rel'] = 2;
+        //$tools['aacgeom']['rel'] = 1;
+    }
+        
+
     $this->formatTools($tools);
 }
 #}}}########################################################################

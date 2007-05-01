@@ -33,19 +33,31 @@ function describePdbStats($pdbstats, $useHTML = true)
     $details[] = $pdbstats['chains']." chain(s) is/are present [".$pdbstats['unique_chains']." unique chain(s)]";
     $details[] = "A total of ".$pdbstats['residues']." residues are present.";
     
-    // CA, sidechains, and H
-    if($pdbstats['hydrogens'] > 0 and $pdbstats['sidechains'] > 0) $details[] = "Mainchain, sidechains, and hydrogens are present.";
-    elseif($pdbstats['sidechains'] > 0) $details[] = "Mainchain and sidechains are present, but not hydrogens.";
-    elseif($pdbstats['nucacids'] == 0) $details[] = "{$b}Only C-alphas{$unb} are present.";
-    
-    // Alt confs
-    if($pdbstats['all_alts'] > 0) $details[] = $pdbstats['all_alts']." residues have alternate conformations (".$pdbstats['mc_alts']." in protein mc/CB).";
-    
-    // RNA / DNA
-    if($pdbstats['nucacids'] > 0) $details[] = "".$pdbstats['nucacids']." nucleic acid residues are present.";
-    
-    // Hets and waters
-    if($pdbstats['hets'] > 0) $details[] = "".$pdbstats['hets']." hetero group(s) is/are present.";
+    // Types of residues
+    if($pdbstats['residues'] > 0)
+    {
+        if($pdbstats['sidechains'] == 0 && $pdbstats['nucacids'] == 0)
+            $details[] = "{$b}Only C-alphas{$unb} are present.";
+        else
+        {
+            if($pdbstats['sidechains'] > 0)
+                $details[] = "Protein mainchain and sidechains are present.";
+            if($pdbstats['all_alts'] > 0)
+                $details[] = $pdbstats['all_alts']." protein residues have alternate conformations (".$pdbstats['mc_alts']." in mc/CB).";
+            if($pdbstats['nucacids'] > 0)
+                $details[] = "".$pdbstats['nucacids']." nucleic acid residues are present.";
+
+            if($pdbstats['has_most_H'])
+                $details[] = "Explicit hydrogens are present.";
+            elseif($pdbstats['hydrogens'] > 0)
+                $details[] = "{$b}Not all hydrogens{$unb} are explicitly included, although a few are.";
+            else
+                $details[] = "No explicit hydrogen atoms are included.";
+        }
+        
+        if($pdbstats['hets'] > 0)
+            $details[] = "".$pdbstats['hets']." hetero group(s) is/are present.";
+    }
     
     // Crystallographic information
     if(isset($pdbstats['refiprog'])) $details[] = "Refinement was carried out in $pdbstats[refiprog].";
