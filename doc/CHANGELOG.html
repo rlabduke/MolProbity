@@ -78,7 +78,7 @@
     Note that NMR models should be done one at a time to get multichart, etc
     Add page to explain meaning of MolProbity score
     record file contents: protein, nuc. acid, or both (?)
-  * write improved to-do list for Coot w/ clustered errors (waiting on Paul)
+    write improved to-do list for Coot w/ clustered errors (waiting on Paul)
     add *option* to make REMARK 42 into an unnumbered REMARK
     email new MolP tarball to Joe Moran at GSK
     error cluster fails at 0,0,0 for certain pdbs e.g. 1lg7
@@ -99,6 +99,12 @@
 - added multi-model Rama plot (PDF) for Pei et al.
 - setup now runs PHP check script and opens it in a browser
 - ssh_grid_filter now directs stderr to a separate file
+- fixed split/joinPdbFiles() to retain model numbers when making ensembles
+- added model.php :: reduceEnsemble()
+- added missing "plain text" link for pdbH files
+- added GUI for running Reduce on an entire ensemble
+- reorganized pdbstat.php :: describePdbStats() to be more RNA-friendly
+- added isReduced / isBuilt for ensembles too
 
 ### 3.07 ###
 - updated mpReadfile() with provisions for very large files

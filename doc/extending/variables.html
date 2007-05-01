@@ -297,8 +297,17 @@ instance, an ensemble representing the results of <span
 -build</span> might point back to the NMR file pulled directly from the
 PDB. This key is not set for ensembles supplied by the user (as
 multi-model files).</li>
+  <li><span style="font-family: monospace; font-weight: bold;">isReduced</span>:
+true if the PDB file has been processed by Reduce, so we know at a
+minimum that all hydrogens are present. This is a heritable property.</li>
+  <li><span style="font-weight: bold; font-family: monospace;">isBuilt</span>:
+true if the PDB is the result of a <span
+ style="font-family: monospace;">-build</span> and/or <span
+ style="font-family: monospace;">-fix</span> run in Reduce, so the
+expert system has already changed all the Asn, Gln, and His that might
+need changing. This is a heritable property.<br>
+  </li>
 </ul>
-<br>
 <h2>Contents of $_SESSION['bgjob']:</h2>
 <ul>
   <li><span style="font-family: monospace; font-weight: bold;">isRunning</span>:

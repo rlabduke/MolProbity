@@ -198,7 +198,7 @@ function makeFileCommands($path, $url)
     // PDB files with H
     elseif(endsWith($path, "H.pdb")) // have to use $path b/c the capital letter matters!
     {
-        $s .= "<td></td>";
+        $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=plain' target='_blank'>plain text</a></small></td>";
         $s .= "<td><small><a href='download_trimmed.php?$_SESSION[sessTag]&file=$path'>without H</a></small></td>";
     }
     // PHP-encoded-array chart or table (e.g. the multicriterion chart)

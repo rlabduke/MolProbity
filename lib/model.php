@@ -121,7 +121,9 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
             // so mdl can be ID'd, but bad for sorting multiple structures...
             $model = createModel(sprintf("m%02d_{$origID}", $modelNum));
             $id = $model['id'];
-            $idList[] = $id;
+            // Better to keep the original model numbers hanging around:
+            //$idList[] = $id;
+            $idList[$modelNum] = $id;
             
             $file = $outpath.'/'.$model['pdb'];
             copy($tmp3, $file);
@@ -144,7 +146,7 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
         $ensemble['isUserSupplied'] = $isUserSupplied;
         
         $pdbList = array();
-        foreach($idList as $id) $pdbList[] = $outpath.'/'.$_SESSION['models'][$id]['pdb'];
+        foreach($idList as $modelNum => $id) $pdbList[$modelNum] = $outpath.'/'.$_SESSION['models'][$id]['pdb'];
         $joinedModel = joinPdbModels($pdbList);
         copy($joinedModel, $outpath.'/'.$ensemble['pdb']);
         unlink($joinedModel);
@@ -387,8 +389,9 @@ function splitPdbModels($infile)
 /**
 * Given an array of PDB format files, this function merges them back together
 * into a reasonably coherent multi-model PDB file.
-* The order of models in the array is taken as their desired order and
-* numbering (1...N) in the file.
+* The order of models in the array is taken as their desired order in the file.
+* If the array keys would make sensible model numbers, they are used;
+* else the models are numbered 1 to N.
 * Returns a temp file name holding the joined models.
 */
 function joinPdbModels($infiles)
@@ -415,17 +418,27 @@ function joinPdbModels($infiles)
         fclose($in);
     }
     
-    // Part 2: Re-scan all files and write their contents, in order.
+    // Part 2: Should we number models using the array keys?
+    $useKeysAsModelNumbers = true;
+    foreach($infiles as $key => $dummy)
+    {
+        $key = $key + 0;
+        $useKeysAsModelNumbers =
+            $useKeysAsModelNumbers && $key > 0 && is_int($key);
+    }
+    
+    // Part 3: Re-scan all files and write their contents, in order.
     $tmpFile = mpTempfile("tmp_pdb_");
     $out = fopen($tmpFile, "wb");
     foreach($headers as $h) fwrite($out, $h);
     
     $i = 1;
-    foreach($infiles as $infile)
+    foreach($infiles as $key => $infile)
     {
         //Open PDB file, read line by line
         $in = fopen($infile,"rb");
-        fwrite($out, sprintf("MODEL     %4d                                                                  \n", $i++));
+        $modelNum = ($useKeysAsModelNumbers ? $key : $i);
+        fwrite($out, sprintf("MODEL     %4d                                                                  \n", $modelNum));
         while(!feof($in))
         {
             // We decide based on record type rather than REMARK'd MODEL/ENDMDL
@@ -436,6 +449,7 @@ function joinPdbModels($infiles)
         }
         fwrite($out, "ENDMDL                                                                          \n");
         fclose($in);
+        $i++;
     }
     
     foreach($footers as $f) fwrite($out, $f);
@@ -603,6 +617,66 @@ function reduceFix($inpath, $outpath, $flippath)
     // so it doesn't need to appear on the command line here.
     //exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -build -fix $flippath -allalt $inpath > $outpath");
     exec("reduce -quiet -build -fix $flippath -allalt $inpath > $outpath");
+}
+#}}}########################################################################
+
+#{{{ reduceEnsemble - runs Reduce on all models to make a new ensemble
+############################################################################
+/**
+* Calling this function creates N new models with hydrogens and then
+* reassembles them into one new ensemble with H.
+*
+* Returns the ID of the newly minted ensemble.
+*
+* $ensID        the ensemble ID for the ensemble to reduce
+* $reduceFunc   the function to run on ensemble members: one of
+*   'reduceBuild', 'reduceNoBuild', or 'reduceTrim'
+*/
+function reduceEnsemble($ensID, $reduceFunc = 'reduceNoBuild')
+{
+    $ens        = $_SESSION['ensembles'][$ensID];
+    $idList     = array();
+    $pdbList    = array();
+    
+    foreach($ens['models'] as $modelNum => $modelID)
+    {
+        $oldModel   = $_SESSION['models'][$modelID];
+        $newModel   = createModel($modelID."H");
+        $outname    = $newModel['pdb'];
+        $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
+        if(!file_exists($outpath)) mkdir($outpath, 0777); // shouldn't ever happen, but might...
+        $outpath    .= '/'.$outname;
+        $inpath     = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$oldModel['pdb'];
+        // FUNKY: calls the function whose name is stored in the variable $reduceFunc
+        $reduceFunc($inpath, $outpath);
+        
+        $newModel['stats']          = pdbstat($outpath);
+        $newModel['parent']         = $modelID;
+        $newModel['history']        = "Derived from $oldModel[pdb] by $reduceFunc";
+        $newModel['isUserSupplied'] = $oldModel['isUserSupplied'];
+        $newModel['isReduced']      = ($reduceFunc != 'reduceTrim');
+        $newModel['isBuilt']        = ($reduceFunc == 'reduceBuild');
+        $_SESSION['models'][ $newModel['id'] ] = $newModel;
+        
+        $idList[$modelNum]  = $newModel['id'];
+        $pdbList[$modelNum] = $outpath;
+    }
+    
+    $ensemble = createEnsemble($ensID."H");
+    $ensemble['models']     = $idList;
+    $ensemble['history']    = "Ensemble of ".count($idList)." models derived from $ens[pdb] by $reduceFunc";
+    $newModel['isReduced']  = ($reduceFunc != 'reduceTrim');
+    $newModel['isBuilt']    = ($reduceFunc == 'reduceBuild');
+    $ensemble['isUserSupplied'] = $ens['isUserSupplied'];
+    
+    $joinedModel = joinPdbModels($pdbList);
+    copy($joinedModel, $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$ensemble['pdb']);
+    unlink($joinedModel);
+    
+    // Create the ensemble entry
+    $id = $ensemble['id'];
+    $_SESSION['ensembles'][$id] = $ensemble;
+    return $id;
 }
 #}}}########################################################################
 
