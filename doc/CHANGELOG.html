@@ -79,13 +79,18 @@
     Add page to explain meaning of MolProbity score
     record file contents: protein, nuc. acid, or both (?)
     write improved to-do list for Coot w/ clustered errors (waiting on Paul)
+        merge this clustering func. with analyze::calcLocalBadness()
+  * add suitename, working with Dave
     add *option* to make REMARK 42 into an unnumbered REMARK
     email new MolP tarball to Joe Moran at GSK
-    error cluster fails at 0,0,0 for certain pdbs e.g. 1lg7
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
+
+### 3.09 ###
+- fixed bug (I think): error cluster fails at 0,0,0 for certain pdbs e.g. 1lg7
+- added preliminary version of new Coot to-do list with error clusters
 
 ### 3.08 ###
 - added reduceTrim() function to enable downloading PDBs without H
