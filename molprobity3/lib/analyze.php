@@ -228,7 +228,8 @@ function runAnalysis($modelID, $opts)
         $tasks['multichart'] .= " - <a href='viewtable.php?$_SESSION[sessTag]&file=$outfile' target='_blank'>preview</a>\n";
         setProgress($tasks, 'multichart'); // so the preview link is visible
         $outfile = "$chartDir/$model[prefix]multi-coot.scm";
-        makeCootMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pperp);
+        #makeCootMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pperp);
+        makeCootClusteredChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pperp);
     }
     if($opts['doKinemage'])
     {
@@ -836,6 +837,7 @@ function calcLocalBadness($infile, $range, $clash, $rama, $rota, $cbdev, $pperp)
 {
     $res_xyz = computeResCenters($infile);
     $self_bads = findAllOutliers($clash, $rama, $rota, $cbdev, $pperp);
+    #var_export($self_bads); echo "\n==========\n";
     $range2 = $range * $range;
     $worst_res = array();
     while(true)
@@ -856,11 +858,12 @@ function calcLocalBadness($infile, $range, $clash, $rama, $rota, $cbdev, $pperp)
         }
         // Get worst residue from list and its count of bads
         asort($local_bads); // put worst residue last
+        #var_export($local_bads); echo "\n==========\n";
         end($local_bads); // go to last element
         list($worst_cnit, $bad_count) = each($local_bads); // get last element
         // Only singletons left (for efficiency)
         // Also ensures that singletons are listed under their "owner"
-        if($bad_count == 1)
+        if($bad_count <= 1)
         {
             foreach($self_bads as $cnit => $bads)
                 if($bads > 0) $worst_res[$cnit] = $bads;
@@ -891,7 +894,7 @@ function calcLocalBadness($infile, $range, $clash, $rama, $rota, $cbdev, $pperp)
         #$cycles++;
         #if($cycles > 100) break;
     }
-    var_export($worst_res); echo "\n==========\n";
+    #var_export($worst_res); echo "\n==========\n";
     return $worst_res;
 }
 #}}}########################################################################

@@ -1044,6 +1044,298 @@ function makeCootMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev,
 }
 #}}}########################################################################
 
+#{{{ makeCootClusteredChart - Scheme script for Coot's fascinating-things-gui
+############################################################################
+/**
+* $outfile will be overwritten with a Scheme script for loading in Coot.
+* $clash    is the data structure from loadClashlist()
+* $rama     is the data structure from loadRamachandran()
+* $rota     is the data structure from loadRotamer()
+* $cbdev    is the data structure from loadCbetaDev()
+* $pperp    is the data structure from loadBasePhosPerp()
+* Any of them can be set to null if the data is unavailable.
+*/
+function makeCootClusteredChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pperp)
+{
+    //{{{ 0. A lovely Scheme script written for us by Paul Emsley
+    $schemeScript = <<<HEREDOC
+; -*-scheme-*-
+
+;;(molprobity-fascinating-clusters-things-gui
+;;   dialog-name
+;;   sorting-options
+;;   list-of-clusters)
+;; 
+;; where a cluster is:
+;;    (list 
+;;     cluster-name-string
+;;     cluster-center-go-button-label-string
+;;     ccgb-x ccgb-y ccgb-z
+;;     ; a list of specific items:
+;;     (list 
+;;         (list specific-button-label-string button-red button-green button-blue
+;;               specific-x specific-y specific-z))))
+;;
+;; 
+;;(molprobity-fascinating-clusters-things-gui
+;; gui-name-string
+;; (list
+;;   (list "Active Site" (list 0 1 2 3 4))
+;;   (list "Worst First" (list 3 4 2 1 0)))
+;; ; now a list of clusters:
+;; (list
+;;    (list cluster-name-string
+;;       cluster-center-go-button-label-string
+;;       ccgb-x ccgb-y ccgb-z
+;;       ; now a list of specific items
+;;       (list
+;;         (list specific-button-label-string button-red button-green button-blue
+;;               specific-x specific-y specific-z)
+;;         (list specific-button-label-string button-red button-green button-blue
+;;               specific-x specific-y specific-z)))
+
+;;    (list cluster-name-string
+;;       cluster-center-go-button-label-string
+;;       ccgb-x ccgb-y ccgb-z
+;;       ; now a list of specific items
+;;       (list
+;;         (list specific-button-label-string button-red button-green button-blue
+;;               specific-x specific-y specific-z)
+;;         (list specific-button-label-string button-red button-green button-blue
+;;               specific-x specific-y specific-z)))))
+;; 
+(define (molprobity-fascinating-clusters-things-gui 
+	 window-name sorting-options cluster-list)
+
+  ;; utility function
+  (define (add-feature-buttons feature-list cluster-vbox)
+    (let ((frame (gtk-frame-new "Cluster Features"))
+	  (vbox (gtk-vbox-new #f 0)))
+      (gtk-box-pack-start cluster-vbox frame #f #f 2)
+      (gtk-container-add frame vbox)
+
+      ;; add buttons to vbox for each feature
+      ;; 
+      (map (lambda (feature)
+	     (format #t "feature: ~s~%" feature)
+	     (let ((button (gtk-button-new-with-label (car feature))))
+	       (gtk-signal-connect button "clicked"
+				   (lambda ()
+				     (set-rotation-centre 
+				      (list-ref feature 4)
+				      (list-ref feature 5)
+				      (list-ref feature 6))))
+	       (gtk-box-pack-start vbox button #f #f 1)))
+	     feature-list)))
+	     
+  ;; main body
+  (let* ((window (gtk-window-new 'toplevel))
+	 (scrolled-win (gtk-scrolled-window-new))
+	 (outside-vbox (gtk-vbox-new #f 2))
+	 (inside-vbox (gtk-vbox-new #f 0)))
+    
+    (gtk-window-set-default-size window  300 200)
+    (gtk-window-set-title window window-name)
+    (gtk-container-border-width inside-vbox 2)
+    (gtk-container-add window outside-vbox)
+    (gtk-box-pack-start outside-vbox scrolled-win #t #t 0) ; expand fill padding
+    (gtk-scrolled-window-add-with-viewport scrolled-win inside-vbox)
+    (gtk-scrolled-window-set-policy scrolled-win 'automatic 'always)
+    
+    (map (lambda (cluster-info)
+	   (let* ((frame (gtk-frame-new #f))
+		  (vbox (gtk-vbox-new #f 2)))
+
+	     (gtk-container-border-width frame 6)
+	     (gtk-container-add frame vbox)
+	     (gtk-box-pack-start inside-vbox frame #f #f 10)
+	     (let ((go-to-cluster-button (gtk-button-new-with-label
+					  (car cluster-info))))
+	       (gtk-signal-connect go-to-cluster-button "clicked"
+				   (lambda ()
+				     (set-rotation-centre
+				      (list-ref cluster-info 1)
+				      (list-ref cluster-info 2)
+				      (list-ref cluster-info 3))))
+	       (gtk-box-pack-start vbox go-to-cluster-button #f #f 2)
+	       
+	       ;; now we have a list of individual features:
+	       (add-feature-buttons (list-ref cluster-info 4) vbox))))
+		   
+	 cluster-list)
+
+    (gtk-container-border-width outside-vbox 2)
+    (let ((ok-button (gtk-button-new-with-label "  Close  ")))
+      (gtk-box-pack-end outside-vbox ok-button #f #f 0)
+      (gtk-signal-connect ok-button "clicked"
+			  (lambda args
+			    (gtk-widget-destroy window))))
+    (gtk-widget-show-all window)))
+
+
+
+;; 
+;;(molprobity-fascinating-clusters-things-gui
+;; "Testing the GUI" 
+;; (list 
+;;  (list "Active Site" (list 0 1 2 3 4))
+;;  (list "Worst First" (list 3 4 1 2 0)))
+;; (list 
+;;  (list "The first cluster"
+;;	11 12 15
+;;	(list 
+;;	 (list "A bad thing" 0.4 0.6 0.7 10 13 16)	
+;;	 (list "Another bad thing" 0.4 0.6 0.7 12 15 16)))
+;;  (list "Another cluster of baddies"
+;;	-11 12 15
+;;	(list
+;;	 (list "A quite bad thing" 0.4 0.6 0.7 -10 -13 16)	
+;;	 (list "A not so bad thing" 0.4 0.6 0.7 -12 -15 16)))
+;;  (list "A third cluster of baddies"
+;;	11 12 -15
+;;	(list
+;;	 (list "A quite bad rotamer" 0.4 0.6 0.7 10 13 -16)	
+;;	 (list "A hydrogen clash" 0.4 0.6 0.7 12 15 -16)
+;;	 (list "A not so bad H-H clash" 0.4 0.6 0.7 12 15 -16)))))
+
+HEREDOC;
+    //}}} 0. A lovely Scheme script written for us by Paul Emsley
+    
+    //{{{ 1. For each outlier, create an array(cnit, description, r, g, b, x, y, z)
+    $res_xyz = computeResCenters($infile);
+    $self_bads = array();
+    
+    if(is_array($clash)) foreach($clash['clashes'] as $cnit => $worst)
+    {
+        $ctr = $res_xyz[$cnit];
+        $self_bads[] = array($cnit, "Clash at $cnit ($worst A)", 1, 0, 0.5, $ctr['x'], $ctr['y'], $ctr['z']);
+    }
+        
+    if(is_array($rama)) foreach($rama as $item)
+    {
+        if($item['eval'] == "OUTLIER")
+        {
+            $cnit = $item['resName'];
+            $ctr = $res_xyz[$cnit];
+            $self_bads[] = array($cnit, "Ramachandran outlier $cnit ($item[type] $item[scorePct]%)", 0, 1, 0, $ctr['x'], $ctr['y'], $ctr['z']);
+        }
+    }
+
+    if(is_array($rota)) foreach($rota as $item)
+    {
+        if($item['scorePct'] <= 1.0)
+        {
+            $cnit = $item['resName'];
+            $ctr = $res_xyz[$cnit];
+            $self_bads[] = array($cnit, "Bad rotamer $cnit ($item[scorePct]%)", 1, 0.7, 0, $ctr['x'], $ctr['y'], $ctr['z']);
+        }
+    }
+    
+    if(is_array($cbdev)) foreach($cbdev as $item)
+    {
+        if($item['dev'] >= 0.25)
+        {
+            $cnit = $item['resName'];
+            $ctr = $res_xyz[$cnit];
+            $self_bads[] = array($cnit, "C-beta deviation $cnit ($item[dev] A)", 0.5, 0, 1, $ctr['x'], $ctr['y'], $ctr['z']);
+        }
+    }
+    
+    if(is_array($pperp)) foreach($pperp as $item)
+    {
+        if($item['outlier'])
+        {
+            $cnit = $item['resName'];
+            $ctr = $res_xyz[$cnit];
+            $self_bads[] = array($cnit, "Base-phos. dist. $cnit (wrong pucker?)", 0.5, 0, 1, $ctr['x'], $ctr['y'], $ctr['z']);
+        }
+    }
+    //}}} 1. For each outlier, create an array(cnit, description, r, g, b, x, y, z)
+    
+    //{{{ 2. Cluster the outliers, somehow
+    $range = 7; // a fairly arbitrary value, in Angstroms.
+    $range2 = $range * $range;
+    $worst_res = array();
+    while(true)
+    {
+        // cnit => array( bad1, bad2, ... )
+        $local_bads = array();
+        foreach($res_xyz as $cnit => $xyz)
+        {
+            #$local_bads[$cnit] = array();
+            foreach($self_bads as $idx => $a_bad)
+            {
+                $cnit2 = $a_bad[0];
+                $dx = $xyz['x'] - $a_bad[5];
+                $dy = $xyz['y'] - $a_bad[6];
+                $dz = $xyz['z'] - $a_bad[7];
+                if($dx*$dx + $dy*$dy + $dz*$dz <= $range2)
+                    $local_bads[$cnit][$idx] = $a_bad;
+            }
+        }
+        // Get worst residue from list and its count of bads
+        uasort($local_bads, 'makeCootClusteredChart_cmp'); // put worst residue last
+        #var_export($local_bads); echo "\n==========\n";
+        end($local_bads); // go to last element
+        list($worst_cnit, $worst_bads) = each($local_bads); // get last element
+        $bad_count = count($worst_bads);
+        // Only singletons left (for efficiency)
+        // Also ensures that singletons are listed under their "owner"
+        if($bad_count <= 1)
+        {
+            foreach($self_bads as $idx => $a_bad)
+                $worst_res[$a_bad[0]][$idx] = $a_bad;
+            break;
+        }
+        // else ...
+        #var_export($local_bads);
+        #echo "\nRemoving $worst_cnit with $bad_count bads...\n==========\n";
+        $worst_res[$worst_cnit] = $worst_bads; // record it as the worst one this pass
+        // Discard all bads that went to making the worst, the worst;
+        // then re-run the algorithm to find the next worst, until no bads left.
+        foreach($worst_bads as $idx => $a_bad)
+            unset($self_bads[$idx]);
+        if(count($self_bads) == 0) break;
+        #$cycles++;
+        #if($cycles > 100) break;
+    }
+    #var_export($worst_res); echo "\n==========\n";
+    //}}}
+
+    $out = fopen($outfile, 'wb');
+    fwrite($out, ";\n; Multicriterion chart for ".basename($infile).", generated by MolProbity.\n");
+    fwrite($out, "; Open this in Coot using Calculate | Run Script...\n;\n");
+    fwrite($out, "\n\n".$schemeScript."\n\n");
+    fwrite($out, "(molprobity-fascinating-clusters-things-gui\n \"MolProbity Multi-Chart\"\n (list\n");
+    // this is where we write possible sort orders
+    //fwrite($out, "  (list \"Worst First\" (list 0 1 2 3 4 5))\n");
+    fwrite($out, " )\n (list\n");
+    // This is where we write clusters of outliers
+    foreach($worst_res as $cnit => $bads)
+    {
+        $xyz = $res_xyz[$cnit];
+        if(count($bads) > 1) // a "real" cluster
+        {
+            fwrite($out, "  (list\n   \"problems near $cnit\"\n   $xyz[x] $xyz[y] $xyz[z]\n   (list\n");
+            foreach($bads as $b)
+                fwrite($out, "    (list \"$b[1]\" $b[2] $b[3] $b[4] $b[5] $b[6] $b[7])\n");
+            fwrite($out, "   )\n  )\n");
+        }
+        else // a singleton
+        {
+            $b = reset($bads);
+            fwrite($out, "  (list\n   \"$b[1]\"\n   $xyz[x] $xyz[y] $xyz[z]\n   (list\n");
+            fwrite($out, "   )\n  )\n");
+        }
+    }
+    fwrite($out, " )\n)\n");
+    fclose($out);
+}
+
+function makeCootClusteredChart_cmp($a, $b)
+{ return count($a) - count($b); }
+#}}}########################################################################
+
 #{{{ formatChiAngles - utility for printing 1 - 4 chi angles in a list
 ############################################################################
 /**
