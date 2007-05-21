@@ -30,6 +30,7 @@ require_once(MP_BASE_DIR.'/lib/model.php'); // for making kinemages
 *       kinRota         show rotamer outliers?
 *       kinCBdev        show C-beta deviations?
 *       kinBaseP        show base-phosphate perpendiculars?
+*       kinSuite        show RNA backbone conformational outliers?
 *       kinAltConfs     show alternate conformations?
 *       kinBfactor      show B-factor color model?
 *       kinOccupancy    show occupancy color model?
@@ -41,6 +42,7 @@ require_once(MP_BASE_DIR.'/lib/model.php'); // for making kinemages
 *       chartRota       do rotamer analysis?
 *       chartCBdev      do CB dev plots and analysis?
 *       chartBaseP      check base-phosphate perpendiculars?
+*       chartSuite      check RNA backbone conformations?
 *       chartNotJustOut include residues that have no problems in the list?
 *       chartImprove    compare to reduce -(no)build results to show improvement?
 *       
@@ -71,6 +73,7 @@ function runAnalysis($modelID, $opts)
     if($opts['chartRota'])      $tasks['rota'] = "Do rotamer analysis";
     if($opts['chartCBdev'])     $tasks['cbeta'] = "Do C&beta; deviation analysis and make kins";
     if($opts['chartBaseP'])     $tasks['base-phos'] = "Do base-phosphate perpendicular analysis";
+    if($opts['chartSuite'])     $tasks['suitename'] = "Do RNA backbone conformations analysis";
     
     if($opts['chartClashlist']) $tasks['clashlist'] = "Run <code>clashlist</code> to find bad clashes and clashscore";
     if($opts['chartImprove'])   $tasks['improve'] = "Suggest / report on fixes";
@@ -129,6 +132,15 @@ function runAnalysis($modelID, $opts)
         $outfile = "$rawDir/$model[prefix]pperp.data";
         runBasePhosPerp($infile, $outfile);
         $pperp = loadBasePhosPerp($outfile);
+    }
+    if($opts['chartSuite'])
+    {
+        setProgress($tasks, 'suitename'); // updates the progress display if running as a background job
+        $outfile = "$chartDir/$model[prefix]suitename.txt";
+        runSuitenameReport($infile, $outfile);
+        $suites = loadSuitenameReport($outfile);
+        $tasks['suitename'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=plain' target='_blank'>preview</a>\n";
+        setProgress($tasks, 'suitename'); // so the preview link is visible
     }
     //}}} Run nucleic acid geometry programs and offer kins to user
     
@@ -224,7 +236,7 @@ function runAnalysis($modelID, $opts)
         setProgress($tasks, 'multichart'); // updates the progress display if running as a background job
         $outfile = "$rawDir/$model[prefix]multi.table";
         $snapfile = "$chartDir/$model[prefix]multi.html";
-        writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota, $cbdev, $pperp, !$opts['chartNotJustOut']);
+        writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota, $cbdev, $pperp, $suites, !$opts['chartNotJustOut']);
         $tasks['multichart'] .= " - <a href='viewtable.php?$_SESSION[sessTag]&file=$outfile' target='_blank'>preview</a>\n";
         setProgress($tasks, 'multichart'); // so the preview link is visible
         $outfile = "$chartDir/$model[prefix]multi-coot.scm";
@@ -298,7 +310,7 @@ function runAnalysis($modelID, $opts)
         $entry .= "</ul>\n";
     }
     
-    if($opts['chartClashlist'] || $opts['chartRama'] || $opts['chartCBdev'])
+    if($opts['chartClashlist'] || $opts['chartRama'] || $opts['chartCBdev'] || $opts['chartSuite'])
     {
         $entry .= "<h3>Single-criterion visualizations</h3>";
         $entry .= "<ul>\n";
@@ -311,6 +323,8 @@ function runAnalysis($modelID, $opts)
         }
         if($opts['chartCBdev'])
             $entry .= "<li>".linkAnyFile("$model[prefix]cbetadev.kin", "C&beta; deviation scatter plot")."</li>\n";
+        if($opts['chartSuite'])
+            $entry .= "<li>".linkAnyFile("$model[prefix]suitename.txt", "RNA backbone report")."</li>\n";
         $entry .= "</ul>\n";
     }
     
@@ -784,6 +798,63 @@ function findRamaOutliers($rama)
     }
     ksort($worst); // Put the residues into a sensible order
     return $worst;
+}
+#}}}########################################################################
+
+#{{{ runSuitenameReport - finds conformer and suiteness for every RNA suite
+############################################################################
+function runSuitenameReport($infile, $outfile)
+{
+    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.dangle.Dangle rnabb $infile | suitename -report > $outfile");
+}
+#}}}########################################################################
+
+#{{{ loadSuitenameReport - loads Suitename's -report output into an array
+############################################################################
+/**
+* Returns an array of entries keyed on CNIT name, one per residue.
+* Each entry is an array with these keys:
+*   resName         a formatted name for the residue: 'cnnnnittt'
+*                       c: Chain ID, space for none
+*                       n: sequence number, right justified, space padded
+*                       i: insertion code, space for none
+*                       t: residue type (ALA, LYS, etc.), all caps,
+*                          left justified, space padded
+*   conformer       two letter code (mixed case -- '1L' is legal) or "__"
+*   suiteness       real number, 0 - 1
+*   bin             "inc " (incomplete), "trig" (triaged), or something like "23 p"
+*   isOutlier       true if conformer = !!
+*   isEpsilonOutlier    always false until this is implemented
+*/
+function loadSuitenameReport($datafile)
+{
+#tr0001.pdb:1:A:   1: :  G inc  __ 0.000
+#tr0001.pdb:1:A:   2: :  C 33 p 1a 0.935
+#tr0001.pdb:1:A:  10: :2MG 23 p !! 0.000
+#tr0001.pdb:1:A:  13: :  C 33 t 1c 0.824
+#tr0001.pdb:1:A:  14: :  A trig !! 0.000
+    $data = file($datafile);
+    $ret = array();
+    foreach($data as $line)
+    {
+        if(startsWith($line, " all general case widths")) break;
+        $line = explode(':', rtrim($line));
+        $cnit = $line[2].$line[3].$line[4].substr($line[5],0,3);
+        //$decomp = decomposeResName($cnit);
+        $conf = substr($line[5],9,2);
+        $ret[$cnit] = array(
+            'resName'   => $cnit,
+            //'resType'   => $decomp['resType'],
+            //'chainID'   => $decomp['chainID'],
+            //'resNum'    => $decomp['resNum'],
+            //'insCode'   => $decomp['insCode'],
+            'conformer' => $conf,
+            'suiteness' => substr($line[5],12) + 0,
+            'bin'       => substr($line[5],4,4),
+            'isOutlier' => ($conf == '!!')
+        );
+    }
+    return $ret;
 }
 #}}}########################################################################
 

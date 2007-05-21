@@ -183,7 +183,7 @@ $ok = true;
     <?php $ok &= testForProgs(array("which", "rm", "du", "df",
         "zip", "gzip", "gunzip",
         "php", "awk", "gawk", "perl", "java",
-        "reduce", "prekin", "probe", "flipkin", "clashlist", "cluster",
+        "reduce", "prekin", "probe", "flipkin", "clashlist", "cluster", "suitename",
         "pdbcns", "dang", "scrublines", "cksegid.pl",
         "sswing", "sswingmkrotscrByPerl", "sswingpdb2rotscr",
         "genContour", "genScoreResult", "preGenScore",
