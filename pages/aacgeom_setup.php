@@ -52,7 +52,9 @@ function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
     document.forms[0].chartCBdev.checked        = hasProtein
     
     document.forms[0].kinBaseP.checked          = hasNucAcid
+    document.forms[0].kinSuite.checked          = hasNucAcid
     document.forms[0].chartBaseP.checked        = hasNucAcid
+    document.forms[0].chartSuite.checked        = hasNucAcid
     
     document.forms[0].chartImprove.checked      = (hasProtein && doAAC)
     document.forms[0].chartNotJustOut.checked   = !isBig
@@ -124,6 +126,7 @@ function checkSettingsBeforeSubmit()
     <br><label><input type='checkbox' name='kinRota' value='1'> Rotamer evaluation</label>
     <br><label><input type='checkbox' name='kinCBdev' value='1'> C&beta; deviations</label>
     <br><label><input type='checkbox' name='kinBaseP' value='1'> Base-phosphate perpendiculars</label>
+    <br><label><input type='checkbox' name='kinSuite' value='1'> RNA backbone conformations</label>
     <p><label><input type='checkbox' name='kinForceViews' value='1'> Make views of trouble spots even if it takes longer</label>
     <br><label><input type='checkbox' name='kinAltConfs' value='1'> Alternate conformations</label>
     <br><label><input type='checkbox' name='kinBfactor' value='1'> Model colored by B-factors</label>
@@ -137,6 +140,7 @@ function checkSettingsBeforeSubmit()
     <br><label><input type='checkbox' name='chartRota' value='1'> Rotamer evaluation</label>
     <br><label><input type='checkbox' name='chartCBdev' value='1'> C&beta; deviations</label>
     <br><label><input type='checkbox' name='chartBaseP' value='1'> Base-phosphate perpendiculars</label>
+    <br><label><input type='checkbox' name='chartSuite' value='1'> RNA backbone conformations</label>
     <p><label><input type='checkbox' name='chartImprove' value='1'> Suggest / report on automatic structure fix-ups</label>
     <br><label><input type='checkbox' name='chartNotJustOut' value='1'> List all residues in multi-chart, not just outliers</label>
     </div>
@@ -198,6 +202,7 @@ function onRunAnalysis()
         if($req['kinRota'] || $req['chartRota'])    mpLog("aacgeom-rota:Doing rotamer analysis");
         if($req['kinCBdev'] || $req['chartCBdev'])  mpLog("aacgeom-cbdev:Doing C-beta deviation analysis");
         if($req['kinBaseP'] || $req['chartBaseP'])  mpLog("aacgeom-basep:Validating base-phosphate distances vs sugar puckers");
+        if($req['kinSuite'] || $req['chartSuite'])  mpLog("aacgeom-suite:Validating RNA backbone conformations");
         
         if($req['doKinemage'])      mpLog("aacgeom-mkin:Multi-criterion validation kinemage");
         if($req['doCharts'])        mpLog("aacgeom-mchart:Multi-criterion validation chart");

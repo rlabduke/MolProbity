@@ -772,9 +772,10 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
 * $rota     is the data structure from loadRotamer()
 * $cbdev    is the data structure from loadCbetaDev()
 * $pperp    is the data structure from loadBasePhosPerp()
+* $suites   is the data structure from loadSuitenameReport()
 * Any of them can be set to null if the data is unavailable.
 */
-function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota, $cbdev, $pperp, $outliersOnly = false)
+function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota, $cbdev, $pperp, $suites, $outliersOnly = false)
 {
     //{{{ Process validation data
     // Make sure all residues are represented, and in the right order.
@@ -839,12 +840,12 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
             $res[$item['resName']]['cbdev_val'] = $item['dev'];
             if($item['dev'] >= 0.25)
             {
-                $res[$item['resName']]['cbdev'] = "$item[dev]&Aring;</small>";
+                $res[$item['resName']]['cbdev'] = "$item[dev]&Aring;";
                 $res[$item['resName']]['cbdev_isbad'] = true;
                 $res[$item['resName']]['any_isbad'] = true;
             }
             else
-                $res[$item['resName']]['cbdev'] = "$item[dev]&Aring;</small>";
+                $res[$item['resName']]['cbdev'] = "$item[dev]&Aring;";
         }
     }
     if(is_array($pperp))
@@ -858,6 +859,35 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
                 $res[$item['resName']]['pperp_isbad'] = true;
                 $res[$item['resName']]['any_isbad'] = true;
             }
+        }
+    }
+    if(is_array($suites))
+    {
+        foreach($suites as $cnit => $item)
+        {
+            $res[$cnit]['suites_val'] = $item['suiteness'];
+            $bin = "bin $item[bin]";
+            if($bin == 'bin trig')
+            {
+                $bin = 'bin none (triaged)';
+                $res[$cnit]['suites_val'] = -1; // sorts to very top
+            }
+            elseif($bin == 'bin inc ')
+            {
+                $bin = 'bin none (incomplete)';
+                $res[$cnit]['suites_val'] = 0.0001; // sorts just below all outliers
+            }
+            
+            if($item['isOutlier'])
+            {
+                $res[$cnit]['suites'] = "OUTLIER<br><small>$bin</small>";
+                $res[$cnit]['suites_isbad'] = true;
+                $res[$cnit]['any_isbad'] = true;
+            }
+            elseif($item['bin'] == 'inc ')
+                $res[$cnit]['suites'] = "conformer: $item[conformer]<br><small>$bin</small>";
+            else
+                $res[$cnit]['suites'] = "conformer: $item[conformer]<br><small>$bin, suiteness = $item[suiteness]</small>";
         }
     }
     //}}} Process validation data
@@ -879,6 +909,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     if(is_array($rota))   $header1[] = array('html' => "<b>Rotamer</b>",                'sort' => 1);
     if(is_array($cbdev))  $header1[] = array('html' => "<b>C&beta; deviation</b>",      'sort' => -1);
     if(is_array($pperp))  $header1[] = array('html' => "<b>Base-P perp. dist.</b>",     'sort' => -1);
+    if(is_array($suites)) $header1[] = array('html' => "<b>RNA suite conf.</b>",        'sort' => 1);
     
     $header2 = array();
     $header2[] = array('html' => "");
@@ -889,6 +920,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     if(is_array($rota))   $header2[] = array('html' => "Outliers: ".count(findRotaOutliers($rota))." of ".count($rota));
     if(is_array($cbdev))  $header2[] = array('html' => "Outliers: ".count(findCbetaOutliers($cbdev))." of ".count($cbdev));
     if(is_array($pperp))  $header2[] = array('html' => "Outliers: ".count(findBasePhosPerpOutliers($pperp))." of ".count($pperp));
+    if(is_array($suites)) $header2[] = array('html' => "Outliers: ? of ".count($suites));
     
     $table['headers'] = array($header1, $header2);
     //}}} Table prequel and headers
@@ -905,7 +937,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
         $row[] = array('html' => $cni,              'sort_val' => $eval['order']+0);
         $row[] = array('html' => $type,             'sort_val' => $type);
         $row[] = array('html' => $eval['resHiB'],   'sort_val' => $eval['resHiB']+0);
-        foreach(array('clash', 'rama', 'rota', 'cbdev', 'pperp') as $type)
+        foreach(array('clash', 'rama', 'rota', 'cbdev', 'pperp', 'suites') as $type)
         {
             if(is_array($$type))
             {
