@@ -920,7 +920,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     if(is_array($rota))   $header2[] = array('html' => "Outliers: ".count(findRotaOutliers($rota))." of ".count($rota));
     if(is_array($cbdev))  $header2[] = array('html' => "Outliers: ".count(findCbetaOutliers($cbdev))." of ".count($cbdev));
     if(is_array($pperp))  $header2[] = array('html' => "Outliers: ".count(findBasePhosPerpOutliers($pperp))." of ".count($pperp));
-    if(is_array($suites)) $header2[] = array('html' => "Outliers: ? of ".count($suites));
+    if(is_array($suites)) $header2[] = array('html' => "Outliers: ".count(findSuitenameOutliers($suites))." of ".count($suites));
     
     $table['headers'] = array($header1, $header2);
     //}}} Table prequel and headers
