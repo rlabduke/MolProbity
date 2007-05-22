@@ -858,6 +858,26 @@ function loadSuitenameReport($datafile)
 }
 #}}}########################################################################
 
+#{{{ findSuitenameOutliers - evaluates residues for bad score
+############################################################################
+/**
+* Returns an array of 9-char residue names for residues that
+* fall outside the allowed boundaries for this criteria.
+* Inputs are from appropriate loadXXX() function above.
+*/
+function findSuitenameOutliers($suites)
+{
+    $worst = array();
+    if(is_array($suites)) foreach($suites as $res)
+    {
+        if($suites['isOutlier'])
+            $worst[$res['resName']] = $res['suiteness'];
+    }
+    ksort($worst); // Put the residues into a sensible order
+    return $worst;
+}
+#}}}########################################################################
+
 #{{{ findAllOutliers - clash, Rama, rota, Cb, P-perp
 ############################################################################
 /**
