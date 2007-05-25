@@ -367,7 +367,10 @@ function runBasePhosPerp($infile, $outfile)
 *   5Pdist          distance from the base to the 5' phosphate (?)
 *   3Pdist          distance from the base to the 3' phosphate (?)
 *   delta           delta angle of the sugar ring
-*   outlier         true if the sugar pucker (delta) doesn't match P dist
+*   deltaOut        true if the sugar pucker (delta) doesn't match dist to 3' P
+*   epsilon         epsilon angle of the backbone
+*   epsilonOut      true if the epsilon angle is out of the allowed range
+*   outlier         (deltaOut || epsilonOut)
 */
 function loadBasePhosPerp($datafile)
 {
@@ -378,6 +381,8 @@ function loadBasePhosPerp($datafile)
         if($line != "" && !startsWith($line, ':pdb:res:'))
         {
             $line = explode(':', $line);
+            $deltaOut = (trim($line[8]) ? true : false);
+            $epsilonOut = (trim($line[10]) ? true : false);
             $entry = array(
                 'resType'   => strtoupper(substr($line[2],1,-1)),
                 'chainID'   => strtoupper(substr($line[3],1,-1)),
@@ -386,7 +391,10 @@ function loadBasePhosPerp($datafile)
                 '5Pdist'    => $line[5] + 0,
                 '3Pdist'    => $line[6] + 0,
                 'delta'     => $line[7] + 0,
-                'outlier'   => (trim($line[8]) ? true : false)
+                'deltaOut'  => $deltaOut,
+                'epsilon'   => $line[9] + 0,
+                'epsilonOut'=> $epsilonOut,
+                'outlier'   => ($deltaOut || $epsilonOut)
             );
             $entry['resName']   = $entry['chainID']
                                 . str_pad($entry['resNum'], 4, ' ', STR_PAD_LEFT)
