@@ -292,22 +292,17 @@ function runAnalysis($modelID, $opts)
     if($opts['doKinemage'] || $opts['doCharts'])
     {
         $entry .= "<h3>Multi-criterion visualizations</h3>\n";
-        //$entry .= "<div class='indent'>\n";
-        //$entry .= "<table width='100%' border='0'>\n";
-        $entry .= "<ul>\n";
+        $entry .= "<div class='indent'>\n";
+        $entry .= "<table width='100%' border='0'>\n";
         if($opts['doKinemage'])
-            //$entry .= "<tr><td><img src='img/mkin_icon.png' alt='Multi-kin icon'></td><td>".linkAnyFile("$model[prefix]multi.kin", "Multi-criterion kinemage")."</td></tr>\n";
-            $entry .= "<li>".linkAnyFile("$model[prefix]multi.kin", "Kinemage")."</li>\n";
+            $entry .= "<td>".linkAnyFile("$model[prefix]multi.kin", "Kinemage", "img/multikin.jpg")."</td>\n";
         if($opts['doCharts'])
         {
-            //$entry .= "<tr><td><img src='img/mchart_icon.png' alt='Multi-chart icon'></td><td>".linkAnyFile("$model[prefix]multi.table", "Multi-criterion chart")."</td></tr>\n";
-            //$entry .= "<tr><td></td><td>".linkAnyFile("$model[prefix]multi-coot.scm", "Multi-criterion to-do list for Coot")."<br><small><i>Open this in Coot using Calculate | Run Script...</i></small></td></tr>\n";
-            $entry .= "<li>".linkAnyFile("$model[prefix]multi.table", "Chart")."</li>\n";
-            $entry .= "<li>".linkAnyFile("$model[prefix]multi-coot.scm", "To-do list for Coot")."<br><small><i>Open this in Coot 0.1.2 or later using Calculate | Run Script...</i></small></li>\n";
+            $entry .= "<td>".linkAnyFile("$model[prefix]multi.table", "Chart", "img/multichart.jpg")."</td>\n";
+            $entry .= "<td>".linkAnyFile("$model[prefix]multi-coot.scm", "To-do list for Coot")."<br><small><i>Open this in Coot 0.1.2 or later using Calculate | Run Script...</i></small></td>\n";
         }
-        //$entry .= "</table>\n";
-        //$entry .= "</div>\n";
-        $entry .= "</ul>\n";
+        $entry .= "</tr></table>\n";
+        $entry .= "</div>\n";
     }
     
     if($opts['chartClashlist'] || $opts['chartRama'] || $opts['chartCBdev'] || $opts['chartSuite'])
