@@ -82,7 +82,6 @@
         merge this clustering func. with analyze::calcLocalBadness()
   * add suitename, working with Dave
         use -chart
-        new Prekin info for pperp -- what should chart say?
     add *option* to make REMARK 42 into an unnumbered REMARK
     email new MolP tarball to Joe Moran at GSK
 
@@ -102,6 +101,10 @@
 - updated Mac versions of suitename and prekin
 - we now parse in the info about epsilon from Prekin
 - updated chiropraxis.jar to fix "+1" parsing error in Dangle
+- tweaked table sort order (native order fallback never changes direction)
+- updated HTML and Coot multicharts to use new Prekin epsilon info
+- fixed typo bug in findSuitenameOutliers()
+- added suitename info to outlier summary table
 
 ### 3.08 ###
 - added reduceTrim() function to enable downloading PDBs without H

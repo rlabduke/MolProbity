@@ -640,7 +640,7 @@ function makeOccupancyScale($infile, $outfile)
 /**
 * Documentation for this function.
 */
-function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp)
+function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp, $suites)
 {
     $entry = "";
     $bgPoor = '#ff9999';
@@ -742,16 +742,37 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             $entry .= "</td><td>$mer_pct[pct_rank]<sup>".ordinalSuffix($mer_pct['pct_rank'])."</sup> percentile<sup>*</sup> (N=$mer_pct[n_samples], $mer_pct[minresol]&Aring; - $mer_pct[maxresol]&Aring;)</td></tr>\n";
         }
     }// end of protein-specific stats
-    if(is_array($pperp))
+    $nucleicRows = 0;
+    if(is_array($pperp))   $nucleicRows += 1;
+    if(is_array($suites))  $nucleicRows += 1;
+    if($nucleicRows > 0)
     {
-        $pperpOut = count(findBasePhosPerpOutliers($pperp));
-        $pperpTot = count($pperp);
-        if($pperpOut == 0)  $bg = $bgGood;
-        else                $bg = $bgFair;
-        $entry .= "<tr><td rowspan='1' align='center'>Nucleic Acid<br>Geometry</td>\n";
-        $entry .= "<td>Base-P dist./pucker disagreement:</td><td bgcolor='$bg'>$pperpOut</td>\n";
-        $entry .= "<td>Goal: 0</td></tr>\n";
-        $entry .= "</tr>\n";
+        $entry .= "<tr><td rowspan='$nucleicRows' align='center'>Nucleic Acid<br>Geometry</td>\n";
+        $firstRow = true;
+        if(is_array($pperp))
+        {
+            if($firstRow) $firstRow = false;
+            else $entry .= "<tr>";
+            
+            $pperpOut = count(findBasePhosPerpOutliers($pperp));
+            $pperpTot = count($pperp);
+            if($pperpOut == 0)  $bg = $bgGood;
+            else                $bg = $bgFair;
+            $entry .= "<td>Probably wrong sugar puckers:</td><td bgcolor='$bg'>$pperpOut</td>\n";
+            $entry .= "<td>Goal: 0</td></tr>\n";
+        }
+        if(is_array($suites))
+        {
+            if($firstRow) $firstRow = false;
+            else $entry .= "<tr>";
+            
+            $suitesOut = count(findSuitenameOutliers($suites));
+            $suitesTot = count($suites);
+            if($suitesOut == 0) $bg = $bgGood;
+            else                $bg = $bgFair;
+            $entry .= "<td>Bad backbone conformations:</td><td bgcolor='$bg'>$suitesOut</td>\n";
+            $entry .= "<td>Goal: 0</td></tr>\n";
+        }
     }
     $entry .= "</table>\n";
     if(is_array($clash)) $entry .= "<small>* 100<sup>th</sup> percentile is the best among structures of comparable resolution; 0<sup>th</sup> percentile is the worst.</small>\n";
@@ -854,8 +875,11 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
         {
             if($item['outlier'])
             {
+                $reasons = array();
+                if($item['deltaOut'])   $reasons[] = "base-phosphate distance";
+                if($item['epsilonOut']) $reasons[] = "bad epsilon angle";
                 $res[$item['resName']]['pperp_val'] = 1; // no way to quantify this
-                $res[$item['resName']]['pperp'] = "wrong pucker?";
+                $res[$item['resName']]['pperp'] = "wrong sugar pucker (".implode(", ", $reasons).")";
                 $res[$item['resName']]['pperp_isbad'] = true;
                 $res[$item['resName']]['any_isbad'] = true;
             }
@@ -898,7 +922,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     //{{{ Table prequel and headers
     // Do summary chart
     $pdbstats = pdbstat($infile);
-    $table['prequel'] = makeSummaryStatsTable($pdbstats['resolution'], $clash, $rama, $rota, $cbdev, $pperp);
+    $table['prequel'] = makeSummaryStatsTable($pdbstats['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites);
     
     $header1 = array();
     $header1[] = array('html' => "<b>#</b>",                                            'sort' => 1);
@@ -1279,7 +1303,10 @@ HEREDOC;
         {
             $cnit = $item['resName'];
             $ctr = $res_xyz[$cnit];
-            $self_bads[] = array($cnit, "Base-phos. dist. $cnit (wrong pucker?)", 0.5, 0, 1, $ctr['x'], $ctr['y'], $ctr['z']);
+            $reasons = array();
+            if($item['deltaOut'])   $reasons[] = "base-phosphate distance";
+            if($item['epsilonOut']) $reasons[] = "bad epsilon angle";
+            $self_bads[] = array($cnit, "Wrong sugar pucker $cnit (".implode(', ', $reasons).")", 0.5, 0, 1, $ctr['x'], $ctr['y'], $ctr['z']);
         }
     }
     //}}} 1. For each outlier, create an array(cnit, description, r, g, b, x, y, z)

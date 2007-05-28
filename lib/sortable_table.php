@@ -26,16 +26,17 @@ function formatSortableTable($table, $url, $col = -1, $direction = 1)
     foreach($rows as $key => $row)
         $rows[$key]['@@NATIVE@@'] = $i++;
     // Custom "lambda" sort function -- essentially, curried on the name of the sort field and direction
+    // Commented out $direction component of native fallback b/c native should always be same order
     $mySortFunc = create_function('$a,$b', "
         if(!isset(\$a[$col]['sort_val']))
         {
-            if(!isset(\$b[$col]['sort_val']))   return $direction*(\$a['@@NATIVE@@'] - \$b['@@NATIVE@@']);
+            if(!isset(\$b[$col]['sort_val']))   return /*$direction**/(\$a['@@NATIVE@@'] - \$b['@@NATIVE@@']);
             else                                return 1;
         }
         elseif(!isset(\$b[$col]['sort_val']))   return -1;
         elseif(\$a[$col]['sort_val'] < \$b[$col]['sort_val']) return -($direction);
         elseif(\$a[$col]['sort_val'] > \$b[$col]['sort_val']) return $direction;
-        else                                    return $direction*(\$a['@@NATIVE@@'] - \$b['@@NATIVE@@']);
+        else                                    return /*$direction**/(\$a['@@NATIVE@@'] - \$b['@@NATIVE@@']);
     ");
     // This check isn't necessary (sort will be done correctly) but makes me feel better...
     if($col != -1)
