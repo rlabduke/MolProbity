@@ -411,8 +411,9 @@ function linkKinemage($fname, $name = null)
 /**
 * $fname    the filename, relative to __?__
 * $name     an optional name to use in place of the filename
+* $image    an optional relative or absolute URL to an icon image
 */
-function linkAnyFile($fname, $name = null)
+function linkAnyFile($fname, $name = null, $image = null)
 {
     // Find the file of this name -- all names should actually be unique
     foreach(array(MP_DIR_MODELS, MP_DIR_KINS, MP_DIR_CHARTS, MP_DIR_EDMAPS, MP_DIR_TOPPAR, MP_DIR_RAWDATA) as $dir)
@@ -434,26 +435,42 @@ function linkAnyFile($fname, $name = null)
     // Link the file
     $path = "$_SESSION[dataDir]/$subdir/$fname";
     $link = "$_SESSION[dataURL]/$subdir/$fname";
+    $size = formatFilesize(filesize($path));
     if($name == null) $name = $fname;
-    $s = "";
-    $s .= "<b>$name</b> (" . formatFilesize(filesize($path)) . "): ";
     
     // Choose the right action(s) -- see pages/file_browser.php for origin
     if(endsWith($fname, ".kin") || endsWith($fname, ".kin.gz"))
-    {
-        $s .= "<a href='viewking.php?$_SESSION[sessTag]&url=$link' target='_blank'>View in KiNG</a> | ";
-        $s .= "<a href='$link'>Download</a>";
-    }
+        $links = array(
+            array('url' => "viewking.php?$_SESSION[sessTag]&url=$link", 'label' => "View in KiNG", 'blank' => true),
+            array('url' => "$link", 'label' => "Download", 'blank' => false),
+        );
     elseif(endsWith($fname, ".table"))
-        $s .= "<a href='viewtable.php?$_SESSION[sessTag]&file=$path' target='_blank'>View</a>";
+        $links = array(array('url' => "viewtable.php?$_SESSION[sessTag]&file=$path", 'label' => "View", 'blank' => true));
     elseif(endsWith($fname, ".html"))
-        $s .= "<a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=html' target='_blank'>View</a>";
+        $links = array(array('url' => "viewtext.php?$_SESSION[sessTag]&file=$path&mode=html", 'label' => "View", 'blank' => true));
     elseif(endsWith($fname, ".txt"))
-        $s .= "<a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=plain' target='_blank'>View</a>";
+        $links = array(array('url' => "viewtext.php?$_SESSION[sessTag]&file=$path&mode=plain", 'label' => "View", 'blank' => true));
     elseif(endsWith($fname, ".pdf"))
-        $s .= "<a href='$link' target='_blank'>View</a>";
+        $links = array(array('url' => "$link", 'label' => "View", 'blank' => true));
     else
-        $s .= "<a href='$link'>Download</a>";
+        $links = array(array('url' => "$link", 'label' => "Download", 'blank' => false));
+    
+    $isFirst = true;
+    $linkText = "";
+    foreach($links as $link)
+    {
+        if($isFirst) $isFirst = false;
+        else $linkText .= " | ";
+        $linkText .= "<a href='$link[url]'".($link['blank'] ? " target='_blank'" : "").">$link[label]</a>";
+    }
+    
+    if($image == null)
+        $s = "<b>$name</b> ($size): $linkText";
+    else
+    {
+        $link = reset($links);
+        $s = "<a href='$link[url]'".($link['blank'] ? " target='_blank'" : "")."><img src='$image' alt='$name ($size)'></a><br>$linkText ($size)";
+    }
     
     return $s;
 }
