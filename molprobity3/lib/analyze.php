@@ -283,10 +283,10 @@ function runAnalysis($modelID, $opts)
     
     //{{{ Create lab notebook entry
     $entry = "";
-    if(is_array($clash) || is_array($rama) || is_array($rota) || is_array($cbdev) || is_array($pperp))
+    if(is_array($clash) || is_array($rama) || is_array($rota) || is_array($cbdev) || is_array($pperp) || is_array($suites))
     {
         $entry .= "<h3>Summary statistics</h3>\n";
-        $entry .= makeSummaryStatsTable($model['stats']['resolution'], $clash, $rama, $rota, $cbdev, $pperp);
+        $entry .= makeSummaryStatsTable($model['stats']['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites);
     }
     $entry .= $improveText;
     if($opts['doKinemage'] || $opts['doCharts'])
@@ -832,7 +832,6 @@ function runSuitenameReport($infile, $outfile)
 *   suiteness       real number, 0 - 1
 *   bin             "inc " (incomplete), "trig" (triaged), or something like "23 p"
 *   isOutlier       true if conformer = !!
-*   isEpsilonOutlier    always false until this is implemented
 */
 function loadSuitenameReport($datafile)
 {
@@ -878,7 +877,7 @@ function findSuitenameOutliers($suites)
     $worst = array();
     if(is_array($suites)) foreach($suites as $res)
     {
-        if($suites['isOutlier'])
+        if($res['isOutlier'])
             $worst[$res['resName']] = $res['suiteness'];
     }
     ksort($worst); // Put the residues into a sensible order
