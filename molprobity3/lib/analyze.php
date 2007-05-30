@@ -141,6 +141,9 @@ function runAnalysis($modelID, $opts)
         $suites = loadSuitenameReport($outfile);
         $tasks['suitename'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=plain' target='_blank'>preview</a>\n";
         setProgress($tasks, 'suitename'); // so the preview link is visible
+        
+        $outfile = "$chartDir/$model[prefix]suitestring.txt";
+        runSuitenameString($infile, $outfile);
     }
     //}}} Run nucleic acid geometry programs and offer kins to user
     
@@ -319,7 +322,10 @@ function runAnalysis($modelID, $opts)
         if($opts['chartCBdev'])
             $entry .= "<li>".linkAnyFile("$model[prefix]cbetadev.kin", "C&beta; deviation scatter plot")."</li>\n";
         if($opts['chartSuite'])
+        {
             $entry .= "<li>".linkAnyFile("$model[prefix]suitename.txt", "RNA backbone report")."</li>\n";
+            $entry .= "<li>".linkAnyFile("$model[prefix]suitestring.txt", "RNA backbone conformation \"sequence\"")."</li>\n";
+        }
         $entry .= "</ul>\n";
     }
     
@@ -877,6 +883,17 @@ function findSuitenameOutliers($suites)
     }
     ksort($worst); // Put the residues into a sensible order
     return $worst;
+}
+#}}}########################################################################
+
+#{{{ runSuitenameString - writes the sequence+structure string for RNA
+############################################################################
+function runSuitenameString($infile, $outfile)
+{
+    // Unix "fold" is used to wrap long lines to reasonable lengths,
+    // so they display OK in the <PRE> region of the HTML page.
+    // 60 was selected because it makes counting to specific positions easier (20 suites/line)
+    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.dangle.Dangle rnabb $infile | suitename -string -oneline | fold -w 60 > $outfile");
 }
 #}}}########################################################################
 
