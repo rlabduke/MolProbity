@@ -144,6 +144,8 @@ function runAnalysis($modelID, $opts)
         
         $outfile = "$chartDir/$model[prefix]suitestring.txt";
         runSuitenameString($infile, $outfile);
+        
+        makeSuitenameKin($infile, "$kinDir/$model[prefix]suitename.kin");
     }
     //}}} Run nucleic acid geometry programs and offer kins to user
     
@@ -296,13 +298,13 @@ function runAnalysis($modelID, $opts)
     {
         $entry .= "<h3>Multi-criterion visualizations</h3>\n";
         $entry .= "<div class='indent'>\n";
-        $entry .= "<table width='100%' border='0'>\n";
+        $entry .= "<table width='100%' border='0'><tr valign='top'>\n";
         if($opts['doKinemage'])
             $entry .= "<td>".linkAnyFile("$model[prefix]multi.kin", "Kinemage", "img/multikin.jpg")."</td>\n";
         if($opts['doCharts'])
         {
             $entry .= "<td>".linkAnyFile("$model[prefix]multi.table", "Chart", "img/multichart.jpg")."</td>\n";
-            $entry .= "<td>".linkAnyFile("$model[prefix]multi-coot.scm", "To-do list for Coot")."<br><small><i>Open this in Coot 0.1.2 or later using Calculate | Run Script...</i></small></td>\n";
+            $entry .= "<td>".linkAnyFile("$model[prefix]multi-coot.scm", "To-do list for Coot", "img/multichart-coot.jpg")."<br><small><i>Open this in Coot 0.1.2 or later using Calculate | Run Script...</i></small></td>\n";
         }
         $entry .= "</tr></table>\n";
         $entry .= "</div>\n";
@@ -325,6 +327,7 @@ function runAnalysis($modelID, $opts)
         {
             $entry .= "<li>".linkAnyFile("$model[prefix]suitename.txt", "RNA backbone report")."</li>\n";
             $entry .= "<li>".linkAnyFile("$model[prefix]suitestring.txt", "RNA backbone conformation \"sequence\"")."</li>\n";
+            $entry .= "<li>".linkAnyFile("$model[prefix]suitename.kin", "RNA backbone multi-D plot of conformations")."</li>\n";
         }
         $entry .= "</ul>\n";
     }

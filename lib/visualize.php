@@ -46,6 +46,14 @@ function makeCbetaDevPlot($infile, $outfile)
 }
 #}}}########################################################################
 
+#{{{ makeSuitenameKin - creates a high-D plot of suite conformations
+############################################################################
+function makeSuitenameKin($infile, $outfile)
+{
+    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.dangle.Dangle rnabb $infile | suitename -kinemage > $outfile");
+}
+#}}}########################################################################
+
 #{{{ makeFlipkin - runs Flipkin to generate a summary of the Reduce -build changes
 ############################################################################
 /**
