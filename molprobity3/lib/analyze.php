@@ -842,7 +842,7 @@ function loadSuitenameReport($datafile)
 #tr0001.pdb:1:A:  13: :  C 33 t 1c 0.824
 #tr0001.pdb:1:A:  14: :  A trig !! 0.000
     $data = file($datafile);
-    $ret = array();
+    //$ret = array(); // needs to return null if no data!
     foreach($data as $line)
     {
         if(startsWith($line, " all general case widths")) break;
