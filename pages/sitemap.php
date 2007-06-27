@@ -57,6 +57,11 @@ function display($context)
     echo "<li>Kinemages can be combined and edited in KiNG with File | Append.</li>\n";
     echo "<li>KiNG can save modified kinemages to the server with File | Save as.</li>\n";
     echo "</ul>\n";
+    
+    echo "<h3><a href='".makeEventURL("onCall", "fragmentfill_setup.php")."'>Fill protein gaps</a></h3>\n<ul>\n";
+    echo "<li>ALPHA TEST - not for general public use.</li>\n";
+    echo "<li>Fill gaps in protein structures automatically.</li>\n";
+    echo "</ul>\n";    
 
     echo "<hr>\n";
 
