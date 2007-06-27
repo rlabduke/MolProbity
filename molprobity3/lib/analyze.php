@@ -900,6 +900,19 @@ function runSuitenameString($infile, $outfile)
 }
 #}}}########################################################################
 
+#{{{ runFragmentFiller - fills gaps in protein structures with fragments
+############################################################################
+/**
+* Documentation for this function.
+*/
+function runFragmentFiller($inFile, $outKin, $outPdbPrefix) {
+    $ffcom = "java -Xmx512m -cp ".MP_BASE_DIR."/lib/fragmentfiller.jar fragmentfiller.FragFiller ";
+    $ffcom .= "-libloc ".MP_BASE_DIR."/lib/fragmentfiller/ -pdbloc ".MP_BASE_DIR."/lib/fragmentfiller/pdblibrary/ ";
+    $ffcom .= "$inFile $outKin $outPdbPrefix";
+  exec($ffcom);
+}
+#}}}########################################################################
+
 #{{{ findAllOutliers - clash, Rama, rota, Cb, P-perp
 ############################################################################
 /**
