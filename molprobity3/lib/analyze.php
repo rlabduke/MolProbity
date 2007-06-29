@@ -390,8 +390,8 @@ function loadBasePhosPerp($datafile)
             $entry = array(
                 'resType'   => strtoupper(substr($line[2],1,-1)),
                 'chainID'   => strtoupper(substr($line[3],1,-1)),
-                'resNum'    => trim(substr($line[4], 0, -1)) + 0,
-                'insCode'   => substr($line[4], -1),
+                'resNum'    => trim(substr($line[4], 0, -2)) + 0,
+                'insCode'   => strtoupper(substr($line[4], -2, 1)),
                 '5Pdist'    => $line[5] + 0,
                 '3Pdist'    => $line[6] + 0,
                 'delta'     => $line[7] + 0,
