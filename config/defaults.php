@@ -33,9 +33,15 @@ if(!defined("MP_BIN_PATH"))
 
 // MP_REDUCE_HET_DICT
 //  Path to Reduce's heterogen dictionary
-//  Default: /usr/local/reduce_het_dict.txt
+//  Default: /usr/local/reduce_wwPDB_het_dict.txt
 if(!defined("MP_REDUCE_HET_DICT"))
-    define("MP_REDUCE_HET_DICT", MP_BASE_DIR."/lib/reduce_het_dict.txt");
+    define("MP_REDUCE_HET_DICT", MP_BASE_DIR."/lib/reduce_wwPDB_het_dict.txt");
+
+// MP_REDUCE_OLD_HET_DICT
+//  Path to Reduce's heterogen dictionary
+//  Default: /usr/local/reduce_het_dict.txt
+if(!defined("MP_REDUCE_OLD_HET_DICT"))
+    define("MP_REDUCE_OLD_HET_DICT", MP_BASE_DIR."/lib/reduce_het_dict.txt");
 
 // Limit for Reduce's -limit flag
 // As of Reduce 3.03, this does nothing -- will be restored in future?
@@ -115,12 +121,12 @@ if(!defined("MP_DIR_CHARTS"))
 //  of the MolProbity source code. Please DO NOT modify this
 //  entry; this is how we get feedback about bugs, etc.
 //  Change MP_EMAIL_WEBMASTER instead.
-    define("MP_EMAIL_AUTHOR", "iwd@duke.edu");
+    define("MP_EMAIL_AUTHOR", "vbc3@duke.edu");
 
 // Don't change this! It will break user bookmarks.
     define("MP_SESSION_NAME", "MolProbSID");
 
 // Current "internal reference" version number. Please DO NOT change.
-    define("MP_VERSION", "3.10");
+    define("MP_VERSION", "3.11");
 
 ?>

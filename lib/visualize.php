@@ -648,7 +648,7 @@ function makeOccupancyScale($infile, $outfile)
 /**
 * Documentation for this function.
 */
-function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp, $suites)
+function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles)
 {
     $entry = "";
     $bgPoor = '#ff9999';
@@ -678,6 +678,8 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
     if(is_array($rota))    $proteinRows += 1;
     if(is_array($cbdev))   $proteinRows += 1;
     if(is_array($clash) && is_array($rota) && is_array($rama)) $proteinRows += 1;
+    if(hasMoltype($bbonds, "protein")) $proteinRows += 1;
+    if(hasMoltype($bangles, "protein")) $proteinRows += 1;
     if($proteinRows > 0)
     {
         $entry .= "<tr><td rowspan='$proteinRows' align='center'>Protein<br>Geometry</td>\n";
@@ -749,10 +751,54 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             //$entry .= "</td><td>Goal: &lt;$axr</td></tr>\n";
             $entry .= "</td><td>$mer_pct[pct_rank]<sup>".ordinalSuffix($mer_pct['pct_rank'])."</sup> percentile<sup>*</sup> (N=$mer_pct[n_samples], $mer_pct[minresol]&Aring; - $mer_pct[maxresol]&Aring;)</td></tr>\n";
         }
+        if(hasMoltype($bbonds, "protein"))
+        {
+            if($firstRow) $firstRow = false;
+            else $entry .= "<tr>";
+            
+            $total = 0;
+            $outCount = 0;
+            foreach($bbonds as $cnit => $item) {
+                if($item['type'] == 'protein') {
+                    if($item['isOutlier']) {
+                        $outCount += 1;
+                    }
+                    $total += 1;
+                }
+            }
+            $geomOutPct = sprintf("%.2f", 100.0 * $outCount / $total);
+            if ($outCount/$total < 0.10)    $bg = $bgFair;
+            if ($outCount/$total < 0.05)    $bg = $bgGood;
+            else                            $bg = $bgPoor;
+            $entry .= "<td>Residues with bad bonds:</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <5%</td></tr>\n";
+        }
+        if(hasMoltype($bangles, "protein"))
+        {
+            if($firstRow) $firstRow = false;
+            else $entry .= "<tr>";
+            
+            $total = 0;
+            $outCount = 0;
+            foreach($bangles as $cnit => $item) {
+                if($item['type'] == 'protein') {
+                    if($item['isOutlier']) {
+                        $outCount += 1;
+                    }
+                    $total += 1;
+                }
+            }
+            $geomOutPct = sprintf("%.2f", 100.0 * $outCount / $total);
+            if ($outCount/$total < 0.10)    $bg = $bgFair;
+            if ($outCount/$total < 0.05)    $bg = $bgGood;
+            else                            $bg = $bgPoor;
+            $entry .= "<td>Residues with bad angles:</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <5%</td></tr>\n";
+        }
     }// end of protein-specific stats
     $nucleicRows = 0;
     if(is_array($pperp))   $nucleicRows += 1;
     if(is_array($suites))  $nucleicRows += 1;
+    if(hasMoltype($bbonds, "rna")) $nucleicRows += 1;
+    if(hasMoltype($bangles, "rna")) $nucleicRows += 1;
     if($nucleicRows > 0)
     {
         $entry .= "<tr><td rowspan='$nucleicRows' align='center'>Nucleic Acid<br>Geometry</td>\n";
@@ -778,12 +824,64 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             $suitesTot = count($suites);
             if($suitesOut == 0) $bg = $bgGood;
             else                $bg = $bgFair;
-            $entry .= "<td>Bad backbone conformations:</td><td bgcolor='$bg'>$suitesOut</td>\n";
+            $entry .= "<td>Bad backbone conformations<sup><small>#</small></sup>:</td><td bgcolor='$bg'>$suitesOut</td>\n";
             $entry .= "<td>Goal: 0</td></tr>\n";
+        }
+        if(hasMoltype($bbonds, "rna"))
+        {
+            if($firstRow) $firstRow = false;
+            else $entry .= "<tr>";
+            
+            $total = 0;
+            $outCount = 0;
+            foreach($bbonds as $cnit => $item) {
+                if($item['type'] == 'rna') {
+                    if($item['isOutlier']) {
+                        $outCount += 1;
+                    }
+                    $total += 1;
+                }
+            }
+            $geomOutPct = sprintf("%.2f", 100.0 * $outCount / $total);
+            if ($outCount/$total < 0.10)    $bg = $bgFair;
+            if ($outCount/$total < 0.05)    $bg = $bgGood;
+            else                            $bg = $bgPoor;
+            $entry .= "<td>Residues with bad bonds:</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <5%</td></tr>\n";
+        }
+        if(hasMoltype($bangles, "rna"))
+        {
+            if($firstRow) $firstRow = false;
+            else $entry .= "<tr>";
+            
+            $total = 0;
+            $outCount = 0;
+            foreach($bangles as $cnit => $item) {
+                if($item['type'] == 'rna') {
+                    if($item['isOutlier']) {
+                        $outCount += 1;
+                    }
+                    $total += 1;
+                }
+            }
+            $geomOutPct = sprintf("%.2f", 100.0 * $outCount / $total);
+            if ($outCount/$total < 0.10)    $bg = $bgFair;
+            if ($outCount/$total < 0.05)    $bg = $bgGood;
+            else                            $bg = $bgPoor;
+            $entry .= "<td>Residues with bad angles:</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <5%</td></tr>\n";
         }
     }
     $entry .= "</table>\n";
-    if(is_array($clash)) $entry .= "<small>* 100<sup>th</sup> percentile is the best among structures of comparable resolution; 0<sup>th</sup> percentile is the worst.</small>\n";
+    $firstRow = true;
+    if(is_array($clash)) {
+        if($firstRow) $firstRow = false;
+        else $entry .= "<br>";
+        $entry .= "<small>* 100<sup>th</sup> percentile is the best among structures of comparable resolution; 0<sup>th</sup> percentile is the worst.</small>\n";
+    }
+    if(is_array($suites)) {
+        if($firstRow) $firstRow = false;
+        else $entry .= "<br>";
+        $entry .= "<small><sup>#</sup> RNA backbone was recently shown to be rotameric.  Outliers are RNA suites that don't fall into recognized rotamers.</small>\n";
+    }
     $entry .= "</p>\n"; // end of summary stats table
     return $entry;
 }
@@ -804,7 +902,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
 * $suites   is the data structure from loadSuitenameReport()
 * Any of them can be set to null if the data is unavailable.
 */
-function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota, $cbdev, $pperp, $suites, $outliersOnly = false)
+function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $outliersOnly = false)
 {
     //{{{ Process validation data
     // Make sure all residues are represented, and in the right order.
@@ -884,10 +982,10 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
             if($item['outlier'])
             {
                 $reasons = array();
-                if($item['deltaOut'])   $reasons[] = "base-phosphate distance";
-                if($item['epsilonOut']) $reasons[] = "bad epsilon angle";
+                if($item['deltaOut'] && $item['3Pdist'] < 3.0)   $reasons[] = "base-p distance indicates 2'-endo";
+                if($item['deltaOut'] && $item['3Pdist'] >= 3.0) $reasons[] = "base-p distance indicates 3'-endo";
                 $res[$item['resName']]['pperp_val'] = 1; // no way to quantify this
-                $res[$item['resName']]['pperp'] = "wrong sugar pucker (".implode(", ", $reasons).")";
+                $res[$item['resName']]['pperp'] = "wrong sugar pucker<br>(".implode(", ", $reasons).")";
                 $res[$item['resName']]['pperp_isbad'] = true;
                 $res[$item['resName']]['any_isbad'] = true;
             }
@@ -898,15 +996,15 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
         foreach($suites as $cnit => $item)
         {
             $res[$cnit]['suites_val'] = $item['suiteness'];
-            $bin = "bin $item[bin]";
-            if($bin == 'bin trig')
+            $bin = "&delta&delta&gamma $item[bin]";
+            if($bin == '&delta&delta&gamma trig')
             {
-                $bin = 'bin none (triaged)';
+                $bin = '&delta&delta&gamma none (triaged)';
                 $res[$cnit]['suites_val'] = -1; // sorts to very top
             }
-            elseif($bin == 'bin inc ')
+            elseif($bin == '&delta&delta&gamma inc ')
             {
-                $bin = 'bin none (incomplete)';
+                $bin = '&delta&delta&gamma none (incomplete)';
                 $res[$cnit]['suites_val'] = 0.0001; // sorts just below all outliers
             }
             
@@ -922,6 +1020,26 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
                 $res[$cnit]['suites'] = "conformer: $item[conformer]<br><small>$bin, suiteness = $item[suiteness]</small>";
         }
     }
+    if(is_array($bbonds)) {
+        foreach($bbonds as $cnit => $item) {
+            if ($item['isOutlier']) {
+                $res[$cnit]['bbonds_val'] = $item['count'];
+                $res[$cnit]['bbonds'] = "$item[count] OUTLIER(S)<br><small>worst is $item[measure]: $item[sigma] &sigma</small>";
+                $res[$cnit]['bbonds_isbad'] = true;
+                $res[$cnit]['any_isbad'] = true;
+            }
+        }
+    }
+    if(is_array($bangles)) {
+        foreach($bangles as $cnit => $item) {
+            if ($item['isOutlier']) {
+                $res[$cnit]['bangles_val'] = $item['count'];
+                $res[$cnit]['bangles'] = "$item[count] OUTLIER(S)<br><small>worst is $item[measure]: $item[sigma] &sigma</small>";
+                $res[$cnit]['bangles_isbad'] = true;
+                $res[$cnit]['any_isbad'] = true;
+            }
+        }
+    }
     //}}} Process validation data
     
     // Set up output data structure
@@ -930,7 +1048,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     //{{{ Table prequel and headers
     // Do summary chart
     $pdbstats = pdbstat($infile);
-    $table['prequel'] = makeSummaryStatsTable($pdbstats['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites);
+    $table['prequel'] = makeSummaryStatsTable($pdbstats['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles);
     
     $header1 = array();
     $header1[] = array('html' => "<b>#</b>",                                            'sort' => 1);
@@ -942,6 +1060,8 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     if(is_array($cbdev))  $header1[] = array('html' => "<b>C&beta; deviation</b>",      'sort' => -1);
     if(is_array($pperp))  $header1[] = array('html' => "<b>Base-P perp. dist.</b>",     'sort' => -1);
     if(is_array($suites)) $header1[] = array('html' => "<b>RNA suite conf.</b>",        'sort' => 1);
+    if(is_array($bbonds)) $header1[] = array('html' => "<b>Bond lengths.</b>",      'sort' => 1);
+    if(is_array($bangles)) $header1[] = array('html' => "<b>Bond angles.</b>",      'sort' => 1);
     
     $header2 = array();
     $header2[] = array('html' => "");
@@ -953,6 +1073,8 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     if(is_array($cbdev))  $header2[] = array('html' => "Outliers: ".count(findCbetaOutliers($cbdev))." of ".count($cbdev));
     if(is_array($pperp))  $header2[] = array('html' => "Outliers: ".count(findBasePhosPerpOutliers($pperp))." of ".count($pperp));
     if(is_array($suites)) $header2[] = array('html' => "Outliers: ".count(findSuitenameOutliers($suites))." of ".count($suites));
+    if(is_array($bbonds)) $header2[] = array('html' => "Outliers: ".count(findGeomOutliers($bbonds))." of ".count(listAtomResidues($infile)));
+    if(is_array($bangles)) $header2[] = array('html' => "Outliers: ".count(findGeomOutliers($bangles))." of ".count(listAtomResidues($infile)));
     
     $table['headers'] = array($header1, $header2);
     //}}} Table prequel and headers
@@ -969,7 +1091,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
         $row[] = array('html' => $cni,              'sort_val' => $eval['order']+0);
         $row[] = array('html' => $type,             'sort_val' => $type);
         $row[] = array('html' => $eval['resHiB'],   'sort_val' => $eval['resHiB']+0);
-        foreach(array('clash', 'rama', 'rota', 'cbdev', 'pperp', 'suites') as $type)
+        foreach(array('clash', 'rama', 'rota', 'cbdev', 'pperp', 'suites', 'bbonds', 'bangles') as $type)
         {
             if(is_array($$type))
             {

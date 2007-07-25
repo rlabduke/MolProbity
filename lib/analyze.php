@@ -74,6 +74,7 @@ function runAnalysis($modelID, $opts)
     if($opts['chartCBdev'])     $tasks['cbeta'] = "Do C&beta; deviation analysis and make kins";
     if($opts['chartBaseP'])     $tasks['base-phos'] = "Do base-phosphate perpendicular analysis";
     if($opts['chartSuite'])     $tasks['suitename'] = "Do RNA backbone conformations analysis";
+    if($opts['chartGeom'])      $tasks['geomValidation'] = "Do bond length and angle geometry analysis";
     
     if($opts['chartClashlist']) $tasks['clashlist'] = "Run <code>clashlist</code> to find bad clashes and clashscore";
     if($opts['chartImprove'])   $tasks['improve'] = "Suggest / report on fixes";
@@ -146,6 +147,20 @@ function runAnalysis($modelID, $opts)
         runSuitenameString($infile, $outfile);
         
         makeSuitenameKin($infile, "$kinDir/$model[prefix]suitename.kin");
+    }
+    if($opts['chartGeom'])
+    {
+        setProgress($tasks, 'geomValidation'); // updates the progress display if running as a background job
+        $protfile = "$rawDir/$model[prefix]protvalidation.data";
+        runValidationReport($infile, $protfile, "protein");
+        $rnafile = "$rawDir/$model[prefix]rnavalidation.data";
+        runValidationReport($infile, $rnafile, "rna");
+        //$validate_bond  = loadValidationBondReport($protfile,"protein");
+        //if (is_array($validate_bond))
+        $validate_bond  = array_merge(loadValidationBondReport($protfile,"protein"), loadValidationBondReport($rnafile, "rna"));
+        if (count($validate_bond) == 0) $validate_bond = null;
+        $validate_angle = array_merge(loadValidationAngleReport($protfile, "protein"), loadValidationAngleReport($rnafile, "rna"));
+        if (count($validate_angle) == 0) $validate_angle = null;
     }
     //}}} Run nucleic acid geometry programs and offer kins to user
     
@@ -241,7 +256,7 @@ function runAnalysis($modelID, $opts)
         setProgress($tasks, 'multichart'); // updates the progress display if running as a background job
         $outfile = "$rawDir/$model[prefix]multi.table";
         $snapfile = "$chartDir/$model[prefix]multi.html";
-        writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota, $cbdev, $pperp, $suites, !$opts['chartNotJustOut']);
+        writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, !$opts['chartNotJustOut']);
         $tasks['multichart'] .= " - <a href='viewtable.php?$_SESSION[sessTag]&file=$outfile' target='_blank'>preview</a>\n";
         setProgress($tasks, 'multichart'); // so the preview link is visible
         $outfile = "$chartDir/$model[prefix]multi-coot.scm";
@@ -291,7 +306,7 @@ function runAnalysis($modelID, $opts)
     if(is_array($clash) || is_array($rama) || is_array($rota) || is_array($cbdev) || is_array($pperp) || is_array($suites))
     {
         $entry .= "<h3>Summary statistics</h3>\n";
-        $entry .= makeSummaryStatsTable($model['stats']['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites);
+        $entry .= makeSummaryStatsTable($model['stats']['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle);
     }
     $entry .= $improveText;
     if($opts['doKinemage'] || $opts['doCharts'])
@@ -900,6 +915,197 @@ function runSuitenameString($infile, $outfile)
 }
 #}}}########################################################################
 
+
+#{{{ runValidationReport - finds >4sigma geometric outliers for protein and RNA 
+############################################################################
+function runValidationReport($infile, $outfile, $moltype)
+{
+    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.dangle.Dangle -$moltype -validate -outliers -sigma=0.0 $infile > $outfile");
+}
+#}}}########################################################################
+
+#{{{ loadValidationBondReport - loads Dangle's geometry statistics (bonds)
+############################################################################
+/**
+* Returns an array of entries keyed on CNIT name, one per residue.
+* Each entry is an array with these keys:
+*   resName         a formatted name for the residue: 'cnnnnittt'
+*                       c: Chain ID, space for none
+*                       n: sequence number, right justified, space padded
+*                       i: insertion code, space for none
+*                       t: residue type (ALA, LYS, etc.), all caps,
+*                          left justified, space padded
+*   measure         bond (A--B) or angle (A-B-C)
+*   value           value of the bond or angle measurement
+*   sigma           deviation from ideality
+*   count           number of bonds with >4sigma
+*   isOutlier       with the -outliers flag all output are >4sigma outliers
+*/
+function loadValidationBondReport($datafile, $moltype)
+{
+#1TC6.pdb:1:A: 250: :VAL:N-CA-C:99.511:-4.255
+    $data = file($datafile);
+    //$ret = array(); // needs to return null if no data!
+    $hash1_1 = array();
+    foreach($data as $line)
+    {
+        if(startsWith($line, "#")) continue;
+        $line = explode(':', rtrim($line));
+        $cnit = $line[2].$line[3].$line[4].$line[5];
+        //$decomp = decomposeResName($cnit);
+        $measure = $line[6];
+        $value = $line[7] + 0;
+        $sigma = $line[8] + 0;
+        if (ereg("--", $measure)) {
+            if (array_key_exists($cnit, $hash1_1)) {
+                $old_sigma_bond  = $hash1_1[$cnit]['sigma'];
+                if (abs($sigma) > abs($old_sigma_bond)) {
+                    $hash1_1[$cnit]['measure'] = $measure;
+                    $hash1_1[$cnit]['value'] = $value;
+                    $hash1_1[$cnit]['sigma'] = $sigma;
+                }
+                if (abs($sigma) > 4) {
+                    $hash1_1[$cnit]['count'] = $hash1_1[$cnit]['count'] + 1;
+                    $hash1_1[$cnit]['isOutlier'] = true;
+                }
+            }
+            else {
+                $hash1_1[$cnit] = array(
+                    'resName' => $cnit,
+                    'type'    => $moltype,
+                    'measure' => $measure,
+                    'value'   => $value,
+                    'sigma'   => $sigma,
+                    'count'   => 0
+                    //'isOutlier' => true
+                );
+                if (abs($sigma) > 4) {
+                    $hash1_1[$cnit]['isOutlier'] = true;
+                    $hash1_1[$cnit]['count'] = 1;
+                }
+                else $hash1_1[$cnit]['isOutlier'] = false;
+            }
+        }
+    }
+    return $hash1_1;
+    //$hash1_1_length = count($hash1_1);
+    //$hash1_2_length = count ($hash1_2);
+    //if ($hash1_1_length > 0) {return $hash1_1; }
+    //else { return $null; }
+}
+#}}}########################################################################
+
+#{{{ loadValidationAngleReport - loads Dangle's geometry statistics (angles)
+############################################################################
+/**
+* Returns an array of entries keyed on CNIT name, one per residue.
+* Each entry is an array with these keys:
+*   resName         a formatted name for the residue: 'cnnnnittt'
+*                       c: Chain ID, space for none
+*                       n: sequence number, right justified, space padded
+*                       i: insertion code, space for none
+*                       t: residue type (ALA, LYS, etc.), all caps,
+*                          left justified, space padded
+*   measure         bond (A--B) or angle (A-B-C)
+*   value           value of the bond or angle measurement
+*   sigma           deviation from ideality
+*   count           number of angles with >4sigma
+*   isOutlier       with the -outliers flag all output are >4sigma outliers
+*/
+function loadValidationAngleReport($datafile, $moltype)
+{
+#1TC6.pdb:1:A: 250: :VAL:N-CA-C:99.511:-4.255
+    $data = file($datafile);
+    //$ret = array(); // needs to return null if no data!
+    //$hash1_1 = array();
+    $hash1_2 = array();
+    //$cnit = "";
+    foreach($data as $line)
+    {
+        if(startsWith($line, "#")) continue;
+        $line = explode(':', rtrim($line));
+        $cnit = $line[2].$line[3].$line[4].$line[5];
+        //$decomp = decomposeResName($cnit);
+        $measure = $line[6];
+        $value = $line[7] + 0;
+        $sigma = $line[8] + 0;
+        if (ereg("-.-",$measure) || ereg("-..-",$measure) || ereg("-...-",$measure)) {
+            if (array_key_exists($cnit, $hash1_2)) {
+                $old_outlier_sigma = $hash1_2[$cnit]['sigma'];
+                if (abs($sigma) > abs($old_outlier_sigma)) {
+                    $hash1_2[$cnit]['measure'] = $measure;
+                    $hash1_2[$cnit]['value'] = $value;
+                    $hash1_2[$cnit]['sigma'] = $sigma;
+                }
+                if (abs($sigma) > 4) {
+                    $hash1_2[$cnit]['count'] = $hash1_2[$cnit]['count'] + 1;
+                    $hash1_2[$cnit]['isOutlier'] = true;
+                }
+            }
+            else {
+                //$count = 1;
+                $hash1_2[$cnit] = array(
+                    'resName' => $cnit,
+                    'type'    => $moltype,
+                    'measure' => $measure,
+                    'value'   => $value,
+                    'sigma'   => $sigma,
+                    'count'   => 0
+                    //'isOutlier' => true
+                );
+                if ($sigma > 4) {
+                    $hash1_2[$cnit]['isOutlier'] = true;
+                    $hash1_2[$cnit]['count'] = 1;
+                }
+                else $hash1_2[$cnit]['isOutlier'] = false;
+            }
+
+        }
+    }
+    return $hash1_2;
+    //$hash1_2_length = count($hash1_2);
+    //if ($hash1_2_length > 0 ) {return $hash1_2; }
+    //else { return $null; }
+}
+
+#}}}########################################################################
+
+#{{{ findGeomOutliers - evaluates residues for bad score
+############################################################################
+/**
+* Returns an array of 9-char residue names for residues that
+* fall outside the allowed boundaries for this criteria.
+* Inputs are from appropriate loadXXX() function above.
+*/
+function findGeomOutliers($geom)
+{
+    $worst = array();
+    if(is_array($geom)) foreach($geom as $res)
+    {
+        if($res['isOutlier'])
+            $worst[$res['resName']] = $res['resName'];
+    }
+    ksort($worst); // Put the residues into a sensible order
+    return $worst;
+}
+#}}}########################################################################
+
+#{{{ hasMoltype - determines if a geometry array has residues of type moltype
+############################################################################
+/**
+* For figuring out whether a geometry array has protein or nucleic acid in it.
+*/
+function hasMoltype($geom, $moltype) {
+    if(is_array($geom)) foreach($geom as $res) {
+        if($res['type'] == $moltype) {
+            return true;
+        }
+    }
+    return false;
+}
+#}}}########################################################################
+
+
 #{{{ runFragmentFiller - fills gaps in protein structures with fragments
 ############################################################################
 /**
@@ -1152,6 +1358,33 @@ function listProteinResidues($infile)
             $res = pdbComposeResName($s);
             if(isset($protein[substr($res,6,3)]))
                 $out[$res] = $res;
+        }
+    }
+    fclose($in);
+
+    return $out;
+}
+#}}}########################################################################
+
+#{{{ listAtomResidues - lists CNIT codes for amino acid residues in a PDB
+############################################################################
+/**
+* Returns NULL if the file could not be read.
+* Otherwise, an array of CNIT 9-char residue codes.
+* Does not account for the possibility of multiple MODELs
+*/
+function listAtomResidues($infile) {
+    $out = array();
+    
+    $in = fopen($infile, "r");
+    if(!$in) return NULL;
+    while(!feof($in))
+    {
+        $s = fgets($in, 1024);
+        if(startsWith($s, "ATOM"))
+        {
+            $res = pdbComposeResName($s);
+            $out[$res] = $res;
         }
     }
     fclose($in);

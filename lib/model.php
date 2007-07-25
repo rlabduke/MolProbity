@@ -224,6 +224,7 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
     $tasks['pdbstat'] = "Analyze contents of PDB file";
     $tasks['segmap'] = "Convert segment IDs to chain IDs (if needed)";
     $tasks['cnsnames'] = "Convert CNS atom names to PDB standard (if needed)";
+    $tasks['remediate'] = "Convert PDB to version 3 format (if needed)";
     $tasks['pdbstat2'] = "Re-analyze contents of final PDB file";
     
     // Process file - this is the part that matters
@@ -280,6 +281,14 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
     }
     else // swap tmp1 and tmp2; now tmp1 holds most recent file
     {
+        $t = $tmp1;
+        $tmp1 = $tmp2;
+        $tmp2 = $t;
+    }
+    setProgress($tasks, 'remediate');
+    //echo "number of v2atoms: ".$stats['v2atoms']."\n";
+    if($stats['v2atoms'] > 0) {
+        exec("PDBconverter_bulk.pl $tmp1 > $tmp2");
         $t = $tmp1;
         $tmp1 = $tmp2;
         $tmp2 = $t;
