@@ -554,6 +554,20 @@ function removeChains($inpath, $outpath, $idsToRemove)
 }
 #}}}########################################################################
 
+#{{{ downgradePDB - converts a pdb to PDB v2.3
+############################################################################
+/**
+* Converts a Pdb to PDB v2.3 format
+*
+* $inpath       the full filename for the PDB file to be processed
+* $outpath      the full filename for the destination PDB. Will be overwritten.
+*/
+function downgradePDB($inpath, $outpath)
+{
+    exec("PDBconverter_bulk.pl -oldout $inpath > $outpath");
+}
+#}}}########################################################################
+
 #{{{ reduceTrim - removes H from a PDB file
 ############################################################################
 /**

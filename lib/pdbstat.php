@@ -69,6 +69,10 @@ function describePdbStats($pdbstats, $useHTML = true)
         $details[] = $note;
     }
     
+    //echo $pdbstats['v2atoms']." many pdbv2.3 atoms were found";
+    if($pdbstats['v2atoms'] > 0)
+        $details[] = $b.$pdbstats['v2atoms']." PDBv2.3 atoms were found.  They have been converted to PDBv3.".$unb;
+    
     return $details;
     
 }
@@ -96,6 +100,7 @@ function describePdbStats($pdbstats, $useHTML = true)
 #   hets            number of non-water heterogens
 #   waters          number of waters
 #   fromcns         headers look like CNS output? (0 < n < 7)
+#   v2atoms         number of PDBv2.3 atoms
 #
 # Optional keys:
 #   resolution      the crystallographic resolution
@@ -123,7 +128,7 @@ function pdbstat($pdbfilename)
     $waters = 0;            # number of water hets
     $hetcode = "";          # current het ID
     $fromCNS = 0;           # counter for CNS-style header records
-    $v2format = 0;
+    $v2format = 0;          # counter for PDBv2.3 type atoms.
     $mcAlts = array();      # mainchain/CB alternates (set of res)
     $allAlts = array();     # total number of alternates (set of res)
     $rValue = array();      # various kinds of R value
@@ -269,7 +274,7 @@ function pdbstat($pdbfilename)
         }
     }
     fclose($file);
-    echo $v2format."\n";
+    //echo $v2format."\n";
     # Determine number of entries in $chains that are unique
     if(count($chains) > 1)
     {
