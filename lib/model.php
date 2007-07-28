@@ -286,9 +286,10 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
         $tmp2 = $t;
     }
     setProgress($tasks, 'remediate');
-    //echo "number of v2atoms: ".$stats['v2atoms']."\n";
-    if($stats['v2atoms'] > 0) {
-        exec("PDBconverter_bulk.pl $tmp1 > $tmp2");
+    $v2atoms = $stats['v2atoms'];
+    //echo "pre-pdbconvert-number of v2atoms: ".$v2atoms."\n";
+    if($v2atoms > 0) {
+        exec("remediator.pl $tmp1 > $tmp2");
         $t = $tmp1;
         $tmp1 = $tmp2;
         $tmp2 = $t;
@@ -302,6 +303,7 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
 
     setProgress($tasks, 'pdbstat2'); // updates the progress display if running as a background job
     $stats = pdbstat($outpath);
+    $stats['v2atoms'] = $v2atoms; // have to reset number of v2atoms because post-convert pdbstat should count zero
     setProgress($tasks, null); // all done
     return array( $stats, $segToChainMapping );
 }
@@ -564,7 +566,7 @@ function removeChains($inpath, $outpath, $idsToRemove)
 */
 function downgradePDB($inpath, $outpath)
 {
-    exec("PDBconverter_bulk.pl -oldout $inpath > $outpath");
+    exec("remediator.pl -oldout $inpath > $outpath");
 }
 #}}}########################################################################
 

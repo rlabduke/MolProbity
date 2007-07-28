@@ -70,7 +70,7 @@ $pdbDir    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
 $pdb = $pdbDir.'/'.$model['pdb'];
 
 // Set up progress message
-$tasks['convert'] = "Convert pdb with <code>PDBconverter -oldout</code>";
+$tasks['convert'] = "Convert pdb with <code>remediator -oldout</code>";
 $tasks['notebook'] = "Add entry to lab notebook";
 
 setProgress($tasks, 'convert'); // updates the progress display if running as a background job
@@ -81,7 +81,7 @@ downgradePDB($pdb, $outpdb);
 setProgress($tasks, 'notebook');
 $outpdburl = $_SESSION['dataURL'].'/'.MP_DIR_MODELS.'/'.$modelID."v23.pdb";
 
-$entry = "PDBconverter was run on $model[pdb] to convert its atoms to PDB v2.3 format.\n";
+$entry = "remediator was run on $model[pdb] to convert its atoms to PDB v2.3 format.\n";
 $entry .= "<p>You can now <a href='$outpdburl'>download the converted PDB file</a> (".formatFilesize(filesize($outpdb)).").</p>\n";
 $entry .= $pdbEntries;
 //$entry .= "<p>A kinemage of all of the fragments is ready for viewing in KiNG: ".linkKinemage($modelID.'.kin')."</p>\n";
