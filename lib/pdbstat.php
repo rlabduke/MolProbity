@@ -138,7 +138,7 @@ function pdbstat($pdbfilename)
     $hash = array();
     foreach($hashFile as $line) {
         if(!startsWith($line, "#")) {
-            $expLine = explode(',', $line);
+            $expLine = explode(':', $line);
             //echo rtrim($expLine[1])."->".$expLine[0];
             $hash[rtrim($expLine[1])] = $expLine[0];
         }

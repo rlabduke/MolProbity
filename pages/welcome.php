@@ -75,7 +75,11 @@ from your web browser.</p>
 
 </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>
 
-
+<h3>What's new in 3.12:</h3><ul>
+<li>PDB v3 compatibility (but still compatible with v2.3!)</li>
+<li>RNA backbone suite analysis</li>
+<li>Protein and nucleic acids bond lengths and angles analysis</li>
+</ul>
 <h3>Common questions:</h3>
 <p><b><a href='help/about.html' target='_blank'>Cite MolProbity</a></b>:
     <small>Davis et al. (2007)
@@ -598,10 +602,10 @@ function toggleUploadOptions()
 </div></form>
 <?php
 
-    echo("<div class=alert><strong>The PDB is currently changing its file format (see <a href='http://remediation.wwpdb.org/index.html' target='_blank'>here</a> for more info).  
-        We are currently upgrading our software to be compatible with the new format.
-        <br>Any uploaded files will be converted to PDB v3.0 if necessary; you will have an option to convert modified files back to PDB v2.3 if desired.
-        <br>Please don't hesitate to report any bugs you may encounter; sorry for any inconvenience.</strong></div>");
+    echo("<div class=alert><strong>The PDB has changed its file format from PDB v2.3 to v3 (see <a href='http://remediation.wwpdb.org/index.html' target='_blank'>here</a> for more info).  
+        We are currently upgrading our software to be compatible with the new format.  
+        Any uploaded files will be converted to PDB v3 if necessary; you will have an option to convert modified files back to PDB v2.3 if desired.
+        <br><br>Please don't hesitate to report any bugs you may encounter; sorry for any inconvenience.</strong></div>");
 }
 #}}}########################################################################
 

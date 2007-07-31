@@ -1540,27 +1540,30 @@ function formatChiAngles($item)
 }
 #}}}########################################################################
 
-#{{{ makeRemark42 - format MolProbity summary for PDB inclusion
+#{{{ makeRemark999 - format MolProbity summary for PDB inclusion
 ############################################################################
 /**
 * $clash    is the data structure from loadClashlist()
 * $rama     is the data structure from loadRamachandran()
 * $rota     is the data structure from loadRotamer()
 *
-* Returns a properly-formatted REMARK 42 string.
+* Returns a properly-formatted REMARK 999 string.
 */
-function makeRemark42($clash, $rama, $rota)
+function makeRemark999($clash, $rama, $rota)
 {
-    $s = 'REMARK  42                                                                      
-REMARK  42 MOLPROBITY STRUCTURE VALIDATION                                      
-REMARK  42  PROGRAMS    : MOLPROBITY  (KING, REDUCE, AND PROBE)                 
-REMARK  42  AUTHORS     : I.W.DAVIS,J.M.WORD                                    
-REMARK  42  URL         : HTTP://KINEMAGE.BIOCHEM.DUKE.EDU/MOLPROBITY/          
-REMARK  42  AUTHORS     : J.S.RICHARDSON,W.B.ARENDALL,D.C.RICHARDSON            
-REMARK  42  REFERENCE   : NEW TOOLS AND DATA FOR IMPROVING                      
-REMARK  42              : STRUCTURES, USING ALL-ATOM CONTACTS                   
-REMARK  42              : METHODS IN ENZYMOLOGY. 2003;374:385-412.              
-REMARK  42  MOLPROBITY OUTPUT SCORES:                                           
+    $s = 'REMARK 999                                                                      
+REMARK 999 MOLPROBITY STRUCTURE VALIDATION                                      
+REMARK 999  PROGRAMS    : MOLPROBITY  (KING, REDUCE, AND PROBE)                 
+REMARK 999  AUTHORS     : I.W.DAVIS,V.B.CHEN,                                   
+REMARK 999              : R.M.IMMORMINO,J.J.HEADD,W.B.ARENDALL,J.M.WORD         
+REMARK 999  URL         : HTTP://KINEMAGE.BIOCHEM.DUKE.EDU/MOLPROBITY/          
+REMARK 999  AUTHORS     : I.W.DAVIS,A.LEAVER-FAY,V.B.CHEN,J.N.BLOCK,            
+                        : G.J.KAPRAL,X.WANG,L.W.MURRAY,W.B.ARENDALL,            
+                        : J.SNOEYINK,J.S.RICHARDSON,D.C.RICHARDSON              
+REMARK 999  REFERENCE   : MOLPROBITY: ALL-ATOM CONTACTS AND STRUCTURE           
+REMARK 999              : VALIDATION FOR PROTEINS AND NUCLEIC ACIDS             
+REMARK 999              : NUCLEIC ACIDS RESEARCH. 2007;35:W375-83.              
+REMARK 999  MOLPROBITY OUTPUT SCORES:                                           
 ';
     // WARNING!
     // This code will perform correctly ONLY on PHP 4.3.7 and later.
@@ -1572,14 +1575,15 @@ REMARK  42  MOLPROBITY OUTPUT SCORES:
     
     if(is_array($clash))
     {
-        $s .= str_pad(sprintf('REMARK  42  ALL-ATOM CLASHSCORE     : %6.2f  (%.2f B<40)', $clash['scoreAll'], $clash['scoreBlt40']), 80) . "\n";
+        //$s .= str_pad(sprintf('REMARK 999  ALL-ATOM CLASHSCORE     : %6.2f  (%.2f B<40)', $clash['scoreAll'], $clash['scoreBlt40']), 80) . "\n";
+        $s .= str_pad(sprintf('REMARK 999  ALL-ATOM CLASHSCORE     : %6.2f', $clash['scoreAll']), 80) . "\n";
     }
     if(is_array($rota))
     {
         $rotaOut = count(findRotaOutliers($rota));
         $rotaTot = count($rota);
         $rotaOutPct = (100.0 * $rotaOut / $rotaTot);
-        $s .= str_pad(sprintf('REMARK  42  BAD ROTAMERS            : %5.1f%% %4d/%-5d  (TARGET  0-1%%)', $rotaOutPct, $rotaOut, $rotaTot), 80) . "\n";
+        $s .= str_pad(sprintf('REMARK 999  BAD ROTAMERS            : %5.1f%% %4d/%-5d  (TARGET  0-1%%)', $rotaOutPct, $rotaOut, $rotaTot), 80) . "\n";
     }
     if(is_array($rama))
     {
@@ -1588,8 +1592,8 @@ REMARK  42  MOLPROBITY OUTPUT SCORES:
         $ramaTot = count($rama);
         $ramaOutPct = (100.0 * $ramaOut / $ramaTot);
         $ramaFavPct = (100.0 * $ramaFav / $ramaTot);
-        $s .= str_pad(sprintf('REMARK  42  RAMACHANDRAN OUTLIERS   : %5.1f%% %4d/%-5d  (TARGET  0.2%%)', $ramaOutPct, $ramaOut, $ramaTot), 80) . "\n";
-        $s .= str_pad(sprintf('REMARK  42  RAMACHANDRAN FAVORED    : %5.1f%% %4d/%-5d  (TARGET 98.0%%)', $ramaFavPct, $ramaFav, $ramaTot), 80) . "\n";
+        $s .= str_pad(sprintf('REMARK 999  RAMACHANDRAN OUTLIERS   : %5.1f%% %4d/%-5d  (TARGET  0.2%%)', $ramaOutPct, $ramaOut, $ramaTot), 80) . "\n";
+        $s .= str_pad(sprintf('REMARK 999  RAMACHANDRAN FAVORED    : %5.1f%% %4d/%-5d  (TARGET 98.0%%)', $ramaFavPct, $ramaFav, $ramaTot), 80) . "\n";
     }
     
     return $s;         

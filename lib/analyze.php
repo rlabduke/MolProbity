@@ -81,8 +81,8 @@ function runAnalysis($modelID, $opts)
     if($opts['doCharts'])       $tasks['multichart'] = "Create multi-criterion chart";
     if($opts['doKinemage'])     $tasks['multikin'] = "Create multi-criterion kinemage";
     
-    $doRem42 = $opts['chartClashlist'] || $opts['chartRama'] || $opts['chartRota'];
-    if($doRem42)                $tasks['remark42'] = "Create REMARK 42 record for the PDB file";
+    $doRem999 = $opts['chartClashlist'] || $opts['chartRama'] || $opts['chartRota'];
+    if($doRem999)                $tasks['remark999'] = "Create REMARK 999 record for the PDB file";
     //}}} Set up file/directory vars and the task list
     
     //{{{ Run protein geometry programs and offer kins to user
@@ -292,14 +292,14 @@ function runAnalysis($modelID, $opts)
     }
     //}}} Build multi-criterion chart, kinemage
     
-    //{{{ Create REMARK 42 and insert into PDB file
+    //{{{ Create REMARK 999 and insert into PDB file
     if(is_array($clash) || is_array($rama) || is_array($rota))
     {
-        setProgress($tasks, 'remark42'); // updates the progress display if running as a background job
-        $remark42 = makeRemark42($clash, $rama, $rota);
-        replacePdbRemark($infile, $remark42, 42);
+        setProgress($tasks, 'remark999'); // updates the progress display if running as a background job
+        $remark999 = makeRemark999($clash, $rama, $rota);
+        replacePdbRemark($infile, $remark999, 999);
     }
-    //}}} Create REMARK 42 and insert into PDB file
+    //}}} Create REMARK 999 and insert into PDB file
     
     //{{{ Create lab notebook entry
     $entry = "";
@@ -347,12 +347,12 @@ function runAnalysis($modelID, $opts)
         $entry .= "</ul>\n";
     }
     
-    if($remark42)
+    if($remark999)
     {
-        $entry .= "<h3>REMARK 42</h3>";
+        $entry .= "<h3>REMARK 999</h3>";
         $url = "$modelURL/$model[pdb]";
-        $entry .= "You can <a href='$url'>download your PDB file with REMARK 42</a> inserted, or the same <a href='download_trimmed.php?$_SESSION[sessTag]&file=$infile'> without hydrogens</a>.\n";
-        $entry .= "<p><pre>$remark42</pre></p>";
+        $entry .= "You can <a href='$url'>download your PDB file with REMARK 999</a> inserted, or the same <a href='download_trimmed.php?$_SESSION[sessTag]&file=$infile'> without hydrogens</a>.\n";
+        $entry .= "<p><pre>$remark999</pre></p>";
     }
     //}}} Create lab notebook entry
     
