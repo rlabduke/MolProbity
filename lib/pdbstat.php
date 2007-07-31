@@ -69,6 +69,9 @@ function describePdbStats($pdbstats, $useHTML = true)
         $details[] = $note;
     }
     
+    //echo $pdbstats['v2atoms']." many pdbv2.3 atoms were found\n";
+    if($pdbstats['v2atoms'] > 0) $details[] = /*"<div class=alert>".*/$b.$pdbstats['v2atoms']." PDBv2.3 atoms were found.  They have been converted to PDBv3.".$unb/*."</div>"*/;
+    else                         $details[] = "0 PDBv2.3 atoms were found.  Proceeding assuming PDBv3 formatted file.";
     return $details;
     
 }
@@ -96,6 +99,7 @@ function describePdbStats($pdbstats, $useHTML = true)
 #   hets            number of non-water heterogens
 #   waters          number of waters
 #   fromcns         headers look like CNS output? (0 < n < 7)
+#   v2atoms         number of PDBv2.3 atoms
 #
 # Optional keys:
 #   resolution      the crystallographic resolution
@@ -123,11 +127,24 @@ function pdbstat($pdbfilename)
     $waters = 0;            # number of water hets
     $hetcode = "";          # current het ID
     $fromCNS = 0;           # counter for CNS-style header records
+    $v2format = 0;          # counter for PDBv2.3 type atoms.
     $mcAlts = array();      # mainchain/CB alternates (set of res)
     $allAlts = array();     # total number of alternates (set of res)
     $rValue = array();      # various kinds of R value
     $rFree = array();       # various kinds of Rfree
     
+    // for testing whether there are any old format atom lines.
+    $hashFile = file(MP_BASE_DIR."/lib/PDBv2toPDBv3.hashmap.txt");
+    $hash = array();
+    foreach($hashFile as $line) {
+        if(!startsWith($line, "#")) {
+            $expLine = explode(':', $line);
+            //echo rtrim($expLine[1])."->".$expLine[0];
+            $hash[rtrim($expLine[1])] = $expLine[0];
+        }
+    }
+    //echo sizeof($hash);
+
     $file = fopen($pdbfilename, "r");
     while(!feof($file))
     {
@@ -241,10 +258,22 @@ function pdbstat($pdbfilename)
                     $hetcode = $id;
                 }
             }
+
+            //return $hash; 
+            if(startsWith($s, "ATOM")||startsWith($s, "HETATM")||startsWith($s, "TER")||startsWith($s, "ANISOU")||startsWith($s, "SIGATM")||startsWith($s, "SUIUIJ")) {
+                //$atom_name = substr($s, 12, 4);
+                //$resn = substr($s, 17, 3);
+                //$key = $atom_name." ".$resn;
+                $key = substr($s, 12, 8);
+                //echo "|".$key."|\n";
+                if(array_key_exists($key, $hash)) {
+                    $v2format++;
+                }
+            }
         }
     }
     fclose($file);
-    
+    //echo $v2format."\n";
     # Determine number of entries in $chains that are unique
     if(count($chains) > 1)
     {
@@ -289,6 +318,7 @@ function pdbstat($pdbfilename)
     $ret['hets']            = $hets;
     $ret['waters']          = $waters;
     $ret['fromcns']         = $fromCNS;
+    $ret['v2atoms']         = $v2format;
     $ret['all_alts']        = count($allAlts);
     $ret['mc_alts']         = count($mcAlts);
 

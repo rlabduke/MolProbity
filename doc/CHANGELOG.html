@@ -83,16 +83,42 @@
     change runSuitenameReport() to use "suitename -chart" (?)
     add *option* to make REMARK 42 into an unnumbered REMARK
     email new MolP tarball to Joe Moran at GSK
+    **** Fix ensemble model upload history info like in 3.12****
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
+### 3.12 ###
+- fixed bug in warning about auto-converting to PDBv3.
+- new remediator, prekin, flipkin, reduce, and probe.
+- changed name of PDBconverter_bulk to remediator.
+- changed warning on file upload page to be more specific about file upload modifications.
+- changed model[history] so it more accurately reflects origins and modifications of file.
+- added note that if no PDBv2.3 atoms are detected, assumes PDBv3 format file.
+- Downgrade is (for download only).
+- Updated authors on about page.
+- Added references to bond and angle geometry papers on about page.
+- Added "What's new" to welcome page.
+- Updated site map.
+- Changed Remark42 to Remark999, and updated its authors and reference.
+- New Dangle to avoid doing suite analysis on DNA.
+- Fixed bug in PDBv2->PDBv3 hashmap.
+- Updated aacgeom_setup page so geometry and suitename are listed as beta test.
+
 ### 3.11 ###
 - added fragmentfiller pages and jar (access through site map).
 - have not included the libraries into svn yet, but they go in lib/fragmentfiller/.
 - new versions of prekin to try to address issues with new pdb files.
 - incorporated Bob's changes to analyze.php for dealing with insertion codes in RNA files.
+- geometry analysis for proteins and nucleic acids added to multi-crit chart.
 - [IWD] Java help page now suggests Java 1.5 (required for KiNG 2.x)
+- new probe, reduce, and prekin versions for dealing with PDBv3 files.
+- new pdbconverter for converting PDBv2 format to PDBv3.
+- new code to check if files are old format, and convert them if necessary.
+- updated references to new NAR 2007 reference.
+- added warning about PDBv3 files.
+- added warning to file summary page.
+- added pages for converting files to PDB v2.3 format.
 
 ### 3.10 ###
 - added support for icon images to linkAnyFile()
