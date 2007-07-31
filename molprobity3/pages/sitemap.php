@@ -29,6 +29,10 @@ function display($context)
     echo "<li>Specify crystallographic resolution.</li>\n";
     echo "</ul>\n";
     
+    echo "<h3><a href='".makeEventURL("onCall", "pdb_convert_setup.php")."'>Downgrade PDB to v2.3</a></h3>\n<ul>\n";
+    echo "<li>Downgrade an uploaded PDB to v2.3 (for download only)</li>\n";
+    echo "</ul>\n";
+    
     echo "<h3><a href='".makeEventURL("onCall", "reduce_setup.php")."'>Add hydrogens</a></h3>\n<ul>\n";
     echo "<li>Add missing hydrogens.</li>\n";
     echo "<li>Optimize H-bond networks.</li>\n";
@@ -38,7 +42,8 @@ function display($context)
     echo "<h3><a href='".makeEventURL("onCall", "aacgeom_setup.php")."'>Analyze all-atom contacts and geometry</a></h3>\n<ul>\n";
     echo "<li>All-atom steric contacts (clashlist, clash score, contact dots)</li>\n";
     echo "<li>Protein geometry evaluation (Ramachandran plot, rotamers, C&beta; deviations)</li>\n";
-    echo "<li>Nucleic acid geometry (base-phosphate perpendiculars)</li>\n";
+    echo "<li>Nucleic acid geometry (base-phosphate perpendiculars, suite names)</li>\n";
+    echo "<li>Evaulate protein and nucleic acid bond lengths and angles</li>\n";
     echo "<li>Multi-criterion chart and kinemage displays</li>\n";
     echo "</ul>\n";
 

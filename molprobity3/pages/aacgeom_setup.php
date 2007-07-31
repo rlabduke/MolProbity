@@ -138,9 +138,10 @@ function checkSettingsBeforeSubmit()
     <label><input type='checkbox' name='chartClashlist' value='1'> Clashes &amp; clashscore</label>
     <br><label><input type='checkbox' name='chartRama' value='1'> Ramachandran plots</label>
     <br><label><input type='checkbox' name='chartRota' value='1'> Rotamer evaluation</label>
+    <br><label><input type='checkbox' name='chartGeom' value='1'> Geometry evaluation [BETA TEST]</label>
     <br><label><input type='checkbox' name='chartCBdev' value='1'> C&beta; deviations</label>
     <br><label><input type='checkbox' name='chartBaseP' value='1'> Base-phosphate perpendiculars</label>
-    <br><label><input type='checkbox' name='chartSuite' value='1'> RNA backbone conformations</label>
+    <br><label><input type='checkbox' name='chartSuite' value='1'> RNA backbone conformations [BETA TEST]</label>
     <p><label><input type='checkbox' name='chartImprove' value='1'> Suggest / report on automatic structure fix-ups</label>
     <br><label><input type='checkbox' name='chartNotJustOut' value='1'> List all residues in multi-chart, not just outliers</label>
     </div>
@@ -200,6 +201,7 @@ function onRunAnalysis()
             mpLog("aacgeom-aac:Generataing all-atom contact data of some type");
         if($req['kinRama'] || $req['chartRama'])    mpLog("aacgeom-rama:Doing Ramachandran analysis");
         if($req['kinRota'] || $req['chartRota'])    mpLog("aacgeom-rota:Doing rotamer analysis");
+        if($req['chartGeom'])                       mpLog("aacgeom-geom:Doing geometry analysis");
         if($req['kinCBdev'] || $req['chartCBdev'])  mpLog("aacgeom-cbdev:Doing C-beta deviation analysis");
         if($req['kinBaseP'] || $req['chartBaseP'])  mpLog("aacgeom-basep:Validating base-phosphate distances vs sugar puckers");
         if($req['kinSuite'] || $req['chartSuite'])  mpLog("aacgeom-suite:Validating RNA backbone conformations");

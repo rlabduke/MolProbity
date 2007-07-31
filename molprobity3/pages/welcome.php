@@ -75,18 +75,17 @@ from your web browser.</p>
 
 </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>
 
-
+<h3>What's new in 3.12:</h3><ul>
+<li>PDB v3 compatibility (but still compatible with v2.3!)</li>
+<li>RNA backbone suite analysis</li>
+<li>Protein and nucleic acids bond lengths and angles analysis</li>
+</ul>
 <h3>Common questions:</h3>
 <p><b><a href='help/about.html' target='_blank'>Cite MolProbity</a></b>:
-    <small>Lovell et al. (2003)
-    <a href="http://kinemage.biochem.duke.edu/validation/valid.html" target="_blank">Structure
-    validation by C-alpha geometry: phi, psi, and C-beta deviation.</a>
-    Proteins 50:437-450
-    <b>or</b>
-    Davis et al. (2004)
+    <small>Davis et al. (2007)
     <a href="http://kinemage.biochem.duke.edu/lab/papers.php" target="_blank">MolProbity:
-    structure validation and all-atom contact analysis for nucleic acids and their complexes.</a>
-    Nucleic Acids Research 32:W615-W619.
+    all-atom contacts and structure validation for proteins and nucleic acids.</a>
+    Nucleic Acids Research 35:W375-W383.
     </small></p>
 <p><b><a href='help/java.html' target='_blank'>Installing Java</a></b>: how to make kinemage graphics work in your browser.</p>
 <p><b><a href='get_molprobity.php' target='_blank'>Download MolProbity</a></b>: how can I run a private MolProbity server, or run from the command line?</p>
@@ -198,6 +197,7 @@ function displayModelTools($context)
         //'sswing'    => array('desc' => 'Refit sidechains', 'page' => 'sswing_setup1.php', 'rel' => 1, 'img' => ''),
         'makekins'  => array('desc' => 'Make simple kinemages', 'page' => 'makekin_setup.php', 'rel' => 1, 'img' => 'porin_barrel.png'),
         'editpdb' => array('desc' => 'Edit PDB file', 'page' => 'editpdb_setup1.php', 'rel' => 1, 'img' => 'scissors.png'),
+        'downgrade' => array('desc' => 'Downgrade file to PDBv2.3 format (for download only)', 'page' => 'pdb_convert_setup.php', 'rel' => 1, 'img' => 'downgrade.gif'),
         //'' => array('desc' => '', 'page' => '', 'rel' => 1, 'img' => ''),
     );
     
@@ -243,6 +243,7 @@ function displayEnsembleTools($context)
         'aacgeom'   => array('desc' => 'Analyze all-atom contacts and geometry', 'page' => 'ens_aacgeom_setup.php', 'rel' => 2, 'img' => 'clash_rama.png'),
         'biolunit'  => array('desc' => 'Biol. unit, not NMR', 'handler' => 'onConvertToBiolUnit', 'rel' => 1, 'img' => 'scissors.png'),
         'reduce'    => array('desc' => 'Add hydrogens', 'page' => 'ens_reduce_setup.php', 'rel' => 1, 'img' => 'add_h.png'),
+        'downgrade' => array('desc' => 'Downgrade file to PDBv2.3 format (for download only)', 'page' => 'pdb_convert_setup.php', 'rel' => 1, 'img' => 'downgrade.gif'),
     );
     
     // Reduce
@@ -600,6 +601,11 @@ function toggleUploadOptions()
     </div>
 </div></form>
 <?php
+
+    echo("<div class=alert><strong>The PDB has changed its file format from PDB v2.3 to v3 (see <a href='http://remediation.wwpdb.org/index.html' target='_blank'>here</a> for more info).  
+        We are currently upgrading our software to be compatible with the new format.  
+        Any uploaded files will be converted to PDB v3 if necessary; you will have an option to convert modified files back to PDB v2.3 if desired.
+        <br><br>Please don't hesitate to report any bugs you may encounter; sorry for any inconvenience.</strong></div>");
 }
 #}}}########################################################################
 
