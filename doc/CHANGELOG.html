@@ -83,6 +83,7 @@
     change runSuitenameReport() to use "suitename -chart" (?)
     add *option* to make REMARK 42 into an unnumbered REMARK
     email new MolP tarball to Joe Moran at GSK
+    **** Fix ensemble model upload history info like in 3.12****
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
@@ -91,6 +92,10 @@
 - fixed bug in warning about auto-converting to PDBv3.
 - new remediator, prekin, and probe.
 - changed name of PDBconverter_bulk to remediator.
+- changed warning on file upload page to be more specific about file upload modifications.
+- changed model[history] so it more accurately reflects origins and modifications of file.
+- added note that if no PDBv2.3 atoms are detected, assumes PDBv3 format file.
+- Downgrade is (for download only).
 
 ### 3.11 ###
 - added fragmentfiller pages and jar (access through site map).

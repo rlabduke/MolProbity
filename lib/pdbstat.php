@@ -70,9 +70,8 @@ function describePdbStats($pdbstats, $useHTML = true)
     }
     
     //echo $pdbstats['v2atoms']." many pdbv2.3 atoms were found\n";
-    if($pdbstats['v2atoms'] > 0)
-        $details[] = $b.$pdbstats['v2atoms']." PDBv2.3 atoms were found.  They have been converted to PDBv3.".$unb;
-    
+    if($pdbstats['v2atoms'] > 0) $details[] = /*"<div class=alert>".*/$b.$pdbstats['v2atoms']." PDBv2.3 atoms were found.  They have been converted to PDBv3.".$unb/*."</div>"*/;
+    else                         $details[] = "0 PDBv2.3 atoms were found.  Proceeding assuming PDBv3 formatted file.";
     return $details;
     
 }

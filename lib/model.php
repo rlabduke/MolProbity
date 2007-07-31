@@ -101,7 +101,9 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
     
     // Process file to clean it up
     $tmp2 = mpTempfile("tmp_pdb_");
+    $tmp3 = mpTempfile("tmp_pdb_");
     list($stats, $segmap) = preparePDB($tmpPdb, $tmp2, $isCnsFormat, $ignoreSegID);
+    $stats = convertToPDBv3($tmp2, $tmp3);
     
     if($stats['models'] > 1) // NMR/theoretical with multiple models {{{
     {
@@ -160,21 +162,32 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
     {
         // If our cleaning procedure had no impact, then don't confuse by
         // changing the name. If it DID change something, then append "_clean".
-        if(filesAreIdentical($tmpPdb, $tmp2))   $model = createModel($origID);        
-        else                                    $model = createModel($origID, "_clean");
+        $append = "";
+        if(!filesAreIdentical($tmpPdb, $tmp2)) $append .= "_clean";
+        if(!filesAreIdentical($tmp2, $tmp3)) $append .= "_pdbv3";
+        $model = createModel($origID, $append);
+        //if(filesAreIdentical($tmpPdb, $tmp2))   $model = createModel($origID);        
+        //else                                    $model = createModel($origID, "_clean");
+
+    
+        $model['stats']                 = $stats;
+        $historyText = "";
+        if (filesAreIdentical($tmpPdb, $tmp3))  $historyText  = 'Original file ';
+        else                                    $historyText  = 'File (modified) ';
+        if ($isUserSupplied)                    $historyText .= 'uploaded by user';
+        else                                    $historyText .= 'downloaded from web';
+        $model['history'] = $historyText;
+        $model['isUserSupplied']        = $isUserSupplied;
+        if($segmap) $model['segmap']    = $segmap;
         
         $id         = $model['id'];
         $outname    = $model['pdb'];
         $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
         if(!file_exists($outpath)) mkdir($outpath, 0777);
         $outpath .= '/'.$outname;
-        copy($tmp2, $outpath);
+        copy($tmp3, $outpath);
+        unlink($tmp3);   
         unlink($tmp2);
-    
-        $model['stats']                 = $stats;
-        $model['history']               = 'Original file uploaded by user';
-        $model['isUserSupplied']        = $isUserSupplied;
-        if($segmap) $model['segmap']    = $segmap;
         
         // Create the model entry
         $_SESSION['models'][$id] = $model;
@@ -224,8 +237,8 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
     $tasks['pdbstat'] = "Analyze contents of PDB file";
     $tasks['segmap'] = "Convert segment IDs to chain IDs (if needed)";
     $tasks['cnsnames'] = "Convert CNS atom names to PDB standard (if needed)";
-    $tasks['remediate'] = "Convert PDB to version 3 format (if needed)";
     $tasks['pdbstat2'] = "Re-analyze contents of final PDB file";
+    //$tasks['remediate'] = "Convert PDB to version 3 format (if needed)";    
     
     // Process file - this is the part that matters
     // Convert linefeeds to UNIX standard (\n):
@@ -285,15 +298,15 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
         $tmp1 = $tmp2;
         $tmp2 = $t;
     }
-    setProgress($tasks, 'remediate');
-    $v2atoms = $stats['v2atoms'];
-    //echo "pre-pdbconvert-number of v2atoms: ".$v2atoms."\n";
-    if($v2atoms > 0) {
-        exec("remediator.pl $tmp1 > $tmp2");
-        $t = $tmp1;
-        $tmp1 = $tmp2;
-        $tmp2 = $t;
-    }
+    //setProgress($tasks, 'remediate');
+    //$v2atoms = $stats['v2atoms'];
+    ////echo "pre-pdbconvert-number of v2atoms: ".$v2atoms."\n";
+    //if($v2atoms > 0) {
+    //    exec("remediator.pl $tmp1 > $tmp2");
+    //    $t = $tmp1;
+    //    $tmp1 = $tmp2;
+    //    $tmp2 = $t;
+    //}
     // Copy to output pdb
     copy($tmp1, $outpath);
 
@@ -303,9 +316,35 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
 
     setProgress($tasks, 'pdbstat2'); // updates the progress display if running as a background job
     $stats = pdbstat($outpath);
-    $stats['v2atoms'] = $v2atoms; // have to reset number of v2atoms because post-convert pdbstat should count zero
+    //$stats['v2atoms'] = $v2atoms; // have to reset number of v2atoms because post-convert pdbstat should count zero
     setProgress($tasks, null); // all done
     return array( $stats, $segToChainMapping );
+}
+#}}}########################################################################
+
+#{{{ convertToPDBv3 - converts pdb file to v 3.0
+############################################################################
+function convertToPDBv3($inpath, $outpath) {
+    $tasks = getProgressTasks();
+    $tasks['remediate'] = "Convert PDB to version 3 format (if needed)";
+    $tmp1   = mpTempfile("tmp_pdb_");
+    
+    setProgress($tasks, 'remediate');
+    $stats = pdbstat($inpath);
+    $v2atoms = $stats['v2atoms'];
+    //echo "pre-pdbconvert-number of v2atoms: ".$v2atoms."\n";
+    if($v2atoms > 0) {
+        exec("remediator.pl $inpath > $tmp1");
+        copy($tmp1, $outpath);
+    } else {
+        copy($inpath, $outpath);
+    }
+    
+    // Clean up temp files
+    unlink($tmp1);
+    
+    setProgress($tasks, null); // all done
+    return $stats;
 }
 #}}}########################################################################
 

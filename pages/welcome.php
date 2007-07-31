@@ -193,7 +193,7 @@ function displayModelTools($context)
         //'sswing'    => array('desc' => 'Refit sidechains', 'page' => 'sswing_setup1.php', 'rel' => 1, 'img' => ''),
         'makekins'  => array('desc' => 'Make simple kinemages', 'page' => 'makekin_setup.php', 'rel' => 1, 'img' => 'porin_barrel.png'),
         'editpdb' => array('desc' => 'Edit PDB file', 'page' => 'editpdb_setup1.php', 'rel' => 1, 'img' => 'scissors.png'),
-        'downgrade' => array('desc' => 'Downgrade file to PDBv2.3 format', 'page' => 'pdb_convert_setup.php', 'rel' => 1, 'img' => 'downgrade.gif'),
+        'downgrade' => array('desc' => 'Downgrade file to PDBv2.3 format (for download only)', 'page' => 'pdb_convert_setup.php', 'rel' => 1, 'img' => 'downgrade.gif'),
         //'' => array('desc' => '', 'page' => '', 'rel' => 1, 'img' => ''),
     );
     
@@ -239,7 +239,7 @@ function displayEnsembleTools($context)
         'aacgeom'   => array('desc' => 'Analyze all-atom contacts and geometry', 'page' => 'ens_aacgeom_setup.php', 'rel' => 2, 'img' => 'clash_rama.png'),
         'biolunit'  => array('desc' => 'Biol. unit, not NMR', 'handler' => 'onConvertToBiolUnit', 'rel' => 1, 'img' => 'scissors.png'),
         'reduce'    => array('desc' => 'Add hydrogens', 'page' => 'ens_reduce_setup.php', 'rel' => 1, 'img' => 'add_h.png'),
-        'downgrade' => array('desc' => 'Downgrade file to PDBv2.3 format', 'page' => 'pdb_convert_setup.php', 'rel' => 1, 'img' => 'downgrade.gif'),
+        'downgrade' => array('desc' => 'Downgrade file to PDBv2.3 format (for download only)', 'page' => 'pdb_convert_setup.php', 'rel' => 1, 'img' => 'downgrade.gif'),
     );
     
     // Reduce
@@ -600,6 +600,7 @@ function toggleUploadOptions()
 
     echo("<div class=alert><strong>The PDB is currently changing its file format (see <a href='http://remediation.wwpdb.org/index.html' target='_blank'>here</a> for more info).  
         We are currently upgrading our software to be compatible with the new format.
+        <br>Any uploaded files will be converted to PDB v3.0 if necessary; you will have an option to convert modified files back to PDB v2.3 if desired.
         <br>Please don't hesitate to report any bugs you may encounter; sorry for any inconvenience.</strong></div>");
 }
 #}}}########################################################################
