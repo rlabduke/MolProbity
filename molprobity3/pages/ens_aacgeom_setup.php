@@ -128,7 +128,7 @@ function checkSettingsBeforeSubmit()
     <p><label><input type='checkbox' name='kinRama' value='1'> Ramachandran plots</label>
     <br><label><input type='checkbox' name='kinRota' value='1'> Rotamer evaluation</label>
     <br><label><input type='checkbox' name='kinCBdev' value='1'> C&beta; deviations</label>
-    <br><label><input type='checkbox' name='kinBaseP' value='1'> Base-phosphate perpendiculars</label>
+    <br><label><input type='checkbox' name='kinBaseP' value='1'> RNA sugar pucker analysis</label>
     <p><label><input type='checkbox' name='kinAltConfs' value='1'> Alternate conformations</label>
     <br><label><input type='checkbox' name='kinBfactor' value='1'> Models colored by B-factors</label>
     <br><label><input type='checkbox' name='kinOccupancy' value='1'> Models colored by occupancy</label>
