@@ -125,7 +125,7 @@ function checkSettingsBeforeSubmit()
     <p><label><input type='checkbox' name='kinRama' value='1'> Ramachandran plots</label>
     <br><label><input type='checkbox' name='kinRota' value='1'> Rotamer evaluation</label>
     <br><label><input type='checkbox' name='kinCBdev' value='1'> C&beta; deviations</label>
-    <br><label><input type='checkbox' name='kinBaseP' value='1'> Base-phosphate perpendiculars</label>
+    <br><label><input type='checkbox' name='kinBaseP' value='1'> RNA sugar pucker analysis</label>
     <br><label><input type='checkbox' name='kinSuite' value='1'> RNA backbone conformations</label>
     <p><label><input type='checkbox' name='kinForceViews' value='1'> Make views of trouble spots even if it takes longer</label>
     <br><label><input type='checkbox' name='kinAltConfs' value='1'> Alternate conformations</label>
@@ -140,7 +140,7 @@ function checkSettingsBeforeSubmit()
     <br><label><input type='checkbox' name='chartRota' value='1'> Rotamer evaluation</label>
     <br><label><input type='checkbox' name='chartGeom' value='1'> Geometry evaluation [BETA TEST]</label>
     <br><label><input type='checkbox' name='chartCBdev' value='1'> C&beta; deviations</label>
-    <br><label><input type='checkbox' name='chartBaseP' value='1'> Base-phosphate perpendiculars</label>
+    <br><label><input type='checkbox' name='chartBaseP' value='1'> RNA sugar pucker analysis</label>
     <br><label><input type='checkbox' name='chartSuite' value='1'> RNA backbone conformations [BETA TEST]</label>
     <p><label><input type='checkbox' name='chartImprove' value='1'> Suggest / report on automatic structure fix-ups</label>
     <br><label><input type='checkbox' name='chartNotJustOut' value='1'> List all residues in multi-chart, not just outliers</label>

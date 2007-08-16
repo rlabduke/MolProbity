@@ -72,7 +72,7 @@ function runAnalysis($modelID, $opts)
     if($opts['chartRama'])      $tasks['rama'] = "Do Ramachandran analysis and make plots";
     if($opts['chartRota'])      $tasks['rota'] = "Do rotamer analysis";
     if($opts['chartCBdev'])     $tasks['cbeta'] = "Do C&beta; deviation analysis and make kins";
-    if($opts['chartBaseP'])     $tasks['base-phos'] = "Do base-phosphate perpendicular analysis";
+    if($opts['chartBaseP'])     $tasks['base-phos'] = "Do RNA sugar pucker analysis";
     if($opts['chartSuite'])     $tasks['suitename'] = "Do RNA backbone conformations analysis";
     if($opts['chartGeom'])      $tasks['geomValidation'] = "Do bond length and angle geometry analysis";
     
