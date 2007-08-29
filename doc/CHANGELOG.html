@@ -88,6 +88,25 @@
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
+### 3.13 ###
+- pdb converter page now allows download without hydrogens.
+- fixed bug in multi-crit table bond angle analysis.
+- geometry analysis visualization from dangle has been incorporated into multicrit.
+- fixed bug in pdbstat where atoms with alt confs would automatically be called pdb v3
+- Suitename was updated suitename.0.3.070628
+- Suitenames output on the multi-criterion chart now includes triage
+  angle or 7D outlier information
+- pdbcns and the remediator were updated to convert three letter
+  nucleic acid names to single letter names
+- The reduce het dictionaries were updated so that hydrogens aren't
+  built on carboxylates
+- A link was made to the Reduce download page on the reduce results
+  page so that people could find the het dictionary that was being used
+- REMARK 999 was changed to REMARK  40
+- The spurious non-links on the lab notebook page were removed
+- The perp-to-line info on the multi-crit chart now reads suspect
+  instead of wrong sugar pucker, and also includes the offending torsion
+
 ### 3.12 ###
 - fixed bug in warning about auto-converting to PDBv3.
 - new remediator, prekin, flipkin, reduce, and probe.

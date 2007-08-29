@@ -28,6 +28,7 @@ require_once(MP_BASE_DIR.'/lib/model.php'); // for making kinemages
 *       kinContacts     show contact dots?
 *       kinRama         show Rama outliers?
 *       kinRota         show rotamer outliers?
+*       kinGeom         show bond length and angle outliers?
 *       kinCBdev        show C-beta deviations?
 *       kinBaseP        show base-phosphate perpendiculars?
 *       kinSuite        show RNA backbone conformational outliers?
@@ -40,6 +41,7 @@ require_once(MP_BASE_DIR.'/lib/model.php'); // for making kinemages
 *       chartClashlist  run clashlistcluster?
 *       chartRama       do Rama plots and analysis?
 *       chartRota       do rotamer analysis?
+*       chartGeom       do bond length and angle outliers?
 *       chartCBdev      do CB dev plots and analysis?
 *       chartBaseP      check base-phosphate perpendiculars?
 *       chartSuite      check RNA backbone conformations?
@@ -273,6 +275,7 @@ function runAnalysis($modelID, $opts)
             'altconf'   =>  $opts['kinAltConfs'],
             'rama'      =>  $opts['kinRama'],
             'rota'      =>  $opts['kinRota'],
+            'geom'      =>  $opts['kinGeom'],
             'cbdev'     =>  $opts['kinCBdev'],
             'pperp'     =>  $opts['kinBaseP'],
             'clashdots' =>  $opts['kinClashes'],
@@ -1061,7 +1064,7 @@ function loadValidationAngleReport($datafile, $moltype)
                     'count'   => 0
                     //'isOutlier' => true
                 );
-                if ($sigma > 4) {
+                if (abs($sigma) > 4) {
                     $hash1_2[$cnit]['isOutlier'] = true;
                     $hash1_2[$cnit]['count'] = 1;
                 }

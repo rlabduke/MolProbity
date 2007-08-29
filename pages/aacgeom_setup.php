@@ -124,9 +124,10 @@ function checkSettingsBeforeSubmit()
     <br><label><input type='checkbox' name='kinContacts' value='1'> van der Waals contacts</label>
     <p><label><input type='checkbox' name='kinRama' value='1'> Ramachandran plots</label>
     <br><label><input type='checkbox' name='kinRota' value='1'> Rotamer evaluation</label>
+    <br><label><input type='checkbox' name='kinGeom' value='1'> Geometry evaluation [BETA TEST]</label>
     <br><label><input type='checkbox' name='kinCBdev' value='1'> C&beta; deviations</label>
     <br><label><input type='checkbox' name='kinBaseP' value='1'> RNA sugar pucker analysis</label>
-    <br><label><input type='checkbox' name='kinSuite' value='1'> RNA backbone conformations</label>
+    <br><label><input type='checkbox' name='kinSuite' value='1'> RNA backbone conformations [BETA TEST]</label>
     <p><label><input type='checkbox' name='kinForceViews' value='1'> Make views of trouble spots even if it takes longer</label>
     <br><label><input type='checkbox' name='kinAltConfs' value='1'> Alternate conformations</label>
     <br><label><input type='checkbox' name='kinBfactor' value='1'> Model colored by B-factors</label>
@@ -201,7 +202,7 @@ function onRunAnalysis()
             mpLog("aacgeom-aac:Generataing all-atom contact data of some type");
         if($req['kinRama'] || $req['chartRama'])    mpLog("aacgeom-rama:Doing Ramachandran analysis");
         if($req['kinRota'] || $req['chartRota'])    mpLog("aacgeom-rota:Doing rotamer analysis");
-        if($req['chartGeom'])                       mpLog("aacgeom-geom:Doing geometry analysis");
+        if($req['kinGeom'] || $req['chartGeom'])    mpLog("aacgeom-geom:Doing geometry analysis");
         if($req['kinCBdev'] || $req['chartCBdev'])  mpLog("aacgeom-cbdev:Doing C-beta deviation analysis");
         if($req['kinBaseP'] || $req['chartBaseP'])  mpLog("aacgeom-basep:Validating base-phosphate distances vs sugar puckers");
         if($req['kinSuite'] || $req['chartSuite'])  mpLog("aacgeom-suite:Validating RNA backbone conformations");

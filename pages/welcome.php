@@ -603,7 +603,7 @@ function toggleUploadOptions()
 <?php
 
     echo("<div class=alert><strong>The PDB has changed its file format from PDB v2.3 to v3 (see <a href='http://remediation.wwpdb.org/index.html' target='_blank'>here</a> for more info).  
-        We are currently upgrading our software to be compatible with the new format.  
+        We have upgraded our software to be compatible with the new format.
         Any uploaded files will be converted to PDB v3 if necessary; you will have an option to convert modified files back to PDB v2.3 if desired.
         <br><br>Please don't hesitate to report any bugs you may encounter; sorry for any inconvenience.</strong></div>");
 }
