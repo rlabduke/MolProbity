@@ -1631,8 +1631,7 @@ REMARK  40              : J.SNOEYINK,J.S.RICHARDSON,D.C.RICHARDSON
 REMARK  40  REFERENCE   : MOLPROBITY: ALL-ATOM CONTACTS AND STRUCTURE           
 REMARK  40              : VALIDATION FOR PROTEINS AND NUCLEIC ACIDS             
 REMARK  40              : NUCLEIC ACIDS RESEARCH. 2007;35:W375-83.              
-';
-/*REMARK  40  MOLPROBITY OUTPUT SCORES:                                           
+REMARK  40  MOLPROBITY OUTPUT SCORES:                                           
 ';
     // WARNING!
     // This code will perform correctly ONLY on PHP 4.3.7 and later.
@@ -1663,7 +1662,7 @@ REMARK  40              : NUCLEIC ACIDS RESEARCH. 2007;35:W375-83.
         $ramaFavPct = (100.0 * $ramaFav / $ramaTot);
         $s .= str_pad(sprintf('REMARK  40  RAMACHANDRAN OUTLIERS   : %5.1f%% %4d/%-5d  (TARGET  0.2%%)', $ramaOutPct, $ramaOut, $ramaTot), 80) . "\n";
         $s .= str_pad(sprintf('REMARK  40  RAMACHANDRAN FAVORED    : %5.1f%% %4d/%-5d  (TARGET 98.0%%)', $ramaFavPct, $ramaFav, $ramaTot), 80) . "\n";
-    } */
+    } 
     
     return $s;         
 }
