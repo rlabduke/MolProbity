@@ -261,10 +261,9 @@ function pdbstat($pdbfilename)
 
             //return $hash; 
             if(startsWith($s, "ATOM")||startsWith($s, "HETATM")||startsWith($s, "TER")||startsWith($s, "ANISOU")||startsWith($s, "SIGATM")||startsWith($s, "SUIUIJ")) {
-                //$atom_name = substr($s, 12, 4);
-                //$resn = substr($s, 17, 3);
-                //$key = $atom_name." ".$resn;
-                $key = substr($s, 12, 8);
+                $atom_name = substr($s, 12, 4);
+                $resn = substr($s, 17, 3);
+                $key = $atom_name." ".$resn;
                 //echo "|".$key."|\n";
                 if(array_key_exists($key, $hash)) {
                     $v2format++;

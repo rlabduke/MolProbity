@@ -82,7 +82,8 @@ setProgress($tasks, 'notebook');
 $outpdburl = $_SESSION['dataURL'].'/'.MP_DIR_MODELS.'/'.$modelID."v23.pdb";
 
 $entry = "remediator was run on $model[pdb] to convert its atoms to PDB v2.3 format.\n";
-$entry .= "<p>You can now <a href='$outpdburl'>download the converted PDB file</a> (".formatFilesize(filesize($outpdb)).").</p>\n";
+$entry .= "<p>You can now <a href='$outpdburl'>download the converted PDB file with hydrogens</a> ";
+$entry .= "or <a href='download_trimmed.php?$_SESSION[sessTag]&file=$outpdb'>without hydrogens</a>.</p>\n";
 $entry .= $pdbEntries;
 //$entry .= "<p>A kinemage of all of the fragments is ready for viewing in KiNG: ".linkKinemage($modelID.'.kin')."</p>\n";
 $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(

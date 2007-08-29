@@ -80,6 +80,7 @@ if($opts['doKinemage'])
         'altconf'   =>  $opts['kinAltConfs'],
         'rama'      =>  $opts['kinRama'],
         'rota'      =>  $opts['kinRota'],
+        //'geom'      =>  $opts['kinGeom'],
         'cbdev'     =>  $opts['kinCBdev'],
         'pperp'     =>  $opts['kinBaseP'],
         'clashdots' =>  $opts['kinClashes'],

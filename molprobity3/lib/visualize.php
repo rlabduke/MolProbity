@@ -249,6 +249,7 @@ function makeMulticritKin($infiles, $outfile, $opt, $nmrConstraints = null)
 *   ribbons             ribbons rainbow colored N to C
 *   rama                Ramachandran outliers
 *   rota                rotamer outliers
+*   geom                Bond length and angle geometry
 *   cbdev               C-beta deviations greater than 0.25A
 *   pperp               phosphate-base perpendicular outliers
 *   clashdots           small and bad overlap dots
@@ -305,6 +306,8 @@ function makeMulticritKin2($infiles, $outfile, $opt, $viewRes = array(), $nmrCon
             makeBadRamachandranKin($infile, $outfile);
         if($opt['rota'])
             makeBadRotamerKin($infile, $outfile);
+        if($opt['geom'])
+            makeBadGeomKin($infile, $outfile);
         if($opt['cbdev'])
             makeBadCbetaBalls($infile, $outfile);
         if($opt['pperp'])
@@ -495,6 +498,16 @@ function makeBadRotamerKin($infile, $outfile, $rota = null, $color = 'gold', $cu
         //echo("prekin -quiet -append -nogroup -nosubgroup -listname 'chain $chainID' -listmaster 'rotamer outliers' -bval -scope $scRange -show 'sc($color)' $infile >> $outfile\n");
         exec("prekin -quiet -append -nogroup -nosubgroup -listname 'chain $chainID' -listmaster 'rotamer outliers' -bval -scope $scRange -show 'sc($color)' $infile >> $outfile");
     }
+}
+#}}}########################################################################
+
+#{{{ makeBadGeomKin - appends mc of Ramachandran outliers
+############################################################################
+function makeBadGeomKin($infile, $outfile) {
+    //$out = fopen($outfile, 'a');
+    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.dangle.Dangle -kin -sub -validate -protein $infile >> $outfile");
+    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.dangle.Dangle -kin -sub -validate -rna $infile >> $outfile");
+    //exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.dangle.Dangle -kin -validate -dna $infile >> $outfile");
 }
 #}}}########################################################################
 
