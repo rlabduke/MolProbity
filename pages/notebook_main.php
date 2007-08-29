@@ -29,7 +29,7 @@ function display($context)
     echo "</div>\n<br>\n<div class='pagecontent'>\n";
     
     // Notebook table of contents
-    echo "<h3><a name='top'>Table of contents:</a></h3>\n";
+    echo "<h3><a name='top'</a>Table of contents:</h3>\n";
     echo "<div class='indent'>\n";
     $this->printTOC($labbook);
     echo makeEventForm("onNotebookEdit");
@@ -43,7 +43,7 @@ function display($context)
     }
 
     echo $this->pageFooter();
-}// end of display
+}// end of display+0
 #}}}########################################################################
 
 #{{{ printEntry - prints an entry along with controls
@@ -51,9 +51,9 @@ function display($context)
 function printEntry($num, $entry)
 {
     echo "<hr>\n";
-    echo "<a name='entry$num'>\n";
+    echo "<a name='entry$num'</a>";
     echo formatLabbookEntry($entry);
-    echo "</a>\n";
+    echo "</hr>\n";
     echo "<p><a href='#top'>Top</a> | <a href='".makeEventURL("onNotebookEdit", $num)."'>Edit</a>\n";
 }
 #}}}########################################################################

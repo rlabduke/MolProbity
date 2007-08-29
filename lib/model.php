@@ -1159,7 +1159,7 @@ function remapSegIDs($inpath, $outpath, $mapString)
 }
 #}}}########################################################################
 
-#{{{ replacePdbRemark - used for inserting REMARK 999
+#{{{ replacePdbRemark - used for inserting REMARK  40
 ############################################################################
 /**
 * Inserts the given block of text into the named PDB file.

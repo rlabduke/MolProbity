@@ -982,10 +982,14 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
             if($item['outlier'])
             {
                 $reasons = array();
-                if($item['deltaOut'] && $item['3Pdist'] < 3.0)   $reasons[] = "base-p distance indicates 2'-endo";
-                if($item['deltaOut'] && $item['3Pdist'] >= 3.0) $reasons[] = "base-p distance indicates 3'-endo";
+                if    ($item['deltaOut'] && $item['epsilonOut'] && $item['3Pdist'] < 3.0) $reasons[] = "&delta & &epsilon outlier <br> (base-p distance indicates 2'-endo";
+                elseif($item['deltaOut'] && $item['epsilonOut'] && $item['3Pdist'] >= 3.0) $reasons[] = "&delta & &epsilon outlier <br> (base-p distance indicates 3'-endo";
+                elseif($item['deltaOut'] && $item['3Pdist'] < 3.0)   $reasons[] = "&delta outlier <br> (base-p distance indicates 2'-endo";
+                elseif($item['deltaOut'] && $item['3Pdist'] >= 3.0) $reasons[] = "&delta outlier <br> (base-p distance indicates 3'-endo";
+                elseif($item['epsilonOut'] && $item['3Pdist'] < 3.0)   $reasons[] = "&epsilon outlier <br> (base-p distance indicates 2'-endo";
+                elseif($item['epsilonOut'] && $item['3Pdist'] >= 3.0) $reasons[] = "&epsilon outlier <br> (base-p distance indicates 3'-endo";
                 $res[$item['resName']]['pperp_val'] = 1; // no way to quantify this
-                $res[$item['resName']]['pperp'] = "wrong sugar pucker<br>(".implode(", ", $reasons).")";
+                $res[$item['resName']]['pperp'] = "suspect sugar pucker  -  ".implode(", ", $reasons).")";
                 $res[$item['resName']]['pperp_isbad'] = true;
                 $res[$item['resName']]['any_isbad'] = true;
             }
@@ -999,13 +1003,17 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
             $bin = "&delta&delta&gamma $item[bin]";
             if($bin == '&delta&delta&gamma trig')
             {
-                $bin = '&delta&delta&gamma none (triaged)';
+                $bin = "&delta&delta&gamma none (triaged  $item[triage]  )";
                 $res[$cnit]['suites_val'] = -1; // sorts to very top
             }
             elseif($bin == '&delta&delta&gamma inc ')
             {
                 $bin = '&delta&delta&gamma none (incomplete)';
                 $res[$cnit]['suites_val'] = 0.0001; // sorts just below all outliers
+            }
+            elseif(preg_match('/7D dist/', $item['triage']))
+            {
+                $bin = "$bin ( $item[triage] )";
             }
             
             if($item['isOutlier'])
@@ -1540,7 +1548,7 @@ function formatChiAngles($item)
 }
 #}}}########################################################################
 
-#{{{ makeRemark999 - format MolProbity summary for PDB inclusion
+#{{{ makeRemark999 - format MolProbity summary for PDB inclusion DEPRECIATED
 ############################################################################
 /**
 * $clash    is the data structure from loadClashlist()
@@ -1558,8 +1566,8 @@ REMARK 999  AUTHORS     : I.W.DAVIS,V.B.CHEN,
 REMARK 999              : R.M.IMMORMINO,J.J.HEADD,W.B.ARENDALL,J.M.WORD         
 REMARK 999  URL         : HTTP://KINEMAGE.BIOCHEM.DUKE.EDU/MOLPROBITY/          
 REMARK 999  AUTHORS     : I.W.DAVIS,A.LEAVER-FAY,V.B.CHEN,J.N.BLOCK,            
-                        : G.J.KAPRAL,X.WANG,L.W.MURRAY,W.B.ARENDALL,            
-                        : J.SNOEYINK,J.S.RICHARDSON,D.C.RICHARDSON              
+REMARK 999              : G.J.KAPRAL,X.WANG,L.W.MURRAY,W.B.ARENDALL,            
+REMARK 999              : J.SNOEYINK,J.S.RICHARDSON,D.C.RICHARDSON              
 REMARK 999  REFERENCE   : MOLPROBITY: ALL-ATOM CONTACTS AND STRUCTURE           
 REMARK 999              : VALIDATION FOR PROTEINS AND NUCLEIC ACIDS             
 REMARK 999              : NUCLEIC ACIDS RESEARCH. 2007;35:W375-83.              
@@ -1595,6 +1603,67 @@ REMARK 999  MOLPROBITY OUTPUT SCORES:
         $s .= str_pad(sprintf('REMARK 999  RAMACHANDRAN OUTLIERS   : %5.1f%% %4d/%-5d  (TARGET  0.2%%)', $ramaOutPct, $ramaOut, $ramaTot), 80) . "\n";
         $s .= str_pad(sprintf('REMARK 999  RAMACHANDRAN FAVORED    : %5.1f%% %4d/%-5d  (TARGET 98.0%%)', $ramaFavPct, $ramaFav, $ramaTot), 80) . "\n";
     }
+    
+    return $s;         
+}
+#}}}########################################################################
+
+#{{{ makeRemark40 - format MolProbity summary for PDB inclusion
+############################################################################
+/**
+* $clash    is the data structure from loadClashlist()
+* $rama     is the data structure from loadRamachandran()
+* $rota     is the data structure from loadRotamer()
+*
+* Returns a properly-formatted REMARK  40 string.
+*/
+function makeRemark40($clash, $rama, $rota)
+{
+    $s = 'REMARK  40                                                                      
+REMARK  40 MOLPROBITY STRUCTURE VALIDATION                                      
+REMARK  40  PROGRAMS    : MOLPROBITY  (KING, REDUCE, AND PROBE)                 
+REMARK  40  AUTHORS     : I.W.DAVIS,V.B.CHEN,                                   
+REMARK  40              : R.M.IMMORMINO,J.J.HEADD,W.B.ARENDALL,J.M.WORD         
+REMARK  40  URL         : HTTP://KINEMAGE.BIOCHEM.DUKE.EDU/MOLPROBITY/          
+REMARK  40  AUTHORS     : I.W.DAVIS,A.LEAVER-FAY,V.B.CHEN,J.N.BLOCK,            
+REMARK  40              : G.J.KAPRAL,X.WANG,L.W.MURRAY,W.B.ARENDALL,            
+REMARK  40              : J.SNOEYINK,J.S.RICHARDSON,D.C.RICHARDSON              
+REMARK  40  REFERENCE   : MOLPROBITY: ALL-ATOM CONTACTS AND STRUCTURE           
+REMARK  40              : VALIDATION FOR PROTEINS AND NUCLEIC ACIDS             
+REMARK  40              : NUCLEIC ACIDS RESEARCH. 2007;35:W375-83.              
+';
+/*REMARK  40  MOLPROBITY OUTPUT SCORES:                                           
+';
+    // WARNING!
+    // This code will perform correctly ONLY on PHP 4.3.7 and later.
+    // Prior to that %6.2f meant up 6 characters before the decimal, and 2 after.
+    // Afterwards, it means 6 characters total with 2 after the decimal,
+    // and thus a maximum of 3 before (3 + 1 + 2 == 6).
+    // The new meaning is consistent with the way printf() works in other languages (C, Perl, Python).
+    // See PHP bugs #28633 and #29286 for more details.
+    
+    if(is_array($clash))
+    {
+        //$s .= str_pad(sprintf('REMARK  40  ALL-ATOM CLASHSCORE     : %6.2f  (%.2f B<40)', $clash['scoreAll'], $clash['scoreBlt40']), 80) . "\n";
+        $s .= str_pad(sprintf('REMARK  40  ALL-ATOM CLASHSCORE     : %6.2f', $clash['scoreAll']), 80) . "\n";
+    }
+    if(is_array($rota))
+    {
+        $rotaOut = count(findRotaOutliers($rota));
+        $rotaTot = count($rota);
+        $rotaOutPct = (100.0 * $rotaOut / $rotaTot);
+        $s .= str_pad(sprintf('REMARK  40  BAD ROTAMERS            : %5.1f%% %4d/%-5d  (TARGET  0-1%%)', $rotaOutPct, $rotaOut, $rotaTot), 80) . "\n";
+    }
+    if(is_array($rama))
+    {
+        $ramaOut = count(findRamaOutliers($rama));
+        foreach($rama as $r) { if($r['eval'] == "Favored") $ramaFav++; }
+        $ramaTot = count($rama);
+        $ramaOutPct = (100.0 * $ramaOut / $ramaTot);
+        $ramaFavPct = (100.0 * $ramaFav / $ramaTot);
+        $s .= str_pad(sprintf('REMARK  40  RAMACHANDRAN OUTLIERS   : %5.1f%% %4d/%-5d  (TARGET  0.2%%)', $ramaOutPct, $ramaOut, $ramaTot), 80) . "\n";
+        $s .= str_pad(sprintf('REMARK  40  RAMACHANDRAN FAVORED    : %5.1f%% %4d/%-5d  (TARGET 98.0%%)', $ramaFavPct, $ramaFav, $ramaTot), 80) . "\n";
+    } */
     
     return $s;         
 }

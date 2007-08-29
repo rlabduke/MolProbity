@@ -89,7 +89,7 @@ function saveLabbookHTML($bookData)
         {
             $title = $entry['title'];
             if($title == "") $title = "(no title)";
-            fwrite($fp, "<li><a href='#entry$num'>$title</a> [".formatDayTime($entry['modtime'])."]</li>\n");
+            fwrite($fp, "<li><a href='#entry$num'</a>$title [".formatDayTime($entry['modtime'])."]</li>\n");
         }
         fwrite($fp, "</ul>\n<br clear='all' />\n");
         foreach($bookData as $num => $entry)

@@ -37,6 +37,8 @@
 #
 #     5/4/01 - JM Word - v2.0 - perl version
 #    9/29/06 - IW Davis - v2.0.1 - changed \\047 to \047 - probable typo in original
+#    8/24/07 - RMI     - v2.0.2 - added utility for changing residue names from 
+#				 three letter nucleotides to one letter
 
 use strict;
 
@@ -490,6 +492,25 @@ while (<>) {
       $inputAtomName    =~ tr/a-z/A-Z/;
       $inputResidueName =~ tr/a-z/A-Z/;
 
+#---------------------------------------------------------------------------------
+# Added Jeff Headd's routine for conveting three letter nucleotide names
+# RMI 070824
+
+      my $rec1 = $rec;
+
+        #--pre-screen for CNS Xplor RNA base names and Coot RNA base names--------
+        if($rec1=~m/\b.{17}(GUA|ADE|CYT|THY|URI)/){
+                $rec1=~s/\b(.{17})(.)../$1  $2/;
+        }
+        elsif($rec1=~m/\b.{17}(OIP| Ar| Gr| Cr| Ur)/){
+                $rec1=~s/\b(.{17}).(.)./$1  $2/;
+       }
+	
+	my $residueName=substr($rec1, 17,3); 
+	
+#---------------------------------------------------------------------------------
+
+
       if ($DIRECTION eq 'pdb -> cns') {
          # lookup cns style atom name and translate chainid to segid
 
@@ -530,9 +551,10 @@ while (<>) {
 
 	 my $chainID = &seg2chain($svar, $cvar);
 
-         printf "%s%s%s%s%s\n", substr($rec, 0, 12), $atomName, 
-	                        substr($rec, 16, 5), $chainID,
-	                        substr($rec, 22, 62);
+         printf "%s%s%s%s%s\n", substr($rec,  0, 12), $atomName,
+				substr($rec, 16, 1), $residueName, 
+                                substr($rec, 20, 56), $chainID,
+                                substr($rec, 76,  8);
       }
    }
    elsif ($_ =~ /^MODEL|^model/) {
