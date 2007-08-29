@@ -81,8 +81,8 @@ function runAnalysis($modelID, $opts)
     if($opts['doCharts'])       $tasks['multichart'] = "Create multi-criterion chart";
     if($opts['doKinemage'])     $tasks['multikin'] = "Create multi-criterion kinemage";
     
-    $doRem999 = $opts['chartClashlist'] || $opts['chartRama'] || $opts['chartRota'];
-    if($doRem999)                $tasks['remark999'] = "Create REMARK 999 record for the PDB file";
+    $doRem40 = $opts['chartClashlist'] || $opts['chartRama'] || $opts['chartRota'];
+    if($doRem40)                $tasks['remark40'] = "Create REMARK  40 record for the PDB file";
     //}}} Set up file/directory vars and the task list
     
     //{{{ Run protein geometry programs and offer kins to user
@@ -292,14 +292,14 @@ function runAnalysis($modelID, $opts)
     }
     //}}} Build multi-criterion chart, kinemage
     
-    //{{{ Create REMARK 999 and insert into PDB file
+    //{{{ Create REMARK  40 and insert into PDB file
     if(is_array($clash) || is_array($rama) || is_array($rota))
     {
-        setProgress($tasks, 'remark999'); // updates the progress display if running as a background job
-        $remark999 = makeRemark999($clash, $rama, $rota);
-        replacePdbRemark($infile, $remark999, 999);
+        setProgress($tasks, 'remark40'); // updates the progress display if running as a background job
+        $remark40 = makeRemark40($clash, $rama, $rota);
+        replacePdbRemark($infile, $remark40,  40);
     }
-    //}}} Create REMARK 999 and insert into PDB file
+    //}}} Create REMARK  40 and insert into PDB file
     
     //{{{ Create lab notebook entry
     $entry = "";
@@ -347,12 +347,12 @@ function runAnalysis($modelID, $opts)
         $entry .= "</ul>\n";
     }
     
-    if($remark999)
+    if($remark40)
     {
-        $entry .= "<h3>REMARK 999</h3>";
+        $entry .= "<h3>REMARK  40</h3>";
         $url = "$modelURL/$model[pdb]";
-        $entry .= "You can <a href='$url'>download your PDB file with REMARK 999</a> inserted, or the same <a href='download_trimmed.php?$_SESSION[sessTag]&file=$infile'> without hydrogens</a>.\n";
-        $entry .= "<p><pre>$remark999</pre></p>";
+        $entry .= "You can <a href='$url'>download your PDB file with REMARK  40</a> inserted, or the same <a href='download_trimmed.php?$_SESSION[sessTag]&file=$infile'> without hydrogens</a>.\n";
+        $entry .= "<p><pre>$remark40</pre></p>";
     }
     //}}} Create lab notebook entry
     
@@ -850,15 +850,22 @@ function runSuitenameReport($infile, $outfile)
 *   conformer       two letter code (mixed case -- '1L' is legal) or "__"
 *   suiteness       real number, 0 - 1
 *   bin             "inc " (incomplete), "trig" (triaged), or something like "23 p"
+*   triage          contains details about the reason for triage  rmi 070827
 *   isOutlier       true if conformer = !!
 */
 function loadSuitenameReport($datafile)
 {
-#tr0001.pdb:1:A:   1: :  G inc  __ 0.000
-#tr0001.pdb:1:A:   2: :  C 33 p 1a 0.935
-#tr0001.pdb:1:A:  10: :2MG 23 p !! 0.000
-#tr0001.pdb:1:A:  13: :  C 33 t 1c 0.824
-#tr0001.pdb:1:A:  14: :  A trig !! 0.000
+# 404d.pdb:1:A:   1: :  G inc  __ 0.000
+# 404d.pdb:1:A:   2: :  A 33 p 1a 0.544
+# 404d.pdb:1:A:   3: :  A trig !! 0.000 alpha
+# 404d.pdb:1:A:   4: :  G 33 t 1c 0.135
+# 404d.pdb:1:A:   5: :  A 33 p 1a 0.579
+# 404d.pdb:1:A:   6: :  G 33 t 1c 0.180
+# 404d.pdb:1:A:   7: :  A 33 p 1a 0.458
+# 404d.pdb:1:A:   8: :  A 33 t !! 0.000 7D dist 1c
+# 404d.pdb:1:A:   9: :  G 33 p 1a 0.294
+# 404d.pdb:1:A:  10: :  C 33 p 1a 0.739
+
     $data = file($datafile);
     //$ret = array(); // needs to return null if no data!
     foreach($data as $line)
@@ -875,8 +882,9 @@ function loadSuitenameReport($datafile)
             //'resNum'    => $decomp['resNum'],
             //'insCode'   => $decomp['insCode'],
             'conformer' => $conf,
-            'suiteness' => substr($line[5],12) + 0,
+            'suiteness' => substr($line[5],12,5) + 0,
             'bin'       => substr($line[5],4,4),
+            'triage'    => substr($line[5],18),
             'isOutlier' => ($conf == '!!')
         );
     }

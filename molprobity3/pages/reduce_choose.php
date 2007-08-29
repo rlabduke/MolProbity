@@ -179,6 +179,7 @@ function onRerunReduce()
         if($hcount['std']) $entry .= "$hcount[std] H were repositioned to standardize bond lengths.\n";
         if($hcount['adj']) $entry .= "The positions of $hcount[adj] hydrogens were adjusted to optimize H-bonding.\n";
     }
+    $entry .= "<p>Reduce used <a href=http://kinemage.biochem.duke.edu/software/reduce.php> reduce_wwPDB_het_dict.txt </a> as the het dictonary.\n";
     $entry .= "<p>You can now download the optimized and annotated <a href='$url'>PDB file with hydrogens</a>";
     $entry .= " or <a href='download_trimmed.php?$_SESSION[sessTag]&file=$pdb'>without hydrogens (flips only)</a>.</p>\n";
 
