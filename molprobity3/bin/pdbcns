@@ -40,8 +40,6 @@
 #    8/24/07 - RMI     - v2.0.2 - added utility for changing residue names from 
 #				 three letter nucleotides to one letter
 #    9/06/07 - RMI     - v2.0.3 - added C5A for CNS 5-methyl on Thymidine
-#				- added utility to convert back to three letter names 
-#				  for CNS refinement
 use strict;
 
 my $VersionString = 'pdbcns (version 2.0 - May 4, 2001 -- perl)';
@@ -367,7 +365,7 @@ my @Water = ('HOH', 'DOD', 'H2O', 'D2O', 'WAT', 'TIP', 'SOL', 'MTO');
 my @gNA = ('  G', 'G  ', 'GUA', 'GTP', 'GDP', 'GMP', 'GSP');
 my @aNA = ('  A', 'A  ', 'ADE', 'ATP', 'ADP', 'AMP');
 my @cNA = ('  C', 'C  ', 'CYT', 'CTP', 'CDP', 'CMP');
-my @uNA = ('  U', 'U  ', 'URA', 'UTP', 'UDP', 'UMP');
+my @uNA = ('  U', 'U  ', 'URA', 'UTP', 'UDP', 'UMP', 'URI');  # RMI added URI 071030
 my @tNA = ('  T', 'T  ', 'THY', 'TTP', 'TDP', 'TMP');
 
 my @NucleicAcid = (@gNA, @aNA, @cNA, @uNA, @tNA);
