@@ -1450,7 +1450,7 @@ function listResidueBfactors($infile)
 * and the second key is 'x', 'y', or 'z'.
 * Does not account for the possibility of multiple MODELs
 */
-function computeResCenters($infile)
+function computeResCenters($infile, $excludeWaters = false)
 {
     $out = array(); // x, y, z
     $cnt = array(); // how many atoms have been tallied
@@ -1462,6 +1462,7 @@ function computeResCenters($infile)
         $s = fgets($in, 1024);
         if(startsWith($s, "ATOM") || startsWith($s, "HETATM"))
         {
+            if($excludeWaters && preg_match('/(HOH|DOD|H20|D20|WAT|SOL|TIP|TP3|MTO|HOD|DOH)/', $s)) continue;
             $res = pdbComposeResName($s);
             $out[$res]['x'] += substr($s, 30, 8) + 0.0;
             $out[$res]['y'] += substr($s, 38, 8) + 0.0;

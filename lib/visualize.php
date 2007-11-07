@@ -355,7 +355,7 @@ function makeResidueViews($infile, $outfile, $cnits, $excludeWaters = true)
 {
     $h = fopen($outfile, 'a');
     fwrite($h, "@1viewid {Overview}\n"); // auto-determine center, span, etc.
-    $centers = computeResCenters($infile);
+    $centers = computeResCenters($infile, true);
     $views = array();
     $i = 2;
     foreach($cnits as $res)
@@ -383,7 +383,7 @@ function makeResidueViews($infile, $outfile, $cnits, $excludeWaters = true)
 function makeResidueViewMarkers($outfile, $views)
 {
     $h = fopen($outfile, 'a');
-    fwrite($h, "@subgroup {view markers} dominant master= {view markers}\n");
+    fwrite($h, "@subgroup {view markers} off dominant master= {view markers}\n");
     fwrite($h, "@vectorlist {view markers} color= gray\n");
     foreach($views as $v)
     {
@@ -780,10 +780,10 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
                 }
             }
             $geomOutPct = sprintf("%.2f", 100.0 * $outCount / $total);
-            if ($outCount/$total < 0.10)    $bg = $bgFair;
-            if ($outCount/$total < 0.05)    $bg = $bgGood;
+            if ($outCount/$total < 0.02)    $bg = $bgFair;
+            if ($outCount/$total < 0.01)    $bg = $bgGood;
             else                            $bg = $bgPoor;
-            $entry .= "<td>Residues with bad bonds:</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <5%</td></tr>\n";
+            $entry .= "<td>Residues with bad bonds:</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <1%</td></tr>\n";
         }
         if(hasMoltype($bangles, "protein"))
         {
@@ -801,10 +801,10 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
                 }
             }
             $geomOutPct = sprintf("%.2f", 100.0 * $outCount / $total);
-            if ($outCount/$total < 0.10)    $bg = $bgFair;
-            if ($outCount/$total < 0.05)    $bg = $bgGood;
+            if ($outCount/$total < 0.01)    $bg = $bgFair;
+            if ($outCount/$total < 0.005)    $bg = $bgGood;
             else                            $bg = $bgPoor;
-            $entry .= "<td>Residues with bad angles:</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <5%</td></tr>\n";
+            $entry .= "<td>Residues with bad angles:</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <0.5%</td></tr>\n";
         }
     }// end of protein-specific stats
     $nucleicRows = 0;
@@ -856,10 +856,10 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
                 }
             }
             $geomOutPct = sprintf("%.2f", 100.0 * $outCount / $total);
-            if ($outCount/$total < 0.10)    $bg = $bgFair;
-            if ($outCount/$total < 0.05)    $bg = $bgGood;
+            if ($outCount/$total < 0.02)    $bg = $bgFair;
+            if ($outCount/$total < 0.01)    $bg = $bgGood;
             else                            $bg = $bgPoor;
-            $entry .= "<td>Residues with bad bonds:</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <5%</td></tr>\n";
+            $entry .= "<td>Residues with bad bonds:</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <1%</td></tr>\n";
         }
         if(hasMoltype($bangles, "rna"))
         {
@@ -877,10 +877,10 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
                 }
             }
             $geomOutPct = sprintf("%.2f", 100.0 * $outCount / $total);
-            if ($outCount/$total < 0.10)    $bg = $bgFair;
-            if ($outCount/$total < 0.05)    $bg = $bgGood;
+            if ($outCount/$total < 0.01)    $bg = $bgFair;
+            if ($outCount/$total < 0.005)    $bg = $bgGood;
             else                            $bg = $bgPoor;
-            $entry .= "<td>Residues with bad angles:</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <5%</td></tr>\n";
+            $entry .= "<td>Residues with bad angles:</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <0.5%</td></tr>\n";
         }
     }
     $entry .= "</table>\n";
@@ -917,6 +917,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
 */
 function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $outliersOnly = false)
 {
+    $startTime = time();
     //{{{ Process validation data
     // Make sure all residues are represented, and in the right order.
     $res = listResidues($infile);
@@ -984,8 +985,10 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
                 $res[$item['resName']]['cbdev_isbad'] = true;
                 $res[$item['resName']]['any_isbad'] = true;
             }
-            else
-                $res[$item['resName']]['cbdev'] = "$item[dev]&Aring;";
+            else {
+                if($res[$item['resName']]['cbdev'] == null) //for fixing a bug where an ok alt conf dev would get reported instead of the bad dev.
+                    $res[$item['resName']]['cbdev'] = "$item[dev]&Aring;";
+            }
         }
     }
     if(is_array($pperp))
@@ -1044,7 +1047,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     if(is_array($bbonds)) {
         foreach($bbonds as $cnit => $item) {
             if ($item['isOutlier']) {
-                $res[$cnit]['bbonds_val'] = $item['count'];
+                $res[$cnit]['bbonds_val'] = $item['sigma'];
                 $res[$cnit]['bbonds'] = "$item[count] OUTLIER(S)<br><small>worst is $item[measure]: $item[sigma] &sigma</small>";
                 $res[$cnit]['bbonds_isbad'] = true;
                 $res[$cnit]['any_isbad'] = true;
@@ -1054,7 +1057,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     if(is_array($bangles)) {
         foreach($bangles as $cnit => $item) {
             if ($item['isOutlier']) {
-                $res[$cnit]['bangles_val'] = $item['count'];
+                $res[$cnit]['bangles_val'] = $item['sigma'];
                 $res[$cnit]['bangles'] = "$item[count] OUTLIER(S)<br><small>worst is $item[measure]: $item[sigma] &sigma</small>";
                 $res[$cnit]['bangles_isbad'] = true;
                 $res[$cnit]['any_isbad'] = true;
@@ -1062,10 +1065,12 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
         }
     }
     //}}} Process validation data
+    echo "Processing validation data took ".(time() - $startTime)." seconds\n";
     
     // Set up output data structure
     $table = array('prequel' => '', 'headers' => array(), 'rows' => array(), 'footers' => array(), 'sequel' => '');
     
+    $startTime = time();
     //{{{ Table prequel and headers
     // Do summary chart
     $pdbstats = pdbstat($infile);
@@ -1099,7 +1104,9 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     
     $table['headers'] = array($header1, $header2);
     //}}} Table prequel and headers
-
+    echo "Table prequel and headers took ".(time() - $startTime)." seconds\n";
+    
+    $startTime = time();
     //{{{ Table body
     $rows = array();
     foreach($res as $cnit => $eval)
@@ -1140,10 +1147,13 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     }
     $table['rows'] = $rows;
     //}}} Table body
+    echo "Table body took ".(time() - $startTime)." seconds\n";
     
+    $startTime = time();
     $out = fopen($outfile, 'wb');
     fwrite($out, mpSerialize($table));
     fclose($out);
+    echo "Serializing table took ".(time() - $startTime)." seconds\n";
     
     // serialize() and unserialize() screw up floating point numbers sometimes.
     // Not only is there a change in precision, but sometimes numbers become INF
@@ -1173,10 +1183,12 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     
     if($snapfile)
     {
+        $startTime = time();
         $out = fopen($snapfile, 'wb');
         //fwrite($out, formatSortableTable($table, 'DUMMY_URL'));
         fwrite($out, formatSortableTableJS($table));
         fclose($out);
+        echo "Formatting sortable table took ".(time() - $startTime)." seconds\n";
     }
 }
 #}}}########################################################################
@@ -1264,6 +1276,7 @@ function makeCootMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev,
 */
 function makeCootClusteredChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pperp)
 {
+    $startTime1 = time();
     //{{{ 0. A lovely Scheme script written for us by Paul Emsley
     $schemeScript = <<<HEREDOC
 ; -*-scheme-*-
@@ -1409,7 +1422,7 @@ HEREDOC;
     //}}} 0. A lovely Scheme script written for us by Paul Emsley
     
     //{{{ 1. For each outlier, create an array(cnit, description, r, g, b, x, y, z)
-    $res_xyz = computeResCenters($infile);
+    $res_xyz = computeResCenters($infile, true);
     $self_bads = array();
     
     if(is_array($clash)) foreach($clash['clashes'] as $cnit => $worst)
@@ -1463,27 +1476,32 @@ HEREDOC;
     //}}} 1. For each outlier, create an array(cnit, description, r, g, b, x, y, z)
     
     //{{{ 2. Cluster the outliers, somehow
+    echo "self_bads has ".count($self_bads)." elements\n";
     $range = 7; // a fairly arbitrary value, in Angstroms.
     $range2 = $range * $range;
     $worst_res = array();
+    // cnit => array( bad1, bad2, ... )
+    $local_bads = array();
+    $startTime = time();
+    foreach($res_xyz as $cnit => $xyz)
+    {
+        #$local_bads[$cnit] = array();
+        foreach($self_bads as $idx => $a_bad)
+        {
+            $cnit2 = $a_bad[0];
+            $dx = $xyz['x'] - $a_bad[5];
+            $dy = $xyz['y'] - $a_bad[6];
+            $dz = $xyz['z'] - $a_bad[7];
+            if($dx*$dx + $dy*$dy + $dz*$dz <= $range2)
+                $local_bads[$cnit][$idx] = $a_bad;
+        }
+    }
+    echo "first foreach loop took ".(time() - $startTime)." seconds\n";
     while(true)
     {
-        // cnit => array( bad1, bad2, ... )
-        $local_bads = array();
-        foreach($res_xyz as $cnit => $xyz)
-        {
-            #$local_bads[$cnit] = array();
-            foreach($self_bads as $idx => $a_bad)
-            {
-                $cnit2 = $a_bad[0];
-                $dx = $xyz['x'] - $a_bad[5];
-                $dy = $xyz['y'] - $a_bad[6];
-                $dz = $xyz['z'] - $a_bad[7];
-                if($dx*$dx + $dy*$dy + $dz*$dz <= $range2)
-                    $local_bads[$cnit][$idx] = $a_bad;
-            }
-        }
+        
         // Get worst residue from list and its count of bads
+        $startTime = time();
         uasort($local_bads, 'makeCootClusteredChart_cmp'); // put worst residue last
         #var_export($local_bads); echo "\n==========\n";
         end($local_bads); // go to last element
@@ -1491,24 +1509,30 @@ HEREDOC;
         $bad_count = count($worst_bads);
         // Only singletons left (for efficiency)
         // Also ensures that singletons are listed under their "owner"
-        if($bad_count <= 1)
-        {
-            foreach($self_bads as $idx => $a_bad)
-                $worst_res[$a_bad[0]][$idx] = $a_bad;
-            break;
-        }
+        //if($bad_count <= 1)
+        //{
+        //    foreach($self_bads as $idx => $a_bad)
+        //        $worst_res[$a_bad[0]][$idx] = $a_bad;
+        //    break;
+        //}
         // else ...
         #var_export($local_bads);
         #echo "\nRemoving $worst_cnit with $bad_count bads...\n==========\n";
         $worst_res[$worst_cnit] = $worst_bads; // record it as the worst one this pass
         // Discard all bads that went to making the worst, the worst;
         // then re-run the algorithm to find the next worst, until no bads left.
-        foreach($worst_bads as $idx => $a_bad)
-            unset($self_bads[$idx]);
+        foreach($res_xyz as $cnit2 => $xyz) {
+            foreach($worst_bads as $idx => $a_bad) {
+                unset($self_bads[$idx]);
+                unset($local_bads[$cnit2][$idx]);
+            }
+        }
         if(count($self_bads) == 0) break;
-        #$cycles++;
+        $cycles++;
+        echo "end of while loop took ".(time() - $startTime)." seconds\n";
         #if($cycles > 100) break;
     }
+    echo "number of cycles: ".$cycles."\n";
     #var_export($worst_res); echo "\n==========\n";
     //}}}
 
@@ -1540,6 +1564,7 @@ HEREDOC;
     }
     fwrite($out, " )\n)\n");
     fclose($out);
+    echo "Making coot clustered chart took ".(time() - $startTime1)." seconds\n";
 }
 
 function makeCootClusteredChart_cmp($a, $b)
