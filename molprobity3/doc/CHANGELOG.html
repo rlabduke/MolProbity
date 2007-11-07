@@ -108,7 +108,13 @@
 - The perp-to-line info on the multi-crit chart now reads suspect
   instead of wrong sugar pucker, and also includes the offending torsion
 - New remediator and hash table for fixing a bug where C5A on DT wasn't getting converted
-  to C7.  
+  to C7.
+- Tighter goal values for geometry.
+- Sorts geometry outliers by sigma value
+- View markers now come up as off.
+- Fixed a bug where Cbeta dev on alternate confs gave wrong value on multi-chart.
+- Changed MakeCootClusteredChart so it's much faster.  Results are slightly different,
+  but still correct, I think.  12 minutes for ribosome as opposed to >24 hours before.
 
 ### 3.12 ###
 - fixed bug in warning about auto-converting to PDBv3.
