@@ -1276,7 +1276,7 @@ function makeCootMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev,
 */
 function makeCootClusteredChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pperp)
 {
-    $startTime1 = time();
+    //$startTime1 = time();
     //{{{ 0. A lovely Scheme script written for us by Paul Emsley
     $schemeScript = <<<HEREDOC
 ; -*-scheme-*-
@@ -1422,7 +1422,8 @@ HEREDOC;
     //}}} 0. A lovely Scheme script written for us by Paul Emsley
     
     //{{{ 1. For each outlier, create an array(cnit, description, r, g, b, x, y, z)
-    $res_xyz = computeResCenters($infile, true);
+    //$res_xyz = computeResCenters($infile, true);
+    $res_xyz = computeResCenters($infile);
     $self_bads = array();
     
     if(is_array($clash)) foreach($clash['clashes'] as $cnit => $worst)
@@ -1476,33 +1477,56 @@ HEREDOC;
     //}}} 1. For each outlier, create an array(cnit, description, r, g, b, x, y, z)
     
     //{{{ 2. Cluster the outliers, somehow
-    echo "self_bads has ".count($self_bads)." elements\n";
+    //echo "self_bads has ".count($self_bads)." elements\n";
     $range = 7; // a fairly arbitrary value, in Angstroms.
     $range2 = $range * $range;
     $worst_res = array();
     // cnit => array( bad1, bad2, ... )
     $local_bads = array();
-    $startTime = time();
+    //$startTime = time();
     foreach($res_xyz as $cnit => $xyz)
     {
         #$local_bads[$cnit] = array();
+        foreach($self_bads as $idx => $a_bad)
+        {
+            if(preg_match('/'.$a_bad[0].'/',$cnit)) //count bads for each $res
+            {
+                    $res_bads[$cnit]++;
+            }
+        }
         foreach($self_bads as $idx => $a_bad)
         {
             $cnit2 = $a_bad[0];
             $dx = $xyz['x'] - $a_bad[5];
             $dy = $xyz['y'] - $a_bad[6];
             $dz = $xyz['z'] - $a_bad[7];
-            if($dx*$dx + $dy*$dy + $dz*$dz <= $range2)
-                $local_bads[$cnit][$idx] = $a_bad;
+            if($dx*$dx + $dy*$dy + $dz*$dz <= $range2 && $res_bads[$cnit]!=0)
+            {
+                if(preg_match('/(HOH|DOD|H20|D20|WAT|SOL|TIP|TP3|MTO|HOD|DOH)/',$cnit))
+                {
+                     if(preg_match('/(HOH|DOD|H20|D20|WAT|SOL|TIP|TP3|MTO|HOD|DOH)/',$a_bad[0]))
+                        $local_bads[$cnit][$idx] = $a_bad;
+                }
+                else $local_bads[$cnit][$idx] = $a_bad;
+            }
         }
     }
-    echo "first foreach loop took ".(time() - $startTime)." seconds\n";
+    //echo "first foreach loop took ".(time() - $startTime)." seconds\n";
     while(true)
     {
-        
         // Get worst residue from list and its count of bads
-        $startTime = time();
+        //$startTime = time();
         uasort($local_bads, 'makeCootClusteredChart_cmp'); // put worst residue last
+        //echo "Iteration number ".$cycles."\n";
+        //foreach($self_bads as $key => $value)
+        //{
+        //        echo $self_bads[$key][0]."\n";
+        //}
+        #foreach($local_bads as $key => $value)
+        #{
+        #        echo $key." ".count($local_bads[$key])."\n";
+        #}
+        //echo "size of self_bads = ".count($self_bads)."\n";
         #var_export($local_bads); echo "\n==========\n";
         end($local_bads); // go to last element
         list($worst_cnit, $worst_bads) = each($local_bads); // get last element
@@ -1523,16 +1547,20 @@ HEREDOC;
         // then re-run the algorithm to find the next worst, until no bads left.
         foreach($res_xyz as $cnit2 => $xyz) {
             foreach($worst_bads as $idx => $a_bad) {
-                unset($self_bads[$idx]);
                 unset($local_bads[$cnit2][$idx]);
+                //assure that once used, a residue can't be a new center
+                foreach($self_bads as $idx2 => $a_bad2) {
+                        unset($local_bads[$a_bad[0]][$idx2]);
+                }
+                unset($self_bads[$idx]);
             }
         }
         if(count($self_bads) == 0) break;
-        $cycles++;
-        echo "end of while loop took ".(time() - $startTime)." seconds\n";
+        //$cycles++;
+        //echo "end of while loop took ".(time() - $startTime)." seconds\n";
         #if($cycles > 100) break;
     }
-    echo "number of cycles: ".$cycles."\n";
+    //echo "number of cycles: ".$cycles."\n";
     #var_export($worst_res); echo "\n==========\n";
     //}}}
 
@@ -1545,14 +1573,27 @@ HEREDOC;
     //fwrite($out, "  (list \"Worst First\" (list 0 1 2 3 4 5))\n");
     fwrite($out, " )\n (list\n");
     // This is where we write clusters of outliers
+    $outlier_ctr=0;
     foreach($worst_res as $cnit => $bads)
     {
+        $max=0;
+        foreach($bads as $b)
+        {
+             //identify which residue has the most outliers in this group, make header name
+             if ($res_bads[$b[0]] > $max && !preg_match('/(HOH|DOD|H20|D20|WAT|SOL|TIP|TP3|MTO|HOD|DOH)/', $b[0])){
+                $max=$res_bads[$b[0]];
+                $max_header=$b[0];
+             }
+        }
         $xyz = $res_xyz[$cnit];
         if(count($bads) > 1) // a "real" cluster
         {
-            fwrite($out, "  (list\n   \"problems near $cnit\"\n   $xyz[x] $xyz[y] $xyz[z]\n   (list\n");
+            fwrite($out, "  (list\n   \"problems near $max_header\"\n   $xyz[x] $xyz[y] $xyz[z]\n   (list\n");
             foreach($bads as $b)
+            {    
                 fwrite($out, "    (list \"$b[1]\" $b[2] $b[3] $b[4] $b[5] $b[6] $b[7])\n");
+                $outlier_ctr++;
+            }
             fwrite($out, "   )\n  )\n");
         }
         else // a singleton
@@ -1560,11 +1601,13 @@ HEREDOC;
             $b = reset($bads);
             fwrite($out, "  (list\n   \"$b[1]\"\n   $xyz[x] $xyz[y] $xyz[z]\n   (list\n");
             fwrite($out, "   )\n  )\n");
+            $outlier_ctr++;
         }
     }
     fwrite($out, " )\n)\n");
     fclose($out);
-    echo "Making coot clustered chart took ".(time() - $startTime1)." seconds\n";
+    //echo "Making coot clustered chart took ".(time() - $startTime1)." seconds\n";
+    //echo "printed out ".$outlier_ctr." elements\n";
 }
 
 function makeCootClusteredChart_cmp($a, $b)
