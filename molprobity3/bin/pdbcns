@@ -40,9 +40,14 @@
 #    8/24/07 - RMI     - v2.0.2 - added utility for changing residue names from 
 #				 three letter nucleotides to one letter
 #    9/06/07 - RMI     - v2.0.3 - added C5A for CNS 5-methyl on Thymidine
+#   10/30/07 - RMI     - v2.1   - Added URI as a Uracil alias 
+#                               - Added -cs to allow stripping of segIDs
+#                               - Fixed residue name conversions to be more robust
 use strict;
 
-my $VersionString = 'pdbcns (version 2.0 - May 4, 2001 -- perl)';
+#my $VersionString = 'pdbcns (version 2.0 - May 4, 2001 -- perl)';
+my $VersionString = 'pdbcns (version 2.1 - Oct 30, 2007 -- perl)'; 
+my $Version = '2.1.071030'; 
 
 my $hNameIfHasO2Prime  = '';
 my $hNameWithNoO2Prime = '';
@@ -56,12 +61,17 @@ my %p2x; ## atom mapping
 my %x2p;
 
 my $DIRECTION = '';
+my $STRIP= ''; 
 
 my $cnsinput;
 my $map = '';
 
 while(defined($ARGV[0]) && $ARGV[0] =~ /^-/) {
    $_ = shift;
+   if (/v/i) { # -V
+      print STDOUT $Version."\n"; 
+      exit(0); 
+   }
    if (/[Pp]/) { # -P
       $DIRECTION = 'pdb -> cns';
    }
@@ -88,6 +98,10 @@ while(defined($ARGV[0]) && $ARGV[0] =~ /^-/) {
          die "no segID to chainID mapping following flag: $_\n";
       }
    }
+   if (/cs/i) { # -CS
+      $DIRECTION = 'cns -> pdb';
+      $STRIP=1; 
+  }
 }
 if ($DIRECTION eq '') {
    warn "syntax: pdbcns flag inputpdb > outputpdb\n";
@@ -95,6 +109,7 @@ if ($DIRECTION eq '') {
    warn "   -p               PDB->CNS/XPLOR\n";
    warn "   -pm c,seg,c,seg  ditto, mapping each chainID to corresponding segID\n";
    warn "   -c               CNS/XPLOR->PDB\n";
+   warn "   -cs              Strip segIDs\n";
    warn "   -cm seg,c,seg,c  ditto, mapping each segID to corresponding chainID\n";
    warn "\n";
    die "command line parameter error, stopped";
@@ -501,7 +516,15 @@ while (<>) {
       my $rec1 = $rec;
 
       if ($DIRECTION eq 'pdb -> cns') {
-	#convert one letter names to three letter names
+        #--pre-screen for CNS Xplor RNA base names and Coot RNA base names--------
+        if($rec1=~m/\b.{17}(GUA|ADE|CYT|THY|URI)/){
+                $rec1=~s/\b(.{17})(.)../$1  $2/;
+        }
+        elsif($rec1=~m/\b.{17}(OIP| Ar| Gr| Cr| Ur)/){
+                $rec1=~s/\b(.{17}).(.)./$1  $2/;
+        }
+
+        #convert one letter names to three letter names
 	$rec1=~s/\b(.{17}) .G/$1GUA/;
         $rec1=~s/\b(.{17}) .C/$1CYT/;   
         $rec1=~s/\b(.{17}) .A/$1ADE/;
@@ -538,7 +561,7 @@ while (<>) {
 
 	 my $segID = &chain2seg($cvar, $svar);
 
-         printf "%s%s%s%s%s%s%s\n", substr($rec,  0, 12), $atomName, 
+          printf "%s%s%s%s%s%s%s\n", substr($rec,  0, 12), $atomName, 
 				substr($rec, 16, 1), $residueName,
 	                        substr($rec, 20, 56), $segID,
 	                        substr($rec, 76,  8);
@@ -568,10 +591,17 @@ while (<>) {
 
 	 my $chainID = &seg2chain($svar, $cvar);
 
-         printf "%s%s%s%s%s%s%s\n", substr($rec,  0, 12), $atomName,
+         if ($STRIP) {
+            printf "%s%s%s%s%s%15s\n", substr($rec,  0, 12), $atomName,
+                                substr($rec, 16, 1), $residueName,
+                                substr($rec, 20, 46), substr($rec,80,0); 
+         }
+         else {
+            printf "%s%s%s%s%s%s%s\n", substr($rec,  0, 12), $atomName,
 				substr($rec, 16, 1), $residueName, 
                                 substr($rec, 20, 56), $chainID,
                                 substr($rec, 76,  8);
+         }
       }
    }
    elsif ($_ =~ /^MODEL|^model/) {
