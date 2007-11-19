@@ -599,10 +599,10 @@ function loadClashlist($datafile)
         if($datum{0} == ':')
         {
             $line = explode(':', $datum);
-            $res1 = substr($line[2], 0, 9);
-            $atm1 = substr($line[2], 10, 5);
-            $res2 = substr($line[3], 0, 9);
-            $atm2 = substr($line[3], 10, 5);
+            $res1 = substr($line[2], 1, 9);
+            $atm1 = substr($line[2], 11, 5);
+            $res2 = substr($line[3], 1, 9);
+            $atm2 = substr($line[3], 11, 5);
             $dist = abs(trim($line[4])+0);
             if(!isset($clashes[$res1]) || $clashes[$res1] < $dist)
             {
