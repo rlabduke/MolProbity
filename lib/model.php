@@ -792,8 +792,9 @@ function decodeReduceUsermods($file)
     {
         // Look for Asn, Gln, and His marked by Reduce
         #if( eregi("^USER  MOD........:......(ASN|GLN|HIS)", $s) )
-        if(preg_match('/^USER  MOD (Set|Single).*?:.{6}(ASN|GLN|HIS)/i', $s))
+        if(preg_match('/^USER  MOD (Set|Single).*?:.{7}(ASN|GLN|HIS)/i', $s))
         {
+            //echo "found user mod ".$s;
             // Break it down into colon-delimited fields.
             // There are four fields - Single/Set/Fix : Group ID : (FLIP) group : scores
             $field = explode(":", $s);
@@ -817,7 +818,7 @@ function decodeReduceUsermods($file)
             // Better to group ins code with number than res type.
             // I don't *think* anything depended on the old behavior.
             // CNIT:       C  NNNNI  TTT
-            preg_match('/^(.)(.....)(...)/', $field[1], $f1);
+            preg_match('/^.(.)(.....)(...)/', $field[1], $f1);
             $changes[1][$c] = trim($f1[1]);
             $changes[2][$c] = trim($f1[2]);
             $changes[3][$c] = trim($f1[3]);
