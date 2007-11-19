@@ -47,9 +47,11 @@ function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
     document.forms[0].kinRama.checked           = hasProtein
     document.forms[0].kinRota.checked           = hasProtein
     document.forms[0].kinCBdev.checked          = hasProtein
+    document.forms[0].kinGeom.checked           = (hasProtein || hasNucAcid)
     document.forms[0].chartRama.checked         = hasProtein
     document.forms[0].chartRota.checked         = hasProtein
     document.forms[0].chartCBdev.checked        = hasProtein
+    document.forms[0].chartGeom.checked        = (hasProtein || hasNucAcid)
     
     document.forms[0].kinBaseP.checked          = hasNucAcid
     document.forms[0].kinSuite.checked          = hasNucAcid
