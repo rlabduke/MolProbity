@@ -75,10 +75,10 @@ from your web browser.</p>
 
 </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>
 
-<h3>What's new in 3.12:</h3><ul>
-<li>PDB v3 compatibility (but still compatible with v2.3!)</li>
-<li>RNA backbone suite analysis</li>
-<li>Protein and nucleic acids bond lengths and angles analysis</li>
+<h3>What's new in 3.13:</h3><ul>
+<li>Improved speed of analysis.</li>
+<li>Added bond length and angle outlier visualizations.</li>
+<li>Numerous bug fixes.</li>
 </ul>
 <h3>Common questions:</h3>
 <p><b><a href='help/about.html' target='_blank'>Cite MolProbity</a></b>:
