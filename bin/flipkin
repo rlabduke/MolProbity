@@ -32,8 +32,10 @@
 #   1/11/2005 - I Davis - v2.5 - added @onewidth to kinemage output
 #  10/25/2006 - I Davis -      - added -code to Prekin run on flipdb PDB file
 #   7/31/2007 - J Headd and R Immormino -    - fixed hydrogens on hets
+#  11/29/2007 - RMI            - updated for two character chains 
    use strict;
-
+   
+   my $probe_chain_length = 1; 
    my $isHis = 0;
    my $extraFixFile = '';
    my $dbFile = '';
@@ -130,6 +132,8 @@
       $rec = $_;
       if ($rec =~ /^USER  MOD S|^USER  MOD F/) {
          my ($class, $funcGroup, $prevAction) = split(':', $rec, 4);
+         if    (length($funcGroup) == 14 ) { $probe_chain_length = 1; }
+         elsif (length($funcGroup) == 15 ) { $probe_chain_length = 2; }
          $funcGroup =~ tr/a-z/A-Z/;
          my $matchpat = ($funcGroup =~ /${respattern}/) ? 1 : 0;
 
@@ -139,8 +143,14 @@
          if ($matchpat && !($prevAction =~ /NH3\+/)) { # leave NH3+ for later
 
             my $opposite = 'f';
-            printf FIX "%1.1s:%s:first pass %s\n",
-                        $opposite, $funcGroup, $prevAction;
+            if ($probe_chain_length == 1) {
+               printf FIX "%1.1s: %s:first pass %s\n",
+                           $opposite, $funcGroup, $prevAction;
+            }
+            elsif ($probe_chain_length == 2) {
+               printf FIX "%1.1s:%s:first pass %s\n",
+                           $opposite, $funcGroup, $prevAction;
+            }
 
             # if this residue is in a set we need to remove the set from
             # the list of sets which will have their orientation fixed
@@ -158,13 +168,25 @@
 
             if ($prevAction =~ /(rot|methyl|NH3\+)\s+([+-]?\d+)/) {
                my $angle = $2;
-               printf FIX "r%s:%s:first pass %s\n",
-                        $angle, $funcGroup, $prevAction;
+               if ($probe_chain_length == 1) {
+                  printf FIX "r%s: %s:first pass %s\n",
+                           $angle, $funcGroup, $prevAction;
+               }
+               elsif ($probe_chain_length == 2) {
+                  printf FIX "r%s:%s:first pass %s\n",
+                           $angle, $funcGroup, $prevAction;
+               }
             }
             elsif ($funcGroup =~ /ASN|GLN|HIS/) {
                my $action = 'o';
-               printf FIX "%1.1s:%s:first pass %s\n",
-                           $action, $funcGroup, $prevAction;
+               if ($probe_chain_length == 1) {
+                  printf FIX "%1.1s: %s:first pass %s\n",
+                              $action, $funcGroup, $prevAction;
+               }
+               elsif ($probe_chain_length == 2) {
+                  printf FIX "%1.1s:%s:first pass %s\n",
+                              $action, $funcGroup, $prevAction;
+               }
             }
          }
          # sets - basic info collect for later action unless item flipped above
@@ -190,13 +212,25 @@
          my ($funcGroup,$prevAction) = split(':', $item);
          if ($prevAction =~ /(rot|methyl|NH3)\s+([+-]?\d+)/) {
             my $angle = $2;
-            printf FIX "r %s:%s:first pass %s - %s.%s\n",
-                     $angle, $funcGroup, $prevAction, $setID, $subset;
+            if ($probe_chain_length == 1) {
+               printf FIX "r %s: %s:first pass %s - %s.%s\n",
+                        $angle, $funcGroup, $prevAction, $setID, $subset;
+            }
+            elsif ($probe_chain_length == 2) {
+               printf FIX "r %s:%s:first pass %s - %s.%s\n",
+                        $angle, $funcGroup, $prevAction, $setID, $subset;
+            }
          }
          elsif ($funcGroup =~ /ASN|GLN|HIS/) {
             my $action = 'o';
-            printf FIX "%1.1s:%s:first pass %s - %s.%s\n",
-                     $action, $funcGroup, $prevAction, $setID, $subset;
+            if ($probe_chain_length == 1) {
+               printf FIX "%1.1s: %s:first pass %s - %s.%s\n",
+                        $action, $funcGroup, $prevAction, $setID, $subset;
+            }
+            elsif ($probe_chain_length == 2) {
+               printf FIX "%1.1s:%s:first pass %s - %s.%s\n",
+                        $action, $funcGroup, $prevAction, $setID, $subset;
+            }
          }
 
       }
@@ -206,7 +240,7 @@
 
    # build the new pdb file with opposite (some) orientations
 
-   my $runReduce = "reduce -quiet -trim $redpdb | " .
+   my $runReduce = "reduce -quiet  -trim $redpdb | " .
                    "reduce $verb $limitFlag $dbFile -build -fix $fixFile - > $flipdb";
    my $rc = system($runReduce);
    
@@ -276,9 +310,13 @@
       }
       if (/^USER  MOD S/) {
          my ($class, $restype, $action) = split(/:/, $_, 5);
-
          if ($restype =~ /${respattern}/ && $action =~ /FLIP/) {
-            $flips{substr($restype, 0, 10)} = $action;
+            if ($probe_chain_length == 1) {
+               $flips{substr($restype, 0, 9)} = $action;
+            }
+            elsif ($probe_chain_length == 2) { 
+               $flips{substr($restype, 0, 10)} = $action;
+            }
          }
       }
       if (/^ATOM|^atom/) {
@@ -286,9 +324,16 @@
          my $res     = substr($card, 17, 3);
          my $resid   = substr($card, 22, 4);
          my $inscode = substr($card, 26, 1);
-         my $chain   = substr($card, 21, 1);
-
-         my $ics = ($chain eq ' ') ? '' : $inscode;
+         my $chain   = '';
+         my $ics     = ''; 
+         if ($probe_chain_length == 1) {
+            $chain   = substr($card, 21, 1);
+            $ics = ($chain eq ' ') ? '' : $inscode;
+         }
+         elsif ($probe_chain_length == 2) {
+            $chain   = substr($card, 20, 2);
+            $ics = ($chain eq '  ') ? '' : $inscode;
+         }
 
          if ($res =~ /${respattern}/) {
 	    # only select these two residues
@@ -311,8 +356,17 @@
                   my $Y = substr($card, 38, 8);
                   my $z = substr($card, 46, 8);
 
-                  my $descr = sprintf(' %1.1s%4s%1.1s%-3s',
+                  my $descr = '';  
+
+                  if ($probe_chain_length == 1) {
+                     $descr = sprintf('%1.1s%4s%1.1s%-3s',
                                    $chain, $resid, $inscode, $res);
+                  }
+                  elsif ($probe_chain_length == 2) {
+                     $descr = sprintf('%2s%4s%1.1s%-3s',
+                                   $chain, $resid, $inscode, $res);
+                  }
+
                   my $fflag = (defined $flips{$descr}) ? '*' : ' ';
 
                   my $vs = '';
