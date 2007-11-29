@@ -278,7 +278,7 @@
          my ($class, $restype, $action) = split(/:/, $_, 5);
 
          if ($restype =~ /${respattern}/ && $action =~ /FLIP/) {
-            $flips{substr($restype, 0, 9)} = $action;
+            $flips{substr($restype, 0, 10)} = $action;
          }
       }
       if (/^ATOM|^atom/) {
@@ -311,7 +311,7 @@
                   my $Y = substr($card, 38, 8);
                   my $z = substr($card, 46, 8);
 
-                  my $descr = sprintf('%1.1s%4s%1.1s%-3s',
+                  my $descr = sprintf(' %1.1s%4s%1.1s%-3s',
                                    $chain, $resid, $inscode, $res);
                   my $fflag = (defined $flips{$descr}) ? '*' : ' ';
 
