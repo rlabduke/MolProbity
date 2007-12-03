@@ -1324,8 +1324,9 @@ function makeCootClusteredChart($infile, $outfile, $clash, $rama, $rota, $cbdev,
 ;;         (list specific-button-label-string button-red button-green button-blue
 ;;               specific-x specific-y specific-z)))))
 ;; 
-(define (molprobity-fascinating-clusters-things-gui 
-	 window-name sorting-options cluster-list)
+(define (molprobity-fascinating-clusters-things-gui window-name sorting-options cluster-list)
+
+  (define ncluster-max 120)
 
   ;; utility function
   (define (add-feature-buttons feature-list cluster-vbox)
@@ -1337,7 +1338,7 @@ function makeCootClusteredChart($infile, $outfile, $clash, $rama, $rota, $cbdev,
       ;; add buttons to vbox for each feature
       ;; 
       (map (lambda (feature)
-	     (format #t "feature: ~s~%" feature)
+	    ; (format #t "feature: ~s~%" feature)
 	     (let ((button (gtk-button-new-with-label (car feature))))
 	       (gtk-signal-connect button "clicked"
 				   (lambda ()
@@ -1347,12 +1348,14 @@ function makeCootClusteredChart($infile, $outfile, $clash, $rama, $rota, $cbdev,
 				      (list-ref feature 6))))
 	       (gtk-box-pack-start vbox button #f #f 1)))
 	     feature-list)))
-	     
+
   ;; main body
   (let* ((window (gtk-window-new 'toplevel))
 	 (scrolled-win (gtk-scrolled-window-new))
 	 (outside-vbox (gtk-vbox-new #f 2))
 	 (inside-vbox (gtk-vbox-new #f 0)))
+
+    (format #t "Maxiumum number of clusters displayed: ~s~%" ncluster-max)
     
     (gtk-window-set-default-size window  300 200)
     (gtk-window-set-title window window-name)
@@ -1362,7 +1365,16 @@ function makeCootClusteredChart($infile, $outfile, $clash, $rama, $rota, $cbdev,
     (gtk-scrolled-window-add-with-viewport scrolled-win inside-vbox)
     (gtk-scrolled-window-set-policy scrolled-win 'automatic 'always)
     
-    (map (lambda (cluster-info)
+    (let loop ((cluser-list cluster-list)
+	       (count 0))
+      
+      (cond
+       ((null? cluster-list) 'done)
+       ((= ncluster-max count) 'done)
+       (else 
+
+	(let ((cluster-info (car cluster-list)))
+
 	   (let* ((frame (gtk-frame-new #f))
 		  (vbox (gtk-vbox-new #f 2)))
 
@@ -1380,9 +1392,11 @@ function makeCootClusteredChart($infile, $outfile, $clash, $rama, $rota, $cbdev,
 	       (gtk-box-pack-start vbox go-to-cluster-button #f #f 2)
 	       
 	       ;; now we have a list of individual features:
-	       (add-feature-buttons (list-ref cluster-info 4) vbox))))
+	       (let ((features (list-ref cluster-info 4)))
+		 (if (> (length features) 0)
+		     (add-feature-buttons features vbox)))
+	       (loop (cdr cluster-list) (+ count 1))))))))
 		   
-	 cluster-list)
 
     (gtk-container-border-width outside-vbox 2)
     (let ((ok-button (gtk-button-new-with-label "  Close  ")))
