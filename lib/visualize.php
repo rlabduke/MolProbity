@@ -1326,7 +1326,7 @@ function makeCootClusteredChart($infile, $outfile, $clash, $rama, $rota, $cbdev,
 ;; 
 (define (molprobity-fascinating-clusters-things-gui window-name sorting-options cluster-list)
 
-  (define ncluster-max 120)
+  (define ncluster-max 75)
 
   ;; utility function
   (define (add-feature-buttons feature-list cluster-vbox)
@@ -1492,7 +1492,7 @@ HEREDOC;
     
     //{{{ 2. Cluster the outliers, somehow
     //echo "self_bads has ".count($self_bads)." elements\n";
-    $range = 7; // a fairly arbitrary value, in Angstroms.
+    $range = 12; // a fairly arbitrary value, in Angstroms.
     $range2 = $range * $range;
     $worst_res = array();
     // cnit => array( bad1, bad2, ... )
