@@ -1047,7 +1047,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     if(is_array($bbonds)) {
         foreach($bbonds as $cnit => $item) {
             if ($item['isOutlier']) {
-                $res[$cnit]['bbonds_val'] = $item['sigma'];
+                $res[$cnit]['bbonds_val'] = abs($item['sigma']);
                 $res[$cnit]['bbonds'] = "$item[count] OUTLIER(S)<br><small>worst is $item[measure]: $item[sigma] &sigma</small>";
                 $res[$cnit]['bbonds_isbad'] = true;
                 $res[$cnit]['any_isbad'] = true;
@@ -1057,7 +1057,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     if(is_array($bangles)) {
         foreach($bangles as $cnit => $item) {
             if ($item['isOutlier']) {
-                $res[$cnit]['bangles_val'] = $item['sigma'];
+                $res[$cnit]['bangles_val'] = abs($item['sigma']);
                 $res[$cnit]['bangles'] = "$item[count] OUTLIER(S)<br><small>worst is $item[measure]: $item[sigma] &sigma</small>";
                 $res[$cnit]['bangles_isbad'] = true;
                 $res[$cnit]['any_isbad'] = true;

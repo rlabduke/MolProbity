@@ -40,7 +40,7 @@ OUTPUTS / RESULTS:
 */
 function summaryAnalysis($modelID)
 {
-    global $optStats, $optClash, $optCbeta, $optRota, $optRama;
+    global $optStats, $optClash, $optCbeta, $optRota, $optRama, $optGeom;
     $out = "";
     
     $model =& $_SESSION['models'][$modelID];
@@ -88,6 +88,39 @@ function summaryAnalysis($modelID)
             $ramaScore[ $r['eval'] ] += 1;
         $out .= ":" . ($ramaScore['OUTLIER']+0) . ":" . ($ramaScore['Allowed']+0) . ":" . ($ramaScore['Favored']+0) . ":" . count($rama);
     }
+    if($optGeom)
+    {
+      //echo "running val report\n";
+      runValidationReport($pdbfile, "$rawDir/$model[prefix]geom.data", "protein");
+      //echo "finished running val report\n";
+      $bonds = loadValidationBondReport("$rawDir/$model[prefix]geom.data", "protein");
+      $angles = loadValidationAngleReport("$rawDir/$model[prefix]geom.data", "protein");
+      //echo "finished loading val report\n";
+      $total = 0;
+      $outCount = 0;
+      foreach($bonds as $cnit => $item) {
+        if($item['type'] == 'protein') {
+          if($item['isOutlier']) {
+            $outCount += 1;
+          }
+          $total += 1;
+        }
+      }
+      if ($total > 0) $out .= ":".sprintf("%.2f", 100.0 * $outCount / $total);
+      else            $out .= ":-1";
+      $total = 0;
+      $outCount = 0;
+      foreach($angles as $cnit => $item) {
+        if($item['type'] == 'protein') {
+          if($item['isOutlier']) {
+            $outCount += 1;
+          }
+          $total += 1;
+        }
+      }
+      if ($total > 0) $out .= ":".sprintf("%.2f", 100.0 * $outCount / $total);
+      else            $out .= ":-1";
+    }
     if($optClash && $optRota && $optRama)
     {
         $out .= sprintf(':%.3f', getEffectiveResolution($clash, $rota, $rama));
@@ -116,6 +149,7 @@ $optClash   = true;
 $optCbeta   = true;
 $optRota    = true;
 $optRama    = true;
+$optGeom    = true;
 
 // First argument is the name of this script...
 if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
@@ -127,6 +161,7 @@ if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
     elseif($arg == '-nocbeta')  $optCbeta = false;
     elseif($arg == '-norota')   $optRota = false;
     elseif($arg == '-norama')   $optRama = false;
+    elseif($arg == '-nogeom')   $optGeom = false;
     elseif(!isset($inDir))      $inDir = $arg;
     else                        die("Too many or unrecognized arguments: '$arg'\n");
 }
@@ -172,6 +207,7 @@ if($optVerbose)
     if($optCbeta)   echo ":cbeta>0.25:numCbeta:maxCbeta:medianCbeta:meanCbeta";
     if($optRota)    echo ":rota<1%:numRota";
     if($optRama)    echo ":ramaOutlier:ramaAllowed:ramaFavored:numRama";
+    if($optGeom)    echo ":pct_badbonds:pct_badangles";
     if($optClash && $optRota && $optRama) echo ":MolProbityScore";
     echo "\n";
 }
