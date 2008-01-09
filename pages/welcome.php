@@ -75,9 +75,9 @@ from your web browser.</p>
 
 </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>
 
-<h3>What's new in 3.13:</h3><ul>
-<li>Improved speed of analysis.</li>
-<li>Added bond length and angle outlier visualizations.</li>
+<h3>What's new in 3.14:</h3><ul>
+<li>Added bond geometry analysis to cmdline tools.</li>
+<li>Multicritchart geometry sorts by absolute value now.</li>
 <li>Numerous bug fixes.</li>
 </ul>
 <h3>Common questions:</h3>
