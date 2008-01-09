@@ -45,6 +45,7 @@ $optClash   = true;
 $optCbeta   = true;
 $optRota    = true;
 $optRama    = true;
+$optGeom    = true;
 
 $pdbFileList = array();
 // First argument is the name of this script...
@@ -54,6 +55,7 @@ if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
     elseif($arg == '-nocbeta')  $optCbeta = false;
     elseif($arg == '-norota')   $optRota = false;
     elseif($arg == '-norama')   $optRama = false;
+    elseif($arg == '-nogeom')   $optGeom = false;
     else                        $pdbFileList[] = $arg;
 }
 if(count($pdbFileList) == 0)
@@ -64,6 +66,7 @@ if($optClash)   echo ",worst_clash,src_atom,dst_atom,dst_residue";
 if($optCbeta)   echo ",CB_dev";
 if($optRota)    echo ",rotamer_score,rotamer_eval";
 if($optRama)    echo ",rama_score,rama_eval,rama_type";
+if($optGeom)    echo ",num_length_out,worst_length,worst_length_value,worst_length_sigma,num_angle_out,worst_angle,worst_angle_value,worst_angle_sigma";
 echo "\n";
 
 // Loop through all PDBs
@@ -102,6 +105,12 @@ foreach($pdbFileList as $infile)
             runRamachandran($infile, $tmp);
             $rama = loadRamachandran($tmp);
         }
+        if($optGeom)
+        {
+          runValidationReport($infile, $tmp, "protein");
+          $bonds = loadValidationBondReport($tmp, "protein");
+          $angles = loadValidationAngleReport($tmp, "protein");
+        }
         unlink($tmp);
         
         foreach($res as $cnit)
@@ -134,6 +143,15 @@ foreach($pdbFileList as $infile)
                 if(isset($rama[$cnit]))
                     echo ",".$rama[$cnit]['scorePct'].",".$rama[$cnit]['eval'].",".$rama[$cnit]['type'];
                 else echo ",,,";
+            }
+            if($optGeom)
+            {
+              if(isset($bonds[$cnit]))
+                echo ",".$bonds[$cnit]['count'].",".$bonds[$cnit]['measure'].",".$bonds[$cnit]['value'].",".$bonds[$cnit]['sigma'];
+              else echo ",,,,";
+              if(isset($angles[$cnit]))
+                echo ",".$angles[$cnit]['count'].",".$angles[$cnit]['measure'].",".$angles[$cnit]['value'].",".$angles[$cnit]['sigma'];
+              else echo ",,,,";
             }
             echo "\n";
         }
