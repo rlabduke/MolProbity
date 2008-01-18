@@ -1365,7 +1365,7 @@ function makeCootClusteredChart($infile, $outfile, $clash, $rama, $rota, $cbdev,
     (gtk-scrolled-window-add-with-viewport scrolled-win inside-vbox)
     (gtk-scrolled-window-set-policy scrolled-win 'automatic 'always)
     
-    (let loop ((cluser-list cluster-list)
+    (let loop ((cluster-list cluster-list)
 	       (count 0))
       
       (cond
