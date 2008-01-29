@@ -13,6 +13,9 @@
 //  If you run this code, set this to your address.
 if(!defined("MP_EMAIL_WEBMASTER"))
     define("MP_EMAIL_WEBMASTER", "webmaster@$_SERVER[SERVER_NAME]");
+  
+if(!defined("MP_EMAIL_WEBMASTER2"))
+  define("MP_EMAIL_WEBMASTER2", "webmaster@kinemage.biochem.duke.edu");
 
 // MP_BIN_PATH
 //  Directory(s) where all MolProbity-specific binary

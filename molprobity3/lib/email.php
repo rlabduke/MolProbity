@@ -36,6 +36,9 @@ function mpSendEmailViaSmtp($senderName, $senderAddr, $subject, $body)
     $mail->AddReplyTo($senderAddr, $senderName);
     $mail->AddAddress(MP_EMAIL_AUTHOR);
     $mail->AddAddress(MP_EMAIL_WEBMASTER);
+    //if(defined("MP_EMAIL_WEBMASTER2")) {
+      $mail->AddAddress(MP_EMAIL_WEBMASTER2);
+    //}
     
     $mail->Subject = $subject;
     $mail->Body = $body;
@@ -49,7 +52,7 @@ function mpSendEmailViaSmtp($senderName, $senderAddr, $subject, $body)
 ############################################################################
 function mpSendEmailViaMail($senderName, $senderAddr, $subject, $body)
 {
-    $fb_to = MP_EMAIL_AUTHOR.",".MP_EMAIL_WEBMASTER;
+    $fb_to = MP_EMAIL_AUTHOR.",".MP_EMAIL_WEBMASTER.",".MP_EMAIL_WEBMASTER2;
     $fb_hdrs = "From: " . MP_EMAIL_WEBMASTER
         . "\nReply-To: $senderName<$senderAddr>"
         . "\nX-Mailer: PHP_MolProbity3"
