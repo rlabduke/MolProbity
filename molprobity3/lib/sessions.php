@@ -83,6 +83,7 @@ function mpStartSession($createIfNeeded = false)
     
     // Cookies cause more trouble than they're worth
     ini_set("session.use_cookies", 0);
+    ini_set("session.use_only_cookies", 0);
     // We want to control garbage collection more carefully
     // (MP_SESSION_LIFETIME is a dummy -- lifetime is determined per-session)
     ini_set("session.gc_maxlifetime", MP_SESSION_LIFETIME);
