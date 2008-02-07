@@ -77,6 +77,7 @@ define("MP_BIN_PATH", "/usr/local/php5/bin:/opt/j2/bin:/usr/java/jdk/bin");
 //    </script>
 //    <script type="text/javascript">
 //    _uacct = "UA-327385-3";
+//    __utmSetVar("Java version "+java.lang.System.getProperty("java.version").substr(0,3));
 //    urchinTracker();
 //    </script>
 //    ');
