@@ -262,8 +262,9 @@ function runAnalysis($modelID, $opts)
         $tasks['multichart'] .= " - <a href='viewtable.php?$_SESSION[sessTag]&file=$outfile' target='_blank'>preview</a>\n";
         setProgress($tasks, 'multichart'); // so the preview link is visible
         $outfile = "$chartDir/$model[prefix]multi-coot.scm";
+        $outfile_py = "$chartDir/$model[prefix]multi-coot.py";
         #makeCootMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pperp);
-        makeCootClusteredChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pperp);
+        makeCootClusteredChart($infile, $outfile, $outfile_py, $clash, $rama, $rota, $cbdev, $pperp);
     }
     if($opts['doKinemage'])
     {
@@ -322,7 +323,8 @@ function runAnalysis($modelID, $opts)
         if($opts['doCharts'])
         {
             $entry .= "<td>".linkAnyFile("$model[prefix]multi.table", "Chart", "img/multichart.jpg")."</td>\n";
-            $entry .= "<td>".linkAnyFile("$model[prefix]multi-coot.scm", "To-do list for Coot", "img/multichart-coot.jpg")."<br><small><i>Open this in Coot 0.1.2 or later using Calculate | Run Script...</i></small></td>\n";
+            $entry .= "<td>".linkAnyFile("$model[prefix]multi-coot.scm", "To-do list for Coot Scheme", "img/multichart-coot.jpg")."<br><small><i>Open this in Coot 0.1.2 or later using Calculate | Run Script...</i></small></td>\n";
+            #$entry .= "<td>".linkAnyFile("$model[prefix]multi-coot.py", "To-do list for Coot Python", "img/multichart-coot.jpg")."<br><small><i>Open this in Coot 0.1.2 or later using Calculate | Run Script...</i></small></td>\n";
         }
         $entry .= "</tr></table>\n";
         $entry .= "</div>\n";
