@@ -436,6 +436,7 @@ function linkAnyFile($fname, $name = null, $image = null)
     $path = "$_SESSION[dataDir]/$subdir/$fname";
     $link = "$_SESSION[dataURL]/$subdir/$fname";
     $size = formatFilesize(filesize($path));
+    $python_file = false;
     if($name == null) $name = $fname;
     
     // Choose the right action(s) -- see pages/file_browser.php for origin
@@ -452,6 +453,19 @@ function linkAnyFile($fname, $name = null, $image = null)
         $links = array(array('url' => "viewtext.php?$_SESSION[sessTag]&file=$path&mode=plain", 'label' => "View", 'blank' => true));
     elseif(endsWith($fname, ".pdf"))
         $links = array(array('url' => "$link", 'label' => "View", 'blank' => true));
+    elseif(endsWith($fname, ".scm")){
+        //$python_link=$link;
+        $python_file = true;
+        $python_link = preg_replace("/\.scm/",".py",$link);
+        $python_path = preg_replace("/\.scm/",".py",$path);
+        $python_size = formatFilesize(filesize($python_path));
+        $links = array(
+            array('url' => "$link", 'label' => "Scheme Script Download", 'blank' => false),
+            array('url' => "$python_link", 'label' => "Python Script Download", 'blank' => false),
+        );
+    }
+    elseif(endsWith($fname, ".py"))
+        $links = array(array('url' => "$link", 'label' => "Python Script", 'blank' => false));
     else
         $links = array(array('url' => "$link", 'label' => "Download", 'blank' => false));
     
@@ -459,9 +473,18 @@ function linkAnyFile($fname, $name = null, $image = null)
     $linkText = "";
     foreach($links as $link)
     {
-        if($isFirst) $isFirst = false;
-        else $linkText .= " | ";
-        $linkText .= "<a href='$link[url]'".($link['blank'] ? " target='_blank'" : "").">$link[label]</a>";
+        if($isFirst) {
+            $isFirst = false;
+            $linkText .= "<a href='$link[url]'".($link['blank'] ? " target='_blank'" : "").">$link[label]</a>";
+            if($python_file) {
+                $linkText .= " ($size)";
+                $size = $python_size;
+            }
+        }
+        else {
+            $linkText .= " | ";
+            $linkText .= "<a href='$link[url]'".($link['blank'] ? " target='_blank'" : "").">$link[label]</a>";
+        }
     }
     
     if($image == null)
