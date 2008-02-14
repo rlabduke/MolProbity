@@ -85,10 +85,20 @@
     email new MolP tarball to Joe Moran at GSK
     **** Fix ensemble model upload history info like in 3.12****
     Possible issue with analyzing PDBs without REMARKS? (Bug report 070912)
+    New F name for flips needs to reflect whether the file has any flips in it!!!
 
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
+### 3.15 ###
+- Downloading files without hydrogens trims the H off of the name.
+- Adding flips to a file adds a F to the name of the file.
+- Added options for turning off html or coot chart.
+- Added python version of coot chart.
+- Molprobity score summary box color behavior changed slightly; if percentage is better
+  than 66% then the box is colored green.
+- Typo in the coot script fixed.
+
 ### 3.14 ###
 - fixed a bug in MacOSX makefile that was preventing proper compilation of the 
   universal binaries.

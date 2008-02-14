@@ -52,7 +52,7 @@ $tasks['reduce'] = "Add H with <code>reduce -build</code>";
 if($_SESSION['bgjob']['makeFlipkin']) $tasks['flipkin'] = "Create Asn/Gln and His <code>flipkin</code> kinemages";
 
 setProgress($tasks, 'reduce');
-$newModel = createModel($modelID."H");
+$newModel = createModel($modelID."FH");
 $outname = $newModel['pdb'];
 $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
 if(!file_exists($outpath)) mkdir($outpath, 0777); // shouldn't ever happen, but might...

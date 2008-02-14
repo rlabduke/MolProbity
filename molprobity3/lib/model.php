@@ -794,7 +794,7 @@ function decodeReduceUsermods($file)
         #if( eregi("^USER  MOD........:......(ASN|GLN|HIS)", $s) )
         if(preg_match('/^USER  MOD (Set|Single).*?:.{7}(ASN|GLN|HIS)/i', $s))
         {
-            //echo "found user mod ".$s;
+            //echo "found user mod ".$s."\n";
             // Break it down into colon-delimited fields.
             // There are four fields - Single/Set/Fix : Group ID : (FLIP) group : scores
             $field = explode(":", $s);
@@ -909,6 +909,44 @@ function decodeReduceUsermods($file)
     }
 
     return $changes;
+}
+#}}}########################################################################
+
+#{{{ containsReduceFlips - find flips from USERMOD records in Reduced PDB files
+############################################################################
+/**
+* Read in $file until we reach an ATOM record.
+* Look for USER  MOD records that show Asn/Gln/His flips,
+* or bad clashes in both orientations.
+* 
+* Returns a boolean indicating whether this file has flips.
+*/
+function containsReduceFlips($file)
+{
+    $fp = fopen($file, "r");
+
+    while( !feof($fp) and ($s = fgets($fp, 200)) and !eregi("^ATOM  ", $s) )
+    {
+        // Look for Asn, Gln, and His marked by Reduce
+        #if( eregi("^USER  MOD........:......(ASN|GLN|HIS)", $s) )
+        if(preg_match('/^USER  MOD (Set|Single|Fix).*?:.{7}(ASN|GLN|HIS)/i', $s))
+        {
+            //echo "found user mod ".$s."\n";
+            // Break it down into colon-delimited fields.
+            // There are four fields - Single/Set/Fix : Group ID : (FLIP) group : scores
+            $field = explode(":", $s);
+
+            // Most values can be done without knowing whether or not this is a flip.
+            if (preg_match('/^FLIP/', $field[2])) {
+                return true;
+            }
+        }
+
+    }
+
+    fclose($fp);
+
+    return false;
 }
 #}}}########################################################################
 

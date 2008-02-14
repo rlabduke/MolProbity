@@ -758,6 +758,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             elseif($mer < $axr)                     $bg = $bgGood;  // below
             elseif(abs(($mer-$axr)/$axr) <= 0.20)   $bg = $bgFair;  // within 20% of actual
             else                                    $bg = $bgPoor;  // more than 20% above
+            if($mer_pct['pct_rank'] > 66)           $bg = $bgGood;  // to try to compensate for high-res structures looking worse than they are
             
             $entry .= "<td>MolProbity score</td><td bgcolor='$bg'>";
             $entry .= sprintf('%.2f', $mer);
@@ -915,7 +916,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
 * $suites   is the data structure from loadSuitenameReport()
 * Any of them can be set to null if the data is unavailable.
 */
-function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $outliersOnly = false)
+function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $outliersOnly = false, $doHtmlTable = true)
 {
     $startTime = time();
     //{{{ Process validation data
@@ -1065,7 +1066,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
         }
     }
     //}}} Process validation data
-    echo "Processing validation data took ".(time() - $startTime)." seconds\n";
+    //echo "Processing validation data took ".(time() - $startTime)." seconds\n";
     
     // Set up output data structure
     $table = array('prequel' => '', 'headers' => array(), 'rows' => array(), 'footers' => array(), 'sequel' => '');
@@ -1076,41 +1077,44 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     $pdbstats = pdbstat($infile);
     $table['prequel'] = makeSummaryStatsTable($pdbstats['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles);
     
-    $header1 = array();
-    $header1[] = array('html' => "<b>#</b>",                                            'sort' => 1);
-    $header1[] = array('html' => "<b>Res</b>",                                          'sort' => 1);
-    $header1[] = array('html' => "<b>High B</b>",                                       'sort' => -1);
-    if(is_array($clash))  $header1[] = array('html' => "<b>Clash &gt; 0.4&Aring;</b>",  'sort' => -1);
-    if(is_array($rama))   $header1[] = array('html' => "<b>Ramachandran</b>",           'sort' => 1);
-    if(is_array($rota))   $header1[] = array('html' => "<b>Rotamer</b>",                'sort' => 1);
-    if(is_array($cbdev))  $header1[] = array('html' => "<b>C&beta; deviation</b>",      'sort' => -1);
-    if(is_array($pperp))  $header1[] = array('html' => "<b>Base-P perp. dist.</b>",     'sort' => -1);
-    if(is_array($suites)) $header1[] = array('html' => "<b>RNA suite conf.</b>",        'sort' => 1);
-    if(is_array($bbonds)) $header1[] = array('html' => "<b>Bond lengths.</b>",      'sort' => 1);
-    if(is_array($bangles)) $header1[] = array('html' => "<b>Bond angles.</b>",      'sort' => 1);
-    
-    $header2 = array();
-    $header2[] = array('html' => "");
-    $header2[] = array('html' => "");
-    $header2[] = array('html' => sprintf("Avg: %.2f", array_sum($Bfact)/count($Bfact)));
-    if(is_array($clash))  $header2[] = array('html' => "Clashscore: $clash[scoreAll]");
-    if(is_array($rama))   $header2[] = array('html' => "Outliers: ".count(findRamaOutliers($rama))." of ".count($rama));
-    if(is_array($rota))   $header2[] = array('html' => "Outliers: ".count(findRotaOutliers($rota))." of ".count($rota));
-    if(is_array($cbdev))  $header2[] = array('html' => "Outliers: ".count(findCbetaOutliers($cbdev))." of ".count($cbdev));
-    if(is_array($pperp))  $header2[] = array('html' => "Outliers: ".count(findBasePhosPerpOutliers($pperp))." of ".count($pperp));
-    if(is_array($suites)) $header2[] = array('html' => "Outliers: ".count(findSuitenameOutliers($suites))." of ".count($suites));
-    if(is_array($bbonds)) $header2[] = array('html' => "Outliers: ".count(findGeomOutliers($bbonds))." of ".count(listAtomResidues($infile)));
-    if(is_array($bangles)) $header2[] = array('html' => "Outliers: ".count(findGeomOutliers($bangles))." of ".count(listAtomResidues($infile)));
-    
-    $table['headers'] = array($header1, $header2);
+    if ($doHtmlTable) {
+      $header1 = array();
+      $header1[] = array('html' => "<b>#</b>",                                            'sort' => 1);
+      $header1[] = array('html' => "<b>Res</b>",                                          'sort' => 1);
+      $header1[] = array('html' => "<b>High B</b>",                                       'sort' => -1);
+      if(is_array($clash))  $header1[] = array('html' => "<b>Clash &gt; 0.4&Aring;</b>",  'sort' => -1);
+      if(is_array($rama))   $header1[] = array('html' => "<b>Ramachandran</b>",           'sort' => 1);
+      if(is_array($rota))   $header1[] = array('html' => "<b>Rotamer</b>",                'sort' => 1);
+      if(is_array($cbdev))  $header1[] = array('html' => "<b>C&beta; deviation</b>",      'sort' => -1);
+      if(is_array($pperp))  $header1[] = array('html' => "<b>Base-P perp. dist.</b>",     'sort' => -1);
+      if(is_array($suites)) $header1[] = array('html' => "<b>RNA suite conf.</b>",        'sort' => 1);
+      if(is_array($bbonds)) $header1[] = array('html' => "<b>Bond lengths.</b>",      'sort' => 1);
+      if(is_array($bangles)) $header1[] = array('html' => "<b>Bond angles.</b>",      'sort' => 1);
+      
+      $header2 = array();
+      $header2[] = array('html' => "");
+      $header2[] = array('html' => "");
+      $header2[] = array('html' => sprintf("Avg: %.2f", array_sum($Bfact)/count($Bfact)));
+      if(is_array($clash))  $header2[] = array('html' => "Clashscore: $clash[scoreAll]");
+      if(is_array($rama))   $header2[] = array('html' => "Outliers: ".count(findRamaOutliers($rama))." of ".count($rama));
+      if(is_array($rota))   $header2[] = array('html' => "Outliers: ".count(findRotaOutliers($rota))." of ".count($rota));
+      if(is_array($cbdev))  $header2[] = array('html' => "Outliers: ".count(findCbetaOutliers($cbdev))." of ".count($cbdev));
+      if(is_array($pperp))  $header2[] = array('html' => "Outliers: ".count(findBasePhosPerpOutliers($pperp))." of ".count($pperp));
+      if(is_array($suites)) $header2[] = array('html' => "Outliers: ".count(findSuitenameOutliers($suites))." of ".count($suites));
+      if(is_array($bbonds)) $header2[] = array('html' => "Outliers: ".count(findGeomOutliers($bbonds))." of ".count(listAtomResidues($infile)));
+      if(is_array($bangles)) $header2[] = array('html' => "Outliers: ".count(findGeomOutliers($bangles))." of ".count(listAtomResidues($infile)));
+      
+      $table['headers'] = array($header1, $header2);
+    }
     //}}} Table prequel and headers
-    echo "Table prequel and headers took ".(time() - $startTime)." seconds\n";
+    //echo "Table prequel and headers took ".(time() - $startTime)." seconds\n";
     
     $startTime = time();
     //{{{ Table body
-    $rows = array();
-    foreach($res as $cnit => $eval)
-    {
+    if ($doHtmlTable) {
+      $rows = array();
+      foreach($res as $cnit => $eval)
+      {
         if($outliersOnly && !$eval['any_isbad']) continue;
         $cni = substr($cnit, 0, 6);
         $type = substr($cnit, 6, 3);
@@ -1121,39 +1125,40 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
         $row[] = array('html' => $eval['resHiB'],   'sort_val' => $eval['resHiB']+0);
         foreach(array('clash', 'rama', 'rota', 'cbdev', 'pperp', 'suites', 'bbonds', 'bangles') as $type)
         {
-            if(is_array($$type))
-            {
-                $cell = array();
-                if(isset($eval[$type]))             $cell['html'] = $eval[$type];
-                else                                $cell['html'] = "-";
-                if(isset($eval[$type.'_isbad']))    $cell['color'] = '#ff6699';
-                if(isset($eval[$type.'_val']))      $cell['sort_val'] = $eval[$type.'_val']+0;
-                $row[] = $cell;
-            }
+          if(is_array($$type))
+          {
+            $cell = array();
+            if(isset($eval[$type]))             $cell['html'] = $eval[$type];
+            else                                $cell['html'] = "-";
+            if(isset($eval[$type.'_isbad']))    $cell['color'] = '#ff6699';
+            if(isset($eval[$type.'_val']))      $cell['sort_val'] = $eval[$type.'_val']+0;
+            $row[] = $cell;
+          }
         }
         /*
         if(is_array($clash))
-            $row[] = array('html' => (isset($eval['clash']) ? $eval['clash'] : "-"),        'sort_val' => $eval['clash_val']+0);
+        $row[] = array('html' => (isset($eval['clash']) ? $eval['clash'] : "-"),        'sort_val' => $eval['clash_val']+0);
         if(is_array($rama))
-            $row[] = array('html' => (isset($eval['rama']) ? $eval['rama'] : "-"),          'sort_val' => $eval['rama_val']+0);
+        $row[] = array('html' => (isset($eval['rama']) ? $eval['rama'] : "-"),          'sort_val' => $eval['rama_val']+0);
         if(is_array($rota))
-            $row[] = array('html' => (isset($eval['rota']) ? $eval['rota'] : "-"),          'sort_val' => $eval['rota_val']+0);
+        $row[] = array('html' => (isset($eval['rota']) ? $eval['rota'] : "-"),          'sort_val' => $eval['rota_val']+0);
         if(is_array($cbdev))
-            $row[] = array('html' => (isset($eval['cbdev']) ? $eval['cbdev'] : "-"),        'sort_val' => $eval['cbdev_val']+0);
+        $row[] = array('html' => (isset($eval['cbdev']) ? $eval['cbdev'] : "-"),        'sort_val' => $eval['cbdev_val']+0);
         if(is_array($pperp))
-            $row[] = array('html' => (isset($eval['pperp']) ? $eval['pperp'] : "-"),        'sort_val' => $eval['pperp_val']+0);
+        $row[] = array('html' => (isset($eval['pperp']) ? $eval['pperp'] : "-"),        'sort_val' => $eval['pperp_val']+0);
         */
         $rows[] = $row;
+      }
+      $table['rows'] = $rows;
     }
-    $table['rows'] = $rows;
     //}}} Table body
-    echo "Table body took ".(time() - $startTime)." seconds\n";
+    //echo "Table body took ".(time() - $startTime)." seconds\n";
     
     $startTime = time();
     $out = fopen($outfile, 'wb');
     fwrite($out, mpSerialize($table));
     fclose($out);
-    echo "Serializing table took ".(time() - $startTime)." seconds\n";
+    //echo "Serializing table took ".(time() - $startTime)." seconds\n";
     
     // serialize() and unserialize() screw up floating point numbers sometimes.
     // Not only is there a change in precision, but sometimes numbers become INF
@@ -1188,7 +1193,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
         //fwrite($out, formatSortableTable($table, 'DUMMY_URL'));
         fwrite($out, formatSortableTableJS($table));
         fclose($out);
-        echo "Formatting sortable table took ".(time() - $startTime)." seconds\n";
+        //echo "Formatting sortable table took ".(time() - $startTime)." seconds\n";
     }
 }
 #}}}########################################################################

@@ -45,6 +45,8 @@ require_once(MP_BASE_DIR.'/lib/model.php'); // for making kinemages
 *       chartCBdev      do CB dev plots and analysis?
 *       chartBaseP      check base-phosphate perpendiculars?
 *       chartSuite      check RNA backbone conformations?
+*       chartCoot       do coot chart?
+*       chartMulti      do html multi chart?
 *       chartNotJustOut include residues that have no problems in the list?
 *       chartImprove    compare to reduce -(no)build results to show improvement?
 *       
@@ -80,7 +82,9 @@ function runAnalysis($modelID, $opts)
     
     if($opts['chartClashlist']) $tasks['clashlist'] = "Run <code>clashlist</code> to find bad clashes and clashscore";
     if($opts['chartImprove'])   $tasks['improve'] = "Suggest / report on fixes";
-    if($opts['doCharts'])       $tasks['multichart'] = "Create multi-criterion chart";
+    if($opts['doCharts']&&!$opts['chartMulti'])       $tasks['chartsummary'] = "Create summary chart";
+    if($opts['chartMulti'])     $tasks['multichart'] = "Create multi-criterion chart";
+    if($opts['chartCoot'])      $tasks['cootchart'] = "Create chart for use in Coot";
     if($opts['doKinemage'])     $tasks['multikin'] = "Create multi-criterion kinemage";
     
     $doRem40 = $opts['chartClashlist'] || $opts['chartRama'] || $opts['chartRota'];
@@ -255,16 +259,28 @@ function runAnalysis($modelID, $opts)
     //{{{ Build multi-criterion chart, kinemage
     if($opts['doCharts'])
     {
-        setProgress($tasks, 'multichart'); // updates the progress display if running as a background job
+        if($opts['chartMulti']) {
+          setProgress($tasks, 'multichart'); // updates the progress display if running as a background job
+        } else {
+          setProgress($tasks, 'chartsummary');
+        }
         $outfile = "$rawDir/$model[prefix]multi.table";
         $snapfile = "$chartDir/$model[prefix]multi.html";
-        writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, !$opts['chartNotJustOut']);
-        $tasks['multichart'] .= " - <a href='viewtable.php?$_SESSION[sessTag]&file=$outfile' target='_blank'>preview</a>\n";
-        setProgress($tasks, 'multichart'); // so the preview link is visible
-        $outfile = "$chartDir/$model[prefix]multi-coot.scm";
-        $outfile_py = "$chartDir/$model[prefix]multi-coot.py";
-        #makeCootMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pperp);
-        makeCootClusteredChart($infile, $outfile, $outfile_py, $clash, $rama, $rota, $cbdev, $pperp);
+        writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, !$opts['chartNotJustOut'], $opts['chartMulti']);
+        if($opts['chartMulti']) {
+          $tasks['multichart'] .= " - <a href='viewtable.php?$_SESSION[sessTag]&file=$outfile' target='_blank'>preview</a>\n";
+          setProgress($tasks, 'multichart'); // so the preview link is visible
+        } else {
+          $tasks['chartsummary'] .= " - <a href='viewtable.php?$_SESSION[sessTag]&file=$outfile' target='_blank'>preview</a>\n";
+          setProgress($tasks, 'chartsummary'); // so the preview link is visible
+        }
+        if($opts['chartCoot']) {
+          setProgress($tasks, 'cootchart');
+          $outfile = "$chartDir/$model[prefix]multi-coot.scm";
+          $outfile_py = "$chartDir/$model[prefix]multi-coot.py";
+          #makeCootMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pperp);
+          makeCootClusteredChart($infile, $outfile, $outfile_py, $clash, $rama, $rota, $cbdev, $pperp);
+        }
     }
     if($opts['doKinemage'])
     {
@@ -323,8 +339,10 @@ function runAnalysis($modelID, $opts)
         if($opts['doCharts'])
         {
             $entry .= "<td>".linkAnyFile("$model[prefix]multi.table", "Chart", "img/multichart.jpg")."</td>\n";
-            $entry .= "<td>".linkAnyFile("$model[prefix]multi-coot.scm", "To-do list for Coot Scheme", "img/multichart-coot.jpg")."<br><small><i>Open this in Coot 0.1.2 or later using Calculate | Run Script...</i></small></td>\n";
-            #$entry .= "<td>".linkAnyFile("$model[prefix]multi-coot.py", "To-do list for Coot Python", "img/multichart-coot.jpg")."<br><small><i>Open this in Coot 0.1.2 or later using Calculate | Run Script...</i></small></td>\n";
+            if($opts['chartCoot']) {
+              $entry .= "<td>".linkAnyFile("$model[prefix]multi-coot.scm", "To-do list for Coot", "img/multichart-coot.jpg")."<br><small><i>Open this in Coot 0.1.2 or later using Calculate | Run Script...</i></small></td>\n";
+              #$entry .= "<td>".linkAnyFile("$model[prefix]multi-coot.py", "To-do list for Coot Python", "img/multichart-coot.jpg")."<br><small><i>Open this in Coot 0.1.2 or later using Calculate | Run Script...</i></small></td>\n";
+            }
         }
         $entry .= "</tr></table>\n";
         $entry .= "</div>\n";
