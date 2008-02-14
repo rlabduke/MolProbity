@@ -35,6 +35,13 @@ function hideChartOpts()
     else block.style.display = 'none'
 }
 
+function hideMultiOpts()
+{
+  var block = document.getElementById('multi_opts')
+  if(document.forms[0].chartMulti.checked) block.style.display = 'block'
+  else block.style.display = 'none'
+}
+
 function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
 {
     selectionHasH = doAAC
@@ -58,7 +65,9 @@ function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
     document.forms[0].chartBaseP.checked        = hasNucAcid
     document.forms[0].chartSuite.checked        = hasNucAcid
     
+    document.forms[0].chartCoot.checked         = !isBig
     document.forms[0].chartImprove.checked      = (hasProtein && doAAC)
+    document.forms[0].chartMulti.checked        = !isBig
     document.forms[0].chartNotJustOut.checked   = !isBig
 }
 
@@ -145,8 +154,12 @@ function checkSettingsBeforeSubmit()
     <br><label><input type='checkbox' name='chartCBdev' value='1'> C&beta; deviations</label>
     <br><label><input type='checkbox' name='chartBaseP' value='1'> RNA sugar pucker analysis</label>
     <br><label><input type='checkbox' name='chartSuite' value='1'> RNA backbone conformations [BETA TEST]</label>
-    <p><label><input type='checkbox' name='chartImprove' value='1'> Suggest / report on automatic structure fix-ups</label>
-    <br><label><input type='checkbox' name='chartNotJustOut' value='1'> List all residues in multi-chart, not just outliers</label>
+    <p><label><input type='checkbox' name='chartCoot' value='1'> Chart for use with Coot (may take a long time for large or bad structures)</label>
+    <br><label><input type='checkbox' name='chartImprove' value='1'> Suggest / report on automatic structure fix-ups</label>
+    <br><label><input type='checkbox' name='chartMulti' value='1' onclick='hideMultiOpts()'> Create html version of multi-chart</label>
+    <div class='indent' id='multi_opts'>
+    <label><input type='checkbox' name='chartNotJustOut' value='1'> List all residues in multi-chart, not just outliers</label>
+    </div>
     </div>
 </div>
 <?php

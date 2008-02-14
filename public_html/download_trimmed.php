@@ -40,6 +40,11 @@ if(!$file || !startsWith($file, realpath($_SESSION['dataDir'])))
 $tmp = mpTempfile('tmp_pdb_trim_');
 reduceTrim($file, $tmp);
 $name = basename($file);
+if (preg_match('/H[0-9]*.pdb$/', $name)) {
+    // uses preg_split to split the name into an array with the H from the name missing.
+    $nameArray = preg_split('/H([0-9]*.pdb)$/', $name, -1, PREG_SPLIT_DELIM_CAPTURE);
+    $name = $nameArray[0].$nameArray[1];
+}
 
 ### FUNKY: This turns into a binary file download rather than an HTML page,
 ### and then calls die(), leaving the user on the original HTML page.
