@@ -302,7 +302,7 @@ function runAnalysis($modelID, $opts)
         $outfile = "$kinDir/$model[prefix]multi.kin";
         makeMulticritKin2(array($infile), $outfile, $mcKinOpts,
         #    array_keys(findAllOutliers($clash, $rama, $rota, $cbdev, $pperp)));
-            array_keys(calcLocalBadness($infile, 7, $clash, $rama, $rota, $cbdev, $pperp)));
+            array_keys(calcLocalBadness($infile, 10, $clash, $rama, $rota, $cbdev, $pperp)));
         
         // EXPERIMENTAL: gzip compress large multikins
         if(filesize($outfile) > MP_KIN_GZIP_THRESHOLD)
@@ -1203,23 +1203,39 @@ function calcLocalBadness($infile, $range, $clash, $rama, $rota, $cbdev, $pperp)
     #var_export($self_bads); echo "\n==========\n";
     $range2 = $range * $range;
     $worst_res = array();
+    
+    //calculate all distances and build association matrix
+    foreach($res_xyz as $cnit => $xyz)
+    {
+        foreach($self_bads as $cnit2 => $bads2)
+        {
+             $xyz2 = $res_xyz[$cnit2];
+             $dx = $xyz['x'] - $xyz2['x'];
+             $dy = $xyz['y'] - $xyz2['y'];
+             $dz = $xyz['z'] - $xyz2['z'];
+             if($dx*$dx + $dy*$dy + $dz*$dz <= $range2 && $self_bads[$cnit]!=0)
+             {
+                    $local_mat[$cnit][$cnit2]=1;
+             }
+        }
+    }
+    
     while(true)
     {
+        //at each iteration count of how bad each case is
         $local_bads = array();
         foreach($res_xyz as $cnit => $xyz)
         {
-            #$local_bads[$cnit] = 0;
-            foreach($self_bads as $cnit2 => $bads)
+            foreach($self_bads as $cnit2 => $bads2)
             {
-                $xyz2 = $res_xyz[$cnit2];
-                $dx = $xyz['x'] - $xyz2['x'];
-                $dy = $xyz['y'] - $xyz2['y'];
-                $dz = $xyz['z'] - $xyz2['z'];
-                if($dx*$dx + $dy*$dy + $dz*$dz <= $range2)
-                    $local_bads[$cnit] += $bads;
+                if($local_mat[$cnit][$cnit2]==1 && !preg_match('/(HOH|DOD|H20|D20|WAT|SOL|TIP|TP3|MTO|HOD|DOH)/',$cnit))
+                {
+                    $local_bads[$cnit] += $bads2;
+                }
             }
         }
         // Get worst residue from list and its count of bads
+
         asort($local_bads); // put worst residue last
         #var_export($local_bads); echo "\n==========\n";
         end($local_bads); // go to last element
@@ -1239,25 +1255,23 @@ function calcLocalBadness($infile, $range, $clash, $rama, $rota, $cbdev, $pperp)
         // Discard all bads that went to making the worst, the worst;
         // then re-run the algorithm to find the next worst, until no bads left.
         $cnit = $worst_cnit;
-        $xyz = $res_xyz[$cnit];
+        #$xyz = $res_xyz[$cnit];
         $leftover_bads = 0;
         foreach($self_bads as $cnit2 => $bads)
         {
-            $xyz2 = $res_xyz[$cnit2];
-            $dx = $xyz['x'] - $xyz2['x'];
-            $dy = $xyz['y'] - $xyz2['y'];
-            $dz = $xyz['z'] - $xyz2['z'];
-            if($dx*$dx + $dy*$dy + $dz*$dz <= $range2)
-                #$self_bads[$cnit2] = 0;
+            if($local_mat[$cnit][$cnit2]==1)
+            {
                 unset($self_bads[$cnit2]); // faster than 0 -- won't traverse again
-            else
-                $leftover_bads += $bads;
+                unset($local_bads[$cnit2]);
+            }
         }
-        if($leftover_bads == 0) break;
-        #$cycles++;
-        #if($cycles > 100) break;
+        if(count($self_bads)==0) break;
+        //limit the number of cycles to 25
+        $cycles++;
+        if($cycles > 25) break;
     }
     #var_export($worst_res); echo "\n==========\n";
+
     return $worst_res;
 }
 #}}}########################################################################
