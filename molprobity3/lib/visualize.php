@@ -286,6 +286,7 @@ function makeMulticritKin2($infiles, $outfile, $opt, $viewRes = array(), $nmrCon
     fclose($h);
     
     $view_info = makeResidueViews(reset($infiles), $outfile, $viewRes);
+    #echo "made residue views OK\n";
     
     foreach($infiles as $infile)
     {
@@ -293,33 +294,78 @@ function makeMulticritKin2($infiles, $outfile, $opt, $viewRes = array(), $nmrCon
         //echo("prekin -quiet -lots -append -animate -onegroup $infile >> $outfile\n");
         exec("prekin -quiet -lots -append -animate -onegroup $infile >> $outfile");
         
+        #echo "before ribbon options\n";
         if($opt['ribbons'])
         {
+            echo("I shouldn't be in here\n");
             if($isMultiModel)   makeRainbowRibbons($infile, $outfile);
             else                makeBfactorRibbons($infile, $outfile);
         }
+        #echo "after ribbon options\n";
+        
         if($nmrConstraints)
             exec("noe-display -cv -s viol -ds+ -fs -k $infile $nmrConstraints < /dev/null >> $outfile");
         if($opt['clashdots'] || $opt['hbdots'] || $opt['vdwdots'])
+        {
+            #echo "making Probe Dots...\n";
             makeProbeDots($infile, $outfile, $opt['hbdots'], $opt['vdwdots'], $opt['clashdots']);
+            #echo "Probe dots OK\n";
+        }
         if($opt['rama'])
+        {
+            #echo "making Rama...\n";
             makeBadRamachandranKin($infile, $outfile);
+            #echo "Rama OK\n";
+        }
         if($opt['rota'])
+        {
+            #"making Bad Rota...\n";
             makeBadRotamerKin($infile, $outfile);
+            #"Bad Rota OK\n";
+        }
         if($opt['geom'])
+        {
+            #"making Geom...\n";
             makeBadGeomKin($infile, $outfile);
+            #"Geom OK\n";
+        }
         if($opt['cbdev'])
+        {
+            #"making Cbeta...\n";
             makeBadCbetaBalls($infile, $outfile);
+            #"Cbeta OK\n";
+        }
         if($opt['pperp'])
+        {
+            #"Making BadPPerp...\n";
             makeBadPPerpKin($infile, $outfile);
+            #"BadPPerp OK\n";
+        }
         if($opt['Bscale'])
+        {
+            #"making Bfactor...\n";
             makeBfactorScale($infile, $outfile);
+            #"Bfactor OK\n";
+        }
         if($opt['Qscale'])
+        {
+            #"making Occupancy...\n";
             makeOccupancyScale($infile, $outfile);
+            #"Occupancy OK\n";
+        }
         if($opt['altconf'])
+        {
+            #"making Alts...\n";
             makeAltConfKin($infile, $outfile);
+            #"Alts OK\n";
+        }
         if($view_info)
+        {
+            #"making ViewMarkers...\n";
             makeResidueViewMarkers($outfile, $view_info);
+            #"ViewMarkers OK\n";
+        }
+        #echo "make it through all options OK\n";
     }
 
     // KiNG allows us to do this to control what things are visible
@@ -363,6 +409,7 @@ function makeResidueViews($infile, $outfile, $cnits, $excludeWaters = true)
         if($excludeWaters && preg_match('/(HOH|DOD|H20|D20|WAT|SOL|TIP|TP3|MTO|HOD|DOH)$/', $res)) continue;
         $c = $centers[$res];
         fwrite($h, "@{$i}viewid {{$res}}\n@{$i}span 20\n@{$i}zslab 200\n@{$i}center $c[x] $c[y] $c[z]\n");
+        #echo "@{$i}viewid {{$res}}\n@{$i}span 20\n@{$i}zslab 200\n@{$i}center $c[x] $c[y] $c[z]\n";
         $views[$i] = array(
             'num'   => $i,
             'id'    => $res,
@@ -1700,12 +1747,12 @@ HEREDOC;
             {    
                 fwrite($out, "    (list \"$b[1]\" $b[2] $b[3] $b[4] $b[5] $b[6] $b[7])\n");
                 fwrite($out_py, "       [\"$b[1]\", $b[2], $b[3], $b[4], $b[5], $b[6], $b[7]]");
-                if($loop_ctr < count($worst_res)-1){
+                #if($loop_ctr < count($worst_res)-1){
                     fwrite($out_py, ",\n");
-                }
-                else{
-                    fwrite($out_py, "\n");
-                }
+                #}
+                #else{
+                #    fwrite($out_py, "\n");
+                #}
                 $outlier_ctr++;
             }
             fwrite($out, "   )\n  )\n");
