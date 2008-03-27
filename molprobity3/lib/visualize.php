@@ -261,7 +261,11 @@ function makeMulticritKin($infiles, $outfile, $opt, $nmrConstraints = null)
 */
 function makeMulticritKin2($infiles, $outfile, $opt, $viewRes = array(), $nmrConstraints = null)
 {
-    if(file_exists($outfile)) unlink($outfile);
+    if(file_exists($outfile)){ 
+        if(!unlink($outfile)){
+            echo "delete .kin file failed!\n";
+        }
+    }
     
     $pdbstats = pdbstat(reset($infiles));
     $stats = describePdbStats($pdbstats, false);
