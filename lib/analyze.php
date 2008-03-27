@@ -300,9 +300,15 @@ function runAnalysis($modelID, $opts)
             'vdwdots'   =>  $opts['kinContacts']
         );
         $outfile = "$kinDir/$model[prefix]multi.kin";
+        $viewRes = array();
+        //echo "kinForceViews = ".$opts['kinForceViews']."\n";
+        if($opts['kinForceViews']){
+            //echo "Ran calcLocalBadness\n";
+            $viewRes = array_keys(calcLocalBadness($infile, 10, $clash, $rama, $rota, $cbdev, $pperp));
+        }
         makeMulticritKin2(array($infile), $outfile, $mcKinOpts,
         #    array_keys(findAllOutliers($clash, $rama, $rota, $cbdev, $pperp)));
-            array_keys(calcLocalBadness($infile, 10, $clash, $rama, $rota, $cbdev, $pperp)));
+            $viewRes);
         
         // EXPERIMENTAL: gzip compress large multikins
         if(filesize($outfile) > MP_KIN_GZIP_THRESHOLD)
@@ -508,7 +514,7 @@ function loadCbetaDev($datafile)
             $entry = array(
                 'altConf'   => strtoupper($line[1]),
                 'resType'   => strtoupper($line[2]),
-                'chainID'   => strtoupper($line[3]),
+                'chainID'   => trim(strtoupper($line[3])),
                 'resNum'    => trim(substr($line[4], 0, -1)) + 0,
                 'insCode'   => substr($line[4], -1),
                 'dev'       => $line[5] + 0,
