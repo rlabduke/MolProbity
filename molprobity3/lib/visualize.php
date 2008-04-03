@@ -301,7 +301,7 @@ function makeMulticritKin2($infiles, $outfile, $opt, $viewRes = array(), $nmrCon
         #echo "before ribbon options\n";
         if($opt['ribbons'])
         {
-            echo("I shouldn't be in here\n");
+            //echo("I shouldn't be in here\n");
             if($isMultiModel)   makeRainbowRibbons($infile, $outfile);
             else                makeBfactorRibbons($infile, $outfile);
         }
