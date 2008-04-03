@@ -95,6 +95,7 @@ function runAnalysis($modelID, $opts)
     // Ramachandran
     if($opts['chartRama'])
     {
+        $startTime = time();
         setProgress($tasks, 'rama'); // updates the progress display if running as a background job
         $outfile = "$rawDir/$model[prefix]rama.data";
         runRamachandran($infile, $outfile);
@@ -106,20 +107,24 @@ function runAnalysis($modelID, $opts)
         makeRamachandranPDF($infile, "$chartDir/$model[prefix]rama.pdf");
         $tasks['rama'] .= " | <a href='$chartURL/$model[prefix]rama.pdf' target='_blank'>PDF</a>\n";
         setProgress($tasks, 'rama'); // so the preview link is visible
+        echo "Ramachandran ran for ".(time() - $startTime)." seconds\n";
     }
     
     // Rotamers
     if($opts['chartRota'])
     {
+        $startTime = time();
         setProgress($tasks, 'rota'); // updates the progress display if running as a background job
         $outfile = "$rawDir/$model[prefix]rota.data";
         runRotamer($infile, $outfile);
         $rota = loadRotamer($outfile);
+        echo "Rotamers ran for ".(time() - $startTime)." seconds\n";
     }
     
     // C-beta deviations
     if($opts['chartCBdev'])
     {
+        $startTime = time();
         setProgress($tasks, 'cbeta'); // updates the progress display if running as a background job
         $outfile = "$rawDir/$model[prefix]cbdev.data";
         runCbetaDev($infile, $outfile);
@@ -128,6 +133,7 @@ function runAnalysis($modelID, $opts)
         makeCbetaDevPlot($infile, "$kinDir/$model[prefix]cbetadev.kin");
         $tasks['cbeta'] .= " - <a href='viewking.php?$_SESSION[sessTag]&url=$kinURL/$model[prefix]cbetadev.kin' target='_blank'>preview</a>";
         setProgress($tasks, 'cbeta'); // so the preview link is visible
+        echo "C-beta ran for ".(time() - $startTime)." seconds\n";
     }
     //}}} Run programs and offer kins to user
     
@@ -174,6 +180,7 @@ function runAnalysis($modelID, $opts)
     // Clashes
     if($opts['chartClashlist'])
     {
+        $startTime = time();
         setProgress($tasks, 'clashlist'); // updates the progress display if running as a background job
         $outfile = "$chartDir/$model[prefix]clashlist.txt";
         runClashlist($infile, $outfile);
@@ -181,6 +188,7 @@ function runAnalysis($modelID, $opts)
         //$clashPct = runClashStats($model['stats']['resolution'], $clash['scoreAll'], $clash['scoreBlt40']);
         $tasks['clashlist'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=plain' target='_blank'>preview</a>\n";
         setProgress($tasks, 'clashlist'); // so the preview link is visible
+        echo "chartClashlist ran for ".(time() - $startTime)." seconds\n";
     }
     //}}} Run all-atom contact programs and offer kins to user
     
@@ -188,6 +196,7 @@ function runAnalysis($modelID, $opts)
     $improveText = "";
     if($opts['chartImprove'] && ($clash || $rota))
     {
+        $startTime = time();
         setProgress($tasks, 'improve'); // updates the progress display if running as a background job
         $altpdb = mpTempfile("tmp_altH_pdb_");
         $mainClashscore = ($clash ? $clash['scoreAll'] : 0);
@@ -253,12 +262,14 @@ function runAnalysis($modelID, $opts)
             }
         }
         unlink($altpdb);
+        echo "chart Improve ran for ".(time() - $startTime)." seconds\n";
     }
     //}}} Report on improvements (that could be) made by by MolProbity
     
     //{{{ Build multi-criterion chart, kinemage
     if($opts['doCharts'])
     {
+        $startTime = time();
         if($opts['chartMulti']) {
           setProgress($tasks, 'multichart'); // updates the progress display if running as a background job
         } else {
@@ -281,9 +292,11 @@ function runAnalysis($modelID, $opts)
           #makeCootMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev, $pperp);
           makeCootClusteredChart($infile, $outfile, $outfile_py, $clash, $rama, $rota, $cbdev, $pperp);
         }
+        echo "do Charts ran for ".(time() - $startTime)." seconds\n";
     }
     if($opts['doKinemage'])
     {
+        $startTime = time();
         setProgress($tasks, 'multikin'); // updates the progress display if running as a background job
         $mcKinOpts = array(
             'ribbons'   =>  $opts['kinRibbons'],
@@ -315,6 +328,7 @@ function runAnalysis($modelID, $opts)
         {
             destructiveGZipFile($outfile);
         }
+        echo "do Kinemage ran for ".(time() - $startTime)." seconds\n";
     }
     //}}} Build multi-criterion chart, kinemage
     
@@ -521,6 +535,9 @@ function loadCbetaDev($datafile)
                 'dihedral'  => $line[6] + 0,
                 'occ'       => $line[7] + 0
             );
+            if($entry['chainID'] == ""){
+                $entry['chainID'] = " ";
+            }
             $entry['resName']   = $entry['chainID']
                                 . str_pad($entry['resNum'], 4, ' ', STR_PAD_LEFT)
                                 . $entry['insCode']
