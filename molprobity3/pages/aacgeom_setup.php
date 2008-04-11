@@ -67,7 +67,7 @@ function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
     
     document.forms[0].chartCoot.checked         = !isBig
     document.forms[0].chartImprove.checked      = (hasProtein && doAAC)
-    document.forms[0].chartMulti.checked        = !isBig
+    document.forms[0].chartMulti.checked        = (hasProtein || hasNucAcid)
     document.forms[0].chartNotJustOut.checked   = !isBig
 }
 
