@@ -75,9 +75,10 @@ $opt        = $_SESSION['bgjob'];
 $gap_start    = $opt['gap_start'];
 $gap_end      = $opt['gap_end'];
 echo $gap_start." ".$gap_end."\n";
+
 if ((preg_match("/[0-9]*/", $gap_start)) && (preg_match("/[0-9]*/", $gap_end))) {
   $fragfiller_args = $gap_start."-".$gap_end;
-  $gapCount += 1;
+  //$gapCount += 1;
 }
 
 echo $pdb."\n";
@@ -104,7 +105,7 @@ $pdbFiles = listDir($pdbDir);
 $pdbEntries = "<p>You can now use the following links to download PDB files with each filled gap.</p>\n";
 foreach ($pdbFiles as $pdbName) {
     //echo "For $pdbName\n";
-    if (preg_match("/".$modelID."[0-9]*-[0-9]*\.pdb/", $pdbName)) {
+    if (preg_match("/".$modelID.".*\.[0-9]*-[0-9]*\.pdb/", $pdbName)) {
         //echo "Found $pdbName\n";
         $filledPdbFile = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$pdbName;        
         $pdburl = $_SESSION['dataURL'].'/'.MP_DIR_MODELS.'/'.$pdbName;
