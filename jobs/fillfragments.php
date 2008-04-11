@@ -71,6 +71,14 @@ $pdb = $pdbDir.'/'.$model['pdb'];
 $kinDir     = $_SESSION['dataDir'].'/'.MP_DIR_KINS;
 $kinURL     = $_SESSION['dataURL'].'/'.MP_DIR_KINS;
     if(!file_exists($kinDir)) mkdir($kinDir, 0777);
+$opt        = $_SESSION['bgjob'];
+$gap_start    = $opt['gap_start'];
+$gap_end      = $opt['gap_end'];
+echo $gap_start." ".$gap_end."\n";
+if ((preg_match("/[0-9]*/", $gap_start)) && (preg_match("/[0-9]*/", $gap_end))) {
+  $fragfiller_args = $gap_start."-".$gap_end;
+  $gapCount += 1;
+}
 
 echo $pdb."\n";
 
@@ -81,10 +89,10 @@ $tasks['notebook'] = "Add entry to lab notebook";
 setProgress($tasks, 'fragfill'); // updates the progress display if running as a background job
 //$newModel = createModel($modelID."H");
 //$outname = $newModel['pdb'];
-if(!file_exists($outpath)) mkdir($outpath, 0777); // shouldn't ever happen, but might...
+//if(!file_exists($outpath)) mkdir($outpath, 0777); // shouldn't ever happen, but might...
 $kinpath = $kinDir.'/'.$modelID.'.kin';
 $pdbPrefix = $pdbDir.'/'.$modelID;
-runFragmentFiller($pdb, $kinpath, $pdbPrefix);
+runFragmentFiller($pdb, $pdbPrefix, $fragfiller_args);
 //reduceNoBuild($pdb, $outpath);
 
 setProgress($tasks, 'notebook');

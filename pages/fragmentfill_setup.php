@@ -47,7 +47,8 @@ function display($context)
         echo "</table></p>\n";
         
         echo "<p><table width='100%' border='0'><tr>\n";
-        echo "<td><input type='submit' name='cmd' value='Start filling gaps &gt;'></td>\n";
+        echo "<br>Simulate gap starting at residue number:<input type='text' name='gap_start' size=5 maxlength=10> to <input type='text' name='gap_end' size=5 maxlength=10>\n";
+        echo "<p><td><input type='submit' name='cmd' value='Start filling gaps &gt;'></td>\n";
         echo "<td align='right'><input type='submit' name='cmd' value='Cancel'></td>\n";
         echo "</tr></table></p></form>\n";
     
@@ -105,7 +106,7 @@ function display($context)
 * $req is filled in with the usually info from the form submission, but
 * we don't need to use it for anything here.
 */
-function onFillGaps($arg)
+function onFillGaps()
 {
     $req = $_REQUEST;
     if($req['cmd'] == 'Cancel')

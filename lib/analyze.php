@@ -1165,10 +1165,11 @@ function hasMoltype($geom, $moltype) {
 /**
 * Documentation for this function.
 */
-function runFragmentFiller($inFile, $outKin, $outPdbPrefix) {
-    $ffcom = "java -Xmx512m -cp ".MP_BASE_DIR."/lib/fragmentfiller.jar fragmentfiller.FragFiller ";
-    $ffcom .= "-libloc ".MP_BASE_DIR."/lib/fragmentfiller/ -pdbloc ".MP_BASE_DIR."/lib/fragmentfiller/pdblibrary/ ";
-    $ffcom .= "$inFile $outKin $outPdbPrefix";
+function runFragmentFiller($inFile, $outPdbPrefix, $args) {
+    $ffcom = "java -Xmx512m -jar ".MP_BASE_DIR."/lib/fragmentfiller.jar ";
+    //$ffcom .= "-libloc ".MP_BASE_DIR."/lib/fragmentfiller/ -pdbloc ".MP_BASE_DIR."/lib/fragmentfiller/pdblibrary/ ";
+    $ffcom .= "-pdbloc ".MP_BASE_DIR."/lib/fragmentfiller/pdblibrary/ ";
+    $ffcom .= "$args $inFile $outPdbPrefix";
   exec($ffcom);
 }
 #}}}########################################################################
