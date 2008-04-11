@@ -39,6 +39,11 @@ function display($context)
     }
     echo "</div>\n"; // end indent
     
+    echo "<h5 class='nospaceafter'>Remove hydrogens:</h5>";
+    echo "<div class='indent'>\n";
+    echo "<input type='checkbox' name='removeHs'> Remove hydrogens from $modelID<br>\n";
+    echo "</div>\n"; // end indent
+    
     echo "</div>\n"; // end indent
     echo "<p><table width='100%' border='0'><tr>\n";
     echo "<td><input type='submit' name='cmd' value='Edit PDB file &gt;'></td>\n";
@@ -94,6 +99,14 @@ function onEditPDB()
         replacePdbRemark($outpath, $remark2, 2);
         $s .= "<p>You manually set the resolution for $newModel[pdb].\n";
         mpLog("editpdb:Changed/set resolution for a PDB file");
+    }
+    if($req['removeHs']) {
+      $newModel = createModel($oldID."_trimmed");
+      $newID = $newModel['id'];
+      $outpath = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$newModel['pdb'];
+      reduceTrim($inpath, $outpath);
+      $s .= "<p>You created $newModel[pdb] by removing hydrogens from $oldModel[pdb].\n";
+      mpLog("editpdb:Removed hydrogens from a PDB file");
     }
 
     $newModel['stats']          = pdbstat($outpath);
