@@ -991,6 +991,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
             $res[$cnit]['clash'] = "$worst&Aring;<br><small>".$with[$cnit]['srcatom']." with ".$with[$cnit]['dstcnit']." ".$with[$cnit]['dstatom']."</small>";
             $res[$cnit]['clash_isbad'] = true;
             $res[$cnit]['any_isbad'] = true;
+            //echo "clash ".$cnit."\n";
         }
     }
     if(is_array($rama))
@@ -1049,6 +1050,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
         {
             if($item['outlier'])
             {
+                //echo "pperp ".$item['resName']."\n";
                 $reasons = array();
                 if    ($item['deltaOut'] && $item['epsilonOut'] && $item['3Pdist'] < 3.0) $reasons[] = "&delta & &epsilon outlier <br> (base-p distance indicates 2'-endo";
                 elseif($item['deltaOut'] && $item['epsilonOut'] && $item['3Pdist'] >= 3.0) $reasons[] = "&delta & &epsilon outlier <br> (base-p distance indicates 3'-endo";
