@@ -445,9 +445,10 @@ function loadBasePhosPerp($datafile)
             $line = explode(':', $line);
             $deltaOut = (trim($line[8]) ? true : false);
             $epsilonOut = (trim($line[10]) ? true : false);
+            //echo strtoupper(substr($line[3],0,-1))."\n";
             $entry = array(
                 'resType'   => strtoupper(substr($line[2],1,-1)),
-                'chainID'   => strtoupper(substr($line[3],1,-1)),
+                'chainID'   => strtoupper(substr($line[3],2,-1)),
                 'resNum'    => trim(substr($line[4], 0, -2)) + 0,
                 'insCode'   => strtoupper(substr($line[4], -2, 1)),
                 '5Pdist'    => $line[5] + 0,
