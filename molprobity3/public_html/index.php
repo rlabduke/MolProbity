@@ -32,15 +32,38 @@
             //default:            pageGoto("april_fools.php"); break;
         }
     }
+    
+
 
 // Process submitted event /////////////////////////////////////////////////////
 $page = end($_SESSION['pages']); // not a ref; read only
 $delegate = makeDelegateObject();
 if($isNewSess)
 {
+  // new code for directly telling molprobity to fetch a pdb file with a get in the html call
+  if (isset($_GET["pdbCode"])) {
+    $pdbCode = $_GET["pdbCode"];
+    mpLog("new-session:New session started by calling MolProbity directly with ".$pdbCode);
+    mpLog("browser-detect:".$_SERVER['HTTP_USER_AGENT']);
+    mpLog("refered-by:".$_SERVER['HTTP_REFERER']);
+    if (strlen($pdbCode) > 10) {
+      mpLog("bad-pdb:Invalid PDB code detected.");
+      $pdbCode = "";
+    }
+    $_SESSION['bgjob']['pdbCode']       = $pdbCode;
+    $_SESSION['bgjob']['isCnsFormat']   = false;
+    $_SESSION['bgjob']['ignoreSegID']   = false;
+    $_SESSION['bgjob']['biolunit']      = false;
+    $_SESSION['bgjob']['eds_2fofc']     = false;
+    $_SESSION['bgjob']['eds_fofc']      = false;
+    // launch background job
+    pageCall("job_progress.php");
+    launchBackground(MP_BASE_DIR."/jobs/addmodel.php", "upload_pdb_done.php", 3);
+  } else {
     mpLog("new-session:New interactive user session started on the web");
     mpLog("browser-detect:".$_SERVER['HTTP_USER_AGENT']);
     mpLog("refered-by:".$_SERVER['HTTP_REFERER']);
+  }
 }
 elseif(isset($_REQUEST['eventID']))
 {
