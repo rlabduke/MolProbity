@@ -75,10 +75,11 @@ from your web browser.</p>
 
 </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>
 
-<h3>What's new in 3.14:</h3><ul>
-<li>Added bond geometry analysis to cmdline tools.</li>
-<li>Multicritchart geometry sorts by absolute value now.</li>
-<li>Numerous bug fixes.</li>
+<h3>What's new in 3.15:</h3><ul>
+<li>Python version of coot chart.</li>
+<li>More control over main analysis.</li>
+<li>Ability to remove Hs in Edit PDB.</li>
+<li>New extension (F) on name to indicate flips.</li>
 </ul>
 <h3>Common questions:</h3>
 <p><b><a href='help/about.html' target='_blank'>Cite MolProbity</a></b>:
@@ -602,10 +603,10 @@ function toggleUploadOptions()
 </div></form>
 <?php
 
-    echo("<div class=alert><strong>The PDB has changed its file format from PDB v2.3 to v3 (see <a href='http://remediation.wwpdb.org/index.html' target='_blank'>here</a> for more info).  
-        We have upgraded our software to be compatible with the new format.
-        Any uploaded files will be converted to PDB v3 if necessary; you will have an option to convert modified files back to PDB v2.3 if desired.
-        <br><br>Please don't hesitate to report any bugs you may encounter; sorry for any inconvenience.</strong></div>");
+    //echo("<div class=alert><strong>The PDB has changed its file format from PDB v2.3 to v3 (see <a href='http://remediation.wwpdb.org/index.html' target='_blank'>here</a> for more info).  
+    //    We have upgraded our software to be compatible with the new format.
+    //    Any uploaded files will be converted to PDB v3 if necessary; you will have an option to convert modified files back to PDB v2.3 if desired.
+    //    <br><br>Please don't hesitate to report any bugs you may encounter; sorry for any inconvenience.</strong></div>");
 }
 #}}}########################################################################
 

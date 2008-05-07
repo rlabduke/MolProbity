@@ -726,11 +726,18 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
         if($clashPct['pct_rank'] <= 33)     $bg = $bgPoor;
         elseif($clashPct['pct_rank'] <= 66) $bg = $bgFair;
         else                                $bg = $bgGood;
+        if ($clash['scoreAll']<0)           $bg = $bgFair; // for catching a bug with probe giving clashscore = -1
         $entry .= "<tr><td rowspan='2' align='center'>All-Atom<br>Contacts</td>\n";
         $entry .= "<td>Clashscore, all atoms:</td><td bgcolor='$bg'>$clash[scoreAll]</td>\n";
-        $entry .= "<td>$clashPct[pct_rank]<sup>".ordinalSuffix($clashPct['pct_rank'])."</sup> percentile<sup>*</sup> (N=$clashPct[n_samples], $clashPct[minresol]&Aring; - $clashPct[maxresol]&Aring;)</td></tr>\n";
+        if ($clash['scoreAll']<0) {
+          $entry .= "<td>unknown percentile<sup>*</sup> (N=$clashPct[n_samples], $clashPct[minresol]&Aring; - $clashPct[maxresol]&Aring;)</td></tr>\n";
         
-        $entry .= "<tr><td colspan='3'>Clashscore is the number of serious steric overlaps (&gt; 0.4 &Aring;) per 1000 atoms.</td></tr>\n";
+          $entry .= "<tr><td colspan='3'>An error has occurred; clashscore should not be negative! Please report this bug.</td></tr>\n";
+        } else {
+          $entry .= "<td>$clashPct[pct_rank]<sup>".ordinalSuffix($clashPct['pct_rank'])."</sup> percentile<sup>*</sup> (N=$clashPct[n_samples], $clashPct[minresol]&Aring; - $clashPct[maxresol]&Aring;)</td></tr>\n";
+          
+          $entry .= "<tr><td colspan='3'>Clashscore is the number of serious steric overlaps (&gt; 0.4 &Aring;) per 1000 atoms.</td></tr>\n";
+        }
         //if($clashPct['pct_rank40'] <= 33)       $bg = $bgPoor;
         //elseif($clashPct['pct_rank40'] <= 66)   $bg = $bgFair;
         //else                                    $bg = $bgGood;
@@ -810,11 +817,19 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             elseif(abs(($mer-$axr)/$axr) <= 0.20)   $bg = $bgFair;  // within 20% of actual
             else                                    $bg = $bgPoor;  // more than 20% above
             if($mer_pct['pct_rank'] > 66)           $bg = $bgGood;  // to try to compensate for high-res structures looking worse than they are
+            if (is_infinite($mer)) {
+              $mer = -1;
+              $bg = $bgFair;
+            }
             
             $entry .= "<td>MolProbity score</td><td bgcolor='$bg'>";
             $entry .= sprintf('%.2f', $mer);
             //$entry .= "</td><td>Goal: &lt;$axr</td></tr>\n";
-            $entry .= "</td><td>$mer_pct[pct_rank]<sup>".ordinalSuffix($mer_pct['pct_rank'])."</sup> percentile<sup>*</sup> (N=$mer_pct[n_samples], $mer_pct[minresol]&Aring; - $mer_pct[maxresol]&Aring;)</td></tr>\n";
+            if ($mer == -1) {
+              $entry .= "</td><td>unknown percentile<sup>*</sup> (N=$mer_pct[n_samples], $mer_pct[minresol]&Aring; - $mer_pct[maxresol]&Aring;)</td></tr>\n";
+            } else {
+              $entry .= "</td><td>$mer_pct[pct_rank]<sup>".ordinalSuffix($mer_pct['pct_rank'])."</sup> percentile<sup>*</sup> (N=$mer_pct[n_samples], $mer_pct[minresol]&Aring; - $mer_pct[maxresol]&Aring;)</td></tr>\n";
+            }
         }
         if(hasMoltype($bbonds, "protein"))
         {
@@ -1632,7 +1647,8 @@ HEREDOC;
     $worst_res = array();
     // cnit => array( bad1, bad2, ... )
     $local_bads = array();
-    //$startTime = time();
+    $startTime = time();
+    echo "starting cootclusteredchart\n";
     foreach($res_xyz as $cnit => $xyz)
     {
         #$local_bads[$cnit] = array();
@@ -1660,7 +1676,7 @@ HEREDOC;
             }
         }
     }
-    //echo "first foreach loop took ".(time() - $startTime)." seconds\n";
+    echo "first foreach loop took ".(time() - $startTime)." seconds\nstarting whiletrue loop\ncycles:";
     while(true)
     {
         // Get worst residue from list and its count of bads
@@ -1705,7 +1721,8 @@ HEREDOC;
             }
         }
         if(count($self_bads) == 0) break;
-        //$cycles++;
+        $cycles++;
+        echo $cycles." ";
         //echo "end of while loop took ".(time() - $startTime)." seconds\n";
         #if($cycles > 100) break;
     }
