@@ -86,7 +86,6 @@
     **** Fix ensemble model upload history info like in 3.12****
     Possible issue with analyzing PDBs without REMARKS? (Bug report 070912)
     New F name for flips needs to reflect whether the file has any flips in it!!!
-    option for running trim (e.g. if pdb already has hydrogens)
     Add flips to end of coot todo list?
     fix up fragmentfiller software page
     maintain knowledge about flips done already?
@@ -107,6 +106,11 @@
 - fixed bugs in reduce.
 - new prekins for dealing with two char chain ids.
 - option for running reduce trim added to editpdb
+- Molprobity can interpret ?GET pdbCode now (for use with PDBWiki)
+- Updated pdbv2.3 hashmap.
+- Updated remediator.
+- When clashscore is negative (pdb 2izq) no longer says clashscore is 100th percentile
+- Similar patch to molprobity score
 
 ### 3.14 ###
 - fixed a bug in MacOSX makefile that was preventing proper compilation of the 
