@@ -5,7 +5,7 @@ INPUTS / SWITCHES (via $_SERVER['argv']):
     inFile          a PDB file to operate on, with hydrogens already added
 
 OUTPUTS / RESULTS:
-    A PDB-formatted REMARK 42 on stdout
+    A PDB-formatted REMARK 40 on stdout
 
 *****************************************************************************/
 // EVERY *top-level* page must start this way:
@@ -45,7 +45,7 @@ if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
 if(!isset($inFile))         die("No input file specified.\n");
 elseif(!is_file($inFile))   die("Input file '$inFile' does not exist.\n");
 
-$tmp = mpTempfile("tmp_remark42_");
+$tmp = mpTempfile("tmp_remark40_");
 
 runRotamer($inFile, $tmp);
 $rota = loadRotamer($tmp);
@@ -59,7 +59,7 @@ runClashlist($inFile, $tmp);
 $clash = loadClashlist($tmp);
 unlink($tmp);
 
-echo makeRemark42($clash, $rama, $rota);
+echo makeRemark40($clash, $rama, $rota);
 
 ############################################################################
 // Clean up and go home
