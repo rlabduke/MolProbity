@@ -16,6 +16,9 @@ if(!defined("MP_EMAIL_WEBMASTER"))
   
 if(!defined("MP_EMAIL_WEBMASTER2"))
   define("MP_EMAIL_WEBMASTER2", "webmaster@kinemage.biochem.duke.edu");
+  
+if(!defined("MP_EMAIL_WEBMASTER3"))
+  define("MP_EMAIL_WEBMASTER3", "jjh19@duke.edu");
 
 // MP_BIN_PATH
 //  Directory(s) where all MolProbity-specific binary
@@ -130,6 +133,6 @@ if(!defined("MP_DIR_CHARTS"))
     define("MP_SESSION_NAME", "MolProbSID");
 
 // Current "internal reference" version number. Please DO NOT change.
-    define("MP_VERSION", "3.15");
+    define("MP_VERSION", "3.16");
 
 ?>
