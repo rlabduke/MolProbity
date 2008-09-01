@@ -211,6 +211,8 @@ if($doList)
 {
     setProgress($tasks, 'list'); // updates the progress display if running as a background job
     exec($probe_cmd2);
+    $entry .= "Types of contacts include the following:";
+    $entry .= "<p><code>hb</code> = hydrogen bond; <code>wc</code> = wide contact; <code>cc</code> = close contact; <code>so</code> = small overlap; <code>bo</code> = big overlap";
     $entry .= "<p>The list of contacts is as follows:</p>\n";
     $entry .= "<p><pre>\n";
     $entry .= @file_get_contents($list_out);
