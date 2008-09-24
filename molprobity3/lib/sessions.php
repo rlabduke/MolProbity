@@ -256,12 +256,41 @@ function mpSessDestroy($id)
 // Still, we're ignoring it right now.
 function mpSessGC($maxlifetime)
 {
-    $sessions = mpEnumerateSessions();
-    foreach($sessions as $sess)
+    // This is straightforward but unacceptably slow for thousands of sessions,
+    // because we have to calculate both time-to-live and disk usage --
+    // requires a LOT of disk access.
+    #$sessions = mpEnumerateSessions();
+    #foreach($sessions as $sess)
+    #{
+    #    // Destroy old sessions and ones that are way too big
+    #    if($sess['ttl'] < 0 || $sess['size'] > 1.5*MP_SESSION_MAX_SIZE)
+    #        mpSessDestroy($sess['id']);
+    #}
+    
+    // Time-limited, probabalistic cleanup of old / oversize sessions
+    // 1. Enumerate IDs of all active sessions.
+    $start = microtime(true); // seconds, as float
+    $session_ids = array();
+    $baseDataDir = MP_BASE_DIR."/public_html/data";
+    $h = opendir($baseDataDir);
+    while( ($id = readdir($h)) != false )
     {
-        // Destroy old sessions and ones that are way too big
-        if($sess['ttl'] < 0 || $sess['size'] > 1.5*MP_SESSION_MAX_SIZE)
-            mpSessDestroy($sess['id']);
+        // Assume they're directories for now so we don't have to touch the disk so much
+        if(preg_match('/^[a-zA-Z0-9_]{16,64}$/', $id)) $session_ids[$id] = $id;
+    }
+    closedir($h);
+    // 2. Iterate over sessions in random order until we cover them all or run out of time
+    shuffle($session_ids);
+    foreach($session_ids as $id)
+    {
+        // Confirm now that they're really directories
+        if(!is_dir("$baseDataDir/$id")) continue;
+        $lifetime = mpSessLifetime($id);
+        $ttl = $lifetime['ttl'];
+        $size = mpSessSizeOnDisk($id);
+        if($ttl < 0 || $size > 1.5*MP_SESSION_MAX_SIZE)
+            mpSessDestroy($id);
+        if( (microtime(true) - $start) > 1.0 ) break;
     }
     return true;
 }
@@ -341,6 +370,8 @@ function mpSessSizeOnDisk($id)
 *   last    last touched time (Unix timestamp)
 *   ttl     time to live, in seconds
 *   size    disk usage, in bytes
+* This function may take tens of seconds to run on a production server with
+* thousands of active sessions.
 */
 function mpEnumerateSessions()
 {
