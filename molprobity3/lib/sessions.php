@@ -269,7 +269,7 @@ function mpSessGC($maxlifetime)
     
     // Time-limited, probabalistic cleanup of old / oversize sessions
     // 1. Enumerate IDs of all active sessions.
-    $start = microtime(true); // seconds, as float
+    $start = microtime(); // seconds, as string
     $session_ids = array();
     $baseDataDir = MP_BASE_DIR."/public_html/data";
     $h = opendir($baseDataDir);
@@ -290,7 +290,9 @@ function mpSessGC($maxlifetime)
         $size = mpSessSizeOnDisk($id);
         if($ttl < 0 || $size > 1.5*MP_SESSION_MAX_SIZE)
             mpSessDestroy($id);
-        if( (microtime(true) - $start) > 1.0 ) break;
+        $ellapsed = microtimeSubtract(microtime(), $start);
+        //echo "$ellapsed seconds ellapsed...\n";
+        if( $ellapsed > 1.0 ) break;
     }
     return true;
 }
