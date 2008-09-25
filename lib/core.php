@@ -772,6 +772,22 @@ function censorFileName($origName, $allowedExt = null)
 }
 #}}}########################################################################
 
+#{{{ microtimeSubtract - subtracts two strings from microtime(), returns float
+############################################################################
+/**
+* Computes (a - b), where a and b are values from microtime().
+* Returns the difference in seconds as a float.
+* microtime() can't return a float value directly until PHP 5,
+* and this seems to suffer from precision issues anyway.
+*/
+function microtimeSubtract($a, $b)
+{
+    $x = explode(' ', $a);
+    $y = explode(' ', $b);
+    return ($x[1] - $y[1]) + ($x[0] - $y[0]);
+}
+#}}}########################################################################
+
 #{{{ a_function_definition - sumary_statement_goes_here
 ############################################################################
 /**
