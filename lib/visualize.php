@@ -50,7 +50,7 @@ function makeCbetaDevPlot($infile, $outfile)
 ############################################################################
 function makeSuitenameKin($infile, $outfile)
 {
-    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.dangle.Dangle rnabb $infile | suitename -kinemage > $outfile");
+    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle rnabb $infile | suitename -kinemage > $outfile");
 }
 #}}}########################################################################
 
@@ -556,8 +556,8 @@ function makeBadRotamerKin($infile, $outfile, $rota = null, $color = 'gold', $cu
 ############################################################################
 function makeBadGeomKin($infile, $outfile) {
     //$out = fopen($outfile, 'a');
-    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.dangle.Dangle -kin -sub -validate -protein $infile >> $outfile");
-    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.dangle.Dangle -kin -sub -validate -rna $infile >> $outfile");
+    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -kin -sub -validate -protein $infile >> $outfile");
+    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -kin -sub -validate -rna $infile >> $outfile");
     //exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.dangle.Dangle -kin -validate -dna $infile >> $outfile");
 }
 #}}}########################################################################
