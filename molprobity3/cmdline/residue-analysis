@@ -46,6 +46,7 @@ $optCbeta   = true;
 $optRota    = true;
 $optRama    = true;
 $optGeom    = true;
+$optCountOut= true;
 
 $pdbFileList = array();
 // First argument is the name of this script...
@@ -56,6 +57,7 @@ if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
     elseif($arg == '-norota')   $optRota = false;
     elseif($arg == '-norama')   $optRama = false;
     elseif($arg == '-nogeom')   $optGeom = false;
+    elseif($arg == '-nocount')  $optCountOut = false;
     else                        $pdbFileList[] = $arg;
 }
 if(count($pdbFileList) == 0)
@@ -67,6 +69,7 @@ if($optCbeta)   echo ",CB_dev";
 if($optRota)    echo ",rotamer_score,rotamer_eval";
 if($optRama)    echo ",rama_score,rama_eval,rama_type";
 if($optGeom)    echo ",num_length_out,worst_length,worst_length_value,worst_length_sigma,num_angle_out,worst_angle,worst_angle_value,worst_angle_sigma";
+if($optCountOut) echo ",outlier_count,outlier_count_sep_geom";
 echo "\n";
 
 // Loop through all PDBs
@@ -152,6 +155,42 @@ foreach($pdbFileList as $infile)
               if(isset($angles[$cnit]))
                 echo ",".$angles[$cnit]['count'].",".$angles[$cnit]['measure'].",".$angles[$cnit]['value'].",".$angles[$cnit]['sigma'];
               else echo ",,,,";
+            }
+            if($optCountOut)
+            {
+              $outCount = 0;
+              $outCountSep = 0;
+              if(isset($clash['clashes'][$cnit])) {
+                $outCount++;
+                $outCountSep++;
+              }
+              if(isset($rota[$cnit]))
+              {
+                if($rota[$cnit]['scorePct']+0 <= 1.0) {
+                  $outCount++;
+                  $outCountSep++;
+                }
+              }
+              if(isset($rama[$cnit]))
+              {
+                if($rama[$cnit]['eval'] == "OUTLIER") {
+                  $outCount++;
+                  $outCountSep++;
+                }
+              }
+              if(isset($badCbeta[$cnit]))         $outCountSep++;
+              if(isset($bonds[$cnit]))
+              {
+                if($bonds[$cnit]['count']+0 > 0) $outCountSep++;
+              }
+              if(isset($angles[$cnit]))
+              { 
+                if($angles[$cnit]['count']+0 > 0) $outCountSep++;
+              }
+              if((isset($badCbeta[$cnit]))or((isset($bonds[$cnit]))and($bonds[$cnit]['count']+0 > 0))or((isset($angles[$cnit]))and($angles[$cnit]['count']+0 > 0))) {
+                $outCount++;
+              }
+              echo ",".$outCount.",".$outCountSep;
             }
             echo "\n";
         }
