@@ -919,10 +919,11 @@ function loadSuitenameReport($datafile)
     {
         if(startsWith($line, " all general case widths")) break;
         $line = explode(':', rtrim($line));
-        $cnit = $line[2].$line[3].$line[4].substr($line[5],0,3);
-        //$decomp = decomposeResName($cnit);
-        $conf = substr($line[5],9,2);
-        $ret[$cnit] = array(
+        if (count($line) > 1) {
+          $cnit = $line[2].$line[3].$line[4].substr($line[5],0,3);
+          //$decomp = decomposeResName($cnit);
+          $conf = substr($line[5],9,2);
+          $ret[$cnit] = array(
             'resName'   => $cnit,
             //'resType'   => $decomp['resType'],
             //'chainID'   => $decomp['chainID'],
@@ -933,7 +934,8 @@ function loadSuitenameReport($datafile)
             'bin'       => substr($line[5],4,4),
             'triage'    => substr($line[5],18),
             'isOutlier' => ($conf == '!!')
-        );
+          );
+        }
     }
     return $ret;
 }

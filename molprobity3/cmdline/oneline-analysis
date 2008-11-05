@@ -10,6 +10,9 @@ INPUTS / SWITCHES (via $_SERVER['argv']):
     -nocbeta        don't output/calc C-beta deviations
     -norota         don't output/calc rotamer outliers
     -norama         don't output/calc Ramachandran outliers
+    -nogeom         don't output/calc bond geometry outliers
+    -dopucker       do RNA base phosphate perpendicular distance calc
+    -dosuite        do RNA suite conformation analysis
 
 OUTPUTS / RESULTS:
     Runs clash, Rama, rota, Cb dev analysis on all input files.
@@ -40,7 +43,7 @@ OUTPUTS / RESULTS:
 */
 function summaryAnalysis($modelID)
 {
-    global $optStats, $optClash, $optCbeta, $optRota, $optRama, $optGeom;
+    global $optStats, $optClash, $optCbeta, $optRota, $optRama, $optGeom, $optPuck, $optSuite;
     $out = "";
     
     $model =& $_SESSION['models'][$modelID];
@@ -92,38 +95,55 @@ function summaryAnalysis($modelID)
     {
       //echo "running val report\n";
       runValidationReport($pdbfile, "$rawDir/$model[prefix]geom.data", "protein");
+      runValidationReport($pdbfile, "$rawDir/$model[prefix]rnageom.data", "rna");
       //echo "finished running val report\n";
-      $bonds = loadValidationBondReport("$rawDir/$model[prefix]geom.data", "protein");
-      $angles = loadValidationAngleReport("$rawDir/$model[prefix]geom.data", "protein");
+      $bonds = array_merge(loadValidationBondReport("$rawDir/$model[prefix]geom.data", "protein"), loadValidationBondReport("$rawDir/$model[prefix]rnageom.data", "rna"));
+      $angles = array_merge(loadValidationAngleReport("$rawDir/$model[prefix]geom.data", "protein"), loadValidationAngleReport("$rawDir/$model[prefix]rnageom.data", "rna"));
       //echo "finished loading val report\n";
       $total = 0;
       $outCount = 0;
       foreach($bonds as $cnit => $item) {
-        if($item['type'] == 'protein') {
+        //if($item['type'] == 'protein') {
           if($item['isOutlier']) {
             $outCount += 1;
           }
           $total += 1;
-        }
+        //}
       }
       if ($total > 0) $out .= ":".sprintf("%.2f", 100.0 * $outCount / $total);
       else            $out .= ":-1";
+      //echo "outliers:$outCount total:$total";
       $total = 0;
       $outCount = 0;
       foreach($angles as $cnit => $item) {
-        if($item['type'] == 'protein') {
+        //if($item['type'] == 'protein') {
           if($item['isOutlier']) {
             $outCount += 1;
           }
           $total += 1;
-        }
+        //}
       }
       if ($total > 0) $out .= ":".sprintf("%.2f", 100.0 * $outCount / $total);
       else            $out .= ":-1";
+      //echo "\noutliers:$outCount total:$total\n";
     }
     if($optClash && $optRota && $optRama)
     {
         $out .= sprintf(':%.3f', getEffectiveResolution($clash, $rota, $rama));
+    }
+    if($optPuck) {
+      $outfile = "$rawDir/$model[prefix]pperp.data";
+      runBasePhosPerp($pdbfile, $outfile);
+      $pperp = loadBasePhosPerp($outfile);
+      $badPperp = findBasePhosPerpOutliers($pperp);
+      $out .= ":" . count($badPperp) . ":" . count($pperp);
+    }
+    if($optSuite) {
+      $outfile = "$rawDir/$model[prefix]suitename.txt";
+      runSuitenameReport($pdbfile, $outfile);
+      $suites = loadSuitenameReport($outfile);
+      $badSuites = findSuitenameOutliers($suites);
+      $out .= ":" . count($badSuites) . ":" . count($suites);
     }
     
     $out .= "\n"; // end of this line
@@ -150,6 +170,8 @@ $optCbeta   = true;
 $optRota    = true;
 $optRama    = true;
 $optGeom    = true;
+$optPuck    = false;
+$optSuite   = false;
 
 // First argument is the name of this script...
 if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
@@ -162,6 +184,8 @@ if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
     elseif($arg == '-norota')   $optRota = false;
     elseif($arg == '-norama')   $optRama = false;
     elseif($arg == '-nogeom')   $optGeom = false;
+    elseif($arg == '-dopucker')  $optPuck = true;
+    elseif($arg == '-dosuite')   $optSuite = true;
     elseif(!isset($inDir))      $inDir = $arg;
     else                        die("Too many or unrecognized arguments: '$arg'\n");
 }
@@ -209,6 +233,8 @@ if($optVerbose)
     if($optRama)    echo ":ramaOutlier:ramaAllowed:ramaFavored:numRama";
     if($optGeom)    echo ":pct_badbonds:pct_badangles";
     if($optClash && $optRota && $optRama) echo ":MolProbityScore";
+    if($optPuck)    echo ":numPperpOutliers:numPperp";
+    if($optSuite)   echo ":numSuiteOutliers:numSuites";
     echo "\n";
 }
 
