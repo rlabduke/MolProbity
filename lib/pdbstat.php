@@ -263,6 +263,13 @@ function pdbstat($pdbfilename)
             if(startsWith($s, "ATOM")||startsWith($s, "HETATM")||startsWith($s, "TER")||startsWith($s, "ANISOU")||startsWith($s, "SIGATM")||startsWith($s, "SUIUIJ")) {
                 $atom_name = substr($s, 12, 4);
                 $resn = substr($s, 17, 3);
+                #pre-screen for CNS Xplor RNA base names and Coot RNA base names
+                if($resn == "GUA" || $resn == "ADE" || $resn == " CYT" || $resn == "THY" || $resn == "URI"){
+                    $resn = "  ".substr($resn,0,1); 
+                }
+                elseif($resn == " Ar" || $resn == " Gr" || $resn == " Cr" || $resn == " Ur" || $resn == "OIP"){
+                    $resn = "  ".substr($resn,1,1);
+                }
                 $key = $atom_name." ".$resn;
                 //echo "|".$key."|\n";
                 if(array_key_exists($key, $hash)) {
