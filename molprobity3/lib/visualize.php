@@ -822,7 +822,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
               $bg = $bgFair;
             }
             
-            $entry .= "<td>MolProbity score</td><td bgcolor='$bg'>";
+            $entry .= "<td>MolProbity score<sup><small>^</small></sup></td><td bgcolor='$bg'>";
             $entry .= sprintf('%.2f', $mer);
             //$entry .= "</td><td>Goal: &lt;$axr</td></tr>\n";
             if ($mer == -1) {
@@ -961,6 +961,11 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
         if($firstRow) $firstRow = false;
         else $entry .= "<br>";
         $entry .= "<small><sup>#</sup> RNA backbone was recently shown to be rotameric.  Outliers are RNA suites that don't fall into recognized rotamers.</small>\n";
+    }
+    if(is_array($clash) && is_array($rota) && is_array($rama)) {
+      if($firstRow) $firstRow = false;
+      else $entry .= "<br>";
+      $entry .= "<small><sup>^</sup> MolProbity score is defined as the following: 0.42574*log(1+clashscore) + 0.32996*log(1+max(0,pctRotOut-1)) + 0.24979*log(1+max(0,100-pctRamaFavored-2)) + 0.5</small>\n";
     }
     $entry .= "</p>\n"; // end of summary stats table
     return $entry;
@@ -1156,8 +1161,8 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
       if(is_array($cbdev))  $header1[] = array('html' => "<b>C&beta; deviation</b>",      'sort' => -1);
       if(is_array($pperp))  $header1[] = array('html' => "<b>Base-P perp. dist.</b>",     'sort' => -1);
       if(is_array($suites)) $header1[] = array('html' => "<b>RNA suite conf.</b>",        'sort' => 1);
-      if(is_array($bbonds)) $header1[] = array('html' => "<b>Bond lengths.</b>",      'sort' => 1);
-      if(is_array($bangles)) $header1[] = array('html' => "<b>Bond angles.</b>",      'sort' => 1);
+      if(is_array($bbonds)) $header1[] = array('html' => "<b>Bond lengths.</b>",      'sort' => -1);
+      if(is_array($bangles)) $header1[] = array('html' => "<b>Bond angles.</b>",      'sort' => -1);
       
       $header2 = array();
       $header2[] = array('html' => "");
