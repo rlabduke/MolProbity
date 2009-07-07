@@ -129,7 +129,15 @@ function summaryAnalysis($modelID)
     }
     if($optClash && $optRota && $optRama)
     {
-        $out .= sprintf(':%.3f', getEffectiveResolution($clash, $rota, $rama));
+      $axr = $pdbstats['resolution'];                                     // Actual Xtalographic Resolution
+      if ((count($rota) != 0) && (count($rama) != 0)) {
+        $mer = getEffectiveResolution($clash, $rota, $rama);    // MolProbity Effective Resolution
+        $mer_pct = getEffectiveResolutionPercentile($mer, $axr);
+        $out .= sprintf(':%.3f', $mer);
+        $out .= sprintf(':%s', $mer_pct[pct_rank]);
+      } else {
+        $out .= '::';
+      }
     }
     if($optPuck) {
       $outfile = "$rawDir/$model[prefix]pperp.data";
@@ -232,7 +240,7 @@ if($optVerbose)
     if($optRota)    echo ":rota<1%:numRota";
     if($optRama)    echo ":ramaOutlier:ramaAllowed:ramaFavored:numRama";
     if($optGeom)    echo ":pct_badbonds:pct_badangles";
-    if($optClash && $optRota && $optRama) echo ":MolProbityScore";
+    if($optClash && $optRota && $optRama) echo ":MolProbityScore:Mol_pct_rank";
     if($optPuck)    echo ":numPperpOutliers:numPperp";
     if($optSuite)   echo ":numSuiteOutliers:numSuites";
     echo "\n";
