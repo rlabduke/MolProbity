@@ -52,6 +52,7 @@ if(!isset($inFile))         die("No input file specified.\n");
 elseif(!is_file($inFile))   die("Input file '$inFile' does not exist.\n");
 
 $tmp = mpTempfile();
+$tmp2 = mpTempfile();
 
 runRotamer($inFile, $tmp);
 $rota = loadRotamer($tmp);
@@ -77,10 +78,19 @@ runSuitenameReport($inFile, $tmp);
 $suites = loadSuitenameReport($tmp);
 unlink($tmp);
 
+runValidationReport($inFile, $tmp, "protein");
+runValidationReport($inFile, $tmp2, "rna");
+$bbonds = array_merge(loadValidationBondReport($tmp,"protein"), loadValidationBondReport($tmp2, "rna"));
+if (count($bbonds) == 0) $bbonds = null;
+$bangles = array_merge(loadValidationAngleReport($tmp, "protein"), loadValidationAngleReport($tmp2, "rna"));
+if (count($bangles) == 0) $bangles = null;
+unlink($tmp);
+unlink($tmp2);
+
 if($mode == 'coot')
     makeCootClusteredChart($inFile, "php://stdout", $clash, $rama, $rota, $cbdev, $pperp);
 else
-    writeMulticritChart($inFile, "/dev/null", "php://stdout", $clash, $rama, $rota, $cbdev, $pperp, $suites);
+    writeMulticritChart($inFile, "/dev/null", "php://stdout", $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles);
 
 ############################################################################
 // Clean up and go home
