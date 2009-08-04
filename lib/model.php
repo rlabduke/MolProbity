@@ -1112,8 +1112,10 @@ function getEdsMap($pdbcode, $format, $type)
     foreach($args as $key => $value) $postfields[] = urlencode($key) . '=' . urlencode($value);
     
     // Set CURL options
-    $server = 'fsrv1.bmc.uu.se';
-    $c = curl_init("http://$server/cgi-bin/eds/gen_maps_zip.pl");
+    $server = 'eds.bmc.uu.se/eds';
+    if ($type == '2fofc') $url = "http://$server/dfs/".substr($pdbcode, 1, 2)."/$pdbcode/$pdbcode.$format";
+    if ($type == 'fofc')  $url = "http://$server/dfs/".substr($pdbcode, 1, 2)."/$pdbcode/$pdbcode"."_diff.$format";
+    $c = curl_init($url);
     curl_setopt($c, CURLOPT_RETURNTRANSFER, true); // don't write results to stdout
     //curl_setopt($c, CURLOPT_FOLLOWLOCATION, false);
     curl_setopt($c, CURLOPT_TIMEOUT, 60);
@@ -1140,12 +1142,17 @@ function getEdsMap($pdbcode, $format, $type)
         echo "No $type map available for $pdbcode.\n";
         return null;
     }
-    if(!preg_match('/<a href="(.+?)">/i', $page, $m))    // unknown failure
+    if(preg_match('/not found/i', $page))                   // no map/xtal data available
     {
-        echo "EDS page has no link on it!\n";
+        echo "No $type map found for $pdbcode.\n";
         return null;
     }
-    $url = "http://{$server}{$m[1]}";
+    //if(!preg_match('/<a href="(.+?)">/i', $page, $m))    // unknown failure
+    //{
+    //    echo "EDS page has no link on it!\n";
+    //    return null;
+    //}
+    //$url = "http://{$server}{$m[1]}";
     
     // Copy the file over the network in 8k chunks
     $in = fopen($url, 'r');
