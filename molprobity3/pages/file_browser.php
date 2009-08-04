@@ -41,7 +41,7 @@ function displayDownloadForm($list, $isExpanded)
     echo "<td width='48'></td>";
     echo "<td><b>File name</b></td>";
     echo "<td><b>Size</b></td>";
-    echo "<td colspan='2' align='center'><b>View...</b></td>";
+    echo "<td colspan='3' align='center'><b>View...</b></td>";
     echo "<td align='right'><b>Download</b></td>";
     echo "</tr>\n";
     echo $this->makeFileList($list, $_SESSION['dataDir'], $_SESSION['dataURL'], $isExpanded);
@@ -186,6 +186,7 @@ function makeFileCommands($path, $url)
     if(endsWith($lcPath, ".kin"))
     {
         $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=plain' target='_blank'>plain text</a></small></td>";
+        $s .= "<td></td>";
         //$s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=kin' target='_blank'>highlighted</a></small></td>";
         $s .= "<td><small><a href='viewking.php?$_SESSION[sessTag]&url=$url' target='_blank'>in KiNG</a></small></td>";
     }
@@ -194,28 +195,39 @@ function makeFileCommands($path, $url)
     {
         $s .= "<td></td>";
         $s .= "<td><small><a href='viewking.php?$_SESSION[sessTag]&url=$url' target='_blank'>in KiNG</a></small></td>";
+        $s .= "<td></td>";
     }
     // PDB files with H
     elseif(endsWith($path, "H.pdb")) // have to use $path b/c the capital letter matters!
     {
         $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=plain' target='_blank'>plain text</a></small></td>";
         $s .= "<td><small><a href='download_trimmed.php?$_SESSION[sessTag]&file=$path'>without H</a></small></td>";
+        $s .= "<td><small><a href='viewpdbking.php?$_SESSION[sessTag]&url=$url' target='_blank'>in KiNG</a></small></td>";
+    }
+    elseif(endsWith($path, ".pdb")) // have to use $path b/c the capital letter matters!
+    {
+        $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=plain' target='_blank'>plain text</a></small></td>";
+        $s .= "<td></td>";
+        $s .= "<td><small><a href='viewpdbking.php?$_SESSION[sessTag]&url=$url' target='_blank'>in KiNG</a></small></td>";
     }
     // PHP-encoded-array chart or table (e.g. the multicriterion chart)
     elseif(endsWith($lcPath, ".table"))
     {
         $s .= "<td></td>";
         $s .= "<td><small><a href='viewtable.php?$_SESSION[sessTag]&file=$path' target='_blank'>as table</a></small></td>";
+        $s .= "<td></td>";
     }
     // HTML
     elseif(endsWith($lcPath, ".html"))
     {
         $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=plain' target='_blank'>plain text</a></small></td>";
         $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=html' target='_blank'>as HTML</a></small></td>";
+        $s .= "<td></td>";
     }
     // Binary results files
     elseif(endsWith($lcPath, ".pdf"))
     {
+        $s .= "<td></td>";
         $s .= "<td></td>";
         $s .= "<td></td>";
     }
@@ -224,11 +236,13 @@ function makeFileCommands($path, $url)
     {
         $s .= "<td></td>";
         $s .= "<td></td>";
+        $s .= "<td></td>";
     }
     // The default: assume plain text...
     else
     {
         $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=plain' target='_blank'>plain text</a></small></td>";
+        $s .= "<td></td>";
         $s .= "<td></td>";
     }
     $s .= "<td align='right'><small><a href='$url'><img src='img/download.gif'> Download</a></small></td>";

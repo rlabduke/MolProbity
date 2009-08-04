@@ -199,6 +199,7 @@ function displayModelTools($context)
         'makekins'  => array('desc' => 'Make simple kinemages', 'page' => 'makekin_setup.php', 'rel' => 1, 'img' => 'porin_barrel.png'),
         'editpdb' => array('desc' => 'Edit PDB file', 'page' => 'editpdb_setup1.php', 'rel' => 1, 'img' => 'scissors.png'),
         'downgrade' => array('desc' => 'Downgrade file to PDBv2.3 format (for download only)', 'page' => 'pdb_convert_setup.php', 'rel' => 1, 'img' => 'downgrade.gif'),
+        //'viewpdb' => array('desc' => 'View PDB in KiNG (beta)', 'page' => "viewpdbking.php?$_SESSION[sessTag]&url=".MP_DIR_KINS, 'rel' => 1, 'img' => 'pdb_icon.png'),
         //'' => array('desc' => '', 'page' => '', 'rel' => 1, 'img' => ''),
     );
     
