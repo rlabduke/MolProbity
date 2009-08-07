@@ -1,0 +1,107 @@
+#!/usr/bin/env php
+<?php # (jEdit options) :folding=explicit:collapseFolds=1:
+/*****************************************************************************
+INPUTS / SWITCHES (via $_SERVER['argv']):
+    inDir           the a directory of files ending in ".pdb"
+    outDir          a place to put the output files
+    -q              quiet mode (no progress messages)
+
+OUTPUTS / RESULTS:
+    Renames Ser and Ile H's to PDB standard.
+    Needed for C. Dobson's ubiquitin models.
+
+*****************************************************************************/
+// EVERY *top-level* page must start this way:
+// 1. Define it's relationship to the root of the MolProbity installation.
+// Pages in subdirectories of lib/ or public_html/ will need more "/.." 's.
+    if(!defined('MP_BASE_DIR')) define('MP_BASE_DIR', realpath(dirname(__FILE__).'/..'));
+// 2. Include core functionality - defines constants, etc.
+    require_once(MP_BASE_DIR.'/lib/core.php');
+    require_once(MP_BASE_DIR.'/lib/model.php');
+// 3. Restore session data. If you don't want to access the session
+// data for some reason, you must call mpInitEnvirons() instead.
+    mpInitEnvirons();       // use std PATH, etc.
+    //mpStartSession(true);   // create session dir
+// 5. Set up reasonable values to emulate CLI behavior if we're CGI
+    set_time_limit(0); // don't want to bail after 30 sec!
+
+#{{{ a_function_definition - sumary_statement_goes_here
+############################################################################
+/**
+* Documentation for this function.
+*/
+//function someFunctionName() {}
+#}}}########################################################################
+
+#{{{ a_function_definition - sumary_statement_goes_here
+############################################################################
+/**
+* Documentation for this function.
+*/
+//function someFunctionName() {}
+#}}}########################################################################
+
+#{{{ a_function_definition - sumary_statement_goes_here
+############################################################################
+/**
+* Documentation for this function.
+*/
+//function someFunctionName() {}
+#}}}########################################################################
+
+#{{{ renameHydrogens - rename Ser OG and Ile CD hydrogens to PDB std.
+############################################################################
+/**
+* Documentation for this function.
+*/
+function renameHydrogens($infile, $outfile)
+{
+    $in = fopen($infile, 'rb');
+    $out = fopen($outfile, 'wb');
+    while(!feof($in))
+    {
+        $s = fgets($in, 1024);
+        $s = preg_replace('/^(ATOM.{8}) HG1(.SER.*)$/', '${1} HG $2', $s);
+        $s = preg_replace('/^(ATOM.{8}) HD([123])(.ILE.*)$/', '${1}${2}HD1${3}', $s);
+        fwrite($out, $s);
+    }
+    fclose($out);
+    fclose($in);
+}
+#}}}########################################################################
+
+# MAIN - the beginning of execution for this page
+############################################################################
+// Default options
+$optVerbose = true;
+
+// First argument is the name of this script...
+if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
+{
+    if($arg == '-q')            $optVerbose = false;
+    elseif(!isset($inDir))      $inDir = $arg;
+    elseif(!isset($outDir))     $outDir = $arg;
+    else                        die("Too many or unrecognized arguments: '$arg'\n");
+}
+
+if(!isset($inDir))          die("No input directory specified.\n");
+elseif(!is_dir($inDir))     die("Input directory '$inDir' does not exist.\n");
+elseif(!isset($outDir))     die("No output directory specified.\n");
+elseif(!is_dir($outDir))    die("Output directory '$outDir' does not exist.\n");
+
+if($optVerbose)
+{
+    echo "INPUT   : ".realpath($inDir)."\n";
+    echo "OUTPUT  : ".realpath($outDir)."\n";
+}
+
+foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
+{
+    if($optVerbose) echo "Renaming Hs for $inFile\n";
+    renameHydrogens($inDir.'/'.$inFile, $outDir.'/'.$inFile);
+}
+
+############################################################################
+// Clean up and go home
+//mpDestroySession(); // only call this if we created one
+?>

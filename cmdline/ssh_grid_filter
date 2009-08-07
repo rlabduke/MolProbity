@@ -1,0 +1,146 @@
+#!/usr/bin/env php
+<?php # (jEdit options) :folding=explicit:collapseFolds=1:
+/*****************************************************************************
+    A very simple system for distributing jobs via SSH.
+    Each job should act as a Unix filter,
+    accepting input on stdin and writing output to stdout.
+    
+    Before running, fill in values for $ssh_grid_workers
+    in config/ssh_grid_workers.php !
+    
+INPUTS / SWITCHES (via $_SERVER['argv']):
+    inDir           a directory of input files to pass through the filter
+    outDir          a directory to put the output files in
+    filterCmd       a command to run on all the files, assuming input from
+                    stdin and output to stdout. Should be enclosed in quotes
+                    to protect it from the shell.  Hint: put the word "nice"
+                    before the command to run it at lower priority.
+
+*****************************************************************************/
+// EVERY *top-level* page must start this way:
+// 1. Define it's relationship to the root of the MolProbity installation.
+// Pages in subdirectories of lib/ or public_html/ will need more "/.." 's.
+    if(!defined('MP_BASE_DIR')) define('MP_BASE_DIR', realpath(dirname(__FILE__).'/..'));
+// 2. Include core functionality - defines constants, etc.
+    require_once(MP_BASE_DIR.'/lib/core.php');
+    require_once(MP_BASE_DIR.'/config/ssh_grid_workers.php');
+// 3. Restore session data. If you don't want to access the session
+// data for some reason, you must call mpInitEnvirons() instead.
+    mpInitEnvirons();       // use std PATH, etc.
+    //mpStartSession(true);   // create session dir
+// 5. Set up reasonable values to emulate CLI behavior if we're CGI
+    set_time_limit(0); // don't want to bail after 30 sec!
+// 6. Unlimited memory for processing large files
+    ini_set('memory_limit', -1);
+
+#{{{ dispatchJob - launches a job on an available host
+############################################################################
+/**
+* We have this stupid, hack, blocking way of distributing jobs
+* because PHP has no thread support, and pcntl_fork() isn't always available.
+*/
+function dispatchJob($inpath, $outpath)
+{
+    global $ssh_grid_workers, $sleepTime;
+    while(true)
+    {
+        foreach($ssh_grid_workers as $idx => $worker)
+        {
+            if(!isset($worker['lockfile']) || !file_exists($worker['lockfile']))
+            {
+                $lockfile = mpTempfile("tmp_gridlock_");
+                $ssh_grid_workers[$idx]['lockfile'] = $lockfile;
+                //$cmd = "(touch $lockfile; cat $inpath | $worker[ssh] '$worker[cmd]'; rm $lockfile) > $outpath 2>&1 &"; // out and err to same place
+                $cmd = "(touch $lockfile; cat $inpath | $worker[ssh] '$worker[cmd]'; rm $lockfile) > $outpath 2> $outpath.stderr &"; // out and err to separate files
+                echo str_pad($idx, 20).basename($inpath)."\n";
+                #echo $cmd . "\n";
+                exec($cmd);
+                return;
+            }
+        }
+        // no host available -- sleep for a while and try again
+        #echo "No worker for job -- sleeping...\n";
+        sleep($sleepTime);
+    }
+}
+#}}}########################################################################
+
+#{{{ waitForJobs - waits for all jobs to finish
+############################################################################
+/**
+* Documentation for this function.
+*/
+function waitForJobs()
+{
+    global $ssh_grid_workers, $sleepTime;
+    while(true)
+    {
+        $still_going = 0;
+        foreach($ssh_grid_workers as $idx => $worker)
+        {
+            if(isset($worker['lockfile']) && file_exists($worker['lockfile']))
+                $still_going++;
+        }
+        if($still_going == 0) return;
+        echo "$still_going jobs still in progress...\n";
+        sleep($sleepTime);
+    }
+}
+#}}}########################################################################
+
+#{{{ a_function_definition - sumary_statement_goes_here
+############################################################################
+/**
+* Documentation for this function.
+*/
+//function someFunctionName() {}
+#}}}########################################################################
+
+# MAIN - the beginning of execution for this page
+############################################################################
+// Default options
+$allowClobber   = false;    // run job even if we overwrite file?
+$sleepTime      = 2;        // time to sleep if all workers are busy
+
+// First argument is the name of this script...
+if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
+{
+    if(!isset($inDir))          $inDir = $arg;
+    elseif(!isset($outDir))     $outDir = $arg;
+    elseif(!isset($filterCmd))  $filterCmd = $arg;
+    else                        die("Too many or unrecognized arguments: '$arg'\n");
+}
+
+if(!isset($inDir))          die("No input directory specified.\n");
+elseif(!is_dir($inDir))     die("Input directory '$inDir' does not exist.\n");
+elseif(!isset($outDir))     die("No output directory specified.\n");
+elseif(!is_dir($outDir))    die("Output directory '$outDir' does not exist.\n");
+elseif(realpath($inDir) == realpath($outDir))
+    dir("Input and output directories point to the same place.\n");
+elseif(!isset($filterCmd))  die("No filter command was provided.\n");
+
+// Convert $ssh_grid_workers into a more detailed data structure.
+foreach($ssh_grid_workers as $idx => $ssh_cmd)
+{
+    $ssh_grid_workers[$idx] = array(
+        'ssh' => $ssh_cmd,
+        'cmd' => $filterCmd,
+    );
+}
+
+foreach(listDir($inDir) as $inFile) //if(endsWith($inFile, ".pdb"))
+{
+    $inpath     = "$inDir/$inFile";
+    $outpath    = "$outDir/$inFile";
+    if(!$allowClobber && file_exists($outpath))
+        echo "Skipping $inFile: output file already exists.\n";
+    else
+        dispatchJob($inpath, $outpath);
+}
+
+
+############################################################################
+// Clean up and go home
+waitForJobs();
+//mpDestroySession(); // only call this if we created one
+?>

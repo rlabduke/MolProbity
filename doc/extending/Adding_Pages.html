@@ -1,0 +1,460 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta content="text/html; charset=ISO-8859-1"
+ http-equiv="content-type">
+  <title>Adding pages to MP3</title>
+</head>
+<body>
+<h1>Adding pages to the MolProbity3 web interface</h1>
+This document is a tutorial on adding new web pages to the graphical
+side of MolProbity, that is, the MolProbity that you use via a web
+browser. Before reading this, it would be a VERY good idea to read
+through <a href="UI_Framework.html">the document on MolProbity's UI
+framework</a>. You don't have to understand all of it, but it really is
+important to see the overview. After you finish this tutorial, you
+should go back and read it again, and it should be clearer.<br>
+<hr style="width: 100%; height: 2px;">
+<h2>Overview</h2>
+As an example, this tutorial describes adding the "simple kinemages"
+feature to MolProbity3, the one that allows users to choose one of the
+basic Prekin scripts to make a kinemage, and then allows them to view
+it in KiNG or to download it.<br>
+<br>
+Here are the steps:<br>
+<ol>
+  <li>Create a class that displays a web page for the user input, so
+the user can choose a Prekin script to run. This class is called a <span
+ style="font-style: italic;">delegate</span> and will live in the <span
+ style="font-family: monospace;">pages/</span> folder.</li>
+  <li>Add a link to this delegate page from one or more of the existing
+pages in MolProbity.</li>
+  <li>Create a PHP script that runs Prekin and produces the kinemage,
+based on the user input. This script will run as a background job and
+lives in the <span style="font-family: monospace;">jobs/</span> folder.</li>
+  <li>Create a class that displays a web page that presents the
+finished kinemage to the user, with links for downloading and viewing.
+This class is also a delegate and will also live in the <span
+ style="font-family: monospace;">pages/</span> folder.</li>
+</ol>
+<hr style="width: 100%; height: 2px;">
+<h2>User input page</h2>
+Copy the file <span style="font-family: monospace;">template-page.php</span>
+from <span style="font-family: monospace;">doc/extending/</span> into <span
+ style="font-family: monospace;">pages/</span>, and give it a new name
+(like <span style="font-family: monospace;">makekin_setup.php</span>).
+The file <span style="font-family: monospace;">makekin_setup.php</span>
+in fact already exists, so that you can follow along in it and see the
+actual code that is summarized below. Every script in <span
+ style="font-family: monospace;">pages/</span> declares a class, and
+those classes must all have unique names that exactly match their
+filenames (with ".php" removed and and "_delegate" added). So, change
+"template_delegate"
+to "makekin_setup_delegate".<br>
+<br>
+The template contains a fair bit of junk that we don't need, but there
+are a lot of other <span style="font-family: monospace;"><span
+ style="font-style: italic;">xxx</span>_setup.php</span> scripts that
+can be plundered for example code. It also inherits some functionality
+from the <span style="font-family: monospace;">BasicDelegate</span>
+class, which is definted in <span style="font-family: monospace;">event_page.php</span>.&nbsp;
+We're going to start in the <span style="font-family: monospace;">display()</span>
+function, which is
+responsible for outputing the HTML web page that the user sees when
+they get here. (We'll discuss <span style="font-style: italic;">how</span>
+they get here later on.)<br>
+<br>
+Display should start with <span style="font-family: monospace;">$this-&gt;pageHeader()</span>
+and end with <span style="font-family: monospace;">$this-&gt;pageFooter()</span>.
+These two functions take care of creating the &lt;HTML&gt; and
+&lt;BODY&gt; tags, including stylesheets, etc. The header can
+optionally generate a sidebar of links, timed commands to refresh the
+page, and other things. By default, these functions are just wrappers
+for <span style="font-family: monospace;">mpPageHeader()</span> and <span
+ style="font-family: monospace;">mpPageFooter()</span> in <span
+ style="font-family: monospace;">core.php</span>.<br>
+<br>
+<span style="color: rgb(255, 0, 0);"></span>The working content of the
+page is quite simple: a list of radio buttons
+for selecting the model (PDB file) to work with, a similar list of
+buttons for the Prekin scripts, and a &lt;FORM&gt; to hold them. In
+order for event handling to work properly, the form must be created
+with the <span style="font-family: monospace;">makeEventForm()</span>
+function, although it needs to be ended by a normal <span
+ style="font-family: monospace;">&lt;/form&gt;</span> tag.<br>
+<br>
+The Prekin-script radio buttons are arranged in a table for easier
+formatting, with
+alternating colors for the rows. All the radio buttons have the same <span
+ style="font-family: monospace;">name='scriptName'</span>, which is
+what makes them act as a group (only one member of the group can be
+selected at any given time). Each radio button has a different <span
+ style="font-family: monospace;">value</span>, which we will use later
+to decide which Prekin script to run.<br>
+<br>
+The buttons for selecting a model are very similar, and were in fact
+stolen from one of the other <span style="font-family: monospace;"><span
+ style="font-style: italic;">xxx</span>_setup.php</span> scripts. All
+these buttons have <span style="font-family: monospace;">name='modelID'</span>.
+Many things in MolProbity do not need to be reinvented -- there is
+either a reuseable function available, or there is existing code that
+can form a good starting point. In this case, we choose to copy and
+modify because our requirements are subtly different from those of the
+other pages.<br>
+<br>
+There are two submit buttons for this form, which both have <span
+ style="font-family: monospace;">name='cmd'</span>. The text in their <span
+ style="font-family: monospace;">value</span> property is what appears
+as the button text, and it's what we'll use in a minute to decide which
+one the user pressed, and whether they want to run Prekin or cancel
+this operation.<br>
+<br>
+The other thing we need to declare is a function to handle the
+form-submission event. We call it <span style="font-family: monospace;">onRunPrekin()</span>,
+because that's the name we passed to <span
+ style="font-family: monospace;">makeEventForm()</span> back in <span
+ style="font-family: monospace;">display()</span>. It could take one or
+more
+arguments as well; this feature
+exists to allow one function to handle many related &lt;FORM&gt;s, but
+we only have one form that needs to be handled. All the data submitted
+by the user in the form is available through the PHP superglobal <span
+ style="font-family: monospace;">$_REQUEST</span>. The keys of <span
+ style="font-family: monospace;">$_REQUEST</span> are the <span
+ style="font-family: monospace;">name</span>s of things in the form, so
+our keys are <span style="font-family: monospace;">scriptName</span>
+(from the radio buttons) and <span style="font-family: monospace;">cmd</span>
+(from the submit buttons). The values in <span
+ style="font-family: monospace;">$_REQUEST</span> are the <span
+ style="font-family: monospace;">value</span>s specified in the form.<br>
+<br>
+Thus, we first use <span style="font-family: monospace;">$_REQUEST['cmd']</span>
+to decide if the user pressed the Cancel button or the Make Kinemage
+button. Pressing Cancel leads us to return to the previous page using <span
+ style="font-family: monospace;">pageReturn()</span>. (This requires
+that the previous page got here by calling <span
+ style="font-family: monospace;">pageCall()</span> rather than <span
+ style="font-family: monospace;">pageGoto()</span>, which we'll ensure
+it does in just a minute.) For now, the other button should just do
+nothing. Doing nothing will just cause our form to be displayed again.
+In a while, we'll add code to actually run Prekin when the button is
+pressed.<br>
+<hr style="width: 100%; height: 2px;">
+<h2>Linking to the input page</h2>
+Now that we have an input page, we need to be able to see it. Because
+it's not a typical, simple PHP web page, you can't just go to its URL.
+This is actually deliberate and a huge advantage for a web application,
+as described in the UI Framework document. However, that means that we
+need to connect it to the real site in order to try it out. There are
+two places where we want to link it: from the site map, and from the
+quick-links sidebar.<br>
+<br>
+The site map is generated by <span style="font-family: monospace;">pages/sitemap.php</span>.
+There are lots of links here, so it's easy to copy &amp; paste a good
+example. The key call is this one:<br>
+<br>
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; <span
+ style="font-family: monospace;">makeEventURL("onCall",
+"makekin_setup.php")</span><br style="font-family: monospace;">
+<br>
+</span>Unlike other uses of <span style="font-family: monospace;">makeEventURL()</span>
+we've seen, this one has <span style="font-style: italic;">two</span>
+arguments. The first is still the name of the function that will be
+called when the user clicks on the link. The second one will be passed
+to that function as it's <span style="font-family: monospace;">$arg</span>.
+This allows one function (<span style="font-family: monospace;">onCall()</span>)
+to handle jumping off in any number of directions. Incidentally, <span
+ style="font-family: monospace;">onCall()</span> is defined in
+the <span style="font-family: monospace;">BasicDelegate</span> class,
+which is declared in <span style="font-family: monospace;">lib/event_page.php</span>.
+If you go look at it, you'll see it just uses <span
+ style="font-family: monospace;">pageCall()</span> to transfer control
+to the named delegate page:<br>
+<br>
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; function
+onCall($arg)</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; {</span><br
+ style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+pageCall($arg);</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; }</span><br
+ style="font-family: monospace;">
+<br>
+The very similar <span style="font-family: monospace;">onGoto()</span>
+event handling function uses <span style="font-family: monospace;">pageGoto()</span>
+instead, but is otherwise identical. It's not appropriate here, because
+we want to be able to "call" the Prekin page from anywhere and always
+return to where we started from when it finishes. The trade-off we make
+is that the Prekin pages must not display the sidebar, lest the user
+jump out of our nicely constructed "loop" of Prekin pages.<br>
+<br>
+We add our page to the sidebar in a similar way, by editing <span
+ style="font-family: monospace;">lib/core.php</span>. (Not really
+ideal, is it? This function should live somewhere else, but it's stayed
+in the core as a historical artifact.) In the <span
+ style="font-family: monospace;">mpNavigationBar()</span> function,
+duplicated one of the existing entries and modify it to look like this:<br>
+<br>
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; $s .=
+mpNavBar_call('makekin_setup.php', 'Make simple kins');</span><br
+ style="font-family: monospace;">
+<br>
+Now we've succeeded in linking our page into the main site. Try
+accessing your local development copy of MolProbity, and on the Site
+Map page you should see a link to the kinemage-creation page, as well
+as a link in the sidebar.<br>
+<hr style="width: 100%; height: 2px;">
+<h2>Running Prekin</h2>
+Now that we've got an interface, it would be nice if it actually did
+something when the user pushed the button. For that, we'll need a
+command-line PHP script that actually does the work in the background
+while <span style="font-family: monospace;">pages/job_progress.php</span>
+is displayed in the web browser to keep the user entertained. Create a
+new background job by copying <span style="font-family: monospace;">doc/extending/template-job.php</span>
+to <span style="font-family: monospace;">jobs/makekin.php</span>.<br>
+<br>
+Here we don't have to worry about delegates and all that mess -- this
+script runs in a much more straightforward manner. However, you'll
+notice that it has to explicitly load the session data and initialize
+the MolProbity environment in the first few lines of the script. These
+chores are done for the delegate pages by <span
+ style="font-family: monospace;">public_html/index.php</span>, so they
+never have to bother with it.<br>
+<br>
+Within the main part of the script, we retrieve form values from the <span
+ style="font-family: monospace;">$_SESSION['bgjob']</span> array, which
+was filled with data from the form by our <span
+ style="font-family: monospace;">onRunPrekin()</span> function. We also
+make sure the kinemage file directory exists so we have somewhere to
+put the output file -- notice that files are stored in directories
+based on their type (PDB, kinemage, tabular ASCII data, etc) and are
+named with a prefix that comes from their original PDB file.<br>
+<br>
+Next, we'll use a <span style="font-family: monospace;">switch</span>
+statement to make sure that the specified script is a valid one. It's
+very easy for someone to submit arbitrary data to a web form, so we
+want to make sure the input is valid before running it on the command
+line. This sort of precaution is very important -- it would be bad if
+someone embedded a <span style="font-family: monospace;">"; rm -rf / ;"</span>
+in the middle of your command! PHP has several built-in functions that
+can also help protect you (<span style="font-style: italic;">e.g.</span>
+<span style="font-family: monospace;">escapeshellcmd()</span>); use
+these when appropriate.<br>
+<br>
+Even though our script will run quickly, in just a few seconds, we
+should display a status message for the user. Remember, the <span
+ style="font-family: monospace;">job_progress.php</span> page is being
+displayed in the user's browser while <span style="font-style: italic;">this</span>
+script is running in the background, and it gets refreshed every few
+seconds with the latest status. The steps to be checked off are listed
+in order in an array (call it <span style="font-family: monospace;">$tasks</span>),
+and then you call <span style="font-family: monospace;">setProgress()</span>
+to update which step is the active one. In our example, we have just
+one step:<br>
+<br>
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; $tasks['kin']
+= "Make kinemage using &lt;code&gt;Prekin $flag&lt;/code&gt;";</span><span
+ style="font-family: monospace;"><br>
+&nbsp;&nbsp;&nbsp; setProgress($tasks, 'kin');</span><br>
+<br>
+Now were ready to execute the Prekin command. When it returns, we'll
+call <span style="font-family: monospace;">setProgress($tasks, null)</span>
+to mark all steps as complete, just before returning from the script.<br>
+<br>
+There are two ways to approach getting output to the user. We could
+store some data in the <span style="font-family: monospace;">$_SESSION['bgjob']</span>
+array (<span style="font-style: italic;">e.g.</span> the name of the
+kinemage file) and pass that to our "results" delegate page, which
+would then use it to construct a bit of explanatory HTML with a link to
+open the kinemage in KiNG. There's nothing wrong with that <span
+ style="font-style: italic;">per se</span>, and that's the way a lot of
+the old MolProbity was written. The alternative scheme is to construct
+a result message or mini-page in HTML and store it as a lab notebook
+entry. This is done as the last processing step of the background
+script. Using a notebook entry has two benefits:<br>
+<ol>
+  <li>At any time, the user can go to the lab notebook page and see a
+chronological, stream-of-consciousness record of all the results
+they've produced during the MolProbity session.</li>
+  <li>The user can edit the HTML of these entries in order to annotate
+them, creating a rich record of the refitting process that can be
+archived as part of a "real" lab notebook.</li>
+</ol>
+The disadvantage of a notebook entry is that it can only contain links
+to "data" -- things like kinemages and charts. Trying to link to an
+"active" page in the site via <span style="font-family: monospace;">makeEventURL()</span>
+creates a link that will be stale and unusable by the time anyone
+actually sees it. It's fairly rare that you need to do this, although
+you can imagine (for example) the results from running Reduce having a
+link that suggests running SSWING too. This sort of thing has to be
+done from the delegate page that displays results (see the next
+section). Most of the time, though, the results page can just display
+the lab notebook entry that was created by the background job, which is
+the approach we'll take in the next section.<br>
+<br>
+First, though, we have to create a notebook entry. It's quite simple:
+just build up a string containing data and HTML formatting, like you
+would embed in a &lt;BODY&gt; or &lt;DIV&gt; tag somewhere in a page.
+Notice the <span style="font-family: monospace;">linkKinemage()</span>
+convenience function for generating a kin-viewing link. Then call <span
+ style="font-family: monospace;">addLabbookEntry()</span> with a title,
+body, etc. and save the resulting entry ID so that the results page can
+look it up and display it. Here we save the ID as <span
+ style="font-family: monospace;">$_SESSION['bgjob']['labbookEntry']</span>.
+MolProbity's machinery for background jobs will automatically make this
+available as <span style="font-family: monospace;">$context['labbookEntry']</span>
+in the <span style="font-family: monospace;">display()</span> function
+of the results page. Notice that all these machine-generated notebook
+entries should be marked with the "auto" keyword, to distinguish them
+from entries created <span style="font-style: italic;">de novo</span>
+by the user.<br>
+<br>
+The last few lines of boilerplate code are very important, but don't
+need any modification. They mark the background job as complete and
+record the total running time. Nothing should come after them -- they
+should be the last lines in the script. Once the script exits, <span
+ style="font-family: monospace;">job_progress.php</span> will notice
+the background job is finished and control will be transferred to the
+results page delegate.<br>
+<hr style="width: 100%; height: 2px;">
+<h2>Results page</h2>
+The results page is very, very simple, because there are lots of
+jobs already written that just need to display a lab notebook entry as
+their results. All those jobs use <span style="font-family: monospace;">generic_done.php</span>
+as the results&nbsp; page.<br>
+<br>
+This introduces the <span style="font-family: monospace;">$context</span>
+variable for delegate pages.&nbsp; <span
+ style="font-family: monospace;">$context</span> is a place to put data
+that configures how a page looks, or to save data between views of this
+same page -- sort of like member variable in an object.&nbsp; In fact,
+that's how I should have implemented it, but I didn't, and it's too
+scary to change it now, because they could collide with other member
+variables.&nbsp; Anyway, the <span style="font-family: monospace;">setContext()</span>
+and <span style="font-family: monospace;">getContext()</span>
+functions can be used to retrieve and replace this data.&nbsp; The<span
+ style="font-family: monospace;"> setContext()</span> function can
+either be passed the whole context as an array, or a key and value to
+be updated.&nbsp; That is,<br>
+<br>
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;
+setContext("foo", "bar");</span><br style="font-family: monospace;">
+<br>
+is a shortcut for<br>
+<br>
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; $ctx =
+getContext();</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp; $ctx["foo"] =
+"bar";</span><br style="font-family: monospace;">
+<span style="font-family: monospace;">&nbsp;&nbsp;&nbsp;
+setContext($ctx);</span><br style="font-family: monospace;">
+<br>
+Context persists while a delegate is on the stack.&nbsp; That is, it
+will persist through a <span style="font-family: monospace;">pageCall()</span>
+to a subroutine and the corresponding <span
+ style="font-family: monospace;">pageReturn()</span>, but it will
+disappear when <span style="font-style: italic;">this</span> delegate
+does a <span style="font-family: monospace;">pageReturn()</span> or a <span
+ style="font-family: monospace;">pageGoto()</span>.&nbsp; Context gets
+used for things like flags that determine whether the "advanced
+options" are visible or hidden, or for recording which folders are open
+and which are closed in the file browser page.<br>
+<br>
+Notice that the data from <span style="font-family: monospace;">$_SESSION['bgjob']</span>
+has been transferred to this page's <span
+ style="font-family: monospace;">$context</span>, so that it's easy to
+retrieve the lab notebook ID number. That number can be used with <span
+ style="font-family: monospace;">openLabbbook()</span> and <span
+ style="font-family: monospace;">formatLabbookEntry()</span> to easily
+retrieve and display the entry.<br>
+<br>
+Two event handlers are set up on this page: a button (form) to <span
+ style="font-family: monospace;">pageReturn()</span> out of the Prekin
+loop, back to wherever we came from; and a link that will <span
+ style="font-family: monospace;">pageCall()</span> the notebook
+editting page.<br>
+<hr style="width: 100%; height: 2px;">
+<h2>Launching the background job</h2>
+Now it's time to go back to <span style="font-family: monospace;">pages/makekin_setup.php</span>,
+and make sure that when the user presses the "Make kinemage" button,
+something actually happens. This involves three steps:<br>
+<ol>
+  <li>Pass all the data the user submitted in the HTML form (in <span
+ style="font-family: monospace;">$_REQUEST</span>) to the background
+job, by
+storing that data in the <span style="font-family: monospace;">$_SESSION['bgjob']</span>
+variable. In this case, there are only two pieces of data (which model
+to act on, and which script to run) but a complicated input page might
+provide tens of input fields that need to be made available to the
+background job.</li>
+  <li>Log a message about what's happening to the system log using <span
+ style="font-family: monospace;">mpLog()</span>. While the lab notebook
+serves as a log of sorts for the user, <span
+ style="font-family: monospace;">mpLog()</span> records short messages
+in the system log. The system log can then later be parsed to provide
+usage statistics for the MolProbity administrators. The log file has
+one record per line with colon-delimited fields, so the proper message
+format is a short unique identifier (in this case, "makekin") followed
+by a colon and a longer, human-readable explanation of what's
+happening, possibly with additional information about which options or
+files were used.</li>
+  <li>Use <span style="font-family: monospace;">pageGoto()</span> to
+transfer control to <span style="font-family: monospace;">job_progress.php</span>,
+which will display the progress messages while the background job is
+running. This doesn't take affect until we exit <span
+ style="font-family: monospace;">onRunPrekin()</span>, so you still
+have time to launch the background job with <span
+ style="font-family: monospace;">launchBackground()</span>. It's very
+important that <span style="font-family: monospace;">pageGoto()</span>
+be called before <span style="font-family: monospace;">launchBackground()</span>,
+because the later freezes the session data. In fact, as a rule of thumb
+nothing should be done after calling <span
+ style="font-family: monospace;">launchBackground()</span>; it should
+be the last call in the event handler.</li>
+</ol>
+That's it. Now when the user pushes the button on the set-up page, the
+background job script will be started and the progress page displayed.
+When the background job finishes, control will pass to the results
+page, which will display the HTML notebook entry created by the
+background job.<br>
+<hr style="width: 100%; height: 2px;">
+<h2>Denouement</h2>
+Your script is finished -- now all that remains is to test and debug
+it. Here are some hints:<br>
+<ul>
+  <li>PHP errors in the background script are particularly nasty
+because the error messages don't show up anywhere obvious. Use the
+"View &amp; download file" page to view <span
+ style="font-family: monospace;">system/errors</span>, which should
+have (most) the errors generated by any programs run in the background.</li>
+  <li>Use <span style="font-family: monospace;">php -l</span> ("L" for
+"lint") to check your scripts for syntax errors before trying to run
+them. This is especially useful for background job scripts.</li>
+  <li>You can also use the download page to view the contents of
+kinemage files, which sometimes contain error messages instead of data
+when something goes wrong.</li>
+  <li>Make sure your variable names are spelled correctly. I'm always
+mistyping variable names and then wondering why my variable doesn't
+have any data in it. This can happen when you copy and paste, too.<br>
+  </li>
+  <li>Ditto for making sure the <span style="font-family: monospace;">name</span>
+fields in your HTML forms actually match up with the variable names
+you're looking for in <span style="font-family: monospace;">$_REQUEST</span>
+or in <span style="font-family: monospace;">$_SESSION['bgjob']</span>.</li>
+  <li>Make sure you've included the library/libraries you need using <span
+ style="font-family: monospace;">require_once()</span>. Missing library
+function definitions will crash your script.</li>
+  <li>Document the inputs and outputs of your own library functions. In
+detail. You won't remember later.</li>
+  <li>Read the existing documentation, both in the code (comments) and
+in the <span style="font-family: monospace;">doc/</span> folder.<br>
+  </li>
+  <li>When in doubt, look for something that already exists that's
+similar to what you want. I've done the best I can with MolProbity's
+architecture, but it's still complicated and difficult to remember. I
+am constantly using the existing code as a reference manual.</li>
+</ul>
+<br>
+The End<br>
+</body>
+</html>

@@ -1,0 +1,641 @@
+#!/usr/bin/perl -w
+
+# name: flipkin_auto_fixes
+# date created: perl version 070915
+# author: Robert Immormino, Richardson Lab, Duke University
+# purpose: reduce (i.e., add hydrogens to) pre-fixed and 
+#          post-fixed files and build a kinemage to show this
+#
+# usage: flipkin_auto_fixes pre-fix.pdb post-fix.pdb > outputH.autoFlip.kin
+#
+# installation: You will probably need to change the location of the perl
+#               on the first line to reflect your site's configuration
+#               Requires prekin, probe and reduce (+ mage/king to view).
+#
+# flipkin history:
+#   5/ 8/2001 - JM Word - v2.0 - first perl cut
+#   5/10/2001 - JM Word - v2.1 - eliminated several masters
+#   5/31/2001 - JM Word - v2.2 - added Bvalue to atom id and
+#                                -limit, -fix, -v flags
+#   6/ 1/2001 - JM Word - v2.3 - added error checking for abandoned opt.
+#   7/19/2001 - JM Word - v2.4 - added -db flag to pass reduce het dict
+#   1/11/2005 - I Davis - v2.5 - added @onewidth to kinemage output
+#  10/25/2006 - I Davis -      - added -code to Prekin run on flipdb PDB file
+#   7/31/2007 - J Headd and R Immormino -    - fixed hydrogens on hets
+# flikin_auto_fixes history:
+#   9/15/2007 - RMI     - v1.0 - first cut for general purpose comparison of two pdbs
+#   9/24/2007 - RMI     -      - finished first cut, most of the bugs thus far
+#                               - involve handling of non-flipped VTLR residues
+#   8/05/2009 - RMI     -      - add ser,cys,ile to test fixing these
+
+#{{{ version - sub-routine for outputing the RLab version
+############################################################################
+sub version{
+        print "\n*******************************************************************
+flipkin_auto_fixes.pl: version 1.0x.070924    09/24/07
+Copyright 2007, Robert Immormino \n\n";
+   if (!(!$ARGV[0] || !$ARGV[1] || ($ARGV[0] =~ m/^-[h|c]/i))) {
+      exit(0);  
+   }
+   elsif ($ARGV[0] =~ m/^-v/i) {
+      exit(0); 
+   }
+}
+#}}}########################################################################
+
+#{{{ help - sub-routine for outputing the Usage and Help
+############################################################################
+sub help{
+   &version; 
+   print "
+ name: flipkin_auto_fixes
+ date created: perl version 070915
+ author: Robert Immormino, Richardson Lab, Duke University
+ purpose: reduce (i.e., add hydrogens to) pre-fixed and
+          post-fixed files and build a kinemage to show this
+
+ USAGE: flipkin_auto_fixes [-options] pre-fix.pdb post-fix.pdb > outputH.autoFlip.kin
+
+options:
+  -Help       outputs this help message
+  -Changes    outputs a changelog
+  -VEsion     outputs the Version information
+  -Verbose    verbose output from Reduce
+  -DB         Reduce Het database file
+
+ installation: You will probably need to change the location of the perl
+               on the first line to reflect your site's configuration
+               Requires prekin, probe and reduce (+ mage/king to view).
+
+EXAMPLE:   flipkin_auto_fixes 1A0F.pdb 1A0F.pdb_mod > 1A0f_autoFlip.kin    \n\n";
+        exit(0);
+}
+#}}}########################################################################
+
+#{{{ changes - sub-routine for outputing the Changelog
+############################################################################
+sub changes{
+   &version;
+        print "    ***** FLIPKIN_AUTO_FIXES *****
+
+ flipkin history:
+   5/ 8/2001 - JM Word - v2.0 - first perl cut
+   5/10/2001 - JM Word - v2.1 - eliminated several masters
+   5/31/2001 - JM Word - v2.2 - added Bvalue to atom id and
+                                -limit, -fix, -v flags
+   6/ 1/2001 - JM Word - v2.3 - added error checking for abandoned opt.
+   7/19/2001 - JM Word - v2.4 - added -db flag to pass reduce het dict
+   1/11/2005 - I Davis - v2.5 - added \@onewidth to kinemage output
+  10/25/2006 - I Davis -      - added -code to Prekin run on flipdb PDB file
+   7/31/2007 - J Headd and R Immormino -    - fixed hydrogens on hets
+ flikin_auto_fixes history:
+   9/15/2007 - RMI     - v1.0 - first cut for general purpose comparison of two pdbs
+   9/24/2007 - RMI     -      - finished first cut, most of the bugs thus far
+                              - involve handling of non-flipped VTLR residues
+  
+\n"; 
+        exit(0);
+}
+#}}}########################################################################
+
+
+   #use strict;
+
+#   my $isHis = 0;
+#   my $extraFixFile = '';
+#   my $limitFlag = '';
+
+   my $verb = '-quiet';
+   my $dbFile = '';
+
+   while(defined($ARGV[0]) && $ARGV[0] =~ /^-/) {
+      $_ = shift;
+      if    ($_ =~ m/^-h/i)  { &help; exit(0); } 
+      elsif ($_ =~ m/^-ve/i) { &version; exit(0); }                  # -ve
+      elsif ($_ =~ m/^-v/i)  { $verb = ''; }                         # -v
+      elsif ($_ =~ m/^-c/i)  { &changes; exit(0); }                  # -c
+
+# un-necessary flags for updated reduce / have two .pdb so we won't use a fix file
+#      if    (/^-[Hh]$/) { $isHis = 1; }                         # -h
+#      elsif (/^-[Ll][Ii][Mm][Ii][Tt]\d+$/) { $limitFlag = $_; } # -limit#
+#      elsif (/^-[Ff][Ii][Xx]$/) {                               # -fix file
+#         if (defined($ARGV[0])) {
+#            $extraFixFile = shift;
+#	 }
+#         else {
+#            die "No filename after flag: $_\n";
+#         }
+#      }
+
+      elsif (/^-[Dd][Bb]$/) {                                   # -db file
+         if (defined($ARGV[0])) {
+            my $dbfn = shift;
+            $dbFile = "-db $dbfn";
+	 }
+         else {
+            die "No filename after flag: $_\n";
+         }
+      }
+      else {
+         die "unknown parameter: $_\n";
+      }
+   }
+
+   my $fixedpdb; # the fixed pdb file we will process
+   my $redpdb; # the original (pre-fixed) pdb file we will process
+
+   if ($#ARGV == 1 && defined($ARGV[1]) && defined($ARGV[0])) {
+      $redpdb = shift;
+      die "can not read input file: $redpdb\n" unless (-r $redpdb);
+      $fixedpdb = shift;
+      die "can not read input file: $fixedpdb\n" unless (-r $fixedpdb);
+   }
+   else {
+      &help;
+      die "command line parameter error, stopped";
+   }
+
+   # -----------------------------------------------------------
+   # pull out FIXED residues from the USER MOD RECORDS
+   # for animation and views
+   # EXAMPLE USER  MOD record from autoFix
+   #   Record      C   NI  TF:   rota before  :   rota after   :           DECISION  
+   # USER  MOD FIX:A  27 LEU*:   0.2 (OUTLIER):  44.7      (mt):         FLIP ACCEPTED
+
+   open UMOD, "<$fixedpdb";
+   my @user_mod=();
+   my $line;
+      $line =<UMOD>; # first line is a key for the USER  MOD records
+   my $qbert=0;
+   my %want_view=(); 
+   my $junk;
+   my $key;
+   my $chain;
+   my $resid;
+   my $resn;
+   my $descr; 
+   while ($line=<UMOD>) {
+      if ($line =~ m/USER  MOD FIX/) {
+         $user_mod[$qbert]=$line;
+         ($junk, $key)=split(/FIX:/, $line);
+         $chain  = substr($key, 0,1);
+         $resid  = substr($key, 1,4);
+         $ins    = substr($key,5,1);
+         $resn   = substr($key, 6,3);
+         $descr  = sprintf('%1.1s%4s%1.1s%-3s',
+                $chain, $resid, $ins, $resn);
+         $want_view{$descr}="fixed";
+         if ( substr($key, 9,1) =~ m/\*/ ) {
+            $flip{$descr}= substr($key, 9,1); 
+         }
+         $qbert++; 
+      }
+      else { last; }
+   }
+   close UMOD; 
+
+   # -----------------------------------------------------------
+   # make array for unfixed leu, val, thr, and, arg 
+   # add ser, cys, and ile rmi 090805
+
+   open UMOD, "<$fixedpdb";
+   my @unfixed=();
+   $qbert=0; 
+   while ($line=<UMOD>) {
+      if ($line =~ m/^ATOM  /) {
+         my $res     = substr($line, 17, 3);
+         my $resid   = substr($line, 22, 4);
+         my $inscode = substr($line, 26, 1);
+         my $chain   = substr($line, 21, 1);
+         $descr = sprintf('%1.1s%4s%1.1s%-3s',
+                  $chain, $resid, $inscode, $res);
+         if ($qbert == 0) {
+            $unfixed[$qbert]=$descr;
+            $qbert++;
+         }
+         if ($qbert > 0) {
+            if(($res eq "LEU" || $res eq "VAL" || $res eq "THR" || 
+                $res eq "ARG" || $res eq "SER" || $res eq "CYS" ||
+                $res eq "ILE") && (!defined($want_view{$descr})) &&
+                ($descr ne $unfixed[$qbert-1])) {
+               $unfixed[$qbert]=$descr;
+               $qbert++; 
+            }
+         }
+      }
+   } 
+   close UMOD;
+
+   # -----------------------------------------------------------
+
+ 
+   # temp file names
+
+   my @now = localtime(time);
+   my $year = $now[5];
+   my $mon  = $now[4];
+   my $day  = $now[3];
+   my $uniquid = "${$}${year}${mon}${day}";
+
+#   my $fixFile = "/tmp/flipF${uniquid}.txt";
+   my $flipdb    = "/tmp/flipH${uniquid}.pdb";
+   my $fixflipdb = "/tmp/flipH2${uniquid}.pdb";
+   my $kintmp    = "/tmp/flipK${uniquid}.kin";
+
+#   unlink($fixFile); # remove any existing copy of these files
+   unlink($flipdb);
+   unlink($fixflipdb);
+   unlink($kintmp);
+
+   # -----------------------------------------------------------
+
+   # make temp file to force reduce to build alternate orientations
+      my $respattern = 'LEU|VAL|THR|ARG|SER|CYS|ILE';
+   # removed 
+   # build the new pdb file with opposite (some) orientations
+
+   my $runReduce = "reduce -quiet -trim $redpdb | " .
+                   "reduce $verb $dbFile -build - > $flipdb";
+   my $runReduce2 = "reduce -quiet -trim $fixedpdb | " .
+                    "reduce $verb $dbFile -build - > $fixflipdb";
+
+   my $rc  = system($runReduce);
+   my $rc2 = system($runReduce2);
+
+   # -----------------------------------------------------------
+   
+   # output kin file header, including views
+
+   my %altname;
+   my %flips;
+   my $initial = 1;
+   my $vid = 0;
+   
+#   $altname{'1'} = 'A';
+#   $altname{'2'} = 'B';
+#   $altname{'3'} = 'C';
+#   if ($isHis) {
+#      $altname{'HIS'} = 'H';
+#   }
+#   else {
+#      $altname{'ASN'} = 'N';
+#      $altname{'GLN'} = 'Q';
+#   }
+
+   $altname{'LEU'} = 'L';
+   $altname{'VAL'} = 'V';
+   $altname{'THR'} = 'T';
+   $altname{'SER'} = 'S';
+   $altname{'CYS'} = 'C';
+   $altname{'ARG'} = 'R';
+   $altname{'ILE'} = 'I'; 
+
+
+   print "\@text\n";
+   print "original coordinates from file: ${redpdb}\n";
+   print "fixed coordinated from file: ${fixedpdb}\n";
+   if ($rc) { # inspect return code from reduce run
+      print "WARNING: Problems encountered during processing.\n";
+      if ($rc == 256) {
+         my %probres;
+         print "         Optimization of one or more groups abandoned\n";
+         print "         because too many permutations were required.\n";
+         print "         The following groups may be affected:\n";
+#         open(FPDB, $flipdb)    || die "Can't read flipped pdbH header: $!\n";
+#         while (<FPDB>) {
+#            chop;
+#	    if (/^USER  MOD (.+)\:sc\=\-9\.9e\+99/) {
+#               my ($class, $restype, $action) = split(/:/, $_, 5);
+#               $probres{$restype} = $action;
+#	    }
+#            last if /^ATOM|^atom|^HETA|^heta/;
+#         }
+#	 close FPDB;
+#	 my $combo = join(',', sort keys(%probres));
+#	 $combo =~ s/  +/ /g;
+#        $combo =~ s/ +$//;
+#	 $combo =~ s/^ +//;
+#	 $combo =~ s/ +,/,/g;
+#	 $combo =~ s/,  +/, /g;
+#        print " > $combo\n\n";
+      }
+   }
+
+   open(PDBH, $fixedpdb)    || die "Can't process fixed pdb file: $!\n";
+   while (<PDBH>) {
+      chop;
+      print $_,"\n" if $initial && /^USER  MOD|^HEADER|^TITLE|^KEYWDS|^AUTHOR/;
+
+      if ($initial && /^ATOM|^atom|^HETA|^heta/) {
+         $initial = 0;
+         print "\@kinemage 1\n";
+         print "\@caption\n";
+         print "from file: ${redpdb}\n";
+         print " views marked with \* are for groups flipped by autoFix\n";
+      }
+#      if (/^USER  MOD S/) {
+#         my ($class, $restype, $action) = split(/:/, $_, 5);
+#
+#         if ($restype =~ /${respattern}/ && $action =~ /FLIP/) {
+#            $flips{substr($restype, 0, 9)} = $action;
+#         }
+#      }
+      if (/^ATOM|^atom/) {
+         my $card    = $_; $card =~ tr/a-z/A-Z/;
+         my $res     = substr($card, 17, 3);
+         my $resid   = substr($card, 22, 4);
+         my $inscode = substr($card, 26, 1);
+         my $chain   = substr($card, 21, 1);
+
+         my $ics = ($chain eq ' ') ? '' : $inscode;
+
+         if ($res =~ /${respattern}/) {
+	    # only select these two residues
+	    my $atom    = substr($card, 12, 4);
+	    my $dist    = substr($atom, 2, 1);
+	    my $altConf = substr($card, 16, 1);
+	    if (defined $altname{$altConf}) {
+		$altConf = $altname{$altConf};
+	    }
+
+	    if (($res eq 'LEU' && $dist eq 'B') || 
+	        ($res eq 'VAL' && $dist eq 'B') ||
+                ($res eq 'THR' && $dist eq 'B') ||
+                ($res eq 'SER' && $dist eq 'B') ||
+                ($res eq 'CYS' && $dist eq 'B') ||
+                ($res eq 'ILE' && $dist eq 'B') ||
+	        ($res eq 'ARG' && $dist eq 'G')) {
+		# beta or gamma carbon
+
+               if ($altConf eq ' ' || $altConf eq 'A') {
+                  my $rchar = $altname{$res};
+
+                  my $X = substr($card, 30, 8);
+                  my $Y = substr($card, 38, 8);
+                  my $z = substr($card, 46, 8);
+
+                  $descr = sprintf('%1.1s%4s%1.1s%-3s',
+                                   $chain, $resid, $inscode, $res);
+                  my $fflag = (defined $flip{$descr}) ? '*' : ' ';
+
+                  my $vs = '';
+                  if (++$vid > 1) { $vs = $vid . ''; }
+
+                  my $LCaltConf = $altConf; $LCaltConf =~ tr/A-Z/a-z/;
+
+                  if (defined($want_view{$descr})) {
+                     printf "\@%sviewid {%s%s%d%s%s%s}\n", 
+   		       $vs, $fflag, $rchar, $resid,
+                       $ics, $LCaltConf, $chain;
+                     printf "\@%sspan 12\n", $vs;
+                     printf "\@%szslab 100\n", $vs;
+                     printf "\@%scenter %s %s %s\n", $vs, $X, $Y, $z;
+                  }
+               }
+            }
+         }
+      }
+   }
+   close PDBH;
+
+   printf "\@master \{mainchain\}\n";
+   printf "\@master \{sidechain\}\n";
+   printf "\@master \{H's\}\n";
+   printf "\@master \{hets\}\n";
+   printf "\@master \{water\}\n";
+   printf "\@onewidth\n";
+
+   # -----------------------------------------------------------
+   
+   # molecule: group 1 constant stuff
+
+   my $selSC  = "leu,val,thr,arg,ser,cys,ile";
+
+   my $fileID = $flipdb;
+   $fileID =~ s#\.\w+$##;
+   $fileID =~ s#^.*[\\/]##g;
+#   print "\@group \{$fileID\} dominant\n";
+   print "\@group \{$redpdb\} dominant\n";
+
+   my $pkin; # repeated first part of the prekin command
+   my $pkin1; 
+   my $prekin = "/Users/Bob_Immormino/Sites/molprobity3/trunk/molprobity3/bin/macosx/prekin";
+
+   my $q=0; 
+   unlink($kintmp);
+   $pkin = "$prekin -append -in $flipdb -out $kintmp -scope -bval";
+   $pkin1= "$prekin -append -in $flipdb -out $kintmp";
+   my $prekin_cmd=$pkin1;
+
+   system("$pkin -show \"mc(white),hy(gray)\"");
+   system("$pkin -show \"sc(cyan),hy(gray)\" " .
+                "-excludesc \"leu,val,thr,arg,ser,cys,ile\"");
+
+   for ($q=0;$q<scalar(@unfixed);$q++) {
+      $key  =$unfixed[$q];
+      $chain=substr($key, 0,1);
+      #$chain=" ".$chain; 
+      $resid=substr($key, 1,4);
+      $resid+=0;
+      $resn =substr($key, 6,3);
+      $prekin_cmd.=" -scope -bval -show \"sc(cyan),hy(gray)\" -sc \"${selSC}\" -chainid \"${chain}\" -range \"${resid}-${resid}\"";
+      if ($q%50 == 0) {
+         system($prekin_cmd);
+         $prekin_cmd=$pkin1;
+      } 
+   }
+   if ($q%50 != 0) {
+      system($prekin_cmd);
+   }
+   system("$pkin -show \"ht(orange),hy(gray)\"");
+   system("$pkin -show \"wa(peachtint),ba(peachtint)\"");
+   &reformatConstantOutput;
+
+   # -----------------------------------------------------------
+
+   # molecule animation: group 2 flipped orientation
+
+#   my $selSC  = "leu,val,thr,arg,ser,cys,ile";
+#   my $nselSC = "leu,val,thr,arg,ser,cys,ile";
+   my $nselSC = "";
+   my $prbSC  = "L,V,T,R,S,C,I";
+
+   print "\@group \{fixes\} animate\n";
+
+   unlink($kintmp);
+
+   $pkin = "$prekin -append -in $fixflipdb -out $kintmp -scope -bval";
+
+   system("echo \"\@group \{selected\}\" >> $kintmp");
+
+   $prekin_cmd="$prekin -append -in $fixflipdb -out $kintmp ";
+   $q=0;
+   for ($q=0;$q<scalar(@user_mod);$q++) {
+      #USER  MOD FIX:A  27 LEU*:   0.2 (OUTLIER):  44.7      (mt):         FLIP ACCEPTED
+      ($junk, $key)=split(/FIX:/, $user_mod[$q]); 
+      $key=substr($key,0,9);
+      $chain=substr($key, 0,1);  
+      $resid=substr($key, 1,4); 
+      $resid+=0; 
+      #$resn=substr($key, 6,3);
+      $prekin_cmd.=" -scope -bval -show \"sc(sea),hy(gray),atom_markers,ct\" -sc \"${selSC}\" -chainid \"${chain}\" -range \"${resid}-${resid}\"";
+      if ($q%50 == 0) {
+         system($prekin_cmd);
+         $prekin_cmd="$prekin -append -in $fixflipdb -out $kintmp ";
+      }
+   }
+   if ($q%50 != 0) {
+      system($prekin_cmd);
+   }
+   #system("$pkin -show \"sc(sea),hy(gray),atom_markers,ct\" -sc \"${selSC}\"");
+   system("echo \"\@group \{movable\}\" >> $kintmp");
+   system("$pkin -show \"sc(cyan),hy(gray)\" -sc \"${nselSC},lys,met,tyr\"");
+   system("echo \"\@group \{contacts\}\" >> $kintmp");
+   system("probe -dens12 -lens -nogroup -3 -q -wat -het -both " .
+         "\"${prbSC} sc alta ogt1 not (beta,atom1HG_,atom2HG_,atom3HG_)\" " .
+         "\"not water alta ogt1 | water alta blt40 ogt66\" $fixflipdb >> $kintmp");
+   &reformatAnimatedOutput;
+
+   # -----------------------------------------------------------
+   
+   # molecule animation: group 3 original orientation
+
+#   if ($isHis) {
+#      print "\@group \{flipH\} animate\n";
+#   }
+#   else {
+#      print "\@group \{flipNQ\} animate\n";
+#   }
+
+      print "\@group \{orig\} animate\n";
+
+
+   unlink($kintmp);
+
+   $pkin = "$prekin -append -in $flipdb -out $kintmp -scope -bval -code \"$fileID\"";
+
+   system("echo \"\@group \{selected\}\" >> $kintmp");
+   $prekin_cmd="$prekin -append -in $flipdb -out $kintmp -scope ";
+   for ($q=0;$q<scalar(@user_mod);$q++) {
+      # USER  MOD FIX:A 126 ARG*: -20.3:  36.4:   0.0: 0.000:   1.4:   1.2:  56.6: 171.7: 158.6  rmi090723
+      ($junk, $key)=split(/FIX:/, $user_mod[$q]);
+      $key=substr($key,0,9);
+      $chain=substr($key, 0,1);
+      $resid=substr($key, 1,4);
+      $resid+=0; 
+      #$resn=substr($key, 6,3);
+      $prekin_cmd.=" -code \"$fileID\" -scope -bval -show \"sc(pink),hy(gray),atom_markers,ct\" -sc \"${selSC}\" -chainid \"${chain}\" -range \"${resid}-${resid}\"";
+      if ($q%50 == 0) {
+         system($prekin_cmd);
+         $prekin_cmd="$prekin -append -in $flipdb -out $kintmp -scope ";
+      }
+   }
+   if ($q%50 != 0) {
+      system($prekin_cmd);
+   }
+   #system("$pkin -show \"sc(pink),hy(gray),atom_markers,ct\" -sc \"${selSC}\"");
+   system("echo \"\@group \{movable\}\" >> $kintmp");
+   system("$pkin -show \"sc(cyan),hy(gray)\" -sc \"${nselSC},lys,met,tyr\"");
+   system("echo \"\@group \{contacts\}\" >> $kintmp");
+   system("probe -dens12 -lens -nogroup -3 -q -wat -het -both " .
+         "\"${prbSC} sc alta ogt1 not (beta,atom1HG_,atom2HG_,atom3HG_)\" " .
+         "\"not water alta ogt1 | water alta blt40 ogt66\" $flipdb >> $kintmp");
+
+   &reformatAnimatedOutput;
+
+   # -----------------------------------------------------------
+   # remove the temp files
+
+   unlink($kintmp);
+   unlink($flipdb);
+
+   # $fixFile removed earlier
+
+   # -----------------------------------------------------------
+   sub reformatConstantOutput {
+
+      open(PKC, $kintmp) || die "Can't process prekin output 1: $!\n";
+
+      my ($keyword, $rest, $label);
+      my $chainID = '';
+
+PKCRECORD:
+      while (<PKC>) {
+         chop;
+
+         ($keyword, $rest) = split(' ', $_, 2);
+         if (! defined($keyword)) { next PKCRECORD; }
+         $label = '';
+         if ($keyword =~ /^\@/ && defined($rest)) {
+            $label = $1 if /^[^\=]*\{([^\{\}]*)\}/;
+         }
+
+         if ($keyword =~ /^\@pdbfile/) { next PKCRECORD; }
+         if ($keyword =~ /^\@group/)   {
+            $chainID = $label;
+            next PKCRECORD;
+         }
+         if ($keyword =~ /^\@subgroup/ && $label =~ /mainchain|sidechain/) {
+	   s/mainchain/mc $chainID/ || s/sidechain/sc $chainID/;
+	   s/master\s*\=\s*\{subunit\s*\S+\}//;
+         }
+         if ($keyword =~ /^\@subgroup/ && $_ !~ /dominant/) {
+	   $_ = $_ . ' dominant';
+         }
+         if ($keyword =~ /^\@vector/ && $label =~ /water/) {
+	   $_ = $_ . ' off';
+         }
+         if ($keyword =~ /^\@/ && $_ =~ /color\w*\=/ && $label =~ /water/) {
+	   s/red/pink/g;
+         }
+         printf "%s\n", $_;
+      }
+      close PKC;
+   }
+   # -----------------------------------------------------------
+   sub reformatAnimatedOutput {
+      my $sgns = 0; # number of side-chanin subgroups
+
+      open(PKA, $kintmp) || die "Can't process prekin output 1: $!\n";
+
+      my ($keyword, $rest, $label);
+      my $grouptype = '';
+
+PKARECORD:
+      while (<PKA>) {
+         chop;   # strip record separator
+
+         ($keyword, $rest) = split(' ', $_, 2);
+         if (! defined($keyword)) { next PKARECORD; }
+         $label = '';
+         if ($keyword =~ /^\@/ && defined($rest)) {
+            $label = $1 if /^[^\=]*\{([^\{\}]*)\}/;
+         }
+
+         if ($keyword =~ /^\@pdbfile/) { next PKARECORD; }
+         if ($keyword =~ /^\@group/)   {
+            $grouptype = $label if ($label =~ /selected|movable|contacts/);
+            next PKARECORD;
+         }
+         if ($keyword =~ /^\@subgroup/ && $label =~ /sidechain/) {
+            # group types are passed in with echo before each prekin pass
+	    if ($grouptype =~ /movable|selected/) {
+               $_ = $_ . ' nobutton';
+	    }
+         }
+         if ($keyword =~ /^\@balllist/ && $_ =~ /atoms/) {
+	   s/master\s*\=\s*\{atoms\}//;
+         }
+         if ($keyword =~ /^\@subgroup/ && $_ !~ /dominant/) {
+            $_ = $_ . ' dominant';
+         }
+         if ($keyword =~ /^\@balllist/ && $_ =~ /color\w*\=/ && $label =~ /sc N/) {
+            s/cyan/sky/g;
+         }
+         if ($keyword =~ /^\@balllist/ && $_ =~ /radius\w*\=/) {
+            s/0.2/0.1/g;
+         }
+         printf "%s\n", $_;
+      }
+      close PKA;
+   }
