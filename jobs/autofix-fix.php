@@ -93,7 +93,7 @@ $hash_val="";
 # Read the coot commands into an array
 while(!feof($fp) and ($line = fgets($fp, 200)))
 {
-   if ( eregi("DECOY",$line) ) {
+   if ( eregi("DECOY",$line) || eregi("BAD",$line) || eregi("BORDERLINE",$line) ) {
       $s = trim($line, "\n");
       $key   = substr($s, -10);
       for ($i=0; $i<7; $i++) {

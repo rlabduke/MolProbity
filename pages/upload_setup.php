@@ -37,6 +37,7 @@ function display($context)
 <div class='side_options'>
     <b>Advanced options:</b>
     <br><label><input type="checkbox" name="biolunit" value="1"> Biol. unit (PDB only)</label>
+    <br><label><input type='checkbox' name="eds_mtz" value="1"> Get mtz from EDS</label>
     <br><label><input type="checkbox" name="eds_2fofc" value="1"> Get 2Fo-Fc map from EDS</label>
     <br><label><input type="checkbox" name="eds_fofc" value="1"> Get Fo-Fc map from EDS</label>
 </div>
@@ -233,6 +234,7 @@ function onFetchPdbFile()
     $_SESSION['bgjob']['isCnsFormat']   = false;
     $_SESSION['bgjob']['ignoreSegID']   = false;
     $_SESSION['bgjob']['biolunit']      = $req['biolunit'];
+    $_SESSION['bgjob']['eds_mtz']       = $req['eds_mtz'];
     $_SESSION['bgjob']['eds_2fofc']     = $req['eds_2fofc'];
     $_SESSION['bgjob']['eds_fofc']      = $req['eds_fofc'];
     
@@ -260,6 +262,7 @@ function onFetchEdsMap()
     
     unset($_SESSION['bgjob']); // Clean up any old data
     $_SESSION['bgjob']['pdbCode']       = $req['pdbCode'];
+    $_SESSION['bgjob']['eds_mtz']       = $req['eds_mtz'];
     $_SESSION['bgjob']['eds_2fofc']     = $req['eds_2fofc'];
     $_SESSION['bgjob']['eds_fofc']      = $req['eds_fofc'];
     

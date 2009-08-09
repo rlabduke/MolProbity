@@ -69,6 +69,8 @@ function display($context)
         echo "<td><input type='submit' name='cmd' value='Start Fixing Leucines &gt;'></td>\n";
         echo "<td align='right'><input type='submit' name='cmd' value='Cancel'></td>\n";
         echo "</tr></table></p></form>\n";
+
+        echo "<p>Mtz files with phase information are preferred because Real-space correlation calculations currently require an mtz</p>";
 ?>
 <script type='text/javascript'>
 
@@ -145,6 +147,7 @@ windowOnload(function() {
         echo "</tr></table>";
         echo "</form>";
 
+        echo "<p>Mtz files with phase information are preferred because Real-space correlation calculations currently require an mtz</p>";
     }
     
     echo $this->pageFooter();
@@ -275,13 +278,12 @@ function onFetchEdsMap()
     $_SESSION['bgjob']['eds_2fofc']     = $req['eds_2fofc'];
     $_SESSION['bgjob']['eds_fofc']      = $req['eds_fofc'];
 
-    // logging is done is background job
+    // logging is done in background job
 
     // launch background job
     pageGoto("job_progress.php");
-    #launchBackground(MP_BASE_DIR."/jobs/fetch-edsmap.php", "generic_done.php", 3);
-    launchBackground(MP_BASE_DIR."/jobs/fetch-edsmap.php", "upload_autofix_map.php", array('type' => 'map', 'mapName' => $mapName));
 
+    launchBackground(MP_BASE_DIR."/jobs/fetch-edsmap.php", "generic_done.php", 3);
 }
 #}}}########################################################################
 

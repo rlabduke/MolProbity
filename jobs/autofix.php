@@ -98,6 +98,7 @@ $_SESSION['lastUsedModelID'] = $newModel['id']; // this is now the current model
 setProgress($tasks, 'improvement');
 
 $improveText = "";
+$improvementList = array(); 
 
    $mainModel = mpTempfile("tmp_newModelH_pdb_");
    reduceBuild($modelOutpath, $mainModel);

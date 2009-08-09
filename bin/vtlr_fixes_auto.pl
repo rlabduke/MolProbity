@@ -32,7 +32,7 @@ sub help{
    &version; 
    print "
 USAGE: vtlr_fixes_auto.pl [-options] input_pdb_file (input_ccp4_map input_mtz) 
-            tempFile_path MP_BASE_DIR autoFix_log modelOutpath
+            tempFile_path MP_BASE_DIR modelOutpath
 
 options:
   -Help                 outputs this help message
@@ -50,9 +50,11 @@ Output is directed to input_pdb_file_mod
 
 EXAMPLES: vtlr_fixes_auto.pl  [flags] 1A0F.pdb 1a0f.map 1aof_temp 
                                 /Users/Bob_Immormino/Sites/molprobity3/trunk/molprobity3 
+                                1A0F_mod.pdb
           vtlr_fixes_auto.pl  [flags] 1A0F.pdb 1a0f_sigmaa.mtz 1aof_temp 
                                 /Users/Bob_Immormino/Sites/molprobity3/trunk/molprobity3 
-                                
+                                1A0F_mod.pdb
+
 DEFAULT
    -Decoy-only           False
    -RotamericityCutoff    6%  
@@ -452,7 +454,7 @@ system ("java -Xmx256m -cp ".$MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.dang
 system ("java -Xmx256m -cp ".$MP_BASE_DIR."/lib/hless.jar hless.Ramachandran -raw -nokin ".$initial_model." > $temp_data/temp.rama"); 
 system ("java -Xmx256m -cp ".$MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.rotarama.Rotalyze  ".$initial_model." > $temp_data/temp.rota");
 system ($MP_BASE_DIR."/bin/macosx/prekin -cbdevdump ".$initial_model." > $temp_data/temp.cb");
-system ($MP_BASE_DIR."/bin/quick_clashscore.pl ".$initial_model." 0.4 > $temp_data/temp.clash"); 
+system ($MP_BASE_DIR."/bin/quick_clashscore.pl -mcsc ".$initial_model." 0.4 > $temp_data/temp.clash"); 
 # system ("phenix.elbow --do-all ".$initial_model);
 # $cif = $temp_data."/".$modelID.".cif"; 
 # $phenix_mtz1 = $temp_data."/".$modelID."_phenix1.mtz";
@@ -921,7 +923,7 @@ $initial_model1 = "$temp_data/pdbtmp1.pdb";
 system ("java -Xmx256m -cp ".$MP_BASE_DIR."/lib/hless.jar hless.Ramachandran -raw -nokin ".$initial_model1." > $temp_data/temp.rama");
 system ("java -Xmx256m -cp ".$MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.rotarama.Rotalyze  ".$initial_model1." > $temp_data/temp.rota2"); 
 system ($MP_BASE_DIR."/bin/macosx/prekin -cbdevdump ".$initial_model1." > $temp_data/temp.cb");
-system ("quick_clashscore.pl ".$initial_model1." 0.4 > $temp_data/temp.clash");
+system ($MP_BASE_DIR."/bin/quick_clashscore.pl -mcsc ".$initial_model1." 0.4 > $temp_data/temp.clash");
 system ("diff -y --suppress-common-lines $temp_data/temp.rota $temp_data/temp.rota2 > $temp_data/temp.rotated");
 # $phenix_mtz2 = $temp_data."/".$modelID."_phenix2.mtz";
 # system ("phenix.refine --overwrite ".$mtz." ".$initial_model1." ".$cif." main.number_of_macro_cycles=0 main.bulk_solvent_and_scale=false export_final_f_model=mtz refinement.input.xray_data.r_free_flags.generate=True");
@@ -1157,14 +1159,17 @@ while ($line=<ROTA>) {
          $rotated_diff_score    = $quality_score_hash{$cnit}->{diff_rotated};
          $guan_angle_diff_score = $quality_score_hash{$cnit}->{diff_guans};
          $rsc_diff_score        = $quality_score_hash{$cnit}->{diff_rsc}; 
+         $probe_diff_score      = $quality_score_hash{$cnit}->{diff_probe};
+         $hb_diff_score         = $quality_score_hash{$cnit}->{diff_hb};
+
 
          $key = $chain." ".$resn.$resid.$ins;
 
-         if ($fixed_rota =~ m/OUTLIER/ || $fixed_rama < 1 || $fixed_cb < 1) {
+         if ($fixed_rota =~ m/OUTLIER/ || $fixed_rama =~ m/\(0\)/ || $fixed_cb < 1) {
             if ($fixed_rota =~ m/OUTLIER/ && defined $script_hash{$key}) {
                $script_hash{$key}="  ;;could not fix ".$key." *fix* is a rotamer outlier!\n\n";
             }
-            elsif ($fixed_rama < 1 && defined $script_hash{$key}) {
+            elsif ($fixed_rama =~ m/\(0\)/ && defined $script_hash{$key}) {
                $script_hash{$key}="  ;;could not fix ".$key." *fix* is a ramachandran outlier!\n\n";
             }
             elsif ($fixed_cb < 1 && defined $script_hash{$key}) {
@@ -1173,7 +1178,7 @@ while ($line=<ROTA>) {
          }
          
          elsif ($rota_diff_score < -0.1 || $rama_diff_score < -30 || $cb_diff_score < 0 || 
-            $clash_diff_score < -0.1 || $rotated_diff_score < 10 || $rsc_diff_score < -0.0005 ||
+            $clash_diff_score < -0.1 || ($resn !~ m/ARG/ && $rotated_diff_score < 10) || $rsc_diff_score < -0.0005 ||
             (($resn =~ m/ARG/) && ($guan_angle_diff_score > -150 && $guan_angle_diff_score <150)) ) {
          
             if ($rota_diff_score < -0.1 && defined $script_hash{$key}) {
@@ -1192,10 +1197,18 @@ while ($line=<ROTA>) {
                $script_hash{$key}="  ;;could not fix ".$key." rsc score got worse!\n\n";
             }
             elsif ((($resn =~ m/ARG/) && ($guan_angle_diff_score > -150 && $guan_angle_diff_score < 150)) && defined $script_hash{$key}) {
-               $script_hash{$key}="  ;;could not fix ".$key."Arg did not flip by 180+/-30deg!\n\n";
+               if ($probe_diff_score > 0 && $hb_diff_score > 0 && $rota_diff_score > 0) { # allows for probe based improvement in packing and h-bonding 
+                  $script_hash{$key}="  ;;".$key."  has packing and h-bond improvements. \n\n";
+               }
+               else {
+                  $script_hash{$key}="  ;;could not fix ".$key."Arg did not flip by 180+/-30deg!\n\n";
+               }
             }
-            elsif ( $rotated_diff_score < 10 && defined $script_hash{$key} && $resn !~ m/ARG/) {
-               if ($rota_diff_score < -0.1 || $rama_diff_score < 10) { # allows for density based bb fixes
+            elsif ($resn !~ m/ARG/ && $rotated_diff_score < 10 && defined $script_hash{$key}) {
+               if ($rota_diff_score > -0.1 && $rama_diff_score > 10) { # allows for density based bb fixes
+                  $script_hash{$key}="  ;;".$key." has backbone only improvement. \n\n";
+               }
+               else {
                   $script_hash{$key}="  ;;".$key." did not significantly move \n\n";
                }
             }
@@ -1252,7 +1265,7 @@ $stats=$temp_data."/".$modelID."_stats";
 open STATS, ">$stats";
 print STATS "#index:diff_rama:diff_rota:diff_cb:diff_clash:diff_rsc:diff_rotated:\t|:orig_rama:orig_rota:orig_cb:orig_clash:orig_rsc:place_holder:\t|:fixed_rama:fixed_rota:fixed_cb:fixed_clash:fixed_rsc:place_holder
 # diff_rama is the sum of the ramachandran score differences for residues n-1, n and n+1   current cutoff is  > -30      is accepted
-# diff_rota is the fractional change (old_rota_score-new_rota_score)/(old_rota_score)      current cutoff is  >  -0.1    is accepted
+# diff_rota is the fractional change (new_rota_score-old_rota_score)/(new_rota_score)      current cutoff is  >  -0.1    is accepted
 # diff_cb   is (new_cb-old_cb); cb is binned outliers ( >= 0.25 ) are designated as 0      current cutoff is  <   0      is rejected 
 # diff_clash is the straight difference in clashscore score (greatest overlap per residue) current cutoff is  >  -0.1    is rejected
 # diff_rsc  is the straight difference in rsc scores                                       current cutoff is  >  -0.0005 is accepted
@@ -1260,9 +1273,9 @@ print STATS "#index:diff_rama:diff_rota:diff_cb:diff_clash:diff_rsc:diff_rotated
 #   smaller rotations are only excepted if diff_rama > 10 and diff_rota > -0.1 \n"; 
 print STATS "#now, positive differences in rota and rama are good  * are fixed residues ^ are attempted\n"; 
 print STATS "#
-#----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 # DIFF    : rama : rota :  cb  : clash:probe:  hb :   rsc :rot'd1:rot'd2:rot'd3:rot'd4:guan_a:         FLIP DECISION          :   ORIG  : rama bin:  rota   (type) :  cb  : clash:probe:  hb :  rsc :chi1  :chi2  :chi3  :chi4  :     FIXED     : rama bin:  rota   (type) :  cb  : clash:probe:  hb :  rsc :chi1  :chi2  :chi3  :chi4  : #
-#----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 ";      
         
 foreach $key (sort keys %quality_score_hash) {
@@ -1285,6 +1298,14 @@ foreach $key (sort keys %quality_score_hash) {
          $marked_cnit=$cnit."*";
          $quality_score_hash{$cnit}->{reject_reason} = "     [ALPHA TEST] ACCEPTED      ";
       } 
+      elsif ($tmp_reject_reason =~ m/backbone/) {
+         $marked_cnit=$cnit."*";
+         $quality_score_hash{$cnit}->{reject_reason} = "     [ALPHA TEST BB] ACCEPTED    ";
+      }
+      elsif ($tmp_reject_reason =~ m/packing/) {
+         $marked_cnit=$cnit."*";
+         $quality_score_hash{$cnit}->{reject_reason} = "     [ALPHA TEST HB] ACCEPTED    ";
+      }
       else {
          $marked_cnit=$cnit."^";
          $s = length($tmp_reject_reason);

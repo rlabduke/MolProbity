@@ -14,7 +14,8 @@ INPUTS (via $_SESSION['bgjob']):
     
     biolunit        true if we should get the biological, rather   }
                     than asymmetric, unit from the PDB             } for pdbCode
-    eds_2fofc       true if the user wants the 2Fo-Fc map from EDS } only...
+    eds_mtz         true if the user wants the mtz from EDS        } only...
+    eds_2fofc       true if the user wants the 2Fo-Fc map from EDS } 
     eds_fofc        true if the user wants the Fo-Fc map from EDS  }
 
 OUTPUTS (via $_SESSION['bgjob']):
@@ -52,12 +53,33 @@ function getMaps($code)
     global $map_notebook_msg;
     $map_notebook_msg = "";
     $prog = getProgressTasks();
+    if($_SESSION['bgjob']['eds_mtz'])   $prog['mtz']   = "Download mtz from the EDS";
     if($_SESSION['bgjob']['eds_2fofc']) $prog['2fofc'] = "Download 2Fo-Fc map from the EDS";
     if($_SESSION['bgjob']['eds_fofc'])  $prog['fofc']  = "Download Fo-Fc (difference) map from the EDS";
     
     $mapDir = "$_SESSION[dataDir]/".MP_DIR_EDMAPS;
     if(!file_exists($mapDir)) mkdir($mapDir, 0777);
-    
+
+    if($_SESSION['bgjob']['eds_mtz'])
+    {
+        setProgress($prog, 'mtz');
+        $mapName = $code."_sigmaa.mtz";
+        $mapPath = "$mapDir/$mapName";
+        if(!file_exists($mapName))
+        {
+            $tmpMap = getEdsMtz($code);
+            if($tmpMap && copy($tmpMap, $mapPath))
+            {
+                unlink($tmpMap);
+                $_SESSION['edmaps'][$mapName] = $mapName;
+                $_SESSION['lastUsedED'] = $mapName;
+                mpLog("edmap-eds:User requested mtz for $code from the EDS");
+                $map_notebook_msg .= "<p>The mtz for $code was successfully retrieved from the EDS.</p>\n";
+            }
+            else $map_notebook_msg .= "<p><div class='alert'>The mtz for $code could not be retrieved from the EDS.</div></p>\n";
+        }
+        else echo "The mtz for $code could not be retrieved, because a file of the same name already exists.";
+    }    
     if($_SESSION['bgjob']['eds_2fofc'])
     {
         setProgress($prog, '2fofc');

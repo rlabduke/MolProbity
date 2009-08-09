@@ -4,7 +4,7 @@
     
 INPUTS (via $_SESSION['bgjob']):
     pdbCode         the PDB or NDB code for the molecule
-    
+    eds_mtz         true if the user wants the mtz from EDS 
     eds_2fofc       true if the user wants the 2Fo-Fc map from EDS
     eds_fofc        true if the user wants the Fo-Fc map from EDS
 
@@ -72,6 +72,7 @@ if(preg_match('/^[0-9A-Z]{4}$/i', $code))
             {
                 unlink($tmpMap);
                 $_SESSION['edmaps'][$mapName] = $mapName;
+                $_SESSION['lastUsedED'] = $mapName;
                 mpLog("edmap-eds:User requested mtz for $code from the EDS");
                 $s .= "<p>The mtz for $code was successfully retrieved from the EDS.</p>\n";
             }
@@ -91,6 +92,7 @@ if(preg_match('/^[0-9A-Z]{4}$/i', $code))
             {
                 unlink($tmpMap);
                 $_SESSION['edmaps'][$mapName] = $mapName;
+                $_SESSION['lastUsedED'] = $mapName;
                 mpLog("edmap-eds:User requested 2Fo-Fc map for $code from the EDS");
                 $s .= "<p>The 2Fo-Fc map for $code was successfully retrieved from the EDS.</p>\n";
             }

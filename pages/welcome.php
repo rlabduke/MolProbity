@@ -196,7 +196,7 @@ function displayModelTools($context)
         'geomonly'  => array('desc' => 'Analyze geometry without all-atom contacts', 'page' => 'aacgeom_setup.php', 'rel' => 1, 'img' => 'ramaplot.png'),
         'iface'     => array('desc' => 'Visualize interface contacts', 'handler' => 'onVisInterface', 'rel' => 1, 'img' => 'barnase_barstar.png'),
         //'sswing'    => array('desc' => 'Refit sidechains', 'page' => 'sswing_setup1.php', 'rel' => 1, 'img' => ''),
-        'autoFix'    => array('desc' => 'Fix Flipped Leu sidechains', 'page' => 'autofix_setup.php', 'rel' => 1, 'img' => 'auto_fix_v4.png'),
+        'autoFix'    => array('desc' => 'Fix Flipped Leu sidechains', 'page' => 'autofix_setup.php', 'rel' => 1, 'img' => 'leu_fix.png'),
         'makekins'  => array('desc' => 'Make simple kinemages', 'page' => 'makekin_setup.php', 'rel' => 1, 'img' => 'porin_barrel.png'),
         'editpdb' => array('desc' => 'Edit PDB file', 'page' => 'editpdb_setup1.php', 'rel' => 1, 'img' => 'scissors.png'),
         'downgrade' => array('desc' => 'Downgrade file to PDBv2.3 format (for download only)', 'page' => 'pdb_convert_setup.php', 'rel' => 1, 'img' => 'downgrade.gif'),

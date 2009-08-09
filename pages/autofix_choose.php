@@ -104,7 +104,7 @@ function display($context)
                 else                                                         { $checked = "";        }
                 
                 echo "<tr bgcolor='$color'>\n";
-                echo "<td align='center'><input type='checkbox' $checked name='$dofix[$c]' value='1'></td>\n";
+                echo "<td align='center'><input type='checkbox' $checked name='dofix[$c]' value='1'></td>\n";
                 echo "<td align='center'>" . $changes[1][$c]  . "</td>\n";
                 echo "<td align='left'>"   . $changes[2][$c]  . "</td>\n";
                 echo "<td align='center'>" . $changes[4][$c]  . "</td>\n";
@@ -120,6 +120,7 @@ function display($context)
 
         echo "</table>\n";
         
+        $improveText .= ""; 
         $improveText .= $changes[34][0]."\n";
 
         $improveTextFile = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA."/$model[parent]_autofix_improvement.html";
@@ -171,7 +172,7 @@ function onRerunAutoFix()
     $rerun = false;
     $n = count($changes[0]); // How many changes are in the table?
     $autofix  = "<p>The following residues were fixed automatically by AutoFix:\n<ul>\n";
-    $userfix  = "<p>The following residues were fixed manually by the user:\n<ul>\n";
+    $userfix  = "<p>The following residues were fixed by user request:\n<ul>\n";
     $userkeep = "<p>The following residues were NOT flipped, though AutoFix recommended doing so:\n<ul>\n";
     for($c = 0; $c < $n; $c++)
     {
@@ -191,7 +192,7 @@ function onRerunAutoFix()
         }
         elseif($dofix[$c])
         {
-            $userfix  .= "<li>{$changes[1][$c]} {$changes[2][$c]} {$changes[3][$c]}</li>\n";
+            $userfix  .= "<li>{$changes[1][$c]} {$changes[2][$c]} {$changes[4][$c]}</li>\n";
             $rerun = true;
         }
     }
