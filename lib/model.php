@@ -631,7 +631,8 @@ function autoFix($inpdb, $map, $temp_dir, $_MP_BASE_DIR_, $autofix_out_log, $mod
     exec("cp ".$inpdb." ". $tmppdb); 
     reduceTrim($inpdb, $tmppdbTrim); 
     exec("cp ".$tmppdbTrim." ".$inpdb);
-    exec("vtlr_fixes_auto.pl $inpdb $map $temp_dir $_MP_BASE_DIR_ $modelOutpath > $autofix_out_log");
+    exec("vtlr_fixes_auto.pl -decoy $inpdb $map $temp_dir $_MP_BASE_DIR_ $modelOutpath > $autofix_out_log");
+//echo "vtlr_fixes_auto.pl -decoy $inpdb $map $temp_dir $_MP_BASE_DIR_ $modelOutpath > $autofix_out_log"; 
     exec("cp ".$tmppdb." ".$inpdb);
     unlink($tmppdb);
     unlink($tmppdbTrim);
@@ -1355,8 +1356,15 @@ function getEdsMtz($pdbcode)
     $in = fopen($url, 'r');
     $outpath = mpTempfile("tmp_map_");
     $out = fopen($outpath, 'w');
-    while(!feof($in))
+    if($in) while(!feof($in))
+    {
         fwrite($out, fread($in, 8192));
+    }
+    else 
+    {
+        echo "No $type map available for $pdbcode.\n";
+        return null;
+    }
     fclose($out);
     fclose($in);
 
@@ -1434,8 +1442,15 @@ function getEdsMap($pdbcode, $format, $type)
     $in = fopen($url, 'r');
     $outpath = mpTempfile("tmp_map_");
     $out = fopen($outpath, 'w');
-    while(!feof($in))
+    if($in) while(!feof($in))
+    {
         fwrite($out, fread($in, 8192));
+    }
+    else 
+    {
+        echo "No $type map available for $pdbcode.\n";
+        return null;
+    }
     fclose($out);
     fclose($in);
     

@@ -2,6 +2,8 @@
 # (jEdit options) :folding=explicit:collapseFolds=1:
 
 use File::Basename;
+use File::Path;
+
 $start = time();
 #TODO  add proper handling of alt, ins, and chain breaks
 #      split buttons to zoom, fix, undo DONE
@@ -190,6 +192,7 @@ sub changes{
 
 sub buttons {
         $coot_button_commands = $_[0];
+        $matrix_weight        = $_[1];
         $buttonsout = $temp_data."/".$modelID."_button.scm";
 
         open BUTTONSOUT, ">$buttonsout";
@@ -274,6 +277,8 @@ sub buttons {
 ;; input coot style commands \n\n"; 
 
    print BUTTONSOUT "(set-refinement-immediate-replacement 1)\n\n";
+   print BUTTONSOUT "(set-matrix ".$matrix_weight.")\n\n";
+
    open ALLFIXES, "<$coot_script"; 
    $before_first_button=1; 
    while ($line =<ALLFIXES>) {
@@ -297,15 +302,23 @@ sub buttons {
    (gtk-widget-show-all window)))
 
    (let* ((imol 0)
-          (action-func (lambda (imol chain-id resno inscode x y z info)
+          (action-func (lambda (imol chain-id resno inscode x y z info fitRota)
                (let ((backup-mode (backup-state imol))
                (replacement-state (refinement-immediate-replacement-state)))
              ; (turn-off-backup imol) for now
                (set-refinement-immediate-replacement 1)
                (set-rotation-centre x y z)
                (refine-zone imol chain-id resno resno inscode)
-               (accept-regularizement)
-               (auto-fit-best-rotamer resno \"\" inscode chain-id imol (imol-refinement-map) 1 0.1)
+               (accept-regularizement)"; 
+#   if ($decoy_only) {
+#      print BUTTONSOUT "
+#               (set-residue-to-rotamer-number imol chain-id resno inscode fitRota)"; 
+#   }
+#   else{
+      print BUTTONSOUT "
+               (auto-fit-best-rotamer resno \"\" inscode chain-id imol (imol-refinement-map) 1 0.1)";
+#   }
+   print BUTTONSOUT "
                (refine-zone imol chain-id resno resno inscode)
                (accept-regularizement)
                (info-dialog info)
@@ -395,6 +408,9 @@ if ($ARGV[1+$nflag] =~ m/mtz/) { $mtz=$ARGV[1+$nflag]; }
 if ($ARGV[1+$nflag] =~ m/map/) { $map=$ARGV[1+$nflag]; }
 
 $temp_data    = $ARGV[2+$nflag];
+unless(-d $temp_data){
+    mkpath $temp_data or die "can't mkdir $temp_data: $!";
+}
 $MP_BASE_DIR  = $ARGV[3+$nflag];
 $modelOutpath = $ARGV[4+$nflag];
 chomp($modelOutpath); 
@@ -444,6 +460,35 @@ for ($i=0; $i <= scalar keys (%seq_hash); $i++) {
    $neighbor_hash{$index} = $seq_hash{$i-1}.":".$seq_hash{$i+1}; 
 }       
 #}}}########################################################################
+
+#{{{ setup hash for coot residue numbers
+############################################################################
+
+%coot_rotamer_hash=(); 
+# Leu
+$coot_rotamer_hash{LEU}->{mt} = 0;
+$coot_rotamer_hash{LEU}->{tp} = 1;
+$coot_rotamer_hash{LEU}->{tt} = 2;
+$coot_rotamer_hash{LEU}->{mp} = 3;
+$coot_rotamer_hash{LEU}->{pp} = 4;
+# Val
+$coot_rotamer_hash{VAL}->{t} = 0;
+$coot_rotamer_hash{VAL}->{m} = 1;
+$coot_rotamer_hash{VAL}->{p} = 2;
+# Thr
+$coot_rotamer_hash{THR}->{t} = 2;
+$coot_rotamer_hash{THR}->{m} = 1;
+$coot_rotamer_hash{THR}->{p} = 0;
+# Ser
+$coot_rotamer_hash{SER}->{t} = 2;
+$coot_rotamer_hash{SER}->{m} = 1;
+$coot_rotamer_hash{SER}->{p} = 0;
+# Cys
+$coot_rotamer_hash{CYS}->{t} = 1;
+$coot_rotamer_hash{CYS}->{m} = 0;
+$coot_rotamer_hash{CYS}->{p} = 2;
+
+#}}}########################################################################
         
 #{{{ Prep for Coot FIRST PASS
 ############################################################################
@@ -466,7 +511,6 @@ system ($MP_BASE_DIR."/bin/quick_clashscore.pl -mcsc ".$initial_model." 0.4 > $t
 # system ("iotbx.python ".$MP_BASE_DIR."/bin/pdb_map_correlation.py ".$phenix_mtz1." ".$initial_model." > $temp_data/temp.rsc");
 system ($MP_BASE_DIR."/bin/iotbx.python ".$MP_BASE_DIR."/bin/pdb_map_correlation.py ".$mtz." ".$initial_model." > $temp_data/temp.rsc");
 
-        
 # sort stats for the initial .pdb 
 #-----------------------------------------------------------------------
         
@@ -524,28 +568,31 @@ while ($line = <ROTA>) {
               if ( ($chi1 > 230  &&  $chi1 < 300)  &&
                    ($chi2 > 300  ||  $chi2 < 60) )
               {
-                 $quality_score_hash{$cnit}->{decoy} = "Likely decoy try mt";
+                 $quality_score_hash{$cnit}->{decoy} = "Likely decoy try mt"; # coot rota #1
               }
               if ( ($chi1 > 120  &&  $chi1 < 180)  &&
                    ($chi2 > 300  ||  $chi2 < 60) )
               {
-                 $quality_score_hash{$cnit}->{decoy} = "Likely decoy try tt";
+                 $quality_score_hash{$cnit}->{decoy} = "Likely decoy try tt"; # coot rota #3
               }
               if ( ($chi1 > 180  &&  $chi1 < 250)  &&
                    ($chi2 > 150  &&  $chi2 < 270) )
               {
-                 $quality_score_hash{$cnit}->{decoy} = "Likely decoy try tp";
+                 $quality_score_hash{$cnit}->{decoy} = "Likely decoy try tp"; # coot rota #2
               }
               if ( ($chi1 > 260  &&  $chi1 < 360)  &&
                    ($chi2 > 180  &&  $chi2 < 300) )
               {
-                 $quality_score_hash{$cnit}->{decoy} = "Likely decoy try mp";
+                 $quality_score_hash{$cnit}->{decoy} = "Likely decoy try mp"; # coot rota #4
               }
            }
            elsif ($resn =~ m/VAL/ || $resn =~ m/THR/ || $resn =~ m/SER/ || $resn =~ m/CYS/)
            {
-              if ($chi1 > 330  ||  $chi1 <  30)  { $quality_score_hash{$cnit}->{decoy} = "Likely decoy try t"; }
-              if ($chi1 >  90  &&  $chi1 < 150)  { $quality_score_hash{$cnit}->{decoy} = "Likely decoy try m"; }
+             # t coot val rota #1  ser rota #3  thr rota #3  cys rota #2
+             # m coot     rota #2      rota #2      rota #2      rota #1
+             # p coot     rota #3      rota #1      rota #1      rota #3
+              if ($chi1 > 330  ||  $chi1 <  30)  { $quality_score_hash{$cnit}->{decoy} = "Likely decoy try t"; } 
+              if ($chi1 >  90  &&  $chi1 < 150)  { $quality_score_hash{$cnit}->{decoy} = "Likely decoy try m"; } 
               if ($chi1 > 210  &&  $chi1 < 270)  { $quality_score_hash{$cnit}->{decoy} = "Likely decoy try p"; }
            }
         }
@@ -607,9 +654,13 @@ while ($line = <RSC>) {
        while ($line = <RSC>) {
           if ($line =~ m/mean/) {
             #  mean: 0.823939
-             $mean = substr($line, 8,8); 
-             $quality_score_hash{orig_rsc_mean} = $mean +0; 
-             break; 
+             $mean = substr($line, 8,8);
+             $mean += 0;
+             $quality_score_hash{orig_rsc_mean} = $mean;
+             $matrix_weight = (100 * $mean) - 30;
+             if ($matrix_weight > 60) { $matrix_weight = 60; }
+             elsif ($matrix_weight < 10) { $matrix_weight = 10; }
+             break;
           }
        }
        break; 
@@ -664,7 +715,10 @@ open ROTA, "<$temp_data/temp.rota";
 # to circumvent this problem we put our scheme file into the startup 
 # directory for coot 
         
-$coot_script = "/sw/share/coot/scheme/bob_molprobity.scm"; 
+#$coot_script = "/usr/local/xtal/coot/share/coot/scheme/bob-molprobity.scm"; 
+$coot_script = "/sw/share/coot/scheme/bob_molprobity.scm ";
+#$coot_script = $temp_data."/".$modelID."_coot_fix_VTLR.scm";
+
 $button_script_text = "";
         
 open COOTSCRIPT1, ">$coot_script";
@@ -676,6 +730,7 @@ elsif (defined $initial_model && defined $mtz) { print COOTSCRIPT1 "(auto-read-m
 print COOTSCRIPT1 "(copy-molecule 0)\n";
 print COOTSCRIPT1 "(set-imol-refinement-map 1)\n";
 print COOTSCRIPT1 "(set-refinement-immediate-replacement 1)\n\n"; 
+print COOTSCRIPT1 "(set-matrix ".$matrix_weight.")\n\n";
         
 if (!$decoy_only) {
    while ($line=<ROTA>) {
@@ -702,7 +757,8 @@ if (!$decoy_only) {
          $coot_script_commands  = "(set-rotation-centre ".$x." ".$y." ".$z.")\n"; 
          $coot_script_commands .= "(refine-zone 0 \"".$chain."\" ".$resid." ".$resid." \"".$inscoot."\")\n"; 
          $coot_script_commands .= "(accept-regularizement)\n"; 
-         $coot_script_commands .= "(auto-fit-best-rotamer ".$resid." \"".$alt."\" \"".$inscoot."\" \"".$chain."\" 0 1 1 0.1)\n"; 
+         $coot_script_commands .= "(auto-fit-best-rotamer ".$resid." \"".$alt."\" \"".$inscoot."\" \"".$chain."\" 0 1 1 0.1)\n";
+#         $coot_script_commands .= "(set-residue-to-rotamer-number 0 \"".$chain."\" ".$resid." \"".$inscoot."\" $fit_to_rotamer)\n";
          $coot_script_commands .= "(refine-zone 0 \"".$chain."\" ".$resid." ".$resid." \"".$inscoot."\")\n"; 
          $coot_script_commands .= "(accept-regularizement)\n\n";   
               
@@ -741,6 +797,7 @@ if (!$decoy_only) {
          $button_command2 .= "\t\t\"    Fix Above   \"\n";
          $button_command2 .= "\t\t(lambda (imol)\n";
          $button_command2 .= "\t\t(action-func imol \"$chain\" $resid \"$inscoot\" $x $y $z $info))\n";
+#         $button_command2 .= "\t\t(action-func imol \"$chain\" $resid \"$inscoot\" $x $y $z $info $fit_to_rotamer))\n";
          $button_command2 .= "\t\t\"   Undo  Fix    \"\n";
          $button_command2 .= "\t\t(lambda (imol)\n";
          $button_command2 .= "\t\t(set-undo-molecule imol)\n\t\t(apply-undo)\n\t\t(apply-undo)\n\t\t(apply-undo)))\n\n";
@@ -821,6 +878,18 @@ elsif($decoy_only) {
          $resid = substr($cnit, 1,4);
          $ins   = substr($cnit, 5,1);
          $resn  = substr($cnit, 6,3); 
+         $decoy = $quality_score_hash{$cnit}->{decoy};
+         if ($resn =~ m/LEU/) {
+            $likely_name = substr($decoy, length($decoy)-2, 2); 
+            $fit_to_rotamer = $coot_rotamer_hash{$resn}->{$likely_name}; 
+         }
+         elsif ($resn =~ m/VAL/ || $resn =~ m/THR/ || $resn =~ m/SER/ || $resn =~ m/CYS/) {
+            $likely_name = substr($decoy, length($decoy)-1, 1); 
+            $fit_to_rotamer = $coot_rotamer_hash{$resn}->{$likely_name}; 
+         }
+         elsif ($resn =~ m/ILE/ || $resn =~ m/ARG/) { # no decoys yet
+         }
+
          $score+=0;
          chomp($rotamer);
             
@@ -835,6 +904,7 @@ elsif($decoy_only) {
          $coot_script_commands .= "(refine-zone 0 \"".$chain."\" ".$resid." ".$resid." \"".$inscoot."\")\n"; 
          $coot_script_commands .= "(accept-regularizement)\n"; 
          $coot_script_commands .= "(auto-fit-best-rotamer ".$resid." \"".$alt."\" \"".$inscoot."\" \"".$chain."\" 0 1 1 0.1)\n"; 
+#         $coot_script_commands .= "(set-residue-to-rotamer-number 0 \"".$chain."\" ".$resid." \"".$inscoot."\" $fit_to_rotamer)\n";
          $coot_script_commands .= "(refine-zone 0 \"".$chain."\" ".$resid." ".$resid." \"".$inscoot."\")\n"; 
          $coot_script_commands .= "(accept-regularizement)\n\n";   
               
@@ -864,6 +934,7 @@ elsif($decoy_only) {
          $button_command .= "\t\t\"    Fix Above   \"\n";
          $button_command .= "\t\t(lambda (imol)\n";
          $button_command .= "\t\t(action-func imol \"$chain\" $resid \"$inscoot\" $x $y $z $info))\n";
+#         $button_command .= "\t\t(action-func imol \"$chain\" $resid \"$inscoot\" $x $y $z $info $fit_to_rotamer))\n";
          $button_command .= "\t\t\"   Undo  Fix    \"\n";
          $button_command .= "\t\t(lambda (imol)\n";
          $button_command .= "\t\t(set-undo-molecule imol)\n\t\t(apply-undo)\n\t\t(apply-undo)\n\t\t(apply-undo)))\n\n";
@@ -883,7 +954,7 @@ print COOTSCRIPT1 "(coot-real-exit 1)\n";
 close COOTSCRIPT1; 
         
 # Call the buttons sub-routine and make the buttons GUI
-&buttons($button_script_text);
+&buttons($button_script_text, $matrix_weight);
 #}}}#########################################################################--------------------------------------------------------------------------------------
         
 #{{{ Run Coot and store results for the FIRST PASS
@@ -891,7 +962,7 @@ close COOTSCRIPT1;
         
 # run coot to try all the fixes
 #-----------------------------------------------------------------------
-system ("coot --no-guano -s ".$coot_script." --no-graphics");            
+system ("coot --no-guano --no-graphics");            
             
 open SCRIPT, "<$coot_script"; 
 %script_hash=(); 
@@ -935,7 +1006,7 @@ system ($MP_BASE_DIR."/bin/iotbx.python ".$MP_BASE_DIR."/bin/pdb_map_correlation
 # then run Java program to make $temp_data/temp.guans
 system ("echo 'Running Java flip-confirming program...'");
 system ("java -Xmx256m -cp ".$MP_BASE_DIR."/lib/cmdline.jar cmdline.ArgFlipConfirmer ".$initial_model." ".$initial_model1." > $temp_data/temp.guans");
-        
+
 # sort stats for the "fixed" .pdb
 #-----------------------------------------------------------------------
         
@@ -1029,7 +1100,7 @@ while ($line = <CLASH>) {
        $orig_clash_score = $quality_score_hash{$cnit}->{orig_clash};
        $orig_probe_score = $quality_score_hash{$cnit}->{orig_probe};
        $orig_hb_score    = $quality_score_hash{$cnit}->{orig_hb};
-       if ($orig_clash_score =~ m/0.000/) { $orig_clash_score -= 0.4; }
+       if ($orig_clash_score =~ m/0.000/ || $orig_clash_score == 0) { $orig_clash_score -= 0.4; }
        if ($clashscore == 0) { $score -= 0.4; }                                        
        $quality_score_hash{$cnit}->{diff_clash} = sprintf("%6.3f", ($clashscore-$orig_clash_score));
        $quality_score_hash{$cnit}->{diff_probe} = sprintf("%5.1f", ($probescore-$orig_probe_score)); 
@@ -1238,6 +1309,7 @@ elsif (defined $initial_model && defined $mtz) {
 print COOTSCRIPT2 "(copy-molecule 0)\n";
 print COOTSCRIPT2 "(set-imol-refinement-map 1)\n";
 print COOTSCRIPT2 "(set-refinement-immediate-replacement 1)\n\n";
+print COOTSCRIPT2 "(set-matrix ".$matrix_weight.")\n\n";
         
 foreach $key (keys %script_hash) {
    $value = $script_hash{$key}; 
@@ -1253,7 +1325,7 @@ system ("cp ".$coot_script." ".$temp_data."/".$modelID."_coot_fix_VTLR.scm");
 
 # run coot to with fixes that improve one or more quality score
 #-----------------------------------------------------------------------
-system ("coot --no-guano -s ".$coot_script." --no-graphics");                    
+system ("coot --no-guano --no-graphics");                    
         
 #finished second pass in coot 
 #}}}########################################################################
@@ -1265,7 +1337,7 @@ $stats=$temp_data."/".$modelID."_stats";
 open STATS, ">$stats";
 print STATS "#index:diff_rama:diff_rota:diff_cb:diff_clash:diff_rsc:diff_rotated:\t|:orig_rama:orig_rota:orig_cb:orig_clash:orig_rsc:place_holder:\t|:fixed_rama:fixed_rota:fixed_cb:fixed_clash:fixed_rsc:place_holder
 # diff_rama is the sum of the ramachandran score differences for residues n-1, n and n+1   current cutoff is  > -30      is accepted
-# diff_rota is the fractional change (new_rota_score-old_rota_score)/(new_rota_score)      current cutoff is  >  -0.1    is accepted
+# diff_rota is the fractional change (new_rota_score-old_rota_score)/(old_rota_score)      current cutoff is  >  -0.1    is accepted
 # diff_cb   is (new_cb-old_cb); cb is binned outliers ( >= 0.25 ) are designated as 0      current cutoff is  <   0      is rejected 
 # diff_clash is the straight difference in clashscore score (greatest overlap per residue) current cutoff is  >  -0.1    is rejected
 # diff_rsc  is the straight difference in rsc scores                                       current cutoff is  >  -0.0005 is accepted
@@ -1300,11 +1372,11 @@ foreach $key (sort keys %quality_score_hash) {
       } 
       elsif ($tmp_reject_reason =~ m/backbone/) {
          $marked_cnit=$cnit."*";
-         $quality_score_hash{$cnit}->{reject_reason} = "     [ALPHA TEST BB] ACCEPTED    ";
+         $quality_score_hash{$cnit}->{reject_reason} = "    [ALPHA TEST BB] ACCEPTED    ";
       }
       elsif ($tmp_reject_reason =~ m/packing/) {
          $marked_cnit=$cnit."*";
-         $quality_score_hash{$cnit}->{reject_reason} = "     [ALPHA TEST HB] ACCEPTED    ";
+         $quality_score_hash{$cnit}->{reject_reason} = "    [ALPHA TEST HB] ACCEPTED    ";
       }
       else {
          $marked_cnit=$cnit."^";

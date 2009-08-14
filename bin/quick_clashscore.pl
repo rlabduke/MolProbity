@@ -119,8 +119,8 @@ close IN;
 # adds hydrogens with reduce and looks for VDW contacts with probe
 
 if ($nobuild==0) {
-   system ("reduce -q -trim -DB \"\/home\/srcer\/lib\/reduce_wwPDB_het_dict.txt\" ". $filename ." > /tmp/temp.pdb_".$uniquid); 
-   system ("reduce -q -build -PEN200 -DB \"\/home\/srcer\/lib\/reduce_wwPDB_het_dict.txt\" /tmp/temp.pdb_".$uniquid." > /tmp/tempH.pdb_".$uniquid);
+   system ("reduce -q -trim -DB \"lib\/reduce_wwPDB_het_dict.txt\"  ". $filename ." > /tmp/temp.pdb_".$uniquid);
+   system ("reduce -q -build -PEN200 -DB \"lib\/reduce_wwPDB_het_dict.txt\" /tmp/temp.pdb_".$uniquid." > /tmp/tempH.pdb_".$uniquid);
 #   system ("probe -c -q -mc -het -once -stdbonds -4h \"alta ogt33 not water\" \"all\" /tmp/tempH.pdb_".$uniquid."  > /tmp/temp.probec_".$uniquid);
 #        exit(0);
    if ($mcsc) {
@@ -301,4 +301,12 @@ else {
 #print $check_score."\n"; 
 print $total_score."\n"; 
 
-system ("rm -rf /tmp/temp.list_".$uniquid." /tmp/temp2.list_".$uniquid); 
+# clean up temporary files
+unlink ("/tmp/temp.pdb_".$uniquid); 
+unlink ("/tmp/tempH.pdb_".$uniquid);
+unlink ("/tmp/temp.probec_".$uniquid);
+unlink ("/tmp/temp.probe_mc_".$uniquid);       
+unlink ("/tmp/temp.probe_sc_".$uniquid);
+unlink ("/tmp/temp.probe_".$uniquid);
+unlink ("/tmp/temp.list_".$uniquid);
+unlink ("/tmp/temp2.list_".$uniquid); 

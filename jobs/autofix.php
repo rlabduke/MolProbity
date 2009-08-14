@@ -56,7 +56,7 @@ $rawDir     = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA;
 $temp_dir = $rawDir; 
 
 // Set up progress message
-$tasks['autoFix'] = "Flip Leu residues with <code>autoFix</code>";
+$tasks['autoFix'] = "Flip Leu residues with <code>autoFix</code> may take a few minutes";
 $tasks['fixkin'] = "Create Leucine  <code>fixkin</code> kinemages";
 $tasks['improvement'] = "Calculate improvement in quality statistics"; 
 

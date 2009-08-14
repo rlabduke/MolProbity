@@ -283,7 +283,7 @@ function onFetchEdsMap()
     // launch background job
     pageGoto("job_progress.php");
 
-    launchBackground(MP_BASE_DIR."/jobs/fetch-edsmap.php", "generic_done.php", 3);
+    launchBackground(MP_BASE_DIR."/jobs/fetch-edsmap.php", "fetch_eds_autofix_done.php", 3);
 }
 #}}}########################################################################
 

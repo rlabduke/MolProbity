@@ -467,7 +467,7 @@ sub changes{
 
    system("echo \"\@group \{selected\}\" >> $kintmp");
 
-   $prekin_cmd="$prekin -append -in $fixflipdb -out $kintmp ";
+   $prekin_cmd="$prekin -append -in $fixflipdb -out $kintmp";
    $q=0;
    for ($q=0;$q<scalar(@user_mod);$q++) {
       #USER  MOD FIX:A  27 LEU*:   0.2 (OUTLIER):  44.7      (mt):         FLIP ACCEPTED
@@ -514,7 +514,7 @@ sub changes{
    $pkin = "$prekin -append -in $flipdb -out $kintmp -scope -bval -code \"$fileID\"";
 
    system("echo \"\@group \{selected\}\" >> $kintmp");
-   $prekin_cmd="$prekin -append -in $flipdb -out $kintmp -scope ";
+   $prekin_cmd="$prekin -append -in $flipdb -out $kintmp ";
    for ($q=0;$q<scalar(@user_mod);$q++) {
       # USER  MOD FIX:A 126 ARG*: -20.3:  36.4:   0.0: 0.000:   1.4:   1.2:  56.6: 171.7: 158.6  rmi090723
       ($junk, $key)=split(/FIX:/, $user_mod[$q]);
