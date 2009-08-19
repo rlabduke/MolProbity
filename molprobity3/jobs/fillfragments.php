@@ -84,16 +84,16 @@ if ((preg_match("/[0-9]*/", $gap_start)) && (preg_match("/[0-9]*/", $gap_end))) 
 echo $pdb."\n";
 
 // Set up progress message
-$tasks['fragfill'] = "Fill gaps with <code>java -jar fragmentfiller.jar</code>";
+$tasks['jiffiloop'] = "Fill gaps with <code>java -jar jiffiloop.jar</code>";
 $tasks['notebook'] = "Add entry to lab notebook";
 
-setProgress($tasks, 'fragfill'); // updates the progress display if running as a background job
+setProgress($tasks, 'jiffiloop'); // updates the progress display if running as a background job
 //$newModel = createModel($modelID."H");
 //$outname = $newModel['pdb'];
 //if(!file_exists($outpath)) mkdir($outpath, 0777); // shouldn't ever happen, but might...
 $kinpath = $kinDir.'/'.$modelID.'.kin';
 $pdbPrefix = $pdbDir.'/'.$modelID;
-runFragmentFiller($pdb, $pdbPrefix, $fragfiller_args);
+runJiffiloop($pdb, $pdbPrefix, $fragfiller_args);
 //reduceNoBuild($pdb, $outpath);
 
 setProgress($tasks, 'notebook');
@@ -115,7 +115,7 @@ foreach ($pdbFiles as $pdbName) {
 }
 //$pdbout = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$pdbpath;
 //$pdburl = $_SESSION['dataURL'].'/'.MP_DIR_MODELS.'/'.$pdbpath;
-$entry = "Fragmentfiller was run on $model[pdb] to fill $gapCount backbone gap(s).\n";
+$entry = "Jiffiloop was run on $model[pdb] to fill $gapCount backbone gap(s).\n";
 //$entry .= "<p>You can now <a href='$pdburl'>download the annotated PDB file</a> (".formatFilesize(filesize($pdb)).").</p>\n";
 $entry .= $pdbEntries;
 $entry .= "<p>A kinemage of all of the fragments is ready for viewing in KiNG: ".linkKinemage($modelID.'.kin')."</p>\n";

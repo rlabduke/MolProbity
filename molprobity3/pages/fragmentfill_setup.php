@@ -23,7 +23,7 @@ class fragmentfill_setup_delegate extends BasicDelegate {
 */
 function display($context)
 {
-    echo $this->pageHeader("Fragment-filler options");
+    echo $this->pageHeader("Jiffiloop options");
     
 		if(count($_SESSION['models']) > 0)
     {
@@ -56,7 +56,7 @@ function display($context)
 <hr>
 <div class='help_info'>
 <h4>Filling gaps with fragments</h4>
-<i>TODO: Help text about fragment filling tool goes here</i>
+<i>TODO: Help text about Jiffiloop goes here</i>
 </div>
 <?php
     }
