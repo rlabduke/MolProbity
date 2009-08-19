@@ -1163,15 +1163,15 @@ function hasMoltype($geom, $moltype) {
 #}}}########################################################################
 
 
-#{{{ runFragmentFiller - fills gaps in protein structures with fragments
+#{{{ runJiffiloop - fills gaps in protein structures with fragments
 ############################################################################
 /**
 * Documentation for this function.
 */
-function runFragmentFiller($inFile, $outPdbPrefix, $args) {
-    $ffcom = "java -Xmx512m -jar ".MP_BASE_DIR."/lib/fragmentfiller.jar ";
+function runJiffiloop($inFile, $outPdbPrefix, $args) {
+    $ffcom = "java -Xmx512m -jar ".MP_BASE_DIR."/lib/jiffiloop.jar ";
     //$ffcom .= "-libloc ".MP_BASE_DIR."/lib/fragmentfiller/ -pdbloc ".MP_BASE_DIR."/lib/fragmentfiller/pdblibrary/ ";
-    $ffcom .= "-pdbloc ".MP_BASE_DIR."/lib/fragmentfiller/pdblibrary/ ";
+    $ffcom .= "-pdbloc ".MP_BASE_DIR."/lib/jiffiloop/pdblibrary/ ";
     $ffcom .= "$args $inFile $outPdbPrefix";
   exec($ffcom);
 }
