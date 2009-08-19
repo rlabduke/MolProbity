@@ -1,5 +1,6 @@
 from iotbx import reflection_file_reader
 import iotbx.pdb
+from iotbx import pdb
 from cctbx import xray
 from cctbx import adptbx
 from cctbx.array_family import flex
@@ -53,7 +54,9 @@ def run(args):
   #
   map_structure_factors = read_map_structure_factors(file_name=refl_file_name)
   #
-  pdb_inp, pdb_hierarchy = iotbx.pdb.show_summary(file_name=pdb_file_name)
+  #pdb_hierarchy = iotbx.pdb.hierarchy.input(file_name=pdb_file_name)
+  pdb_inp = pdb.input(file_name=pdb_file_name)
+  pdb_hierarchy = pdb_inp.construct_hierarchy()
   print
   pdb_models = pdb_hierarchy.models()
   if (len(pdb_models) != 1):
@@ -135,7 +138,7 @@ def run(args):
       corr = flex.linear_correlation(
         x=fft_map.as_1d().select(sel),
         y=model_map.as_1d().select(sel))
-      print chain.id, residue.id(), "%6.4f %5d" % (
+      print "%s %s%s%s %6.4f %5d" % (chain.id,residue.resname,residue.resseq,residue.icode,
         corr.coefficient(), corr.n())
       correlations.append(corr.coefficient())
   print "time per-residue correlations: %.2f s" % timer.elapsed()

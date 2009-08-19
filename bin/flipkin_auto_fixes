@@ -27,6 +27,9 @@
 #   9/24/2007 - RMI     -      - finished first cut, most of the bugs thus far
 #                               - involve handling of non-flipped VTLR residues
 #   8/05/2009 - RMI     -      - add ser,cys,ile to test fixing these
+#   8/17/2009 - RMI     -      - Change kinemage output to four groups from three
+#                              - *constant* and animated for each pdb
+#                              - removes discontinuity and shows tweaking of bb
 
 #{{{ version - sub-routine for outputing the RLab version
 ############################################################################
@@ -99,11 +102,7 @@ sub changes{
 #}}}########################################################################
 
 
-   #use strict;
-
-#   my $isHis = 0;
-#   my $extraFixFile = '';
-#   my $limitFlag = '';
+   use strict;
 
    my $verb = '-quiet';
    my $dbFile = '';
@@ -115,19 +114,7 @@ sub changes{
       elsif ($_ =~ m/^-v/i)  { $verb = ''; }                         # -v
       elsif ($_ =~ m/^-c/i)  { &changes; exit(0); }                  # -c
 
-# un-necessary flags for updated reduce / have two .pdb so we won't use a fix file
-#      if    (/^-[Hh]$/) { $isHis = 1; }                         # -h
-#      elsif (/^-[Ll][Ii][Mm][Ii][Tt]\d+$/) { $limitFlag = $_; } # -limit#
-#      elsif (/^-[Ff][Ii][Xx]$/) {                               # -fix file
-#         if (defined($ARGV[0])) {
-#            $extraFixFile = shift;
-#	 }
-#         else {
-#            die "No filename after flag: $_\n";
-#         }
-#      }
-
-      elsif (/^-[Dd][Bb]$/) {                                   # -db file
+      elsif (/^-[Dd][Bb]$/) {                                        # -db file
          if (defined($ARGV[0])) {
             my $dbfn = shift;
             $dbFile = "-db $dbfn";
@@ -168,10 +155,12 @@ sub changes{
       $line =<UMOD>; # first line is a key for the USER  MOD records
    my $qbert=0;
    my %want_view=(); 
+   my %flip=();
    my $junk;
    my $key;
    my $chain;
    my $resid;
+   my $ins; 
    my $resn;
    my $descr; 
    while ($line=<UMOD>) {
@@ -270,17 +259,6 @@ sub changes{
    my $initial = 1;
    my $vid = 0;
    
-#   $altname{'1'} = 'A';
-#   $altname{'2'} = 'B';
-#   $altname{'3'} = 'C';
-#   if ($isHis) {
-#      $altname{'HIS'} = 'H';
-#   }
-#   else {
-#      $altname{'ASN'} = 'N';
-#      $altname{'GLN'} = 'Q';
-#   }
-
    $altname{'LEU'} = 'L';
    $altname{'VAL'} = 'V';
    $altname{'THR'} = 'T';
@@ -300,23 +278,6 @@ sub changes{
          print "         Optimization of one or more groups abandoned\n";
          print "         because too many permutations were required.\n";
          print "         The following groups may be affected:\n";
-#         open(FPDB, $flipdb)    || die "Can't read flipped pdbH header: $!\n";
-#         while (<FPDB>) {
-#            chop;
-#	    if (/^USER  MOD (.+)\:sc\=\-9\.9e\+99/) {
-#               my ($class, $restype, $action) = split(/:/, $_, 5);
-#               $probres{$restype} = $action;
-#	    }
-#            last if /^ATOM|^atom|^HETA|^heta/;
-#         }
-#	 close FPDB;
-#	 my $combo = join(',', sort keys(%probres));
-#	 $combo =~ s/  +/ /g;
-#        $combo =~ s/ +$//;
-#	 $combo =~ s/^ +//;
-#	 $combo =~ s/ +,/,/g;
-#	 $combo =~ s/,  +/, /g;
-#        print " > $combo\n\n";
       }
    }
 
@@ -332,13 +293,6 @@ sub changes{
          print "from file: ${redpdb}\n";
          print " views marked with \* are for groups flipped by autoFix\n";
       }
-#      if (/^USER  MOD S/) {
-#         my ($class, $restype, $action) = split(/:/, $_, 5);
-#
-#         if ($restype =~ /${respattern}/ && $action =~ /FLIP/) {
-#            $flips{substr($restype, 0, 9)} = $action;
-#         }
-#      }
       if (/^ATOM|^atom/) {
          my $card    = $_; $card =~ tr/a-z/A-Z/;
          my $res     = substr($card, 17, 3);
@@ -405,25 +359,27 @@ sub changes{
    printf "\@onewidth\n";
 
    # -----------------------------------------------------------
+
    
-   # molecule: group 1 constant stuff
+   # molecule: fixflip group 1 constant stuff
 
-   my $selSC  = "leu,val,thr,arg,ser,cys,ile";
-
-   my $fileID = $flipdb;
+   my $fileID = $redpdb;
    $fileID =~ s#\.\w+$##;
    $fileID =~ s#^.*[\\/]##g;
-#   print "\@group \{$fileID\} dominant\n";
-   print "\@group \{$redpdb\} dominant\n";
+
+   my $selSC  = "leu,val,thr,arg,ser,cys,ile";
+   my $prbSC  = "L,V,T,R,S,C,I";
+
+   print "\@group \{fixes\} animate\n";
 
    my $pkin; # repeated first part of the prekin command
    my $pkin1; 
-   my $prekin = "/Users/Bob_Immormino/Sites/molprobity3/trunk/molprobity3/bin/macosx/prekin";
+   my $q =0; 
 
-   my $q=0; 
    unlink($kintmp);
-   $pkin = "$prekin -append -in $flipdb -out $kintmp -scope -bval";
-   $pkin1= "$prekin -append -in $flipdb -out $kintmp";
+
+   $pkin = "prekin -append -in $fixflipdb -out $kintmp -scope -bval -code \"$fileID\" ";
+   $pkin1= "prekin -append -in $fixflipdb -out $kintmp";
    my $prekin_cmd=$pkin1;
 
    system("$pkin -show \"mc(white),hy(gray)\"");
@@ -437,10 +393,10 @@ sub changes{
       $resid=substr($key, 1,4);
       $resid+=0;
       $resn =substr($key, 6,3);
-      $prekin_cmd.=" -scope -bval -show \"sc(cyan),hy(gray)\" -sc \"${selSC}\" -chainid \"${chain}\" -range \"${resid}-${resid}\"";
+      $prekin_cmd.=" -scope -bval -code \"$fileID\" -show \"sc(cyan),hy(gray)\" -sc \"${selSC}\" -chainid \"${chain}\" -range \"${resid}-${resid}\"";
       if ($q%50 == 0) {
          system($prekin_cmd);
-         $prekin_cmd=$pkin1;
+         $prekin_cmd=$pkin1." -nosubgroup";
       } 
    }
    if ($prekin_cmd !~ m/kin$/) {
@@ -454,21 +410,14 @@ sub changes{
 
    # molecule animation: group 2 flipped orientation
 
-#   my $selSC  = "leu,val,thr,arg,ser,cys,ile";
-#   my $nselSC = "leu,val,thr,arg,ser,cys,ile";
-   my $nselSC = "";
-   my $prbSC  = "L,V,T,R,S,C,I";
-
-   print "\@group \{fixes\} animate\n";
-
    unlink($kintmp);
 
-   $pkin = "$prekin -append -in $fixflipdb -out $kintmp -scope -bval";
+   $pkin = "prekin -append -in $fixflipdb -out $kintmp -scope -bval -code \"$fileID\" ";
+   $pkin1= "prekin -append -in $fixflipdb -out $kintmp";
+   $prekin_cmd=$pkin1;
 
    system("echo \"\@group \{selected\}\" >> $kintmp");
 
-   $prekin_cmd="$prekin -append -in $fixflipdb -out $kintmp";
-   $q=0;
    for ($q=0;$q<scalar(@user_mod);$q++) {
       #USER  MOD FIX:A  27 LEU*:   0.2 (OUTLIER):  44.7      (mt):         FLIP ACCEPTED
       ($junk, $key)=split(/FIX:/, $user_mod[$q]); 
@@ -477,18 +426,16 @@ sub changes{
       $resid=substr($key, 1,4); 
       $resid+=0; 
       #$resn=substr($key, 6,3);
-      $prekin_cmd.=" -scope -bval -show \"sc(sea),hy(gray),atom_markers,ct\" -sc \"${selSC}\" -chainid \"${chain}\" -range \"${resid}-${resid}\"";
+      $prekin_cmd.=" -scope -bval -code \"$fileID\" -show \"sc(sea),hy(gray),atom_markers,ct\" -sc \"${selSC}\" -chainid \"${chain}\" -range \"${resid}-${resid}\"";
       if ($q%50 == 0) {
          system($prekin_cmd);
-         $prekin_cmd="$prekin -append -in $fixflipdb -out $kintmp";
+         $prekin_cmd=$pkin1." -nosubgroup";
       }
    }
    if ($prekin_cmd !~ m/kin$/) {
       system($prekin_cmd);
    }
-   #system("$pkin -show \"sc(sea),hy(gray),atom_markers,ct\" -sc \"${selSC}\"");
    system("echo \"\@group \{movable\}\" >> $kintmp");
-   #system("$pkin -show \"sc(cyan),hy(gray)\" -sc \"${nselSC},lys,met,tyr\"");
    system("echo \"\@group \{contacts\}\" >> $kintmp");
    system("probe -dens12 -lens -nogroup -3 -q -wat -het -both " .
          "\"${prbSC} sc alta ogt1 not (beta,atom1HG_,atom2HG_,atom3HG_)\" " .
@@ -496,25 +443,56 @@ sub changes{
    &reformatAnimatedOutput;
 
    # -----------------------------------------------------------
-   
-   # molecule animation: group 3 original orientation
 
-#   if ($isHis) {
-#      print "\@group \{flipH\} animate\n";
-#   }
-#   else {
-#      print "\@group \{flipNQ\} animate\n";
-#   }
 
-      print "\@group \{orig\} animate\n";
+   # molecule constant: flipdb group 1 constant stuff
 
+   print "\@group \{orig\} animate\n";
 
    unlink($kintmp);
 
-   $pkin = "$prekin -append -in $flipdb -out $kintmp -scope -bval -code \"$fileID\"";
+   $pkin = "prekin -append -in $flipdb -out $kintmp -scope -bval -code \"$fileID\"";
+   $pkin1= "prekin -append -in $flipdb -out $kintmp";
+   $prekin_cmd=$pkin1;
+
+   system("$pkin -show \"mc(white),hy(gray)\"");
+   system("$pkin -show \"sc(cyan),hy(gray)\" " .
+                "-excludesc \"leu,val,thr,arg,ser,cys,ile\"");
+
+   for ($q=0;$q<scalar(@unfixed);$q++) {
+      $key  =$unfixed[$q];
+      $chain=substr($key, 0,1);
+      #$chain=" ".$chain; 
+      $resid=substr($key, 1,4);
+      $resid+=0;
+      $resn =substr($key, 6,3);
+      $prekin_cmd.=" -scope -bval -code \"$fileID\"  -show \"sc(cyan),hy(gray)\" -sc \"${selSC}\" -chainid \"${chain}\" -range \"${resid}-${resid}\"";
+      if ($q%50 == 0) {
+         system($prekin_cmd);
+         $prekin_cmd=$pkin1." -nosubgroup";
+      }
+   }
+   if ($prekin_cmd !~ m/kin$/) {
+      system($prekin_cmd);
+   }
+   system("$pkin -show \"ht(orange),hy(gray)\"");
+   system("$pkin -show \"wa(peachtint),ba(peachtint)\"");
+   &reformatConstantOutput;
+
+
+   # -----------------------------------------------------------
+
+   
+   # molecule animation: group 2 original orientation
+
+   unlink($kintmp);
+
+   $pkin = "prekin -append -in $flipdb -out $kintmp -scope -bval -code \"$fileID\"";
+   $pkin1= "prekin -append -in $flipdb -out $kintmp";
+   $prekin_cmd=$pkin1;
 
    system("echo \"\@group \{selected\}\" >> $kintmp");
-   $prekin_cmd="$prekin -append -in $flipdb -out $kintmp ";
+   $prekin_cmd="prekin -append -in $flipdb -out $kintmp ";
    for ($q=0;$q<scalar(@user_mod);$q++) {
       # USER  MOD FIX:A 126 ARG*: -20.3:  36.4:   0.0: 0.000:   1.4:   1.2:  56.6: 171.7: 158.6  rmi090723
       ($junk, $key)=split(/FIX:/, $user_mod[$q]);
@@ -523,18 +501,16 @@ sub changes{
       $resid=substr($key, 1,4);
       $resid+=0; 
       #$resn=substr($key, 6,3);
-      $prekin_cmd.=" -scope -code \"$fileID\" -scope -bval -show \"sc(pink),hy(gray),atom_markers,ct\" -sc \"${selSC}\" -chainid \"${chain}\" -range \"${resid}-${resid}\"";
+      $prekin_cmd.=" -scope -bval -code \"$fileID\" -show \"sc(pink),hy(gray),atom_markers,ct\" -sc \"${selSC}\" -chainid \"${chain}\" -range \"${resid}-${resid}\"";
       if ($q%50 == 0) {
          system($prekin_cmd);
-         $prekin_cmd="$prekin -append -in $flipdb -out $kintmp";
+         $prekin_cmd=$pkin1." -nosubgroup";
       }
    }
    if ($prekin_cmd !~ m/kin$/) {
       system($prekin_cmd);
    }
-   #system("$pkin -show \"sc(pink),hy(gray),atom_markers,ct\" -sc \"${selSC}\"");
    system("echo \"\@group \{movable\}\" >> $kintmp");
-   #system("$pkin -show \"sc(cyan),hy(gray)\" -sc \"${nselSC},lys,met,tyr\"");
    system("echo \"\@group \{contacts\}\" >> $kintmp");
    system("probe -dens12 -lens -nogroup -3 -q -wat -het -both " .
          "\"${prbSC} sc alta ogt1 not (beta,atom1HG_,atom2HG_,atom3HG_)\" " .
@@ -593,7 +569,7 @@ PKCRECORD:
    }
    # -----------------------------------------------------------
    sub reformatAnimatedOutput {
-      my $sgns = 0; # number of side-chanin subgroups
+      my $sgns = 0; # number of side-chan in subgroups
 
       open(PKA, $kintmp) || die "Can't process prekin output 1: $!\n";
 

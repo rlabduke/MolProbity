@@ -94,8 +94,8 @@ while ($pdb_line=<IN>) {
 # adds hydrogens with reduce and looks for VDW contacts with probe
 
 if ($nobuild==0) {
-	system ("reduce -q -trim -DB \"\/Users\/Bob_Immormino\/Sites\/molprobity3\/trunk\/molprobity3\/reduce_wwPDB_het_dict.txt\"  ". $filename ." > /tmp/temp.pdb_".$uniquid); 
-	system ("reduce -q -build -PEN200 -DB \"\/Users\/Bob_Immormino\/Sites\/molprobity3\/trunk\/molprobity3\/reduce_wwPDB_het_dict.txt\" /tmp/temp.pdb_".$uniquid." > /tmp/tempH.pdb_".$uniquid);
+	system ("reduce -q -trim -DB \"lib\/reduce_wwPDB_het_dict.txt\"  ". $filename ." > /tmp/temp.pdb_".$uniquid); 
+	system ("reduce -q -build -PEN200 -DB \"lib\/reduce_wwPDB_het_dict.txt\" /tmp/temp.pdb_".$uniquid." > /tmp/tempH.pdb_".$uniquid);
 	system ("probe -q -u -mc -het -once -stdbonds -4h \"alta ogt33 not water\" \"alta ogt33\" /tmp/tempH.pdb_".$uniquid."  > /tmp/temp.probe_".$uniquid);       
 }
 else { 

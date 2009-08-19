@@ -9,7 +9,7 @@
 require_once(MP_BASE_DIR.'/lib/labbook.php');
 
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
-class autoFix_done_delegate extends BasicDelegate {
+class autofix_done_delegate extends BasicDelegate {
     
 #{{{ display - creates the UI for this page
 ############################################################################

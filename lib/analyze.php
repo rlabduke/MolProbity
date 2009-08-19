@@ -200,6 +200,7 @@ function runAnalysis($modelID, $opts)
         setProgress($tasks, 'improve'); // updates the progress display if running as a background job
         $altpdb = mpTempfile("tmp_altH_pdb_");
         $mainClashscore = ($clash ? $clash['scoreAll'] : 0);
+        $mainCbetaCount = ($cbdev ? count(findCbetaOutliers($cbdev)) : 0);
         $mainRotaCount = ($rota ? count(findRotaOutliers($rota)) : 0);
         $mainRamaCount = ($rama ? count(findRamaOutliers($rama)) : 0);
         $mainRotaDecoyCount = ($rota ? count(findRotaDecoys($rota)) : 0);
@@ -213,7 +214,6 @@ function runAnalysis($modelID, $opts)
             //$grandparentID = $parent['parent']; 
             //$grandparent = $_SESSION['models'][$grandparentID];
             $altInpath = $modelDir . '/'. $_SESSION['models'][  $parent['parent'] ]['pdb'];
-echo "Both ".$altInpath; 
 
             reduceNoBuild($altInpath, $altpdb);
             // Ramachandran
@@ -222,7 +222,7 @@ echo "Both ".$altInpath;
                 $altrama = loadRamachandran($outfile);
                 $altRamaCount = count(findRamaOutliers($altrota));
                 if($altRamaCount > $mainRamaCount)
-                    $improvementList[] = "fixed ".($altRamaCount - $mainRamaCount)." bad backbone conformations";
+                    $improvementList[] = "fixed ".($altRamaCount - $mainRamaCount)." bad backbone conformation(s)";
                 unlink($outfile);
             // Rotamers Outliers
                 $outfile = mpTempfile("tmp_rotamer_");
@@ -237,11 +237,19 @@ echo "Both ".$altInpath;
                 if($altRotaCount > $mainRotaCount  &&  $altRotaDecoyCount > $mainRotaDecoyCount)
                     $improvementList[] = "fixed ".($altRotaCount - $mainRotaCount)." bad rotamers ( ".($altRotaDecoyCount - $mainRotaDecoyCount)." decoy rotamer(s) )";
                 elseif($altRotaCount > $mainRotaCount)
-                    $improvementList[] = "fixed ".($altRotaCount - $mainRotaCount)." bad rotamers";
+                    $improvementList[] = "fixed ".($altRotaCount - $mainRotaCount)." bad rotamer(s)";
                 elseif($altRotaDecoyCount > $mainRotaDecoyCount)  
                     $improvementList[] = "fixed ".($altRotaDecoyCount - $mainRotaDecoyCount)." decoy rotamers"; // shouldn't happen
                 unlink($outfile);
                 unlink($outfileD);
+            // C(Beta) 
+                $outfile = mpTempfile("tmp_cbeta_");
+                runCbetaDev($altpdb, $outfile);
+                $altcbeta = loadCbetaDev($outfile);
+                $altCbetaCount = count(findCbetaOutliers($altcbeta));
+                if($altCbetaCount > $mainCbetaCount)
+                    $improvementList[] = "fixed ".($altCbetaCount - $mainCbetaCount)." C(beta) outlier(s)";
+                unlink($outfile);
             // Clashes
                 $outfile = mpTempfile("tmp_clashlist_");
                 runClashlist($altpdb, $outfile);
@@ -251,15 +259,16 @@ echo "Both ".$altInpath;
                 unlink($outfile);
             if(count($improvementList) > 0)
             {
-                $improveText .= "<div class='feature'>By adding H to this model, allowing Asn/Gln/His flips, and running AutoFix on this model, you have already ";
-                $improveText .= implode(" and ", $improvementList);
-                $improveText .= ".  <b>Make sure you download the modified PDB to take advantage of these improvements!</b></div>\n";
+                $improveText .= "<div class='feature'>By adding H to this model, allowing Asn/Gln/His flips, and running AutoFix on this model, you have already:";
+                $improveText .= "<div class='indent'>";
+                $improveText .= implode("<br>  ", $improvementList);
+                $improveText .= ".</div>";
+                $improveText .= "<b>Make sure you download the modified PDB to take advantage of these improvements!</b></div>\n";
             }
         }
         elseif($model['isFixed'])
         {
             $altInpath = $modelDir . '/'. $_SESSION['models'][ $model['parent'] ]['pdb'];
-echo "Fixed ".$altInpath;
             reduceNoBuild($altInpath, $altpdb);
             // Ramachandran
                 $outfile = mpTempfile("tmp_ramachandran_");
@@ -267,7 +276,7 @@ echo "Fixed ".$altInpath;
                 $altrama = loadRamachandran($outfile);
                 $altRamaCount = count(findRamaOutliers($altrota));
                 if($altRamaCount > $mainRamaCount)
-                    $improvementList[] = "fixed ".($altRamaCount - $mainRamaCount)." bad backbone conformations";
+                    $improvementList[] = "fixed ".($altRamaCount - $mainRamaCount)." bad backbone conformation(s)";
                 unlink($outfile);
             // Rotamers Outliers
                 $outfile = mpTempfile("tmp_rotamer_");
@@ -275,7 +284,7 @@ echo "Fixed ".$altInpath;
                 $altrota = loadRotamer($outfile);
                 $altRotaCount = count(findRotaOutliers($altrota));
                 if($altRotaCount > $mainRotaCount)
-                    $improvementList[] = "fixed ".($altRotaCount - $mainRotaCount)." bad rotamers";
+                    $improvementList[] = "fixed ".($altRotaCount - $mainRotaCount)." bad rotamer(s)";
                 unlink($outfile);
             // Rotamers Decoys
                 $outfile = mpTempfile("tmp_rotamerD_");
@@ -285,6 +294,14 @@ echo "Fixed ".$altInpath;
                 if($altRotaDecoyCount > $mainRotaDecoyCount)
                     $improvementList[] = "( ".($altRotaDecoyCount - $mainRotaDecoyCount)." decoy rotamers)";
                 unlink($outfile);
+            // C(Beta) 
+                $outfile = mpTempfile("tmp_cbeta_");
+                runCbetaDev($altpdb, $outfile);
+                $altcbeta = loadCbetaDev($outfile);
+                $altCbetaCount = count(findCbetaOutliers($altcbeta));
+                if($altCbetaCount > $mainCbetaCount)
+                    $improvementList[] = "fixed ".($altCbetaCount - $mainCbetaCount)." C(beta) outlier(s)";
+                unlink($outfile);
             // Clashes
                 $outfile = mpTempfile("tmp_clashlist_");
                 runClashlist($altpdb, $outfile);
@@ -294,15 +311,16 @@ echo "Fixed ".$altInpath;
                 unlink($outfile);
             if(count($improvementList) > 0)
             {
-                $improveText .= "<div class='feature'>By running AutoFix on this model, you have already ";
-                $improveText .= implode(" and ", $improvementList);
-                $improveText .= ".  <b>Make sure you download the modified PDB to take advantage of these improvements!</b></div>\n";
+                $improveText .= "<div class='feature'>By running AutoFix on this model, you have already <br>";
+                $improveText .= "<div class='indent'>";
+                $improveText .= implode("<br>  ", $improvementList);
+                $improveText .= ".</div>";
+                $improveText .= "<b>Make sure you download the modified PDB to take advantage of these improvements!</b></div>\n";
             }
         }
         elseif($model['isBuilt']) // file has been through reduce -build or reduce -fix
         {
             $altInpath = $modelDir . '/'. $_SESSION['models'][ $model['parent'] ]['pdb'];
-echo "Built ".$altInpath; 
             reduceNoBuild($altInpath, $altpdb);
             // Rotamers
                 $outfile = mpTempfile("tmp_rotamer_");
@@ -310,7 +328,7 @@ echo "Built ".$altInpath;
                 $altrota = loadRotamer($outfile);
                 $altRotaCount = count(findRotaOutliers($altrota));
                 if($altRotaCount > $mainRotaCount)
-                    $improvementList[] = "fixed ".($altRotaCount - $mainRotaCount)." bad rotamers";
+                    $improvementList[] = "fixed ".($altRotaCount - $mainRotaCount)." bad rotamer(s)";
                 unlink($outfile);
             // Rotamers Decoys
                 //$outfile = mpTempfile("tmp_rotamerD_");
@@ -321,7 +339,7 @@ echo "Built ".$altInpath;
                   if($mainRotaDecoyCount > 1) 
                     $suggestionsList[] = "Analysis found ".$mainRotaDecoyCount." decoy rotamers. Running Autofix may improve these residues";
                   elseif($mainRotaDecoyCount)
-                    $suggestionsList[] = "Analysis found ".$mainRotaDecoyCount." decoy rotamers. Running Autofix may improve this residue";
+                    $suggestionsList[] = "Analysis found ".$mainRotaDecoyCount." decoy rotamer. Running Autofix may improve this residue";
                 //unlink($outfile);
             // Clashes
                 $outfile = mpTempfile("tmp_clashlist_");

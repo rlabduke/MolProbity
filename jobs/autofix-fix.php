@@ -45,6 +45,7 @@ $dofix = $_SESSION['bgjob']['dofix'];
 $modelID = $_SESSION['bgjob']['modelID'];
 $model = $_SESSION['models'][$modelID];
 $pdb = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$model['pdb'];
+$modelRoot = substr($model['pdb'], 0, -4);
 
 // Read the USER  MOD FIX records into a hash
 $pdbFile = fopen($pdb,"rb");
@@ -68,7 +69,7 @@ while(!feof($pdbFile) and ($userModFix = fgets($pdbFile,1024)))
 fclose($pdbFile);
 
 $dataDir    = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA;
-$autoFixStats = $dataDir."/$model[parent]_stats";
+$autoFixStats = $dataDir."/".$modelRoot."_stats";
 
 $changes = decodeAutoFixUsermods($autoFixStats,$pdb);
 $n = count($changes[0]); // How many changes are in the table?
@@ -78,10 +79,10 @@ $rerun = false;
 // Re-write the coot script for AutoFix
 $rawDir = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA;
 if(!file_exists($rawDir)) mkdir($rawDir, 0777); // shouldn't happen
-$cootScript = "$rawDir/$model[parent]_coot_fix_VTLR.scm_all";
-$cootScriptMP = "$rawDir/$model[parent]_user_coot_fix_VTLR.scm";
-$newcootScript = "/sw/share/coot/scheme/bob_molprobity.scm"; 
-$autoFixUserMod =  "$rawDir/$model[parent]_mod_header.txt";
+$cootScript     = $rawDir."/".$modelRoot."_autoFix.scm_all";
+$cootScriptMP   = $rawDir."/".$modelRoot."_user_autoFix.scm";
+$newcootScript  = "/usr/local/xtal/coot-0.5.2/share/coot/scheme/bob-molprobity.scm"; 
+$autoFixUserMod = $rawDir."/".$modelRoot."_mod_header.txt";
 
 // Read the coot commands into a hash
 $fp = fopen($cootScript, "rb");

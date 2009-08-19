@@ -631,7 +631,8 @@ function autoFix($inpdb, $map, $temp_dir, $_MP_BASE_DIR_, $autofix_out_log, $mod
     exec("cp ".$inpdb." ". $tmppdb); 
     reduceTrim($inpdb, $tmppdbTrim); 
     exec("cp ".$tmppdbTrim." ".$inpdb);
-    exec("vtlr_fixes_auto.pl -decoy $inpdb $map $temp_dir $_MP_BASE_DIR_ $modelOutpath > $autofix_out_log");
+    //exec("vtlr_fixes_auto.pl -decoy -set-to-rotamer -geometry 30 $inpdb $map $temp_dir $_MP_BASE_DIR_ $modelOutpath > $autofix_out_log");
+    exec("vtlr_fixes_auto.pl $inpdb $map $temp_dir $_MP_BASE_DIR_ $modelOutpath > $autofix_out_log");
 //echo "vtlr_fixes_auto.pl -decoy $inpdb $map $temp_dir $_MP_BASE_DIR_ $modelOutpath > $autofix_out_log"; 
     exec("cp ".$tmppdb." ".$inpdb);
     unlink($tmppdb);

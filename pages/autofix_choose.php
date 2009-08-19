@@ -31,10 +31,11 @@ function display($context)
     $model = $_SESSION['models'][$id];
     $modelDir   = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
     $pdb = $modelDir.'/'.$model['pdb'];
+    $modelID = substr($model['pdb'], 0, -4); 
 
     $dataDir    = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA;
         if(!file_exists($dataDir)) mkdir($dataDir, 0777); // shouldn't happen
-    $autoFixStats = $dataDir."/$model[parent]_stats";
+    $autoFixStats = $dataDir."/".$modelID."_stats";
 
 //    if(file_exists($autoFixStats) and file_exists($pdb))
 
@@ -42,29 +43,29 @@ function display($context)
     $n = count($changes[0]); // How many changes are in the table?
     if ($n > 0) { $did_fix = true; }  
     
-    $fixkin = $_SESSION['dataDir'].'/'.MP_DIR_KINS."/$model[parent]_autoFlip.kin";
+    $fixkin = $_SESSION['dataDir'].'/'.MP_DIR_KINS."/".$modelID."_autoFlip.kin.gz";
 
     if(file_exists($fixkin))
     {
         echo "This Fixkin kinemage illustrates fixes made by AutoFix.\n";
         echo "Residues that AutoFix <i>suggested</i> adjusting are listed in the Views menu.\n";
         echo "<ul>\n";
-        echo "<li>" . linkKinemage("$model[parent]_autoFlip.kin") . "</li>\n";
+        echo "<li>" . linkKinemage($modelID."_autoFlip.kin") . "</li>\n";
         echo "</ul>\n";
         echo "<hr>\n";
     }
 
-    $buttonScm = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA."/$model[parent]_button.scm";
+    $buttonScm = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA."/".$modelID."_button.scm";
 
     if(file_exists($buttonScm))
     {
         echo "This Scheme file can be loaded into coot and will allow you to interactively make the changes attempted by AutoFix.\n";
         echo "<ul>\n";
-        echo "<li>" . linkAnyFile("$model[parent]_button.scm", "$model[parent]_button.scm") . "</li>\n";
+        echo "<li>" . linkAnyFile($modelID."_button.scm", $modelID."_button.scm") . "</li>\n";
         echo "</ul>\n";
         echo "<i>Open this in Coot0.1.2 or later using Calculate | Run Script...</i>\n"; 
         echo "<hr>\n";
-     }
+    }
     
     
     echo makeEventForm("onRerunAutofix");
@@ -134,13 +135,13 @@ function display($context)
               else { $improveText = "<div class='feature'>By accepting the default fixes from AutoFix on this model, you will ".fgets($in); }
            }
            fclose($in);
+           unlink($improveTextFile);
         }
         if ( eregi("div", $improveText) )
         {
            $improveText .= "</div>";
            echo $improveText;
         }
-
         echo "<p><input type='submit' name='cmd' value='Regenerate structure, applying only selected fixes &gt;'>\n";
         echo "<br><small>(If you didn't make any changes, we won't recalculate.)</small>\n";
    } 
@@ -166,7 +167,7 @@ function onRerunAutoFix()
     // We're going to construct a lab notebook entry at the same time.
 
     $dataDir    = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA;
-    $autoFixStats = $dataDir."/$model[parent]_stats";
+    $autoFixStats = $dataDir."/".$modelID."_stats";
 
     $changes = decodeAutoFixUsermods($autoFixStats,$pdb); 
     $rerun = false;
@@ -208,24 +209,24 @@ function onRerunAutoFix()
     //$entry .= "<p>Reduce used <a href=http://kinemage.biochem.duke.edu/software/reduce.php> reduce_wwPDB_het_dict.txt </a> as the het dictonary.\n";
     $entry .= "<p>You can now download the <a href='$pdb'> fixed PDB file </a>.</p>\n";
 
-    $fixkin = $_SESSION['dataDir'].'/'.MP_DIR_KINS."/$model[parent]_autoFlip.kin";
+    $fixkin = $_SESSION['dataDir'].'/'.MP_DIR_KINS."/".$modelID."_autoFlip.kin.gz";
 
     if(file_exists($fixkin))
     {
         $entry .= "<p>This Fixkin kinemage illustrates fixes made by AutoFix.\n";
         $entry .= "Residues that AutoFix <i>suggested</i> adjusting are listed in the Views menu.\n";
         $entry .= "<ul>\n";
-        $entry .= "<li>" . linkKinemage("$model[parent]_autoFlip.kin") . "</li>\n";
+        $entry .= "<li>" . linkKinemage($modelID."_autoFlip.kin") . "</li>\n";
         $entry .= "</ul></p>\n";
     }
 
-    $buttonScm = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA."/$model[parent]_button.scm";
+    $buttonScm = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA."/".$modelID."_button.scm";
 
     if(file_exists($buttonScm))
     {
         $entry .= "<p>This Scheme file can be loaded into coot and will allow you to interactively make the changes attempted by AutoFix.\n";
         $entry .= "<ul>\n";
-        $entry .= "<li>" . linkAnyFile("$model[parent]_button.scm", "$model[parent]_button.scm") . "</li>\n";
+        $entry .= "<li>" . linkAnyFile($modelID."_button.scm", $modelID."_button.scm") . "</li>\n";
         $entry .= "</ul></p>\n";
         $entry .= "<p><ul><i>Open this in Coot0.1.2 or later using Calculate | Run Script...</i>\n";
         $entry .= "</ul></p>\n";
@@ -262,7 +263,7 @@ function onRerunAutoFix()
     else
     {
         mpLog("autofix-accept:User accepted all fixes proposed by AutoFix as-is");
-        pageGoto("autoFix_done.php", $_SESSION['bgjob']);
+        pageGoto("autofix_done.php", $_SESSION['bgjob']);
     }
 
 setProgress($tasks, 'null'); 
