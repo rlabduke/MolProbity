@@ -78,7 +78,7 @@ function display($context)
 <?php
     echo makeEventForm("onUploadMtzFile") . "\n";
 ?>
-<h3>Upload mtz with phase information</h3>
+<h3>Upload mtz with map coefficients</h3>
 <label>Mtz file:
 <input type="file" name="uploadFile"></label>
 <br><table border='0' width='100%'><tr>

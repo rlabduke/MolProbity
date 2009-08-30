@@ -487,8 +487,14 @@ chomp($initial_model);
 
 $modelID = substr (basename($initial_model), 0, length(basename($initial_model))-4);
 
-if ($ARGV[1+$nflag] =~ m/mtz/) { $mtz=$ARGV[1+$nflag]; }
-if ($ARGV[1+$nflag] =~ m/map/) { $map=$ARGV[1+$nflag]; }
+if ($ARGV[1+$nflag] =~ m/mtz/) { 
+   $mtz=$ARGV[1+$nflag]; 
+   $input_mtz = 1; 
+}
+if ($ARGV[1+$nflag] =~ m/map/) { 
+   $map=$ARGV[1+$nflag]; 
+   $input_map = 1; 
+}
 
 $temp_data    = $ARGV[2+$nflag];
 unless(-d $temp_data){
@@ -545,7 +551,7 @@ for ($i=0; $i <= scalar keys (%seq_hash); $i++) {
 }       
 #}}}########################################################################
 
-#{{{ setup hash for coot residue numbers
+#{{{ setup hash for coot rotamer numbers
 ############################################################################
 
 %coot_rotamer_hash=(); 
@@ -593,8 +599,9 @@ system ($MP_BASE_DIR."/bin/quick_clashscore.pl -mcsc ".$initial_model." 0.4 > $t
 # system ("mv ".$modelID."_refine_001_map_coeffs.mtz ".$phenix_mtz1); 
 # system ("rm *_refine_00* *_refine_data.mtz"); 
 # system ("iotbx.python ".$MP_BASE_DIR."/bin/pdb_map_correlation.py ".$phenix_mtz1." ".$initial_model." > $temp_data/temp.rsc");
-system ($MP_BASE_DIR."/bin/iotbx.python ".$MP_BASE_DIR."/bin/pdb_map_correlation.py ".$mtz." ".$initial_model." > $temp_data/temp.rsc");
-
+if ($input_mtz) {
+   system ($MP_BASE_DIR."/bin/iotbx.python ".$MP_BASE_DIR."/bin/pdb_map_correlation.py ".$mtz." ".$initial_model." > $temp_data/temp.rsc");
+}
 # sort stats for the initial .pdb 
 #-----------------------------------------------------------------------
         
@@ -726,45 +733,50 @@ while ($line = <CLASH>) {
 close CLASH;
 
 # Use iotbx.python and pdb_map_correlation.py to get Real-space CC put these into the hash
-open RSC, "<$temp_data/temp.rsc";
-$line = <RSC>;
-$in_header = 1; 
-while ($line = <RSC>) {
-    if ($in_header) {
-       if ($line !~ m/^chain/) { next; }
-       else { $in_header = 0; }
-    }
-    elsif ($line =~ m/^time/) {
-       while ($line = <RSC>) {
-          if ($line =~ m/mean/) {
-            #  mean: 0.823939
-             $mean = substr($line, 8,8);
-             $mean += 0;
-             $quality_score_hash{orig_rsc_mean} = $mean;
-             $matrix_weight = (100 * $mean) - 30;
-             if ($matrix_weight > 60) { $matrix_weight = 60; }
-             elsif ($matrix_weight < 10) { $matrix_weight = 10; }
-             break;
-          }
+if($input_mtz) {         # only run if you have an MTZ
+   open RSC, "<$temp_data/temp.rsc";
+   $line = <RSC>;
+   $in_header = 1; 
+   while ($line = <RSC>) {
+       if ($in_header) {
+          if ($line !~ m/^chain/) { next; }
+          else { $in_header = 0; }
        }
-       break; 
-    }
-    #chain, residue, correlation, number of contributing grid points
-    #A MET   1  0.8876  1503
-
-    $chain = substr($line, 0,1);
-    $resid = substr($line, 5,4); 
-    $ins   = substr($line, 9,1);
-    $resn  = substr($line, 2,3);
-    $rsc   = substr($line, 11,6);
-    $cnit  = $chain.$resid.$ins.$resn; 
-    if (defined $quality_score_hash{$cnit}) {
-       $rsc += 0;
-       $quality_score_hash{$cnit}->{orig_rsc} = $rsc;
-    }
+       elsif ($line =~ m/^time/) {
+          while ($line = <RSC>) {
+             if ($line =~ m/mean/) {
+               #  mean: 0.823939
+                $mean = substr($line, 8,8);
+                $mean += 0;
+                $quality_score_hash{orig_rsc_mean} = $mean;
+                $matrix_weight = (100 * $mean) - 30;
+                if ($matrix_weight > 60) { $matrix_weight = 60; }
+                elsif ($matrix_weight < 10) { $matrix_weight = 10; }
+                break;
+             }
+          }
+          break; 
+       }
+       #chain, residue, correlation, number of contributing grid points
+       #A MET   1  0.8876  1503
+   
+       $chain = substr($line, 0,1);
+       $resid = substr($line, 5,4); 
+       $ins   = substr($line, 9,1);
+       $resn  = substr($line, 2,3);
+       $rsc   = substr($line, 11,6);
+       $cnit  = $chain.$resid.$ins.$resn; 
+       if (defined $quality_score_hash{$cnit}) {
+          $rsc += 0;
+          $quality_score_hash{$cnit}->{orig_rsc} = $rsc;
+       }
+   }
+   close RSC;
 }
-close RSC;
-        
+else { # for now pad with zeros
+   $quality_score_hash{$cnit}->{orig_rsc} = 0;   
+}
+
 # Set up coot script
         
 # Set up hash of to get x,y,z coords of each potentially flipped residue's "terminal" atom 
@@ -1136,12 +1148,12 @@ system ("diff -y --suppress-common-lines $temp_data/temp.rota $temp_data/temp.ro
 # system ("mv pdbtmp1_refine_001_map_coeffs.mtz ".$phenix_mtz2);
 # system ("rm *_refine_00* *_refine_data.mtz");  
 # system ("iotbx.python ".$MP_BASE_DIR."/bin/pdb_map_correlation.py ".$phenix_mtz2." ".$initial_model1." > $temp_data/temp.rsc1");
-system ($MP_BASE_DIR."/bin/iotbx.python ".$MP_BASE_DIR."/bin/pdb_map_correlation.py ".$mtz." ".$initial_model1." > $temp_data/temp.rsc1");
-
+if ($input_mtz) {
+   system ($MP_BASE_DIR."/bin/iotbx.python ".$MP_BASE_DIR."/bin/pdb_map_correlation.py ".$mtz." ".$initial_model1." > $temp_data/temp.rsc1");
+}
 # then run Java program to make $temp_data/temp.guans
 system ("echo 'Running Java flip-confirming program...'");
 system ("java -Xmx256m -cp ".$MP_BASE_DIR."/lib/cmdline.jar cmdline.ArgFlipConfirmer ".$initial_model." ".$initial_model1." > $temp_data/temp.guans");
-
 # sort stats for the "fixed" .pdb
 #-----------------------------------------------------------------------
         
@@ -1244,42 +1256,49 @@ while ($line = <CLASH>) {
 }       
 close CLASH;
 
-open RSC, "<$temp_data/temp.rsc1";
-$line = <RSC>;
-$in_header = 1;
-while ($line = <RSC>) {
-    if ($in_header) {
-       if ($line !~ m/^chain/) { next; }
-       else { $in_header = 0; }
-    }
-    elsif ($line =~ m/^time/) {
-       while ($line = <RSC>) {
-          if ($line =~ m/mean/) {
-            #  mean: 0.823939
-             $mean = substr($line, 8,8);
-             $quality_score_hash{fixed_rsc_mean} = $mean +0;
-             break;
-          }
+if($input_mtz) {         # only run if you have an MTZ
+   open RSC, "<$temp_data/temp.rsc1";
+   $line = <RSC>;
+   $in_header = 1;
+   while ($line = <RSC>) {
+       if ($in_header) {
+          if ($line !~ m/^chain/) { next; }
+          else { $in_header = 0; }
        }
-       break;
-    }
-    #chain, residue, correlation, number of contributing grid points
-    #A MET   1  0.8876  1503
-
-    $chain = substr($line, 0,1);
-    $resid = substr($line, 5,4);
-    $ins   = substr($line, 9,1);
-    $resn  = substr($line, 2,3);
-    $rsc   = substr($line, 11,6);
-    $cnit  = $chain.$resid.$ins.$resn;
-    if (defined $quality_score_hash{$cnit}) {
-       $rsc += 0;
-       $quality_score_hash{$cnit}->{fixed_rsc} = $rsc;
-       $diff_rsc = $rsc - $quality_score_hash{$cnit}->{orig_rsc};
-       $quality_score_hash{$cnit}->{diff_rsc}  = sprintf("%7.4f", $diff_rsc);
-    }
+       elsif ($line =~ m/^time/) {
+          while ($line = <RSC>) {
+             if ($line =~ m/mean/) {
+               #  mean: 0.823939
+                $mean = substr($line, 8,8);
+                $quality_score_hash{fixed_rsc_mean} = $mean +0;
+                break;
+             }
+          }
+          break;
+       }
+       #chain, residue, correlation, number of contributing grid points
+       #A MET   1  0.8876  1503
+   
+       $chain = substr($line, 0,1);
+       $resid = substr($line, 5,4);
+       $ins   = substr($line, 9,1);
+       $resn  = substr($line, 2,3);
+       $rsc   = substr($line, 11,6);
+       $cnit  = $chain.$resid.$ins.$resn;
+       if (defined $quality_score_hash{$cnit}) {
+          $rsc += 0;
+          $quality_score_hash{$cnit}->{fixed_rsc} = $rsc;
+          $diff_rsc = $rsc - $quality_score_hash{$cnit}->{orig_rsc};
+          $quality_score_hash{$cnit}->{diff_rsc}  = sprintf("%7.4f", $diff_rsc);  
+       }
+   }
+   close RSC; 
 }
-close RSC;
+else { # for now pad with zeros
+   $quality_score_hash{$cnit}->{fixed_rsc} = 0;   
+   $diff_rsc = 0;
+   $quality_score_hash{$cnit}->{diff_rsc}  = sprintf("%7.4f", $diff_rsc); 
+}        
         
 %guan_angle_hash=(); 
 open GUANS, "<$temp_data/temp.guans";
@@ -1364,10 +1383,12 @@ while ($line=<ROTA>) {
          $clash_diff_score      = $quality_score_hash{$cnit}->{diff_clash};
          $rotated_diff_score    = $quality_score_hash{$cnit}->{diff_rotated};
          $guan_angle_diff_score = $quality_score_hash{$cnit}->{diff_guans};
-         $rsc_diff_score        = $quality_score_hash{$cnit}->{diff_rsc}; 
          $probe_diff_score      = $quality_score_hash{$cnit}->{diff_probe};
          $hb_diff_score         = $quality_score_hash{$cnit}->{diff_hb};
-
+         if($input_mtz) {         # only run if you have an MTZ
+            $rsc_diff_score        = $quality_score_hash{$cnit}->{diff_rsc};
+         }
+         else { $rsc_diff_score = 0; }
 
          $key = $chain." ".$resn.$resid.$ins;
 
@@ -1585,12 +1606,6 @@ foreach $key (sort keys %quality_score_hash) {
 }       
 close STATS;                                                                  
                                                                             
-# Clean up temporary files
-#system ("mkdir coot-auto-fix_temp");
-#system ("cp $temp_data/pdbtmp2.pdb ".$initial_model."_mod");
-#system ("mv -t coot-auto-fix_temp $temp_data/temp.cb $temp_data/temp.clash $temp_data/temp.dngl $temp_data/temp.rama $temp_data/temp.rota $temp_data/temp.rota2 $temp_data/temp.rotated $temp_data/temp.seq $temp_data/pdbtmp1.pdb $temp_data/pdbtmp2.pdb $temp_data/temp.guans");
-#system ("rm -rf 0-coot* molprobity-tmp* coot-backup "); 
- 
 open IN, "<$temp_data/pdbtmp2.pdb";
 $modelPath  = substr($temp_data, 0, length($temp_data)-9);
 $modelPath .= "/coordinates";
@@ -1609,15 +1624,40 @@ while ($line =<STATS>) {
       print FINAL_OUT "USER  MOD FIX:".$cnit.":".$orig_rota.":".$fixed_rota.":".$flip_decision.":\n"; 
    }
 }
-$diff_mean_rsc_tmp = $quality_score_hash{fixed_rsc_mean}- $quality_score_hash{orig_rsc_mean};
-$diff_mean_rsc     = sprintf("%7.4f", $diff_mean_rsc_tmp); 
-if ($diff_mean_rsc > 0) {
-   print FINAL_OUT "USER  MOD      Improved MEAN RSC by ".$diff_mean_rsc." (".
-       $quality_score_hash{fixed_rsc_mean}."-".$quality_score_hash{orig_rsc_mean}.")\n"; 
+
+system ($MP_BASE_DIR."/bin/iotbx.python ".$MP_BASE_DIR."/bin/pdb_map_correlation.py ".$mtz." ".$temp_data."/pdbtmp2.pdb > ".$temp_data."/temp.rsc2");
+open RSC, "<$temp_data/temp.rsc2";
+$line = <RSC>;
+$in_header = 1;
+while ($line = <RSC>) {
+    if ($in_header) {
+       if ($line !~ m/^chain/) { next; }
+       else { $in_header = 0; }
+    }
+    elsif ($line =~ m/^time/) {
+       while ($line = <RSC>) {
+          if ($line =~ m/mean/) {
+            #  mean: 0.823939
+             $mean = substr($line, 8,8);
+             $quality_score_hash{final_rsc_mean} = $mean +0;
+             break;
+          }
+       }
+       break;
+    }
 }
-else {
-   print FINAL_OUT "USER  MOD      ERROR MEAN RSC by ".$diff_mean_rsc." (".
-       $quality_score_hash{fixed_rsc_mean}."-".$quality_score_hash{orig_rsc_mean}.")\n"; 
+ 
+$diff_mean_rsc_tmp = $quality_score_hash{final_rsc_mean}- $quality_score_hash{orig_rsc_mean};
+$diff_mean_rsc     = sprintf("%7.4f", $diff_mean_rsc_tmp); 
+if($input_mtz) {
+   if ($diff_mean_rsc_tmp >= 0) {
+      print FINAL_OUT "USER  MOD      Improved MEAN RSC by ".$diff_mean_rsc." (".
+          $quality_score_hash{final_rsc_mean}."-".$quality_score_hash{orig_rsc_mean}.")\n"; 
+   }
+   else {
+      print FINAL_OUT "USER  MOD      ERROR MEAN RSC by ".$diff_mean_rsc." (".
+          $quality_score_hash{final_rsc_mean}."-".$quality_score_hash{orig_rsc_mean}.")\n"; 
+   }          
 }
 close STATS; 
 $mod_all = $modelOutpath;
@@ -1630,7 +1670,7 @@ system ("cat $temp_data/pdbtmp1.pdb >> $mod_all");
 $kinPath  = substr($temp_data, 0, length($temp_data)-9);
 $kinPath .= "/kinemages";
 system ($MP_BASE_DIR."/bin/flipkin_auto_fixes ".$initial_model." ".$mod_all." > ".$kinPath."/".$OutmodelID."_autoFlip.kin");  
-system ("gzip ".$kinPath."/".$OutmodelID."_autoFlip.kin");
+system ("gzip -f ".$kinPath."/".$OutmodelID."_autoFlip.kin");
 $end = time();
 
 #clean up
@@ -1646,6 +1686,7 @@ unlink ("$temp_data/temp.rota2");
 unlink ("$temp_data/temp.rotated");
 unlink ("$temp_data/temp.rsc");
 unlink ("$temp_data/temp.rsc1");
+unlink ("$temp_data/temp.rsc2");
 unlink ("$temp_data/temp.seq");
 
 print "Time taken was ".($end-$start)." seconds";

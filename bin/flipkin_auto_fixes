@@ -523,8 +523,7 @@ sub changes{
 
    unlink($kintmp);
    unlink($flipdb);
-
-   # $fixFile removed earlier
+   unlink($fixflipdb);
 
    # -----------------------------------------------------------
    sub reformatConstantOutput {

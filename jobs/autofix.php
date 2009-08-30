@@ -6,7 +6,7 @@
 INPUTS (via $_SESSION['bgjob']):
     modelID         ID code for model to process
     mapID           ID for ccp4 style map to process
-    mtzID           ID for ccp4 style mtz with phase information to process
+    mtzID           ID for ccp4 style mtz with map coefficients to process
     makeFixkin     true if the user wants a Flipkin made
 
 OUTPUTS (via $_SESSION['bgjob']):

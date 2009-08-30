@@ -70,7 +70,7 @@ function display($context)
         echo "<td align='right'><input type='submit' name='cmd' value='Cancel'></td>\n";
         echo "</tr></table></p></form>\n";
 
-        echo "<p>Mtz files with phase information are preferred because Real-space correlation calculations currently require an mtz</p>";
+        echo "<p>Mtz files with map coefficients are preferred because Real-space correlation calculations currently require an mtz</p>";
 ?>
 <script type='text/javascript'>
 
@@ -106,7 +106,7 @@ windowOnload(function() {
     }
     else
     {
-        echo "No electron density maps are available. Please upload a CCP4-format map or phase containing mtz in order to continue.\n";
+        echo "No electron density maps are available. Please upload a CCP4-format map or mtz with map coefficients in order to continue.\n";
         echo makeEventForm("onReturn");
         
         echo makeEventForm("onFetchEdsMap"); 
@@ -137,7 +137,7 @@ windowOnload(function() {
         echo "</tr></table>";
 
         echo makeEventForm("onUploadMtzFile");
-        echo "<h3>Upload mtz with phase information</h3>";
+        echo "<h3>Upload mtz with map coefficients</h3>";
         echo "<label>Mtz file:";
         echo "<input type='file' name='uploadFile'></label>";
         echo "<br><table border='0' width='100%'><tr>";
@@ -147,7 +147,7 @@ windowOnload(function() {
         echo "</tr></table>";
         echo "</form>";
 
-        echo "<p>Mtz files with phase information are preferred because Real-space correlation calculations currently require an mtz</p>";
+        echo "<p>Mtz files with map coefficients are preferred because Real-space correlation calculations currently require an mtz</p>";
     }
     
     echo $this->pageFooter();
