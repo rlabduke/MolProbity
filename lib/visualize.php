@@ -258,8 +258,9 @@ function makeMulticritKin($infiles, $outfile, $opt, $nmrConstraints = null)
 * $viewRes is a list of 9-char "CNIT" names of residues for which there should views
 *   (e.g. outliers that someone should inspect, etc.)
 * $nmrConstraints is optional, and if present will generate lines for violated NOEs
+* $clashLimit is an option for probe, to set the clash cutoff to something different than -0.4
 */
-function makeMulticritKin2($infiles, $outfile, $opt, $viewRes = array(), $nmrConstraints = null)
+function makeMulticritKin2($infiles, $outfile, $opt, $viewRes = array(), $nmrConstraints = null, $clashLimit = null)
 {
     if(file_exists($outfile)){ 
         if(!unlink($outfile)){
@@ -307,12 +308,16 @@ function makeMulticritKin2($infiles, $outfile, $opt, $viewRes = array(), $nmrCon
         }
         #echo "after ribbon options\n";
         
-        if($nmrConstraints)
+        if ($nmrConstraints)
             exec("noe-display -cv -s viol -ds+ -fs -k $infile $nmrConstraints < /dev/null >> $outfile");
         if($opt['clashdots'] || $opt['hbdots'] || $opt['vdwdots'])
         {
             #echo "making Probe Dots...\n";
-            makeProbeDots($infile, $outfile, $opt['hbdots'], $opt['vdwdots'], $opt['clashdots']);
+            if ($clashLimit == null){
+              makeProbeDots($infile, $outfile, $opt['hbdots'], $opt['vdwdots'], $opt['clashdots']);
+            } else {
+              makeProbeDots($infile, $outfile, $opt['hbdots'], $opt['vdwdots'], $opt['clashdots'], $clashLimit);
+            }
             #echo "Probe dots OK\n";
         }
         if($opt['rama'])
@@ -601,7 +606,7 @@ function makeBadPPerpKin($infile, $outfile)
 /**
 * Documentation for this function.
 */
-function makeProbeDots($infile, $outfile, $hbDots = false, $vdwDots = false, $clashDots = true)
+function makeProbeDots($infile, $outfile, $hbDots = false, $vdwDots = false, $clashDots = true, $clashLimit = null)
 {
     $options = "";
     if(!$hbDots)    $options .= " -nohbout";
@@ -609,7 +614,11 @@ function makeProbeDots($infile, $outfile, $hbDots = false, $vdwDots = false, $cl
     if(!$clashDots) $options .= " -noclashout";
     
     // -dotmaster adds a "dots" master -- useful when using this kin with Probe remote update
-    exec("probe $options -4H -quiet -noticks -nogroup -dotmaster -mc -self 'alta' $infile >> $outfile");
+    if ($clashLimit == null) {
+      exec("probe $options -4H -quiet -noticks -nogroup -dotmaster -mc -self 'alta' $infile >> $outfile");
+    } else {
+      exec("probe $options -DIVlow$clashLimit -4H -quiet -noticks -nogroup -dotmaster -mc -self 'alta' $infile >> $outfile");
+    }
 }
 #}}}########################################################################
 
@@ -734,8 +743,23 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
         
           $entry .= "<tr><td colspan='3'>An error has occurred; clashscore should not be negative! Please report this bug.</td></tr>\n";
         } else {
-          $entry .= "<td>$clashPct[pct_rank]<sup>".ordinalSuffix($clashPct['pct_rank'])."</sup> percentile<sup>*</sup> (N=$clashPct[n_samples], $clashPct[minresol]&Aring; - $clashPct[maxresol]&Aring;)</td></tr>\n";
-          
+          //$entry .= "<td>$clashPct[pct_rank]<sup>".ordinalSuffix($clashPct['pct_rank'])."</sup> percentile<sup>*</sup> (N=$clashPct[n_samples], $clashPct[minresol]&Aring; - $clashPct[maxresol]&Aring;)</td></tr>\n";
+          if (($clashPct[minresol] == 0) && ($clashPct[maxresol] == 9999)) {
+            $percentileOut = "all resolutions";
+          } else {
+            $diff = $resolution - $clashPct[minresol];
+            //echo $diff." ".gettype($diff)." ";
+            $diff2 = -($resolution - $clashPct[maxresol]);
+            //echo $diff2." ".gettype($diff2)." ";
+            //$test = ($diff2 > 0.245 && $diff2 < 0.255);
+            //echo "diff2 = 0.25:".$test;
+            if (($diff > 0.245)&&($diff2 > 0.245)&&($diff < 0.255)&&($diff2 < 0.255)) { 
+              $percentileOut = "$resolution&Aring; &plusmn; $diff&Aring;"; 
+            } else { 
+              $percentileOut = "$clashPct[minresol]&Aring; - $clashPct[maxresol]&Aring;"; 
+            }
+          }
+          $entry .= "<td>$clashPct[pct_rank]<sup>".ordinalSuffix($clashPct['pct_rank'])."</sup> percentile<sup>*</sup> (N=$clashPct[n_samples], $percentileOut)</td></tr>\n";
           $entry .= "<tr><td colspan='3'>Clashscore is the number of serious steric overlaps (&gt; 0.4 &Aring;) per 1000 atoms.</td></tr>\n";
         }
         //if($clashPct['pct_rank40'] <= 33)       $bg = $bgPoor;
@@ -767,7 +791,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             if($rotaOutPct+0 <= 1)      $bg = $bgGood;
             elseif($rotaOutPct+0 <= 5)  $bg = $bgFair;
             else                        $bg = $bgPoor;
-            $entry .= "<td>Rotamer outliers</td><td bgcolor='$bg'>$rotaOutPct%</td>\n";
+            $entry .= "<td>Poor rotamers</td><td bgcolor='$bg'>$rotaOutPct%</td>\n";
             $entry .= "<td>Goal: &lt;1%</td></tr>\n";
         }
         if(is_array($rama))
@@ -828,7 +852,19 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             if ($mer == -1) {
               $entry .= "</td><td>unknown percentile<sup>*</sup> (N=$mer_pct[n_samples], $mer_pct[minresol]&Aring; - $mer_pct[maxresol]&Aring;)</td></tr>\n";
             } else {
-              $entry .= "</td><td>$mer_pct[pct_rank]<sup>".ordinalSuffix($mer_pct['pct_rank'])."</sup> percentile<sup>*</sup> (N=$mer_pct[n_samples], $mer_pct[minresol]&Aring; - $mer_pct[maxresol]&Aring;)</td></tr>\n";
+              if (($mer_pct[minresol] == 0) && ($mer_pct[maxresol] == 9999)) {
+                $percentileOut = "all resolutions";
+              } else {
+                $diff = $resolution - $mer_pct[minresol];
+                $diff2 = -($resolution - $mer_pct[maxresol]);
+                if (($diff > 0.245)&&($diff2 > 0.245)&&($diff < 0.255)&&($diff2 < 0.255)) {
+                  $percentileOut = "$resolution&Aring; &plusmn; $diff&Aring;";
+                } else {
+                  $percentileOut = "$mer_pct[minresol]&Aring; - $mer_pct[maxresol]&Aring;";
+                }
+              }
+              $entry .= "</td><td>$mer_pct[pct_rank]<sup>".ordinalSuffix($mer_pct['pct_rank'])."</sup> percentile<sup>*</sup> (N=$mer_pct[n_samples], $percentileOut)</td></tr>\n";
+          //$entry .= "</td><td>$mer_pct[pct_rank]<sup>".ordinalSuffix($mer_pct['pct_rank'])."</sup> percentile<sup>*</sup> (N=$mer_pct[n_samples], $mer_pct[minresol]&Aring; - $mer_pct[maxresol]&Aring;)</td></tr>\n";
             }
         }
         if(hasMoltype($bbonds, "protein"))
@@ -847,10 +883,10 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
                 }
             }
             $geomOutPct = sprintf("%.2f", 100.0 * $outCount / $total);
-            if ($outCount/$total < 0.02)    $bg = $bgFair;
-            if ($outCount/$total < 0.01)    $bg = $bgGood;
+            if ($outCount/$total < 0.002)    $bg = $bgFair;
+            if ($outCount/$total == 0.0)    $bg = $bgGood;
             else                            $bg = $bgPoor;
-            $entry .= "<td>Residues with bad bonds:</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <1%</td></tr>\n";
+            $entry .= "<td>Residues with bad bonds:</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: 0%</td></tr>\n";
         }
         if(hasMoltype($bangles, "protein"))
         {
@@ -868,10 +904,10 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
                 }
             }
             $geomOutPct = sprintf("%.2f", 100.0 * $outCount / $total);
-            if ($outCount/$total < 0.01)    $bg = $bgFair;
-            if ($outCount/$total < 0.005)    $bg = $bgGood;
+            if ($outCount/$total < 0.005)    $bg = $bgFair;
+            if ($outCount/$total < 0.000001)    $bg = $bgGood;
             else                            $bg = $bgPoor;
-            $entry .= "<td>Residues with bad angles:</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <0.5%</td></tr>\n";
+            $entry .= "<td>Residues with bad angles:</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <0.1%</td></tr>\n";
         }
     }// end of protein-specific stats
     $nucleicRows = 0;
@@ -923,10 +959,10 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
                 }
             }
             $geomOutPct = sprintf("%.2f", 100.0 * $outCount / $total);
-            if ($outCount/$total < 0.02)    $bg = $bgFair;
-            if ($outCount/$total < 0.01)    $bg = $bgGood;
+            if ($outCount/$total < 0.002)    $bg = $bgFair;
+            if ($outCount/$total < 0.000001)    $bg = $bgGood;
             else                            $bg = $bgPoor;
-            $entry .= "<td>Residues with bad bonds:</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <1%</td></tr>\n";
+            $entry .= "<td>Residues with bad bonds:</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: 0%</td></tr>\n";
         }
         if(hasMoltype($bangles, "rna"))
         {
@@ -944,10 +980,10 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
                 }
             }
             $geomOutPct = sprintf("%.2f", 100.0 * $outCount / $total);
-            if ($outCount/$total < 0.01)    $bg = $bgFair;
-            if ($outCount/$total < 0.005)    $bg = $bgGood;
+            if ($outCount/$total < 0.005)    $bg = $bgFair;
+            if ($outCount/$total < 0.001)    $bg = $bgGood;
             else                            $bg = $bgPoor;
-            $entry .= "<td>Residues with bad angles:</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <0.5%</td></tr>\n";
+            $entry .= "<td>Residues with bad angles:</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <0.1%</td></tr>\n";
         }
     }
     $entry .= "</table>\n";
@@ -1170,7 +1206,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
       $header2[] = array('html' => sprintf("Avg: %.2f", array_sum($Bfact)/count($Bfact)));
       if(is_array($clash))  $header2[] = array('html' => "Clashscore: $clash[scoreAll]");
       if(is_array($rama))   $header2[] = array('html' => "Outliers: ".count(findRamaOutliers($rama))." of ".count($rama));
-      if(is_array($rota))   $header2[] = array('html' => "Outliers: ".count(findRotaOutliers($rota))." of ".count($rota));
+      if(is_array($rota))   $header2[] = array('html' => "Poor rotamers: ".count(findRotaOutliers($rota))." of ".count($rota));
       if(is_array($cbdev))  $header2[] = array('html' => "Outliers: ".count(findCbetaOutliers($cbdev))." of ".count($cbdev));
       if(is_array($pperp))  $header2[] = array('html' => "Outliers: ".count(findBasePhosPerpOutliers($pperp))." of ".count($pperp));
       if(is_array($suites)) $header2[] = array('html' => "Outliers: ".count(findSuitenameOutliers($suites))." of ".count($suites));
