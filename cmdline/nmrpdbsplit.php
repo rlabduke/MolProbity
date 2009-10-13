@@ -25,7 +25,8 @@ while(($file = readdir($dirHandle)) !== false)
 	{
 	//Open PDB file
 	$pdbopen = fopen($file,"rb");
-
+	$header = "";
+        $model = "";
 	
 	
 while(! feof($pdbopen))
