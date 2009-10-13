@@ -67,7 +67,7 @@ echo mpPageHeader("KiNG - $file");
 ############################################################################
 ?>
 <center>
-<applet id="king_applet" code="king/Kinglet.class" archive="king-new.jar" <?php echo $size; ?>>
+<applet id="king_applet" code="king/Kinglet.class" archive="king.jar" <?php echo $size; ?>>
 <param name="java_arguments" value="-Xmx512m">
 <param name="mode" value="flat">
 <?php
