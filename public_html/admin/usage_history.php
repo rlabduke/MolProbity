@@ -14,7 +14,7 @@ Summarizes MolProbity usage over a specified date range.
     mpInitEnvirons();
     
 // Have to do this for big log files ... we'll need a better solution one day.
-    ini_set('memory_limit', '128M');
+    ini_set('memory_limit', '2048M');
     $exec_time = time();
 
 #{{{ class LogIter
