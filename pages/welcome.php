@@ -72,21 +72,28 @@ as part of the refinement cycle.</p>
 Create and view interactive 3-D graphics
 from your web browser.</p>
 
-
+<h3>What's new in 3.17:</h3><ul>
+<li>Updated to KiNG version 2.</li>
+<li>Direct viewing of PDB files in KiNG.</li>
+<li>Updates to prekin, reduce, suitename, and jiffiloop.</li>
+<li>Slight changes in summary chart output.</li>
+<li>Updates in cmdline scripts.</li>
+</ul>
 </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>
 
-<h3>What's new in 3.15:</h3><ul>
-<li>Python version of coot chart.</li>
-<li>More control over main analysis.</li>
-<li>Ability to remove Hs in Edit PDB.</li>
-<li>New extension (F) on name to indicate flips.</li>
-</ul>
+
 <h3>Common questions:</h3>
 <p><b><a href='help/about.html' target='_blank'>Cite MolProbity</a></b>:
     <small>Davis et al. (2007)
     <a href="http://kinemage.biochem.duke.edu/lab/papers.php" target="_blank">MolProbity:
     all-atom contacts and structure validation for proteins and nucleic acids.</a>
     Nucleic Acids Research 35:W375-W383.
+    </small></p>
+<p><b><a href='help/about.html' target='_blank'>Cite KiNG</a></b>:
+    <small>Chen et al. (2009)
+    <a href="http://kinemage.biochem.duke.edu/lab/papers.php" target="_blank">KiNG (Kinemage, Next Generation):
+    A versatile interactive molecular and scientific visualization program.</a>
+    Protein Science 18.
     </small></p>
 <p><b><a href='help/java.html' target='_blank'>Installing Java</a></b>: how to make kinemage graphics work in your browser.</p>
 <p><b><a href='get_molprobity.php' target='_blank'>Download MolProbity</a></b>: how can I run a private MolProbity server, or run from the command line?</p>
