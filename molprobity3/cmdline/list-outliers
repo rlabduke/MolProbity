@@ -2,7 +2,8 @@
 <?php # (jEdit options) :folding=explicit:collapseFolds=1:
 /*****************************************************************************
     Processes a directory full of PDB files non-recursively and outputs
-    a list of all the Ramachanadran/rotamer/C-beta dev./clash outliers
+    a list of all the Ramachandran/rotamer/C-beta dev./clash/RNA pperp/
+    RNA suite/backbone geometry outliers
     
  -> We assume all files already have H's added! <-
 
@@ -63,6 +64,7 @@ while(($infile = readdir($h)) !== false)
     {
         $filename = basename($infile);
         $tmp = mpTempfile();
+        $tmp2 = mpTempFile();
         
         // Run analysis; load data
         runClashlist($infile, $tmp);
@@ -75,7 +77,18 @@ while(($infile = readdir($h)) !== false)
         $badRota = findRotaOutliers($rota);
         runRamachandran($infile, $tmp);
         $rama = loadRamachandran($tmp);
+        runBasePhosPerp($infile, $tmp);
+        $pperp = loadBasePhosPerp($tmp);
+        $badPperp = findBasePhosPerpOutliers($pperp);
+        runSuitenameReport($infile, $tmp);
+        $suites = loadSuitenameReport($tmp);
+        $badSuites = findSuitenameOutliers($suites);
+        runValidationReport($infile, $tmp, "protein");
+        runValidationReport($infile, $tmp2, "rna");
+        $bonds = array_merge(loadValidationBondReport($tmp, "protein"), loadValidationBondReport($tmp2, "rna"));
+        $angles = array_merge(loadValidationAngleReport($tmp, "protein"), loadValidationAngleReport($tmp2, "rna"));
         unlink($tmp);
+        unlink($tmp2);
         
         // Clash scores
         echo "$filename:clashscore:$clash[scoreAll]\n";
@@ -94,6 +107,30 @@ while(($infile = readdir($h)) !== false)
         // Rama outliers - count each type
         foreach($rama as $r)
             if($r['eval'] == "OUTLIER") echo "$filename:ramachandran:$r[resName]:$r[type]\n";
+        
+        // PPerp outliers - indicate possible RNA sugar pucker problem
+        foreach($badPperp as $res)
+            echo "$filename:pperp:$res\n";
+        
+        // Suite outliers - indicate possible RNA suite backbone conformation problem.
+        foreach($badSuites as $res => $suiteness)
+            echo "$filename:suite:$res\n";
+            
+        // Geometry outliers - only shows the worst one of a residue, if it has > 4sigma outlier
+        foreach($bonds as $cnit => $item) {
+          //if($item['type'] == 'protein') {
+            if($item['isOutlier']) {
+              echo "$filename:bond(worst):$item[resName]:$item[measure]\n";
+            }
+          //}
+        }
+        foreach($angles as $cnit => $item) {
+          //if($item['type'] == 'protein') {
+            if($item['isOutlier']) {
+              echo "$filename:angle(worst):$item[resName]:$item[measure]\n";
+            }
+          //}
+        }
     }
 }
 closedir($h);
