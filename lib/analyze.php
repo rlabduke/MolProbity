@@ -919,6 +919,10 @@ function loadSuitenameReport($datafile)
     {
         if(startsWith($line, " all general case widths")) break;
         $line = explode(':', rtrim($line));
+        if (count($line)==5) { // missing colon due to name length issue in suitename
+          $linestart = array(substr($line[0], 32));
+          $line = array_merge($linestart, $line);
+        }
         if (count($line) > 1) {
           $cnit = $line[2].$line[3].$line[4].substr($line[5],0,3);
           //$decomp = decomposeResName($cnit);
