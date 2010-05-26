@@ -72,20 +72,23 @@ as part of the refinement cycle.</p>
 Create and view interactive 3-D graphics
 from your web browser.</p>
 
-<h3>What's new in 3.17:</h3><ul>
-<li>Updated to KiNG version 2.</li>
-<li>Direct viewing of PDB files in KiNG.</li>
-<li>Updates to prekin, reduce, suitename, and jiffiloop.</li>
-<li>Slight changes in summary chart output.</li>
-<li>Updates in cmdline scripts.</li>
+<h3>What's new in 3.18:</h3><ul>
+<li>New references added.</li>
+<li>Update to allow download of jiffiloop to standalone installs.</li>
 </ul>
 </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>
 
 
 <h3>Common questions:</h3>
 <p><b><a href='help/about.html' target='_blank'>Cite MolProbity</a></b>:
-    <small>Davis et al. (2007)
-    <a href="http://kinemage.biochem.duke.edu/lab/papers.php" target="_blank">MolProbity:
+    <small>Chen et al. (2010)
+    <a href="http://kinemage.biochem.duke.edu/lab/papers.php" target="_blank">MolProbity: 
+    all-atom structure validation for macromolecular crystallography.</a>
+    Acta Crystallographica D66:12-21.
+    </p>
+    <center>and/or</center>
+<p>Davis et al. (2007)
+    <a href="http://kinemage.biochem.duke.edu/lab/papers.php" target="_blank">MolProbity: 
     all-atom contacts and structure validation for proteins and nucleic acids.</a>
     Nucleic Acids Research 35:W375-W383.
     </small></p>
@@ -93,7 +96,7 @@ from your web browser.</p>
     <small>Chen et al. (2009)
     <a href="http://kinemage.biochem.duke.edu/lab/papers.php" target="_blank">KiNG (Kinemage, Next Generation):
     A versatile interactive molecular and scientific visualization program.</a>
-    Protein Science 18.
+    Protein Science 18:2403-2409.
     </small></p>
 <p><b><a href='help/java.html' target='_blank'>Installing Java</a></b>: how to make kinemage graphics work in your browser.</p>
 <p><b><a href='get_molprobity.php' target='_blank'>Download MolProbity</a></b>: how can I run a private MolProbity server, or run from the command line?</p>

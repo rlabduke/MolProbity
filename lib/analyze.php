@@ -723,7 +723,7 @@ function runRotamer($infile, $outfile)
 {
     // Very large files (1htq) need extra memory
     //exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/hless.jar hless.Rotamer -raw $infile > $outfile");
-    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.rotarama.Rotalyze $infile > $outfile");
+    exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.rotarama.Rotalyze $infile > $outfile");
 }
 #}}}########################################################################
 
@@ -805,7 +805,7 @@ function findRotaOutliers($rota)
 ############################################################################
 function runRamachandran($infile, $outfile)
 {
-    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/hless.jar hless.Ramachandran -nokin -raw $infile > $outfile");
+    exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/hless.jar hless.Ramachandran -nokin -raw $infile > $outfile");
 }
 #}}}########################################################################
 
@@ -879,7 +879,7 @@ function findRamaOutliers($rama)
 ############################################################################
 function runSuitenameReport($infile, $outfile)
 {
-    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle rnabb $infile | suitename -report > $outfile");
+    exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle rnabb $infile | suitename -report > $outfile");
 }
 #}}}########################################################################
 
@@ -972,7 +972,7 @@ function runSuitenameString($infile, $outfile)
     // Unix "fold" is used to wrap long lines to reasonable lengths,
     // so they display OK in the <PRE> region of the HTML page.
     // 60 was selected because it makes counting to specific positions easier (20 suites/line)
-    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle rnabb $infile | suitename -string -oneline | fold -w 60 > $outfile");
+    exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle rnabb $infile | suitename -string -oneline | fold -w 60 > $outfile");
 }
 #}}}########################################################################
 
@@ -981,7 +981,7 @@ function runSuitenameString($infile, $outfile)
 ############################################################################
 function runValidationReport($infile, $outfile, $moltype)
 {
-    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -$moltype -validate -outliers -sigma=0.0 $infile > $outfile");
+    exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -$moltype -validate -outliers -sigma=0.0 $infile > $outfile");
 }
 #}}}########################################################################
 
