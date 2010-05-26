@@ -62,4 +62,15 @@ for an up-to-date copy of the source code.
 }
 ?>
 
+<p>For the optional jiffiloop functionality, download the following file and untar it in
+the lib/ directory.
+<?php
+$file = "jiffiloop.tgz";
+if(file_exists($file) && filesize($file) > 0)
+{
+    echo "<p><b>Download now: <a href='$file'>".basename($file)."</a></b>";
+    echo ", ".formatFilesize(filesize($file));
+    echo ", last updated ".date('j M Y', filemtime($file))."\n";
+}
+?>
 <?php echo mpPageFooter(); ?>
