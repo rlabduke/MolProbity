@@ -252,11 +252,14 @@ function pdbstat($pdbfilename)
                 if($id != $hetcode)
                 {
                     if(preg_match("/HOH|DOD|H20|D20|WAT|SOL|TIP|TP3|MTO|HOD|DOH/", $restype))
-                        $waters++;
+                        { $waters++; }
+                    if(preg_match("/YG |OMG|H2U|7MG|5MU|A2M|2MG|5FU|G7M|OMU|PR5|FHU|1MA|OMC|5MC|XUG|A23|UMS|FMU|UR3|YYG|CFL|UD5|CSL|PSU|UFT|5IC|5BU|M2G|BGM|CBR|U34|CCC|AVC|TM2|AET|IU |1MG/", $restype)) # hopefully catches modified bases without counting separate ligands too much as nucacids
+                        { $nucacids++; $residues++; }
                     else
-                        $hets++;
+                        { $hets++; }
                     $hetcode = $id;
                 }
+                
             }
 
             //return $hash; 
