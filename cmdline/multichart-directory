@@ -58,8 +58,8 @@ elseif(!is_dir($outDir))    die("Output directory '$outDir' does not exist.\n");
 foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
 {
   
-  $outFile = basename($inFile, ".pdb").".html";
-  echo $outFile;
+  $outFile = basename($outDir).'/'.basename($inFile, ".pdb").".html";
+  echo $outFile."\n";
 
 $tmp = mpTempfile();
 $tmp2 = mpTempfile();
@@ -100,7 +100,7 @@ unlink($tmp2);
 if($mode == 'coot')
     makeCootClusteredChart($inFile, $outFile, $clash, $rama, $rota, $cbdev, $pperp);
 else
-    writeMulticritChart($inFile, $outFile, null, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles);
+    writeMulticritChart($inFile, "/dev/null", $outFile, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles);
 
 }
 ############################################################################
