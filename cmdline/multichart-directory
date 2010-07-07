@@ -58,8 +58,12 @@ elseif(!is_dir($outDir))    die("Output directory '$outDir' does not exist.\n");
 foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
 {
   
-  $outFile = basename($outDir).'/'.basename($inFile, ".pdb").".html";
-  echo $outFile."\n";
+  $inFile = realpath($inDir).'/'.$inFile;
+  echo "reading ".$inFile."\n";
+
+  $outFile = realpath($outDir).'/'.basename($inFile, ".pdb").".html";
+  echo "writing ".$outFile."\n";
+
 
 $tmp = mpTempfile();
 $tmp2 = mpTempfile();
