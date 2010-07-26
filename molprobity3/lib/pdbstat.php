@@ -275,8 +275,11 @@ function pdbstat($pdbfilename)
                 }
                 $key = $atom_name." ".$resn;
                 //echo "|".$key."|\n";
-                if(array_key_exists($key, $hash)) {
+                if ($key !== " HA2 GLY") { // TEMP FIX: because HA2 GLY is both old AND new format,
+                                           // Remediator messes it up.  
+                  if(array_key_exists($key, $hash)) {
                     $v2format++;
+                  }
                 }
             }
         }
