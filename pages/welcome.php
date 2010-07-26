@@ -75,6 +75,9 @@ from your web browser.</p>
 <h3>What's new in 3.18:</h3><ul>
 <li>New references added.</li>
 <li>Update to allow download of jiffiloop to standalone installs.</li>
+<li>Improved handling of modified nucleic acid bases.</li>
+<li>Updated versions of various components.</li>
+<li>Bug fixes/improvements in cmdline tools</li>
 </ul>
 </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>
 
