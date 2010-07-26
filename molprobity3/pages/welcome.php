@@ -76,6 +76,7 @@ from your web browser.</p>
 <li>New references added.</li>
 <li>Update to allow download of jiffiloop to standalone installs.</li>
 <li>Improved handling of modified nucleic acid bases.</li>
+<li>Workaround for remediator bug due to " HA2 GLY" being both old and new format.</li>
 <li>Updated versions of various components.</li>
 <li>Bug fixes/improvements in cmdline tools</li>
 </ul>
