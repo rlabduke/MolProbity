@@ -74,17 +74,32 @@ $kinURL     = $_SESSION['dataURL'].'/'.MP_DIR_KINS;
 $opt        = $_SESSION['bgjob'];
 $gap_start    = $opt['gap_start'];
 $gap_end      = $opt['gap_end'];
-echo $gap_start." ".$gap_end."\n";
+$num_fragments = $opt['num_fragments'];
+$tight_params = $opt['tight_params'];
+$keep_seq     = $opt['keep_seq'];
+$nomatch      = $opt['nomatch'];
+$nomatch_size = $opt['nomatch_size'];
+//echo $gap_start." ".$gap_end."\n";
+//echo preg_match("/[0-9]+/", $gap_start);
 
-if ((preg_match("/[0-9]*/", $gap_start)) && (preg_match("/[0-9]*/", $gap_end))) {
+if ((preg_match("/[0-9]+/", $gap_start)) && (preg_match("/[0-9]+/", $gap_end))) {
   $fragfiller_args = $gap_start."-".$gap_end;
   //$gapCount += 1;
 }
+if (preg_match("/[0-9]+/", $num_fragments)) {
+  $fragfiller_args = $fragfiller_args." -fragments ".$num_fragments;
+} else {
+  echo "Non-numeric value entered into fragment number\n";
+}
+if ($tight_params==1) $fragfiller_args = $fragfiller_args." -tighter";
+if ($keep_seq    ==1) $fragfiller_args = $fragfiller_args." -sequence";
+if ($nomatch     ==1) $fragfiller_args = $fragfiller_args." -nomatchsize ".$nomatch_size;
+//echo $fragfiller_args."\n";
 
 echo $pdb."\n";
 
 // Set up progress message
-$tasks['jiffiloop'] = "Fill gaps with <code>java -jar jiffiloop.jar</code>";
+$tasks['jiffiloop'] = "Fill gaps with <code>java -jar jiffiloop.jar ".$fragfiller_args."</code>";
 $tasks['notebook'] = "Add entry to lab notebook";
 
 setProgress($tasks, 'jiffiloop'); // updates the progress display if running as a background job
@@ -97,12 +112,12 @@ runJiffiloop($pdb, $pdbPrefix, $fragfiller_args);
 //reduceNoBuild($pdb, $outpath);
 
 setProgress($tasks, 'notebook');
-$kinout = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$kinpath;
-$kinurl = $_SESSION['dataURL'].'/'.MP_DIR_MODELS.'/'.$kinpath;
+//$kinout = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$kinpath;
+//$kinurl = $_SESSION['dataURL'].'/'.MP_DIR_MODELS.'/'.$kinpath;
 // have to scan MP_DIR_MODELS directory for all outputted loop files.
 $gapCount = 0;
 $pdbFiles = listDir($pdbDir);
-$pdbEntries = "<p>You can now use the following links to download PDB files with each filled gap.</p>\n";
+$pdbEntries = "<p>You can now use the following links to download multi-model PDB files for each filled gap.</p>\n";
 foreach ($pdbFiles as $pdbName) {
     //echo "For $pdbName\n";
     if (preg_match("/".$modelID.".*\.[0-9]*-[0-9]*\.pdb/", $pdbName)) {
@@ -111,16 +126,23 @@ foreach ($pdbFiles as $pdbName) {
         $pdburl = $_SESSION['dataURL'].'/'.MP_DIR_MODELS.'/'.$pdbName;
         $pdbEntries .= "<p>File <a href='$pdburl'>$pdbName</a> (".formatFilesize(filesize($filledPdbFile)).").</p>\n";
         $gapCount += 1;
+    } else if (preg_match("/.kin/", $pdbName)) { 
+      // because JiffiLoop puts all output files in one directory, this moves the output kin to the kin directory.
+      //echo "kin file name: ".$pdbName."\n";
+      $origKinFile =  $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$pdbName;
+      $newKinFile = $kinDir.'/'.$pdbName;
+      rename($origKinFile, $newKinFile);
+      $jiffiKin = $pdbName;
     }
 }
 //$pdbout = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$pdbpath;
 //$pdburl = $_SESSION['dataURL'].'/'.MP_DIR_MODELS.'/'.$pdbpath;
-$entry = "Jiffiloop was run on $model[pdb] to fill $gapCount backbone gap(s).\n";
+$entry = "Jiffiloop was run on $model[pdb]; $gapCount JiffiLoop PDB files were found. If there are no files shown here, JiffiLoop likely crashed; please contact the developers.\n";
 //$entry .= "<p>You can now <a href='$pdburl'>download the annotated PDB file</a> (".formatFilesize(filesize($pdb)).").</p>\n";
 $entry .= $pdbEntries;
-$entry .= "<p>A kinemage of all of the fragments is ready for viewing in KiNG: ".linkKinemage($modelID.'.kin')."</p>\n";
+$entry .= "<p>A kinemage of the fragments from this run is ready for viewing in KiNG: ".linkKinemage($jiffiKin)."</p>\n";
 $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
-    "Added fragments to get $modelID.kin and $modelID.",
+    "Filled gaps in $modelID.",
     $entry,
     "$modelID|$newModel[id]", // applies to both old and new model
     "auto",
