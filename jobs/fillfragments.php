@@ -79,6 +79,13 @@ $tight_params = $opt['tight_params'];
 $keep_seq     = $opt['keep_seq'];
 $nomatch      = $opt['nomatch'];
 $nomatch_size = $opt['nomatch_size'];
+$distrange    = $opt['distrange'];
+$nangrange    = $opt['nanglerange'];
+$cangrange    = $opt['canglerange'];
+$ndihedrange  = $opt['ndihedrange'];
+$ddihedrange  = $opt['ddihedrange'];
+$cdihedrange  = $opt['cdihedrange'];
+
 //echo $gap_start." ".$gap_end."\n";
 //echo preg_match("/[0-9]+/", $gap_start);
 
@@ -91,10 +98,19 @@ if (preg_match("/[0-9]+/", $num_fragments)) {
 } else {
   echo "Non-numeric value entered into fragment number\n";
 }
+if (preg_match("/[0-9]*\.?[0-9]+/", $distrange)) {
+  $fragfiller_args = $fragfiller_args." -distancerange ".$distrange;
+}
+if ((preg_match("/[0-9]*\.?[0-9]+/", $nangrange)) && (preg_match("/[0-9]*\.?[0-9]+/", $cangrange))) {
+  $fragfiller_args = $fragfiller_args." -angleranges ".$nangrange." ".$cangrange;
+}
+if ((preg_match("/[0-9]*\.?[0-9]+/", $ndihedrange)) && (preg_match("/[0-9]*\.?[0-9]+/", $ddihedrange)) && (preg_match("/[0-9]*\.?[0-9]+/", $cdihedrange))) {
+  $fragfiller_args = $fragfiller_args." -dihedralranges ".$ndihedrange." ".$ddihedrange." ".$cdihedrange;
+}
 if ($tight_params==1) $fragfiller_args = $fragfiller_args." -tighter";
 if ($keep_seq    ==1) $fragfiller_args = $fragfiller_args." -sequence";
 if ($nomatch     ==1) $fragfiller_args = $fragfiller_args." -nomatchsize ".$nomatch_size;
-//echo $fragfiller_args."\n";
+echo $fragfiller_args."\n";
 
 echo $pdb."\n";
 

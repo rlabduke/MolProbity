@@ -54,7 +54,12 @@ function display($context)
     <p><input type="checkbox" name="tight_params" value="1" checked> Use narrow ranges around JiffiLoop parameters
     <p><input type="checkbox" name="keep_seq" value="1"> Keep original sequences of matching loops
     <p><input type="checkbox" name="nomatch" value="1" onclick="switchTextBox()"> Instead of matching gap size, return loops of length (<15):<input type='text' disabled name='nomatch_size' size=5 maxlength=5>
-
+    <p><input type="checkbox" name="ranges" value="1" onclick="hideRangeOpts()"> Manually specify parameter ranges: 
+      <div class='indent' id='range_opts' style="display: none">
+      <p>Distance: <input type='text' name='distrange' size=5 maxlength=5>
+      <p>Angles: <input type="text" name='nanglerange' size=5 maxlength=5> <input type="text" name='canglerange' size=5 maxlength=5> 
+      <p>Dihedrals: <input type="text" name='ndihedrange' size=5 maxlength=5> <input type="text" name='ddihedrange' size=5 maxlength=5> <input type="text" name='cdihedrange' size=5 maxlength=5> 
+      </div>
     <table width='100%' border='0'><tr>
     <p><td><input type='submit' name='cmd' value='Start filling gaps &gt;'></td>
     <td align='right'><input type='submit' name='cmd' value='Cancel'></td>
@@ -85,8 +90,35 @@ function switchTextBox() {
     document.forms[0].nomatch_size.disabled=false
   } else {
     document.forms[0].nomatch_size.disabled=true
-  }
+  }    
+  //if(document.forms[0].ranges.checked) {
+  //  document.forms[0].distrange.disabled=false
+  //  document.forms[0].nanglerange.disabled=false
+  //  document.forms[0].canglerange.disabled=false
+  //  document.forms[0].ndihedrange.disabled=false
+  //  document.forms[0].ddihedrange.disabled=false
+  //  document.forms[0].cdihedrange.disabled=false
+  //} else {
+  //  document.forms[0].distrange.disabled=true
+  //  document.forms[0].nanglerange.disabled=true
+  //  document.forms[0].canglerange.disabled=true
+  //  document.forms[0].ndihedrange.disabled=true
+  //  document.forms[0].ddihedrange.disabled=true
+  //  document.forms[0].cdihedrange.disabled=true
+  //}
 }
+
+// hides range options
+function hideRangeOpts()
+{
+    var block = document.getElementById('range_opts')
+    if(document.forms[0].ranges.checked) {
+      block.style.display = 'block'
+      document.forms[0].tight_params.checked=false
+    }
+    else block.style.display = 'none'
+}
+
 </SCRIPT>
     
     <?php
