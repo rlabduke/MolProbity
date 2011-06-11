@@ -82,29 +82,29 @@ function recognizeUserAgent($agent = null)
     $bd['version'] = "Unknown";
 
     // find operating system
-    if (eregi("win", $agent))
+    if (preg_match("/win/i", $agent))
         $bd['platform'] = "Windows";
-    elseif (eregi("mac", $agent))
+    elseif (preg_match("/mac/i", $agent))
         $bd['platform'] = "Apple Macintosh";
-    elseif (eregi("linux", $agent))
+    elseif (preg_match("/linux/i", $agent))
         $bd['platform'] = "Linux";
-    elseif (eregi("sgi|irix", $agent))
+    elseif (preg_match("/sgi|irix/i", $agent))
         $bd['platform'] = "SGI";
-    elseif (eregi("sunos", $agent))
+    elseif (preg_match("/sunos/i", $agent))
         $bd['platform'] = "Sun";
-    elseif (eregi("OS/2", $agent))
+    elseif (preg_match("@OS/2@i", $agent))
         $bd['platform'] = "OS/2";
-    elseif (eregi("BeOS", $agent))
+    elseif (preg_match("/BeOS/i", $agent))
         $bd['platform'] = "BeOS";
-    elseif (eregi("java|jakarta", $agent))
+    elseif (preg_match("/java|jakarta/i", $agent))
         $bd['platform'] = "Java";
-    elseif (eregi('bot|crawler|yahoo|ask|heritrix', $agent))
+    elseif (preg_match('/bot|crawler|yahoo|ask|heritrix/i', $agent))
         $bd['platform'] = "Bot/Crawler";
 
     // test for Opera        
-    if (eregi("opera",$agent)){
+    if (preg_match("/opera/i",$agent)){
         $val = stristr($agent, "opera");
-        if (eregi("/", $val)){
+        if (preg_match("@/@", $val)){
             $val = explode("/",$val);
             $bd['browser'] = $val[0];
             $val = explode(" ",$val[1]);
@@ -116,39 +116,39 @@ function recognizeUserAgent($agent = null)
         }
 
     // test for WebTV
-    }elseif(eregi("webtv",$agent)){
+    }elseif(preg_match("/webtv/i",$agent)){
         $val = explode("/",stristr($agent,"webtv"));
         $bd['browser'] = $val[0];
         $bd['version'] = $val[1];
     
     // test for MS Internet Explorer version 1
-    }elseif(eregi("microsoft internet explorer", $agent)){
+    }elseif(preg_match("/microsoft internet explorer/i", $agent)){
         $bd['browser'] = "MSIE";
         $bd['version'] = "1.0";
         $var = stristr($agent, "/");
-        if (ereg("308|425|426|474|0b1", $var)){
+        if (preg_match("/308|425|426|474|0b1/", $var)){
             $bd['version'] = "1.5";
         }
 
     // test for NetPositive
-    }elseif(eregi("NetPositive", $agent)){
+    }elseif(preg_match("/NetPositive/", $agent)){
         $val = explode("/",stristr($agent,"NetPositive"));
         $bd['platform'] = "BeOS";
         $bd['browser'] = $val[0];
         $bd['version'] = $val[1];
 
     // test for MS Internet Explorer
-    }elseif(eregi("msie",$agent) && !eregi("opera",$agent)){
+    }elseif(preg_match("/msie/i",$agent) && !preg_match("/opera/i",$agent)){
         $val = explode(" ",stristr($agent,"msie"));
         $bd['browser'] = $val[0];
         $bd['version'] = $val[1];
     
     // test for MS Pocket Internet Explorer
-    }elseif(eregi("mspie",$agent) || eregi('pocket', $agent)){
+    }elseif(preg_match("/mspie/i",$agent) || preg_match('/pocket/i', $agent)){
         $val = explode(" ",stristr($agent,"mspie"));
         $bd['browser'] = "MSPIE";
         $bd['platform'] = "WindowsCE";
-        if (eregi("mspie", $agent))
+        if (preg_match("/mspie/i", $agent))
             $bd['version'] = $val[1];
         else {
             $val = explode("/",$agent);
@@ -156,70 +156,70 @@ function recognizeUserAgent($agent = null)
         }
         
     // test for Galeon
-    }elseif(eregi("galeon",$agent)){
+    }elseif(preg_match("/galeon/i",$agent)){
         $val = explode(" ",stristr($agent,"galeon"));
         $val = explode("/",$val[0]);
         $bd['browser'] = $val[0];
         $bd['version'] = $val[1];
         
     // test for Konqueror
-    }elseif(eregi("Konqueror",$agent)){
+    }elseif(preg_match("/Konqueror/i",$agent)){
         $val = explode(" ",stristr($agent,"Konqueror"));
         $val = explode("/",$val[0]);
         $bd['browser'] = $val[0];
         $bd['version'] = $val[1];
         
     // test for iCab
-    }elseif(eregi("icab",$agent)){
+    }elseif(preg_match("/icab/i",$agent)){
         $val = explode(" ",stristr($agent,"icab"));
         $bd['browser'] = $val[0];
         $bd['version'] = $val[1];
 
     // test for OmniWeb
-    }elseif(eregi("omniweb",$agent)){
+    }elseif(preg_match("/omniweb/i",$agent)){
         $val = explode("/",stristr($agent,"omniweb"));
         $bd['browser'] = $val[0];
         $bd['version'] = $val[1];
 
     // test for Phoenix
-    }elseif(eregi("Phoenix", $agent)){
+    }elseif(preg_match("/Phoenix/i", $agent)){
         $bd['browser'] = "Phoenix";
         $val = explode("/", stristr($agent,"Phoenix/"));
         $bd['version'] = $val[1];
     
     // test for Firebird
-    }elseif(eregi("firebird", $agent)){
+    }elseif(preg_match("/firebird/i", $agent)){
         $bd['browser']="Firebird";
         $val = stristr($agent, "Firebird");
         $val = explode("/",$val);
         $bd['version'] = $val[1];
         
     // test for Firefox
-    }elseif(eregi("Firefox", $agent)){
+    }elseif(preg_match("/Firefox/i", $agent)){
         $bd['browser']="Firefox";
         $val = stristr($agent, "Firefox");
         $val = explode("/",$val);
         $bd['version'] = $val[1];
         
     // test for Mozilla Alpha/Beta Versions
-    }elseif(eregi("mozilla",$agent) && 
-        eregi("rv:[0-9].[0-9][a-b]",$agent) && !eregi("netscape",$agent)){
+    }elseif(preg_match("/mozilla/i",$agent) && 
+        preg_match("/rv:[0-9].[0-9][a-b]/i",$agent) && !preg_match("/netscape/i",$agent)){
         $bd['browser'] = "Mozilla";
         $val = explode(" ",stristr($agent,"rv:"));
-        eregi("rv:[0-9].[0-9][a-b]",$agent,$val);
+        preg_match("/rv:[0-9].[0-9][a-b]/i",$agent,$val);
         $bd['version'] = str_replace("rv:","",$val[0]);
         
     // test for Mozilla Stable Versions
-    }elseif(eregi("mozilla",$agent) &&
-        eregi("rv:[0-9]\.[0-9]",$agent) && !eregi("netscape",$agent)){
+    }elseif(preg_match("/mozilla/i",$agent) &&
+        preg_match("/rv:[0-9]\.[0-9]/i",$agent) && !preg_match("/netscape/i",$agent)){
         $bd['browser'] = "Mozilla";
         $val = explode(" ",stristr($agent,"rv:"));
-        eregi("rv:[0-9]\.[0-9]\.[0-9]",$agent,$val);
+        preg_match("/rv:[0-9]\.[0-9]\.[0-9]/i",$agent,$val);
         $bd['version'] = str_replace("rv:","",$val[0]);
     
     // test for Lynx & Amaya
-    }elseif(eregi("libwww", $agent)){
-        if (eregi("amaya", $agent)){
+    }elseif(preg_match("/libwww/i", $agent)){
+        if (preg_match("/amaya/i", $agent)){
             $val = explode("/",stristr($agent,"amaya"));
             $bd['browser'] = "Amaya";
             $val = explode(" ", $val[1]);
@@ -231,27 +231,27 @@ function recognizeUserAgent($agent = null)
         }
     
     // test for Safari
-    }elseif(eregi("safari", $agent)){
+    }elseif(preg_match("/safari/i", $agent)){
         $bd['browser'] = "Safari";
         $bd['version'] = "";
 
     // test for Googlebot
-    }elseif(eregi("googlebot", $agent)){
+    }elseif(preg_match("/googlebot/i", $agent)){
         $bd['browser'] = "Googlebot";
         $bd['version'] = "";
 
     // test for MSN bot
-    }elseif(eregi("msnbot", $agent)){
+    }elseif(preg_match("/msnbot/i", $agent)){
         $bd['browser'] = "MSN bot";
         $bd['version'] = "";
 
     // remaining two tests are for Netscape
-    }elseif(eregi("netscape",$agent)){
+    }elseif(preg_match("/netscape/i",$agent)){
         $val = explode(" ",stristr($agent,"netscape"));
         $val = explode("/",$val[0]);
         $bd['browser'] = $val[0];
         $bd['version'] = $val[1];
-    }elseif(eregi("mozilla",$agent) && !eregi("rv:[0-9]\.[0-9]\.[0-9]",$agent)){
+    }elseif(preg_match("/mozilla/i",$agent) && !preg_match("/rv:[0-9]\.[0-9]\.[0-9]/i",$agent)){
         $val = explode(" ",stristr($agent,"mozilla"));
         $val = explode("/",$val[0]);
         $bd['browser'] = "Netscape";
@@ -259,15 +259,15 @@ function recognizeUserAgent($agent = null)
     }
     
     // clean up extraneous garbage that may be in the name
-    $bd['browser'] = ereg_replace("[^a-z,A-Z]", "", $bd['browser']);
+    $bd['browser'] = preg_replace("/[^a-z,A-Z]/", "", $bd['browser']);
     // clean up extraneous garbage that may be in the version        
-    $bd['version'] = ereg_replace("[^0-9,.,a-z,A-Z]", "", $bd['version']);
+    $bd['version'] = preg_replace("/[^0-9,.,a-z,A-Z]/", "", $bd['version']);
     
     // check for AOL
-    if (eregi("AOL", $agent)){
+    if (preg_match("/AOL/i", $agent)){
         $var = stristr($agent, "AOL");
         $var = explode(" ", $var);
-        $bd['aol'] = ereg_replace("[^0-9,.,a-z,A-Z]", "", $var[1]);
+        $bd['aol'] = preg_replace("/[^0-9,.,a-z,A-Z]/", "", $var[1]);
     }
     
     return $bd;

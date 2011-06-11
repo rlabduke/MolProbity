@@ -16,7 +16,8 @@ function mpInitEnvirons()
     if(trim(substr($df, $i-2, 2)) >= 98) die("Server disk is more than 98% full.");
     
     // Configure some PHP options for our use
-    set_magic_quotes_runtime(0); // off
+    // comment out the following set_magic_quotes_runtime line; deprecated in PHP vers 5.3
+    // set_magic_quotes_runtime(0); // off
     
     // Make sure our pages aren't cached by the browser.
     // Most browsers are OK without this, but we're just being safe...
@@ -501,7 +502,7 @@ function getVisitorIP_impl()
     if($HTTP_X_FORWARDED_FOR)
     {
         // case 1.A: proxy && HTTP_X_FORWARDED_FOR is defined
-        $b = ereg ("^([0-9]{1,3}\.){3,3}[0-9]{1,3}", $HTTP_X_FORWARDED_FOR, $array) ;
+        $b = preg_match("/^([0-9]{1,3}\.){3,3}[0-9]{1,3}/", $HTTP_X_FORWARDED_FOR, $array) ;
         if ($b && (count($array)>=1) )
         { return ( $array[0] ) ; } // first IP in the list
         else
@@ -510,7 +511,7 @@ function getVisitorIP_impl()
     elseif($HTTP_X_FORWARDED)
     {
         // case 1.B: proxy && HTTP_X_FORWARDED is defined
-        $b = ereg ("^([0-9]{1,3}\.){3,3}[0-9]{1,3}", $HTTP_X_FORWARDED, $array) ;
+        $b = preg_match("/^([0-9]{1,3}\.){3,3}[0-9]{1,3}/", $HTTP_X_FORWARDED, $array) ;
         if ($b && (count($array)>=1) )
         { return ( $array[0] ) ; } // first IP in the list
         else
@@ -519,7 +520,7 @@ function getVisitorIP_impl()
     elseif($HTTP_FORWARDED_FOR)
     {
         // case 1.C: proxy && HTTP_FORWARDED_FOR is defined
-        $b = ereg ("^([0-9]{1,3}\.){3,3}[0-9]{1,3}", $HTTP_FORWARDED_FOR, $array) ;
+        $b = preg_match("/^([0-9]{1,3}\.){3,3}[0-9]{1,3}/", $HTTP_FORWARDED_FOR, $array) ;
         if ($b && (count($array)>=1) )
         { return ( $array[0] ) ; } // first IP in the list
         else
@@ -528,7 +529,7 @@ function getVisitorIP_impl()
     elseif($HTTP_FORWARDED)
     {
         // case 1.D: proxy && HTTP_FORWARDED is defined
-        $b = ereg ("^([0-9]{1,3}\.){3,3}[0-9]{1,3}", $HTTP_FORWARDED, $array) ;
+        $b = preg_match("/^([0-9]{1,3}\.){3,3}[0-9]{1,3}/", $HTTP_FORWARDED, $array) ;
         if ($b && (count($array)>=1) )
         { return ( $array[0] ) ; } // first IP in the list
         else

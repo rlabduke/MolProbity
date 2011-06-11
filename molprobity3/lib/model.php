@@ -788,7 +788,7 @@ function decodeReduceUsermods($file)
     $c      = 0;      // Track number of flips and clashes found (Counter)
     $nlines = 0;      // Track number of lines read, for debugging
 
-    while( !feof($fp) and ($s = fgets($fp, 200)) and !eregi("^ATOM  ", $s) )
+    while( !feof($fp) and ($s = fgets($fp, 200)) and !preg_match("/^ATOM  /i", $s) )
     {
         // Look for Asn, Gln, and His marked by Reduce
         #if( eregi("^USER  MOD........:......(ASN|GLN|HIS)", $s) )
@@ -801,18 +801,18 @@ function decodeReduceUsermods($file)
 
             // Most values can be done without knowing whether or not this is a flip.
             $changes[0][$c] = $field[1];
-            /** Original, highly inefficient code! * /
-            $changes[1][$c] = trim(eregi_replace("^(.).*$", "\\1", $field[1]));
-            $changes[2][$c] = trim(eregi_replace("^.(....).*$", "\\1", $field[1]));
-            $changes[3][$c] = trim(eregi_replace("^.....(....).*$", "\\1", $field[1]));
+            /** Original, highly inefficient code! */
+            $changes[1][$c] = trim(preg_replace("/^(.).*$/i", "\\1", $field[1]));
+            $changes[2][$c] = trim(preg_replace("/^.(....).*$/i", "\\1", $field[1]));
+            $changes[3][$c] = trim(preg_replace("/^.....(....).*$/i", "\\1", $field[1]));
             // skip 4 and 5 for now
-            $changes[6][$c] = trim(eregi_replace("^sc=(........).*$", "\\1", $field[3]));
-            $changes[7][$c] = trim(eregi_replace("^sc=........([! ]).*$", "\\1", $field[3]));
-            $changes[8][$c] = trim(eregi_replace("^sc=......... ..o=([^!]+)(!?),f=([^!]+)(!?).*$", "\\1", $field[3]));
-            $changes[9][$c] = trim(eregi_replace("^sc=......... ..o=([^!]+)(!?),f=([^!]+)(!?).*$", "\\2", $field[3]));
-            $changes[10][$c] = trim(eregi_replace("^sc=......... ..o=([^!]+)(!?),f=([^!\)]+)(!?).*$", "\\3", $field[3]));
-            $changes[11][$c] = trim(eregi_replace("^sc=......... ..o=([^!]+)(!?),f=([^!]+)(!?).*$", "\\4", $field[3]));
-            $changes[12][$c] = trim(eregi_replace("^sc=......... ([FXCK]).*$", "\\1", $field[3]));
+            $changes[6][$c] = trim(preg_replace("/^sc=(........).*$/i", "\\1", $field[3]));
+            $changes[7][$c] = trim(preg_replace("/^sc=........([! ]).*$/i", "\\1", $field[3]));
+            $changes[8][$c] = trim(preg_replace("/^sc=......... ..o=([^!]+)(!?),f=([^!]+)(!?).*$/i", "\\1", $field[3]));
+            $changes[9][$c] = trim(preg_replace("/^sc=......... ..o=([^!]+)(!?),f=([^!]+)(!?).*$/i", "\\2", $field[3]));
+            $changes[10][$c] = trim(preg_replace("/^sc=......... ..o=([^!]+)(!?),f=([^!\)]+)(!?).*$/i", "\\3", $field[3]));
+            $changes[11][$c] = trim(preg_replace("/^sc=......... ..o=([^!]+)(!?),f=([^!]+)(!?).*$/i", "\\4", $field[3]));
+            $changes[12][$c] = trim(preg_replace("/^sc=......... ([FXCK]).*$/i", "\\1", $field[3]));
             /** Original, highly inefficient code! */
             
             // Better to group ins code with number than res type.
@@ -852,7 +852,7 @@ function decodeReduceUsermods($file)
             }
             
             // Set this flag so we can determine 4 and 5
-            $didflip = eregi("^FLIP", $field[2]);
+            $didflip = preg_match("/^FLIP/", $field[2]);
 
             switch($changes[12][$c])
             {
@@ -925,7 +925,7 @@ function containsReduceFlips($file)
 {
     $fp = fopen($file, "r");
 
-    while( !feof($fp) and ($s = fgets($fp, 200)) and !eregi("^ATOM  ", $s) )
+    while( !feof($fp) and ($s = fgets($fp, 200)) and !preg_match("/^ATOM  /", $s) )
     {
         // Look for Asn, Gln, and His marked by Reduce
         #if( eregi("^USER  MOD........:......(ASN|GLN|HIS)", $s) )

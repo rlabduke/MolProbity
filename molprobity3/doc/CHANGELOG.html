@@ -95,6 +95,22 @@
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
+### pre 3.19 please combine with other's changes of 3.19 ###
+- 110611, svn rev 373 change to file: analyze.php function: findRotaOutliers
+    commented out: #if($res['scorePct'] <= 1.0)
+    added:          if($res['rotamer'] == 'OUTLIER')
+  to address bug found by Jeff Headd in comparing percentages of rotamer outliers calculated in 
+  MolProbity cf w/ phenix.rotalyze.
+- 110611, svn rev 373 commented out the line ~19 in sessions.php: 
+    set_magic_quotes_runtime(0); // off
+  which was causing a obsolete deprecated error message.  
+- 110611, svn rev 373 handled the deprecation of 'ereg' - including variants thereof (like 'eregi').
+  For all previous uses of 'ereg' found in files analyze.php(4), browser.php(4), model.php(15), and
+  sessions.php(4), changed:
+     'ereg' to 'preg_match' adding a pattern delimiter,
+     'eregi' to 'preg_match' with an 'i' flag after the pattern delimiter,
+     'ereg_replace' to 'preg_replace' and
+     'eregi_replace' to 'preg_replace' with an 'i' flag after the pattern delimiter.
 ### 3.18 ###
 - Fixed bugs in dangle and nucleic acids multi-chart not correctly recognizing modified RNA bases.
 - Possibility of downloading jiffiloop added.
