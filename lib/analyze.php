@@ -793,7 +793,8 @@ function findRotaOutliers($rota)
     $worst = array();
     if(is_array($rota)) foreach($rota as $res)
     {
-        if($res['scorePct'] <= 1.0)
+        #if($res['scorePct'] <= 1.0)
+         if($res['rotamer'] == 'OUTLIER')
             $worst[$res['resName']] = $res['scorePct'];
     }
     ksort($worst); // Put the residues into a sensible order
@@ -1017,7 +1018,7 @@ function loadValidationBondReport($datafile, $moltype)
         $measure = $line[6];
         $value = $line[7] + 0;
         $sigma = $line[8] + 0;
-        if (ereg("--", $measure)) {
+        if (preg_match("/--/", $measure)) {
             if (array_key_exists($cnit, $hash1_1)) {
                 $old_sigma_bond  = $hash1_1[$cnit]['sigma'];
                 if (abs($sigma) > abs($old_sigma_bond)) {
@@ -1090,7 +1091,7 @@ function loadValidationAngleReport($datafile, $moltype)
         $measure = $line[6];
         $value = $line[7] + 0;
         $sigma = $line[8] + 0;
-        if (ereg("-.-",$measure) || ereg("-..-",$measure) || ereg("-...-",$measure)) {
+        if (preg_match("/-.-/",$measure) || preg_match("/-..-/",$measure) || preg_match("/-...-/",$measure)) {
             if (array_key_exists($cnit, $hash1_2)) {
                 $old_outlier_sigma = $hash1_2[$cnit]['sigma'];
                 if (abs($sigma) > abs($old_outlier_sigma)) {
