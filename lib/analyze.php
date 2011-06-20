@@ -359,6 +359,13 @@ function runAnalysis($modelID, $opts)
         if($opts['doCharts'])
         {
             $entry .= "<td>".linkAnyFile("$model[prefix]multi.table", "Chart", "img/multichart.jpg")."</td>\n";
+            ## Bradley's code start
+            if($opts['chartHorizontal']) {
+              $horiz_url = "<td>".linkAnyFile("$model[prefix]multi.table", "Chart", "img/multichart_horiz.jpg")."</td>\n";
+              # point the multi-criterion horizontal chart to viewtable_horiz.php
+              $entry .= str_replace("viewtable.php?", "viewtable_horiz.php?", $horiz_url);
+            }
+            ## Bradley's code end
             if($opts['chartCoot']) {
               $entry .= "<td>".linkAnyFile("$model[prefix]multi-coot.scm", "To-do list for Coot", "img/multichart-coot.jpg")."<br><small><i>Open this in Coot 0.1.2 or later using Calculate | Run Script...</i></small></td>\n";
               #$entry .= "<td>".linkAnyFile("$model[prefix]multi-coot.py", "To-do list for Coot Python", "img/multichart-coot.jpg")."<br><small><i>Open this in Coot 0.1.2 or later using Calculate | Run Script...</i></small></td>\n";
@@ -793,8 +800,7 @@ function findRotaOutliers($rota)
     $worst = array();
     if(is_array($rota)) foreach($rota as $res)
     {
-        #if($res['scorePct'] <= 1.0)
-         if($res['rotamer'] == 'OUTLIER')
+        if($res['scorePct'] <= 1.0)
             $worst[$res['resName']] = $res['scorePct'];
     }
     ksort($worst); // Put the residues into a sensible order
@@ -1018,7 +1024,7 @@ function loadValidationBondReport($datafile, $moltype)
         $measure = $line[6];
         $value = $line[7] + 0;
         $sigma = $line[8] + 0;
-        if (preg_match("/--/", $measure)) {
+        if (ereg("--", $measure)) {
             if (array_key_exists($cnit, $hash1_1)) {
                 $old_sigma_bond  = $hash1_1[$cnit]['sigma'];
                 if (abs($sigma) > abs($old_sigma_bond)) {
@@ -1091,7 +1097,7 @@ function loadValidationAngleReport($datafile, $moltype)
         $measure = $line[6];
         $value = $line[7] + 0;
         $sigma = $line[8] + 0;
-        if (preg_match("/-.-/",$measure) || preg_match("/-..-/",$measure) || preg_match("/-...-/",$measure)) {
+        if (ereg("-.-",$measure) || ereg("-..-",$measure) || ereg("-...-",$measure)) {
             if (array_key_exists($cnit, $hash1_2)) {
                 $old_outlier_sigma = $hash1_2[$cnit]['sigma'];
                 if (abs($sigma) > abs($old_outlier_sigma)) {

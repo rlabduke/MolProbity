@@ -445,6 +445,12 @@ function linkAnyFile($fname, $name = null, $image = null)
             array('url' => "viewking.php?$_SESSION[sessTag]&url=$link", 'label' => "View in KiNG", 'blank' => true),
             array('url' => "$link", 'label' => "Download", 'blank' => false),
         );
+    //Bradley START
+    elseif(endsWith($fname, "table.mpc"))
+        $links = array(array('url' => "view_mpc_sbs.php?$_SESSION[sessTag]&file=$path&model1=".$_SESSION['mpc']['model_1']."&model2=".$_SESSION['mpc']['model_2'], 'label' => "View", 'blank' => true));
+    elseif(endsWith($fname, "table.mpcscores"))
+        $links = array(array('url' => "view_mpc_changes.php?$_SESSION[sessTag]&file=$path&model1=".$_SESSION['mpc']['model_1']."&model2=".$_SESSION['mpc']['model_2']."&original_num=".$_SESSION['mpc']['original_num']."&improved_num=".$_SESSION['mpc']['improved_num'], 'label' => "View", 'blank' => true));
+    //Bradley END
     elseif(endsWith($fname, ".table"))
         $links = array(array('url' => "viewtable.php?$_SESSION[sessTag]&file=$path", 'label' => "View", 'blank' => true));
     elseif(endsWith($fname, ".html"))

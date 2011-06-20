@@ -62,9 +62,9 @@ fclose($in);
     echo formatSortableTable($table, "viewtable.php?$_SESSION[sessTag]&file=$file", $col, $direction);
     
     // Debug version:
-    //echo "<pre>";
-    //print_r($table);
-    //echo "</pre>\n";
+    echo "<pre>";
+    print_r($table);
+    echo "</pre>\n";
 
 echo mpPageFooter();
 ?>

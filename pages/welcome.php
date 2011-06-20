@@ -72,8 +72,13 @@ as part of the refinement cycle.</p>
 Create and view interactive 3-D graphics
 from your web browser.</p>
 
-<h3>What's new in 3.19:</h3><ul>
-<li>JiffiLoop moved to main page, more options enabled.</li>
+<h3>What's new in 3.18:</h3><ul>
+<li>New references added.</li>
+<li>Update to allow download of jiffiloop to standalone installs.</li>
+<li>Improved handling of modified nucleic acid bases.</li>
+<li>Workaround for remediator bug due to " HA2 GLY" being both old and new format.</li>
+<li>Updated versions of various components.</li>
+<li>Bug fixes/improvements in cmdline tools</li>
 </ul>
 </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>
 
@@ -203,6 +208,7 @@ function displayModelTools($context)
         'reduce'    => array('desc' => 'Add hydrogens', 'page' => 'reduce_setup.php', 'rel' => 1, 'img' => 'add_h.png'),
         'aacgeom'   => array('desc' => 'Analyze all-atom contacts and geometry', 'page' => 'aacgeom_setup.php', 'rel' => 1, 'img' => 'clash_rama.png'),
         'geomonly'  => array('desc' => 'Analyze geometry without all-atom contacts', 'page' => 'aacgeom_setup.php', 'rel' => 1, 'img' => 'ramaplot.png'),
+        'compare_aacgeom'   => array('desc' => 'Compare all-atom contacts and geometry analysis from two similar structures', 'page' => 'compare_aacgeom_setup.php', 'rel' => 1, 'img' => 'MPC.png'),#bradley's line of code
         'iface'     => array('desc' => 'Visualize interface contacts', 'handler' => 'onVisInterface', 'rel' => 1, 'img' => 'barnase_barstar.png'),
         //'sswing'    => array('desc' => 'Refit sidechains', 'page' => 'sswing_setup1.php', 'rel' => 1, 'img' => ''),
         'makekins'  => array('desc' => 'Make simple kinemages', 'page' => 'makekin_setup.php', 'rel' => 1, 'img' => 'porin_barrel.png'),
@@ -210,7 +216,6 @@ function displayModelTools($context)
         'downgrade' => array('desc' => 'Downgrade file to PDBv2.3 format (for download only)', 'page' => 'pdb_convert_setup.php', 'rel' => 1, 'img' => 'downgrade.gif'),
         //'viewpdb' => array('desc' => 'View PDB in KiNG (beta)', 'page' => "viewpdbking.php?$_SESSION[sessTag]&url=".MP_DIR_KINS, 'rel' => 1, 'img' => 'pdb_icon.png'),
         //'' => array('desc' => '', 'page' => '', 'rel' => 1, 'img' => ''),
-        'jiffiloop' => array('desc' => 'Fill gaps in protein backbone with JiffiLoop (beta test)', 'page' => 'fragmentfill_setup.php', 'rel' => 1, 'img' => 'jiffiloop.png'),
     );
     
     // Reduce
@@ -223,12 +228,14 @@ function displayModelTools($context)
     if($model['isReduced'] || $model['stats']['has_most_H'])
     {
         $tools['aacgeom']['rel'] = 2;
+        $tools['compare_aacgeom']['rel'] = 2;#bradley's
         $tools['iface']['rel'] = 2;
         $tools['geomonly']['rel'] = 0;
     }
     else
     {
         $tools['aacgeom']['rel'] = 0;
+        $tools['compare_aacgeom']['rel'] = 0;#bradley's
         $tools['iface']['rel'] = 0;
         $tools['makekins']['rel'] = 2;
     }
