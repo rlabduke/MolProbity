@@ -352,14 +352,11 @@ function get_chain_sequences($mh1, $modelID1, $mh2=false, $modelID2=false,
   $chain1=false, $chain2=false)
 {
   $res_nums1 = array_keys($mh1);
-  $chain_array = $_SESSION['models'][$modelID1]['stats']['chainids'];
   $aa_3_1 = array('ALA' => 'A', 'CYS' => 'C', 'ASP' => 'D', 'GLU' => 'E',
     'PHE' => 'F', 'GLY'  => 'G', 'HIS' => 'H', 'ILE' => 'I', 'LYS' => 'K',
     'LEU' => 'L', 'MET' => 'M', 'ASN' => 'N', 'PRO' => 'P', 'GLN' => 'Q' ,
     'ARG' => 'R', 'SER' => 'S', 'THR' => 'T', 'VAL' => 'V', 'TRP' => 'W',
     'TYR' => 'Y');
-  //return func_get_args();
-  // if($chain1 === false) return "hi";
   if($chain1 !== false & $chain2 !== false) {
     $chain_sequences;
     foreach(array($chain1, $chain2) as $chain){
@@ -846,7 +843,7 @@ function extract_bond_sigma($html)
 {
   $sig = strpos($html, "&sigma");
   $col = strpos($html, ":");
-  if($sig === false || $col === false) return 'n';//$sig; delete n
+  if($sig === false & $col === false) return $html;//$sig; delete n
   return trim(substr($html, $col+1, strpos($html, '&')-$col-1));
 }
 // }}}
@@ -965,47 +962,116 @@ function get_changes_overall($diff_array)
 ******************************************************************/
 {
   $html = "<table frame='void' rules='rows'>\n  <tr><td>";
-  $clash_ideal = 0;
+  
+  // {{{ initiate 'score' variables
+  // red_targ = reduction target and actual_red = actual reduction
+  $clash_red_targ = 0;
+  $clash_actual_red = 0;
   $clash_overall = 0;
-  $rama_ideal = 0;
+  $clash_num_original = 0;
+  $clash_num_improved = 0;
+  $rama_red_targ = 0;
+  $rama_actual_red = 0;
+  $rama_num_original = 0;
+  $rama_num_improved = 0;
   $rama_overall = 0;
-  $rot_ideal = 0;
+  $rot_red_targ = 0;
+  $rot_actual_red = 0;
   $rot_overall = 0;
-  $cb_ideal = 0;
+  $rot_num_original = 0;
+  $rot_num_improved = 0;
+  $cb_red_targ = 0;
+  $cb_actual_red = 0;
   $cb_overall = 0;
-  $bl_ideal = 0;
+  $cb_num_original = 0;
+  $cb_num_improved = 0;
+  $bl_red_targ = 0;
+  $bl_actual_red = 0;
   $bl_overall = 0;
-  $ba_ideal = 0;
+  $bl_num_original = 0;
+  $bl_num_improved = 0;
+  $ba_red_targ = 0;
+  $ba_actual_red = 0;
   $ba_overall = 0;
+  $ba_num_original = 0;
+  $ba_num_improved = 0;
+  // }}}
+
   foreach($diff_array as $ress => $array) {
     if($array["clashD"] !== "-") {
-      $clash_ideal += $array["clash_original"];// {8}
-      $clash_actual += $array["clashD"];// {9}
-      $rama_ideal += $array["rama_original"];// {15}
-      $rama_actual += $array["ramaD"];//_original"] - $array["rama_improved"];// {35} HELP
-      $rot_ideal += $array["rotamer_original"];// {36}
-      $rot_actual += $array["rotD"];//amer_original"] - $array["rotamer_improved"];// {46} HELP
-      $cb_ideal += $array["cB_original"];// {15}
-      $cb_actual += $array["cbD"];//_original"] - $array["cB_improved"];// {47} HELP
-      $bl_ideal += abs($array["bl_original"]);// {15}
-      $bl_actual += abs($array["bl_original"]) - abs($array["bl_improved"]);// {58} HELP
-      $ba_ideal += abs($array["ba_original"]);// {15}
-      $ba_actual += $array["baD"];//_original"] - $array["ba_improved"];// {59} HELP
+      if($array["clash_original"] !== 0) $sc = 1;
+      else $sc = 0;
+      $clash_num_original += $sc;
+      if($array["clash_improved"] !== 0) $sc = 1;
+      else $sc = 0;
+      $clash_num_improved += $sc;
+      $clash_red_targ += $array["clash_original"];// {8}
+      $clash_actual_red += $array["clashD"];// {9}
+    }
+    if($array["ramaD"] !== "-") {
+      if($array["rama_original"] !== 0) $sc = 1;
+      else $sc = 0;
+      $rama_num_original += $sc;
+      if($array["rama_improved"] !== 0) $sc = 1;
+      else $sc = 0;
+      $rama_num_improved += $sc;
+      $rama_red_targ += $array["rama_original"];// {15}
+      $rama_actual_red += $array["ramaD"];// {35}
+    }
+    if($array["rotD"] !== "-") {
+      if($array["rotamer_original"] !== 0) $sc = 1;
+      else $sc = 0;
+      $rot_num_original += $sc;
+      if($array["rotamer_improved"] !== 0) $sc = 1;
+      else $sc = 0;
+      $rot_num_improved += $sc;
+      $rot_red_targ += $array["rotamer_original"];// {36}
+      $rot_actual_red += $array["rotD"];// {46}
+    }
+    if($array["cbD"] !== "-") {
+      if($array["cB_original"] !== 0) $sc = 1;
+      else $sc = 0;
+      $cb_num_original += $sc;
+      if($array["cB_improved"] !== 0) $sc = 1;
+      else $sc = 0;
+      $cb_num_improved += $sc;
+      $cb_red_targ += $array["cB_original"];// {15}
+      $cb_actual_red += $array["cbD"];// {47}
+    }
+    if($array["blD"] !== "-") {
+      if($array["bl_original"] !== 0) $sc = 1;
+      else $sc = 0;
+      $bl_num_original += $sc;
+      if($array["bl_improved"] !== 0) $sc = 1;
+      else $sc = 0;
+      $bl_num_improved += $sc;
+      $bl_red_targ += abs($array["bl_original"]);// {15}
+      $bl_actual_red += $array["blD"];// {58}
+    }
+    if($array["baD"] !== "-") {
+      if($array["ba_original"] !== 0) $sc = 1;
+      else $sc = 0;
+      $ba_num_original += $sc;
+      if($array["ba_improved"] !== 0) $sc = 1;
+      else $sc = 0;
+      $ba_num_improved += $sc;
+      $ba_red_targ += abs($array["ba_original"]);// {15}
+      $ba_actual_red += $array["baD"];// {59}
     }
   }
   // {{{ calculate overall difference scores for each paarameter
-  if($clash_ideal === 0 & $clash_actual !== 0) {
+  if($clash_red_targ === 0 & $clash_actual_red !== 0) {
     $clash_overall = "-5*";// {10a}
     $clash_info = "The original model had<br>";
     $clash_info .= "no clashes but the<br>";
     $clash_info .= "improved model does!";
   }
-  elseif($clash_ideal === 0 & $clash_actual === 0) {
+  elseif($clash_red_targ === 0 & $clash_actual_red === 0) {
     $clash_overall = "0*";// {10b}
     $clash_info = "The original and improved<br>";
     $clash_info .= "model have no clashes!";
   } else {
-    $clash_overall = round($clash_actual/$clash_ideal, 4);// {10}
+    $clash_overall = round($clash_actual_red/$clash_red_targ, 4);// {10}
     if($clash_overall < 0) {
       $clash_info = "The improved model has<br>";
       $clash_info .= "worse overall clashes<br>";
@@ -1017,19 +1083,19 @@ function get_changes_overall($diff_array)
       $clash_info .= "by $p%.";
     }
   }
-  if($rama_ideal === 0 & $rama_actual !== 0) {
+  if($rama_red_targ === 0 & $rama_actual_red !== 0) {
     $rama_overall = "-5*";// {17}
     $rama_info = "The original model had no<br>";
     $rama_info .= "ramachandran outliers<br>";
     $rama_info .= "but the improved model does!";
   }
-  elseif($rama_ideal === 0 & $rama_actual === 0) {
+  elseif($rama_red_targ === 0 & $rama_actual_red === 0) {
     $rama_overall = "0*";// {18}
     $rama_info = "The original and improved<br>";
     $rama_info .= "model have no<br>";
     $rama_info .= "ramachandran outliers!";
   } else {
-    $rama_overall = round($rama_actual/$rama_ideal, 4);// {19}
+    $rama_overall = round($rama_actual_red/$rama_red_targ, 4);// {19}
     if($rama_overall < 0) {
       $rama_info = "The improved model has<br>";
       $rama_info .= "more ramachandran outliers<br>";
@@ -1040,19 +1106,19 @@ function get_changes_overall($diff_array)
       $rama_info .= "decreased by $p%.";
     }
   }
-  if($rot_ideal === 0 & $rot_actual !== 0) {
+  if($rot_red_targ === 0 & $rot_actual_red !== 0) {
     $rot_overall = "-5*";// {26}
     $rot_info = "The original model had no<br>";
     $rot_info .= "rotamer outliers<br>";
     $rot_info .= "but the improved model does!";
   }
-  elseif($rot_ideal === 0 & $rot_actual === 0) {
+  elseif($rot_red_targ === 0 & $rot_actual_red === 0) {
     $rot_overall = "0*";// {27}
     $rot_info = "The original and improved<br>";
     $rot_info .= "model have no<br>";
     $rot_info .= "rotamer outliers!";
   } else {
-    $rot_overall = round($rot_actual/$rot_ideal, 4);// {28}
+    $rot_overall = round($rot_actual_red/$rot_red_targ, 4);// {28}
     if($rot_overall < 0) {
       $rot_info = "The improved model has<br>";
       $rot_info .= "more rotamer outliers<br>";
@@ -1063,19 +1129,19 @@ function get_changes_overall($diff_array)
       $rot_info .= "decreased by $p%.";
     }
   }
-  if($cb_ideal === 0 & $cb_actual !== 0) {
+  if($cb_red_targ === 0 & $cb_actual_red !== 0) {
     $cb_overall = "-5*";// {37}
     $cb_info = "The original model had<br>";
     $cb_info .= "no C&beta; deviation but<br>";
     $cb_info .= "the improved model does!";
   }
-  elseif($cb_ideal === 0 & $cb_actual === 0) {
+  elseif($cb_red_targ === 0 & $cb_actual_red === 0) {
     $cb_overall = "0*";// {38}
     $cb_info = "The original and improved<br>";
     $cb_info .= "model have no<br>";
     $cb_info .= "C&beta; deviations!";
   } else {
-    $cb_overall = round($cb_actual/$cb_ideal, 4);// {39}
+    $cb_overall = round($cb_actual_red/$cb_red_targ, 4);// {39}
     if($cb_overall < 0) {
       $cb_info = "The improved model has worse<br>";
       $cb_info .= "overall C&beta; deviations<br>";
@@ -1086,19 +1152,19 @@ function get_changes_overall($diff_array)
       $cb_info .= "severity decreased by $p%.";
     }
   }
-  if($bl_ideal === 0 & $bl_actual !== 0) {
+  if($bl_red_targ === 0 & $bl_actual_red !== 0) {
     $bl_overall = "-5*";// {48}
     $bl_info = "The original model had<br>";
     $bl_info .= "no bond length outliers<br>";
     $bl_info .= "but the improved model does!";
   }
-  elseif($bl_ideal === 0 & $bl_actual === 0) {
+  elseif($bl_red_targ === 0 & $bl_actual_red === 0) {
     $bl_overall = "0*";// {49}
     $bl_info = "The original and improved<br>";
     $bl_info .= "model have no bond<br>";
     $bl_info .= "length outliers!";
   } else {
-    $bl_overall = round($bl_actual/$bl_ideal, 4);// {50}
+    $bl_overall = round($bl_actual_red/$bl_red_targ, 4);// {50}
     if($bl_overall < 0) {
       $bl_info = "The improved model has<br>";
       $bl_info .= "more bond length outliers<br>";
@@ -1109,19 +1175,19 @@ function get_changes_overall($diff_array)
       $bl_info .= "outliers decreased by $p%.";
     }
   }
-  if($ba_ideal === 0 & $ba_actual !== 0) {
+  if($ba_red_targ === 0 & $ba_actual_red !== 0) {
     $ba_overall = "-5*";// {60}
     $ba_info = "The original model had<br>";
     $ba_info .= "no bond angle outliers<br>";
     $ba_info .= "but the improved model does!";
   }
-  elseif($ba_ideal === 0 & $ba_actual === 0) {
+  elseif($ba_red_targ === 0 & $ba_actual_red === 0) {
     $ba_overall = "0*";// {61}
     $ba_info = "The original and improved<br>";
     $ba_info .= "model have no bond<br>";
     $ba_info .= "angle outliers!";
   } else {
-    $ba_overall = round($ba_actual/$ba_ideal, 4);// {62}
+    $ba_overall = round($ba_actual_red/$ba_red_targ, 4);// {62}
     if($ba_overall < 0) {
       $ba_info = "The improved model has<br>";
       $ba_info .= "more bond angle outliers<br>";
@@ -1174,28 +1240,58 @@ function get_changes_overall($diff_array)
   $html .= "<div id=\"ba\" class=\'comment\"$style>";
   $html .= "<center><b>Bond Angle</b><br>$ba_info</center></div>";
   // $html = get_div_html($info="info", $num="calsh", $param="param", $res="res");
-  $html .= "<center>\n<table frame=void rules=all width = '65%'>\n";
-  $html .= "  <tr><th colspan='4'>Overall Difference Scores</th</tr>\n";
-  $html .= "  <tr><th>Parameter</th>\n      <th>Ideal Score</th>\n";
-  $html .= "      <th>Actual Score</th>\n      <th>Difference Score</th></tr>\n";
-  $html .= "  <tr><td>Clash &gt; 0.4&Aring;</td>\n      <td>$clash_ideal</td>\n";
-  $html .= "      <td>$clash_actual</td>\n";
-  $html .= "      <td$clash_td>$clash_overall</td></tr>\n";
-  $html .= "  <tr><td>Ramachandran</td>\n      <td>$rama_ideal</td>\n";
-  $html .= "      <td>$rama_actual</td>\n";
-  $html .= "      <td$rama_td>$rama_overall</td></tr>\n";
-  $html .= "  <tr><td>Rotamer</td>\n      <td>$rot_ideal</td>\n";
-  $html .= "      <td>$rot_actual</td>\n";
-  $html .= "      <td$rot_td>$rot_overall</td></tr>\n";
-  $html .= "  <tr><td>C&beta; deviation</td>\n      <td>$cb_ideal</td>\n";
-  $html .= "      <td>$cb_actual</td>\n";
-  $html .= "      <td$cb_td>$cb_overall</td></tr>\n";
-  $html .= "  <tr><td>Bond Length</td>\n      <td>$bl_ideal</td>\n";
-  $html .= "      <td>$bl_actual</td>\n";
-  $html .= "      <td$bl_td>$bl_overall</td></tr>\n";
-  $html .= "  <tr><td>Bond Angle</td>\n      <td>$ba_ideal</td>\n";
-  $html .= "      <td>$ba_actual</td>\n";
-  $html .= "      <td$ba_td>$ba_overall</td></tr>\n";
+  $html .= "<center>\n<table frame=void rules=all width = '90%'>\n";
+  $html .= "  <tr><th colspan='7'>Overall Summary</th</tr>\n";
+  $html .= "  <tr><th>Parameter</th>\n";
+  $html .= "      <th>Reduction<br>Target</th>\n";
+  $html .= "      <th>Actual<br>Reduction</th>\n";
+  $html .= "      <th>Reduction<br>Ratio</th>\n";
+  $html .= "      <th># of Original<br>Outliers</th>\n";
+  $html .= "      <th># of Outliers<br>Eliminated</th>\n";
+  $html .= "      <th># of Improved<br>Outliers</th></tr>\n";
+  $html .= "  <tr><td>Clash &gt; 0.4&Aring;</td>\n";
+  $html .= "      <td>$clash_red_targ</td>\n";
+  $html .= "      <td>$clash_actual_red</td>\n";
+  $html .= "      <td$clash_td>$clash_overall</td>\n";
+  $html .= "      <td>$clash_num_original</td>\n";
+  $d = $clash_num_original - $clash_num_improved;
+  $html .= "      <td>".$d."</td>\n";
+  $html .= "      <td>$clash_num_improved</td></tr>\n";
+  $html .= "  <tr><td>Ramachandran</td>\n      <td>$rama_red_targ</td>\n";
+  $html .= "      <td>$rama_actual_red</td>\n";
+  $html .= "      <td$rama_td>$rama_overall</td>\n";
+  $html .= "      <td>$rama_num_original</td>\n";
+  $d = $rama_num_original - $rama_num_improved;
+  $html .= "      <td>".$d."</td>\n";
+  $html .= "      <td>$rama_num_improved</td></tr>\n";
+  $html .= "  <tr><td>Rotamer</td>\n      <td>$rot_red_targ</td>\n";
+  $html .= "      <td>$rot_actual_red</td>\n";
+  $html .= "      <td$rot_td>$rot_overall</td>\n";
+  $html .= "      <td>$rot_num_original</td>\n";
+  $d = $rot_num_original - $rot_num_improved;
+  $html .= "      <td>".$d."</td>\n";
+  $html .= "      <td>$rot_num_improved</td></tr>\n";
+  $html .= "  <tr><td>C&beta; deviation</td>\n      <td>$cb_red_targ</td>\n";
+  $html .= "      <td>$cb_actual_red</td>\n";
+  $html .= "      <td$cb_td>$cb_overall</td>\n";
+  $html .= "      <td>$cb_num_original</td>\n";
+  $d = $cb_num_original - $cb_num_improved;
+  $html .= "      <td>".$d."</td>\n";
+  $html .= "      <td>$cb_num_improved</td></tr>\n";
+  $html .= "  <tr><td>Bond Length</td>\n      <td>$bl_red_targ</td>\n";
+  $html .= "      <td>$bl_actual_red</td>\n";
+  $html .= "      <td$bl_td>$bl_overall</td>\n";
+  $html .= "      <td>$bl_num_original</td>\n";
+  $d = $bl_num_original - $bl_num_improved;
+  $html .= "      <td>".$d."</td>\n";
+  $html .= "      <td>$bl_num_improved</td></tr>\n";
+  $html .= "  <tr><td>Bond Angle</td>\n      <td>$ba_red_targ</td>\n";
+  $html .= "      <td>$ba_actual_red</td>\n";
+  $html .= "      <td$ba_td>$ba_overall</td>\n";
+  $html .= "      <td>$ba_num_original</td>\n";
+  $d = $ba_num_original - $ba_num_improved;
+  $html .= "      <td>".$d."</td>\n";
+  $html .= "      <td>$ba_num_improved</td></tr>\n";
   $html .= "</table>\n<center>\n</body>\n</html>";
   return $html;
 }

@@ -109,7 +109,7 @@ $frame = get_mpc_changes_chart($mpc_html = $diff_html,
   $improved_model = $_REQUEST["model$improved_num"],
   $original_model = $_REQUEST["model$original_num"]);
 // echo "<pre>";
-// print_r($overall_html);
+// print_r($diff_table);
 // echo "</pre>";
 // this page is the frame containing the horizontal multi_chart;
 // if 'table=x' is in the URL then the chart is displayed, if 'key=x' is in the

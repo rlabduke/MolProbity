@@ -105,7 +105,6 @@ $frame = get_mpc_sbs_chart(
   $mpc_t = $mpc_table, 
   $model1_name = $modelID1,
   $model2_name = $modelID2);
-//echo "hi<br>$file<br>$file1<br>";
 // echo "<pre>";
 // print_r($mpc_table);
 // echo "</pre>";

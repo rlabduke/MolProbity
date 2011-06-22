@@ -207,6 +207,9 @@ function onChooseModel()
         $out2 = fopen($rawDir."/$mpc_table_name-table.mpcscores", 'wb');
         fwrite($out2, mpSerialize($mph_diff));
         fclose($out2);
+        // echo "<pre>";
+        // echo print_r($mph_side_by_side);
+        // echo "</pre>";
         $_SESSION['mpc']['model_1'] = $modelID1;
         $_SESSION['mpc']['model_2'] = $modelID2;
         $_SESSION['mpc']['mpc_table_name'] = $mpc_table_name;
