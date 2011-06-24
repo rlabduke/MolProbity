@@ -72,13 +72,8 @@ as part of the refinement cycle.</p>
 Create and view interactive 3-D graphics
 from your web browser.</p>
 
-<h3>What's new in 3.18:</h3><ul>
-<li>New references added.</li>
-<li>Update to allow download of jiffiloop to standalone installs.</li>
-<li>Improved handling of modified nucleic acid bases.</li>
-<li>Workaround for remediator bug due to " HA2 GLY" being both old and new format.</li>
-<li>Updated versions of various components.</li>
-<li>Bug fixes/improvements in cmdline tools</li>
+<h3>What's new in 3.19:</h3><ul>
+<li>JiffiLoop moved to main page, more options enabled.</li>
 </ul>
 </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>
 
@@ -216,6 +211,7 @@ function displayModelTools($context)
         'downgrade' => array('desc' => 'Downgrade file to PDBv2.3 format (for download only)', 'page' => 'pdb_convert_setup.php', 'rel' => 1, 'img' => 'downgrade.gif'),
         //'viewpdb' => array('desc' => 'View PDB in KiNG (beta)', 'page' => "viewpdbking.php?$_SESSION[sessTag]&url=".MP_DIR_KINS, 'rel' => 1, 'img' => 'pdb_icon.png'),
         //'' => array('desc' => '', 'page' => '', 'rel' => 1, 'img' => ''),
+        'jiffiloop' => array('desc' => 'Fill gaps in protein backbone with JiffiLoop (beta test)', 'page' => 'fragmentfill_setup.php', 'rel' => 1, 'img' => 'jiffiloop.png'),
     );
     
     // Reduce
