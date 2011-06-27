@@ -49,7 +49,9 @@ function display($context)
       $models;
       foreach($_SESSION['models'] as $id => $model) {
         $dot_pos = strpos($model['pdb'], '.')-strlen($model['pdb']);
-        $pdb = substr($model['pdb'], 0, $dot_pos);
+        if(endsWith($model['pdb'], ".pdb"))
+          $pdb = substr($model['pdb'], 0, $dot_pos);
+        else $pdb = $model['pdb'];
         if(array_search($pdb, $aacgeom_models) !== false) $models[] = $model;
       }
       if($_SESSION['mpc_setup'] == 'choose_chain') {
@@ -74,7 +76,8 @@ function display($context)
         echo "<h3>Select TWO models or one model with at least TWO chains to compare:</h3>";
         $form = get_checkbox_form($run = "onChooseModel",
           $array = $models,
-          $button_text = "Continue &gt;");
+          $button_text = "Continue &gt;",
+          $is_model = true);
         echo $form;
       }
       // Rather than trying to put this in onload(), we'll do it after the form is defined.
@@ -124,7 +127,7 @@ function check_multitable_inputs($raw_dir)
       }
     }
     $tables_count = count($tables_array);
-    // MolProbity Compare needs at least 2 'multi.table(S) 
+    // MolProbity Compare needs at least 1 'multi.table(S)'
     if($tables_count = 0) { 
       $ret = "Could not find any all-atom contact and geometric analysis tables.<br>\n";
       return $ret.$return_home;
@@ -150,7 +153,9 @@ function onChooseModel()
   // get selected models
   $comparison_models;
   foreach($req as $key => $pdb) {
-    $name = substr($pdb, 0, strpos($pdb, ".pdb")-strlen($pdb));
+    if(endsWith($pdb, ".pdb"))
+      $name = substr($pdb, 0, strpos($pdb, ".pdb")-strlen($pdb));
+    else $name = $pdb;
     if(strpos($key, "model_4_comp_") !== false) $comparison_models[$name] = $name;
   }
   $_SESSION['comparison_models'] = $comparison_models;

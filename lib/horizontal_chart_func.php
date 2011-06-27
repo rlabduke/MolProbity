@@ -1618,7 +1618,7 @@ function get_mpc_changes_chart($mpc_html, $improved_model, $original_model)
 // }}}
 
 // {{{ get_checkbox_form
-function get_checkbox_form($run, $array, $button_text)
+function get_checkbox_form($run, $array, $button_text, $is_model=false)
 /**************************************************************
 *
 *  Returns html for a form with a list of checkboxes, the options are elements
@@ -1631,12 +1631,19 @@ function get_checkbox_form($run, $array, $button_text)
   $c = MP_TABLE_ALT1;
   foreach($array as $id => $model)
   {
+    if($is_model === true) {
+      $history = $model['history'];
+      $pdb = $model['id'];
+    } else {
+      $history = $model;
+      $pdb = $model;
+    }
     // Alternate row colors:
     $c == MP_TABLE_ALT1 ? $c = MP_TABLE_ALT2 : $c = MP_TABLE_ALT1;
     $s .= " <tr bgcolor='$c'>\n";
-    $s .= "  <td><input type='checkbox' name='model_4_comp_$id' value='$model[pdb]'\n";
-    $s .= "  <td><b>$model[pdb]</b></td>\n";
-    $s .= "  <td><small>$model[history]</small></td>\n";
+    $s .= "  <td><input type='checkbox' name='model_4_comp_$id' value='$pdb'\n";
+    $s .= "  <td><b>$pdb</b></td>\n";
+    $s .= "  <td><small>$history</small></td>\n";
     $s .= " </tr>\n";
   }
   $s .= "</table></p>\n";
