@@ -995,7 +995,7 @@ function calculate_mpc_differences($table_mpcscores, $improved_model,
 // }}}
 
 // {{{ get_changes_overall
-function get_changes_overall($diff_array)
+function get_changes_overall($diff_array, $return_array=null)
 /******************************************************************
 *
 *  returns HTML for the MolProbity Compare overall scores table
@@ -1264,6 +1264,7 @@ function get_changes_overall($diff_array)
   $cb_td = $cb_bg.get_omo_html("cb");
   $bl_td = $bl_bg.get_omo_html("bl");
   $ba_td = $ba_bg.get_omo_html("ba");
+  $overall_array = array();
   $style = " style=\"width:200; position:absolute; display:none;";
   $style .= " background-color: #cccc99; border-style:solid;";
   $style .= " border-width:1px; padding: 5px;\"";
@@ -1289,7 +1290,7 @@ function get_changes_overall($diff_array)
   $html .= "      <th>Reduction<br>Ratio</th>\n";
   $html .= "      <th># of Original<br>Outliers</th>\n";
   $html .= "      <th># of Outliers<br>Eliminated</th>\n";
-  $html .= "      <th># of Improved<br>Outliers</th></tr>\n";
+  $html .= "      <th># of Outliers<br>Remaining</th></tr>\n";
   $html .= "  <tr><td>Clash &gt; 0.4&Aring;</td>\n";
   $html .= "      <td>$clash_red_targ</td>\n";
   $html .= "      <td>$clash_actual_red</td>\n";
@@ -1298,6 +1299,12 @@ function get_changes_overall($diff_array)
   $d = $clash_num_original - $clash_num_improved;
   $html .= "      <td>".$d."</td>\n";
   $html .= "      <td>$clash_num_improved</td></tr>\n";
+  $overall_array['clash']['reduction_target'] = $clash_red_targ;
+  $overall_array['clash']['actual_reduction'] = $clash_actual_red;
+  $overall_array['clash']['reduction_ratio'] = $clash_overall;
+  $overall_array['clash']['num_original'] = $clash_num_original;
+  $overall_array['clash']['outliers_eliminated'] = $d;
+  $overall_array['clash']['num_improved'] = $clash_num_improved;
   $html .= "  <tr><td>Ramachandran</td>\n      <td>$rama_red_targ</td>\n";
   $html .= "      <td>$rama_actual_red</td>\n";
   $html .= "      <td$rama_td>$rama_overall</td>\n";
@@ -1305,6 +1312,12 @@ function get_changes_overall($diff_array)
   $d = $rama_num_original - $rama_num_improved;
   $html .= "      <td>".$d."</td>\n";
   $html .= "      <td>$rama_num_improved</td></tr>\n";
+  $overall_array['rama']['reduction_target'] = $rama_red_targ;
+  $overall_array['rama']['actual_reduction'] = $rama_actual_red;
+  $overall_array['rama']['reduction_ratio'] = $rama_overall;
+  $overall_array['rama']['num_original'] = $rama_num_original;
+  $overall_array['rama']['outliers_eliminated'] = $d;
+  $overall_array['rama']['num_improved'] = $rama_num_improved;
   $html .= "  <tr><td>Rotamer</td>\n      <td>$rot_red_targ</td>\n";
   $html .= "      <td>$rot_actual_red</td>\n";
   $html .= "      <td$rot_td>$rot_overall</td>\n";
@@ -1312,6 +1325,12 @@ function get_changes_overall($diff_array)
   $d = $rot_num_original - $rot_num_improved;
   $html .= "      <td>".$d."</td>\n";
   $html .= "      <td>$rot_num_improved</td></tr>\n";
+  $overall_array['rot']['reduction_target'] = $rot_red_targ;
+  $overall_array['rot']['actual_reduction'] = $rot_actual_red;
+  $overall_array['rot']['reduction_ratio'] = $rot_overall;
+  $overall_array['rot']['num_original'] = $rot_num_original;
+  $overall_array['rot']['outliers_eliminated'] = $d;
+  $overall_array['rot']['num_improved'] = $rot_num_improved;
   $html .= "  <tr><td>C&beta; deviation</td>\n      <td>$cb_red_targ</td>\n";
   $html .= "      <td>$cb_actual_red</td>\n";
   $html .= "      <td$cb_td>$cb_overall</td>\n";
@@ -1319,6 +1338,12 @@ function get_changes_overall($diff_array)
   $d = $cb_num_original - $cb_num_improved;
   $html .= "      <td>".$d."</td>\n";
   $html .= "      <td>$cb_num_improved</td></tr>\n";
+  $overall_array['cb']['reduction_target'] = $cb_red_targ;
+  $overall_array['cb']['actual_reduction'] = $cb_actual_red;
+  $overall_array['cb']['reduction_ratio'] = $cb_overall;
+  $overall_array['cb']['num_original'] = $cb_num_original;
+  $overall_array['cb']['outliers_eliminated'] = $d;
+  $overall_array['cb']['num_improved'] = $cb_num_improved;
   $html .= "  <tr><td>Bond Length</td>\n      <td>$bl_red_targ</td>\n";
   $html .= "      <td>$bl_actual_red</td>\n";
   $html .= "      <td$bl_td>$bl_overall</td>\n";
@@ -1326,6 +1351,12 @@ function get_changes_overall($diff_array)
   $d = $bl_num_original - $bl_num_improved;
   $html .= "      <td>".$d."</td>\n";
   $html .= "      <td>$bl_num_improved</td></tr>\n";
+  $overall_array['bl']['reduction_target'] = $bl_red_targ;
+  $overall_array['bl']['actual_reduction'] = $bl_actual_red;
+  $overall_array['bl']['reduction_ratio'] = $bl_overall;
+  $overall_array['bl']['num_original'] = $bl_num_original;
+  $overall_array['bl']['outliers_eliminated'] = $d;
+  $overall_array['bl']['num_improved'] = $bl_num_improved;
   $html .= "  <tr><td>Bond Angle</td>\n      <td>$ba_red_targ</td>\n";
   $html .= "      <td>$ba_actual_red</td>\n";
   $html .= "      <td$ba_td>$ba_overall</td>\n";
@@ -1333,8 +1364,15 @@ function get_changes_overall($diff_array)
   $d = $ba_num_original - $ba_num_improved;
   $html .= "      <td>".$d."</td>\n";
   $html .= "      <td>$ba_num_improved</td></tr>\n";
+  $overall_array['ba']['reduction_target'] = $ba_red_targ;
+  $overall_array['ba']['actual_reduction'] = $ba_actual_red;
+  $overall_array['ba']['reduction_ratio'] = $ba_overall;
+  $overall_array['ba']['num_original'] = $ba_num_original;
+  $overall_array['ba']['outliers_eliminated'] = $d;
+  $overall_array['ba']['num_improved'] = $ba_num_improved;
   $html .= "</table>\n<center>\n</body>\n</html>";
-  return $html;
+  if($return_array) return $overall_array;
+  else return $html;
 }
 
 function get_omo_html($id)

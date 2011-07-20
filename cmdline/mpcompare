@@ -70,12 +70,53 @@ $mph_array = get_molprobity_compare_table(
   $modelID2 = $modelID2);
 $mph_side_by_side = $mph_array[0];
 $mph_diff = $mph_array[1];
-$diff_table = calculate_mpc_differences($table_mpcscores = $$mph_diff,
+$diff_table = calculate_mpc_differences($table_mpcscores = $mph_diff,
   $improved_model = $modelID1,
   $original_model = $modelID2);
-echo print_r($diff_table);
-echo "\n";
+$overall_array = get_changes_overall($diff_array = $diff_table,
+  $return_array = true);
+// echo print_r($overall_array);
+echo "                   Reduction      Actual         Reduction      # of Original  Outliers       Remaining\n";
+echo "                   Target         Reduction      Ratio          Outliers       Eliminated     Outliers\n";
 
+$clash = "Clash              ";
+$ramachandran = "Ramachandran       ";
+$rotamer = "Rotamer            ";
+$cbeta = "cB deviations      ";
+$bondl = "Bond Lengths       ";
+$bonda = "Bond Angle         ";
+foreach($overall_array['clash'] as $key => $value) {
+  $c = $overall_array['clash'][$key];
+  $clash .= $c.get_multiple_string(15 - strlen($c), " ");
+  $c = $overall_array['rama'][$key];
+  $ramachandran .=  $c.get_multiple_string(15 - strlen($c), " ");
+  $c = $overall_array['rot'][$key];
+  $rotamer .=  $c.get_multiple_string(15 - strlen($c), " ");
+  $c = $overall_array['cb'][$key];
+  $cbeta .=  $c.get_multiple_string(15 - strlen($c), " ");
+  $c = $overall_array['bl'][$key];
+  $bondl .=  $c.get_multiple_string(15 - strlen($c), " ");
+  $c = $overall_array['ba'][$key];
+  $bonda .=  $c.get_multiple_string(15 - strlen($c), " ");
+}
+
+echo $clash."\n";
+echo $ramachandran."\n";
+echo $rotamer."\n";
+echo $cbeta."\n";
+echo $bondl."\n";
+echo $bonda."\n";
+
+// {{{ get_multiple_string
+function get_multiple_string($num, $string)
+{
+  $s = "";
+  for($i=0;$i<$num;$i++)
+    $s .= $string;
+  return $s;
+}
+// }}}
+  
 // {{{ get_res_ana_array
 function get_res_ana_array($mp)
 {
