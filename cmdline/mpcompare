@@ -24,7 +24,8 @@
 
 // First argument is the name of this script...
 if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg) {
-  $pdb_file_list[] = $arg;
+  if(endsWith($arg,  ".pdb"))   $pdb_file_list[] = $arg;
+  elseif($arg == '-table')      $return_table = true;
 }
 
 // ensure that the user provided two args
@@ -35,7 +36,7 @@ if(count($pdb_file_list) != 2)
 $confirmed_pdb_files = array();
 foreach($pdb_file_list as $infile) {
   if(is_file($infile)) $confirmed_pdb_files[] = $infile;
-  else die("'$infile' is not a file. Please provide only PDB files.");
+  else die("'$infile' is not a file. Please provide only PDB files.\n");
 }
 
 if(count($confirmed_pdb_files) == 2) {
@@ -44,68 +45,83 @@ if(count($confirmed_pdb_files) == 2) {
 }
 // run residue analysis
 $res_ana = array();
-$cmd = "/Users/bradleyhintze/Sites/MPcompare/cmdline/residue-analysis $pdb1";
+$cmd = MP_BASE_DIR."/cmdline/residue-analysis $pdb1";
 $out1 = shell_exec($cmd);
 $res_ana[] = $out1;
-$cmd = "/Users/bradleyhintze/Sites/MPcompare/cmdline/residue-analysis $pdb2";
+$cmd = MP_BASE_DIR."/cmdline/residue-analysis $pdb2";
 $out2 = shell_exec($cmd);
 $res_ana[] = $out2;
 $modelID1 = substr($pdb1, 0, strpos($pdb1, ".pdb"));
 $modelID2 = substr($pdb2, 0, strpos($pdb2, ".pdb"));
 
-echo "\n\n\n\n\n\n**************\n\n\n\n\n";
 $mp1 = explode("\n", $res_ana[0]);
 $mp2 = explode("\n", $res_ana[1]);
 $mpt1 = get_res_ana_array($mp1);
 $mph1 = get_mp_hierarchy($mpt1);
 $mpt2 = get_res_ana_array($mp2);
 $mph2 = get_mp_hierarchy($mpt2);
-// this will get the sequence of ALL chains in one sequencr as we didn't
+// this will get the sequence of ALL chains in one sequence as we didn't
 // provide a chain
 $fasta = get_chain_sequences($mh1 = $mph1,  $modelID1 = $modelID1,
   $mp2 = $mph2, $modelID2 = $modelID2);
+// get ksdssp residues
+$ksdssp_1 = get_ksdssp($pdb1);
+$ksdssp_2 = get_ksdssp($pdb2);
 $mph_array = get_molprobity_compare_table(
   $fasta = $fasta,
   $mph1 = $mph1, $modelID1 = $modelID1, $mph2 = $mph2,
-  $modelID2 = $modelID2);
+  $modelID2 = $modelID2, $chain1 = false, $chain2 = false, 
+  $ksdssp1 = $ksdssp_1, $ksdssp2 = $ksdssp_2);
 $mph_side_by_side = $mph_array[0];
 $mph_diff = $mph_array[1];
 $diff_table = calculate_mpc_differences($table_mpcscores = $mph_diff,
   $improved_model = $modelID1,
   $original_model = $modelID2);
-$overall_array = get_changes_overall($diff_array = $diff_table,
-  $return_array = true);
-// echo print_r($overall_array);
-echo "                   Reduction      Actual         Reduction      # of Original  Outliers       Remaining\n";
-echo "                   Target         Reduction      Ratio          Outliers       Eliminated     Outliers\n";
+// start writing mpc table (when '-table' flag is present)
 
-$clash = "Clash              ";
-$ramachandran = "Ramachandran       ";
-$rotamer = "Rotamer            ";
-$cbeta = "cB deviations      ";
-$bondl = "Bond Lengths       ";
-$bonda = "Bond Angle         ";
-foreach($overall_array['clash'] as $key => $value) {
-  $c = $overall_array['clash'][$key];
-  $clash .= $c.get_multiple_string(15 - strlen($c), " ");
-  $c = $overall_array['rama'][$key];
-  $ramachandran .=  $c.get_multiple_string(15 - strlen($c), " ");
-  $c = $overall_array['rot'][$key];
-  $rotamer .=  $c.get_multiple_string(15 - strlen($c), " ");
-  $c = $overall_array['cb'][$key];
-  $cbeta .=  $c.get_multiple_string(15 - strlen($c), " ");
-  $c = $overall_array['bl'][$key];
-  $bondl .=  $c.get_multiple_string(15 - strlen($c), " ");
-  $c = $overall_array['ba'][$key];
-  $bonda .=  $c.get_multiple_string(15 - strlen($c), " ");
+if($return_table) {
+  $mpc_table_raw = get_mpc_sbs_chart($mpc_t = $mph_side_by_side,
+    $model1_name = $modelID1, $model2_name = $modelID2, $return_mpc_array=true);
+  $mpc_table = get_database_table($mpc_t = $mpc_table_raw);
+  // print a CSV string
+  echo implode(",", array_keys($mpc_table[0]))."\n";// print column headers
+  foreach($mpc_table as $res)
+    echo implode(",", $res)."\n";
+  // echo print_r($mpc_table);
 }
-
-echo $clash."\n";
-echo $ramachandran."\n";
-echo $rotamer."\n";
-echo $cbeta."\n";
-echo $bondl."\n";
-echo $bonda."\n";
+// start writing overall output variables (default output)
+else{
+  $overall_array = get_changes_overall($diff_array = $diff_table,
+    $return_array = true);
+  $clash =        "Clash              ";
+  $ramachandran = "Ramachandran       ";
+  $rotamer =      "Rotamer            ";
+  $cbeta =        "cB deviations      ";
+  $bondl =        "Bond Lengths       ";
+  $bonda =        "Bond Angle         ";
+  foreach($overall_array['clash'] as $key => $value) {
+    $c = $overall_array['clash'][$key];
+    $clash .= $c.get_multiple_string(15 - strlen($c), " ");
+    $c = $overall_array['rama'][$key];
+    $ramachandran .=  $c.get_multiple_string(15 - strlen($c), " ");
+    $c = $overall_array['rot'][$key];
+    $rotamer .=  $c.get_multiple_string(15 - strlen($c), " ");
+    $c = $overall_array['cb'][$key];
+    $cbeta .=  $c.get_multiple_string(15 - strlen($c), " ");
+    $c = $overall_array['bl'][$key];
+    $bondl .=  $c.get_multiple_string(15 - strlen($c), " ");
+    $c = $overall_array['ba'][$key];
+    $bonda .=  $c.get_multiple_string(15 - strlen($c), " ");
+  }
+  echo "                   Reduction      Actual         Reduction      # of Original  Outliers       Remaining\n";
+  echo "                   Target         Reduction      Ratio          Outliers       Eliminated     Outliers\n";
+  echo $clash."\n";
+  echo $ramachandran."\n";
+  echo $rotamer."\n";
+  echo $cbeta."\n";
+  echo $bondl."\n";
+  echo $bonda."\n";
+}
 
 // {{{ get_multiple_string
 function get_multiple_string($num, $string)

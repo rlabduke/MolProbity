@@ -4,8 +4,12 @@
     created by the novice PHP programmer King Bradley
 *****************************************************************************/
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
-require_once(MP_BASE_DIR.'/lib/horizontal_chart_func.php');
-require_once(MP_BASE_DIR.'/lib/labbook.php');
+// 1. Define it's relationship to the root of the MolProbity installation.
+// Pages in subdirectories of lib/ or public_html/ will need more "/.." 's.
+  if(!defined('MP_BASE_DIR')) define('MP_BASE_DIR', realpath(dirname(__FILE__).'/..'));
+// 2. Include core functionality - defines constants, etc.
+  require_once(MP_BASE_DIR.'/lib/horizontal_chart_func.php');
+  require_once(MP_BASE_DIR.'/lib/labbook.php');
 class compare_aacgeom_setup_delegate extends BasicDelegate {
     
 #{{{ display - creates the UI for this page
@@ -24,7 +28,7 @@ function display($context)
     $lastUsedID = $context['modelID'];
     if(!$lastUsedID) $lastUsedID = $_SESSION['lastUsedModelID'];
     
-    $raw_dir = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA;
+    $raw_dir = $_SESSION['dataDir'].'/raw_data';
     // if raw_dir doesn't exists then aacgeom has not been run or perhaps charts
     // were not made. MolProbity Compare needs the charts (xxxx-multi.table)
     // check_multitable_inputs will ensure that there are at least two 
@@ -196,12 +200,18 @@ function onChooseModel()
       // provide a chain
       $fasta = get_chain_sequences($mh1 = $mph1,  $modelID1 = $modelID1,
         $mp2 = $mph2, $modelID2 = $modelID2);
+      // get ksdssp info
+      $pdb1 = $_SESSION['dataDir'].'/coordinates/'.$modelID1.'.pdb';
+      $pdb2 = $_SESSION['dataDir'].'/coordinates/'.$modelID2.'.pdb';
+      $ksdssp_1 = get_ksdssp($pdb1);
+      $ksdssp_2 = get_ksdssp($pdb2);
       // get MolProbity Compare hierarchy
       list($mph_side_by_side, $mph_diff) = get_molprobity_compare_table(
         $fasta = $fasta,
         $mph1 = $mph1, $modelID1 = $modelID1, $mph2 = $mph2,
-        $modelID2 = $modelID2);
-      $rawDir = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA;
+        $modelID2 = $modelID2, $chain1 = false, $chain2 = false, 
+        $ksdssp1 = $ksdssp_1, $ksdssp2 = $ksdssp_2);
+      $rawDir = $_SESSION['dataDir'].'/raw_data/';
       if(!file_exists($rawDir)) return "ERROR!!!";
       else
       {
@@ -268,7 +278,7 @@ function onChooseChains()
         $fasta = $fasta,
         $mph1 = $mph1, $modelID1 = $modelID1, $mph2 = $mph2,
         $modelID2 = $modelID2, $chain1 = $chain1, $chain2 = $chain2);
-      $rawDir = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA;
+      $rawDir = $_SESSION['dataDir'].'/raw_data';
       if(!file_exists($rawDir)) echo "ERROR!!!";
       else
       {

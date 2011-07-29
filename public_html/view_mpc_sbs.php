@@ -40,13 +40,19 @@ echo mpPageHeader("Viewing MPC side-by-side");
 <?php
 $modelID_1 = $_REQUEST['model1'];
 $modelID_2 = $_REQUEST['model2'];
-echo "<center>$modelID_1 Outlier: <img src='img/mpc_out1.png' width=15px><br>";
-echo "$modelID_2 Outlier: <img src='img/mpc_out2.png' width=15px></center>";
-$rawDir = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA;
+echo "<center>\n<table rules='all' cellpadding='5'>\n";
+echo "  <tr><th>Model 1:</th>\n      <td>$modelID_1</td></tr>";
+echo "  <tr><th>Model 2:</th>\n      <td>$modelID_2</td></tr>\n</table>\n";
+echo "<hr width='40%'>\n";
+echo "Model 1 Outlier: <img src='img/mpc_out1.png' width=15px><br>";
+echo "Model 2 Outlier: <img src='img/mpc_out2.png' width=15px></center>";
+$rawDir = $_SESSION['dataDir'].'/raw_data/';
 if(!file_exists($rawDir)) return "ERROR: cannot find raw data directory.";
 $file = realpath($_REQUEST['file']);
-$url = "mpc_frame_sbs.php?$_SESSION[sessTag]&file=$file&model1=$modelID_1&model2=$modelID_2";
+$url = "mpc_frame_sbs.php?$_SESSION[sessTag]&file=$file";
+$url .= "&model1=$modelID_1&model2=$modelID_2";
 echo get_mpc_frame_sbs($url);
-echo "<center><a href='$url&table=t' target='_blank'>Open chart in new window(tab)</a></center>";
+echo "<center><a href='$url&table=t' target='_blank'>";
+echo "Open chart in new window(tab)</a></center>";
 echo mpPageFooter();
 ?>

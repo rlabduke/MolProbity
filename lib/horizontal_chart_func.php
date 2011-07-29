@@ -397,14 +397,15 @@ function get_chain_sequences($mh1, $modelID1, $mh2=false, $modelID2=false,
 *    $modelID2: the model ID for model 2.
 **/
 function get_molprobity_compare_table($fasta, $mph1, $modelID1, $mph2,
-  $modelID2, $chain1 = false, $chain2 = false) 
+  $modelID2, $chain1 = false, $chain2 = false, 
+  $ksdssp1 = false, $ksdssp2 = false) 
 {
   if($mph2 !== false && $modelID2 !== false)
     $model_2_name = $modelID1."_".$modelID2;
   else 
     $model_2_name = $modelID1;
   // save the sequences of the two chains in fasta format
-  if(!isset($_SESSION)) {
+  if(!isset($_SESSION)) { //for the cmdline version
     $rawDir = getcwd();
     $cleanup = true; 
   } else {
@@ -423,9 +424,9 @@ function get_molprobity_compare_table($fasta, $mph1, $modelID1, $mph2,
     // linearize aln file
     list($aln_seq1, $aln_seq2, $aln_code) = linearize_alignment($aln_lines,
       $modelID1, $modelID2);
-    $mph1_aln = apply_allign_2_mph($mph1, $aln_seq1);
-    $mph2_aln = apply_allign_2_mph($mph2, $aln_seq2);
-    if(count($mph1_aln) != count($mph2_aln))
+    $mph1_aln = apply_align_2_mph($mph1, $aln_seq1);
+    $mph2_aln = apply_align_2_mph($mph2, $aln_seq2);
+    if(count($mph1_aln) != count($mph2_aln))//after alignment these should be the same length
       return "ERROR: The two MPH are not the same length.";
     $mph_sbs;
     $mph_diff = array('modelID1' => $modelID1, 'modelID2' => $modelID2);
@@ -462,7 +463,28 @@ function get_molprobity_compare_table($fasta, $mph1, $modelID1, $mph2,
         $mph_diff[$key][$param] = $param_scores;
       }
     }
-    //return array($mph1_aln, $mph2_aln);
+    //add ksdssp to $mph_sbs
+    if($ksdssp1 !== false) {
+      foreach($mph_sbs as $key => $res_info) {
+        $ksdssp_assign1 = '-';
+        foreach($ksdssp1 as $ksdssp_res) {
+          $chain_num = $ksdssp_res['chain_num'];
+          if(startsWith($res_info['#']['html1'], $chain_num))
+            $ksdssp_assign1 = $ksdssp_res['ss'];
+        }
+        $ksdssp_assign2 = '-';
+        foreach($ksdssp2 as $ksdssp_res) {
+          $chain_num = $ksdssp_res['chain_num'];
+          if(startsWith($res_info['#']['html2'], $chain_num))
+            $ksdssp_assign2 = $ksdssp_res['ss'];
+        }
+        $mph_sbs[$key]['ksdssp'] = array(
+                'html1' => $ksdssp_assign1,
+                'color1' => '',
+                'html2' => $ksdssp_assign2,
+                'color2' => '');
+      }
+    }
     return array($mph_sbs, $mph_diff);
   }
 }
@@ -548,8 +570,8 @@ function split_mph_by_chain($mparam_hierarchy, $chain)
 }
 // }}}
 
-// {{{ apply_allign_2_mph
-function apply_allign_2_mph($mph, $aln_seq)
+// {{{ apply_align_2_mph
+function apply_align_2_mph($mph, $aln_seq)
 {
   $aa_3_1 = array('ALA' => 'A', 'CYS' => 'C', 'ASP' => 'D', 'GLU' => 'E', 'PHE' => 'F', 'GLY'  => 'G', 'HIS' => 'H', 'ILE' => 'I', 'LYS' => 'K', 'LEU' => 'L', 'MET' => 'M', 'ASN' => 'N', 'PRO' => 'P', 'GLN' => 'Q' , 'ARG' => 'R', 'SER' => 'S', 'THR' => 'T', 'VAL' => 'V', 'TRP' => 'W', 'TYR' => 'Y');
   // put dashes in mph as dictated by the aligned sequences
@@ -567,7 +589,8 @@ function apply_allign_2_mph($mph, $aln_seq)
 // }}}
 
 // {{{ get_mpc_sbs_chart; side-by-side chart
-function get_mpc_sbs_chart($mpc_t, $model1_name, $model2_name)
+function get_mpc_sbs_chart($mpc_t, $model1_name, $model2_name,
+  $return_mpc_array=false)
 /*********************************************************
 *  
 *  MPC = MolProbity Compare
@@ -605,127 +628,226 @@ function get_mpc_sbs_chart($mpc_t, $model1_name, $model2_name)
     else $res_2 = $aa_3_1[$res['res']['html2']];
     $mpc_data[$key]['res'][1] = $res_1;
     $mpc_data[$key]['res'][2] = $res_2;
-    $mpc_data[$key]['high b'][1] = $aa_3_1[$res['high b']['html1']];
-    $mpc_data[$key]['high b'][2] = $aa_3_1[$res['high b']['html2']];
+    $mpc_data[$key]['high b'][1] = $res['high b']['html1'];
+    $mpc_data[$key]['high b'][2] = $res['high b']['html2'];
     
-    if($res['clash &gt; 0.4&aring;']['color1']) 
+    if($res['clash &gt; 0.4&aring;']['color1']) {
       $html = get_img_html('img/mpc_out1.png', $chain_num1.":clash1");
-    else 
+      $bool = true;
+    }else {
       $html = get_img_html('img/mpc_noout.png', $chain_num1.":clash1");
-    $html .= get_div_html($info = $res['clash &gt; 0.4&aring;']['html1'], 
-      $num = $chain_num1.":clash1",
-      $param = "Clash");
-    $mpc_data[$key]['clash &gt; 0.4&aring;'][1] = $html;
-    if($res['clash &gt; 0.4&aring;']['color2']) 
+      $bool = false;
+    }
+    if($return_mpc_array) $c = $bool;
+    else {
+      $html .= get_div_html($info = $res['clash &gt; 0.4&aring;']['html1'], 
+        $num = $chain_num1.":clash1",
+        $param = "Clash");
+      $c = $html;
+    }
+    $mpc_data[$key]['clash &gt; 0.4&aring;'][1] = $c;
+    if($res['clash &gt; 0.4&aring;']['color2']) {
       $html = get_img_html('img/mpc_out2.png', $chain_num1.":clash2");
-    else 
+      $bool = true;
+    }else {
       $html = get_img_html('img/mpc_noout.png', $chain_num1.":clash2");
-    $html .= get_div_html($info = $res['clash &gt; 0.4&aring;']['html2'], 
-      $num = $chain_num1.":clash2",
-      $param = "Clash");
-    $mpc_data[$key]['clash &gt; 0.4&aring;'][2] = $html;
+      $bool = false;
+    }
+    if($return_mpc_array) $c = $bool;
+    else {
+      $html .= get_div_html($info = $res['clash &gt; 0.4&aring;']['html2'], 
+        $num = $chain_num1.":clash2",
+        $param = "Clash");
+      $c = $html;
+    }
+    $mpc_data[$key]['clash &gt; 0.4&aring;'][2] = $c;
     
-    if($res['ramachandran']['color1']) 
+    if($res['ramachandran']['color1']) {
       $html = get_img_html('img/mpc_out1.png', $chain_num1.":rama1");
-    else 
+      $bool = true;
+    }else {
       $html = get_img_html('img/mpc_noout.png', $chain_num1.":rama1");
-    $html .= get_div_html($info = $res['ramachandran']['html1'], 
-      $num = $chain_num1.":rama1",
-      $param = "Ramachandran");
-    $mpc_data[$key]['ramachandran'][1] = $html;
-    if($res['ramachandran']['color2']) 
+      $bool = false;
+    }
+    if($return_mpc_array) $c = $bool;
+    else {
+      $html .= get_div_html($info = $res['ramachandran']['html1'], 
+        $num = $chain_num1.":rama1",
+        $param = "Ramachandran"); 
+      $c = $html;
+    }
+    $mpc_data[$key]['ramachandran'][1] = $c;
+    if($res['ramachandran']['color2']) {
       $html = get_img_html('img/mpc_out2.png', $chain_num1.":rama2");
-    else 
+      $bool = true;
+    }else {
       $html = get_img_html('img/mpc_noout.png', $chain_num1.":rama2");
-    $html .= get_div_html($info = $res['ramachandran']['html2'], 
-      $num = $chain_num1.":rama2",
-      $param = "Ramachandran");
-    $mpc_data[$key]['ramachandran'][2] = $html;
+      $bool = false;
+    }
+    if($return_mpc_array) $c = $bool;
+    else {
+      $html .= get_div_html($info = $res['ramachandran']['html2'], 
+        $num = $chain_num1.":rama2",
+        $param = "Ramachandran");
+      $c = $html;
+    }
+    $mpc_data[$key]['ramachandran'][2] = $c;
     
-    if($res['rotamer']['color1']) 
+    if($res['rotamer']['color1']) {
       $html = get_img_html('img/mpc_out1.png', $chain_num1.":rotamer1");
-    else 
+      $bool = true;
+    }else {
       $html = get_img_html('img/mpc_noout.png', $chain_num1.":rotamer1");
-    $html .= get_div_html($info = $res['rotamer']['html1'], 
-      $num = $chain_num1.":rotamer1",
-      $param = "Rotamer");
-    $mpc_data[$key]['rotamer'][1] = $html;
-    if($res['rotamer']['color2']) 
+      $bool = false;
+    }
+    if($return_mpc_array) $c = $bool;
+    else {
+      $html .= get_div_html($info = $res['rotamer']['html1'], 
+        $num = $chain_num1.":rotamer1",
+        $param = "Rotamer");
+      $c = $html;
+    }
+    $mpc_data[$key]['rotamer'][1] = $c;
+    if($res['rotamer']['color2']) {
       $html = get_img_html('img/mpc_out2.png', $chain_num1.":rotamer2");
-    else 
+      $bool = true;
+    }else {
       $html = get_img_html('img/mpc_noout.png', $chain_num1.":rotamer2");
-    $html .= get_div_html($info = $res['rotamer']['html2'], 
-      $num = $chain_num1.":rotamer2",
-      $param = "Rotamer");
-    $mpc_data[$key]['rotamer'][2] = $html;
+      $bool = false;
+    }
+    if($return_mpc_array) $c = $bool;
+    else { 
+      $html .= get_div_html($info = $res['rotamer']['html2'], 
+        $num = $chain_num1.":rotamer2",
+        $param = "Rotamer");
+      $c = $html;
+    }
+    $mpc_data[$key]['rotamer'][2] = $c;
     
-    if($res['c&beta; deviation']['color1']) 
+    if($res['c&beta; deviation']['color1']) {
       $html = get_img_html('img/mpc_out1.png', $chain_num1.":cB1");
-    else 
+      $bool = true;
+    }else {
       $html = get_img_html('img/mpc_noout.png', $chain_num1.":cB1");
-    $html .= get_div_html($info = $res['c&beta; deviation']['html1'], 
-      $num = $chain_num1.":cB1",
-      $param = "c&beta; deviation");
-    $mpc_data[$key]['c&beta; deviation'][1] = $html;
-    if($res['c&beta; deviation']['color2']) 
+      $bool = false;
+    }
+    if($return_mpc_array) $c = $bool;
+    else {
+      $html .= get_div_html($info = $res['c&beta; deviation']['html1'], 
+        $num = $chain_num1.":cB1",
+        $param = "c&beta; deviation");
+      $c = $html;
+    }
+    $mpc_data[$key]['c&beta; deviation'][1] = $c;
+    if($res['c&beta; deviation']['color2']) {
       $html = get_img_html('img/mpc_out2.png', $chain_num1.":cB2");
-    else 
+      $bool = true;
+    }else {
       $html = get_img_html('img/mpc_noout.png', $chain_num1.":cB2");
-    $html .= get_div_html($info = $res['c&beta; deviation']['html2'], 
-      $num = $chain_num1.":cB2",
-      $param = "c&beta; deviation");
-    $mpc_data[$key]['c&beta; deviation'][2] = $html;
+      $bool = false;
+    }
+    if($return_mpc_array) $c = $bool;
+    else {
+      $html .= get_div_html($info = $res['c&beta; deviation']['html2'], 
+        $num = $chain_num1.":cB2",
+        $param = "c&beta; deviation");
+      $c = $html;
+    }
+    $mpc_data[$key]['c&beta; deviation'][2] = $c;
     
-    if($res['bond lengths.']['color1']) 
+    if($res['bond lengths.']['color1']) {
       $html = get_img_html('img/mpc_out1.png', $chain_num1.":bl1");
-    else 
+      $bool = true;
+    }else {
       $html = get_img_html('img/mpc_noout.png', $chain_num1.":bl1");
-    $html .= get_div_html($info = $res['bond lengths.']['html1'], 
-      $num = $chain_num1.":bl1",
-      $param = "Bond Length");
-    $mpc_data[$key]['bond lengths.'][1] = $html;
-    if($res['bond lengths.']['color2']) 
+      $bool = false;
+    }
+    if($return_mpc_array) $c = $bool;
+    else {
+      $html .= get_div_html($info = $res['bond lengths.']['html1'], 
+        $num = $chain_num1.":bl1",
+        $param = "Bond Length");
+      $c = $html;
+    }
+    $mpc_data[$key]['bond lengths.'][1] = $c;
+    if($res['bond lengths.']['color2']) {
       $html = get_img_html('img/mpc_out2.png', $chain_num1.":bl2");
-    else 
+      $bool = true;
+    }else {
       $html = get_img_html('img/mpc_noout.png', $chain_num1.":bl2");
-    $html .= get_div_html($info = $res['bond lengths.']['html2'], 
-      $num = $chain_num1.":bl2",
-      $param = "Bond Length");
-    $mpc_data[$key]['bond lengths.'][2] = $html;
+      $bool = false;
+    }
+    if($return_mpc_array) $c = $bool;
+    else {
+      $html .= get_div_html($info = $res['bond lengths.']['html2'], 
+        $num = $chain_num1.":bl2",
+        $param = "Bond Length");
+      $c = $html;
+    }
+    $mpc_data[$key]['bond lengths.'][2] = $c;
     
-    if($res['bond angles.']['color1']) 
+    if($res['bond angles.']['color1']) {
       $html = get_img_html('img/mpc_out1.png', $chain_num1.":ba1");
-    else 
+      $bool = true;
+    }else {
       $html = get_img_html('img/mpc_noout.png', $chain_num1.":ba1");
-    $html .= get_div_html($info = $res['bond angles.']['html1'], 
-      $num = $chain_num1.":ba1",
-      $param = "Bond Angle");
-    $mpc_data[$key]['bond angles.'][1] = $html;
-    if($res['bond angles.']['color2']) 
+      $bool = false;
+    }
+    if($return_mpc_array) $c = $bool;
+    else {
+      $html .= get_div_html($info = $res['bond angles.']['html1'], 
+        $num = $chain_num1.":ba1",
+        $param = "Bond Angle");
+      $c = $html;
+    }
+    $mpc_data[$key]['bond angles.'][1] = $c;
+    if($res['bond angles.']['color2']) {
       $html = get_img_html('img/mpc_out2.png', $chain_num1.":ba2");
-    else 
+      $bool = true;
+    }else {
       $html = get_img_html('img/mpc_noout.png', $chain_num1.":ba2");
-    $html .= get_div_html($info = $res['bond angles.']['html2'], 
-      $num = $chain_num1.":ba2",
-      $param = "Bond Angle");
-    $mpc_data[$key]['bond angles.'][2] = $html;
+      $bool = false;
+    }
+    if($return_mpc_array) $c = $bool;
+    else {
+      $html .= get_div_html($info = $res['bond angles.']['html2'], 
+        $num = $chain_num1.":ba2",
+        $param = "Bond Angle");
+      $c = $html;
+    }
+    $mpc_data[$key]['bond angles.'][2] = $c;
+    
+    //add ksdssp info
+    if(isset($res['ksdssp'])) {
+      $mpc_data[$key]['ksdssp'][1] = $res['ksdssp']['html1'];
+      $mpc_data[$key]['ksdssp'][2] = $res['ksdssp']['html2'];
+    }
     // }}}
   }
   $heads = array('clash &gt; 0.4&aring;', 'ramachandran', 'rotamer', 
-    'c&beta; deviation', 'bond lengths.', 'bond angles.', 'res');
+    'c&beta; deviation', 'bond lengths.', 'bond angles.', 'res', 'ksdssp');
   $c = "<html>\n<body>\n<table frame=void rules=all width = '100%'>\n";
   $k = "<html>\n<body>\n<table frame=void rules=all width = '100%'>\n";
+  $rk = array('res', 'ksdssp');
   foreach($heads as $head) {
     // if($head == 'res') ensures that this is only done once
-    if($head == 'res') { 
-      $res_key = "<table><tr><td>$model1_name</td></tr><tr><td>$model2_name";
-      $res_key .= "</td></tr></table>";
+    if(in_array($head, $rk)) {
+      if($head == 'res') $pa = 'Res&nbsp;';
+      elseif($head == 'ksdssp') $pa = 'ss&nbsp;';
+      $res_key = "<table rules='rows' frame='void'><tr>";
+      $res_key .= "<td rowspan='2'>$pa</td>";
+      $res_key .= "<td>Model 1</td></tr><tr>";
+      $res_key .= "<td>Model 2</td></tr></table>";
+      $align = " align='right'";
     }
-    else $res_key = ucwords($head);
-    $c .= "  <tr><td style=\"height:28px\">$res_key</td>\n";
-    $k .= "  <tr><td style=\"height:28px\">$res_key</td></tr>\n";
+    else {
+      $res_key = ucwords($head);
+      $align = "";
+    }
+    $c .= "  <tr><td style='height:28px'$align>$res_key</td>\n";
+    $k .= "  <tr><td style='height:28px'$align>$res_key</td></tr>\n";
     foreach($mpc_data as $res) {
-      if($head == 'res' & $res[$head][1] !== $res[$head][2]) {
+      if(in_array($head, $rk) & $res[$head][1] !== $res[$head][2]) {
         $res1 = "<font color='red'>".$res[$head][1]."</font>";
         $res2 = "<font color='red'>".$res[$head][2]."</font>";
       } else {
@@ -740,7 +862,8 @@ function get_mpc_sbs_chart($mpc_t, $model1_name, $model2_name)
   }
   $k .= "</table>\n</body>\n</html>\n";
   $c .= "</table>\n</body>\n</html>\n";
-  return array("table" => $c, "key" => $k);
+  if($return_mpc_array) return $mpc_data;
+  else return array("table" => $c, "key" => $k);
 }
 // }}}
 
@@ -749,11 +872,11 @@ function get_mpc_frame_sbs($url)
 {
   $s = "<html>\n<body>\n<table style=\"width:100%\">\n  ";
   $s .= "<tr><td style=\"width:125px\">\n";
-  $s .= "         <iframe src=$url&key=t width='100%' height='250' align=center>\n";
+  $s .= "         <iframe src=$url&key=t width='100%' height='300' align=center>\n";
   $s .= "          <p>Your browser does not support iframes.</p>\n";
   $s .= "        </iframe>\n";
   $s .= "      </td>\n      <td>\n";
-  $s .= "         <iframe src=$url&table=t width='100%' height='250' align=center>\n";
+  $s .= "         <iframe src=$url&table=t width='100%' height='300' align=center>\n";
   $s .= "          <p>Your browser does not support iframes.</p>\n";
   $s .= "        </iframe>\n</td></tr></table>\n</body>\n</html>";
   return $s;
@@ -1755,6 +1878,115 @@ function add_or_change_parameter($params_2_change)
   $firstRun = true;
   foreach($get as $key=>$val) $output .= $key."=".urlencode($val)."&";
   return htmlentities($output);
+}
+// }}}
+
+// {{{ get_ksdssp
+function get_ksdssp($pdb)
+/**************************************************************
+*
+*  Returns array, $ss_residues containing ksddsp info for all residues assigned
+*  either helix or sheet for the given $pdb. This function parses the ksdssp
+*  output.
+*
+**************************************************************/
+{
+  list($ksdssp, $status) = run_ksdssp($pdb);
+  if($status === 0) {
+    $ss_residues;
+    foreach($ksdssp as $line) {
+      if(startsWith($line, 'HELIX')) {
+        $start = trim(substr($line, 20, 5));
+        $end = trim(substr($line, 32, 5));
+        $chain1 = substr($line, 19, 1);
+        $chain2 = substr($line, 31, 1);
+        if($chain1 == $chain2) {
+          for($i = $start; $i <= $end; $i++) {
+            $spaces = '';
+            if(strlen(strval($i)) == 3) $spaces = ' ';
+            elseif(strlen(strval($i)) == 2) $spaces = '  ';
+            elseif(strlen(strval($i)) == 1) $spaces = '   ';
+            $chain_num = $chain1.$spaces.$i;
+            $ss_residues[] = array(
+              'cahin' => $chain1, 
+              '#' => $i, 
+              'chain_num' => $chain_num,
+              'ss' => 'H');
+          }
+        }
+      }
+      elseif(startsWith($line, 'SHEET')) {
+        $start = trim(substr($line, 22, 4));
+        $end = trim(substr($line, 33, 4));
+        $chain1 = substr($line, 21, 1);
+        $chain2 = substr($line, 32, 1);
+        if($chain1 == $chain2) {// should always be true
+          for($i = $start; $i <= $end; $i++) { 
+            $spaces = '';
+            if(strlen(strval($i)) == 3) $spaces = ' ';
+            elseif(strlen(strval($i)) == 2) $spaces = '  ';
+            elseif(strlen(strval($i)) == 1) $spaces = '   ';
+            $chain_num = $chain1.$spaces.$i;
+            $ss_residues[] = array(
+              'cahin' => $chain1, 
+              '#' => $i, 
+              'chain_num' => $chain_num,
+              'ss' => 'S');
+          }
+        }
+      }
+    }
+    return $ss_residues;
+  }
+}
+// }}}
+
+// {{{ run_ksdssp
+function run_ksdssp($pdb)
+{
+  $out = exec("ksdssp $pdb", $output, $status);
+  return array($output, $status);
+}
+// }}}
+
+// {{{ get_database_table
+function get_database_table($mpc_t)
+/*********************************************************************
+*
+*  Returns an array where each elements represents two residues being compared.
+*  This function is used on the cmdline when '-table' flag is an argument.
+*  $mpc_t is the output of 'get_mpc_sbs_chart'
+*
+*********************************************************************/
+{
+  $db_table = array();
+  foreach($mpc_t as $res) {
+    $arr = array();
+    $arr['chain_1'] =    substr($res['#'][1], 0, 1);
+    $arr['chain_2'] =    substr($res['#'][2], 0, 1);
+    $arr['resnum_1'] =   trim(substr($res['#'][1], 1));
+    $arr['resnum_2'] =   trim(substr($res['#'][2], 1));
+    $arr['resid_1'] =    $res['res'][1];
+    $arr['resid_2'] =    $res['res'][2];
+    $arr['highb_1'] =    $res['high b'][1];
+    $arr['highb_2'] =    $res['high b'][2];
+    $arr['ksdssp_1'] =   $res['ksdssp'][1];
+    $arr['ksdssp_2'] =   $res['ksdssp'][2];
+    $arr['clash_1'] =    $res['clash &gt; 0.4&aring;'][1];
+    $arr['clash_2'] =    $res['clash &gt; 0.4&aring;'][2];
+    $arr['rama_1'] =     $res['ramachandran'][1];
+    $arr['rama_2'] =     $res['ramachandran'][2];
+    $arr['rota_1'] =     $res['rotamer'][1];
+    $arr['rota_2'] =     $res['rotamer'][2];
+    $arr['cb_1'] =       $res['c&beta; deviation'][1];
+    $arr['cb_2'] =       $res['c&beta; deviation'][2];
+    $arr['bl_1'] =       $res['bond lengths.'][1];
+    $arr['bl_2'] =       $res['bond lengths.'][2];
+    $arr['ba_1'] =       $res['bond angles.'][1];
+    $arr['ba_2'] =       $res['bond angles.'][2];
+    $db_table[] = $arr;
+  }
+  return $db_table;
 }
 // }}}
 
