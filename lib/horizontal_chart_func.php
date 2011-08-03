@@ -14,10 +14,15 @@
 *   $num       connects onmouseover to the correct div
 *   $img       the image to be displayed
 **/
-function get_img_html($img, $num)
+function get_img_html($img, $num, $txt = false)
 {
-  $s  = "<img src = '$img' width=15px onmouseover=\"ShowContent('$num');";
-  $s .= " return true;\" onmouseout=\"HideContent('$num'); return true;\">\n";
+  if($img === false) {
+    $s  = "<a onmouseover=\"ShowContent('$num'); return true;\"";
+    $s .= " onmouseout=\"HideContent('$num'); return true;\">$txt</a>\n";
+  } else {
+    $s  = "<img src = '$img' width=15px onmouseover=\"ShowContent('$num');";
+    $s .= " return true;\" onmouseout=\"HideContent('$num'); return true;\">\n";
+  }
   return $s;
 }
 // }}}
@@ -131,7 +136,11 @@ function get_horizontal_chart($table)
   $rows_array = vert_to_horiz($table);
   
   //{{{ Determine outliers START###########################
-  $aa_3_1 = array('ALA' => 'A', 'CYS' => 'C', 'ASP' => 'D', 'GLU' => 'E', 'PHE' => 'F', 'GLY'  => 'G', 'HIS' => 'H', 'ILE' => 'I', 'LYS' => 'K', 'LEU' => 'L', 'MET' => 'M', 'ASN' => 'N', 'PRO' => 'P', 'GLN' => 'Q' , 'ARG' => 'R', 'SER' => 'S', 'THR' => 'T', 'VAL' => 'V', 'TRP' => 'W', 'TYR' => 'Y');
+  $aa_3_1 = array('ALA' => 'A', 'CYS' => 'C', 'ASP' => 'D', 'GLU' => 'E', 
+    'PHE' => 'F', 'GLY'  => 'G', 'HIS' => 'H', 'ILE' => 'I', 'LYS' => 'K', 
+    'LEU' => 'L', 'MET' => 'M', 'ASN' => 'N', 'PRO' => 'P', 'GLN' => 'Q' , 
+    'ARG' => 'R', 'SER' => 'S', 'THR' => 'T', 'VAL' => 'V', 'TRP' => 'W', 
+    'TYR' => 'Y');
   # $mp_params is used to populate the HTML horizontal table
   $nums;
   if(isset($rows_array["#"])) {
@@ -361,22 +370,35 @@ function get_chain_sequences($mh1, $modelID1, $mh2=false, $modelID2=false,
     $chain_sequences;
     foreach(array($chain1, $chain2) as $chain){
       $s = '';
-      foreach($res_nums1 as $resnum)
-        if(substr($resnum, 0, 1) == $chain)
-          $s .= $aa_3_1[$mh1[$resnum]['res']['html']];
+      foreach($res_nums1 as $resnum) {
+        if(substr($resnum, 0, 1) == $chain) {
+          if(array_key_exists($mh1[$resnum]['res']['html'], $aa_3_1))
+            $s .= $aa_3_1[$mh1[$resnum]['res']['html']];
+          elseif($mh1[$resnum]['res']['html'] == "HOH") $s .= "*";
+          else $s .= 'X';
+        }
+      }
       $chain_sequences[$chain][] = $s;
       $fasta .= ">".$modelID1."_".$chain."\n$s\n";
       }
     return $fasta;
   } else {
     $s = '';
-    foreach($res_nums1 as $resnum)
-      $s .= $aa_3_1[$mh1[$resnum]['res']['html']];
+    foreach($res_nums1 as $resnum) {
+      if(array_key_exists($mh1[$resnum]['res']['html'], $aa_3_1))
+        $s .= $aa_3_1[$mh1[$resnum]['res']['html']];
+      elseif($mh1[$resnum]['res']['html'] == "HOH") $s .= "*";
+      else $s .= 'X';
+    }
     $fasta = ">".$modelID1."\n$s\n";
     $res_nums2 = array_keys($mh2);
     $s = '';
-    foreach($res_nums2 as $resnum)
-      $s .= $aa_3_1[$mh2[$resnum]['res']['html']];
+    foreach($res_nums2 as $resnum) {
+      if(array_key_exists($mh2[$resnum]['res']['html'], $aa_3_1))
+        $s .= $aa_3_1[$mh2[$resnum]['res']['html']];
+      elseif($mh1[$resnum]['res']['html'] == "HOH") $s .= "*";
+      else $s .= 'X';
+    }
     $fasta .= ">".$modelID2."\n$s\n";
     return $fasta;
   }
@@ -416,7 +438,9 @@ function get_molprobity_compare_table($fasta, $mph1, $modelID1, $mph2,
   $aln_lines = align_fasta($fasta_file_name.".fasta", $fasta);
   $aln_array = array($fasta_file_name.".fasta", $fasta_file_name.".dnd", 
     $fasta_file_name.".aln");
+  //for the cmdline version, deletes clustalw files in the current dir
   if($cleanup) delete_files($aln_array);
+  
   $err = "ERROR: Problem aligning the sequences. Contact the webmaster and ";
   $err .= "include this error message";
   if($aln_lines === false) return $err;
@@ -426,8 +450,9 @@ function get_molprobity_compare_table($fasta, $mph1, $modelID1, $mph2,
       $modelID1, $modelID2);
     $mph1_aln = apply_align_2_mph($mph1, $aln_seq1);
     $mph2_aln = apply_align_2_mph($mph2, $aln_seq2);
-    if(count($mph1_aln) != count($mph2_aln))//after alignment these should be the same length
-      return "ERROR: The two MPH are not the same length.";
+    //after alignment these should be the same length
+    if(count($mph1_aln) != count($mph2_aln))
+      return "ERROR: The two MPH are not the same length.\n";
     $mph_sbs;
     $mph_diff = array('modelID1' => $modelID1, 'modelID2' => $modelID2);
     foreach(array_keys($mph1_aln) as $key) {
@@ -573,16 +598,21 @@ function split_mph_by_chain($mparam_hierarchy, $chain)
 // {{{ apply_align_2_mph
 function apply_align_2_mph($mph, $aln_seq)
 {
-  $aa_3_1 = array('ALA' => 'A', 'CYS' => 'C', 'ASP' => 'D', 'GLU' => 'E', 'PHE' => 'F', 'GLY'  => 'G', 'HIS' => 'H', 'ILE' => 'I', 'LYS' => 'K', 'LEU' => 'L', 'MET' => 'M', 'ASN' => 'N', 'PRO' => 'P', 'GLN' => 'Q' , 'ARG' => 'R', 'SER' => 'S', 'THR' => 'T', 'VAL' => 'V', 'TRP' => 'W', 'TYR' => 'Y');
+  $aa_3_1 = array('ALA' => 'A', 'CYS' => 'C', 'ASP' => 'D', 'GLU' => 'E', 
+    'PHE' => 'F', 'GLY'  => 'G', 'HIS' => 'H', 'ILE' => 'I', 'LYS' => 'K', 
+    'LEU' => 'L', 'MET' => 'M', 'ASN' => 'N', 'PRO' => 'P', 'GLN' => 'Q' , 
+    'ARG' => 'R', 'SER' => 'S', 'THR' => 'T', 'VAL' => 'V', 'TRP' => 'W', 
+    'TYR' => 'Y');
   // put dashes in mph as dictated by the aligned sequences
   $mph_keys = array_keys($mph);
   $mph_aln;
   $i = 0;
   foreach(str_split($aln_seq) as $key => $res) {
-    if($res == $aa_3_1[$mph[$mph_keys[$i]]['res']['html']]) {
+    if($res == "-") $mph_aln[] = $res;
+    else {//if($res == $aa_3_1[$mph[$mph_keys[$i]]['res']['html']]) {
       $mph_aln[] =  $mph[$mph_keys[$i]];
       $i++;
-    } elseif($res == "-") $mph_aln[] = $res;
+    } 
   }
   return $mph_aln;
 }
@@ -620,14 +650,22 @@ function get_mpc_sbs_chart($mpc_t, $model1_name, $model2_name,
     // {{{ get mpc_data for the horizontal chart
     $chain_num1 = $res['#']['html1'];
     $chain_num2 = $res['#']['html2'];
+    $mpc_data[$key]['model'][1] = $model1_name;
+    $mpc_data[$key]['model'][2] = $model2_name;
     $mpc_data[$key]['#'][1] = $chain_num1;
     $mpc_data[$key]['#'][2] = $chain_num2;
     if($res['res']['html1'] == 'No Residue') $res_1 = '-';
-    else $res_1 = $aa_3_1[$res['res']['html1']];
+    elseif(array_key_exists($res['res']['html1'], $aa_3_1))
+      $res_1 = $aa_3_1[$res['res']['html1']];
+    else $res_1 = '?';
     if($res['res']['html2'] == 'No Residue') $res_2 = '-';
-    else $res_2 = $aa_3_1[$res['res']['html2']];
+    elseif(array_key_exists($res['res']['html2'], $aa_3_1))
+      $res_2 = $aa_3_1[$res['res']['html2']];
+    else $res_2 = '?';
     $mpc_data[$key]['res'][1] = $res_1;
     $mpc_data[$key]['res'][2] = $res_2;
+    $mpc_data[$key]['res_full'][1] = $res['res']['html1'];
+    $mpc_data[$key]['res_full'][2] = $res['res']['html2'];
     $mpc_data[$key]['high b'][1] = $res['high b']['html1'];
     $mpc_data[$key]['high b'][2] = $res['high b']['html2'];
     
@@ -846,13 +884,27 @@ function get_mpc_sbs_chart($mpc_t, $model1_name, $model2_name,
     }
     $c .= "  <tr><td style='height:28px'$align>$res_key</td>\n";
     $k .= "  <tr><td style='height:28px'$align>$res_key</td></tr>\n";
-    foreach($mpc_data as $res) {
+    foreach($mpc_data as $key => $res) {
+      // REMINDER: $rk = array('res', 'ksdssp')
       if(in_array($head, $rk) & $res[$head][1] !== $res[$head][2]) {
         $res1 = "<font color='red'>".$res[$head][1]."</font>";
         $res2 = "<font color='red'>".$res[$head][2]."</font>";
       } else {
         $res1 = $res[$head][1];
         $res2 = $res[$head][2];
+      }
+      // put <div> hovers on res ids
+      if($head == 'res') {
+        $res1 = get_img_html($img = false, $num = $res['#'][1].":resid1", $txt = $res1);
+        $info1 = "Residue ID: ".$res['res_full'][1]."<br>High B: ".$res['high b'][1];
+        $rescn1 = 'l';//$res['#'][1];
+        $res1 .= get_div_html($info = $info1, $num = $res['#'][1].":resid1", 
+          $param = "Residue");
+        $res2 = get_img_html($img = false, $num = $res['#'][2].":resid2", $txt = $res2);
+        $info2 = "Residue ID: ".$res['res_full'][2]."<br>High B: ".$res['high b'][2];
+        $rescn2 = 'l';//$res['#'][2];
+        $res2 .= get_div_html($info = $info2, $num = $res['#'][2].":resid2", 
+          $param = "Residue");
       }
       $c .= "      <td><table><tr><td align='center'>$res1";
       $c .= "</td></tr><tr><td align='center'>$res2";
@@ -1043,6 +1095,7 @@ function calculate_mpc_differences($table_mpcscores, $improved_model,
 {
   $modelID1 = $table_mpcscores['modelID1'];
   $modelID2 = $table_mpcscores['modelID2'];
+  // why do we need this??
   unset($table_mpcscores['modelID1']);
   unset($table_mpcscores['modelID2']);
   // set the improved and original models
@@ -1071,6 +1124,8 @@ function calculate_mpc_differences($table_mpcscores, $improved_model,
     $bl_original = $resarray['bond lengths.'][$original];
     $ba_improved = $resarray['bond angles.'][$improved];
     $ba_original = $resarray['bond angles.'][$original];
+    $highb_improved = $resarray['high b'][$improved];
+    $highb_original = $resarray['high b'][$original];
     $res_a['improved_resname'] = $resname_improved;
     $res_a['original_resname'] = $resname_original;
     $res_a['improved_resnum'] = $res_improved;
@@ -1087,6 +1142,8 @@ function calculate_mpc_differences($table_mpcscores, $improved_model,
     $res_a['bl_original'] = $bl_original;
     $res_a['ba_improved'] = $ba_improved;
     $res_a['ba_original'] = $ba_original;
+    $res_a['high_b_improved'] = $highb_improved;
+    $res_a['high_b_original'] = $highb_original;
     if($clash_original === '-' || $clash_original === 'No Residue' || 
       $clash_improved === '-' || $clash_improved === 'No Residue')
       $res_a['clashD'] = '-';
@@ -1519,10 +1576,33 @@ function get_changes_html($diff_array)
 *
 ******************************************************************/
 {
+  $aa_3_1 = array('ALA' => 'A', 'CYS' => 'C', 'ASP' => 'D', 'GLU' => 'E',
+    'PHE' => 'F', 'GLY'  => 'G', 'HIS' => 'H', 'ILE' => 'I', 'LYS' => 'K',
+    'LEU' => 'L', 'MET' => 'M', 'ASN' => 'N', 'PRO' => 'P', 'GLN' => 'Q' ,
+    'ARG' => 'R', 'SER' => 'S', 'THR' => 'T', 'VAL' => 'V', 'TRP' => 'W',
+    'TYR' => 'Y');  
   $changes_array;
   foreach($diff_array as $res_pair => $res_array) {
-    $changes_array[$res_pair]['improved_res'] = $res_array['improved_resname'];
-    $changes_array[$res_pair]['original_res'] = $res_array['original_resname'];
+    if(isset($aa_3_1[$res_array['improved_resname']]))
+      $improved = $aa_3_1[$res_array['improved_resname']];
+    elseif($res_array['improved_resname'] == "No Residue") $improved = "-";
+    else $improved = "?";
+    $info1 = "Redidue ID: $res_array[improved_resname]<br>High B: ";
+    $info1 .= "$res_array[high_b_improved]";
+    $s = "<a".get_omo_html($id = $res_pair.":i").">$improved</a>\n";
+    $s .= get_div_html($info = $info1, $num = $res_pair.":i", 
+      $param = "Residue", $res = "Residue: ".$res_array['improved_resnum']);
+    $changes_array[$res_pair]['improved_res'] = $s;
+    if(isset($aa_3_1[$res_array['original_resname']]))
+      $original = $aa_3_1[$res_array['original_resname']];
+    elseif($res_array['original_resname'] == "No Residue") $original = "-";
+    else $original = "?";
+    $info2 = "Redidue ID: $res_array[original_resname]<br>High B: ";
+    $info2 .= "$res_array[high_b_original]";
+    $s = "<a".get_omo_html($id = $res_pair.":o").">$original</a>\n";
+    $s .= get_div_html($info = $info2, $num = $res_pair.":o",
+      $param = "Residue", $res = "Residue: ".$res_array['original_resnum']);
+    $changes_array[$res_pair]['original_res'] = $s;
     // CLASH
     if($res_array['clashD'] < 0 & $res_array['clash_original'] === 0) {
       $html = get_img_html('img/change_red.png', $res_pair.":clash");//{4}
@@ -1734,18 +1814,10 @@ function get_mpc_changes_chart($mpc_html, $improved_model, $original_model)
       $param_html["Bond Length"][] = $params["bl"];
     if(isset($params["ba"])) 
       $param_html["Bond Angle"][] = $params["ba"];
-    if(isset($aa_3_1[$params["original_res"]]))
-      $original = $aa_3_1[$params["original_res"]];
-    elseif($params["original_res"] == "No Residue") $original = "-";
-    else $original = "?";
-    if(isset($params["original_res"])) 
-      $param_html["Original&nbsp;Residue"][] = $original;
-    if(isset($aa_3_1[$params["improved_res"]]))
-      $improved = $aa_3_1[$params["improved_res"]];
-    elseif($params["improved_res"] == "No Residue") $improved = "-";
-    else $improved = "?";
-    if(isset($params["improved_res"])) 
-      $param_html["Improved&nbsp;Residue"][] = $improved;
+    if(isset($params["original_res"]))
+      $param_html["Original&nbsp;Residue"][] = $params["original_res"];
+    if(isset($params["improved_res"]))
+      $param_html["Improved&nbsp;Residue"][] = $params["improved_res"];
     if($improved != $original) $param_html["color"][] = " color='red'";
     else $param_html["color"][] = "";
   }
@@ -1984,6 +2056,8 @@ function get_database_table($mpc_t)
     $arr['bl_2'] =       $res['bond lengths.'][2];
     $arr['ba_1'] =       $res['bond angles.'][1];
     $arr['ba_2'] =       $res['bond angles.'][2];
+    $arr['model_1'] =    $res['model'][1];
+    $arr['model_2'] =    $res['model'][2];
     $db_table[] = $arr;
   }
   return $db_table;
