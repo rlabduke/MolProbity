@@ -366,9 +366,11 @@ function get_chain_sequences($mh1, $modelID1, $mh2=false, $modelID2=false,
     'LEU' => 'L', 'MET' => 'M', 'ASN' => 'N', 'PRO' => 'P', 'GLN' => 'Q' ,
     'ARG' => 'R', 'SER' => 'S', 'THR' => 'T', 'VAL' => 'V', 'TRP' => 'W',
     'TYR' => 'Y');
-  if($chain1 !== false & $chain2 !== false) {
+  if($chain1 !== false & $chain2 !== false & $modelID2 !== false) 
+    $chain_from_2 = true; //for when the user picks chains from different models
+  if($chain1 !== false & $chain2 !== false & $modelID2 === false) {
     $chain_sequences;
-    foreach(array($chain1, $chain2) as $chain){
+    foreach(array($chain1, $chain2) as $chain) {
       $s = '';
       foreach($res_nums1 as $resnum) {
         if(substr($resnum, 0, 1) == $chain) {
@@ -386,27 +388,33 @@ function get_chain_sequences($mh1, $modelID1, $mh2=false, $modelID2=false,
     $s = '';
     foreach($res_nums1 as $resnum) {
       if(array_key_exists($mh1[$resnum]['res']['html'], $aa_3_1))
-        $s .= $aa_3_1[$mh1[$resnum]['res']['html']];
-      elseif($mh1[$resnum]['res']['html'] == "HOH") $s .= "*";
-      else $s .= 'X';
+        $aa = $aa_3_1[$mh1[$resnum]['res']['html']];
+      elseif($mh1[$resnum]['res']['html'] == "HOH") $aa = "*";
+      else $aa = 'X';
+      if(substr($resnum, 0, 1) == $chain1 & $chain_from_2) $s .= $aa;
+      elseif(!$chain_from_2) $s .= $aa;
     }
     $fasta = ">".$modelID1."\n$s\n";
     $res_nums2 = array_keys($mh2);
     $s = '';
     foreach($res_nums2 as $resnum) {
       if(array_key_exists($mh2[$resnum]['res']['html'], $aa_3_1))
-        $s .= $aa_3_1[$mh2[$resnum]['res']['html']];
-      elseif($mh1[$resnum]['res']['html'] == "HOH") $s .= "*";
-      else $s .= 'X';
+        $aa = $aa_3_1[$mh2[$resnum]['res']['html']];
+      elseif($mh1[$resnum]['res']['html'] == "HOH") $aa = "*";
+      else $aa = 'X';
+      if(substr($resnum, 0, 1) == $chain2 & $chain_from_2) $s .= $aa;
+      elseif(!$chain_from_2) $s .= $aa;
     }
     $fasta .= ">".$modelID2."\n$s\n";
     return $fasta;
   }
-  
 }
 //}}}
 
 // {{{ get_molprobity_compare_table
+function get_molprobity_compare_table($fasta, $mph1, $modelID1, $mph2,
+  $modelID2, $chain1 = false, $chain2 = false, 
+  $ksdssp1 = false, $ksdssp2 = false) 
 /**
 *  Returns a MolProbity Compare array that has info on each MolProbity parameter
 *  for each residue being compared and how they compare to one another. This 
@@ -418,9 +426,6 @@ function get_chain_sequences($mh1, $modelID1, $mh2=false, $modelID2=false,
 *    $mph2: MolProbity parameter hierarchy 2.
 *    $modelID2: the model ID for model 2.
 **/
-function get_molprobity_compare_table($fasta, $mph1, $modelID1, $mph2,
-  $modelID2, $chain1 = false, $chain2 = false, 
-  $ksdssp1 = false, $ksdssp2 = false) 
 {
   if($mph2 !== false && $modelID2 !== false)
     $model_2_name = $modelID1."_".$modelID2;
@@ -448,6 +453,11 @@ function get_molprobity_compare_table($fasta, $mph1, $modelID1, $mph2,
     // linearize aln file
     list($aln_seq1, $aln_seq2, $aln_code) = linearize_alignment($aln_lines,
       $modelID1, $modelID2);
+    // get the % identity of the pairwise alignment
+    $identity = (substr_count($aln_code, '*')/strlen($aln_code))*100;
+    if($identity < 70) $low_identity = $identity;
+    else $low_identity = false;
+    // apply the alignment to mph 
     $mph1_aln = apply_align_2_mph($mph1, $aln_seq1);
     $mph2_aln = apply_align_2_mph($mph2, $aln_seq2);
     //after alignment these should be the same length
@@ -510,7 +520,7 @@ function get_molprobity_compare_table($fasta, $mph1, $modelID1, $mph2,
                 'color2' => '');
       }
     }
-    return array($mph_sbs, $mph_diff);
+    return array($mph_sbs, $mph_diff, $low_identity);
   }
 }
 //}}}
@@ -1874,7 +1884,7 @@ function get_checkbox_form($run, $array, $button_text, $is_model=false)
     // Alternate row colors:
     $c == MP_TABLE_ALT1 ? $c = MP_TABLE_ALT2 : $c = MP_TABLE_ALT1;
     $s .= " <tr bgcolor='$c'>\n";
-    $s .= "  <td><input type='checkbox' name='model_4_comp_$id' value='$pdb'\n";
+    $s .= "  <td><input type='checkbox' name='model_4_comp_$id' value='$pdb'</td>\n";
     $s .= "  <td><b>$pdb</b></td>\n";
     $s .= "  <td><small>$history</small></td>\n";
     $s .= " </tr>\n";
@@ -1890,12 +1900,15 @@ function get_checkbox_form($run, $array, $button_text, $is_model=false)
 // }}}
 
 // {{{ get_choose_form
-function get_choose_form($run, $array, $button_text, $num_choice, $choice_name)
+function get_choose_form($run, $array, $button_text, $num_choice, $choice_name,
+  $array2=false)
 /**************************************************************
 *
 *  Returns html for a form with a where the user can choose $num_choice
 *  elements in $array. The elements are listed $num_choice times in different
-*  radiobutton groups.
+*  radiobutton groups. One can also specify $num_choice as 2 and $array2 as 
+*  a second array to shoose from; i.e. chose one from $array and one from 
+*  $array2.
 *
 *    $run, the name of the function to be ran upon submission
 *    $array, the elements to choose from
@@ -1905,31 +1918,69 @@ function get_choose_form($run, $array, $button_text, $num_choice, $choice_name)
 *
 **************************************************************/
 {
+  if($array2 !== false & $num_choice !== 2) return "ERROR 66 in Bradley's code";
   $s = makeEventForm($run);
   $s .= "<p><table width='100%' border='0' cellspacing='0' cellpadding='2'>\n";
   $s .= " <tr>\n  ";
   $i = 1;
   while($i <= $num_choice) {
-    $s .= "<td colspan=2><center>$choice_name $i</center></td>\n";
+    if($num_choice > 1) $num = " $i";
+    else $num = '';
+    $s .= "<td colspan=2><center>".$choice_name.$num."</center></td>\n";
     $i++;
   }
   //$s .= "  <td colspan=2><center>$choice_name 2</center></td>\n";
   $s .= " </tr>\n";
   $c = MP_TABLE_ALT1;
-  foreach($array as $id => $choice) {
-    // Alternate row colors:
-    $c == MP_TABLE_ALT1 ? $c = MP_TABLE_ALT2 : $c = MP_TABLE_ALT1;
-    $s .= " <tr bgcolor='$c'>\n";
-    $i = 1;
-    while($i <= $num_choice) {
-      $s .= "  <td width='25%' align='right'><input type='radio'";
-      $s .= " name='$choice_name$i' value='$id'></td>\n";
-      $s .= "  <td width='25%' align='left'><b>$choice</b></td>\n";
+  if($array2 === false) {
+    foreach($array as $id => $choice) {
+      // Alternate row colors:
+      $c == MP_TABLE_ALT1 ? $c = MP_TABLE_ALT2 : $c = MP_TABLE_ALT1;
+      $s .= " <tr bgcolor='$c'>\n";
+      $i = 1;
+      while($i <= $num_choice) {
+        $s .= "  <td width='25%' align='right'><input type='radio'";
+        $s .= " name='$choice_name$i' value='$id'></td>\n";
+        $s .= "  <td width='25%' align='left'><b>$choice</b></td>\n";
+        $i++;
+      }
+      $s .= " </tr>\n";
+    }
+  } else {
+    $keys1 = array_keys($array);
+    $keys2 = array_keys($array2);
+    if(count($keys1) > count($keys2)) $one_bigger_two = true;
+    else $one_bigger_two = false;
+    if($one_bigger_two === true) {
+      $num_rows = count($keys1);
+      $keys = $keys1;
+    } else {
+      $num_rows = count($keys2);
+      $keys = $keys2;
+    }
+    $i = 0;
+    while($i < count($keys)) {
+      $choice1 = '';
+      $radio1 = '';
+      $choice2 = '';
+      $radio2 = '';
+      if($i < count($keys1)) {
+        $choice1 = $array[$keys1[$i]];
+        $radio1 = "<input type='radio' name='$choice_name"."1' value='".$keys1[$i]."'>";
+      }
+      if($i < count($keys2)) {
+        $choice2 = $array2[$keys2[$i]];
+        $radio2 = "<input type='radio' name='$choice_name"."2' value='".$keys2[$i]."'>";
+      }
+      $c == MP_TABLE_ALT1 ? $c = MP_TABLE_ALT2 : $c = MP_TABLE_ALT1;
+      $s .= " <tr bgcolor='$c'>\n";
+      $s .= "  <td width='25%' align='right'>$radio1</td>\n";
+      $s .= "  <td width='25%' align='left'>$choice1</td>\n";
+      $s .= "  <td width='25%' align='right'>$radio2</td>\n";
+      $s .= "  <td width='25%' align='left'>$choice2</td></tr>\n";
       $i++;
     }
-    $s .= " </tr>\n";
   }
-  $s .= "</table></p>\n";
 
   $s .= "<p><table width='100%' border='0'><tr>\n";
   $s .= "<td><input type='submit' name='cmd' value='$button_text'></td>\n";

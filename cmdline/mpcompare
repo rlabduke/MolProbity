@@ -11,6 +11,7 @@
   if(!defined('MP_BASE_DIR')) define('MP_BASE_DIR', realpath(dirname(__FILE__).'/..'));
 // 2. Include core functionality - defines constants, etc.
   require_once(MP_BASE_DIR.'/lib/core.php');
+  require_once(MP_BASE_DIR.'/lib/model.php');
   require_once(MP_BASE_DIR.'/lib/horizontal_chart_func.php');
 // 3. Restore session data. If you don't want to access the session
 // data for some reason, you must call mpInitEnvirons() instead.
@@ -22,9 +23,13 @@
   ini_set('memory_limit', -1);
 
 $return_table = false;
+$reduce = false;
+$reduce_n_exit = false;
 // First argument is the name of this script...
 if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg) {
   if(endsWith($arg,  ".pdb"))   $pdb_file_list[] = $arg;
+  elseif($arg == '-reduce')     $reduce = true;
+  elseif($arg == '-re')     $reduce_n_exit = true;
   elseif($arg == '-table')      $return_table = true;
 }
 
@@ -43,16 +48,30 @@ if(count($confirmed_pdb_files) == 2) {
   $pdb1 = $confirmed_pdb_files[0];
   $pdb2 = $confirmed_pdb_files[1];
 }
+
+// run reduce
+if($reduce || $reduce_n_exit) {
+  $cwd = getcwd();
+  $pdb1H = str_replace('.', 'H.', $pdb1);
+  $pdb2H = str_replace('.', 'H.', $pdb2);
+  reduceNoBuild($cwd."/".$pdb1, $cwd."/".$pdb1H);
+  reduceNoBuild($cwd."/".$pdb2, $cwd."/".$pdb2H);
+  if($reduce_n_exit) die();
+} else {
+  $pdb1H = $pdb1;
+  $pdb2H = $pdb2;
+}
+
 // run residue analysis
 $res_ana = array();
-$cmd = MP_BASE_DIR."/cmdline/residue-analysis $pdb1";
+$cmd = MP_BASE_DIR."/cmdline/residue-analysis $pdb1H";
 $out1 = shell_exec($cmd);
 $res_ana[] = $out1;
-$cmd = MP_BASE_DIR."/cmdline/residue-analysis $pdb2";
+$cmd = MP_BASE_DIR."/cmdline/residue-analysis $pdb2H";
 $out2 = shell_exec($cmd);
 $res_ana[] = $out2;
-$modelID1 = substr($pdb1, 0, strpos($pdb1, ".pdb"));
-$modelID2 = substr($pdb2, 0, strpos($pdb2, ".pdb"));
+$modelID1 = substr($pdb1H, 0, strpos($pdb1H, ".pdb"));
+$modelID2 = substr($pdb2H, 0, strpos($pdb2H, ".pdb"));
 
 $mp1 = explode("\n", $res_ana[0]);
 $mp2 = explode("\n", $res_ana[1]);
@@ -65,8 +84,8 @@ $mph2 = get_mp_hierarchy($mpt2);
 $fasta = get_chain_sequences($mh1 = $mph1,  $modelID1 = $modelID1,
   $mp2 = $mph2, $modelID2 = $modelID2);
 // get ksdssp residues
-$ksdssp_1 = get_ksdssp($pdb1);
-$ksdssp_2 = get_ksdssp($pdb2);
+$ksdssp_1 = get_ksdssp($pdb1H);
+$ksdssp_2 = get_ksdssp($pdb2H);
 $mph_array = get_molprobity_compare_table(
   $fasta = $fasta,
   $mph1 = $mph1, $modelID1 = $modelID1, $mph2 = $mph2,
@@ -75,6 +94,7 @@ $mph_array = get_molprobity_compare_table(
 if(is_string($mph_array)) die("\n\n".$mph_array."\n\n");
 $mph_side_by_side = $mph_array[0];
 $mph_diff = $mph_array[1];
+$low_identity = $mph_array[2];
 $diff_table = calculate_mpc_differences($table_mpcscores = $mph_diff,
   $improved_model = $modelID1,
   $original_model = $modelID2);
@@ -215,8 +235,8 @@ function get_mp_hierarchy($mpt)
       $color = "";
       $bl = "-";
     }
-    $ar["bond angles."]["html"] = $bl;
-    $ar["bond angles."]["color"] = $color;
+    $ar["bond lengths."]["html"] = $bl;
+    $ar["bond lengths."]["color"] = $color;
     if($params["num_angle_out"] != 0) {
       $color = "#ff6699";
       $ba = $params["worst_angle_sigma"];
@@ -224,8 +244,8 @@ function get_mp_hierarchy($mpt)
       $color = "";
       $ba = "-";
     }
-    $ar["bond lengths."]["html"] = $ba;
-    $ar["bond lengths."]["color"] = $color;
+    $ar["bond angles."]["html"] = $ba;
+    $ar["bond angles."]["color"] = $color;
     $mph[substr($res, 0, strrpos($res, " "))] = $ar;
   }
   return $mph;
