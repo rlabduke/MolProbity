@@ -414,7 +414,7 @@ function get_chain_sequences($mh1, $modelID1, $mh2=false, $modelID2=false,
 // {{{ get_molprobity_compare_table
 function get_molprobity_compare_table($fasta, $mph1, $modelID1, $mph2,
   $modelID2, $chain1 = false, $chain2 = false, 
-  $ksdssp1 = false, $ksdssp2 = false) 
+  $ksdssp1 = false, $ksdssp2 = false, $directory = false) 
 /**
 *  Returns a MolProbity Compare array that has info on each MolProbity parameter
 *  for each residue being compared and how they compare to one another. This 
@@ -432,8 +432,8 @@ function get_molprobity_compare_table($fasta, $mph1, $modelID1, $mph2,
   else 
     $model_2_name = $modelID1;
   // save the sequences of the two chains in fasta format
-  if(!isset($_SESSION)) { //for the cmdline version
-    $rawDir = getcwd();
+  if($directory) { //!isset($_SESSION)) { //for the cmdline version
+    $rawDir = $directory;
     $cleanup = true; 
   } else {
     $rawDir = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA;
@@ -447,7 +447,7 @@ function get_molprobity_compare_table($fasta, $mph1, $modelID1, $mph2,
   if($cleanup) delete_files($aln_array);
   
   $err = "ERROR: Problem aligning the sequences. Contact the webmaster and ";
-  $err .= "include this error message";
+  $err .= "include this error message.";
   if($aln_lines === false) return $err;
   else {
     // linearize aln file
@@ -2073,22 +2073,34 @@ function run_ksdssp($pdb)
 // }}}
 
 // {{{ get_database_table
-function get_database_table($mpc_t)
+function get_database_table($mpc_t, $minus_unpaired_res = false)
 /*********************************************************************
 *
 *  Returns an array where each elements represents two residues being compared.
 *  This function is used on the cmdline when '-table' flag is an argument.
 *  $mpc_t is the output of 'get_mpc_sbs_chart'
+*  If $minus_unpaired_res = true then those residues that are unpaired in the
+*  alignment will not be included in the table
 *
 *********************************************************************/
 {
   $db_table = array();
   foreach($mpc_t as $res) {
     $arr = array();
-    $arr['chain_1'] =    substr($res['#'][1], 0, 1);
-    $arr['chain_2'] =    substr($res['#'][2], 0, 1);
-    $arr['resnum_1'] =   trim(substr($res['#'][1], 1));
-    $arr['resnum_2'] =   trim(substr($res['#'][2], 1));
+    if($res['#'][1] == 'No Residue') {
+      $arr['chain_1'] =  '-';
+      $arr['resnum_1'] = 'No Residue';
+    } else {
+      $arr['chain_1'] =    substr($res['#'][1], 0, 1);
+      $arr['resnum_1'] =   trim(substr($res['#'][1], 1));
+    }
+    if($res['#'][2] == 'No Residue') {
+      $arr['chain_2'] =  '-';
+      $arr['resnum_2'] = 'No Residue';
+    } else {
+      $arr['chain_2'] =    substr($res['#'][2], 0, 1);
+      $arr['resnum_2'] =   trim(substr($res['#'][2], 1));
+    }
     $arr['resid_1'] =    $res['res'][1];
     $arr['resid_2'] =    $res['res'][2];
     $arr['highb_1'] =    $res['high b'][1];
@@ -2109,7 +2121,10 @@ function get_database_table($mpc_t)
     $arr['ba_2'] =       $res['bond angles.'][2];
     $arr['model_1'] =    $res['model'][1];
     $arr['model_2'] =    $res['model'][2];
-    $db_table[] = $arr;
+    if($minus_unpaired_res) {
+      if($res['#'][1] != 'No Residue' && $res['#'][2] != 'No Residue') 
+        $db_table[] = $arr;
+    } else $db_table[] = $arr;
   }
   return $db_table;
 }

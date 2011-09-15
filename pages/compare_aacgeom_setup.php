@@ -42,7 +42,7 @@ function display($context)
       $aacgeom_models;
       // only add the pdb names (not '-multi.table')
       foreach($check_value as $table) {
-        $pdb = substr($table, 0, strpos($table, '-')-strlen($table));
+        $pdb = substr($table, 0, strpos($table, '-mul')-strlen($table));
         $aacgeom_models[] = $pdb ;
       }
       if(isset($_SESSION['user_mpc_error'])) {
@@ -53,7 +53,13 @@ function display($context)
       $models;
       foreach($_SESSION['models'] as $id => $model) {
         $dot_pos = strpos($model['pdb'], '.')-strlen($model['pdb']);
-        if(endsWith($model['pdb'], ".pdb"))
+        $clean_pos = strpos($model['pdb'], '_clean.')-strlen($model['pdb']);
+        $pdbv3_pos = strpos($model['pdb'], '_pdbv3.')-strlen($model['pdb']);
+        if(endsWith($model['pdb'], "_clean.pdb"))
+          $pdb = substr($model['pdb'], 0, $clean_pos);
+        elseif(endsWith($model['pdb'], "_pdbv3.pdb"))
+          $pdb = substr($model['pdb'], 0, $pdbv3_pos);
+        elseif(endsWith($model['pdb'], ".pdb"))
           $pdb = substr($model['pdb'], 0, $dot_pos);
         else $pdb = $model['pdb'];
         if(array_search($pdb, $aacgeom_models) !== false) $models[] = $model;
@@ -207,6 +213,7 @@ function onChooseModel()
       $s = $comparison_models[0]." has only ".count($chain_array)." chain.<br>";
       $s .= "Please select a model with TWO or more chains or select TWO ";
       $s .= "models.";
+      $s .= "<br>p<br>";
       $_SESSION['user_mpc_error'] = $s;# displays $s on the page
     }
     else {

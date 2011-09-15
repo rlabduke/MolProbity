@@ -4,6 +4,20 @@
 *
 *  MolProbity Compare - cmdline version
 *
+*  Usage: 
+*   /path/to/cmdline/mpcompare one.pdb two.pdb
+*    where one.pdb is the 'improved' pdb.
+*
+*  Options:
+*   -chain1       perform mpcompare analysis of only the chain specified 
+*                  immediately after this flag for one.pdb
+*   -chain2       perform mpcompare analysis of only the chain specified 
+*                  immediately after this flag for two.pdb
+*   -h            show this help
+*   -re           reduce the provided PDBs and exit
+*   -reduce       reduce the provided PDBs before running mpcompare analysis
+*   -table        print csv of per-residue mpcompare analysis to stdout
+*
 *****************************************************************************/
 // EVERY *top-level* page must start this way:
 // 1. Define it's relationship to the root of the MolProbity installation.
@@ -22,16 +36,46 @@
 // 6. Unlimited memory for processing large files
   ini_set('memory_limit', -1);
 
+// {{{ argument parsing and validating
 $return_table = false;
 $reduce = false;
 $reduce_n_exit = false;
+$chain_1 = false;
+$chain_2 = false;
+$show_help = false;
+$return_psa = false;
 // First argument is the name of this script...
-if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg) {
-  if(endsWith($arg,  ".pdb"))   $pdb_file_list[] = $arg;
-  elseif($arg == '-reduce')     $reduce = true;
-  elseif($arg == '-re')     $reduce_n_exit = true;
-  elseif($arg == '-table')      $return_table = true;
+if(is_array($_SERVER['argv'])) {
+  $arg_array = array_slice($_SERVER['argv'], 1);
+  foreach($arg_array as $key => $arg) {
+    if(endsWith($arg,  ".pdb"))   $pdb_file_list[] = $arg;
+    elseif($arg == '-reduce')     $reduce = true;
+    elseif($arg == '-re')         $reduce_n_exit = true;
+    elseif($arg == '-h')          $show_help = true;
+    elseif($arg == '-table')      $return_table = true;
+    elseif($arg == '-psa')        $return_psa = true;
+    elseif($arg == '-chain1')     $chain_1 = strtoupper($arg_array[$key +1]);
+    elseif($arg == '-chain2')     $chain_2 = strtoupper($arg_array[$key +1]);
+  }
 }
+// show help
+
+$help = "\n\n  MolProbity Compare - cmdline version\n\n";
+$help .= "  Usage: \n";
+$help .= "   /path/to/cmdline/mpcompare one.pdb two.pdb\n";
+$help .= "    where one.pdb is the 'improved' pdb.\n\n";
+$help .= "  Options:\n";
+$help .= "   -chain1       perform mpcompare analysis of only the chain specified \n";
+$help .= "                  immediately after this flag for one.pdb\n";
+$help .= "   -chain2       perform mpcompare analysis of only the chain specified \n";
+$help .= "                  immediately after this flag for two.pdb\n";
+$help .= "   -h            show this help\n";
+$help .= "   -re           reduce the provided PDBs and exit\n";
+$help .= "   -reduce       reduce the provided PDBs before running mpcompare analysis\n";
+$help .= "   -psa          print serialized array with keys 'table' and 'overall'\n";
+$help .= "   -table        print csv of per-residue mpcompare analysis to stdout\n\n";
+
+if($show_help) die($help);
 
 // ensure that the user provided two pdbs
 if(count($pdb_file_list) != 2)
@@ -44,34 +88,44 @@ foreach($pdb_file_list as $infile) {
   else die("'$infile' is not a file. Please provide only PDB files.\n");
 }
 
-if(count($confirmed_pdb_files) == 2) {
-  $pdb1 = $confirmed_pdb_files[0];
-  $pdb2 = $confirmed_pdb_files[1];
+$num = count($confirmed_pdb_files);
+if($num == 2) {
+  $pdb1 = basename($confirmed_pdb_files[0]);
+  $pdb2 = basename($confirmed_pdb_files[1]);
+} else die("Found $num PDB(s). Please provide two and only two PDB files.\n");
+
+// check that the two PDBs are in the same directory.
+if(dirname(realpath($pdb1)) != dirname(realpath($pdb2))) {
+  $err = "ERROR: The two PDBs are in different directories. They must be ";
+  $err .= "in the same directory.";
+  die($err);
 }
+// }}}
 
 // run reduce
 if($reduce || $reduce_n_exit) {
-  $cwd = getcwd();
+  $dir = dirname(realpath($confirmed_pdb_files[0]));
   $pdb1H = str_replace('.', 'H.', $pdb1);
   $pdb2H = str_replace('.', 'H.', $pdb2);
-  reduceNoBuild($cwd."/".$pdb1, $cwd."/".$pdb1H);
-  reduceNoBuild($cwd."/".$pdb2, $cwd."/".$pdb2H);
+  reduceNoBuild($dir."/".$pdb1, $dir."/".$pdb1H);
+  reduceNoBuild($dir."/".$pdb2, $dir."/".$pdb2H);
   if($reduce_n_exit) die();
 } else {
+  $dir = dirname(realpath($confirmed_pdb_files[0]));//getcwd();
   $pdb1H = $pdb1;
   $pdb2H = $pdb2;
 }
 
 // run residue analysis
 $res_ana = array();
-$cmd = MP_BASE_DIR."/cmdline/residue-analysis $pdb1H";
+$cmd = MP_BASE_DIR."/cmdline/residue-analysis $dir/$pdb1H";
 $out1 = shell_exec($cmd);
 $res_ana[] = $out1;
-$cmd = MP_BASE_DIR."/cmdline/residue-analysis $pdb2H";
+$cmd = MP_BASE_DIR."/cmdline/residue-analysis $dir/$pdb2H";
 $out2 = shell_exec($cmd);
 $res_ana[] = $out2;
-$modelID1 = substr($pdb1H, 0, strpos($pdb1H, ".pdb"));
-$modelID2 = substr($pdb2H, 0, strpos($pdb2H, ".pdb"));
+$modelID1_ = substr($pdb1H, 0, strpos($pdb1H, ".pdb"));
+$modelID2_ = substr($pdb2H, 0, strpos($pdb2H, ".pdb"));
 
 $mp1 = explode("\n", $res_ana[0]);
 $mp2 = explode("\n", $res_ana[1]);
@@ -81,67 +135,88 @@ $mpt2 = get_res_ana_array($mp2);
 $mph2 = get_mp_hierarchy($mpt2);
 // this will get the sequence of ALL chains in one sequence as we didn't
 // provide a chain
-$fasta = get_chain_sequences($mh1 = $mph1,  $modelID1 = $modelID1,
-  $mp2 = $mph2, $modelID2 = $modelID2);
+if($chain_1 !== false && $chain_2 !== false) {
+  $modelID1_ch = $modelID1_."_".$chain_1;
+  $modelID2_ch = $modelID2_."_".$chain_2;
+} else {
+  $modelID1_ch = $modelID1_;
+  $modelID2_ch = $modelID2_;
+}
+$fasta = get_chain_sequences($mh1 = $mph1,  $modelID1 = $modelID1_ch,
+  $mp2 = $mph2, $modelID2 = $modelID2_ch, 
+  $chain1 = $chain_1, $chain2 = $chain_2);
+if($chain_1 !== false && $chain_2 !== false) {
+  $mph_1 = split_mph_by_chain($mph1, $chain_1);
+  $mph_2 = split_mph_by_chain($mph2, $chain_2);
+} else {
+  $mph_1 = $mph1;
+  $mph_2 = $mph2;
+}
+// print_r($mph_2);
+// die();//$modelID1_ch."\n".$modelID2_ch."\n");
 // get ksdssp residues
-$ksdssp_1 = get_ksdssp($pdb1H);
-$ksdssp_2 = get_ksdssp($pdb2H);
+$ksdssp_1 = get_ksdssp($dir."/".$pdb1H);
+$ksdssp_2 = get_ksdssp($dir."/".$pdb2H);
 $mph_array = get_molprobity_compare_table(
   $fasta = $fasta,
-  $mph1 = $mph1, $modelID1 = $modelID1, $mph2 = $mph2,
-  $modelID2 = $modelID2, $chain1 = false, $chain2 = false, 
-  $ksdssp1 = $ksdssp_1, $ksdssp2 = $ksdssp_2);
+  $mph1 = $mph_1, $modelID1 = $modelID1_ch, $mph2 = $mph_2,
+  $modelID2 = $modelID2_ch, $chain1 = false, $chain2 = false, 
+  $ksdssp1 = $ksdssp_1, $ksdssp2 = $ksdssp_2, $directory = $dir);
 if(is_string($mph_array)) die("\n\n".$mph_array."\n\n");
 $mph_side_by_side = $mph_array[0];
 $mph_diff = $mph_array[1];
+// print_r($mph_diff);
 $low_identity = $mph_array[2];
 $diff_table = calculate_mpc_differences($table_mpcscores = $mph_diff,
-  $improved_model = $modelID1,
-  $original_model = $modelID2);
-// start writing mpc table (when '-table' flag is present)
-if($return_table) {
-  $mpc_table_raw = get_mpc_sbs_chart($mpc_t = $mph_side_by_side,
-    $model1_name = $modelID1, $model2_name = $modelID2, $return_mpc_array=true);
-  $mpc_table = get_database_table($mpc_t = $mpc_table_raw);
-  // print a CSV string
-  echo implode(",", array_keys($mpc_table[0]))."\n";// print column headers
-  foreach($mpc_table as $res)
-    echo implode(",", $res)."\n";
-  // echo print_r($mpc_table);
+  $improved_model = $modelID1_ch,
+  $original_model = $modelID2_ch);
+
+// writing mpc table to $table
+$mpc_table_raw = get_mpc_sbs_chart($mpc_t = $mph_side_by_side,
+  $model1_name = $modelID1_ch, $model2_name = $modelID2_ch, 
+  $return_mpc_array=true);
+$mpc_table = get_database_table($mpc_t = $mpc_table_raw, 
+  $minus_unpaired_res = true);
+// print a CSV string
+$table = implode(",", array_keys($mpc_table[0]))."\n";// print column headers
+foreach($mpc_table as $res)
+  $table .= implode(",", $res)."\n";
+
+// write overall to $overall (default output)
+$overall_array = get_changes_overall($diff_array = $diff_table,
+  $return_array = true);
+$clash =        "Clash              ";
+$ramachandran = "Ramachandran       ";
+$rotamer =      "Rotamer            ";
+$cbeta =        "cB deviations      ";
+$bondl =        "Bond Lengths       ";
+$bonda =        "Bond Angle         ";
+foreach($overall_array['clash'] as $key => $value) {
+  $c = $overall_array['clash'][$key];
+  $clash .= $c.get_multiple_string(15 - strlen($c), " ");
+  $c = $overall_array['rama'][$key];
+  $ramachandran .=  $c.get_multiple_string(15 - strlen($c), " ");
+  $c = $overall_array['rot'][$key];
+  $rotamer .=  $c.get_multiple_string(15 - strlen($c), " ");
+  $c = $overall_array['cb'][$key];
+  $cbeta .=  $c.get_multiple_string(15 - strlen($c), " ");
+  $c = $overall_array['bl'][$key];
+  $bondl .=  $c.get_multiple_string(15 - strlen($c), " ");
+  $c = $overall_array['ba'][$key];
+  $bonda .=  $c.get_multiple_string(15 - strlen($c), " ");
 }
-// start writing overall output variables (default output)
-else{
-  $overall_array = get_changes_overall($diff_array = $diff_table,
-    $return_array = true);
-  $clash =        "Clash              ";
-  $ramachandran = "Ramachandran       ";
-  $rotamer =      "Rotamer            ";
-  $cbeta =        "cB deviations      ";
-  $bondl =        "Bond Lengths       ";
-  $bonda =        "Bond Angle         ";
-  foreach($overall_array['clash'] as $key => $value) {
-    $c = $overall_array['clash'][$key];
-    $clash .= $c.get_multiple_string(15 - strlen($c), " ");
-    $c = $overall_array['rama'][$key];
-    $ramachandran .=  $c.get_multiple_string(15 - strlen($c), " ");
-    $c = $overall_array['rot'][$key];
-    $rotamer .=  $c.get_multiple_string(15 - strlen($c), " ");
-    $c = $overall_array['cb'][$key];
-    $cbeta .=  $c.get_multiple_string(15 - strlen($c), " ");
-    $c = $overall_array['bl'][$key];
-    $bondl .=  $c.get_multiple_string(15 - strlen($c), " ");
-    $c = $overall_array['ba'][$key];
-    $bonda .=  $c.get_multiple_string(15 - strlen($c), " ");
-  }
-  echo "                   Reduction      Actual         Reduction      # of Original  Outliers       Remaining\n";
-  echo "                   Target         Reduction      Ratio          Outliers       Eliminated     Outliers\n";
-  echo $clash."\n";
-  echo $ramachandran."\n";
-  echo $rotamer."\n";
-  echo $cbeta."\n";
-  echo $bondl."\n";
-  echo $bonda."\n";
-}
+$overall = "                   Reduction      Actual         Reduction      # of Original  Outliers       Remaining\n";
+$overall .= "                   Target         Reduction      Ratio          Outliers       Eliminated     Outliers\n";
+$overall .= $clash."\n";
+$overall .= $ramachandran."\n";
+$overall .= $rotamer."\n";
+$overall .= $cbeta."\n";
+$overall .= $bondl."\n";
+$overall .= $bonda."\n";
+
+if($return_table) echo $table;
+elseif($return_psa) echo serialize(array('table' => $table, 'overall' => $overall));
+else echo $overall;
 
 // {{{ get_multiple_string
 function get_multiple_string($num, $string)
