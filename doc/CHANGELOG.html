@@ -95,6 +95,14 @@
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
+### 3.19 ###
+- Wrapped up changes to move to version 3.19 with changing out Reduce executables
+  found in /molprobity3/bin/linux and /macosx.  
+  The Linux exec was downloaded from the Phenix compile farm (duke_downloads); 
+  it is version 3.15.091106, 32bit.  Tested on the mcp linux box.
+  The MacOSX exec was compiled on dewar running 10.6 against the 10.5 libraries.
+  It contains intel chipset 32bit and 64bit execs and PPC chipset 32 bit exec.
+  It was tested on intel 10.5 32bit, intel 10.6 32 and 64 bit.
 ### pre 3.19 please combine with other's changes of 3.19 ###
 - 110611, svn rev 373 change to file: analyze.php function: findRotaOutliers
     commented out: #if($res['scorePct'] <= 1.0)
