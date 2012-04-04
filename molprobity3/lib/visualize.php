@@ -12,7 +12,8 @@ require_once(MP_BASE_DIR.'/lib/eff_resol.php');
 ############################################################################
 function makeRamachandranKin($infile, $outfile)
 {
-    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/hless.jar hless.Ramachandran -nosummary $infile > $outfile");
+    //exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/hless.jar hless.Ramachandran -nosummary $infile > $outfile");
+    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -kinplot $infile > $outfile");
 }
 #}}}########################################################################
 
@@ -496,7 +497,10 @@ function makeBadRamachandranKin($infile, $outfile, $rama = null, $color = 'green
     fclose($out);
     
     // Jane still likes this best.
-    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/hless.jar hless.Ramachandran -nosummary -outliers $color < $infile >> $outfile");
+    //exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/hless.jar hless.Ramachandran -nosummary -outliers $color < $infile >> $outfile");
+    
+    // New ramachandran kin from chiropraxis
+    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -kinmarkup $infile >> $outfile");
     
     // This uses Prekin, but just produces chunks of mainchain. Hard to see.
     /*if(!$rama)
@@ -1056,16 +1060,18 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
         {
             $res[$item['resName']]['rama_val'] = $item['scorePct'];
             $phipsi = sprintf("%.1f,%.1f", $item['phi'], $item['psi']);
-            if($item['eval'] == "OUTLIER")
-            {
+            if (isset($item['type'])) {
+              if($item['eval'] == "OUTLIER")
+              {
                 $res[$item['resName']]['rama'] = "$item[eval] ($item[scorePct]%)<br><small>$item[type] / $phipsi</small>";
                 $res[$item['resName']]['rama_isbad'] = true;
                 $res[$item['resName']]['any_isbad'] = true;
                 // ensures that all outliers sort to the top, b/c 0.2 is a Gly outlier but not a General outlier
                 $res[$item['resName']]['rama_val'] -= 100.0;
+              }
+              else
+              $res[$item['resName']]['rama'] = "$item[eval] ($item[scorePct]%)<br><small>$item[type] / $phipsi</small>";
             }
-            else
-                $res[$item['resName']]['rama'] = "$item[eval] ($item[scorePct]%)<br><small>$item[type] / $phipsi</small>";
         }
     }
     if(is_array($rota))
