@@ -73,7 +73,7 @@ Create and view interactive 3-D graphics
 from your web browser.</p>
 
 <h3>What's new in 3.19:</h3><ul>
-<li>JiffiLoop moved to main page, more options enabled.</li>
+<li>New Top8000 Ramachandran validation information.</li>
 </ul>
 </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>
 
