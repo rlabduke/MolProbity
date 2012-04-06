@@ -68,7 +68,7 @@ function get_div_html($info, $num, $param, $res=false)
 *  first element and if [color] is defined than means 'A   1' has a '#'
 *  outlier. Obviously '#' is never an outlier! But 'clash > 0.4Œ' can be.
 **/
-function vert_to_horiz($table)
+function vert_to_horiz($table, $keep_HOH = false)
 {
   $head_keys;
   # populates $header_array for only first array in $table['headers']
@@ -82,15 +82,13 @@ function vert_to_horiz($table)
     }
     if ($is_first) $is_first = False;
   }
-  // I don't believe that $header_html is even used, could probably eliminate
-  // the next three lines of code and be fine. Commenting out the next 3 lines on 5/13/2011...delete if its a month later
-  //$header_html;
-  //foreach($head_keys as $key => $html)
-    //$header_html[$key] = $html;
   $rows_array;
   foreach($table['rows'] as $row) {
     foreach($row as $key => $cell) {
-      $rows_array[$head_keys[$key]][] = array('html' => $cell['html'], 'color' => $cell['color']);
+      if ($row[1]['html'] != "HOH")
+        $rows_array[$head_keys[$key]][] = array('html' => $cell['html'], 'color' => $cell['color']);
+      elseif ($keep_HOH)
+        $rows_array[$head_keys[$key]][] = array('html' => $cell['html'], 'color' => $cell['color']);
     }
   }
   foreach($rows_array['#'] as $key => $res_info)
@@ -130,8 +128,52 @@ function get_mparam_hierarchy($table, $modelID)
 }
 // }}}
 
+// {{{ standard_deviation; returns standard deviation float
+function standard_deviation($aValues, $bSample = false)
+{
+    $fMean = array_sum($aValues) / count($aValues);
+    $fVariance = 0.0;
+    foreach ($aValues as $i) {
+        $fVariance += pow($i - $fMean, 2);
+    }
+    $fVariance /= ( $bSample ? count($aValues) - 1 : count($aValues) );
+    return (float) sqrt($fVariance);
+}
+// }}}
+
+// {{{ get_avg_percent; returns array 
+function get_avg_percent($ar, $percent=10)
+/*******************************************************************************
+*
+*  Takes the given array, $ar, and takes its values, assumed to be int or float,
+*  and finds the average and a percentage value according to the given $percent.
+*  Returns an arrary with keys 'average', 'stddev, and 'percent_value'.
+*  percent_value is a value in the array where $percent% of the data is above
+*  that value.
+*
+*******************************************************************************/
+{
+  $sum = 0;
+  foreach ($ar as $v) $sum += $v;
+  $return_array = array('average' => round($sum/count($ar), 3));
+  $a = array_values($ar);
+  sort($a);
+  $return_array['percent_value'] = $a[round(count($ar) - $percent*0.01*count($ar))];
+  $return_array['stddev'] = round(standard_deviation($a), 3);
+  // return $a;
+  return $return_array;
+}
+// }}}
+
+// {{{ remove_waters_from_multi
+function remove_waters_from_multi($table)
+{
+  
+}
+// }}}
+
 // {{{ get_horizontal_chart
-function get_horizontal_chart($table)
+function get_horizontal_chart($table, $b_percent = 10)
 {
   $rows_array = vert_to_horiz($table);
   
@@ -143,21 +185,29 @@ function get_horizontal_chart($table)
     'TYR' => 'Y');
   # $mp_params is used to populate the HTML horizontal table
   $nums;
+  $chains = array();
   if(isset($rows_array["#"])) {
-    foreach($rows_array["#"] as $key => $num)
+    foreach($rows_array["#"] as $key => $num) {
       $nums[] = $num['html'];
-  }
-  $high_b;
-  if(isset($rows_array["high b"])) {
-    foreach($rows_array["high b"] as $key => $b)
-      $high_b[$nums[$key]] = $b['html'];
+      $ch = substr($num['html'], 0, 1);
+      if (!in_array($ch, $chains)) $chains[] = $ch; 
+    }
   }
   $mp_params;
   if(isset($rows_array["clash &gt; 0.4&aring;"])) {
     foreach($rows_array["clash &gt; 0.4&aring;"] as $key => $res){
-      if($res['color'])
-        $html = get_img_html('img/clash_out.png', $key.":clash");
-      else
+      if($res['color']) {
+        $overlap = get_clash_overlap($res['html']);
+        // if($overlap < 0.7) $clash_img = 'img/clash_outA.png';
+        // elseif($overlap < 1.0) $clash_img = 'img/clash_outB.png';
+        // elseif($overlap < 1.3) $clash_img = 'img/clash_outC.png';
+        // else $clash_img = 'img/clash_outD.png';
+        if($overlap < 0.7) $clash_img = 'img/clash_outA.png';
+        // elseif($overlap < 1.0) $clash_img = 'img/clash_outB.png';
+        elseif($overlap < 1.0) $clash_img = 'img/clash_outC.png';
+        else $clash_img = 'img/clash_outD.png';
+        $html = get_img_html($clash_img, $key.":clash");
+      } else
         $html = get_img_html('img/no_out.png', $key.":clash");
       $html .= get_div_html($res['html'], $key.":clash", "Clash");
       $mp_params["clash &gt; 0.4&aring;"][$key]['img'] = $html; 
@@ -217,24 +267,47 @@ function get_horizontal_chart($table)
     foreach($rows_array["#"] as $key => $num)
       $mp_params["#"][$key]['img'] = $num['html'];
   }
+  $HOH_residues;
+  if(isset($rows_array["res"])) {
+    foreach($rows_array["res"] as $key => $res) {
+      if ($res['html'] == "HOH") $HOH_residues[] = $key;
+    }
+  }
+  $high_b;
+  if(isset($rows_array["high b"])) {
+    foreach($rows_array["high b"] as $key => $b) {
+      if (!in_array($key, $HOH_residues)) $high_b[$key] = $b['html'];
+    }
+    $average_stddev = get_avg_percent($high_b, $b_percent);
+    foreach($rows_array["high b"] as $key => $b) {
+      // change image
+      if ($high_b[$key] > $average_stddev['percent_value'])
+        $html = get_img_html('img/hiB_out.png', $key.":hiB");
+      else $html = get_img_html('img/no_out.png', $key.":hiB");
+      $html .= get_div_html($high_b[$key], $key.":hiB", "High B");
+      $mp_params["High $b_percent% B"][$key]['img'] = $html; 
+    }
+  }
   # turn 3-letter aa code into 1-letter aa code
   if(isset($rows_array["res"])) {
     foreach($rows_array["res"] as $key => $aa) {
       $div_id = $nums[$key].":n";
-      $html = "<center><a onmouseover=\"ShowContent('$div_id'); return true;\"";
-      $html .= "onmouseout=\"HideContent('$div_id'); return true;\">\n";
+      $html = "<center><a onmouseover=\"ShowContent('$key:n'); return true;\"";
+      $html .= "onmouseout=\"HideContent('$key:n'); return true;\">\n";
       if(array_key_exists($aa['html'], $aa_3_1)) 
         $symb = $aa_3_1[$aa['html']];
       elseif($aa['html'] == "HOH")
         $symb = "<img src = 'img/water.png' width=15px>";
       else $symb = "?";
       $html .= $symb."</a></center>\n";
-      $html .= get_div_html("High B: ".$high_b[$nums[$key]], $div_id, $aa['html']);
+      $html .= get_div_html("High B: ".$high_b[$key], $key.":n", $aa['html']);
       $mp_params["res"][$key]['img'] = $html;
     }
   }
+  
   //}}} Determine outliers END###########################
 
+  
   $s = "<html>\n<body>\n";
   $s .= "\n<table frame=void rules=all width = '100%'>\n";
   $heads;
@@ -242,8 +315,12 @@ function get_horizontal_chart($table)
     $s .= "    <tr>\n";
     if($header != "#") {
       $heads[] = $header;
-      foreach($res_num as $residue) 
-        $s .= "        <td style='height:22.5px'>".$residue['img']."</td>\n";
+      foreach($res_num as $key => $residue) { 
+        $chain = substr($key, 0, 1);
+        if (array_search($chain, $chains)%2 and $header == "res") $bgc = "#FFFFCC";
+        else $bgc = "#FFFFFF";
+        $s .= "        <td style='height:22.5px' bgcolor='$bgc'>".$residue['img']."</td>\n";
+      }
     }
   }
   $s .= "    </tr>\n</table>\n";
@@ -253,7 +330,10 @@ function get_horizontal_chart($table)
   foreach($heads as $head) $k .= "  <tr><td style='height:22.5px'>".ucwords($head)."</td></tr>\n";
   $k .= "</table>\n</body>\n</html>";
   $k = str_replace("Res", "Residue", $k);
-  return array("table" => $s, "key" => $k);
+  $k = str_replace("&aring", "&Aring", $k);
+  //return array("table" => $rows_array, "key" => $k);
+  return array("table" => $s, "key" => $k, "p" => $chains);
+  // return array("table" => $rows_array["res"], "key" => $nums);
 }
 //}}}
 
@@ -680,7 +760,12 @@ function get_mpc_sbs_chart($mpc_t, $model1_name, $model2_name,
     $mpc_data[$key]['high b'][2] = $res['high b']['html2'];
     
     if($res['clash &gt; 0.4&aring;']['color1']) {
-      $html = get_img_html('img/mpc_out1.png', $chain_num1.":clash1");
+      $overlap = get_clash_overlap($res['clash &gt; 0.4&aring;']['html1']);
+      #defines what color of triangle to put down based on degree of overlap
+      if($overlap < 0.8) $clash_img = 'img/clashA_1.png';
+      elseif($overlap < 1.2) $clash_img = 'img/clashB_1.png';
+      else $clash_img = 'img/clashC_1.png';
+      $html = get_img_html($clash_img, $chain_num1.":clash1");
       $bool = true;
     }else {
       $html = get_img_html('img/mpc_noout.png', $chain_num1.":clash1");
@@ -695,7 +780,12 @@ function get_mpc_sbs_chart($mpc_t, $model1_name, $model2_name,
     }
     $mpc_data[$key]['clash &gt; 0.4&aring;'][1] = $c;
     if($res['clash &gt; 0.4&aring;']['color2']) {
-      $html = get_img_html('img/mpc_out2.png', $chain_num1.":clash2");
+      $overlap = get_clash_overlap($res['clash &gt; 0.4&aring;']['html2']);
+      #defines what color of triangle to put down based on degree of overlap
+      if($overlap < 0.8) $clash_img = 'img/clashA_2.png';
+      elseif($overlap < 1.2) $clash_img = 'img/clashB_2.png';
+      else $clash_img = 'img/clashC_2.png';
+      $html = get_img_html($clash_img, $chain_num1.":clash2");
       $bool = true;
     }else {
       $html = get_img_html('img/mpc_noout.png', $chain_num1.":clash2");
@@ -2127,6 +2217,18 @@ function get_database_table($mpc_t, $minus_unpaired_res = false)
     } else $db_table[] = $arr;
   }
   return $db_table;
+}
+// }}}
+
+// {{{ get_clash_overlap
+function get_clash_overlap($clash_html)
+/****************************************************************
+*
+* returns the clash overlap in angstroms from $clash_html
+*
+****************************************************************/
+{
+  return substr($clash_html, 0, strpos($clash_html, "&Aring"));
 }
 // }}}
 

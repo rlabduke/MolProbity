@@ -16,6 +16,7 @@
 *   -h            show this help
 *   -re           reduce the provided PDBs and exit
 *   -reduce       reduce the provided PDBs before running mpcompare analysis
+*   -psa          print serialized array with keys 'table' and 'overall'
 *   -table        print csv of per-residue mpcompare analysis to stdout
 *
 *****************************************************************************/

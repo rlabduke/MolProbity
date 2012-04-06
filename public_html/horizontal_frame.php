@@ -95,13 +95,16 @@ clearstatcache();
 $data = fread($in, filesize($file));
 $table = mpUnserialize($data);
 fclose($in);
+
 $frame = get_horizontal_chart($table);
 // this page is the frame containing the horizontal multi_chart;
 // if 'table=x' is in the URL then the chart is displayed, if 'key=x' is in the
 // URL then the key for the chart is displayed.
 if(isset($_REQUEST['key'])) echo $frame['key'];
-if(isset($_REQUEST['table']))
-  echo $frame['table'];
+if(isset($_REQUEST['table'])) echo $frame['table'];
+// echo "<pre>";
+// echo print_r($frame['p']);
+// echo "</pre>";
 ?>
 </body>
 </html>
