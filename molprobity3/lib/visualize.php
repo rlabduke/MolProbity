@@ -909,7 +909,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             }
             $geomOutPct = sprintf("%.2f", 100.0 * $outCount / $total);
             if ($outCount/$total < 0.005)    $bg = $bgFair;
-            if ($outCount/$total < 0.000001)    $bg = $bgGood;
+            if ($outCount/$total < 0.001)    $bg = $bgGood;
             else                            $bg = $bgPoor;
             $entry .= "<td>Residues with bad angles:</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <0.1%</td></tr>\n";
         }
