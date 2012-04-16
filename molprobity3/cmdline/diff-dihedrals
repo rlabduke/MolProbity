@@ -1,0 +1,95 @@
+#!/usr/bin/env php
+<?php # (jEdit options) :folding=explicit:collapseFolds=1:
+/*****************************************************************************
+INPUTS / SWITCHES (via $_SERVER['argv']):
+    inFile1         a PDB file to operate on
+    inFile2         a PDB file to operate on
+
+OUTPUTS / RESULTS:
+    A difference-dihedral plot for phi and psi in kinemage format
+
+*****************************************************************************/
+// EVERY *top-level* page must start this way:
+// 1. Define it's relationship to the root of the MolProbity installation.
+// Pages in subdirectories of lib/ or public_html/ will need more "/.." 's.
+    if(!defined('MP_BASE_DIR')) define('MP_BASE_DIR', realpath(dirname(__FILE__).'/..'));
+// 2. Include core functionality - defines constants, etc.
+    require_once(MP_BASE_DIR.'/lib/core.php');
+    require_once(MP_BASE_DIR.'/lib/analyze.php');
+// 3. Restore session data. If you don't want to access the session
+// data for some reason, you must call mpInitEnvirons() instead.
+    mpInitEnvirons();       // use std PATH, etc.
+    //mpStartSession(true);   // create session dir
+// 5. Set up reasonable values to emulate CLI behavior if we're CGI
+    set_time_limit(0); // don't want to bail after 30 sec!
+
+#{{{ a_function_definition - sumary_statement_goes_here
+############################################################################
+/**
+* Documentation for this function.
+*/
+//function someFunctionName() {}
+#}}}########################################################################
+
+#{{{ loadPhiPsis - run Dang to get phi/psi by residue
+############################################################################
+function loadPhiPsis($infile)
+{
+    exec("dang -q $infile", $lines);
+    
+    $out = array();
+    foreach($lines as $line)
+    {
+        $fields = explode(':', $line);
+        $type = trim($fields[4]);
+        if($type == 'phi' || $type == 'psi')
+        {
+            $name = substr($fields[1], 1).'#'.$type;
+            $out[$name] = $fields[5]+0;
+        }
+    }
+    
+    return $out;
+}
+#}}}########################################################################
+
+# MAIN - the beginning of execution for this page
+############################################################################
+// First argument is the name of this script...
+if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
+{
+    if(!isset($inFile1))        $inFile1 = $arg;
+    elseif(!isset($inFile2))    $inFile2 = $arg;
+    else                        die("Too many or unrecognized arguments: '$arg'\n");
+}
+
+if(!isset($inFile1))        die("No first input file specified.\n");
+elseif(!is_file($inFile1))  die("First input file '$inFile1' does not exist.\n");
+if(!isset($inFile2))        die("No second input file specified.\n");
+elseif(!is_file($inFile2))  die("Second input file '$inFile2' does not exist.\n");
+
+$angles1 = loadPhiPsis($inFile1);
+$angles2 = loadPhiPsis($inFile2);
+
+$diff = array();
+foreach($angles1 as $k => $v)
+{
+    if(!isset($angles2[$k])) continue;
+    $d = abs($angles1[$k] - $angles2[$k]);
+    if($d > 180) $d = 360 - $d;
+    $diff[$k] = $d;
+}
+//print_r($angles1);
+//print_r($angles2);
+//print_r($diff);
+
+echo "@flatland\n";
+echo "@vectorlist {phi/psi diff per res}\n";
+$i = 0;
+foreach($diff as $k => $v) { echo "{{$k}} $i $v 0\n"; $i++; }
+
+
+############################################################################
+// Clean up and go home
+//mpDestroySession(); // only call this if we created one
+?>

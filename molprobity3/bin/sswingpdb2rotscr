@@ -1,0 +1,25 @@
+ #name: SSwingpdb2rotscr
+ #author: Mike Word
+ #date written: 8/13/99
+ #purpose: build a rotation script for rotating or mutating a residue
+ #usage: SSwingpdb2rotscr pdbfile res# NEWaaa [chainID]> my.rotscr
+
+ ### if the protein has chain a, chain b,... in PDB file,
+ ### choose first command line and change "chainid" as your expected
+ ### chain, otherwise choose the second command line
+ ### modified by Shuren Wang on 02/18/2003
+
+if  (($# ==4))
+  then
+	    prekin $1 - -scope -show "sc,hy" -chainid $4 -mutate $2 $3 -append |\
+      sswingmkrotscrByPerl - $2 $1
+fi
+
+if (($# == 3))
+  then
+       prekin $1 - -scope -show  "sc,hy"  -mutate $2 $3 -append | \
+       sswingmkrotscrByPerl - $2 $1
+#  else
+#       echo "Usage: sswingpdb2rotscr pdbfile res# NEWaaa [chainID] > my.rotscr"
+
+fi

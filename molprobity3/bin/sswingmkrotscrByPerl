@@ -1,0 +1,274 @@
+#!/usr/bin/perl -w
+
+#name: sswingmkrotscrByPerl
+#author: Mike Word
+#date written: 2/22/99
+#purpose: convert bondrot section of kin file into autobondrot script format
+#modified: 7/20/99 - jmw - radically changed to support -autobondrot within probe
+# usage:  sswingmkrotscrByPerl my.kin 99 my.pdb > my.rotscr
+# change AWK to Perl on 2/14/2003 by Shuren Wang
+# fix His, Trp, Pro, Phe and Tyr bugs (atom duplicated) 
+# add some option " within 12 of $X, $Y, $Z
+
+$[ = 1;			# set array base to 1
+my $pdbfile=$ARGV[3];
+my $resnum=$ARGV[2];
+my @id;
+
+@ARGV=($ARGV[1], $ARGV[3]);
+
+
+line: while (<>) {
+  chomp;	# strip record separator
+#  @Fld = split(' ', $_, 9999);
+  if ($. == 1) {
+  	$nov = 0;
+	  $inside = 0;
+	  $nstack = 0;
+    if (!$pdbfile) {
+    	  $pdbfile = 'pdbfile';	
+    }
+	  $prevrotnum = 0;
+    $atom=0;
+#	  printf (('probe -q -stdbonds -3 -drop '));
+#	  printf "-once \"file1\" \"file1 | file2 alta not water not(sc %d)\" -auto - %s <<END_OF_INPUT\n",
+#                              $resnum+0, $pdbfile;
+  }
+
+  if (/^[ \t]*@(sub)*group/) {
+	  # found @group or @subgroup
+	   while ($nstack > 0) {
+	      $ov{$nov++} = sprintf(')');
+	      $nstack--;
+    }
+  	$inside = 0;
+  }
+  if (/^[ \t]*@.*[0-9]bondrot/) {
+	   # found an @bondrot command
+	   $cursor = $_;
+	   $offset = $cursor =~ /\{/ && ($RLENGTH = length($&), $RSTART = length($`)+1);
+	   $cursor = substr($cursor, $offset + 1, 999999);
+	   $M = ($cursor =~ /\}/ && ($RLENGTH = length($&), $RSTART = length($`)+1)) - 1;
+	   $id = substr($cursor, 1, $M);
+
+	   @b = split('bondrot', $_, 9999);
+	   $nc = (@c = split(' ', $b[1]));
+	   $rotnum = $c[$nc] + 0;
+	   $angle = $b[2] + 0;
+	   if (!$inside) {
+	      $ov{$nov++} = sprintf('(');
+	      ++$nstack;
+	   }
+	   $lastpointid = '';
+	   if ($rotnum == 0) {
+	      $pointcount = 2;
+	      while ($nstack > 0) {
+		       $ov{$nov++} = sprintf(')');
+		       $nstack--;
+	      }
+	   }
+	   else {
+	       $pointcount = 0;
+	       $xformprefix = sprintf('bondrot:%s:%.1f:  0:359:5', $id, $angle);
+	   }
+	   $inside = 1;
+	   $prevrotnum = $rotnum;
+	   next line;
+  }
+  if (/^[ \t]*@/) {
+	# found an @ command, vectors begin with a move
+	   $nextmode = 'move';
+  }
+  if ($inside && ($_ !~ /^[ \t]*@/) && ($_ =~ /\{[^\}]*\}/)) {
+   	  # (bondrot) point
+	    $cursor = $_;
+  	  $offset = $cursor =~ /\{/ && ($RLENGTH = length($&), $RSTART = length($`)+1);
+	    while ($offset > 0) {
+	      # loop over each pointid
+	      $cursor = substr($cursor, $offset + 1, 999999);
+	      $M = ($cursor =~ /\}/ && ($RLENGTH = length($&), $RSTART = length($`)+1)) - 1;
+	      $id = substr($cursor, 1, $M);
+	      if ($id eq "\"") {
+	       	$id = $lastpointid;
+	      }
+
+	    &checkid();
+	    $lastpointid = $id;
+	    $cursor = substr($cursor, $M + 2, 999999);
+
+	    if ($cursor =~ /^[ \t]*[PpMm]/) {
+		       $mode = 'move';
+	    }elsif ($cursor =~ /^[ \t]*[LlDd]/) {
+		       $mode = 'draw';
+      }else {
+		       $mode = $nextmode;
+      }
+      $nextmode = 'draw';
+      $pointcount++;
+
+	    # look for another point (will loop if neccessary)
+  	  $offset = $cursor =~ /\{/ && ($RLENGTH = length($&), $RSTART = length($`)+1);
+
+	    # save the fragment containing xyz position
+	    if ($offset > 0) {
+		      $pointinfo = substr($cursor, 1, $offset - 1);
+	    }
+	    else {
+		      $pointinfo = $cursor;
+	    }
+
+	    #blank out all the stuff not related to the xyz position
+	    $pointinfo =~ s/[a-zA-Z\t,]/ /g;
+
+	    @c = split(' ', $pointinfo);
+	    $X = $c[1] + 0;
+	    $Y = $c[2] + 0;
+	    $z = $c[3] + 0;
+
+	    # first two points define the axis
+	    # otherwise write atoms at the far ends of line segments
+	    if ($pointcount == 1) {
+		        $seg1 = sprintf('%6.3f:%6.3f:%6.3f', $X, $Y, $z);
+	    }
+	    elsif ($pointcount == 2) {
+		        $seg2 = sprintf('%6.3f:%6.3f:%6.3f', $X, $Y, $z);
+
+		        $ov{$nov++} = sprintf('# %d', $rotnum);
+
+            if ($atom==0)
+            {
+           	  printf (('probe -q -stdbonds -3 -drop '));
+	            printf "-once \"file1 \" \"file1 | file2 alta not water not(sc %d) within 12 of %6.3f,%6.3f,%6.3f\" -auto - %s <<END_OF_INPUT\n",
+                               $resnum+0, $X, $Y, $z, $pdbfile;
+              $atom++;
+            }
+		        $ov{$nov++} = sprintf('atom  %5d %s   %8.3f%8.3f%8.3f%6.2f%6.2f', 1, $id,
+		                                                   $X, $Y, $z, 1, 0);
+		        $ov{$nov++} = sprintf('%s:%s:%s', $xformprefix, $seg1, $seg2);
+		        $ov{$nov++} = sprintf('cos:-3:60:3:');
+	    }
+	   # modified and fix atom duplication bug for His, Phe, Tyr, Trp and Pro
+     # by Shuren Wang on Feb 17, 2003
+     elsif ($mode eq 'draw') {
+            my $duplicatedAtom=0;
+            for my $local_id (@id){
+              if ($local_id eq $id){
+                $duplicatedAtom=1;
+              }
+             }
+		        if($duplicatedAtom==0){
+               $ov{$nov++} = sprintf('atom  %5d %s   %8.3f%8.3f%8.3f%6.2f%6.2f', 1, $id,
+		                                                      $X, $Y, $z, 1, 0);
+               push (@id, $id);
+            }
+	    }
+	}
+ }
+#    print $_ if $resnum = $Fld[2];
+#    print $_ if $pdbfile = $Fld[3] . $Fld[1];
+}
+
+while ($nstack > 0) {
+    $ov{$nov++} = sprintf(')');
+    $nstack--;
+}
+$ni = 0;
+for ($i = 0; $i < $nov; $i++) {
+    $c1 = substr($ov{$i}, 1, 1);
+    if ($c1 eq '#') {
+     	$idxtype{$ni} = $c1;
+    	$idx{$ni++} = $i;
+    }
+    elsif ($c1 eq '(') {
+     	$idxtype{$ni} = $c1;
+    	$idx{$ni++} = $i;
+    }
+    elsif ($c1 eq ')') {
+    	$idxtype{$ni} = $c1;
+    	$idx{$ni++} = $i;
+    }
+}
+
+for ($i = 0; $i < $ni; $i++) {
+    if ($idxtype{$i} eq '#') {
+      	for ($j = $i + 1; $j < $ni; $j++) {
+	         if ($idxtype{$j} ne '#') {
+		          last;
+	         }
+	         $ri = substr($ov{$idx{$i}}, 2, 999999) + 0;
+	         $rj = substr($ov{$idx{$j}}, 2, 999999) + 0;
+	         if ($ri >= $rj) {	#???
+		           $idxtype{$i} = '';
+		           $idxtype{$j} = '';
+		           $ov{$idx{$i}} = '(';
+		           $ov{$idx{$j}} = ')';
+	         }
+	      }
+    }
+}
+
+
+for ($i = 0; $i < $nov; $i++) {
+    if ($ov{$i} !~ /^\#/) {
+	     printf "%s\n", $ov{$i};
+    }
+}
+
+printf (("\n"));
+printf "# rotation script generated by mkrotscr from %s\n", $ARGV;
+printf (("# editing checklist:\n"));
+printf (("# 1) verify bondrot angle names and ranges\n"));
+printf (("# 2) remove or modify cos functions as required\n"));
+printf (("# 3) drop any unrequired rotations or atoms\n"));
+printf (("# 4) drop any unneccessary \"(\", \")\" pairs\n"));
+printf (("# 5) if you want to generate specific orientations, add \"go\" statements\n"));
+printf (("# 6) if you want to run this script as a command\n"));
+printf (("#     A) make the script file executable (chmod +x file.rotscr)\n"));
+printf (("#     B) modify the probe command line as required\n"));
+printf (("#   otherwise, comment out the probe and END_OF_INPUT lines\n"));
+printf (("\n"));
+printf (("END_OF_INPUT\n"));
+
+
+sub checkid {
+    local($lenid, $pos, $ch, $ss1, $ss2, $ss3) = @_;
+    $lenid = length($id);
+
+    # trying to fix improper atom name
+
+    if ($lenid > 15) {
+      	$id = substr($id, 1, 15);
+    }
+    elsif ($lenid < 15) {
+	      $pos = $lenid;
+	      while ($pos > 0) {
+	      # find the last digit
+	         $ch = substr($id, $pos, 1);
+	         if ($ch =~ /[0-9]/) {
+		          last;
+	         }
+	         $pos--;
+	     }
+	     if ($pos > 1) {
+	        $pos--;
+	        while ($pos > 0) {
+		        # find the char before the number
+		        $ch = substr($id, $pos, 1);
+		        if ($ch !~ /-[0-9]/) {
+		               last;
+		        }
+		        $pos--;
+	        }
+	        # insert the space between them
+	        $ss1 = substr($id, 1, $pos);
+	        $ss2 = substr('                ', 1, 15 - $lenid);
+	        $ss3 = substr($id, $pos + 1, 999999);
+	        $id = $ss1 . $ss2 . $ss3;
+	     }
+	     else {
+	     # problem, could not find number
+	        $id = substr(($id . '                '), 1, 15);
+	    }
+   }
+}
+
