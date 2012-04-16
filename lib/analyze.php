@@ -87,8 +87,8 @@ function runAnalysis($modelID, $opts)
     if($opts['chartCoot'])      $tasks['cootchart'] = "Create chart for use in Coot";
     if($opts['doKinemage'])     $tasks['multikin'] = "Create multi-criterion kinemage";
     
-    $doRem40 = $opts['chartClashlist'] || $opts['chartRama'] || $opts['chartRota'];
-    if($doRem40)                $tasks['remark40'] = "Create REMARK  40 record for the PDB file";
+    //$doRem40 = $opts['chartClashlist'] || $opts['chartRama'] || $opts['chartRota'];
+    //if($doRem40)                $tasks['remark40'] = "Create REMARK  40 record for the PDB file";
     //}}} Set up file/directory vars and the task list
     
     //{{{ Run protein geometry programs and offer kins to user
@@ -333,12 +333,12 @@ function runAnalysis($modelID, $opts)
     //}}} Build multi-criterion chart, kinemage
     
     //{{{ Create REMARK  40 and insert into PDB file
-    if(is_array($clash) || is_array($rama) || is_array($rota))
-    {
-        setProgress($tasks, 'remark40'); // updates the progress display if running as a background job
-        $remark40 = makeRemark40($clash, $rama, $rota);
-        replacePdbRemark($infile, $remark40,  40);
-    }
+    //if(is_array($clash) || is_array($rama) || is_array($rota))
+    //{
+    //    setProgress($tasks, 'remark40'); // updates the progress display if running as a background job
+    //    $remark40 = makeRemark40($clash, $rama, $rota);
+    //    replacePdbRemark($infile, $remark40,  40);
+    //}
     //}}} Create REMARK  40 and insert into PDB file
     
     //{{{ Create lab notebook entry
@@ -813,7 +813,8 @@ function findRotaOutliers($rota)
 ############################################################################
 function runRamachandran($infile, $outfile)
 {
-    exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/hless.jar hless.Ramachandran -nokin -raw $infile > $outfile");
+    //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/hless.jar hless.Ramachandran -nokin -raw $infile > $outfile");
+    exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -raw $infile > $outfile");
 }
 #}}}########################################################################
 
@@ -839,7 +840,8 @@ function runRamachandran($infile, $outfile)
 */
 function loadRamachandran($datafile)
 {
-    $data = array_slice(file($datafile), 1); // drop first line
+    //$data = array_slice(file($datafile), 1); // drop first line
+    $data = file($datafile);
     $ret = array();
     foreach($data as $line)
     {
