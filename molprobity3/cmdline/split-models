@@ -87,7 +87,8 @@ $baseName = basename($inFile, ".pdb");
 $splitFiles = splitPdbModels($inFile);
 foreach($splitFiles as $number => $outFile)
 {
-    $destFile = $baseName.'_'.trim($number).'.pdb';
+    //$destFile = $baseName.'_'.trim($number).'.pdb';
+    $destFile = sprintf($baseName.'_%02d.pdb', $number);
     if($optVerbose) echo "$inFile > $destFile\n";
     copy($outFile, $outDir.'/'.$destFile);
     unlink($outFile);
