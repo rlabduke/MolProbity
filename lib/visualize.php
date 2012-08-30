@@ -736,12 +736,12 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
     if(is_array($clash))
     {
         $clashPct = runClashStats($resolution, $clash['scoreAll'], $clash['scoreBlt40']);
-        if($clashPct['pct_rank'] <= 33)     $bg = $bgPoor;
-        elseif($clashPct['pct_rank'] <= 66) $bg = $bgFair;
+        if($clashPct['pct_rank'] < 33)     $bg = $bgPoor;
+        elseif($clashPct['pct_rank'] < 66) $bg = $bgFair;
         else                                $bg = $bgGood;
         if ($clash['scoreAll']<0)           $bg = $bgFair; // for catching a bug with probe giving clashscore = -1
         $entry .= "<tr><td rowspan='2' align='center'>All-Atom<br>Contacts</td>\n";
-        $entry .= "<td>Clashscore, all atoms:</td><td bgcolor='$bg'>$clash[scoreAll]</td>\n";
+        $entry .= "<td>Clashscore, all atoms:</td><td colspan='2' bgcolor='$bg'>$clash[scoreAll]</td>\n";
         if ($clash['scoreAll']<0) {
           $entry .= "<td>unknown percentile<sup>*</sup> (N=$clashPct[n_samples], $clashPct[minresol]&Aring; - $clashPct[maxresol]&Aring;)</td></tr>\n";
         
@@ -764,7 +764,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             }
           }
           $entry .= "<td>$clashPct[pct_rank]<sup>".ordinalSuffix($clashPct['pct_rank'])."</sup> percentile<sup>*</sup> (N=$clashPct[n_samples], $percentileOut)</td></tr>\n";
-          $entry .= "<tr><td colspan='3'>Clashscore is the number of serious steric overlaps (&gt; 0.4 &Aring;) per 1000 atoms.</td></tr>\n";
+          $entry .= "<tr><td colspan='4'>Clashscore is the number of serious steric overlaps (&gt; 0.4 &Aring;) per 1000 atoms.</td></tr>\n";
         }
         //if($clashPct['pct_rank40'] <= 33)       $bg = $bgPoor;
         //elseif($clashPct['pct_rank40'] <= 66)   $bg = $bgFair;
@@ -795,7 +795,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             if($rotaOutPct+0 <= 1)      $bg = $bgGood;
             elseif($rotaOutPct+0 <= 5)  $bg = $bgFair;
             else                        $bg = $bgPoor;
-            $entry .= "<td>Poor rotamers</td><td bgcolor='$bg'>$rotaOutPct%</td>\n";
+            $entry .= "<td>Poor rotamers</td><td bgcolor='$bg'>$rotaOut</td><td bgcolor='$bg'>$rotaOutPct%</td>\n";
             $entry .= "<td>Goal: &lt;1%</td></tr>\n";
         }
         if(is_array($rama))
@@ -809,27 +809,16 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             if($firstRow) $firstRow = false;
             else $entry .= "<tr>";
 
-            if($ramaOut == 0) $bg = $bgGood;
+            if($ramaOutPct+0 <= 0.05) $bg = $bgGood;
             elseif($ramaOut == 1 || $ramaOutPct+0 <= 0.5) $bg = $bgFair;
             else $bg = $bgPoor;
-            $entry .= "<td>Ramachandran outliers</td><td bgcolor='$bg'>$ramaOutPct%</td>\n";
-            $entry .= "<td>Goal: &lt;0.2%</td></tr>\n";
+            $entry .= "<td>Ramachandran outliers</td><td bgcolor='$bg'>$ramaOut</td><td bgcolor='$bg'>$ramaOutPct%</td>\n";
+            $entry .= "<td>Goal: &lt;0.05%</td></tr>\n";
             if($ramaFavPct+0 >= 98)     $bg = $bgGood;
             elseif($ramaFavPct+0 >= 95) $bg = $bgFair;
             else                        $bg = $bgPoor;
-            $entry .= "<tr><td>Ramachandran favored</td><td bgcolor='$bg'>$ramaFavPct%</td>\n";
+            $entry .= "<tr><td>Ramachandran favored</td><td bgcolor='$bg'>$ramaFav</td><td bgcolor='$bg'>$ramaFavPct%</td>\n";
             $entry .= "<td>Goal: &gt;98%</td></tr>\n";
-        }
-        if(is_array($cbdev))
-        {
-            $cbOut = count(findCbetaOutliers($cbdev));
-            if($firstRow) $firstRow = false;
-            else $entry .= "<tr>";
-            
-            if($cbOut == 0) $bg = $bgGood;
-            else            $bg = $bgFair;
-            $entry .= "<td>C&beta; deviations &gt;0.25&Aring;</td><td bgcolor='$bg'>$cbOut</td>\n";
-            $entry .= "<td>Goal: 0</td></tr>\n";
         }
         if(is_array($clash) && is_array($rota) && is_array($rama))
         {
@@ -840,17 +829,18 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             $mer = getEffectiveResolution($clash, $rota, $rama);    // MolProbity Effective Resolution
             $mer_pct = getEffectiveResolutionPercentile($mer, $axr);
             
-            if(!$axr)                               $bg = $bgFair;  // unknown AXR
-            elseif($mer < $axr)                     $bg = $bgGood;  // below
-            elseif(abs(($mer-$axr)/$axr) <= 0.20)   $bg = $bgFair;  // within 20% of actual
-            else                                    $bg = $bgPoor;  // more than 20% above
-            if($mer_pct['pct_rank'] > 66)           $bg = $bgGood;  // to try to compensate for high-res structures looking worse than they are
+            /*if(!$axr)*/                             $bg = $bgFair;  // unknown AXR
+            //elseif($mer < $axr)                     $bg = $bgGood;  // below
+            //elseif(abs(($mer-$axr)/$axr) <= 0.20)   $bg = $bgFair;  // within 20% of actual
+            //else                                    $bg = $bgPoor;  // more than 20% above
+            if($mer_pct['pct_rank'] < 33)             $bg = $bgPoor;  // switch to using percentiles for bg colors vbc 120629
+            if($mer_pct['pct_rank'] >= 66)            $bg = $bgGood;  // to try to compensate for high-res structures looking worse than they are
             if (is_infinite($mer)) {
               $mer = -1;
               $bg = $bgFair;
             }
             
-            $entry .= "<td>MolProbity score<sup><small>^</small></sup></td><td bgcolor='$bg'>";
+            $entry .= "<td>MolProbity score<sup><small>^</small></sup></td><td colspan='2' bgcolor='$bg'>";
             $entry .= sprintf('%.2f', $mer);
             //$entry .= "</td><td>Goal: &lt;$axr</td></tr>\n";
             if ($mer == -1) {
@@ -871,6 +861,20 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
           //$entry .= "</td><td>$mer_pct[pct_rank]<sup>".ordinalSuffix($mer_pct['pct_rank'])."</sup> percentile<sup>*</sup> (N=$mer_pct[n_samples], $mer_pct[minresol]&Aring; - $mer_pct[maxresol]&Aring;)</td></tr>\n";
             }
         }
+        if(is_array($cbdev))
+        {
+            $cbOut = count(findCbetaOutliers($cbdev));
+            $cbTot = count($cbdev);
+            $cbOutPct = sprintf("%.2f", 100.0 * $cbOut / $cbTot);
+            if($firstRow) $firstRow = false;
+            else $entry .= "<tr>";
+            
+            if($cbOut == 0) $bg = $bgGood;
+            else            $bg = $bgFair;
+            if($cbOut/$cbTot > 0.05) $bg = $bgPoor;
+            $entry .= "<td>C&beta; deviations &gt;0.25&Aring;</td><td bgcolor='$bg'>$cbOut</td><td bgcolor='$bg'>$cbOutPct%</td>\n";
+            $entry .= "<td>Goal: 0</td></tr>\n";
+        }
         if(hasMoltype($bbonds, "protein"))
         {
             if($firstRow) $firstRow = false;
@@ -881,16 +885,16 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             foreach($bbonds as $cnit => $item) {
                 if($item['type'] == 'protein') {
                     if($item['isOutlier']) {
-                        $outCount += 1;
+                      $outCount += $item['outCount'];
                     }
-                    $total += 1;
+                    $total += $item['bondCount'];
                 }
             }
             $geomOutPct = sprintf("%.2f", 100.0 * $outCount / $total);
             if ($outCount/$total < 0.002)    $bg = $bgFair;
             if ($outCount/$total == 0.0)    $bg = $bgGood;
             else                            $bg = $bgPoor;
-            $entry .= "<td>Residues with bad bonds:</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: 0%</td></tr>\n";
+            $entry .= "<td>Bad backbone bonds:</td><td bgcolor='$bg'>$outCount / $total</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: 0%</td></tr>\n";
         }
         if(hasMoltype($bangles, "protein"))
         {
@@ -902,16 +906,16 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             foreach($bangles as $cnit => $item) {
                 if($item['type'] == 'protein') {
                     if($item['isOutlier']) {
-                        $outCount += 1;
+                        $outCount += $item['outCount'];
                     }
-                    $total += 1;
+                    $total += $item['angCount'];
                 }
             }
             $geomOutPct = sprintf("%.2f", 100.0 * $outCount / $total);
             if ($outCount/$total < 0.005)    $bg = $bgFair;
             if ($outCount/$total < 0.001)    $bg = $bgGood;
             else                            $bg = $bgPoor;
-            $entry .= "<td>Residues with bad angles:</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <0.1%</td></tr>\n";
+            $entry .= "<td>Bad backbone angles:</td><td bgcolor='$bg'>$outCount / $total</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <0.1%</td></tr>\n";
         }
     }// end of protein-specific stats
     $nucleicRows = 0;
@@ -930,9 +934,13 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             
             $pperpOut = count(findBasePhosPerpOutliers($pperp));
             $pperpTot = count($pperp);
-            if($pperpOut == 0)  $bg = $bgGood;
-            else                $bg = $bgFair;
-            $entry .= "<td>Probably wrong sugar puckers:</td><td bgcolor='$bg'>$pperpOut</td>\n";
+            $pperpOutPct = sprintf("%.2f", 100.0 * $pperpOut / $pperpTot);
+            
+            $bg = $bgFair;            
+            if($pperpOut == 0)             $bg = $bgGood;
+            if($pperpOut/$pperpTot > 0.05) $bg = $bgPoor;
+
+            $entry .= "<td>Probably wrong sugar puckers:</td><td bgcolor='$bg'>$pperpOut</td><td bgcolor='$bg'>$pperpOutPct%</td>\n";
             $entry .= "<td>Goal: 0</td></tr>\n";
         }
         if(is_array($suites))
@@ -942,10 +950,13 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             
             $suitesOut = count(findSuitenameOutliers($suites));
             $suitesTot = count($suites);
-            if($suitesOut == 0) $bg = $bgGood;
-            else                $bg = $bgFair;
-            $entry .= "<td>Bad backbone conformations<sup><small>#</small></sup>:</td><td bgcolor='$bg'>$suitesOut</td>\n";
-            $entry .= "<td>Goal: 0</td></tr>\n";
+            $suitesOutPct = sprintf("%.2f", 100.0 * $suitesOut / $suitesTot);
+            
+            $bg = $bgFair;
+            if($suitesOut/$suitesTot<= 0.05)    $bg = $bgGood;
+            if($suitesOut/$suitesTot > 0.15)    $bg = $bgPoor;
+            $entry .= "<td>Bad backbone conformations<sup><small>#</small></sup>:</td><td bgcolor='$bg'>$suitesOut</td><td bgcolor='$bg'>$suitesOutPct%</td>\n";
+            $entry .= "<td>Goal: <= 5%</td></tr>\n";
         }
         if(hasMoltype($bbonds, "rna"))
         {
@@ -957,16 +968,16 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             foreach($bbonds as $cnit => $item) {
                 if($item['type'] == 'rna') {
                     if($item['isOutlier']) {
-                        $outCount += 1;
+                        $outCount += $item['outCount'];
                     }
-                    $total += 1;
+                    $total += $item['bondCount'];
                 }
             }
             $geomOutPct = sprintf("%.2f", 100.0 * $outCount / $total);
             if ($outCount/$total < 0.002)    $bg = $bgFair;
             if ($outCount/$total < 0.000001)    $bg = $bgGood;
             else                            $bg = $bgPoor;
-            $entry .= "<td>Residues with bad bonds:</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: 0%</td></tr>\n";
+            $entry .= "<td>Bad bonds:</td><td bgcolor='$bg'>$outCount / $total</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: 0%</td></tr>\n";
         }
         if(hasMoltype($bangles, "rna"))
         {
@@ -978,24 +989,29 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             foreach($bangles as $cnit => $item) {
                 if($item['type'] == 'rna') {
                     if($item['isOutlier']) {
-                        $outCount += 1;
+                        $outCount += $item['outCount'];
                     }
-                    $total += 1;
+                    $total += $item['angCount'];
                 }
             }
             $geomOutPct = sprintf("%.2f", 100.0 * $outCount / $total);
             if ($outCount/$total < 0.005)    $bg = $bgFair;
             if ($outCount/$total < 0.001)    $bg = $bgGood;
             else                            $bg = $bgPoor;
-            $entry .= "<td>Residues with bad angles:</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <0.1%</td></tr>\n";
+            $entry .= "<td>Bad angles:</td><td bgcolor='$bg'>$outCount / $total</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <0.1%</td></tr>\n";
         }
     }
     $entry .= "</table>\n";
     $firstRow = true;
+    if(is_array($rota) || is_array($rama) || is_array($cbdev) || is_array($bbonds) || is_array($bangles) || is_array($pperp) || is_array($suites)) {
+        if($firstRow) $firstRow = false;
+        else $entry .= "<br>";
+        $entry .= "<small>In the two column results, the left column gives the raw count, right column gives the percentage.</small>\n";
+    }
     if(is_array($clash)) {
         if($firstRow) $firstRow = false;
         else $entry .= "<br>";
-        $entry .= "<small>* 100<sup>th</sup> percentile is the best among structures of comparable resolution; 0<sup>th</sup> percentile is the worst.</small>\n";
+        $entry .= "<small>* 100<sup>th</sup> percentile is the best among structures of comparable resolution; 0<sup>th</sup> percentile is the worst.  For clashscore the comparative set of structures was selected in 2004, for MolProbity score in 2006.</small>\n";
     }
     if(is_array($suites)) {
         if($firstRow) $firstRow = false;
@@ -1005,7 +1021,8 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
     if(is_array($clash) && is_array($rota) && is_array($rama)) {
       if($firstRow) $firstRow = false;
       else $entry .= "<br>";
-      $entry .= "<small><sup>^</sup> MolProbity score is defined as the following: 0.42574*log(1+clashscore) + 0.32996*log(1+max(0,pctRotOut-1)) + 0.24979*log(1+max(0,100-pctRamaFavored-2)) + 0.5</small>\n";
+      //$entry .= "<small><sup>^</sup> MolProbity score is defined as the following: 0.42574*log(1+clashscore) + 0.32996*log(1+max(0,pctRotOut-1)) + 0.24979*log(1+max(0,100-pctRamaFavored-2)) + 0.5</small>\n";
+      $entry .= "<small><sup>^</sup> MolProbity score combines the clashscore, rotamer, and Ramachandran evaluations into a single score, normalized to be on the same scale as X-ray resolution.</small>\n";
     }
     $entry .= "</p>\n"; // end of summary stats table
     return $entry;
