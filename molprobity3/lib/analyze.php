@@ -1002,7 +1002,8 @@ function runValidationReport($infile, $outfile, $moltype)
 *   measure         bond (A--B) or angle (A-B-C)
 *   value           value of the bond or angle measurement
 *   sigma           deviation from ideality
-*   count           number of bonds with >4sigma
+*   bondCount       number of bonds analyzed
+*   outCount        number of bonds with >4sigma
 *   isOutlier       with the -outliers flag all output are >4sigma outliers
 */
 function loadValidationBondReport($datafile, $moltype)
@@ -1029,9 +1030,10 @@ function loadValidationBondReport($datafile, $moltype)
                     $hash1_1[$cnit]['sigma'] = $sigma;
                 }
                 if (abs($sigma) > 4) {
-                    $hash1_1[$cnit]['count'] = $hash1_1[$cnit]['count'] + 1;
+                    $hash1_1[$cnit]['outCount'] = $hash1_1[$cnit]['outCount'] + 1;
                     $hash1_1[$cnit]['isOutlier'] = true;
                 }
+                $hash1_1[$cnit]['bondCount'] = $hash1_1[$cnit]['bondCount'] + 1;
             }
             else {
                 $hash1_1[$cnit] = array(
@@ -1040,12 +1042,13 @@ function loadValidationBondReport($datafile, $moltype)
                     'measure' => $measure,
                     'value'   => $value,
                     'sigma'   => $sigma,
-                    'count'   => 0
+                    'bondCount'   => 1,
+                    'outCount'   => 0
                     //'isOutlier' => true
                 );
                 if (abs($sigma) > 4) {
                     $hash1_1[$cnit]['isOutlier'] = true;
-                    $hash1_1[$cnit]['count'] = 1;
+                    $hash1_1[$cnit]['outCount'] = 1;
                 }
                 else $hash1_1[$cnit]['isOutlier'] = false;
             }
@@ -1073,7 +1076,8 @@ function loadValidationBondReport($datafile, $moltype)
 *   measure         bond (A--B) or angle (A-B-C)
 *   value           value of the bond or angle measurement
 *   sigma           deviation from ideality
-*   count           number of angles with >4sigma
+*   angCount        number of angles
+*   outCount        number of angles with >4sigma
 *   isOutlier       with the -outliers flag all output are >4sigma outliers
 */
 function loadValidationAngleReport($datafile, $moltype)
@@ -1102,9 +1106,10 @@ function loadValidationAngleReport($datafile, $moltype)
                     $hash1_2[$cnit]['sigma'] = $sigma;
                 }
                 if (abs($sigma) > 4) {
-                    $hash1_2[$cnit]['count'] = $hash1_2[$cnit]['count'] + 1;
+                    $hash1_2[$cnit]['outCount'] = $hash1_2[$cnit]['outCount'] + 1;
                     $hash1_2[$cnit]['isOutlier'] = true;
                 }
+                $hash1_2[$cnit]['angCount'] = $hash1_2[$cnit]['angCount'] + 1;
             }
             else {
                 //$count = 1;
@@ -1114,12 +1119,13 @@ function loadValidationAngleReport($datafile, $moltype)
                     'measure' => $measure,
                     'value'   => $value,
                     'sigma'   => $sigma,
-                    'count'   => 0
+                    'angCount' => 1,
+                    'outCount' => 0
                     //'isOutlier' => true
                 );
                 if (abs($sigma) > 4) {
                     $hash1_2[$cnit]['isOutlier'] = true;
-                    $hash1_2[$cnit]['count'] = 1;
+                    $hash1_2[$cnit]['outCount'] = 1;
                 }
                 else $hash1_2[$cnit]['isOutlier'] = false;
             }
