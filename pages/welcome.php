@@ -72,8 +72,10 @@ as part of the refinement cycle.</p>
 Create and view interactive 3-D graphics
 from your web browser.</p>
 
-<h3>What's new in 3.19:</h3><ul>
+<h3>What's new in 3.20:</h3><ul>
+<li>Updated Reduce-added hydrogen lengths to be more consistent with other crystallography software.</li>
 <li>New Top8000 Ramachandran validation information.</li>
+<li>Updated All-atom analysis summary table to also show outlier-counts.</li>
 </ul>
 </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>
 
@@ -618,6 +620,13 @@ function toggleUploadOptions()
     //    We have upgraded our software to be compatible with the new format.
     //    Any uploaded files will be converted to PDB v3 if necessary; you will have an option to convert modified files back to PDB v2.3 if desired.
     //    <br><br>Please don't hesitate to report any bugs you may encounter; sorry for any inconvenience.</strong></div>");
+
+    echo("<div class=alert><strong>We have updated Reduce to add hydrogens at a length more consistent with other software, and accordingly 
+      adjusted the Van der Waals radii in Probe to compensate for the change.  This will affect comparison of results calculated with older versions, 
+      but generally results in lower clashscores.  Ramachandran scoring has also been updated to use new distributions.
+        <br><br>Please don't hesitate to report any bugs you may encounter.</strong></div>");
+
+
 }
 #}}}########################################################################
 
