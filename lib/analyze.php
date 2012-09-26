@@ -72,7 +72,7 @@ function runAnalysis($modelID, $opts)
     $chartURL   = $_SESSION['dataURL'].'/'.MP_DIR_CHARTS;
         if(!file_exists($chartDir)) mkdir($chartDir, 0777);
     $infile     = "$modelDir/$model[pdb]";
-    
+    if($opts['chartSmotif'])		$tasks['Smotif'] = "Searching for Smotifs";
     if($opts['chartRama'])      $tasks['rama'] = "Do Ramachandran analysis and make plots";
     if($opts['chartRota'])      $tasks['rota'] = "Do rotamer analysis";
     if($opts['chartCBdev'])     $tasks['cbeta'] = "Do C&beta; deviation analysis and make kins";
@@ -86,7 +86,7 @@ function runAnalysis($modelID, $opts)
     if($opts['chartMulti'])     $tasks['multichart'] = "Create multi-criterion chart";
     if($opts['chartCoot'])      $tasks['cootchart'] = "Create chart for use in Coot";
     if($opts['doKinemage'])     $tasks['multikin'] = "Create multi-criterion kinemage";
-    
+       
     //$doRem40 = $opts['chartClashlist'] || $opts['chartRama'] || $opts['chartRota'];
     //if($doRem40)                $tasks['remark40'] = "Create REMARK  40 record for the PDB file";
     //}}} Set up file/directory vars and the task list
@@ -159,6 +159,21 @@ function runAnalysis($modelID, $opts)
         runSuitenameString($infile, $outfile);
         
         makeSuitenameKin($infile, "$kinDir/$model[prefix]suitename.kin");
+    }
+    if($opts['chartSmotif'])
+    {
+    	setProgress($tasks, 'Smotif');
+    	$list_out = "$chartDir/$model[prefix]motifsearch.txt";
+    	$Motif_search = "less $chartDir/$model[prefix]suitestring.txt | MotifSearchQuick.pl -Smotif > $list_out";
+    	exec($Motif_search);
+    	$entry .= "<p>The list of contacts is as follows:</p>\n";
+    	$entry .= "<p><pre>\n";
+    	$entry .= @file_get_contents($list_out);
+    	$entry .= "</pre></p>\n";
+    	//$outfile = "$chartDir/$model[prefix]Smotif.txt";
+    	//runSmotifReport($infile);
+    	//$Smotif = loadSmotifReport($outfile);        
+    	//$tasks['Smotif'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=plain' target='_blank'>preview</a>\n";
     }
     if($opts['chartGeom'])
     {
@@ -368,7 +383,7 @@ function runAnalysis($modelID, $opts)
         $entry .= "</div>\n";
     }
     
-    if($opts['chartClashlist'] || $opts['chartRama'] || $opts['chartCBdev'] || $opts['chartSuite'])
+    if($opts['chartClashlist'] || $opts['chartRama'] || $opts['chartCBdev'] || $opts['chartSuite'] || $opts['chartSmotif'])
     {
         $entry .= "<h3>Single-criterion visualizations</h3>";
         $entry .= "<ul>\n";
@@ -387,7 +402,15 @@ function runAnalysis($modelID, $opts)
             $entry .= "<li>".linkAnyFile("$model[prefix]suitestring.txt", "RNA backbone conformation \"sequence\"")."</li>\n";
             $entry .= "<li>".linkAnyFile("$model[prefix]suitename.kin", "RNA backbone multi-D plot of conformations")."</li>\n";
         }
+        if($opts['chartSmotif'])
+        {
+        $entry .= "<p>The list of motifs is as follows:</p>\n";
+    	$entry .= "<p><pre>\n";
+    	$entry .= @file_get_contents($list_out);
+    	$entry .= "</pre></p>\n";
+    	}
         $entry .= "</ul>\n";
+
     }
     
     if($remark40)
@@ -1002,6 +1025,7 @@ function runValidationReport($infile, $outfile, $moltype)
 *   measure         bond (A--B) or angle (A-B-C)
 *   value           value of the bond or angle measurement
 *   sigma           deviation from ideality
+*   count           number of bonds with >4sigma
 *   bondCount       number of bonds analyzed
 *   outCount        number of bonds with >4sigma
 *   isOutlier       with the -outliers flag all output are >4sigma outliers
@@ -1031,6 +1055,7 @@ function loadValidationBondReport($datafile, $moltype)
                 }
                 if (abs($sigma) > 4) {
                     $hash1_1[$cnit]['outCount'] = $hash1_1[$cnit]['outCount'] + 1;
+					$hash1_1[$cnit]['count'] = $hash1_1[$cnit]['count'] + 1;
                     $hash1_1[$cnit]['isOutlier'] = true;
                 }
                 $hash1_1[$cnit]['bondCount'] = $hash1_1[$cnit]['bondCount'] + 1;
@@ -1043,12 +1068,14 @@ function loadValidationBondReport($datafile, $moltype)
                     'value'   => $value,
                     'sigma'   => $sigma,
                     'bondCount'   => 1,
-                    'outCount'   => 0
+                    'outCount'   => 0,
+		    'count'   => 0
                     //'isOutlier' => true
                 );
                 if (abs($sigma) > 4) {
                     $hash1_1[$cnit]['isOutlier'] = true;
                     $hash1_1[$cnit]['outCount'] = 1;
+					$hash1_1[$cnit]['count'] = 1;
                 }
                 else $hash1_1[$cnit]['isOutlier'] = false;
             }
@@ -1076,6 +1103,7 @@ function loadValidationBondReport($datafile, $moltype)
 *   measure         bond (A--B) or angle (A-B-C)
 *   value           value of the bond or angle measurement
 *   sigma           deviation from ideality
+*   count           number of angles with >4sigma
 *   angCount        number of angles
 *   outCount        number of angles with >4sigma
 *   isOutlier       with the -outliers flag all output are >4sigma outliers
@@ -1107,6 +1135,7 @@ function loadValidationAngleReport($datafile, $moltype)
                 }
                 if (abs($sigma) > 4) {
                     $hash1_2[$cnit]['outCount'] = $hash1_2[$cnit]['outCount'] + 1;
+					$hash1_2[$cnit]['count'] = $hash1_2[$cnit]['count'] + 1;
                     $hash1_2[$cnit]['isOutlier'] = true;
                 }
                 $hash1_2[$cnit]['angCount'] = $hash1_2[$cnit]['angCount'] + 1;
@@ -1120,12 +1149,14 @@ function loadValidationAngleReport($datafile, $moltype)
                     'value'   => $value,
                     'sigma'   => $sigma,
                     'angCount' => 1,
-                    'outCount' => 0
+                    'outCount' => 0,
+		     'count'   => 0
                     //'isOutlier' => true
                 );
                 if (abs($sigma) > 4) {
                     $hash1_2[$cnit]['isOutlier'] = true;
                     $hash1_2[$cnit]['outCount'] = 1;
+                    $hash1_2[$cnit]['count'] = 1;
                 }
                 else $hash1_2[$cnit]['isOutlier'] = false;
             }

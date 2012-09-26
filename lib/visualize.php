@@ -777,8 +777,8 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
     if(is_array($rota))    $proteinRows += 1;
     if(is_array($cbdev))   $proteinRows += 1;
     if(is_array($clash) && is_array($rota) && is_array($rama)) $proteinRows += 1;
-    if(hasMoltype($bbonds, "protein")) $proteinRows += 1;
-    if(hasMoltype($bangles, "protein")) $proteinRows += 1;
+    if(hasMoltype($bbonds, "protein")) $proteinRows += 2;
+    if(hasMoltype($bangles, "protein")) $proteinRows += 2;
     if($proteinRows > 0)
     {
         $entry .= "<tr><td rowspan='$proteinRows' align='center'>Protein<br>Geometry</td>\n";
@@ -882,19 +882,30 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             
             $total = 0;
             $outCount = 0;
+			$testCount = 0;
+			$testtotal = 0;
             foreach($bbonds as $cnit => $item) {
                 if($item['type'] == 'protein') {
                     if($item['isOutlier']) {
                       $outCount += $item['outCount'];
+                        $testCount += 1;
                     }
                     $total += $item['bondCount'];
+                    $testtotal += 1;
                 }
             }
             $geomOutPct = sprintf("%.2f", 100.0 * $outCount / $total);
             if ($outCount/$total < 0.002)    $bg = $bgFair;
             if ($outCount/$total == 0.0)    $bg = $bgGood;
             else                            $bg = $bgPoor;
-            $entry .= "<td>Bad backbone bonds:</td><td bgcolor='$bg'>$outCount / $total</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: 0%</td></tr>\n";
+
+            $entry .= "<td>Bad backbone bonds:</td><td bgcolor='$bg'>$outCount / $total</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: 0</td></tr>\n";
+            $geomOutPct = sprintf("%.2f", 100.0 * $testCount / $testtotal);
+            if ($testoutCount/$testtotal < 0.001)    $bg = $bgFair;
+            if ($testoutCount/$testtotal < 0.000001)    $bg = $bgGood;
+            else                            $bg = $bgPoor;
+            $entry .= "<td>Residues with bad bonds:</td><td bgcolor='$bg'>$testCount</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: 0</td></tr>\n";
+
         }
         if(hasMoltype($bangles, "protein"))
         {
@@ -903,26 +914,36 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             
             $total = 0;
             $outCount = 0;
+            $testCount = 0;
+            $testtotal = 0;
             foreach($bangles as $cnit => $item) {
                 if($item['type'] == 'protein') {
                     if($item['isOutlier']) {
                         $outCount += $item['outCount'];
+                        $testCount += 1;
                     }
                     $total += $item['angCount'];
+                    $testtotal += 1;
                 }
             }
             $geomOutPct = sprintf("%.2f", 100.0 * $outCount / $total);
-            if ($outCount/$total < 0.005)    $bg = $bgFair;
-            if ($outCount/$total < 0.001)    $bg = $bgGood;
+            if ($outCount/$total < 0.001)    $bg = $bgFair;
+            if ($outCount/$total < 0.000001)    $bg = $bgGood;
+
             else                            $bg = $bgPoor;
-            $entry .= "<td>Bad backbone angles:</td><td bgcolor='$bg'>$outCount / $total</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <0.1%</td></tr>\n";
+            $entry .= "<td>Bad backbone angles:</td><td bgcolor='$bg'>$outCount / $total</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: 0</td></tr>\n";
+            $geomOutPct = sprintf("%.2f", 100.0 * $testCount / $testtotal);
+            if ($testCount/$testtotal < 0.001)    $bg = $bgFair;
+            if ($testCount/$testtotal < 0.000001)    $bg = $bgGood;
+            else                            $bg = $bgPoor;
+            $entry .= "<td>Residues with bad angles:</td><td bgcolor='$bg'>$testCount</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: 0</td></tr>\n";
         }
     }// end of protein-specific stats
     $nucleicRows = 0;
     if(is_array($pperp))   $nucleicRows += 1;
     if(is_array($suites))  $nucleicRows += 1;
-    if(hasMoltype($bbonds, "rna")) $nucleicRows += 1;
-    if(hasMoltype($bangles, "rna")) $nucleicRows += 1;
+    if(hasMoltype($bbonds, "rna")) $nucleicRows += 2;
+    if(hasMoltype($bangles, "rna")) $nucleicRows += 2;
     if($nucleicRows > 0)
     {
         $entry .= "<tr><td rowspan='$nucleicRows' align='center'>Nucleic Acid<br>Geometry</td>\n";
@@ -965,19 +986,28 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             
             $total = 0;
             $outCount = 0;
+			$testCount = 0;
+			$testtotal = 0;
             foreach($bbonds as $cnit => $item) {
                 if($item['type'] == 'rna') {
                     if($item['isOutlier']) {
                         $outCount += $item['outCount'];
+                        $testCount += 1;
                     }
                     $total += $item['bondCount'];
+                    $testtotal += 1;
                 }
             }
             $geomOutPct = sprintf("%.2f", 100.0 * $outCount / $total);
-            if ($outCount/$total < 0.002)    $bg = $bgFair;
+            if ($outCount/$total < 0.001)    $bg = $bgFair;
             if ($outCount/$total < 0.000001)    $bg = $bgGood;
             else                            $bg = $bgPoor;
-            $entry .= "<td>Bad bonds:</td><td bgcolor='$bg'>$outCount / $total</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: 0%</td></tr>\n";
+            $entry .= "<td>Bad bonds:</td><td bgcolor='$bg'>$outCount / $total</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: 0</td></tr>\n";
+            $geomOutPct = sprintf("%.2f", 100.0 * $testCount / $testtotal);
+            if ($testCount/$testtotal < 0.001)    $bg = $bgFair;
+            if ($testCount/$testtotal < 0.000001)   $bg = $bgGood;
+            else                            $bg = $bgPoor;
+            $entry .= "<td>Residues with bad bonds:</td><td bgcolor='$bg'>$testCount</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: 0</td></tr>\n";
         }
         if(hasMoltype($bangles, "rna"))
         {
@@ -986,27 +1016,41 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             
             $total = 0;
             $outCount = 0;
-            foreach($bangles as $cnit => $item) {
+ 			$testCount = 0;
+			$testtotal = 0;
+           foreach($bangles as $cnit => $item) {
                 if($item['type'] == 'rna') {
                     if($item['isOutlier']) {
                         $outCount += $item['outCount'];
+                        $testCount += 1;
                     }
                     $total += $item['angCount'];
+                    $testtotal += 1;
                 }
             }
             $geomOutPct = sprintf("%.2f", 100.0 * $outCount / $total);
-            if ($outCount/$total < 0.005)    $bg = $bgFair;
-            if ($outCount/$total < 0.001)    $bg = $bgGood;
+            if ($outCount/$total < 0.001)    $bg = $bgFair;
+            if ($outCount/$total < 0.000001)    $bg = $bgGood;
             else                            $bg = $bgPoor;
-            $entry .= "<td>Bad angles:</td><td bgcolor='$bg'>$outCount / $total</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <0.1%</td></tr>\n";
-        }
+            $entry .= "<td>Bad angles:</td><td bgcolor='$bg'>$outCount / $total</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: 0</td></tr>\n";
+             $geomOutPct = sprintf("%.2f", 100.0 * $testCount / $testtotal);
+            if ($testCount/$testtotal < 0.001)    $bg = $bgFair;
+            if ($testCount/$testtotal < 0.000001)    $bg = $bgGood;
+            else                            $bg = $bgPoor;
+            $entry .= "<td>Residues with bad angles:</td><td bgcolor='$bg'>$testCount</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: 0</td></tr>\n";
+       }
     }
     $entry .= "</table>\n";
     $firstRow = true;
     if(is_array($rota) || is_array($rama) || is_array($cbdev) || is_array($bbonds) || is_array($bangles) || is_array($pperp) || is_array($suites)) {
         if($firstRow) $firstRow = false;
         else $entry .= "<br>";
-        $entry .= "<small>In the two column results, the left column gives the raw count, right column gives the percentage.</small>\n";
+        $chartDir   = $_SESSION['dataDir'].'/'.MP_DIR_CHARTS;
+        $outfile = "$chartDir/../../../help/charthelp.txt";
+        $entry .= "<small>In the two column results, the left column gives the raw count, right column gives the percentage. More detailed chart explanation <a href ='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=plain' target='_blank'>here</a> </small>\n";
+        //$chartDir   = $_SESSION['dataDir'].'/'.MP_DIR_CHARTS;
+        //$outfile = "$chartDir/charthelp.txt";
+        //$entry .= "<small>In the two column results, the left column gives the raw count, right column gives the percentage. More detailed chart explanation <a href ='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=plain' target='_blank'>here</a> </small>\n";
     }
     if(is_array($clash)) {
         if($firstRow) $firstRow = false;

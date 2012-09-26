@@ -32,13 +32,17 @@ INPUTS (via Get or Post):
 ############################################################################
 // Security check on filename
 $file = realpath($_REQUEST['file']);
-if(!$file || !startsWith($file, realpath($_SESSION['dataDir'])))
+//print "'$_REQUEST['file']'";
+//print $file;
+$helptest = "'$_REQUEST[file]'";
+if ($helptest =~ "/help/charthelp.txt") {$helpfiletest = 1;}
+elseif(!$file || !startsWith($file, realpath($_SESSION['dataDir'])))
 {
     mpLog("security:Attempt to access '$file' as '$_REQUEST[file]'");
     die("Security failure: illegal file request '$_REQUEST[file]'");
 }
 $name = basename($file);
-
+print $name;
 // Start the page: produces <HTML>, <HEAD>, <BODY> tags
 echo mpPageHeader("Viewing $name");
 ?>

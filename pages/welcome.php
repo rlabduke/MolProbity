@@ -205,6 +205,7 @@ function displayModelTools($context)
         'reduce'    => array('desc' => 'Add hydrogens', 'page' => 'reduce_setup.php', 'rel' => 1, 'img' => 'add_h.png'),
         'aacgeom'   => array('desc' => 'Analyze all-atom contacts and geometry', 'page' => 'aacgeom_setup.php', 'rel' => 1, 'img' => 'clash_rama.png'),
         'geomonly'  => array('desc' => 'Analyze geometry without all-atom contacts', 'page' => 'aacgeom_setup.php', 'rel' => 1, 'img' => 'ramaplot.png'),
+        'motif'   => array('desc' => 'Search for motifs', 'page' => 'motif_search.php', 'rel' => 1, 'img' => 'angry_ribosome.png'),
         'iface'     => array('desc' => 'Visualize interface contacts', 'handler' => 'onVisInterface', 'rel' => 1, 'img' => 'barnase_barstar.png'),
         //'sswing'    => array('desc' => 'Refit sidechains', 'page' => 'sswing_setup1.php', 'rel' => 1, 'img' => ''),
         'makekins'  => array('desc' => 'Make simple kinemages', 'page' => 'makekin_setup.php', 'rel' => 1, 'img' => 'porin_barrel.png'),
@@ -226,6 +227,7 @@ function displayModelTools($context)
     {
         $tools['aacgeom']['rel'] = 2;
         $tools['iface']['rel'] = 2;
+        $tools['motif']['rel'] = 2;
         $tools['geomonly']['rel'] = 0;
     }
     else
