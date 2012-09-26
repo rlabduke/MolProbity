@@ -1,0 +1,7 @@
+MolProbity Multi-Criterion Chart Explained
+Clashscore: The clashscore is the number serious steric overlaps (> 0.4) Angstroms per 1000 atoms. Recently, we have improved the hydrogen bondlengths and vdW radii in our all atom contact analysis. Clashscore percentage is a comparison to other structures of comparable resolution.
+Protein Geometry:
+	Poor Rotamers: protein side-chains are rotameric, and poor rotamers are often indicative of non-standard side-chain orientation. While these are often due to model erors, some poor rotamers can be found at active sites and other chemically interesting parts of the structure, hence the goal of <1% rather than 0.
+	Ramachandran Outliers: The Ramachandran plot of Phi Psi dihedrals can be used to quickly identify outliers in the protein backbone chain. The outliers are split into five major categories: general sidechains, V,S, and T plots, pre-proline, proline, and glycine. Because Ramachandran outliers are rare in good models, the goal is less than .05%.
+	Ramachandran Favored: While the Ramachandran plot can cover a lot of area, certain regions are much more highly populated. Good models have >98% of residues in the favored regions.
+	MolProbity score: The MolProbity score is a relative score that includes clashscore

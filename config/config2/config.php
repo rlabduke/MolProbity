@@ -1,0 +1,88 @@
+<?php
+// CONFIG.PHP
+//
+// Configuration info for MolProbity.
+//
+// This file controls paths to working space and to binaries.
+// Edit this file to match your system configuration.
+
+// MP_EMAIL_WEBMASTER
+//  An email address for the owner of this site.
+//  If you run this code, set this to your address.
+define("MP_EMAIL_WEBMASTER", "webmaster@$_SERVER[SERVER_NAME]");
+
+// MP_SMTP_SERVER / MP_SMTP_USER
+//  An SMTP server for sending feedback emails,
+//  and the email address they should be "from".
+//  It cannot require authentication if this is to work,
+//  but MP_SMTP_USER should be allowed to send mail on that server.
+//  If left undefined, email will be sent via the PHP mail() function.
+//  (Which usually mean via Unix sendmail on the web server.)
+//define("MP_SMTP_SERVER", "smtp.example.com");
+//define("MP_SMTP_USER", "john.doe@example.com");
+
+// MP_BIN_PATH
+//  Directory(s) where all MolProbity-specific binary
+//  executables are stored. Remember, apache must
+//  have execute permission for these.
+//
+//  Does not need to include the bin/, bin/macosx/,
+//  and/or bin/linux directories -- these are
+//  included automatically as appropriate.
+//
+//  These directories have highest precedence of all.
+//
+//  Default: ""
+//  Example: "/usr/local/php/bin:/opt/j2/bin"
+//  Full absolute paths only -- no relative ones!
+define("MP_BIN_PATH", "/usr/local/php5/bin:/opt/j2/bin:/usr/java/jdk/bin");
+
+// Limit for Reduce's -limit flag
+// As of Reduce 3.03, this does nothing -- will be restored in future?
+//define("MP_REDUCE_LIMIT", 10000);
+
+// MP_UMASK
+//  This is a standard Unix file umask, which means it
+//  specifies which bits WON'T be set in the file permissions.
+//  This gets applied to all files created by MolProbity.
+//
+//  Default is 0000.
+//  For highest security, use 0077.
+//define("MP_UMASK", 0);
+
+// Default timezone. See lib/timezones.php for allowed keys.
+// If left undefined (commented out), MolProbity can usually guess correctly.
+//define("MP_DEFAULT_TIMEZONE", 'EST');
+
+// How long a session can go unused, in seconds
+//define("MP_SESSION_LIFETIME", 60*60*12); // 12 hours
+
+// How long a session can go unused if user requests extension, in seconds
+//define("MP_SESSION_LIFETIME_EXT", 60*60*24*14); // 14 days
+
+// How large a session can grow, in bytes
+//define("MP_SESSION_MAX_SIZE", 200*1000*1000); // 200 Mb
+
+// Kinemages above this size will be gzipped (in most cases).
+// To disable, set to a very large value, like 100 Gb.
+//define("MP_KIN_GZIP_THRESHOLD", 1*1000*1000); // 1 Mb
+
+// Web hits tracking code; appears in pageFooter().
+// Use for e.g. tracking with Google Analytics.
+// Defaults to nothing to protect privacy of 3rd party users.
+//define("MP_TRACKING_CODE",
+//    '
+//    <!-- Google Analytics tracking code for IWD -->
+//    <script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
+//    </script>
+//    <script type="text/javascript">
+//    _uacct = "UA-327385-3";
+//    __utmSetVar("Java version "+java.lang.System.getProperty("java.version").substr(0,3));
+//    urchinTracker();
+//    </script>
+//    ');
+
+// If defined, this banner will display at the top of all pages!
+//define("MP_BANNER", "The system will go down for maintainance in ".(int)((strtotime("12pm today")-time())/60)." minutes.  Please download your data and log off.");
+
+?>
