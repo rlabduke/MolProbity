@@ -52,7 +52,7 @@ function display($context)
       // this should always return the same number of $models as $aacgeom_models
       $models;
       foreach($_SESSION['models'] as $id => $model) {
-        $dot_pos = strpos($model['pdb'], '.')-strlen($model['pdb']);
+        $dot_pos = strpos($model['pdb'], '.pdb')-strlen($model['pdb']);
         $clean_pos = strpos($model['pdb'], '_clean.')-strlen($model['pdb']);
         $pdbv3_pos = strpos($model['pdb'], '_pdbv3.')-strlen($model['pdb']);
         if(endsWith($model['pdb'], "_clean.pdb"))
