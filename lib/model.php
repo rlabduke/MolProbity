@@ -102,8 +102,19 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
     // Process file to clean it up
     $tmp2 = mpTempfile("tmp_pdb_");
     $tmp3 = mpTempfile("tmp_pdb_");
+    $tmp4 = mpTempFile("tmp_pdb_");
     list($stats, $segmap) = preparePDB($tmpPdb, $tmp2, $isCnsFormat, $ignoreSegID);
     $stats = convertToPDBv3($tmp2, $tmp3);
+    if ($stats['hydrogens'] > 0) { 
+      removeHydrogens($tmp3, $tmp4);
+      //$stats = pdbstat($tmp4);
+    }
+    else {
+      copy($tmp3, $tmp4);
+    }
+    
+    $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
+    if(!file_exists($outpath)) mkdir($outpath, 0777);
     
     if($stats['models'] > 1) // NMR/theoretical with multiple models {{{
     {
@@ -112,8 +123,8 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
         $tasks['splitNMR'] = "Split NMR models into separate PDB files";
         setProgress($tasks, "splitNMR");
         
-        $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
-        if(!file_exists($outpath)) mkdir($outpath, 0777);
+        //$outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
+        //if(!file_exists($outpath)) mkdir($outpath, 0777);
         $splitModels = splitPdbModels($tmp2);
         unlink($tmp2);
         $idList = array();
@@ -165,14 +176,14 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
         $append = "";
         if(!filesAreIdentical($tmpPdb, $tmp2)) $append .= "_clean";
         if(!filesAreIdentical($tmp2, $tmp3)) $append .= "_pdbv3";
+
         $model = createModel($origID, $append);
         //if(filesAreIdentical($tmpPdb, $tmp2))   $model = createModel($origID);        
         //else                                    $model = createModel($origID, "_clean");
-
     
         $model['stats']                 = $stats;
         $historyText = "";
-        if (filesAreIdentical($tmpPdb, $tmp3))  $historyText  = 'Original file ';
+        if (filesAreIdentical($tmpPdb, $tmp4))  $historyText  = 'Original file ';
         else                                    $historyText  = 'File (modified) ';
         if ($isUserSupplied)                    $historyText .= 'uploaded by user';
         else                                    $historyText .= 'downloaded from web';
@@ -182,15 +193,38 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
         
         $id         = $model['id'];
         $outname    = $model['pdb'];
-        $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
-        if(!file_exists($outpath)) mkdir($outpath, 0777);
-        $outpath .= '/'.$outname;
-        copy($tmp3, $outpath);
-        unlink($tmp3);   
-        unlink($tmp2);
+        //$outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
+        //if(!file_exists($outpath)) mkdir($outpath, 0777);
+        //$outpath .= '/'.$outname;
+        copy($tmp3, $outpath.'/'.$outname);
         
         // Create the model entry
         $_SESSION['models'][$id] = $model;
+        
+        if(!filesAreIdentical($tmp3, $tmp4)) { //trimmed file
+          
+          $untrimmedmod = createModel($origID.$append, "_trimmed");
+          $untrimmedmod['stats'] = pdbstat($tmp4);
+          
+          $historyText = 'File (trimmed) ';
+          if ($isUserSupplied)                    $historyText .= 'uploaded by user';
+          else                                    $historyText .= 'downloaded from web';
+          
+          $untrimmedmod['history'] = $historyText;
+          $untrimmedmod['isUserSupplied']        = $isUserSupplied;
+          
+          $outuntrimmed = $outpath.'/'.$untrimmedmod['pdb'];
+          copy($tmp4, $outuntrimmed);
+          
+          $id = $untrimmedmod['id'];
+          
+          $_SESSION['models'][$id] = $untrimmedmod;
+        }
+        
+        unlink($tmp4);
+        unlink($tmp3);   
+        unlink($tmp2);
+        
         return $id;
     }//}}}
 }
@@ -345,6 +379,26 @@ function convertToPDBv3($inpath, $outpath) {
     
     setProgress($tasks, null); // all done
     return $stats;
+}
+#}}}########################################################################
+
+#{{{ removeHydrogens - removes Hs from files on upload by default
+#    This is intended to be a temporary fix to the possible problem of having
+#    mixed neutron and electron-cloud H bond lengths if new Reduce is used to add
+#    Hs to a file with old Reduce hydrogens.
+############################################################################
+function removeHydrogens($inpath, $outpath) {
+    $tasks = getProgressTasks();
+    $tasks['reducetrim'] = "Remove hydrogens to avoid possible conflict with hydrogen lengths";
+    $tmp1   = mpTempfile("tmp_pdb_");
+    
+    setProgress($tasks, 'reducetrim');
+    reduceTrim($inpath, $tmp1);
+    copy($tmp1, $outpath);
+    
+    unlink($tmp1);
+    
+    setProgress($tasks, null); // all done
 }
 #}}}########################################################################
 
