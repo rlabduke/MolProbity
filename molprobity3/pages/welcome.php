@@ -150,6 +150,7 @@ function displayWarnings($context)
 // -->
 </script>
 <?php
+
     }
 }
 #}}}########################################################################
@@ -158,6 +159,13 @@ function displayWarnings($context)
 ############################################################################
 function displayModels($context)
 {
+  
+    // Warning about default being to trim hydrogens
+    echo("<div class=alert>Due to the parameter adjustments to hydrogen lengths and van der Waals radii, the current default behavior for MolProbity is
+      to trim hydrogens before analysis. For electron-cloud position hydrogens (i.e. for crystal structures), re-add them using the \"Add Hydrogens\" option below. 
+      For nuclear position hydrogens (i.e. for NMR structures), please go to http://molprobity.biochem.duke.edu for analysis.
+        </div>");
+  
     if(count($_SESSION['models']) > 1)
     {
         // This works on Safari but not Firefox:
@@ -204,7 +212,6 @@ function displayModelTools($context)
     $tools = array(
         'reduce'    => array('desc' => 'Add hydrogens', 'page' => 'reduce_setup.php', 'rel' => 1, 'img' => 'add_h.png'),
         'aacgeom'   => array('desc' => 'Analyze all-atom contacts and geometry', 'page' => 'aacgeom_setup.php', 'rel' => 1, 'img' => 'clash_rama.png'),
-        'geomonly'  => array('desc' => 'Analyze geometry without all-atom contacts', 'page' => 'aacgeom_setup.php', 'rel' => 1, 'img' => 'ramaplot.png'),
         'iface'     => array('desc' => 'Visualize interface contacts', 'handler' => 'onVisInterface', 'rel' => 1, 'img' => 'barnase_barstar.png'),
         //'sswing'    => array('desc' => 'Refit sidechains', 'page' => 'sswing_setup1.php', 'rel' => 1, 'img' => ''),
         'makekins'  => array('desc' => 'Make simple kinemages', 'page' => 'makekin_setup.php', 'rel' => 1, 'img' => 'porin_barrel.png'),
@@ -213,6 +220,7 @@ function displayModelTools($context)
         //'viewpdb' => array('desc' => 'View PDB in KiNG (beta)', 'page' => "viewpdbking.php?$_SESSION[sessTag]&url=".MP_DIR_KINS, 'rel' => 1, 'img' => 'pdb_icon.png'),
         //'' => array('desc' => '', 'page' => '', 'rel' => 1, 'img' => ''),
         'jiffiloop' => array('desc' => 'Fill gaps in protein backbone with JiffiLoop (beta test)', 'page' => 'fragmentfill_setup.php', 'rel' => 1, 'img' => 'jiffiloop.png'),
+        'geomonly'  => array('desc' => 'Analyze geometry without all-atom contacts', 'page' => 'aacgeom_setup.php', 'rel' => 1, 'img' => 'ramaplot.png'),
     );
     
     // Reduce
@@ -623,7 +631,8 @@ function toggleUploadOptions()
 
     echo("<div class=alert><strong>We have updated Reduce to add hydrogens at a length more consistent with other software, and accordingly 
       adjusted the Van der Waals radii in Probe to compensate for the change.  This will affect comparison of results calculated with older versions, 
-      but generally results in lower clashscores.  Ramachandran scoring has also been updated to use new distributions.
+      but generally results in lower clashscores.  Ramachandran scoring has also been updated to use new six-category distributions, derived from a larger 
+      Top8000 dataset of high quality PDB files.
         <br><br>Please don't hesitate to report any bugs you may encounter.</strong></div>");
 
 
