@@ -99,6 +99,8 @@ from your web browser.</p>
     A versatile interactive molecular and scientific visualization program.</a>
     Protein Science 18:2403-2409.
     </small></p>
+<p><b><?php echo "<a href='".makeEventURL("onGoto", "helper_hydrogens.php")."'>About hydrogens</a>"; ?>:</b>
+Why have the hydrogen bondlengths changed?</p>
 <p><b><a href='help/java.html' target='_blank'>Installing Java</a></b>: how to make kinemage graphics work in your browser.</p>
 <p><b><a href='get_molprobity.php' target='_blank'>Download MolProbity</a></b>: how can I run a private MolProbity server, or run from the command line?</p>
 <p><small><i>NB: the back button doesn't work inside MolProbity</i></small></p><!-- by request of DCR -->
@@ -161,9 +163,9 @@ function displayModels($context)
 {
   
     // Warning about default being to trim hydrogens
-    echo("<div class=alert>Due to the parameter adjustments to hydrogen lengths and van der Waals radii, the current default behavior for MolProbity is
-      to trim hydrogens before analysis. For electron-cloud position hydrogens (i.e. for crystal structures), re-add them using the \"Add Hydrogens\" option below. 
-      For nuclear position hydrogens (i.e. for NMR structures), please go to http://molprobity.biochem.duke.edu for analysis.
+    echo("<div class=alert>Due to the parameter adjustments to hydrogen bondlengths and van der Waals radii, the current default behavior for MolProbity is
+      to remove hydrogens, if they are present, before analysis. For electron-cloud position hydrogens (i.e. for crystal structures), please re-add them using the \"Add Hydrogens\" option below. 
+      For nuclear position hydrogens (i.e. for neutron-diffraction structures or for NMR structures), please go to http://molprobity.biochem.duke.edu for analysis.
         </div>");
   
     if(count($_SESSION['models']) > 1)
@@ -629,15 +631,33 @@ function toggleUploadOptions()
     //    Any uploaded files will be converted to PDB v3 if necessary; you will have an option to convert modified files back to PDB v2.3 if desired.
     //    <br><br>Please don't hesitate to report any bugs you may encounter; sorry for any inconvenience.</strong></div>");
 
-    echo("<div class=alert><strong>We have updated Reduce to add hydrogens at a length more consistent with other software, and accordingly 
-      adjusted the Van der Waals radii in Probe to compensate for the change.  This will affect comparison of results calculated with older versions, 
-      but generally results in lower clashscores.  Ramachandran scoring has also been updated to use new six-category distributions, derived from a larger 
+    echo("<div class=alert><strong>We have updated Reduce to add hydrogens at a length more consistent with electron cloud positions, and accordingly 
+      adjusted the Van der Waals radii in Probe to compensate for the change.  This will affect comparison of results calculated with older versions of MolProbity, 
+      but generally results in lower clashscores. For analyses using nuclear position hydrogens, please go to ".$this->determineHttps().".  Read more about this change 
+      <a style=\"color: #66FFFF\" href='".makeEventURL("onGoto", "helper_hydrogens.php")."'>here</a>.
+      <p>Ramachandran scoring has also been updated to use new six-category distributions, derived from a larger 
       Top8000 dataset of high quality PDB files.
         <br><br>Please don't hesitate to report any bugs you may encounter.</strong></div>");
 
-
 }
 #}}}########################################################################
+
+#{{{ determineHttps
+/**
+* Intended to be a temporary function for automatically inserting the URL linking to the
+* old nuclear position Molprobity server.  This assumes we're still using a system where
+* the new version is at https:// and the old one is at http://
+*/
+function determineHttps() 
+{
+  if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) {
+    $oldUrl = 'http://';
+    $oldUrl .= $_SERVER["SERVER_NAME"];
+    return $oldUrl;
+  }
+  return "https://".$_SERVER["SERVER_NAME"];
+}
+#}}}
 
 #{{{ displayUploadOld - outputs the file upload/fetch controls
 ############################################################################
