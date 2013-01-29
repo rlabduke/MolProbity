@@ -105,14 +105,15 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
     $tmp4 = mpTempFile("tmp_pdb_");
     list($stats, $segmap) = preparePDB($tmpPdb, $tmp2, $isCnsFormat, $ignoreSegID);
     $stats = convertToPDBv3($tmp2, $tmp3);
-    if ($stats['hydrogens'] > 0) {
+    /* this section is for trimming Hs by default
+    if ($stats['non_ecloud_H'] > 0) { 
       removeHydrogens($tmp3, $tmp4);
       //$stats = pdbstat($tmp4);
     }
     else {
       copy($tmp3, $tmp4);
     }
-
+    */
     $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
     if(!file_exists($outpath)) mkdir($outpath, 0777);
 
@@ -201,6 +202,7 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
         // Create the model entry
         $_SESSION['models'][$id] = $model;
 
+        /* this section is for trimming Hs by default
         if(!filesAreIdentical($tmp3, $tmp4)) { //trimmed file
 
           $untrimmedmod = createModel($origID.$append, "_trimmed");
@@ -222,6 +224,7 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
         }
 
         unlink($tmp4);
+        */
         unlink($tmp3);
         unlink($tmp2);
 

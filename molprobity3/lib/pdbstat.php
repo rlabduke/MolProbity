@@ -69,6 +69,12 @@ function describePdbStats($pdbstats, $useHTML = true)
         $details[] = $note;
     }
     
+    if ($pdbstats['non_ecloud_H'] > 0.1) {
+      //$nonEcloudPct = sprintf("%d", 100.0 * $pdbstats['non_ecloud_H']);
+      //$details[] = /*"<div class=alert>".*/$nonEcloudPct."% non-electron cloud length hydrogens were found."/*."</div>"*/;
+      $details[] = "A high percentage of non-electron cloud length hydrogens were found.";
+    }
+    
     //echo $pdbstats['v2atoms']." many pdbv2.3 atoms were found\n";
     if($pdbstats['v2atoms'] > 0) $details[] = /*"<div class=alert>".*/$b.$pdbstats['v2atoms']." PDBv2.3 atoms were found.  They have been converted to PDBv3.".$unb/*."</div>"*/;
     else                         $details[] = "0 PDBv2.3 atoms were found.  Proceeding assuming PDBv3 formatted file.";
@@ -312,6 +318,10 @@ function pdbstat($pdbfilename)
     }
     else $unique_chains = 1;
     
+    if ($hydrogens+$hnonpolar > 0) {
+      $nonECloudH = analyzeHydrogens($pdbfilename);
+    }
+    
     # Output
     $ret['compnd']          = $compnd;
     $ret['models']          = $models;
@@ -327,6 +337,7 @@ function pdbstat($pdbfilename)
     // Doesn't work for RNA -- too few H.  New criteria:  3+ per residue.
     //$ret['has_most_H']      = ($heavyatoms < 2*($hydrogens+$hnonpolar));
     $ret['has_most_H']      = (3*$residues < ($hydrogens+$hnonpolar));
+    $ret['non_ecloud_H']   = $nonECloudH;
     $ret['hets']            = $hets;
     $ret['waters']          = $waters;
     $ret['fromcns']         = $fromCNS;
@@ -351,5 +362,23 @@ function pdbstat($pdbfilename)
     return $ret;
 }
 #}}}########################################################################
+
+#{{{ analyzeHydrogens - checks lengths of Hs
+function analyzeHydrogens($infile) {
+    #$tmp1   = mpTempfile("tmp_dangle");
+    echo "Analyzing Hydrogens\n";
+
+    exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -validate -hydrogens -outliers -sigma=0 $infile | wc -l", $allHs);
+    exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -validate -hydrogens -outliers $infile | wc -l", $outliers);
+
+    if ($allHs > 0) $fract = ($outliers[0]-1)/($allHs[0]-1);
+    else            $fract = 0;
+    
+    return $fract;
+    #copy($tmp1, $outpath);
+    
+    #unlink($tmp1);
+}
+#}}}
 
 ?>
