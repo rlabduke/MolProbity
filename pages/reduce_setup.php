@@ -7,18 +7,19 @@ require_once(MP_BASE_DIR.'/lib/model.php');
 
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
 class reduce_setup_delegate extends BasicDelegate {
-    
+
 #{{{ display - creates the UI for this page
 ############################################################################
 /**
 * Context may contain the following keys:
 *   modelID     the model ID to add H to
 *   method      the means of adding H: nobuild or build
+*   blength     desired x-H length: ecloud or nuclear
 */
 function display($context)
 {
     echo $this->pageHeader("Add hydrogens");
-    
+
     if(count($_SESSION['models']) > 0)
     {
         // Choose a default model to select
@@ -62,7 +63,7 @@ function display($context)
         // Selects -BUILD by default unless the user changes it.
         if($context['method'] == 'nobuild') { $check1 = ""; $check2 = "checked"; }
         else                                { $check1 = "checked"; $check2 = ""; }
-        echo "<tr valign='top'><td><input type='radio' name='method' value='build' $check1> <b>Asn/Gln/His flips</b><td>";
+        echo "<tr valign='top'><td width='300'><input type='radio' name='method' value='build' $check1> <b>Asn/Gln/His flips</b><td>";
         echo "<td><small>Add missing H, optimize H-bond networks, check for flipped Asn, Gln, His";
         echo " (<code>Reduce -build</code>)\n";
         echo "<div class='inline_options'><b>Advanced options:</b>\n";
@@ -70,8 +71,20 @@ function display($context)
         echo "Make Flipkin kinemages illustrating any Asn, Gln, or His flips</label></div>\n";
         echo "</small></td></tr>\n";
         echo "<tr><td colspan='2'>&nbsp;</td></tr>\n"; // vertical spacer
-        echo "<tr valign='top'><td><input type='radio' name='method' value='nobuild' $check2> <b>No flips</b><td>";
+        echo "<tr valign='top'><td width='300'><input type='radio' name='method' value='nobuild' $check2> <b>No flips</b><td>";
         echo "<td><small>Add missing H, optimize H-bond networks, leave other atoms alone (<code>Reduce -nobuild</code>)</small></td></tr>\n";
+        echo "</table></p>\n";
+
+        echo "<h3>Select x-H bond-length:</h3>";
+        echo "<p><table width='100%' border='0'>\n";
+        if($context['method'] == 'nuclear') { $check1 = ""; $check2 = "checked"; }
+        else                                { $check1 = "checked"; $check2 = ""; }
+        echo "<tr valign='top'><td width='300'><input type='radio' name='blength' value='ecloud' $check1> <b>Electron cloud x-H</b><td>";
+        echo "<td><small>Use electron cloud x-H bond lengths and vdW radii.\nIdeal for X-ray crystal structures.";
+        echo "</small></td></tr>\n";
+        echo "<tr><td colspan='2'>&nbsp;</td></tr>\n"; // vertical spacer
+        echo "<tr valign='top' align='left'><td width='300'><input type='radio' name='blength' value='nuclear' $check2> <b>Nuclear x-H</b><td>";
+        echo "<td><small>Use nuclear x-H bond lengths and vdW radii.\nIdeal for NMR, neutron diffraction, etc.</small></td></tr>\n";
         echo "</table></p>\n";
 
         echo "<p><table width='100%' border='0'><tr>\n";
@@ -114,9 +127,9 @@ windowOnload(function() {
         echo "No models are available. Please <a href='".makeEventURL("onCall", "upload_setup.php")."'>upload or fetch a PDB file</a> in order to continue.\n";
         echo makeEventForm("onReturn");
         echo "<p><input type='submit' name='cmd' value='Cancel'></p></form>\n";
-        
+
     }
-    
+
     echo $this->pageFooter();
 }
 #}}}########################################################################
@@ -134,14 +147,15 @@ function onAddH()
         pageReturn();
         return;
     }
-    
+
     // Otherwise, moving forward:
-    if(isset($req['modelID']) && isset($req['method']))
+    if(isset($req['modelID']) && isset($req['method']) && isset($req['blength']))
     {
         unset($_SESSION['bgjob']); // Clean up any old data
-        $_SESSION['bgjob']['modelID']       = $req['modelID'];
-        $_SESSION['bgjob']['makeFlipkin']   = $req['makeFlipkin'];
-        
+        $_SESSION['bgjob']['modelID']        = $req['modelID'];
+        $_SESSION['bgjob']['makeFlipkin']    = $req['makeFlipkin'];
+        $_SESSION['bgjob']['reduce_blength'] = $req['blength'];
+
         if($req['method'] == 'build')
         {
             mpLog("reduce-build:User ran default Reduce -build job; flipkins=".$_REQUEST['makeFlipkin']);
@@ -162,6 +176,7 @@ function onAddH()
         $context = getContext();
         if(isset($req['modelID']))  $context['modelID'] = $req['modelID'];
         if(isset($req['method']))   $context['method'] = $req['method'];
+        if(isset($req['blength']))   $context['blength'] = $req['blength'];
         setContext($context);
     }
 }

@@ -2,7 +2,7 @@
 /*****************************************************************************
     This file runs the standard Reduce -build command on an existing
     model in this session and creates a new model entry for the Reduced file.
-    
+
 INPUTS (via $_SESSION['bgjob']):
     modelID         ID code for model to process
     makeFlipkin     true if the user wants a Flipkin made
@@ -32,7 +32,7 @@ OUTPUTS (via $_SESSION['bgjob']):
 // 6. Record this PHP script's PID in case it needs to be killed.
     $_SESSION['bgjob']['processID'] = posix_getpid();
     mpSaveSession();
-    
+
 #{{{ a_function_definition - sumary_statement_goes_here
 ############################################################################
 /**
@@ -47,8 +47,17 @@ $modelID = $_SESSION['bgjob']['modelID'];
 $model = $_SESSION['models'][$modelID];
 $pdb = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$model['pdb'];
 
+$reduce_blength = $_SESSION['bgjob']['reduce_blength'];
+
 // Set up progress message
-$tasks['reduce'] = "Add H with <code>reduce -build</code>";
+if ($reduce_blength == 'ecloud')
+{
+  $tasks['reduce'] = "Add H with <code>reduce -build</code>";
+}
+elseif($reduce_blength == 'nuclear')
+{
+  $tasks['reduce'] = "Add H with <code>reduce -build -nuclear</code>";
+}
 if($_SESSION['bgjob']['makeFlipkin']) $tasks['flipkin'] = "Create Asn/Gln and His <code>flipkin</code> kinemages";
 
 setProgress($tasks, 'reduce');
@@ -57,11 +66,19 @@ $outname = $newModel['pdb'];
 $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
 if(!file_exists($outpath)) mkdir($outpath, 0777); // shouldn't ever happen, but might...
 $outpath .= '/'.$outname;
-reduceBuild($pdb, $outpath);
+reduceBuild($pdb, $outpath, $reduce_blength);
 
 $newModel['stats']          = pdbstat($outpath);
 $newModel['parent']         = $modelID;
-$newModel['history']        = "Derived from $model[pdb] by Reduce -build";
+
+if($reduce_blength == 'ecloud')
+{
+  $newModel['history']        = "Derived from $model[pdb] by Reduce -build";
+}
+elseif($reduce_blength == 'nuclear')
+{
+  $newModel['history']        = "Derived from $model[pdb] by Reduce -build -nuclear";
+}
 $newModel['isUserSupplied'] = $model['isUserSupplied'];
 $newModel['isReduced']      = true;
 $newModel['isBuilt']        = true;
