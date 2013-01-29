@@ -26,7 +26,7 @@ function createModel($modelID, $pdbSuffix = "")
     // (It's case-PRESERVING.) This could screw up file naming.
     foreach($_SESSION['models'] as $k => $v) $lowercaseIDs[strtolower($k)] = $k;
     foreach($_SESSION['ensembles'] as $k => $v) $lowercaseIDs[strtolower($k)] = $k;
-    
+
     // If this is true, we're going to need to differentiate this model from an existing one
     if(isset($lowercaseIDs[strtolower($modelID)])
     || file_exists($_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$modelID.$pdbSuffix.".pdb"))
@@ -41,10 +41,10 @@ function createModel($modelID, $pdbSuffix = "")
         }
         $modelID .= $serial;
     }
-    
+
     // $modelID already has $serial in it (if needed)
     $outname = $modelID.$pdbSuffix.".pdb";
-    
+
     // Create the model entry
     return array(
         'id'        => $modelID,
@@ -98,31 +98,31 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
         $origID = $m[1];
     else
         $origID = $origName;
-    
+
     // Process file to clean it up
     $tmp2 = mpTempfile("tmp_pdb_");
     $tmp3 = mpTempfile("tmp_pdb_");
     $tmp4 = mpTempFile("tmp_pdb_");
     list($stats, $segmap) = preparePDB($tmpPdb, $tmp2, $isCnsFormat, $ignoreSegID);
     $stats = convertToPDBv3($tmp2, $tmp3);
-    if ($stats['hydrogens'] > 0) { 
+    if ($stats['hydrogens'] > 0) {
       removeHydrogens($tmp3, $tmp4);
       //$stats = pdbstat($tmp4);
     }
     else {
       copy($tmp3, $tmp4);
     }
-    
+
     $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
     if(!file_exists($outpath)) mkdir($outpath, 0777);
-    
+
     if($stats['models'] > 1) // NMR/theoretical with multiple models {{{
     {
         // Original task list set during preparePDB()
         $tasks = getProgressTasks();
         $tasks['splitNMR'] = "Split NMR models into separate PDB files";
         setProgress($tasks, "splitNMR");
-        
+
         //$outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
         //if(!file_exists($outpath)) mkdir($outpath, 0777);
         $splitModels = splitPdbModels($tmp2);
@@ -137,33 +137,33 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
             // Better to keep the original model numbers hanging around:
             //$idList[] = $id;
             $idList[$modelNum] = $id;
-            
+
             $file = $outpath.'/'.$model['pdb'];
             copy($tmp3, $file);
             unlink($tmp3);
-            
+
             $model['stats']                 = pdbstat($file);
             $model['history']               = "Model $modelNum from file uploaded by user";
             $model['isUserSupplied']        = $isUserSupplied;
             if($segmap) $model['segmap']    = $segmap;
-            
+
             // Create the model entry
             $_SESSION['models'][$id] = $model;
         }
-        
+
         // Create the ensemble entry
         //$ensemble = createEnsemble("ens_$origID"); // why add the "ens_" and confuse people?
         $ensemble = createEnsemble($origID);
         $ensemble['models'] = $idList;
         $ensemble['history'] = "Ensemble of ".count($idList)." models uploaded by user";
         $ensemble['isUserSupplied'] = $isUserSupplied;
-        
+
         $pdbList = array();
         foreach($idList as $modelNum => $id) $pdbList[$modelNum] = $outpath.'/'.$_SESSION['models'][$id]['pdb'];
         $joinedModel = joinPdbModels($pdbList);
         copy($joinedModel, $outpath.'/'.$ensemble['pdb']);
         unlink($joinedModel);
-        
+
         // Create the ensemble entry
         $id = $ensemble['id'];
         $_SESSION['ensembles'][$id] = $ensemble;
@@ -178,9 +178,9 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
         if(!filesAreIdentical($tmp2, $tmp3)) $append .= "_pdbv3";
 
         $model = createModel($origID, $append);
-        //if(filesAreIdentical($tmpPdb, $tmp2))   $model = createModel($origID);        
+        //if(filesAreIdentical($tmpPdb, $tmp2))   $model = createModel($origID);
         //else                                    $model = createModel($origID, "_clean");
-    
+
         $model['stats']                 = $stats;
         $historyText = "";
         if (filesAreIdentical($tmpPdb, $tmp4))  $historyText  = 'Original file ';
@@ -190,41 +190,41 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
         $model['history'] = $historyText;
         $model['isUserSupplied']        = $isUserSupplied;
         if($segmap) $model['segmap']    = $segmap;
-        
+
         $id         = $model['id'];
         $outname    = $model['pdb'];
         //$outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
         //if(!file_exists($outpath)) mkdir($outpath, 0777);
         //$outpath .= '/'.$outname;
         copy($tmp3, $outpath.'/'.$outname);
-        
+
         // Create the model entry
         $_SESSION['models'][$id] = $model;
-        
+
         if(!filesAreIdentical($tmp3, $tmp4)) { //trimmed file
-          
+
           $untrimmedmod = createModel($origID.$append, "_trimmed");
           $untrimmedmod['stats'] = pdbstat($tmp4);
-          
+
           $historyText = 'File (trimmed) ';
           if ($isUserSupplied)                    $historyText .= 'uploaded by user';
           else                                    $historyText .= 'downloaded from web';
-          
+
           $untrimmedmod['history'] = $historyText;
           $untrimmedmod['isUserSupplied']        = $isUserSupplied;
-          
+
           $outuntrimmed = $outpath.'/'.$untrimmedmod['pdb'];
           copy($tmp4, $outuntrimmed);
-          
+
           $id = $untrimmedmod['id'];
-          
+
           $_SESSION['models'][$id] = $untrimmedmod;
         }
-        
+
         unlink($tmp4);
-        unlink($tmp3);   
+        unlink($tmp3);
         unlink($tmp2);
-        
+
         return $id;
     }//}}}
 }
@@ -264,7 +264,7 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
 {
     $tmp1   = mpTempfile("tmp_pdb_");
     $tmp2   = mpTempfile("tmp_pdb_");
-    
+
     // List of tasks for running as a background job
     $tasks['scrublines'] = "Convert linefeeds to UNIX standard (\\n)";
     $tasks['stripusermod'] = "Strip out old USER MOD records from <code>reduce</code>";
@@ -272,8 +272,8 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
     $tasks['segmap'] = "Convert segment IDs to chain IDs (if needed)";
     $tasks['cnsnames'] = "Convert CNS atom names to PDB standard (if needed)";
     $tasks['pdbstat2'] = "Re-analyze contents of final PDB file";
-    //$tasks['remediate'] = "Convert PDB to version 3 format (if needed)";    
-    
+    //$tasks['remediate'] = "Convert PDB to version 3 format (if needed)";
+
     // Process file - this is the part that matters
     // Convert linefeeds to UNIX standard (\n):
     setProgress($tasks, 'scrublines'); // updates the progress display if running as a background job
@@ -362,7 +362,7 @@ function convertToPDBv3($inpath, $outpath) {
     $tasks = getProgressTasks();
     $tasks['remediate'] = "Convert PDB to version 3 format (if needed)";
     $tmp1   = mpTempfile("tmp_pdb_");
-    
+
     setProgress($tasks, 'remediate');
     $stats = pdbstat($inpath);
     $v2atoms = $stats['v2atoms'];
@@ -373,10 +373,10 @@ function convertToPDBv3($inpath, $outpath) {
     } else {
         copy($inpath, $outpath);
     }
-    
+
     // Clean up temp files
     unlink($tmp1);
-    
+
     setProgress($tasks, null); // all done
     return $stats;
 }
@@ -391,13 +391,13 @@ function removeHydrogens($inpath, $outpath) {
     $tasks = getProgressTasks();
     $tasks['reducetrim'] = "Remove hydrogens to avoid possible conflict with hydrogen lengths";
     $tmp1   = mpTempfile("tmp_pdb_");
-    
+
     setProgress($tasks, 'reducetrim');
     reduceTrim($inpath, $tmp1);
     copy($tmp1, $outpath);
-    
+
     unlink($tmp1);
-    
+
     setProgress($tasks, null); // all done
 }
 #}}}########################################################################
@@ -427,7 +427,7 @@ function splitPdbModels($infile)
     $headers = array();     // REMARKs, etc.
     $footers = array();     // CONECTs, etc.
     $sink =& $headers;      // where lines are currently deposited
-    
+
     // Part 1: extract headers and footers from the PDB file
     $keeplines = true;
     $in = fopen($infile,"rb");
@@ -449,7 +449,7 @@ function splitPdbModels($infile)
         elseif($keeplines) $sink[] = $line;
     }
     fclose($in);
-    
+
     // Part 2: write the non-(header, footer) parts to separate files.
     // Every model gets all headers and footers, plus its ATOMs, etc.
     $modelFiles = array();
@@ -465,7 +465,7 @@ function splitPdbModels($infile)
         {
             $keeplines = true;
             $num = trim(substr($line, 5, 20)) + 0;
-            
+
             $tmpFile = mpTempfile("tmp_pdb_");
             $modelFiles[$num] = $tmpFile;
             $out = fopen($tmpFile, "wb");
@@ -475,7 +475,7 @@ function splitPdbModels($infile)
         elseif($start == 'ENDMDL')
         {
             $keeplines = false;
-            
+
             fwrite($out, "REMARK  99 ENDMDL                                                               \n");
             foreach($footers as $f) fwrite($out, $f);
             fclose($out);
@@ -483,7 +483,7 @@ function splitPdbModels($infile)
         elseif($keeplines) fwrite($out, $line);
     }
     fclose($in);
-    
+
     return $modelFiles;
 }
 #}}}########################################################################
@@ -503,7 +503,7 @@ function joinPdbModels($infiles)
     // Part 1: Scan all files to find all unique headers / footers
     $headers = array();     // REMARKs, etc.
     $footers = array();     // CONECTs, etc.
-    
+
     foreach($infiles as $infile)
     {
         //Open PDB file, read line by line
@@ -521,7 +521,7 @@ function joinPdbModels($infiles)
         }
         fclose($in);
     }
-    
+
     // Part 2: Should we number models using the array keys?
     $useKeysAsModelNumbers = true;
     foreach($infiles as $key => $dummy)
@@ -530,12 +530,12 @@ function joinPdbModels($infiles)
         $useKeysAsModelNumbers =
             $useKeysAsModelNumbers && $key > 0 && is_int($key);
     }
-    
+
     // Part 3: Re-scan all files and write their contents, in order.
     $tmpFile = mpTempfile("tmp_pdb_");
     $out = fopen($tmpFile, "wb");
     foreach($headers as $h) fwrite($out, $h);
-    
+
     $i = 1;
     foreach($infiles as $key => $infile)
     {
@@ -555,10 +555,10 @@ function joinPdbModels($infiles)
         fclose($in);
         $i++;
     }
-    
+
     foreach($footers as $f) fwrite($out, $f);
     fclose($out);
-    
+
     return $tmpFile;
 }
 #}}}########################################################################
@@ -579,7 +579,7 @@ function convertModelsToChains($infile)
     $unusedIDs = array();
     for($i = 0; $i < strlen($possibleIDs); $i++)
         $unusedIDs[ $possibleIDs{$i} ] = $possibleIDs{$i};
-    
+
     // Maps old chain IDs to new chain IDs. Mappings are pulled from $unusedIDs.
     // This is cleared out every time a new MODEL is encountered.
     $idmap = array();
@@ -610,7 +610,7 @@ function convertModelsToChains($infile)
     }
     fclose($in);
     fclose($out);
-    
+
     return $tmpFile;
 }
 #}}}########################################################################
@@ -628,13 +628,13 @@ function removeChains($inpath, $outpath, $idsToRemove)
         if($id == '_') $id = ' ';
         $ids .= $id;
     }
-    
+
     if(strlen($ids) == 0)
     {
         copy($inpath, $outpath);
         return;
     }
-    
+
     $in = fopen($inpath, 'rb');
     $out = fopen($outpath, 'wb');
     $regex = "/^(ATOM  |HETATM|TER   |ANISOU|SIGATM|SIGUIJ).{15}[$ids]/";
@@ -687,7 +687,7 @@ function reduceTrim($inpath, $outpath)
 * $inpath       the full filename for the PDB file to be processed
 * $outpath      the full filename for the destination PDB. Will be overwritten.
 */
-function reduceNoBuild($inpath, $outpath)
+function reduceNoBuild($inpath, $outpath, $blength='ecloud')
 {
     // Add missing H's without trying to optimize or fix anything
     // $_SESSION[hetdict] is used to set REDUCE_HET_DICT environment variable,
@@ -695,7 +695,15 @@ function reduceNoBuild($inpath, $outpath)
     // High penalty means no flips happen, but they must be considered to get networks right.
     // "-build" is these 3 plus -rotexoh:         /------------\
     //exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -oh -his -flip -pen9999 -keep -allalt $inpath > $outpath");
-    exec("reduce -quiet -oh -his -flip -norotmet -pen9999 -keep -allalt $inpath > $outpath");
+    if ($blength == 'ecloud')
+    {
+      //exec("reduce -quiet -oh -his -flip -norotmet -pen9999 -keep -allalt $inpath > $outpath");
+      exec("reduce -quiet -nobuild $inpath > $outpath");
+    }
+    elseif ($blength == 'nuclear')
+    {
+      exec("reduce -quiet -nobuild -nuclear $inpath > $outpath");
+    }
 }
 #}}}########################################################################
 
@@ -708,12 +716,19 @@ function reduceNoBuild($inpath, $outpath)
 * $inpath       the full filename for the PDB file to be processed
 * $outpath      the full filename for the destination PDB. Will be overwritten.
 */
-function reduceBuild($inpath, $outpath)
+function reduceBuild($inpath, $outpath, $blength='ecloud')
 {
     // $_SESSION[hetdict] is used to set REDUCE_HET_DICT environment variable,
     // so it doesn't need to appear on the command line here.
     //exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -build -allalt $inpath > $outpath");
-    exec("reduce -quiet -build -norotmet -allalt $inpath > $outpath");
+    if ($blength == 'ecloud')
+    {
+      exec("reduce -quiet -build $inpath > $outpath");
+    }
+    elseif ($blength == 'nuclear')
+    {
+      exec("reduce -quiet -build -nuclear $inpath > $outpath");
+    }
 }
 #}}}########################################################################
 
@@ -755,7 +770,7 @@ function reduceEnsemble($ensID, $reduceFunc = 'reduceNoBuild')
     $ens        = $_SESSION['ensembles'][$ensID];
     $idList     = array();
     $pdbList    = array();
-    
+
     foreach($ens['models'] as $modelNum => $modelID)
     {
         $oldModel   = $_SESSION['models'][$modelID];
@@ -767,7 +782,7 @@ function reduceEnsemble($ensID, $reduceFunc = 'reduceNoBuild')
         $inpath     = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$oldModel['pdb'];
         // FUNKY: calls the function whose name is stored in the variable $reduceFunc
         $reduceFunc($inpath, $outpath);
-        
+
         $newModel['stats']          = pdbstat($outpath);
         $newModel['parent']         = $modelID;
         $newModel['history']        = "Derived from $oldModel[pdb] by $reduceFunc";
@@ -775,22 +790,22 @@ function reduceEnsemble($ensID, $reduceFunc = 'reduceNoBuild')
         $newModel['isReduced']      = ($reduceFunc != 'reduceTrim');
         $newModel['isBuilt']        = ($reduceFunc == 'reduceBuild');
         $_SESSION['models'][ $newModel['id'] ] = $newModel;
-        
+
         $idList[$modelNum]  = $newModel['id'];
         $pdbList[$modelNum] = $outpath;
     }
-    
+
     $ensemble = createEnsemble($ensID."H");
     $ensemble['models']     = $idList;
     $ensemble['history']    = "Ensemble of ".count($idList)." models derived from $ens[pdb] by $reduceFunc";
     $newModel['isReduced']  = ($reduceFunc != 'reduceTrim');
     $newModel['isBuilt']    = ($reduceFunc == 'reduceBuild');
     $ensemble['isUserSupplied'] = $ens['isUserSupplied'];
-    
+
     $joinedModel = joinPdbModels($pdbList);
     copy($joinedModel, $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$ensemble['pdb']);
     unlink($joinedModel);
-    
+
     // Create the ensemble entry
     $id = $ensemble['id'];
     $_SESSION['ensembles'][$id] = $ensemble;
@@ -868,7 +883,7 @@ function decodeReduceUsermods($file)
             $changes[11][$c] = trim(preg_replace("/^sc=......... ..o=([^!]+)(!?),f=([^!]+)(!?).*$/i", "\\4", $field[3]));
             $changes[12][$c] = trim(preg_replace("/^sc=......... ([FXCK]).*$/i", "\\1", $field[3]));
             /** Original, highly inefficient code! */
-            
+
             // Better to group ins code with number than res type.
             // I don't *think* anything depended on the old behavior.
             // CNIT:       C  NNNNI  TTT
@@ -904,7 +919,7 @@ function decodeReduceUsermods($file)
                 echo $s;
                 continue;
             }
-            
+
             // Set this flag so we can determine 4 and 5
             $didflip = preg_match("/^FLIP/", $field[2]);
 
@@ -972,7 +987,7 @@ function decodeReduceUsermods($file)
 * Read in $file until we reach an ATOM record.
 * Look for USER  MOD records that show Asn/Gln/His flips,
 * or bad clashes in both orientations.
-* 
+*
 * Returns a boolean indicating whether this file has flips.
 */
 function containsReduceFlips($file)
@@ -1056,7 +1071,7 @@ function getPdbModel($pdbcode, $biolunit = false)
     else
         //$src = "http://www.rcsb.org/pdb/cgi/export.cgi/$pdbcode.pdb?format=PDB&pdbId=$pdbcode&compression=gz";
         $src = "http://www.pdb.org/pdb/files/".strtolower($pdbcode).".pdb.gz";
-        
+
     $outpath = mpTempfile("tmp_pdb_");
     if(copy($src, $outpath) && filesize($outpath) > 1000)
     {
@@ -1091,21 +1106,21 @@ function getNdbModel($code)
 {
     // I think the NDB website is picky about case
     $code = strtoupper($code);
-    
+
     // Fake POST a user query to the NDB homepage
     $ch = curl_init('http://ndbserver.rutgers.edu/servlet/IDSearch.NDBSearch1');
     $webpage = mpTempfile("tmp_html_");
     $fp = fopen($webpage, "wb");
-    
+
     curl_setopt($ch, CURLOPT_FILE, $fp);    // output to specified file
     curl_setopt($ch, CURLOPT_HEADER, 0);    // no header in output
     curl_setopt($ch, CURLOPT_POST, 1);      // perform HTTP POST operation
     curl_setopt($ch, CURLOPT_POSTFIELDS, "id=$code&Submit=Search&radiobutton=ndbid&site=production");
-    
+
     curl_exec($ch); // download file
     curl_close($ch);
     fclose($fp);
-    
+
     // Grep for this pattern:
     //<a href="ftp://ndbserver.rutgers.edu/NDB/coordinates/na-chiral-correct/pdb401d.ent.Z">Asymmetric Unit coordinates (pdb format
     $lines = file($webpage);
@@ -1119,7 +1134,7 @@ function getNdbModel($code)
     }
     unlink($webpage);
     if(!isset($url)) return null;
-    
+
     // Download file...
     $Zfile = mpTempfile("tmp_pdbZ_");
     if(!copy($url, $Zfile) || filesize($Zfile < 1000))
@@ -1127,13 +1142,13 @@ function getNdbModel($code)
         if(file_exists($Zfile)) unlink($Zfile);
         return null;
     }
-    
+
     // Use gunzip to decompress it
     // -S forces gunzip to recognize file by magic number rather than .Z ending
     $outpath = mpTempfile("tmp_pdb_");
     exec("gunzip -c -S '' $Zfile > $outpath");
     unlink($Zfile);
-    
+
     if( filesize($outpath) > 1000 ) return $outpath;
     else
     {
@@ -1155,7 +1170,7 @@ function getNdbModel($code)
 function getEdsMap($pdbcode, $format, $type)
 {
     $pdbcode = strtolower($pdbcode);
-    
+
     // Create POST arguments to the HTML form
     $args = array(
         'pdbCode'       => $pdbcode,
@@ -1164,7 +1179,7 @@ function getEdsMap($pdbcode, $format, $type)
         'maptype'       => $type
     );
     foreach($args as $key => $value) $postfields[] = urlencode($key) . '=' . urlencode($value);
-    
+
     // Set CURL options
     $server = 'eds.bmc.uu.se/eds';
     if ($type == '2fofc') $url = "http://$server/dfs/".substr($pdbcode, 1, 2)."/$pdbcode/$pdbcode.$format";
@@ -1177,14 +1192,14 @@ function getEdsMap($pdbcode, $format, $type)
     //curl_setopt($c, CURLOPT_NOBODY, true);
     curl_setopt($c, CURLOPT_POST, true);
     curl_setopt($c, CURLOPT_POSTFIELDS, implode('&', $postfields));
-    
+
     // Retrieve the web page from EDS
     $page = curl_exec($c);
     // Can't get these once we close the connection:
     $curlErrno = curl_errno($c);
     $curlError = curl_error($c);
     curl_close($c);
-    
+
     // Check for errors and find the file name
     if($curlErrno)                                      // network failure
     {
@@ -1207,7 +1222,7 @@ function getEdsMap($pdbcode, $format, $type)
     //    return null;
     //}
     //$url = "http://{$server}{$m[1]}";
-    
+
     // Copy the file over the network in 8k chunks
     $in = fopen($url, 'r');
     $outpath = mpTempfile("tmp_map_");
@@ -1216,7 +1231,7 @@ function getEdsMap($pdbcode, $format, $type)
         fwrite($out, fread($in, 8192));
     fclose($out);
     fclose($in);
-    
+
     return $outpath;
 }
 #}}}########################################################################
@@ -1239,7 +1254,7 @@ function remapSegIDs($inpath, $outpath, $mapString)
     for($i = 0; $i < count($tmp); $i += 2)
         $map[strtoupper($tmp[$i])] = strtoupper($tmp[$i+1]);
     #print_r($map);
-    
+
     $in = fopen($inpath, 'rb');
     $out = fopen($outpath, 'wb');
     while(!feof($in))

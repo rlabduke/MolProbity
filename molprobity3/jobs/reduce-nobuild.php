@@ -2,7 +2,7 @@
 /*****************************************************************************
     This file runs the Reduce to add missing H without doing a full -build.
     It runs on model in this session and **replaces** its PDB file.
-    
+
 INPUTS (via $_SESSION['bgjob']):
     modelID         ID code for model to process
 
@@ -32,7 +32,7 @@ OUTPUTS (via $_SESSION['bgjob']):
 // 6. Record this PHP script's PID in case it needs to be killed.
     $_SESSION['bgjob']['processID'] = posix_getpid();
     mpSaveSession();
-    
+
 #{{{ a_function_definition - sumary_statement_goes_here
 ############################################################################
 /**
@@ -47,8 +47,17 @@ $modelID = $_SESSION['bgjob']['modelID'];
 $model = $_SESSION['models'][$modelID];
 $pdb = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$model['pdb'];
 
+$reduce_blength = $_SESSION['bgjob']['reduce_blength'];
+
 // Set up progress message
-$tasks['reduce'] = "Add H with <code>reduce -nobuild</code>";
+if($reduce_blength == 'ecloud')
+{
+  $tasks['reduce'] = "Add H with <code>reduce -nobuild</code>";
+}
+elseif($reduce_blength == 'nuclear')
+{
+  $tasks['reduce'] = "Add H with <code>reduce -nobuild -nuclear</code>";
+}
 $tasks['notebook'] = "Add entry to lab notebook";
 
 setProgress($tasks, 'reduce'); // updates the progress display if running as a background job
@@ -57,11 +66,18 @@ $outname = $newModel['pdb'];
 $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
 if(!file_exists($outpath)) mkdir($outpath, 0777); // shouldn't ever happen, but might...
 $outpath .= '/'.$outname;
-reduceNoBuild($pdb, $outpath);
+reduceNoBuild($pdb, $outpath, $reduce_blength);
 
 $newModel['stats']          = pdbstat($outpath);
 $newModel['parent']         = $modelID;
-$newModel['history']        = "Derived from $model[pdb] by Reduce -nobuild";
+if($reduce_blength == 'ecloud')
+{
+  $newModel['history']        = "Derived from $model[pdb] by Reduce -nobuild";
+}
+if($reduce_blength == 'nuclear')
+{
+  $newModel['history']        = "Derived from $model[pdb] by Reduce -nobuild -nuclear";
+}
 $newModel['isUserSupplied'] = $model['isUserSupplied'];
 $newModel['isReduced']      = true;
 $_SESSION['models'][ $newModel['id'] ] = $newModel;
