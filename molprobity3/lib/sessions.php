@@ -14,11 +14,11 @@ function mpInitEnvirons()
     $df = shell_exec("df '".MP_BASE_DIR."'");
     $i = strrpos($df, "%");
     if(trim(substr($df, $i-2, 2)) >= 98) die("Server disk is more than 98% full.");
-    
+
     // Configure some PHP options for our use
     // comment out the following set_magic_quotes_runtime line; deprecated in PHP vers 5.3
     // set_magic_quotes_runtime(0); // off
-    
+
     // Make sure our pages aren't cached by the browser.
     // Most browsers are OK without this, but we're just being safe...
     // Taken from the PHP manual:
@@ -29,13 +29,13 @@ function mpInitEnvirons()
     header("Cache-Control: post-check=0, pre-check=0", false);      // HTTP/1.1
     header("Pragma: no-cache");                                     // HTTP/1.0
     */
-    
+
     // Set umask for files, directories, etc. that are created
     umask(MP_UMASK);
-    
+
     // Set PATH for executable programs
     putenv("PATH=".mpGetPath());
-    
+
     // Also set location of Reduce's heterogen dictionary
     // Better here than on command line b/c it affects e.g. flipkin too
     putenv("REDUCE_HET_DICT=".MP_REDUCE_HET_DICT);
@@ -49,18 +49,18 @@ function mpInitEnvirons()
 function mpGetPath()
 {
     $mpPath = MP_BASE_DIR."/bin";
-    
+
     if(preg_match("/(darwin|os ?x|mac)/i", PHP_OS))
         $mpPath .= ":".MP_BASE_DIR."/bin/macosx";
     elseif(preg_match("/(linux)/i", PHP_OS))
         $mpPath .= ":".MP_BASE_DIR."/bin/linux";
-        
+
     if(MP_BIN_PATH != "")
         $mpPath = MP_BIN_PATH.":$mpPath";
-    
+
     if(getenv("PATH") != "")
         $mpPath .= ":".getenv("PATH");
-        
+
     return $mpPath;
 }
 #}}}########################################################################
@@ -81,7 +81,7 @@ function mpStartSession($createIfNeeded = false)
 {
     // First set up constants, env. variables, etc.
     mpInitEnvirons();
-    
+
     // Cookies cause more trouble than they're worth
     ini_set("session.use_cookies", 0);
     ini_set("session.use_only_cookies", 0);
@@ -93,11 +93,11 @@ function mpStartSession($createIfNeeded = false)
     session_name(MP_SESSION_NAME);
     // Establish custom routines for persisting session data
     session_set_save_handler ("mpSessOpen", "mpSessClose", "mpSessRead", "mpSessWrite", "mpSessDestroy", "mpSessGC");
-    
+
     // Restore the session data
     @session_start(); // we get meaningless error msgs when used from a script env.
     mpCheckSessionID(session_id()); // just in case
-    
+
     // Check to make sure we have a working directory for this user.
     $dataDir = MP_BASE_DIR."/public_html/data/".session_id();
     if(!file_exists($dataDir))
@@ -107,11 +107,11 @@ function mpStartSession($createIfNeeded = false)
             // Always do cleanup before starting a new session
             // (MP_SESSION_LIFETIME is a dummy -- lifetime is determined per-session)
             mpSessGC(MP_SESSION_LIFETIME);
-            
+
             // Main data directories
             mkdir($dataDir, 0777); // Default mode; is modified by UMASK too.
             mkdir("$dataDir/".MP_DIR_SYSTEM, 0777);
-            
+
             // Others specified in config.php must be created on demand.
 
             // Set up some session variables. See docs for explanation.
@@ -124,10 +124,11 @@ function mpStartSession($createIfNeeded = false)
             $_SESSION['currEventID']    = 1; // used by (optional) MVC/event architecture
             $_SESSION['models']         = array(); // no models to start with
             $_SESSION['ensembles']      = array(); // no ensembles to start with
-            
+            $_SESSION['reduce_blength'] = "ecloud"; // x-H distance
+
             // TODO: perform other tasks to start a session
             // Create databases, etc, etc.
-            
+
             //mpLog("new-session:New user session started");
             $sessionCreated = true;
         }
@@ -138,10 +139,10 @@ function mpStartSession($createIfNeeded = false)
         }
     }
     else $sessionCreated = false;
-    
+
     // Mark the lifetime of this session
     mpSessSetTTL(session_id(), MP_SESSION_LIFETIME);
-    
+
     // Also set location of Reduce's heterogen dictionary,
     // overriding the value set up by mpInitEnvirons().
     // Better here than on command line b/c it affects e.g. flipkin too
@@ -204,7 +205,7 @@ function mpSessRead($id)
     mpCheckSessionID($id); // just in case something nasty is in there
     $dataDir    = MP_BASE_DIR."/public_html/data/$id";
     $sessFile   = "$dataDir/".MP_DIR_SYSTEM."/session";
-    
+
     // Read in session data, if present
     if($fp = @fopen($sessFile, "r"))
     {
@@ -228,11 +229,11 @@ function mpSessWrite($id, $sessData)
     // Don't do anything if we've been marked read-only
     global $__mpsess_readonly__;
     if($__mpsess_readonly__) return false;
-    
+
     mpCheckSessionID($id); // just in case something nasty is in there
     $dataDir    = MP_BASE_DIR."/public_html/data/$id";
     $sessFile   = "$dataDir/".MP_DIR_SYSTEM."/session";
-    
+
     // Write the session data
     if($fp = @fopen($sessFile, "w"))
     {
@@ -247,7 +248,7 @@ function mpSessDestroy($id)
 {
     mpCheckSessionID($id); // just in case something nasty is in there
     $dataDir    = MP_BASE_DIR."/public_html/data/$id";
-    
+
     // This actually seems to be most robust and portable... unlink() is very awkward
     `rm -rf '$dataDir'`;
     return true;
@@ -267,7 +268,7 @@ function mpSessGC($maxlifetime)
     #    if($sess['ttl'] < 0 || $sess['size'] > 1.5*MP_SESSION_MAX_SIZE)
     #        mpSessDestroy($sess['id']);
     #}
-    
+
     // Time-limited, probabalistic cleanup of old / oversize sessions
     // 1. Enumerate IDs of all active sessions.
     $start = microtime(); // seconds, as string
@@ -314,7 +315,7 @@ function mpSessSetTTL($id, $timeToLive)
         $time = time();
         if($timeToLive <= 0) $timeToLive = MP_SESSION_LIFETIME;
         $destroy = $time + $timeToLive;
-        
+
         fwrite($fp, $time."    # Last-used date: ".date("j M Y \\a\\t g:ia", ($time))."\n");
         fwrite($fp, $destroy."    # Destroy-on date: ".date("j M Y \\a\\t g:ia", ($destroy))."\n");
         @fclose($fp);
@@ -344,11 +345,11 @@ function mpSessLifetime($id)
         $lastTouched = trim(fgets($fp, 1024)) + 0;
         $destroyOn = trim(fgets($fp, 1024)) + 0;
         @fclose($fp);
-        
+
         // For backwards compat: second line used to be text
         // Use longest possible lifetime to give 'em benefit of the doubt
         if($destroyOn == 0) $destroyOn = ($lastTouched + MP_SESSION_LIFETIME_EXT);
-        
+
         return array('last' => $lastTouched, 'ttl' => ($destroyOn-time()));
     }
     else return array('last' => 0, 'ttl' => 0);
@@ -379,7 +380,7 @@ function mpSessSizeOnDisk($id)
 function mpEnumerateSessions()
 {
     $sesslist = array();
-    
+
     $baseDataDir = MP_BASE_DIR."/public_html/data";
     $h = opendir($baseDataDir);
     while( ($id = readdir($h)) != false )
@@ -397,7 +398,7 @@ function mpEnumerateSessions()
         }
     }
     closedir($h);
-    
+
     return $sesslist;
 }
 #}}}########################################################################
@@ -498,7 +499,7 @@ function getVisitorIP_impl()
     $HTTP_FORWARDED_FOR     = $_SERVER['HTTP_FORWARDED_FOR'];
     $HTTP_FORWARDED         = $_SERVER['HTTP_FORWARDED'];
     $REMOTE_ADDR            = $_SERVER['REMOTE_ADDR'];
-    
+
     if($HTTP_X_FORWARDED_FOR)
     {
         // case 1.A: proxy && HTTP_X_FORWARDED_FOR is defined

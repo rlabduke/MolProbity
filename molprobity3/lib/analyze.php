@@ -2,7 +2,7 @@
 /*****************************************************************************
     Provides functions for producing analysis data from outside programs
     and for loading and interpretting that data.
-    
+
     Many functions work with a column-formatted residue name
     stored in exactly 9 characters, like this: 'cnnnnittt'
         c: Chain ID, space for none
@@ -49,7 +49,7 @@ require_once(MP_BASE_DIR.'/lib/model.php'); // for making kinemages
 *       chartMulti      do html multi chart?
 *       chartNotJustOut include residues that have no problems in the list?
 *       chartImprove    compare to reduce -(no)build results to show improvement?
-*       
+*
 * This function returns some HTML suitable for using in a lab notebook entry.
 */
 function runAnalysis($modelID, $opts)
@@ -59,7 +59,7 @@ function runAnalysis($modelID, $opts)
     if(!$opts['doKinemage']) foreach($opts as $k => $v) if(startsWith($k, 'kin')) $opts[$k] = false;
     if(!$opts['doCharts']) foreach($opts as $k => $v) if(startsWith($k, 'chart')) $opts[$k] = false;
     if($opts['kinForceViews']) foreach($opts as $k => $v) if(startsWith($k, 'chart')) $opts[$k] = true;
-    
+
     $model      = $_SESSION['models'][$modelID];
     $modelDir   = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
     $modelURL   = $_SESSION['dataURL'].'/'.MP_DIR_MODELS;
@@ -72,25 +72,26 @@ function runAnalysis($modelID, $opts)
     $chartURL   = $_SESSION['dataURL'].'/'.MP_DIR_CHARTS;
         if(!file_exists($chartDir)) mkdir($chartDir, 0777);
     $infile     = "$modelDir/$model[pdb]";
-    
+    $reduce_blength = $_SESSION['reduce_blength'];
+
     if($opts['chartRama'])      $tasks['rama'] = "Do Ramachandran analysis and make plots";
     if($opts['chartRota'])      $tasks['rota'] = "Do rotamer analysis";
     if($opts['chartCBdev'])     $tasks['cbeta'] = "Do C&beta; deviation analysis and make kins";
     if($opts['chartBaseP'])     $tasks['base-phos'] = "Do RNA sugar pucker analysis";
     if($opts['chartSuite'])     $tasks['suitename'] = "Do RNA backbone conformations analysis";
     if($opts['chartGeom'])      $tasks['geomValidation'] = "Do bond length and angle geometry analysis";
-    
+
     if($opts['chartClashlist']) $tasks['clashlist'] = "Run <code>clashlist</code> to find bad clashes and clashscore";
     if($opts['chartImprove'])   $tasks['improve'] = "Suggest / report on fixes";
     if($opts['doCharts']&&!$opts['chartMulti'])       $tasks['chartsummary'] = "Create summary chart";
     if($opts['chartMulti'])     $tasks['multichart'] = "Create multi-criterion chart";
     if($opts['chartCoot'])      $tasks['cootchart'] = "Create chart for use in Coot";
     if($opts['doKinemage'])     $tasks['multikin'] = "Create multi-criterion kinemage";
-    
+
     //$doRem40 = $opts['chartClashlist'] || $opts['chartRama'] || $opts['chartRota'];
     //if($doRem40)                $tasks['remark40'] = "Create REMARK  40 record for the PDB file";
     //}}} Set up file/directory vars and the task list
-    
+
     //{{{ Run protein geometry programs and offer kins to user
     // Ramachandran
     if($opts['chartRama'])
@@ -100,7 +101,7 @@ function runAnalysis($modelID, $opts)
         $outfile = "$rawDir/$model[prefix]rama.data";
         runRamachandran($infile, $outfile);
         $rama = loadRamachandran($outfile);
-        
+
         makeRamachandranKin($infile, "$kinDir/$model[prefix]rama.kin");
         $tasks['rama'] .= " - preview <a href='viewking.php?$_SESSION[sessTag]&url=$kinURL/$model[prefix]rama.kin' target='_blank'>kinemage</a>";
         setProgress($tasks, 'rama'); // so the preview link is visible
@@ -109,7 +110,7 @@ function runAnalysis($modelID, $opts)
         setProgress($tasks, 'rama'); // so the preview link is visible
         echo "Ramachandran ran for ".(time() - $startTime)." seconds\n";
     }
-    
+
     // Rotamers
     if($opts['chartRota'])
     {
@@ -120,7 +121,7 @@ function runAnalysis($modelID, $opts)
         $rota = loadRotamer($outfile);
         echo "Rotamers ran for ".(time() - $startTime)." seconds\n";
     }
-    
+
     // C-beta deviations
     if($opts['chartCBdev'])
     {
@@ -129,14 +130,14 @@ function runAnalysis($modelID, $opts)
         $outfile = "$rawDir/$model[prefix]cbdev.data";
         runCbetaDev($infile, $outfile);
         $cbdev = loadCbetaDev($outfile);
-        
+
         makeCbetaDevPlot($infile, "$kinDir/$model[prefix]cbetadev.kin");
         $tasks['cbeta'] .= " - <a href='viewking.php?$_SESSION[sessTag]&url=$kinURL/$model[prefix]cbetadev.kin' target='_blank'>preview</a>";
         setProgress($tasks, 'cbeta'); // so the preview link is visible
         echo "C-beta ran for ".(time() - $startTime)." seconds\n";
     }
     //}}} Run programs and offer kins to user
-    
+
     //{{{ Run nucleic acid geometry programs and offer kins to user
     // Base-phosphate perpendiculars
     if($opts['chartBaseP'])
@@ -154,10 +155,10 @@ function runAnalysis($modelID, $opts)
         $suites = loadSuitenameReport($outfile);
         $tasks['suitename'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=plain' target='_blank'>preview</a>\n";
         setProgress($tasks, 'suitename'); // so the preview link is visible
-        
+
         $outfile = "$chartDir/$model[prefix]suitestring.txt";
         runSuitenameString($infile, $outfile);
-        
+
         makeSuitenameKin($infile, "$kinDir/$model[prefix]suitename.kin");
     }
     if($opts['chartGeom'])
@@ -175,7 +176,7 @@ function runAnalysis($modelID, $opts)
         if (count($validate_angle) == 0) $validate_angle = null;
     }
     //}}} Run nucleic acid geometry programs and offer kins to user
-    
+
     //{{{ Run all-atom contact programs and offer kins to user
     // Clashes
     if($opts['chartClashlist'])
@@ -183,7 +184,7 @@ function runAnalysis($modelID, $opts)
         $startTime = time();
         setProgress($tasks, 'clashlist'); // updates the progress display if running as a background job
         $outfile = "$chartDir/$model[prefix]clashlist.txt";
-        runClashlist($infile, $outfile);
+        runClashlist($infile, $outfile, $reduce_blength);
         $clash = loadClashlist($outfile);
         //$clashPct = runClashStats($model['stats']['resolution'], $clash['scoreAll'], $clash['scoreBlt40']);
         $tasks['clashlist'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=plain' target='_blank'>preview</a>\n";
@@ -191,7 +192,7 @@ function runAnalysis($modelID, $opts)
         echo "chartClashlist ran for ".(time() - $startTime)." seconds\n";
     }
     //}}} Run all-atom contact programs and offer kins to user
-    
+
     //{{{ Report on improvements (that could be) made by MolProbity
     $improveText = "";
     if($opts['chartImprove'] && ($clash || $rota))
@@ -202,7 +203,7 @@ function runAnalysis($modelID, $opts)
         $mainClashscore = ($clash ? $clash['scoreAll'] : 0);
         $mainRotaCount = ($rota ? count(findRotaOutliers($rota)) : 0);
         $improvementList = array();
-        
+
         if($model['isBuilt']) // file has been through reduce -build or reduce -fix
         {
             $altInpath = $modelDir . '/'. $_SESSION['models'][ $model['parent'] ]['pdb'];
@@ -217,7 +218,7 @@ function runAnalysis($modelID, $opts)
                 unlink($outfile);
             // Clashes
                 $outfile = mpTempfile("tmp_clashlist_");
-                runClashlist($altpdb, $outfile);
+                runClashlist($altpdb, $outfile, $reduce_blength);
                 $altclash = loadClashlist($outfile);
                 if($altclash['scoreAll'] > $mainClashscore)
                     $improvementList[] = "improved your clashscore by ".($altclash['scoreAll'] - $mainClashscore)." points";
@@ -248,7 +249,7 @@ function runAnalysis($modelID, $opts)
             if($mainClashscore > 0)
             {
                 $outfile = mpTempfile("tmp_clashlist_");
-                runClashlist($altpdb, $outfile);
+                runClashlist($altpdb, $outfile, $reduce_blength);
                 $altclash = loadClashlist($outfile);
                 if($altclash['scoreAll'] < $mainClashscore)
                     $improvementList[] = "improve your clashscore by ".($mainClashscore - $altclash['scoreAll'])." points";
@@ -265,7 +266,7 @@ function runAnalysis($modelID, $opts)
         echo "chart Improve ran for ".(time() - $startTime)." seconds\n";
     }
     //}}} Report on improvements (that could be) made by by MolProbity
-    
+
     //{{{ Build multi-criterion chart, kinemage
     if($opts['doCharts'])
     {
@@ -322,7 +323,7 @@ function runAnalysis($modelID, $opts)
         makeMulticritKin2(array($infile), $outfile, $mcKinOpts,
         #    array_keys(findAllOutliers($clash, $rama, $rota, $cbdev, $pperp)));
             $viewRes);
-        
+
         // EXPERIMENTAL: gzip compress large multikins
         if(filesize($outfile) > MP_KIN_GZIP_THRESHOLD)
         {
@@ -331,7 +332,7 @@ function runAnalysis($modelID, $opts)
         echo "do Kinemage ran for ".(time() - $startTime)." seconds\n";
     }
     //}}} Build multi-criterion chart, kinemage
-    
+
     //{{{ Create REMARK  40 and insert into PDB file
     //if(is_array($clash) || is_array($rama) || is_array($rota))
     //{
@@ -340,7 +341,7 @@ function runAnalysis($modelID, $opts)
     //    replacePdbRemark($infile, $remark40,  40);
     //}
     //}}} Create REMARK  40 and insert into PDB file
-    
+
     //{{{ Create lab notebook entry
     $entry = "";
     if(is_array($clash) || is_array($rama) || is_array($rota) || is_array($cbdev) || is_array($pperp) || is_array($suites))
@@ -367,7 +368,7 @@ function runAnalysis($modelID, $opts)
         $entry .= "</tr></table>\n";
         $entry .= "</div>\n";
     }
-    
+
     if($opts['chartClashlist'] || $opts['chartRama'] || $opts['chartCBdev'] || $opts['chartSuite'])
     {
         $entry .= "<h3>Single-criterion visualizations</h3>";
@@ -389,7 +390,7 @@ function runAnalysis($modelID, $opts)
         }
         $entry .= "</ul>\n";
     }
-    
+
     if($remark40)
     {
         $entry .= "<h3>REMARK  40</h3>";
@@ -398,7 +399,7 @@ function runAnalysis($modelID, $opts)
         $entry .= "<p><pre>$remark40</pre></p>";
     }
     //}}} Create lab notebook entry
-    
+
     setProgress($tasks, null); // everything is finished
     return $entry;
 }
@@ -579,31 +580,31 @@ function findCbetaOutliers($cbdev)
 function calcCbetaStats($cbdev)
 {
     if(!(is_array($cbdev) && count($cbdev) >= 2)) return array();
-    
+
     foreach($cbdev as $cb)
     {
         $dev[] = $cb['dev'];
         $sum += $cb['dev'];
     }
     sort($dev);
-    
+
     $len = count($dev);
     $s['max']   = $dev[ $len-1 ];
     $s['mean']  = $mean = $sum / $len;
-    
+
     $half = intval($len/2);
     if($len % 2 == 0)   $s['median'] = ($dev[$half] + $dev[$half-1]) / 2;
     else                $s['median'] = $dev[$half];
-    
+
     return $s;
 }
 #}}}########################################################################
 
 #{{{ runClashlist - generates clash data with Clashlist
 ############################################################################
-function runClashlist($infile, $outfile)
+function runClashlist($infile, $outfile, $blength="ecloud")
 {
-    exec("clashlist $infile > $outfile");
+    exec("clashlist $infile $blength > $outfile");
 }
 #}}}########################################################################
 
@@ -632,7 +633,7 @@ function loadClashlist($datafile)
         $ret['scoreAll']    = $scores[2] + 0;
         $ret['scoreBlt40']  = $scores[3] + 0;
     }
-    
+
     // Parse data about individual clashes
     $clashes = array(); // in case there are no clashes
     $clashes_with = array();
@@ -651,18 +652,18 @@ function loadClashlist($datafile)
             if(!isset($clashes[$res1]) || $clashes[$res1] < $dist)
             {
                 $clashes[$res1] = $dist;
-                $clashes_with[$res1] = array('srcatom' => $atm1, 'dstatom' => $atm2, 'dstcnit' => $res2); 
+                $clashes_with[$res1] = array('srcatom' => $atm1, 'dstatom' => $atm2, 'dstcnit' => $res2);
             }
             if(!isset($clashes[$res2]) || $clashes[$res2] < $dist)
             {
                 $clashes[$res2] = $dist;
-                $clashes_with[$res2] = array('srcatom' => $atm2, 'dstatom' => $atm1, 'dstcnit' => $res1); 
+                $clashes_with[$res2] = array('srcatom' => $atm2, 'dstatom' => $atm1, 'dstcnit' => $res1);
             }
         }
     }
     $ret['clashes'] = $clashes;
     $ret['clashes-with'] = $clashes_with;
-    
+
     return $ret;
 }
 #}}}########################################################################
@@ -980,7 +981,7 @@ function runSuitenameString($infile, $outfile)
 #}}}########################################################################
 
 
-#{{{ runValidationReport - finds >4sigma geometric outliers for protein and RNA 
+#{{{ runValidationReport - finds >4sigma geometric outliers for protein and RNA
 ############################################################################
 function runValidationReport($infile, $outfile, $moltype)
 {
@@ -1243,7 +1244,7 @@ function calcLocalBadness($infile, $range, $clash, $rama, $rota, $cbdev, $pperp)
     #var_export($self_bads); echo "\n==========\n";
     $range2 = $range * $range;
     $worst_res = array();
-    
+
     //calculate all distances and build association matrix
     foreach($res_xyz as $cnit => $xyz)
     {
@@ -1259,7 +1260,7 @@ function calcLocalBadness($infile, $range, $clash, $rama, $rota, $cbdev, $pperp)
              }
         }
     }
-    
+
     while(true)
     {
         //at each iteration count of how bad each case is
@@ -1364,7 +1365,7 @@ function findAltConfs($infile)
 {
     $mcAtoms = array(" N  " => true, " CA " => true, " C  " => true, " O  " => true,
         " H  " => true, " HA " => true, "1HA " => true, "2HA " => true);
-    
+
     $out = array('all' => array(), 'mc' => array(), 'sc' => array());
     $in = fopen($infile, "r");
     if(!$in) return NULL;
@@ -1377,7 +1378,7 @@ function findAltConfs($infile)
             $res    = pdbComposeResName($s);
             $atom   = substr($s, 12, 4);
             $out['all'][$res] = true;
-            
+
             if($mcAtoms[$atom])
                 $out['mc'][$res] = true;
             else
@@ -1385,7 +1386,7 @@ function findAltConfs($infile)
         }
     }
     fclose($in);
-    
+
     return $out;
 }
 #}}}########################################################################
@@ -1400,7 +1401,7 @@ function findAltConfs($infile)
 function listResidues($infile)
 {
     $out = array();
-    
+
     $in = fopen($infile, "r");
     if(!$in) return NULL;
     while(!feof($in))
@@ -1432,7 +1433,7 @@ function listProteinResidues($infile)
         'MSE'=>1, 'LYS'=>1, 'HIS'=>1, 'ARG'=>1, 'ASP'=>1, 'ASN'=>1, 'GLN'=>1,
         'GLU'=>1);
     $out = array();
-    
+
     $in = fopen($infile, "r");
     if(!$in) return NULL;
     while(!feof($in))
@@ -1460,7 +1461,7 @@ function listProteinResidues($infile)
 */
 function listAtomResidues($infile) {
     $out = array();
-    
+
     $in = fopen($infile, "r");
     if(!$in) return NULL;
     while(!feof($in))
@@ -1493,7 +1494,7 @@ function listResidueBfactors($infile)
 {
     $res = array();
     $mc = array();
-    
+
     $in = fopen($infile, "r");
     if(!$in) return NULL;
     while(!feof($in))
@@ -1528,7 +1529,7 @@ function computeResCenters($infile, $excludeWaters = false)
 {
     $out = array(); // x, y, z
     $cnt = array(); // how many atoms have been tallied
-    
+
     $in = fopen($infile, "r");
     if(!$in) return NULL;
     while(!feof($in))
@@ -1545,14 +1546,14 @@ function computeResCenters($infile, $excludeWaters = false)
         }
     }
     fclose($in);
-    
+
     foreach($cnt as $res => $num)
     {
         $out[$res]['x'] /= $num;
         $out[$res]['y'] /= $num;
         $out[$res]['z'] /= $num;
     }
-    
+
     return $out;
 }
 #}}}########################################################################
@@ -1586,10 +1587,10 @@ function groupAdjacentRes($resList)
         $chainID    = $res{0};
         $run[]      = $res;
     }
-    
+
     // Append the last run, if any
     if(isset($run)) $out[$chainID][] = $run;
-    
+
     return $out;
 }
 #}}}########################################################################
