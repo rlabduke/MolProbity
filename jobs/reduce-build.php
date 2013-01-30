@@ -103,4 +103,5 @@ setProgress($tasks, null);
 unset($_SESSION['bgjob']['processID']);
 $_SESSION['bgjob']['endTime']   = time();
 $_SESSION['bgjob']['isRunning'] = false;
+$_SESSION['reduce_blength'] = $reduce_blength;
 ?>

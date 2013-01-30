@@ -10,7 +10,7 @@
 # parameters: input.pdb identifier
 # format-
 #  #summary:file:n atoms:n atoms B<40:n potential dots:#.# A^2:n bumps:n bumps B<40:#.# score
-#  name : natoms : a       :       b       :  lowgap : maxB  
+#  name : natoms : a       :       b       :  lowgap : maxB
 # (sorted by cluster max clash with spaces between clusters)
 
 ##
@@ -21,8 +21,16 @@
 bcutval=40
 ocutval=33
 
+blength=$2
+
 ## Find number of atoms below B cutoff.  Full number of atoms found below.
-bcna=`probe -q -mc -het -dumpatominfo "alta blt$bcutval ogt$ocutval not water" $1|cut -d: -f2`
+if [ "$blength" == "ecloud" ]; then
+probe_flags="-q -mc -het -dumpatominfo"
+else
+probe_flags="-q -mc -het -dumpatominfo -nuclear"
+fi
+
+bcna=`probe $probe_flags "alta blt$bcutval ogt$ocutval not water" $1|cut -d: -f2`
 
 ## Temp files for datastorage.
 ## "$$" expands to the process ID, to avoid name collisions.
@@ -30,19 +38,31 @@ tmpfile=/tmp/junk.$$.clashlistscore.`date '+%H%M%S'`
 tmpf2=/tmp/junk2.$$.clashlistscore.`date '+%H%M%S'`
 
 ## Count all atoms (no B cutoff) and also possible dots, possible surface area
-probe -c -q -mc -het -once "alta ogt$ocutval not water" "none" $1 |\
+if [ "$blength" == "ecloud" ]; then
+probe_flags="-c -q -mc -het -once"
+else
+probe_flags="-c -q -mc -het -once -nuclear"
+fi
+
+probe $probe_flags "alta ogt$ocutval not water" "none" $1 |\
 awk -F: '
 /^atoms selected:/ { na = $2 + 0.0 }
 /^potential dots:/ { pd = $2 + 0.0 }
 /^potential area:/ { pa = $2 + 0.0 }
 END {
  printf("#atom-potential-summary:%s: %d: %d: %.4g\n", name, na, pd, pa)
-}' name=$2 - >$tmpfile
+}' name=$3 - >$tmpfile
 
 ## Process Probe unformatted output to find clashes between atoms.
 ## Don't include water in 'src' search set b/c we don't want it listed in the output
 ## unless it clashes with a protein/nucleic acid residue.
-probe -u -q -mc -het -once "alta ogt$ocutval not water" "alta ogt$ocutval" $1 |\
+if [ "$blength" == "ecloud" ]; then
+probe_flags="-u -q -mc -het -once"
+else
+probe_flags="-u -q -mc -het -once -nuclear"
+fi
+
+probe $probe_flags "alta ogt$ocutval not water" "alta ogt$ocutval" $1 |\
 awk -F: 'BEGIN {
 ## Total Probe score (weighted clash + Hb + exp[vdW]), not clashscore
    totalScore = 0.0
@@ -126,7 +146,7 @@ END {
    name,  clashscore, scoreBcut,bcut)
 
 
-}' name=$2 bcut=$bcutval nabcut="$bcna" $tmpfile - > $tmpf2
+}' name=$3 bcut=$bcutval nabcut="$bcna" $tmpfile - > $tmpf2
 ## Send residue (not atom) pair names through cluster (A:B),
 ## get back clusters that list all the residues linked by (non H-bond) clashes.
 ## (1:3:*CLUSTER*:A:B:C)
@@ -136,7 +156,7 @@ awk -F: '
    b = substr($4, 1, 9)
    printf("%s:%s\n",a, b)
 } ' $tmpf2 | cluster -Max20000 -single -N "*CLUSTER*" -F : -O : - | \
-## Reprocess the output of cluster -- 
+## Reprocess the output of cluster --
 ## what does this accomplish beyond reformatting?
 awk -F: '
 /^[^#]/ {
@@ -198,7 +218,7 @@ END {
    }
 } ' - $tmpf2 | sort -t: -k1,1n -k7,7n | \
 ## Use the Unix utility sort to sort first by worst clash
-## for the cluster, then by individual clash severity. 
+## for the cluster, then by individual clash severity.
 awk -F: '
 /^[^#]/ { cl = $2
    ## Put blank lines between clusters (i.e., when the cluster number changes).
