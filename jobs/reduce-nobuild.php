@@ -48,6 +48,7 @@ $model = $_SESSION['models'][$modelID];
 $pdb = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$model['pdb'];
 
 $reduce_blength = $_SESSION['bgjob']['reduce_blength'];
+$_SESSION['reduce_blength'] = $reduce_blength;
 
 // Set up progress message
 if($reduce_blength == 'ecloud')
@@ -112,5 +113,4 @@ setProgress($tasks, null);
 unset($_SESSION['bgjob']['processID']);
 $_SESSION['bgjob']['endTime']   = time();
 $_SESSION['bgjob']['isRunning'] = false;
-$_SESSION['reduce_blength'] = $reduce_blength;
 ?>

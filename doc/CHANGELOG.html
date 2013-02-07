@@ -91,24 +91,26 @@
     maintain knowledge about flips done already?
     discrepency with pdb 1gtf bond geometry total different than reported on multicrit table
     pdbstat.php doesn't correctly count Hs, regular expression needs to be fixed
-    
+
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
+### 4.00a ###
+- Changes to allow for selecting e-cloud or neutron length options.
+
 ### 3.20 ###
-- Updated Rama code to use new Top8000 6 rama plots.  Transfered handling of 
-  rama stuff to chiropraxis from hless.  hless is still currently used only 
+- Updated Rama code to use new Top8000 6 rama plots.  Transfered handling of
+  rama stuff to chiropraxis from hless.  hless is still currently used only
   to draw Cbeta deviation kins.
-- Fixed a bug in summary table, apparently bad bond lengths were set to 
+- Fixed a bug in summary table, apparently bad bond lengths were set to
   0.0001 % as being green color, instead of 0.1% as we recommend.
 - Changed multi-crit summary table to show counts and percentages.
 - Updated reduce and probe to new shorter H bond lengths.
-- Changes to allow for selecting e-cloud or neutron length options.
 
 ### 3.19 ###
 - Wrapped up changes to move to version 3.19 with changing out Reduce executables
-  found in /molprobity3/bin/linux and /macosx.  
-  The Linux exec was downloaded from the Phenix compile farm (duke_downloads); 
+  found in /molprobity3/bin/linux and /macosx.
+  The Linux exec was downloaded from the Phenix compile farm (duke_downloads);
   it is version 3.15.091106, 32bit.  Tested on the mcp linux box.
   The MacOSX exec was compiled on dewar running 10.6 against the 10.5 libraries.
   It contains intel chipset 32bit and 64bit execs and PPC chipset 32 bit exec.
@@ -117,11 +119,11 @@
 - 110611, svn rev 373 change to file: analyze.php function: findRotaOutliers
     commented out: #if($res['scorePct'] <= 1.0)
     added:          if($res['rotamer'] == 'OUTLIER')
-  to address bug found by Jeff Headd in comparing percentages of rotamer outliers calculated in 
+  to address bug found by Jeff Headd in comparing percentages of rotamer outliers calculated in
   MolProbity cf w/ phenix.rotalyze.
-- 110611, svn rev 373 commented out the line ~19 in sessions.php: 
+- 110611, svn rev 373 commented out the line ~19 in sessions.php:
     set_magic_quotes_runtime(0); // off
-  which was causing a obsolete deprecated error message.  
+  which was causing a obsolete deprecated error message.
 - 110611, svn rev 373 handled the deprecation of 'ereg' - including variants thereof (like 'eregi').
   For all previous uses of 'ereg' found in files analyze.php(4), browser.php(4), model.php(15), and
   sessions.php(4), changed:
@@ -170,7 +172,7 @@
 - Similar patch to molprobity score
 
 ### 3.14 ###
-- fixed a bug in MacOSX makefile that was preventing proper compilation of the 
+- fixed a bug in MacOSX makefile that was preventing proper compilation of the
   universal binaries.
 - fixed MacOSX/reduce
 - updated installing.html file.
@@ -206,7 +208,7 @@
   but still correct, I think.  12 minutes for ribosome as opposed to >24 hours before.
 - More logical button clusters for viewing in coot.
 - geometry analysis selected by default now.
-- New reduce and probe do two letter chains; fixed a bug where flip page wasn't 
+- New reduce and probe do two letter chains; fixed a bug where flip page wasn't
   recognizing the flips in the usermods and.
 - Fixed a bug in loadClashlist where 2 char chain ids weren't read correctly.
 
@@ -917,7 +919,7 @@
 - got the fetch from PDB / NDB function working
 - added upload error handling
 - created initial pass on the site map's formatting
-  
+
 ### 3beta5 ###
 - traced mysterious labbook load/save bug from beta3 to missing clearstatcache()
 - used that fixed bug to simplify improve_sswing_done.php; seems to still work
@@ -1048,7 +1050,7 @@
 - commented out non-functioning placeholders in upload_tab
 - dropped Reduce -limit to 10,000 b/c now 1SBP flipkins take a LONG time
 - background jobs now record their PID and user can abort them (POSIX only)
-  
+
 ### 3pre14 ###
 - refactored multicriterion kin creation into makeMulticritKin()
 - created outlier-res-batch.php to do analysis for JNB

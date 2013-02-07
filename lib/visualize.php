@@ -65,8 +65,16 @@ function makeFlipkin($inpath, $outpathAsnGln, $outpathHis)
     // so it doesn't need to appear on the command line here.
     //exec("flipkin -limit" . MP_REDUCE_LIMIT . " $inpath > $outpathAsnGln");
     //exec("flipkin -limit" . MP_REDUCE_LIMIT . " -h $inpath > $outpathHis");
-    exec("flipkin $inpath > $outpathAsnGln");
-    exec("flipkin -h $inpath > $outpathHis");
+    if($_SESSION['reduce_blength'] == 'ecloud')
+    {
+      exec("flipkin $inpath > $outpathAsnGln");
+      exec("flipkin -h $inpath > $outpathHis");
+    }
+    else
+    {
+      exec("flipkin -n $inpath > $outpathAsnGln");
+      exec("flipkin -n -h $inpath > $outpathHis");
+    }
 }
 #}}}########################################################################
 
@@ -129,7 +137,7 @@ function resGroupsForPrekin($data)
 function makeMulticritKin($infiles, $outfile, $opt, $nmrConstraints = null)
 {
     if(file_exists($outfile)) unlink($outfile);
-    
+
     $stats = describePdbStats( pdbstat(reset($infiles)), false );
     $h = fopen($outfile, 'a');
     fwrite($h, "@text\n");
@@ -141,12 +149,12 @@ function makeMulticritKin($infiles, $outfile, $opt, $nmrConstraints = null)
     fwrite($h, "@kinemage 1\n");
     fwrite($h, "@onewidth\n");
     fclose($h);
-    
+
     foreach($infiles as $infile)
     {
         // Animate is used only for multi-model kins.
         exec("prekin -quiet -lots -append ".($isMultiModel ? "-animate" : "")." -onegroup $infile >> $outfile");
-        
+
         if($opt['ribbons'])
         {
             if($isMultiModel) makeRainbowRibbons($infile, $outfile);
@@ -263,12 +271,12 @@ function makeMulticritKin($infiles, $outfile, $opt, $nmrConstraints = null)
 */
 function makeMulticritKin2($infiles, $outfile, $opt, $viewRes = array(), $nmrConstraints = null, $clashLimit = null)
 {
-    if(file_exists($outfile)){ 
+    if(file_exists($outfile)){
         if(!unlink($outfile)){
             echo "delete .kin file failed!\n";
         }
     }
-    
+
     $pdbstats = pdbstat(reset($infiles));
     $stats = describePdbStats($pdbstats, false);
     $h = fopen($outfile, 'a');
@@ -278,7 +286,7 @@ function makeMulticritKin2($infiles, $outfile, $opt, $viewRes = array(), $nmrCon
     $isMultiModel = (count($infiles) > 1);
     if($isMultiModel)
         fwrite($h, "Statistics for first model only; ".count($infiles)." total models included in kinemage.\n");
-    
+
     // For Dave and Jane: version numbers!
     // This *is* useful for looking at old multikins...
     fwrite($h, "\n\n\n");
@@ -286,20 +294,20 @@ function makeMulticritKin2($infiles, $outfile, $opt, $viewRes = array(), $nmrCon
     $reduce_help = explode("\n", shell_exec("reduce -help 2>&1"));
     fwrite($h, "$reduce_help[0]\n");
     //fwrite($h, "Probe: ".exec("probe -version")."\n"); -- Probe puts its version in the @caption
-    
+
     fwrite($h, "@kinemage 1\n");
     fwrite($h, "@onewidth\n");
     fclose($h);
-    
+
     $view_info = makeResidueViews(reset($infiles), $outfile, $viewRes);
     #echo "made residue views OK\n";
-    
+
     foreach($infiles as $infile)
     {
         // Animate is used even for single models, so they can be appended later.
         //echo("prekin -quiet -lots -append -animate -onegroup $infile >> $outfile\n");
         exec("prekin -quiet -lots -append -animate -onegroup $infile >> $outfile");
-        
+
         #echo "before ribbon options\n";
         if($opt['ribbons'])
         {
@@ -308,7 +316,7 @@ function makeMulticritKin2($infiles, $outfile, $opt, $viewRes = array(), $nmrCon
             else                makeBfactorRibbons($infile, $outfile);
         }
         #echo "after ribbon options\n";
-        
+
         if ($nmrConstraints)
             exec("noe-display -cv -s viol -ds+ -fs -k $infile $nmrConstraints < /dev/null >> $outfile");
         if($opt['clashdots'] || $opt['hbdots'] || $opt['vdwdots'])
@@ -399,7 +407,7 @@ function makeMulticritKin2($infiles, $outfile, $opt, $viewRes = array(), $nmrCon
         fwrite($h, "@master {mc alt confs} off\n");
         fwrite($h, "@master {sc alt confs} off\n");
     }
-    
+
     fclose($h);
 }
 #}}}########################################################################
@@ -474,7 +482,7 @@ function makeAltConfKin($infile, $outfile, $mcColor = 'brown', $scColor = 'brown
     $scGrp  = groupAdjacentRes(array_keys($alts['sc']));
     $mc     = resGroupsForPrekin($mcGrp);
     $sc     = resGroupsForPrekin($scGrp);
-    
+
     foreach($mc as $mcRange)
         exec("prekin -quiet -append -nogroup -listmaster 'mc alt confs' -bval -scope $mcRange -show 'mc($mcColor)' $infile >> $outfile");
 
@@ -495,13 +503,13 @@ function makeBadRamachandranKin($infile, $outfile, $rama = null, $color = 'green
     $out = fopen($outfile, 'a');
     fwrite($out, "@subgroup {Rama outliers} master= {Rama outliers}\n");
     fclose($out);
-    
+
     // Jane still likes this best.
     //exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/hless.jar hless.Ramachandran -nosummary -outliers $color < $infile >> $outfile");
-    
+
     // New ramachandran kin from chiropraxis
     exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -kinmarkup $infile >> $outfile");
-    
+
     // This uses Prekin, but just produces chunks of mainchain. Hard to see.
     /*if(!$rama)
     {
@@ -510,14 +518,14 @@ function makeBadRamachandranKin($infile, $outfile, $rama = null, $color = 'green
         $rama = loadRamachandran($tmp);
         unlink($tmp);
     }
-    
+
     foreach($rama as $res)
     {
         if($res['eval'] == 'OUTLIER')
             $worst[] = $res['resName'];
     }
     $mc = resGroupsForPrekin(groupAdjacentRes($worst));
-    
+
     foreach($mc as $mcRange)
     {
         //echo("prekin -append -nogroup -listmaster 'Rama outliers' -scope $mcRange -show 'mc($color)' $infile >> $outfile\n");
@@ -548,11 +556,11 @@ function makeBadRotamerKin($infile, $outfile, $rota = null, $color = 'gold', $cu
             $worst[] = $res['resName'];
     }
     $sc = resGroupsForPrekin(groupAdjacentRes($worst));
-    
+
     $h = fopen($outfile, 'a');
     fwrite($h, "@subgroup {rotamer outliers} dominant\n");
     fclose($h);
-    
+
     foreach($sc as $chainID => $scRange)
     {
         //echo("prekin -quiet -append -nogroup -nosubgroup -listname 'chain $chainID' -listmaster 'rotamer outliers' -bval -scope $scRange -show 'sc($color)' $infile >> $outfile\n");
@@ -578,9 +586,9 @@ function makeBadCbetaBalls($infile, $outfile)
     $h = fopen($outfile, 'a');
     fwrite($h, "@subgroup {CB dev} dominant\n");
     fclose($h);
-    
+
     // C-beta deviation balls >= 0.25A
-    $cbeta_dev_script = 
+    $cbeta_dev_script =
 'BEGIN { doprint = 0; bigbeta = 0; }
 $0 ~ /^@/ { doprint = 0; }
 $0 ~ /^@(point)?master/ { print $0 }
@@ -588,7 +596,7 @@ $0 ~ /^@balllist/ { doprint = 1; print $0 " master= {Cbeta dev}"; }
 { bigbeta = 0 }
 match($0, /^\{ cb .+ r=([0-9]\.[0-9]+) /, frag) { gsub(/gold|pink/, "magenta"); bigbeta = (frag[1]+0 >= 0.25); }
 doprint && bigbeta';
-    
+
     exec("prekin -append -quiet -cbetadev $infile | gawk '$cbeta_dev_script' >> $outfile");
 }
 #}}}########################################################################
@@ -600,7 +608,7 @@ function makeBadPPerpKin($infile, $outfile)
     $h = fopen($outfile, 'a');
     fwrite($h, "@subgroup {base-phos perp} dominant master= {base-P outliers}\n");
     fclose($h);
-    
+
     exec("prekin -quiet -append -nogroup -pperptoline -pperpoutliers $infile >> $outfile");
 }
 #}}}########################################################################
@@ -613,10 +621,11 @@ function makeBadPPerpKin($infile, $outfile)
 function makeProbeDots($infile, $outfile, $hbDots = false, $vdwDots = false, $clashDots = true, $clashLimit = null)
 {
     $options = "";
-    if(!$hbDots)    $options .= " -nohbout";
-    if(!$vdwDots)   $options .= " -novdwout";
-    if(!$clashDots) $options .= " -noclashout";
-    
+    if(!$hbDots)                                 $options .= " -nohbout";
+    if(!$vdwDots)                                $options .= " -novdwout";
+    if(!$clashDots)                              $options .= " -noclashout";
+    if($_SESSION['reduce_blength'] == 'nuclear') $options .= " -nuclear";
+
     // -dotmaster adds a "dots" master -- useful when using this kin with Probe remote update
     if ($clashLimit == null) {
       exec("probe $options -4H -quiet -noticks -nogroup -dotmaster -mc -self 'alta' $infile >> $outfile");
@@ -731,7 +740,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
     $bgPoor = '#ff9999';
     $bgFair = '#ffff99';
     $bgGood = '#99ff99';
-    
+
     $entry .= "<p><table border='1' width='100%'>\n";
     if(is_array($clash))
     {
@@ -744,7 +753,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
         $entry .= "<td>Clashscore, all atoms:</td><td colspan='2' bgcolor='$bg'>$clash[scoreAll]</td>\n";
         if ($clash['scoreAll']<0) {
           $entry .= "<td>unknown percentile<sup>*</sup> (N=$clashPct[n_samples], $clashPct[minresol]&Aring; - $clashPct[maxresol]&Aring;)</td></tr>\n";
-        
+
           $entry .= "<tr><td colspan='3'>An error has occurred; clashscore should not be negative! Please report this bug.</td></tr>\n";
         } else {
           //$entry .= "<td>$clashPct[pct_rank]<sup>".ordinalSuffix($clashPct['pct_rank'])."</sup> percentile<sup>*</sup> (N=$clashPct[n_samples], $clashPct[minresol]&Aring; - $clashPct[maxresol]&Aring;)</td></tr>\n";
@@ -757,10 +766,10 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             //echo $diff2." ".gettype($diff2)." ";
             //$test = ($diff2 > 0.245 && $diff2 < 0.255);
             //echo "diff2 = 0.25:".$test;
-            if (($diff > 0.245)&&($diff2 > 0.245)&&($diff < 0.255)&&($diff2 < 0.255)) { 
-              $percentileOut = "$resolution&Aring; &plusmn; $diff&Aring;"; 
-            } else { 
-              $percentileOut = "$clashPct[minresol]&Aring; - $clashPct[maxresol]&Aring;"; 
+            if (($diff > 0.245)&&($diff2 > 0.245)&&($diff < 0.255)&&($diff2 < 0.255)) {
+              $percentileOut = "$resolution&Aring; &plusmn; $diff&Aring;";
+            } else {
+              $percentileOut = "$clashPct[minresol]&Aring; - $clashPct[maxresol]&Aring;";
             }
           }
           $entry .= "<td>$clashPct[pct_rank]<sup>".ordinalSuffix($clashPct['pct_rank'])."</sup> percentile<sup>*</sup> (N=$clashPct[n_samples], $percentileOut)</td></tr>\n";
@@ -788,10 +797,10 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             $rotaOut = count(findRotaOutliers($rota));
             $rotaTot = count($rota);
             $rotaOutPct = sprintf("%.2f", 100.0 * $rotaOut / $rotaTot);
-            
+
             if($firstRow) $firstRow = false;
             else $entry .= "<tr>";
-            
+
             if($rotaOutPct+0 <= 1)      $bg = $bgGood;
             elseif($rotaOutPct+0 <= 5)  $bg = $bgFair;
             else                        $bg = $bgPoor;
@@ -805,7 +814,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             $ramaTot = count($rama);
             $ramaOutPct = sprintf("%.2f", 100.0 * $ramaOut / $ramaTot);
             $ramaFavPct = sprintf("%.2f", 100.0 * $ramaFav / $ramaTot);
-            
+
             if($firstRow) $firstRow = false;
             else $entry .= "<tr>";
 
@@ -824,11 +833,11 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
         {
             if($firstRow) $firstRow = false;
             else $entry .= "<tr>";
-            
+
             $axr = $resolution;                                     // Actual Xtalographic Resolution
             $mer = getEffectiveResolution($clash, $rota, $rama);    // MolProbity Effective Resolution
             $mer_pct = getEffectiveResolutionPercentile($mer, $axr);
-            
+
             /*if(!$axr)*/                             $bg = $bgFair;  // unknown AXR
             //elseif($mer < $axr)                     $bg = $bgGood;  // below
             //elseif(abs(($mer-$axr)/$axr) <= 0.20)   $bg = $bgFair;  // within 20% of actual
@@ -839,7 +848,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
               $mer = -1;
               $bg = $bgFair;
             }
-            
+
             $entry .= "<td>MolProbity score<sup><small>^</small></sup></td><td colspan='2' bgcolor='$bg'>";
             $entry .= sprintf('%.2f', $mer);
             //$entry .= "</td><td>Goal: &lt;$axr</td></tr>\n";
@@ -868,7 +877,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             $cbOutPct = sprintf("%.2f", 100.0 * $cbOut / $cbTot);
             if($firstRow) $firstRow = false;
             else $entry .= "<tr>";
-            
+
             if($cbOut == 0) $bg = $bgGood;
             else            $bg = $bgFair;
             if($cbOut/$cbTot > 0.05) $bg = $bgPoor;
@@ -879,7 +888,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
         {
             if($firstRow) $firstRow = false;
             else $entry .= "<tr>";
-            
+
             $total = 0;
             $outCount = 0;
             foreach($bbonds as $cnit => $item) {
@@ -900,7 +909,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
         {
             if($firstRow) $firstRow = false;
             else $entry .= "<tr>";
-            
+
             $total = 0;
             $outCount = 0;
             foreach($bangles as $cnit => $item) {
@@ -931,12 +940,12 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
         {
             if($firstRow) $firstRow = false;
             else $entry .= "<tr>";
-            
+
             $pperpOut = count(findBasePhosPerpOutliers($pperp));
             $pperpTot = count($pperp);
             $pperpOutPct = sprintf("%.2f", 100.0 * $pperpOut / $pperpTot);
-            
-            $bg = $bgFair;            
+
+            $bg = $bgFair;
             if($pperpOut == 0)             $bg = $bgGood;
             if($pperpOut/$pperpTot > 0.05) $bg = $bgPoor;
 
@@ -947,11 +956,11 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
         {
             if($firstRow) $firstRow = false;
             else $entry .= "<tr>";
-            
+
             $suitesOut = count(findSuitenameOutliers($suites));
             $suitesTot = count($suites);
             $suitesOutPct = sprintf("%.2f", 100.0 * $suitesOut / $suitesTot);
-            
+
             $bg = $bgFair;
             if($suitesOut/$suitesTot<= 0.05)    $bg = $bgGood;
             if($suitesOut/$suitesTot > 0.15)    $bg = $bgPoor;
@@ -962,7 +971,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
         {
             if($firstRow) $firstRow = false;
             else $entry .= "<tr>";
-            
+
             $total = 0;
             $outCount = 0;
             foreach($bbonds as $cnit => $item) {
@@ -983,7 +992,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
         {
             if($firstRow) $firstRow = false;
             else $entry .= "<tr>";
-            
+
             $total = 0;
             $outCount = 0;
             foreach($bangles as $cnit => $item) {
@@ -1052,13 +1061,13 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     $res = listResidues($infile);
     $Bfact = listResidueBfactors($infile);
     $Bfact = $Bfact['res'];
-    
+
     $orderIndex = 0; // used to maintain original PDB order on sorting.
     foreach($res as $k => $v)
     {
         $res[$k] = array('cnit' => $v, 'order' => $orderIndex++, 'resHiB' => $Bfact[$v]);
     }
-    
+
     if(is_array($clash))
     {
         $with = $clash['clashes-with'];
@@ -1164,7 +1173,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
             {
                 $bin = "$bin ( $item[triage] )";
             }
-            
+
             if($item['isOutlier'])
             {
                 $res[$cnit]['suites'] = "OUTLIER<br><small>$bin</small>";
@@ -1199,16 +1208,16 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     }
     //}}} Process validation data
     //echo "Processing validation data took ".(time() - $startTime)." seconds\n";
-    
+
     // Set up output data structure
     $table = array('prequel' => '', 'headers' => array(), 'rows' => array(), 'footers' => array(), 'sequel' => '');
-    
+
     $startTime = time();
     //{{{ Table prequel and headers
     // Do summary chart
     $pdbstats = pdbstat($infile);
     $table['prequel'] = makeSummaryStatsTable($pdbstats['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles);
-    
+
     if ($doHtmlTable) {
       $header1 = array();
       $header1[] = array('html' => "<b>#</b>",                                            'sort' => 1);
@@ -1222,7 +1231,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
       if(is_array($suites)) $header1[] = array('html' => "<b>RNA suite conf.</b>",        'sort' => 1);
       if(is_array($bbonds)) $header1[] = array('html' => "<b>Bond lengths.</b>",      'sort' => -1);
       if(is_array($bangles)) $header1[] = array('html' => "<b>Bond angles.</b>",      'sort' => -1);
-      
+
       $header2 = array();
       $header2[] = array('html' => "");
       $header2[] = array('html' => "");
@@ -1235,12 +1244,12 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
       if(is_array($suites)) $header2[] = array('html' => "Outliers: ".count(findSuitenameOutliers($suites))." of ".count($suites));
       if(is_array($bbonds)) $header2[] = array('html' => "Outliers: ".count(findGeomOutliers($bbonds))." of ".count($bbonds));
       if(is_array($bangles)) $header2[] = array('html' => "Outliers: ".count(findGeomOutliers($bangles))." of ".count($bangles));
-      
+
       $table['headers'] = array($header1, $header2);
     }
     //}}} Table prequel and headers
     //echo "Table prequel and headers took ".(time() - $startTime)." seconds\n";
-    
+
     $startTime = time();
     //{{{ Table body
     if ($doHtmlTable) {
@@ -1285,13 +1294,13 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     }
     //}}} Table body
     //echo "Table body took ".(time() - $startTime)." seconds\n";
-    
+
     $startTime = time();
     $out = fopen($outfile, 'wb');
     fwrite($out, mpSerialize($table));
     fclose($out);
     //echo "Serializing table took ".(time() - $startTime)." seconds\n";
-    
+
     // serialize() and unserialize() screw up floating point numbers sometimes.
     // Not only is there a change in precision, but sometimes numbers become INF
     // in some versions of PHP 4, like those shipped with Mac OS X.
@@ -1317,7 +1326,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     #    fwrite($out, var_export($json->decode($json->encode($table)), true));
     #    fclose($out);
     #echo "Dump+load time for JSON: ".(time() - $time)." seconds\n";
-    
+
     if($snapfile)
     {
         $startTime = time();
@@ -1348,13 +1357,13 @@ function makeCootMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev,
     fwrite($out, "; Open this in Coot using Calculate | Run Script...\n;\n");
     fwrite($out, "(interesting-things-gui \"MolProbity Multi-Chart\"\n (list\n");
     $resCenters = computeResCenters($infile);
-    
+
     if(is_array($clash)) foreach($clash['clashes'] as $cnit => $worst)
     {
         $ctr = $resCenters[$cnit];
         fwrite($out, "  (list \"Clash at $cnit ($worst A)\" $ctr[x] $ctr[y] $ctr[z])\n");
     }
-        
+
     if(is_array($rama)) foreach($rama as $item)
     {
         if($item['eval'] == "OUTLIER")
@@ -1374,7 +1383,7 @@ function makeCootMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev,
             fwrite($out, "  (list \"Bad rotamer $cnit ($item[scorePct]%)\" $ctr[x] $ctr[y] $ctr[z])\n");
         }
     }
-    
+
     if(is_array($cbdev)) foreach($cbdev as $item)
     {
         if($item['dev'] >= 0.25)
@@ -1384,7 +1393,7 @@ function makeCootMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev,
             fwrite($out, "  (list \"C-beta deviation $cnit ($item[dev] A)\" $ctr[x] $ctr[y] $ctr[z])\n");
         }
     }
-    
+
     if(is_array($pperp)) foreach($pperp as $item)
     {
         if($item['outlier'])
@@ -1394,7 +1403,7 @@ function makeCootMulticritChart($infile, $outfile, $clash, $rama, $rota, $cbdev,
             fwrite($out, "  (list \"Base-phos. dist. $cnit (wrong pucker?)\" $ctr[x] $ctr[y] $ctr[z])\n");
         }
     }
-    
+
     fwrite($out, " )\n)\n");
     fclose($out);
 }
@@ -1422,18 +1431,18 @@ function makeCootClusteredChart($infile, $outfile, $outfile_py, $clash, $rama, $
 ;;   dialog-name
 ;;   sorting-options
 ;;   list-of-clusters)
-;; 
+;;
 ;; where a cluster is:
-;;    (list 
+;;    (list
 ;;     cluster-name-string
 ;;     cluster-center-go-button-label-string
 ;;     ccgb-x ccgb-y ccgb-z
 ;;     ; a list of specific items:
-;;     (list 
+;;     (list
 ;;         (list specific-button-label-string button-red button-green button-blue
 ;;               specific-x specific-y specific-z))))
 ;;
-;; 
+;;
 ;;(molprobity-fascinating-clusters-things-gui
 ;; gui-name-string
 ;; (list
@@ -1460,7 +1469,7 @@ function makeCootClusteredChart($infile, $outfile, $outfile_py, $clash, $rama, $
 ;;               specific-x specific-y specific-z)
 ;;         (list specific-button-label-string button-red button-green button-blue
 ;;               specific-x specific-y specific-z)))))
-;; 
+;;
 (define (molprobity-fascinating-clusters-things-gui window-name sorting-options cluster-list)
 
   (define ncluster-max 75)
@@ -1473,13 +1482,13 @@ function makeCootClusteredChart($infile, $outfile, $outfile_py, $clash, $rama, $
       (gtk-container-add frame vbox)
 
       ;; add buttons to vbox for each feature
-      ;; 
+      ;;
       (map (lambda (feature)
 	    ; (format #t "feature: ~s~%" feature)
 	     (let ((button (gtk-button-new-with-label (car feature))))
 	       (gtk-signal-connect button "clicked"
 				   (lambda ()
-				     (set-rotation-centre 
+				     (set-rotation-centre
 				      (list-ref feature 4)
 				      (list-ref feature 5)
 				      (list-ref feature 6))))
@@ -1493,7 +1502,7 @@ function makeCootClusteredChart($infile, $outfile, $outfile_py, $clash, $rama, $
 	 (inside-vbox (gtk-vbox-new #f 0)))
 
     (format #t "Maxiumum number of clusters displayed: ~s~%" ncluster-max)
-    
+
     (gtk-window-set-default-size window  300 200)
     (gtk-window-set-title window window-name)
     (gtk-container-border-width inside-vbox 2)
@@ -1501,14 +1510,14 @@ function makeCootClusteredChart($infile, $outfile, $outfile_py, $clash, $rama, $
     (gtk-box-pack-start outside-vbox scrolled-win #t #t 0) ; expand fill padding
     (gtk-scrolled-window-add-with-viewport scrolled-win inside-vbox)
     (gtk-scrolled-window-set-policy scrolled-win 'automatic 'always)
-    
+
     (let loop ((cluster-list cluster-list)
 	       (count 0))
-      
+
       (cond
        ((null? cluster-list) 'done)
        ((= ncluster-max count) 'done)
-       (else 
+       (else
 
 	(let ((cluster-info (car cluster-list)))
 
@@ -1527,13 +1536,13 @@ function makeCootClusteredChart($infile, $outfile, $outfile_py, $clash, $rama, $
 				      (list-ref cluster-info 2)
 				      (list-ref cluster-info 3))))
 	       (gtk-box-pack-start vbox go-to-cluster-button #f #f 2)
-	       
+
 	       ;; now we have a list of individual features:
 	       (let ((features (list-ref cluster-info 4)))
 		 (if (> (length features) 0)
 		     (add-feature-buttons features vbox)))
 	       (loop (cdr cluster-list) (+ count 1))))))))
-		   
+
 
     (gtk-container-border-width outside-vbox 2)
     (let ((ok-button (gtk-button-new-with-label "  Close  ")))
@@ -1545,27 +1554,27 @@ function makeCootClusteredChart($infile, $outfile, $outfile_py, $clash, $rama, $
 
 
 
-;; 
+;;
 ;;(molprobity-fascinating-clusters-things-gui
-;; "Testing the GUI" 
-;; (list 
+;; "Testing the GUI"
+;; (list
 ;;  (list "Active Site" (list 0 1 2 3 4))
 ;;  (list "Worst First" (list 3 4 1 2 0)))
-;; (list 
+;; (list
 ;;  (list "The first cluster"
 ;;	11 12 15
-;;	(list 
-;;	 (list "A bad thing" 0.4 0.6 0.7 10 13 16)	
+;;	(list
+;;	 (list "A bad thing" 0.4 0.6 0.7 10 13 16)
 ;;	 (list "Another bad thing" 0.4 0.6 0.7 12 15 16)))
 ;;  (list "Another cluster of baddies"
 ;;	-11 12 15
 ;;	(list
-;;	 (list "A quite bad thing" 0.4 0.6 0.7 -10 -13 16)	
+;;	 (list "A quite bad thing" 0.4 0.6 0.7 -10 -13 16)
 ;;	 (list "A not so bad thing" 0.4 0.6 0.7 -12 -15 16)))
 ;;  (list "A third cluster of baddies"
 ;;	11 12 -15
 ;;	(list
-;;	 (list "A quite bad rotamer" 0.4 0.6 0.7 10 13 -16)	
+;;	 (list "A quite bad rotamer" 0.4 0.6 0.7 10 13 -16)
 ;;	 (list "A hydrogen clash" 0.4 0.6 0.7 12 15 -16)
 ;;	 (list "A not so bad H-H clash" 0.4 0.6 0.7 12 15 -16)))))
 
@@ -1648,18 +1657,18 @@ def molprobity_fascinating_clusters_things_gui(window_name, sorting_option, clus
     window.show_all()
 HEREDOC;
     //}}} 0. A lovely Scheme script written for us by Paul Emsley
-    
+
     //{{{ 1. For each outlier, create an array(cnit, description, r, g, b, x, y, z)
     //$res_xyz = computeResCenters($infile, true);
     $res_xyz = computeResCenters($infile);
     $self_bads = array();
-    
+
     if(is_array($clash)) foreach($clash['clashes'] as $cnit => $worst)
     {
         $ctr = $res_xyz[$cnit];
         $self_bads[] = array($cnit, "Clash at $cnit ($worst A)", 1, 0, 0.5, $ctr['x'], $ctr['y'], $ctr['z']);
     }
-        
+
     if(is_array($rama)) foreach($rama as $item)
     {
         if($item['eval'] == "OUTLIER")
@@ -1679,7 +1688,7 @@ HEREDOC;
             $self_bads[] = array($cnit, "Bad rotamer $cnit ($item[scorePct]%)", 1, 0.7, 0, $ctr['x'], $ctr['y'], $ctr['z']);
         }
     }
-    
+
     if(is_array($cbdev)) foreach($cbdev as $item)
     {
         if($item['dev'] >= 0.25)
@@ -1689,7 +1698,7 @@ HEREDOC;
             $self_bads[] = array($cnit, "C-beta deviation $cnit ($item[dev] A)", 0.5, 0, 1, $ctr['x'], $ctr['y'], $ctr['z']);
         }
     }
-    
+
     if(is_array($pperp)) foreach($pperp as $item)
     {
         if($item['outlier'])
@@ -1703,7 +1712,7 @@ HEREDOC;
         }
     }
     //}}} 1. For each outlier, create an array(cnit, description, r, g, b, x, y, z)
-    
+
     //{{{ 2. Cluster the outliers, somehow
     //echo "self_bads has ".count($self_bads)." elements\n";
     $range = 12; // a fairly arbitrary value, in Angstroms.
@@ -1796,7 +1805,7 @@ HEREDOC;
 
     $out = fopen($outfile, 'wb');
     $out_py = fopen($outfile_py, 'wb');
-    
+
     //scheme file
     fwrite($out, ";\n; Multicriterion chart for ".basename($infile).", generated by MolProbity.\n");
     fwrite($out, "; Open this in Coot using Calculate | Run Script...\n;\n");
@@ -1805,7 +1814,7 @@ HEREDOC;
     // this is where we write possible sort orders
     //fwrite($out, "  (list \"Worst First\" (list 0 1 2 3 4 5))\n");
     fwrite($out, " )\n (list\n");
-    
+
     //python file
     fwrite($out_py, "#\n# Multicriterion chart for ".basename($infile).", generated by MolProbity.\n");
     fwrite($out_py, "# Open this in Coot using Calculate | Run Script...\n#\n");
@@ -1831,7 +1840,7 @@ HEREDOC;
             fwrite($out, "  (list\n   \"problems near $max_header\"\n   $xyz[x] $xyz[y] $xyz[z]\n   (list\n");
             fwrite($out_py, "[\"problems near $max_header\",\n      $xyz[x], $xyz[y], $xyz[z],\n      [\n");
             foreach($bads as $b)
-            {    
+            {
                 fwrite($out, "    (list \"$b[1]\" $b[2] $b[3] $b[4] $b[5] $b[6] $b[7])\n");
                 fwrite($out_py, "       [\"$b[1]\", $b[2], $b[3], $b[4], $b[5], $b[6], $b[7]]");
                 #if($loop_ctr < count($worst_res)-1){
@@ -1857,7 +1866,7 @@ HEREDOC;
             else{
                 fwrite($out_py, "\n    ");
             }
-            
+
             $outlier_ctr++;
         }
         $loop_ctr++;
@@ -1900,19 +1909,19 @@ function formatChiAngles($item)
 */
 function makeRemark999($clash, $rama, $rota)
 {
-    $s = 'REMARK 999                                                                      
-REMARK 999 MOLPROBITY STRUCTURE VALIDATION                                      
-REMARK 999  PROGRAMS    : MOLPROBITY  (KING, REDUCE, AND PROBE)                 
-REMARK 999  AUTHORS     : I.W.DAVIS,V.B.CHEN,                                   
-REMARK 999              : R.M.IMMORMINO,J.J.HEADD,W.B.ARENDALL,J.M.WORD         
-REMARK 999  URL         : HTTP://KINEMAGE.BIOCHEM.DUKE.EDU/MOLPROBITY/          
-REMARK 999  AUTHORS     : I.W.DAVIS,A.LEAVER-FAY,V.B.CHEN,J.N.BLOCK,            
-REMARK 999              : G.J.KAPRAL,X.WANG,L.W.MURRAY,W.B.ARENDALL,            
-REMARK 999              : J.SNOEYINK,J.S.RICHARDSON,D.C.RICHARDSON              
-REMARK 999  REFERENCE   : MOLPROBITY: ALL-ATOM CONTACTS AND STRUCTURE           
-REMARK 999              : VALIDATION FOR PROTEINS AND NUCLEIC ACIDS             
-REMARK 999              : NUCLEIC ACIDS RESEARCH. 2007;35:W375-83.              
-REMARK 999  MOLPROBITY OUTPUT SCORES:                                           
+    $s = 'REMARK 999
+REMARK 999 MOLPROBITY STRUCTURE VALIDATION
+REMARK 999  PROGRAMS    : MOLPROBITY  (KING, REDUCE, AND PROBE)
+REMARK 999  AUTHORS     : I.W.DAVIS,V.B.CHEN,
+REMARK 999              : R.M.IMMORMINO,J.J.HEADD,W.B.ARENDALL,J.M.WORD
+REMARK 999  URL         : HTTP://KINEMAGE.BIOCHEM.DUKE.EDU/MOLPROBITY/
+REMARK 999  AUTHORS     : I.W.DAVIS,A.LEAVER-FAY,V.B.CHEN,J.N.BLOCK,
+REMARK 999              : G.J.KAPRAL,X.WANG,L.W.MURRAY,W.B.ARENDALL,
+REMARK 999              : J.SNOEYINK,J.S.RICHARDSON,D.C.RICHARDSON
+REMARK 999  REFERENCE   : MOLPROBITY: ALL-ATOM CONTACTS AND STRUCTURE
+REMARK 999              : VALIDATION FOR PROTEINS AND NUCLEIC ACIDS
+REMARK 999              : NUCLEIC ACIDS RESEARCH. 2007;35:W375-83.
+REMARK 999  MOLPROBITY OUTPUT SCORES:
 ';
     // WARNING!
     // This code will perform correctly ONLY on PHP 4.3.7 and later.
@@ -1921,7 +1930,7 @@ REMARK 999  MOLPROBITY OUTPUT SCORES:
     // and thus a maximum of 3 before (3 + 1 + 2 == 6).
     // The new meaning is consistent with the way printf() works in other languages (C, Perl, Python).
     // See PHP bugs #28633 and #29286 for more details.
-    
+
     if(is_array($clash))
     {
         //$s .= str_pad(sprintf('REMARK 999  ALL-ATOM CLASHSCORE     : %6.2f  (%.2f B<40)', $clash['scoreAll'], $clash['scoreBlt40']), 80) . "\n";
@@ -1944,8 +1953,8 @@ REMARK 999  MOLPROBITY OUTPUT SCORES:
         $s .= str_pad(sprintf('REMARK 999  RAMACHANDRAN OUTLIERS   : %5.1f%% %4d/%-5d  (TARGET  0.2%%)', $ramaOutPct, $ramaOut, $ramaTot), 80) . "\n";
         $s .= str_pad(sprintf('REMARK 999  RAMACHANDRAN FAVORED    : %5.1f%% %4d/%-5d  (TARGET 98.0%%)', $ramaFavPct, $ramaFav, $ramaTot), 80) . "\n";
     }
-    
-    return $s;         
+
+    return $s;
 }
 #}}}########################################################################
 
@@ -1960,19 +1969,19 @@ REMARK 999  MOLPROBITY OUTPUT SCORES:
 */
 function makeRemark40($clash, $rama, $rota)
 {
-    $s = 'REMARK  40                                                                      
-REMARK  40 MOLPROBITY STRUCTURE VALIDATION                                      
-REMARK  40  PROGRAMS    : MOLPROBITY  (KING, REDUCE, AND PROBE)                 
-REMARK  40  AUTHORS     : I.W.DAVIS,V.B.CHEN,                                   
-REMARK  40              : R.M.IMMORMINO,J.J.HEADD,W.B.ARENDALL,J.M.WORD         
-REMARK  40  URL         : HTTP://KINEMAGE.BIOCHEM.DUKE.EDU/MOLPROBITY/          
-REMARK  40  AUTHORS     : I.W.DAVIS,A.LEAVER-FAY,V.B.CHEN,J.N.BLOCK,            
-REMARK  40              : G.J.KAPRAL,X.WANG,L.W.MURRAY,W.B.ARENDALL,            
-REMARK  40              : J.SNOEYINK,J.S.RICHARDSON,D.C.RICHARDSON              
-REMARK  40  REFERENCE   : MOLPROBITY: ALL-ATOM CONTACTS AND STRUCTURE           
-REMARK  40              : VALIDATION FOR PROTEINS AND NUCLEIC ACIDS             
-REMARK  40              : NUCLEIC ACIDS RESEARCH. 2007;35:W375-83.              
-REMARK  40  MOLPROBITY OUTPUT SCORES:                                           
+    $s = 'REMARK  40
+REMARK  40 MOLPROBITY STRUCTURE VALIDATION
+REMARK  40  PROGRAMS    : MOLPROBITY  (KING, REDUCE, AND PROBE)
+REMARK  40  AUTHORS     : I.W.DAVIS,V.B.CHEN,
+REMARK  40              : R.M.IMMORMINO,J.J.HEADD,W.B.ARENDALL,J.M.WORD
+REMARK  40  URL         : HTTP://KINEMAGE.BIOCHEM.DUKE.EDU/MOLPROBITY/
+REMARK  40  AUTHORS     : I.W.DAVIS,A.LEAVER-FAY,V.B.CHEN,J.N.BLOCK,
+REMARK  40              : G.J.KAPRAL,X.WANG,L.W.MURRAY,W.B.ARENDALL,
+REMARK  40              : J.SNOEYINK,J.S.RICHARDSON,D.C.RICHARDSON
+REMARK  40  REFERENCE   : MOLPROBITY: ALL-ATOM CONTACTS AND STRUCTURE
+REMARK  40              : VALIDATION FOR PROTEINS AND NUCLEIC ACIDS
+REMARK  40              : NUCLEIC ACIDS RESEARCH. 2007;35:W375-83.
+REMARK  40  MOLPROBITY OUTPUT SCORES:
 ';
     // WARNING!
     // This code will perform correctly ONLY on PHP 4.3.7 and later.
@@ -1981,7 +1990,7 @@ REMARK  40  MOLPROBITY OUTPUT SCORES:
     // and thus a maximum of 3 before (3 + 1 + 2 == 6).
     // The new meaning is consistent with the way printf() works in other languages (C, Perl, Python).
     // See PHP bugs #28633 and #29286 for more details.
-    
+
     if(is_array($clash))
     {
         //$s .= str_pad(sprintf('REMARK  40  ALL-ATOM CLASHSCORE     : %6.2f  (%.2f B<40)', $clash['scoreAll'], $clash['scoreBlt40']), 80) . "\n";
@@ -2003,9 +2012,9 @@ REMARK  40  MOLPROBITY OUTPUT SCORES:
         $ramaFavPct = (100.0 * $ramaFav / $ramaTot);
         $s .= str_pad(sprintf('REMARK  40  RAMACHANDRAN OUTLIERS   : %5.1f%% %4d/%-5d  (TARGET  0.2%%)', $ramaOutPct, $ramaOut, $ramaTot), 80) . "\n";
         $s .= str_pad(sprintf('REMARK  40  RAMACHANDRAN FAVORED    : %5.1f%% %4d/%-5d  (TARGET 98.0%%)', $ramaFavPct, $ramaFav, $ramaTot), 80) . "\n";
-    } 
-    
-    return $s;         
+    }
+
+    return $s;
 }
 #}}}########################################################################
 
@@ -2030,7 +2039,7 @@ function writeMultimodelChart($infiles, $outfile)
     $ramaOuts   = array();
     $ramaCount  = array();
     $tmpfile    = mpTempfile();
-    
+
     for($i = 0; $i < count($infiles); $i++)
     {
         runClashlist($infiles[$i], $tmpfile);
@@ -2046,7 +2055,7 @@ function writeMultimodelChart($infiles, $outfile)
         $ramaOuts[$i] = findRamaOutliers($ramas[$i]);
         foreach($ramaOuts[$i] as $cnit => $junk) $ramaCount[$cnit] += 1;
     }
-    
+
     $allRes = array_values(listResidues($infiles[0])); // for now, assume all files have same res
     $out = fopen($outfile, 'wb');
     fwrite($out, "@kinemage 1\n");
@@ -2064,21 +2073,21 @@ function writeMultimodelChart($infiles, $outfile)
     for($i = 0; $i < count($infiles); $i++)
     {
         fwrite($out, "@subgroup {".basename($infiles[$i])."} dominant\n");
-        
+
         fwrite($out, "@ringlist {clashes} master= {clashes} radius= 0.3 width= 2 color= hotpink\n");
         for($j = 0; $j < count($allRes); $j++)
             if($clashOuts[$i][ $allRes[$j] ]) fwrite($out, "{".$allRes[$j]."} ".(-$i-1)." -$j 0\n");
-        
+
         fwrite($out, "@ringlist {rotamers} master= {rotamers} radius= 0.1 width= 2 color= gold\n");
         for($j = 0; $j < count($allRes); $j++)
             if($rotaOuts[$i][ $allRes[$j] ]) fwrite($out, "{".$allRes[$j]."} ".(-$i-1)." -$j 0\n");
-        
+
         fwrite($out, "@ringlist {Ramachandran} master= {Ramachandran} radius= 0.2 width= 2 color= green\n");
         for($j = 0; $j < count($allRes); $j++)
             if($ramaOuts[$i][ $allRes[$j] ]) fwrite($out, "{".$allRes[$j]."} ".(-$i-1)." -$j 0\n");
     }
 
-    
+
     fwrite($out, "@group {criteria (rings)} animate collapsable\n");
     fwrite($out, "@labellist {res names}\n");
     for($j = 0; $j < count($allRes); $j++)
@@ -2088,30 +2097,30 @@ function writeMultimodelChart($infiles, $outfile)
     {
         fwrite($out, "@subgroup {".basename($infiles[$i])."} dominant\n");
         $xpos = 0;
-        
+
         fwrite($out, "@ringlist {clashes} radius= ".(0.50 * ($i+1)/count($infiles))." width= 1 color= hotpink\n");
         $xpos -= 1.5;
         for($j = 0; $j < count($allRes); $j++)
             if($clashOuts[$i][ $allRes[$j] ]) fwrite($out, "{".$allRes[$j]."} $xpos -$j ".(-0.1*$i)."\n");
-        
+
         fwrite($out, "@ringlist {rotamers} radius= ".(0.50 * ($i+1)/count($infiles))." width= 1 color= gold\n");
         $xpos -= 1.5;
         for($j = 0; $j < count($allRes); $j++)
             if($rotaOuts[$i][ $allRes[$j] ]) fwrite($out, "{".$allRes[$j]."} $xpos -$j ".(-0.1*$i)."\n");
-        
+
         fwrite($out, "@ringlist {Ramachandran} radius= ".(0.50 * ($i+1)/count($infiles))." width= 1 color= green\n");
         $xpos -= 1.5;
         for($j = 0; $j < count($allRes); $j++)
             if($ramaOuts[$i][ $allRes[$j] ]) fwrite($out, "{".$allRes[$j]."} $xpos -$j ".(-0.1*$i)."\n");
     }
-    
-    
+
+
     fwrite($out, "@group {criteria (lines)} animate collapsable\n");
     fwrite($out, "@labellist {res names}\n");
     for($j = 0; $j < count($allRes); $j++)
         fwrite($out, "{".$allRes[$j]."} 0 -$j ".(-0.1*$i)."\n");
     $xpos = 0;
-    
+
     fwrite($out, "@vectorlist {clashes} color= hotpink\n");
     $xpos -= 1;
     writeMultimodelChart_bars($out, $allRes, $clashCount, count($infiles), $xpos);
@@ -2123,14 +2132,14 @@ function writeMultimodelChart($infiles, $outfile)
     fwrite($out, "@vectorlist {Ramachandran} color= green\n");
     $xpos -= 1;
     writeMultimodelChart_bars($out, $allRes, $ramaCount, count($infiles), $xpos);
-    
-    
+
+
     fwrite($out, "@group {criteria (worms)} animate collapsable\n");
     fwrite($out, "@labellist {res names}\n");
     for($j = 0; $j < count($allRes); $j++)
         fwrite($out, "{".$allRes[$j]."} 0 -$j ".(-0.1*$i)."\n");
     $xpos = 0;
-    
+
     fwrite($out, "@trianglelist {clashes} color= hotpink\n");
     $xpos -= 1;
     writeMultimodelChart_boxes($out, $allRes, $clashCount, count($infiles), $xpos);

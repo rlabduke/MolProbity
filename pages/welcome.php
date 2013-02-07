@@ -14,7 +14,7 @@ require_once(MP_BASE_DIR.'/pages/file_browser.php');
 
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
 class welcome_delegate extends file_browser_delegate {
-    
+
 #{{{ display - creates the UI for this page
 ############################################################################
 /**
@@ -31,15 +31,15 @@ function display($context)
         echo makeEventForm("onSetWorkingModel") . "\n";
         $this->displayModels($context);
         echo "</form>\n";
-        
+
         if(isset($_SESSION['ensembles'][ $_SESSION['lastUsedModelID'] ]))
             $this->displayEnsembleTools($context);
         else
             $this->displayModelTools($context);
-        
+
         echo "</div></div>\n<br>\n<div class='pagecontent'>\n";
     }
-    
+
     // Entries / files should display if we have any entries.
     // We can have entries with no models -- e.g., uploading a het dictionary first thing.
     $labbook = openLabbook();
@@ -53,7 +53,7 @@ function display($context)
         $this->displayAllFiles($context);
         echo "</div>\n<br>\n<div class='pagecontent'>\n";
     }
-    
+
     $this->displayUpload($context);
     echo "</div>\n<br>\n<div class='pagecontent'>\n";
 ?>
@@ -72,10 +72,11 @@ as part of the refinement cycle.</p>
 Create and view interactive 3-D graphics
 from your web browser.</p>
 
-<h3>What's new in 3.20:</h3><ul>
+<h3>What's new in 4.00a:</h3><ul>
 <li>Updated Reduce-added hydrogen lengths to be more consistent with other crystallography software.</li>
 <li>New Top8000 Ramachandran validation information.</li>
 <li>Updated All-atom analysis summary table to also show outlier-counts.</li>
+<li>Allows use of both electron cloud and nuclear x-H bond-lengths.</li>
 </ul>
 </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>
 
@@ -83,13 +84,13 @@ from your web browser.</p>
 <h3>Common questions:</h3>
 <p><b><a href='help/about.html' target='_blank'>Cite MolProbity</a></b>:
     <small>Chen et al. (2010)
-    <a href="http://kinemage.biochem.duke.edu/lab/papers.php" target="_blank">MolProbity: 
+    <a href="http://kinemage.biochem.duke.edu/lab/papers.php" target="_blank">MolProbity:
     all-atom structure validation for macromolecular crystallography.</a>
     Acta Crystallographica D66:12-21.
     </p>
     <center>and/or</center>
 <p>Davis et al. (2007)
-    <a href="http://kinemage.biochem.duke.edu/lab/papers.php" target="_blank">MolProbity: 
+    <a href="http://kinemage.biochem.duke.edu/lab/papers.php" target="_blank">MolProbity:
     all-atom contacts and structure validation for proteins and nucleic acids.</a>
     Nucleic Acids Research 35:W375-W383.
     </small></p>
@@ -108,7 +109,7 @@ Why have the hydrogen bondlengths changed?</p>
 <?php
     // These are too annoying to have at the top all the time
     $this->displayWarnings($context);
-    
+
     echo $this->pageFooter();
 }
 #}}}########################################################################
@@ -123,7 +124,7 @@ function displayWarnings($context)
     $br = recognizeUserAgent();
     if(in_array($br['browser'], $bad_browsers)) $err = "has bugs that keep it from working well with MolProbity";
     //elseif(! in_array($br['browser'], $tested_browsers)) $err = "has not been tested with MolProbity";
-    
+
     if($err)
     {
         echo "<br><div class='alert'>\n";
@@ -132,7 +133,7 @@ function displayWarnings($context)
         echo "try a browser like <a href='http://www.mozilla.org/' target='_blank'>Firefox</a> instead.\n";
         echo "</div><br>\n";
     }
-    
+
     // 2. Check for Java being enabled.
     // This doesn't verify the version, but is better than nothing...
     // javaEnabled() doesn't work in Mozilla-type browsers on OS X, so we exclude them
@@ -161,13 +162,13 @@ function displayWarnings($context)
 ############################################################################
 function displayModels($context)
 {
-  
+
     // Warning about default being to trim hydrogens
     echo("<div class=alert>Due to the parameter adjustments to hydrogen bondlengths and van der Waals radii, the current default behavior for MolProbity is
-      to remove hydrogens, if they are present, before analysis. For electron-cloud position hydrogens (i.e. for crystal structures), please re-add them using the \"Add Hydrogens\" option below. 
-      For nuclear position hydrogens (i.e. for neutron-diffraction structures or for NMR structures), please go to http://molprobity.biochem.duke.edu for analysis.
+      to remove hydrogens, if they are present, before analysis. Please re-add hydrogens using the \"Add Hydrogens\" option below, where you will have the option
+      to choose the default electron cloud position hydrogens (i.e. for crystal structures) or nuclear position hydrogens (i.e. for neutron-diffraction structures or for NMR structures).
         </div>");
-  
+
     if(count($_SESSION['models']) > 1)
     {
         // This works on Safari but not Firefox:
@@ -175,7 +176,7 @@ function displayModels($context)
         // Either of these works on both:
         //$submit_script = 'document.forms[0].cmd.click();';
         $submit_script = 'document.forms[0].submit();';
-        
+
         echo "Currently working on: ";
         echo "<select name='workingModel' onchange='$submit_script'>\n";
         foreach($_SESSION['ensembles'] as $id => $model)
@@ -224,12 +225,12 @@ function displayModelTools($context)
         'jiffiloop' => array('desc' => 'Fill gaps in protein backbone with JiffiLoop (beta test)', 'page' => 'fragmentfill_setup.php', 'rel' => 1, 'img' => 'jiffiloop.png'),
         'geomonly'  => array('desc' => 'Analyze geometry without all-atom contacts', 'page' => 'aacgeom_setup.php', 'rel' => 1, 'img' => 'ramaplot.png'),
     );
-    
+
     // Reduce
     if($model['isReduced'])                 $tools['reduce']['rel'] = 0;
     elseif($model['stats']['has_most_H'])   $tools['reduce']['rel'] = 1;
     else                                    $tools['reduce']['rel'] = 2;
-    
+
     // All-atom contact analysis, etc.
     // Suggest kin w/o H, suggest interface w/ H
     if($model['isReduced'] || $model['stats']['has_most_H'])
@@ -244,7 +245,7 @@ function displayModelTools($context)
         $tools['iface']['rel'] = 0;
         $tools['makekins']['rel'] = 2;
     }
-    
+
     $this->formatTools($tools);
 }
 #}}}########################################################################
@@ -261,7 +262,7 @@ function displayEnsembleTools($context)
     // Use the first model of each ensemble as representative.
     $modelID = reset($ensemble['models']);
     $model = $_SESSION['models'][$modelID];
-            
+
     // "rel" (relevance) is 2 for major, 1 for minor, 0 for not shown.
     $tools = array(
         'aacgeom'   => array('desc' => 'Analyze all-atom contacts and geometry', 'page' => 'ens_aacgeom_setup.php', 'rel' => 2, 'img' => 'clash_rama.png'),
@@ -269,7 +270,7 @@ function displayEnsembleTools($context)
         'reduce'    => array('desc' => 'Add hydrogens', 'page' => 'ens_reduce_setup.php', 'rel' => 1, 'img' => 'add_h.png'),
         'downgrade' => array('desc' => 'Downgrade file to PDBv2.3 format (for download only)', 'page' => 'pdb_convert_setup.php', 'rel' => 1, 'img' => 'downgrade.gif'),
     );
-    
+
     // Reduce
     if($ensemble['isReduced'])
         $tools['reduce']['rel'] = 0;
@@ -280,7 +281,7 @@ function displayEnsembleTools($context)
         $tools['reduce']['rel'] = 2;
         //$tools['aacgeom']['rel'] = 1;
     }
-        
+
 
     $this->formatTools($tools);
 }
@@ -303,7 +304,7 @@ function formatTools($tools)
         if($item['rel'] == 1)   $minor[] = $item;
         // other cases are thrown away
     }
-    
+
     echo "<table border='0' width='100%'>\n";
     // Using a secondary table makes it easier to align icons and text
     echo "<tr valign='top'><td><table border='0'>\n"; // start large icon column
@@ -316,7 +317,7 @@ function formatTools($tools)
         echo "<td>$a$item[desc]</a></td></tr>\n";
     }
     echo "</table></td>\n";
-    
+
     echo "<td><table border='0'>\n"; // end large; start small text column
     foreach($minor as $item)
     {
@@ -335,15 +336,15 @@ function formatTools($tools)
 function displayFiles($context)
 {
     $browser = new file_browser_delegate();
-    
+
     if(isset($_SESSION['ensembles'][ $_SESSION['lastUsedModelID'] ]))
         $model = $_SESSION['ensembles'][ $_SESSION['lastUsedModelID'] ];
     else
         $model = $_SESSION['models'][ $_SESSION['lastUsedModelID'] ];
-    
+
     $files = array(MP_DIR_MODELS.'/'.$model['pdb']);
     $files = array_merge($files, $model['primaryDownloads']);
-    
+
     echo "<h5 class='welcome'>Popular Downloads (<a href='".makeEventURL('onCall', 'file_browser.php')."'>all downloads</a>)</h5>\n";
     echo "<div class='indent'>\n";
     echo "<table border='0' width='100%' cellspacing='0'>\n";
@@ -367,7 +368,7 @@ function displayFilesJS($context)
 {
     echo "<h5 class='welcome'>Popular Downloads (<a href='".makeEventURL('onCall', 'file_browser.php')."'>all downloads</a>)</h5>\n";
     echo "<div class='indent'>\n";
-    
+
     $files = listRecursive($_SESSION['dataDir']);
     unset($files[MP_DIR_SYSTEM]);
     unset($files[MP_DIR_WORK]);
@@ -395,18 +396,18 @@ function displayFilesJS($context)
     var dataURL = <?php echo "\"".$_SESSION['dataURL']."\"\n"; ?>
     var timerID = 0
     var lastLink = null
-    
+
     function showFileTools(link, fileName, event)
     {
         // MSIE is different...
         if(!event) event = window.event
-        
+
         if(timerID != 0)
         {
             window.clearTimeout(timerID)
             timerID = 0
         }
-        
+
         var tools = document.getElementById("filetools")
         if(link != null)// && link != lastLink)
         {
@@ -431,7 +432,7 @@ function displayFilesJS($context)
                 html += "<a href='viewtext.php?"+sessTag+"&file="+dataDir+"/"+fileName+"&mode=plain' target='_blank'>View as text</a><br>\n"
             html += "<a href='"+dataURL+"/"+fileName+"'><img src='img/download.gif'> Download</a>"
             tools.innerHTML = html
-            
+
             //var x = event.clientX
             //var y = event.clientY
             var x = findPosX(link) + link.offsetWidth + 4
@@ -439,7 +440,7 @@ function displayFilesJS($context)
             tools.style.left = x+"px"
             tools.style.top = y+"px"
             tools.style.display = "block"
-            
+
             lastLink = link
         }
     }
@@ -499,14 +500,14 @@ function displayAllFiles($context)
 {
     echo "<h5 class='welcome'>Popular Downloads (<a href='".makeEventURL('onCall', 'file_browser.php')."'>all downloads</a>)</h5>\n";
     echo "<div class='indent'>\n";
-    
+
     $list = listRecursive($_SESSION['dataDir']);
     unset($list[MP_DIR_SYSTEM]);
     unset($list[MP_DIR_WORK]);
     unset($list[MP_DIR_RAWDATA]);
     $list = sortFilesAlpha($list);
     $this->displayDownloadForm($list, $context['isExpanded']);
-    
+
     echo "</div>\n"; // end indent
 }
 #}}}########################################################################
@@ -526,7 +527,7 @@ function displayEntries($context, $labbook)
         $model = $_SESSION['ensembles'][$modelID];
     else
         $model = $_SESSION['models'][$modelID];
-    
+
     //$labbook = openLabbook();
     $labbook = array_reverse($labbook, true); // make reverse chronological
     echo "<h5 class='welcome'>Recently Generated Results (<a href='$url'>all results</a>)</h5>\n";
@@ -571,7 +572,7 @@ function displayEntries($context, $labbook)
 */
 function displayUpload($context)
 {
-    echo makeEventForm("onUploadOrFetch") . "\n"; 
+    echo makeEventForm("onUploadOrFetch") . "\n";
     //echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onCall", "upload_setup.php")."'>more options</a>)</h5>";
     echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onCall", "upload_setup.php")."' onclick='toggleUploadOptions(); return false' id='upload_options_link'>more options</a>)</h5>";
 ?>
@@ -582,7 +583,7 @@ function toggleUploadOptions()
     var block = document.getElementById('upload_options_block')
     var link = document.getElementById('upload_options_link')
     if(block.style.display == 'none')
-    {   
+    {
         block.style.display = 'block'
         link.innerHTML = 'hide options'
     }
@@ -626,16 +627,16 @@ function toggleUploadOptions()
 </div></form>
 <?php
 
-    //echo("<div class=alert><strong>The PDB has changed its file format from PDB v2.3 to v3 (see <a href='http://remediation.wwpdb.org/index.html' target='_blank'>here</a> for more info).  
+    //echo("<div class=alert><strong>The PDB has changed its file format from PDB v2.3 to v3 (see <a href='http://remediation.wwpdb.org/index.html' target='_blank'>here</a> for more info).
     //    We have upgraded our software to be compatible with the new format.
     //    Any uploaded files will be converted to PDB v3 if necessary; you will have an option to convert modified files back to PDB v2.3 if desired.
     //    <br><br>Please don't hesitate to report any bugs you may encounter; sorry for any inconvenience.</strong></div>");
 
-    echo("<div class=alert><strong>We have updated Reduce to add hydrogens at a length more consistent with electron cloud positions, and accordingly 
-      adjusted the Van der Waals radii in Probe to compensate for the change.  This will affect comparison of results calculated with older versions of MolProbity, 
-      but generally results in lower clashscores. For analyses using nuclear position hydrogens, please go to ".$this->determineHttps().".  Read more about this change 
-      <a style=\"color: #66FFFF\" href='".makeEventURL("onGoto", "helper_hydrogens.php")."'>here</a>.
-      <p>Ramachandran scoring has also been updated to use new six-category distributions, derived from a larger 
+    echo("<div class=alert><strong>We have updated Reduce to add hydrogens at a length more consistent with electron cloud positions, and accordingly
+      adjusted the Van der Waals radii in Probe to compensate for the change.  This will affect comparison of results calculated with older versions of MolProbity,
+      but generally results in lower clashscores. For analyses using nuclear position hydrogens, you have the option of selecting nuclear x-H positions when adding hydrogens.
+      Read more about this change <a style=\"color: #66FFFF\" href='".makeEventURL("onGoto", "helper_hydrogens.php")."'>here</a>.
+      <p>Ramachandran scoring has also been updated to use new six-category distributions, derived from a larger
       Top8000 dataset of high quality PDB files.
         <br><br>Please don't hesitate to report any bugs you may encounter.</strong></div>");
 
@@ -648,7 +649,7 @@ function toggleUploadOptions()
 * old nuclear position Molprobity server.  This assumes we're still using a system where
 * the new version is at https:// and the old one is at http://
 */
-function determineHttps() 
+function determineHttps()
 {
   if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) {
     $oldUrl = 'http://';
@@ -673,7 +674,7 @@ function determineHttps()
 */
 function displayUploadOld($context)
 {
-    echo makeEventForm("onUploadOrFetch") . "\n"; 
+    echo makeEventForm("onUploadOrFetch") . "\n";
     //echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onCall", "upload_setup.php")."'>more options</a>)</h5>";
     echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onCall", "upload_setup.php")."' onclick='toggleUploadOptions(); return false' id='upload_options_link'>more options</a>)</h5>";
 ?>
@@ -684,7 +685,7 @@ function toggleUploadOptions()
     var block = document.getElementById('upload_options_block')
     var link = document.getElementById('upload_options_link')
     if(block.style.display == 'none')
-    {   
+    {
         block.style.display = 'block'
         link.innerHTML = 'hide options'
     }
@@ -760,7 +761,7 @@ function onUploadOrFetch()
     //$req = $_REQUEST;
     $hasUpload = isset($_FILES['uploadFile']) && $_FILES['uploadFile']['error'] != UPLOAD_ERR_NO_FILE;
     $hasFetch = isset($_REQUEST['pdbCode']) && $_REQUEST['pdbCode'] != "";
-    
+
     pageCall("upload_setup.php"); // or else a later pageReturn() will screw us up!
     $upload_delegate = makeDelegateObject();
 
@@ -790,7 +791,7 @@ function onUploadOrFetch()
             $upload_delegate->onFetchEdsMap();
         }
     }
-    else 
+    else
         $upload_delegate->onUploadPdbFile();
 }
 #}}}########################################################################
@@ -812,7 +813,7 @@ function onDownloadPopularZip()
 
     $files = array(MP_DIR_MODELS.'/'.$model['pdb']);
     $files = array_merge($files, $model['primaryDownloads']);
-    
+
     $zipfile = makeZipForFiles($_SESSION['dataDir'], $files);
     // These lines may be required by Internet Explorer
     header("Pragma: public");
@@ -846,11 +847,11 @@ function onConvertToBiolUnit()
         $oldID      = $_SESSION['lastUsedModelID'];
         $model      = $_SESSION['ensembles'][$oldID];
         if(!$model) return;
-        
+
         $modelDir   = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
         $infile     = "$modelDir/$model[pdb]";
         $tmpfile    = convertModelsToChains($infile);
-        
+
         $newModel = createModel("$oldID-biolunit");
         $newID = $newModel['id'];
         $newModel['stats'] = pdbstat($tmpfile);
