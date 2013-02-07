@@ -8,10 +8,10 @@ INPUTS (via $_SESSION['bgjob']):
     origName        the name of the file on the user's system.
     pdbCode         the PDB or NDB code for the molecule
     (EITHER pdbCode OR tmpPdb and origName will be set)
-    
+
     isCnsFormat     true if the user thinks he has CNS atom names
     ignoreSegID     true if the user wants to never map segIDs to chainIDs
-    
+
     biolunit        true if we should get the biological, rather   }
                     than asymmetric, unit from the PDB             } for pdbCode
     eds_2fofc       true if the user wants the 2Fo-Fc map from EDS } only...
@@ -54,10 +54,10 @@ function getMaps($code)
     $prog = getProgressTasks();
     if($_SESSION['bgjob']['eds_2fofc']) $prog['2fofc'] = "Download 2Fo-Fc map from the EDS";
     if($_SESSION['bgjob']['eds_fofc'])  $prog['fofc']  = "Download Fo-Fc (difference) map from the EDS";
-    
+
     $mapDir = "$_SESSION[dataDir]/".MP_DIR_EDMAPS;
     if(!file_exists($mapDir)) mkdir($mapDir, 0777);
-    
+
     if($_SESSION['bgjob']['eds_2fofc'])
     {
         setProgress($prog, '2fofc');
@@ -95,7 +95,7 @@ function getMaps($code)
             else $map_notebook_msg .= "<p><div class='alert'>The Fo-Fc map for $code could not be retrieved from the EDS.</div></p>\n";
         }
     }
-    
+
     setProgress($prog, null);
 }
 #}}}########################################################################
@@ -114,7 +114,7 @@ if(isset($_SESSION['bgjob']['pdbCode']))
 {
     // Better upper case it to make sure we find the file in the database
     $code = strtoupper($_SESSION['bgjob']['pdbCode']);
-    
+
     if(preg_match('/^[0-9A-Z]{4}$/i', $code))
     {
         setProgress(array("pdb" => "Retrieve PDB file $code over the network"), "pdb");
@@ -128,7 +128,7 @@ if(isset($_SESSION['bgjob']['pdbCode']))
         $fileSource = "http://ndbserver.rutgers.edu/";
     }
     else $tmpfile == null;
-    
+
     if($tmpfile == null)
     {
         $_SESSION['bgjob']['newModel'] = null;
@@ -140,10 +140,10 @@ if(isset($_SESSION['bgjob']['pdbCode']))
             $_SESSION['bgjob']['isCnsFormat'],
             $_SESSION['bgjob']['ignoreSegID'],
             false /* came from public database */);
-        
+
         // Clean up temp files
         unlink($tmpfile);
-        
+
         if(preg_match('/^[0-9A-Z]{4}$/i', $code)
         &&($_SESSION['bgjob']['eds_2fofc']
         || $_SESSION['bgjob']['eds_fofc']))
@@ -157,13 +157,13 @@ else
     // Remove illegal chars from the upload file name
     $origName = censorFileName($_SESSION['bgjob']['origName'], array("pdb", "ent", "xyz"));
     $fileSource = "local disk";
-    
+
     $id = addModelOrEnsemble($_SESSION['bgjob']['tmpPdb'],
         $origName,
         $_SESSION['bgjob']['isCnsFormat'],
         $_SESSION['bgjob']['ignoreSegID'],
         true /* came from upload */);
-    
+
     // Clean up temp files
     unlink($_SESSION['bgjob']['tmpPdb']);
 }
@@ -174,7 +174,7 @@ if(isset($id))
     // this is now the "working model" until overriden (could also be an ensemble)
     $_SESSION['lastUsedModelID'] = $id;
     $_SESSION['bgjob']['newModel'] = $id;
-    
+
     if(isset($_SESSION['ensembles'][$id]))
     {
         $idList = $_SESSION['ensembles'][$id]['models'];
@@ -185,19 +185,19 @@ if(isset($id))
         $idList = array();
         $model = $_SESSION['models'][ $id ];
     }
-    
+
     // Original task list set during addModel()
     $tasks = getProgressTasks();
     $tasks['thumbnail'] = "Make a thumbnail kinemage using <code>prekin -cass -colornc</code>";
     setProgress($tasks, "thumbnail");
-    
+
     // Make a thumbnail kin for the lab notebook
     $modelDir = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
     $kinDir = $_SESSION['dataDir'].'/'.MP_DIR_KINS;
     $kinURL = $_SESSION['dataURL'].'/'.MP_DIR_KINS;
     if(!file_exists($kinDir)) mkdir($kinDir, 0777);
     exec("prekin -cass -colornc $modelDir/$model[pdb] > $kinDir/$model[prefix]thumbnail.kin");
-    
+
     $s = "";
     $s .= "<div class='side_options'>\n";
     $s .= "<center><small><i>drag to rotate</i></small></center>\n";
@@ -224,9 +224,21 @@ if(isset($id))
     $s .= "<ul>\n";
     foreach($details as $detail) $s .= "<li>$detail</li>\n";
     $s .= "</ul>\n";
-    
+
     $s .= $map_notebook_msg;
-    
+
+    if($model['stats']['originalInputH'])
+    {
+      foreach($_SESSION['models'] as $id_m => $model_m)
+        {
+            if($_SESSION['lastUsedModelID'] != $id_m) $orig = $model_m['pdb'];
+        }
+      $s .= "<p><div class='alert'>The hydrogen atoms from your input model have been removed.<br>\n";
+      $s .= "You will be able to add hydrogens at either electron cloud positions (default), which are best for X-ray crystallographic models, <br>";
+      $s .= "or at nuclear positions, which are best for NMR models, neutron diffraction models, etc.<br>";
+      $s .= "<br>If you prefer to use the input hydrogen positions, please select $orig from the 'Currently working on' list on the next page.</div></p>";
+    }
+
     if($model['segmap'])
     {
         $s .= "<p><div class='alert'>Because this model had more segment IDs than chainIDs,\n";
@@ -234,7 +246,7 @@ if(isset($id))
         $s .= "If you would prefer the original chain IDs, please check the <b>Ignore segID field</b>\n";
         $s .= "on the file upload page.</div></p>";
     }
-    
+
     $idList[] = $id; // make sure ensemble ID also appears in notebook
     $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
         $title,
@@ -243,7 +255,7 @@ if(isset($id))
         "auto",
         "pdb_icon.png"
     );
-    
+
     setProgress($tasks, null);
 }
 

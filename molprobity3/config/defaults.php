@@ -13,10 +13,10 @@
 //  If you run this code, set this to your address.
 if(!defined("MP_EMAIL_WEBMASTER"))
     define("MP_EMAIL_WEBMASTER", "webmaster@$_SERVER[SERVER_NAME]");
-  
+
 if(!defined("MP_EMAIL_WEBMASTER2"))
   define("MP_EMAIL_WEBMASTER2", "webmaster@kinemage.biochem.duke.edu");
-  
+
 //if(!defined("MP_EMAIL_WEBMASTER3"))
 //  define("MP_EMAIL_WEBMASTER3", "jjh19@duke.edu");
 
@@ -133,6 +133,6 @@ if(!defined("MP_DIR_CHARTS"))
     define("MP_SESSION_NAME", "MolProbSID");
 
 // Current "internal reference" version number. Please DO NOT change.
-    define("MP_VERSION", "3.20");
+    define("MP_VERSION", "4.00a");
 
 ?>

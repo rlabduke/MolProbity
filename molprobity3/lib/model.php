@@ -99,21 +99,23 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
     else
         $origID = $origName;
 
+    $inputHasH = false;
+    $hasNuclearH = false;
+
     // Process file to clean it up
     $tmp2 = mpTempfile("tmp_pdb_");
     $tmp3 = mpTempfile("tmp_pdb_");
     $tmp4 = mpTempFile("tmp_pdb_");
     list($stats, $segmap) = preparePDB($tmpPdb, $tmp2, $isCnsFormat, $ignoreSegID);
     $stats = convertToPDBv3($tmp2, $tmp3);
-    /* this section is for trimming Hs by default
-    if ($stats['non_ecloud_H'] > 0) { 
+    /* this section is for trimming Hs by default */
+    if ($stats['has_most_H']) {
       removeHydrogens($tmp3, $tmp4);
       //$stats = pdbstat($tmp4);
     }
     else {
       copy($tmp3, $tmp4);
     }
-    */
     $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
     if(!file_exists($outpath)) mkdir($outpath, 0777);
 
@@ -177,12 +179,15 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
         $append = "";
         if(!filesAreIdentical($tmpPdb, $tmp2)) $append .= "_clean";
         if(!filesAreIdentical($tmp2, $tmp3)) $append .= "_pdbv3";
+        //if(!filesAreIdentical($tmp3, $tmp4)) $append .= "_trim";
 
         $model = createModel($origID, $append);
         //if(filesAreIdentical($tmpPdb, $tmp2))   $model = createModel($origID);
         //else                                    $model = createModel($origID, "_clean");
 
         $model['stats']                 = $stats;
+        if ($model['stats']['originalInputH']) $inputHasH = true;
+        if ($model['stats']['non_ecloud_H']) $hasNuclearH = true;
         $historyText = "";
         if (filesAreIdentical($tmpPdb, $tmp4))  $historyText  = 'Original file ';
         else                                    $historyText  = 'File (modified) ';
@@ -202,11 +207,17 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
         // Create the model entry
         $_SESSION['models'][$id] = $model;
 
-        /* this section is for trimming Hs by default
+        /* this section is for trimming Hs by default */
         if(!filesAreIdentical($tmp3, $tmp4)) { //trimmed file
 
           $untrimmedmod = createModel($origID.$append, "_trimmed");
           $untrimmedmod['stats'] = pdbstat($tmp4);
+
+          if ($inputHasH)
+          {
+            $untrimmedmod['stats']['originalInputH'] = true;
+            $untrimmedmod['stats']['non_ecloud_H'] = $hasNuclearH;
+          }
 
           $historyText = 'File (trimmed) ';
           if ($isUserSupplied)                    $historyText .= 'uploaded by user';
@@ -224,7 +235,6 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
         }
 
         unlink($tmp4);
-        */
         unlink($tmp3);
         unlink($tmp2);
 
@@ -399,6 +409,7 @@ function removeHydrogens($inpath, $outpath) {
     reduceTrim($inpath, $tmp1);
     copy($tmp1, $outpath);
 
+    // Clean up temp files
     unlink($tmp1);
 
     setProgress($tasks, null); // all done

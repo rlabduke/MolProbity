@@ -20,19 +20,19 @@ function describePdbStats($pdbstats, $useHTML = true)
         $b = "**";
         $unb = "**";
     }
-    
+
     $compnd = trim($pdbstats['compnd']);
     if($compnd != "")
         $details[] = "This compound is identified as $b$compnd$unb";
-    
+
     // # of models, if any
     if($pdbstats['models'] > 1) $details[] = "This is an multi-model structure, probably from NMR, with $b".$pdbstats['models']." distinct models$unb present.";
     if(isset($pdbstats['resolution'])) $details[] = "This is a crystal structure at ".$pdbstats['resolution']." A resolution.";
-    
+
     // # of chains and residues
     $details[] = $pdbstats['chains']." chain(s) is/are present [".$pdbstats['unique_chains']." unique chain(s)]";
     $details[] = "A total of ".$pdbstats['residues']." residues are present.";
-    
+
     // Types of residues
     if($pdbstats['residues'] > 0)
     {
@@ -47,18 +47,27 @@ function describePdbStats($pdbstats, $useHTML = true)
             if($pdbstats['nucacids'] > 0)
                 $details[] = "".$pdbstats['nucacids']." nucleic acid residues are present.";
 
-            if($pdbstats['has_most_H'])
+            if($pdbstats['originalInputH'])
+            {
+              if($pdbstats['non_ecloud_H'])
+                $details[] = "Explicit hydrogens present in original input file at nuclear positions. Hydrogens have been removed.";
+              else
+                $details[] = "Explicit hydrogens present in original input file at electron cloud positions. Hydrogens have been removed.";
+            }
+            elseif($pdbstats['has_most_H'])
                 $details[] = "Explicit hydrogens are present.";
             elseif($pdbstats['hydrogens'] > 0)
                 $details[] = "{$b}Not all hydrogens{$unb} are explicitly included, although a few are.";
             else
                 $details[] = "No explicit hydrogen atoms are included.";
+            if($pdbstats['deuteriums'] > 0)
+                $details[] = "Deuterium atoms present. Assuming neutron diffraction.";
         }
-        
+
         if($pdbstats['hets'] > 0)
             $details[] = "".$pdbstats['hets']." hetero group(s) is/are present.";
     }
-    
+
     // Crystallographic information
     if(isset($pdbstats['refiprog'])) $details[] = "Refinement was carried out in $pdbstats[refiprog].";
     if(isset($pdbstats['refitemp'])) $details[] = "Data was collected at $pdbstats[refitemp] K.";
@@ -68,18 +77,18 @@ function describePdbStats($pdbstats, $useHTML = true)
         if(isset($pdbstats['rfree'])) $note .= "; Rfree = $pdbstats[rfree]";
         $details[] = $note;
     }
-    
+
     if ($pdbstats['non_ecloud_H'] > 0.1) {
       //$nonEcloudPct = sprintf("%d", 100.0 * $pdbstats['non_ecloud_H']);
       //$details[] = /*"<div class=alert>".*/$nonEcloudPct."% non-electron cloud length hydrogens were found."/*."</div>"*/;
       $details[] = "A high percentage of non-electron cloud length hydrogens were found.";
     }
-    
+
     //echo $pdbstats['v2atoms']." many pdbv2.3 atoms were found\n";
     if($pdbstats['v2atoms'] > 0) $details[] = /*"<div class=alert>".*/$b.$pdbstats['v2atoms']." PDBv2.3 atoms were found.  They have been converted to PDBv3.".$unb/*."</div>"*/;
     else                         $details[] = "0 PDBv2.3 atoms were found.  Proceeding assuming PDBv3 formatted file.";
     return $details;
-    
+
 }
 #}}}########################################################################
 
@@ -129,6 +138,7 @@ function pdbstat($pdbfilename)
     $heavyatoms = 0;        # number of non-H atoms
     $hnonpolar = 0;         # number of non-polar Hs
     $hydrogens = 0;         # number of hydrogens (possibly polar)
+    $deuteriums = 0;        # number of deuteriums (to ID neutron structures)
     $hets = 0;              # number of non-water hets
     $waters = 0;            # number of water hets
     $hetcode = "";          # current het ID
@@ -138,7 +148,7 @@ function pdbstat($pdbfilename)
     $allAlts = array();     # total number of alternates (set of res)
     $rValue = array();      # various kinds of R value
     $rFree = array();       # various kinds of Rfree
-    
+
     // for testing whether there are any old format atom lines.
     $hashFile = file(MP_BASE_DIR."/lib/PDBv2toPDBv3.hashmap.txt");
     $hash = array();
@@ -155,7 +165,7 @@ function pdbstat($pdbfilename)
     while(!feof($file))
     {
         $s = rtrim(fgets($file, 1024));
-        
+
         # These will be meaningless for some lines, but that's OK
         $chain   = substr($s,21,1); # Chain ID (one letter)
             if($chain == " ") $chain = "_";
@@ -164,7 +174,7 @@ function pdbstat($pdbfilename)
         $restype = substr($s,17,3); # Residue type (three chars)
         $atom    = substr($s,12,5); # Atom (four) + alt (one)
         $id = $chain.$resno.$icode.$restype; # 9-character residue ID
-    
+
         # Switch on record type
         if(startsWith($s, "ENDMDL")) { $models++; }
         # Prefer TITLE records over COMPND records
@@ -228,21 +238,36 @@ function pdbstat($pdbfilename)
                     $rescode = $id;
                     $chains[$chain] .= $restype.'/'; # need slashes for correct substring test, below
                 }
-                
+
                 # Atom name == CB?
                 if(preg_match("/ CB [ A1]/", $atom)) { $cbetas++; $heavyatoms++; }
                 # Atom name == C5' or C5* ?
                 elseif(preg_match("/ C5[*'][ A1]/", $atom)) { $nucacids++; $heavyatoms++; }
                 # Atom is a beta hydrogen? Good flag for nonpolar H in proteins.
-                elseif(preg_match("/[ 1-9][HDTZ]B [ A1]/", $atom)) { $hnonpolar++; }
+                elseif(preg_match("/[ 1-9][HDTZ]B [ A1]/", $atom)) {
+                  $hnonpolar++;
+                  if(preg_match("/[ 1-9][D]B [ A1]/", $atom)) {
+                    $deuteriums++;
+                  }
+                }
                 # Atom is a C5' hydrogen in RNA/DNA? Good flag for nonpolar H in nucleic acids.
-                elseif(preg_match("/[ 1-9][HDTZ]5[*'][ A1]/", $atom)) { $hnonpolar++; }
+                elseif(preg_match("/[ 1-9][HDTZ]5[*'][ A1]/", $atom)) {
+                  $hnonpolar++;
+                  if(preg_match("/[ 1-9][D]5[*'][ A1]/", $atom)) {
+                    $deuteriums++;
+                  }
+                }
                 # Atom is a hydrogen?
                 //elseif(preg_match("/[ 1-9][HDTZ][ A-Z][ 1-9*'][ A1]/", $atom)) { $hydrogens++; }
-                elseif(preg_match("/[ 1-9][HDTZ]..[ A1]/", $atom)) { $hydrogens++; }
+                elseif(preg_match("/[ 1-9][HDTZ]..[ A1]/", $atom)) {
+                  $hydrogens++;
+                  if(preg_match("/[ 1-9][D]..[ A1]/", $atom)) {
+                    $deuteriums++;
+                  }
+                }
                 # Atom is non-descript
                 else { $heavyatoms++; }
-                
+
                 # Does this residue have alternate conformations?
                 if($atom{4} != ' ')
                 {
@@ -265,16 +290,16 @@ function pdbstat($pdbfilename)
                         { $hets++; }
                     $hetcode = $id;
                 }
-                
+
             }
 
-            //return $hash; 
+            //return $hash;
             if(startsWith($s, "ATOM")||startsWith($s, "HETATM")||startsWith($s, "TER")||startsWith($s, "ANISOU")||startsWith($s, "SIGATM")||startsWith($s, "SUIUIJ")) {
                 $atom_name = substr($s, 12, 4);
                 $resn = substr($s, 17, 3);
                 #pre-screen for CNS Xplor RNA base names and Coot RNA base names
                 if($resn == "GUA" || $resn == "ADE" || $resn == " CYT" || $resn == "THY" || $resn == "URI"){
-                    $resn = "  ".substr($resn,0,1); 
+                    $resn = "  ".substr($resn,0,1);
                 }
                 elseif($resn == " Ar" || $resn == " Gr" || $resn == " Cr" || $resn == " Ur" || $resn == "OIP"){
                     $resn = "  ".substr($resn,1,1);
@@ -282,7 +307,7 @@ function pdbstat($pdbfilename)
                 $key = $atom_name." ".$resn;
                 //echo "|".$key."|\n";
                 if ($key !== " HA2 GLY") { // TEMP FIX: because HA2 GLY is both old AND new format,
-                                           // Remediator messes it up.  
+                                           // Remediator messes it up.
                   if(array_key_exists($key, $hash)) {
                     $v2format++;
                   }
@@ -297,7 +322,7 @@ function pdbstat($pdbfilename)
     {
         $ch = array_values($chains);
         $unique_chains = 0;
-        
+
         for($i = 0; $i < count($ch); $i++)
         {
             for($j = $i+1; $j < count($ch); $j++)
@@ -317,11 +342,11 @@ function pdbstat($pdbfilename)
         }
     }
     else $unique_chains = 1;
-    
+
     if ($hydrogens+$hnonpolar > 0) {
       $nonECloudH = analyzeHydrogens($pdbfilename);
     }
-    
+
     # Output
     $ret['compnd']          = $compnd;
     $ret['models']          = $models;
@@ -334,10 +359,12 @@ function pdbstat($pdbfilename)
     $ret['heavyatoms']      = $heavyatoms;
     $ret['hnonpolar']       = $hnonpolar;
     $ret['hydrogens']       = $hydrogens;
+    $ret['deuteriums']      = $deuteriums;
     // Doesn't work for RNA -- too few H.  New criteria:  3+ per residue.
     //$ret['has_most_H']      = ($heavyatoms < 2*($hydrogens+$hnonpolar));
     $ret['has_most_H']      = (3*$residues < ($hydrogens+$hnonpolar));
     $ret['non_ecloud_H']   = $nonECloudH;
+    $ret['originalInputH']  = $ret['has_most_H'];
     $ret['hets']            = $hets;
     $ret['waters']          = $waters;
     $ret['fromcns']         = $fromCNS;
@@ -348,7 +375,7 @@ function pdbstat($pdbfilename)
     if(isset($resolution))  $ret['resolution']  = $resolution;
     if(isset($refiProg))    $ret['refiprog']    = $refiProg;
     if(isset($refiTemp))    $ret['refitemp']    = $refiTemp;
-    
+
     if($rValue['work_nocut'] && $rFree['nocut']) { $ret['rvalue'] = $rValue['work_nocut']; $ret['rfree'] = $rFree['nocut']; }
     elseif($rValue['cryst_nocut'] && $rFree['nocut']) { $ret['rvalue'] = $rValue['cryst_nocut']; $ret['rfree'] = $rFree['nocut']; }
     elseif($rValue['work_4sig'] && $rFree['4sig']) { $ret['rvalue'] = $rValue['work_4sig']; $ret['rfree'] = $rFree['4sig']; }
@@ -358,7 +385,7 @@ function pdbstat($pdbfilename)
         if(count($rValue) > 0)  $ret['rvalue'] = min($rValue);
         if(count($rFree) > 0)   $ret['rfree'] = min($rFree);
     }
-    
+
     return $ret;
 }
 #}}}########################################################################
@@ -373,10 +400,10 @@ function analyzeHydrogens($infile) {
 
     if ($allHs > 0) $fract = ($outliers[0]-1)/($allHs[0]-1);
     else            $fract = 0;
-    
+
     return $fract;
     #copy($tmp1, $outpath);
-    
+
     #unlink($tmp1);
 }
 #}}}
