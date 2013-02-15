@@ -217,6 +217,7 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
           {
             $untrimmedmod['stats']['originalInputH'] = true;
             $untrimmedmod['stats']['non_ecloud_H'] = $hasNuclearH;
+            if($hasNuclearH) $_SESSION['reduce_blength'] = 'nuclear';
           }
 
           $historyText = 'File (trimmed) ';

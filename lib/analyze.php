@@ -207,7 +207,7 @@ function runAnalysis($modelID, $opts)
         if($model['isBuilt']) // file has been through reduce -build or reduce -fix
         {
             $altInpath = $modelDir . '/'. $_SESSION['models'][ $model['parent'] ]['pdb'];
-            reduceNoBuild($altInpath, $altpdb);
+            reduceNoBuild($altInpath, $altpdb, $reduce_blength);
             // Rotamers
                 $outfile = mpTempfile("tmp_rotamer_");
                 runRotamer($altpdb, $outfile);
@@ -235,7 +235,7 @@ function runAnalysis($modelID, $opts)
             if($model['parent']) $altInpath = $_SESSION['models'][ $model['parent'] ]['pdb'];
             else $altInpath = $model['pdb'];
             $altInpath = "$modelDir/$altInpath";
-            reduceBuild($altInpath, $altpdb);
+            reduceBuild($altInpath, $altpdb, $reduce_blength);
             if($mainRotaCount > 0)
             {
                 $outfile = mpTempfile("tmp_rotamer_");
