@@ -165,8 +165,8 @@ function displayModels($context)
 
     // Warning about default being to trim hydrogens
     echo("<div class=alert>Due to the parameter adjustments to hydrogen bondlengths and van der Waals radii, the current default behavior for MolProbity is
-      to remove hydrogens, if they are present, before analysis. Please re-add hydrogens using the \"Add Hydrogens\" option below, where you will have the option
-      to choose the default electron cloud position hydrogens (i.e. for crystal structures) or nuclear position hydrogens (i.e. for neutron-diffraction structures or for NMR structures).
+      to remove hydrogens, if they are present, before analysis. Please re-add hydrogens using the \"Add hydrogens\" option below, where you will have the option
+      to choose the default electron-cloud position hydrogens (i.e. for crystal structures) or nuclear-position hydrogens (i.e. for neutron-diffraction structures or for NMR structures).
         </div>");
 
     if(count($_SESSION['models']) > 1)
@@ -265,9 +265,9 @@ function displayEnsembleTools($context)
 
     // "rel" (relevance) is 2 for major, 1 for minor, 0 for not shown.
     $tools = array(
+        'reduce'    => array('desc' => 'Add hydrogens', 'page' => 'ens_reduce_setup.php', 'rel' => 1, 'img' => 'add_h.png'),
         'aacgeom'   => array('desc' => 'Analyze all-atom contacts and geometry', 'page' => 'ens_aacgeom_setup.php', 'rel' => 2, 'img' => 'clash_rama.png'),
         'biolunit'  => array('desc' => 'Biol. unit, not NMR', 'handler' => 'onConvertToBiolUnit', 'rel' => 1, 'img' => 'scissors.png'),
-        'reduce'    => array('desc' => 'Add hydrogens', 'page' => 'ens_reduce_setup.php', 'rel' => 1, 'img' => 'add_h.png'),
         'downgrade' => array('desc' => 'Downgrade file to PDBv2.3 format (for download only)', 'page' => 'pdb_convert_setup.php', 'rel' => 1, 'img' => 'downgrade.gif'),
     );
 
@@ -632,15 +632,16 @@ function toggleUploadOptions()
     //    Any uploaded files will be converted to PDB v3 if necessary; you will have an option to convert modified files back to PDB v2.3 if desired.
     //    <br><br>Please don't hesitate to report any bugs you may encounter; sorry for any inconvenience.</strong></div>");
 
-    echo("<div class=alert><strong>We have updated Reduce to add hydrogens at a length more consistent with electron cloud positions, and accordingly
+    echo("<div class=alert><strong>We have updated Reduce to add hydrogens at a length more consistent with electron-cloud positions, and accordingly
       adjusted the Van der Waals radii in Probe to compensate for the change.  This will affect comparison of results calculated with older versions of MolProbity,
-      but generally results in lower clashscores. For analyses using nuclear position hydrogens, you have the option of selecting nuclear x-H positions when adding hydrogens.
+      but generally results in lower clashscores. For analyses using nuclear-position hydrogens, you have the option of selecting nuclear x-H positions when adding hydrogens.
       Read more about this change <a style=\"color: #66FFFF\" href='".makeEventURL("onGoto", "helper_hydrogens.php")."'>here</a>.
       <p>Ramachandran scoring has also been updated to use new six-category distributions, derived from a larger
-      Top8000 dataset of high quality PDB files.
-        <br><br>Please don't hesitate to report any bugs you may encounter.</strong></div>");
+      <a style=\"color: #66FFFF\" href='http://kinemage.biochem.duke.edu/databases/top8000.php' target='_blank'>Top8000</a> dataset of high quality PDB files.
+        <br><br>Please don't hesitate to report any <a style=\"color: #66FFFF\" href='".makeEventURL("onGoto", "feedback_setup.php")."'>bugs</a> you may encounter.</strong></div>");
 
 }
+
 #}}}########################################################################
 
 #{{{ determineHttps
