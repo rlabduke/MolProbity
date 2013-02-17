@@ -128,10 +128,10 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
 
         //$outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
         //if(!file_exists($outpath)) mkdir($outpath, 0777);
-        $splitModels = splitPdbModels($tmp2);
+        $splitModels = splitPdbModels($tmp3);
         unlink($tmp2);
         $idList = array();
-        foreach($splitModels as $modelNum => $tmp3)
+        foreach($splitModels as $modelNum => $tmp5)
         {
             // Jane prefers the model number in front. This is good for kins,
             // so mdl can be ID'd, but bad for sorting multiple structures...
@@ -142,10 +142,12 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
             $idList[$modelNum] = $id;
 
             $file = $outpath.'/'.$model['pdb'];
-            copy($tmp3, $file);
-            unlink($tmp3);
+            copy($tmp5, $file);
+            unlink($tmp5);
 
             $model['stats']                 = pdbstat($file);
+            if ($model['stats']['originalInputH']) $inputHasH = true;
+            if ($model['stats']['non_ecloud_H']) $hasNuclearH = true;
             $model['history']               = "Model $modelNum from file uploaded by user";
             $model['isUserSupplied']        = $isUserSupplied;
             if($segmap) $model['segmap']    = $segmap;
@@ -170,6 +172,58 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
         // Create the ensemble entry
         $id = $ensemble['id'];
         $_SESSION['ensembles'][$id] = $ensemble;
+
+        if(!filesAreIdentical($tmp3, $tmp4)) { //trimmed file
+          $splitModels_trim = splitPdbModels($tmp4);
+          $idList = array();
+          foreach($splitModels_trim as $modelNum => $tmp5)
+          {
+            // Jane prefers the model number in front. This is good for kins,
+            // so mdl can be ID'd, but bad for sorting multiple structures...
+            $model = createModel(sprintf("m%02d_{$origID}_trimmed", $modelNum));
+            $id = $model['id'];
+            // Better to keep the original model numbers hanging around:
+            //$idList[] = $id;
+            $idList[$modelNum] = $id;
+
+            $file = $outpath.'/'.$model['pdb'];
+            copy($tmp5, $file);
+            unlink($tmp5);
+
+            $model['stats']                 = pdbstat($file);
+            if ($inputHasH)
+            {
+              $model['stats']['originalInputH'] = true;
+              $model['stats']['non_ecloud_H'] = $hasNuclearH;
+              if($hasNuclearH) $_SESSION['reduce_blength'] = 'nuclear';
+            }
+            $model['history']               = "Model $modelNum from file uploaded by user (trimmed)";
+            $model['isUserSupplied']        = $isUserSupplied;
+            if($segmap) $model['segmap']    = $segmap;
+
+            // Create the model entry
+            $_SESSION['models'][$id] = $model;
+          }
+
+          // Create the trimmed ensemble
+          $ensemble = createEnsemble("{$origID}_trimmed");
+          $ensemble['models'] = $idList;
+          $ensemble['history'] = "Ensemble of ".count($idList)." models uploaded by user (trimmed)";
+          $ensemble['isUserSupplied'] = $isUserSupplied;
+
+          $pdbList = array();
+          foreach($idList as $modelNum => $id) $pdbList[$modelNum] = $outpath.'/'.$_SESSION['models'][$id]['pdb'];
+          $joinedModel = joinPdbModels($pdbList);
+          copy($joinedModel, $outpath.'/'.$ensemble['pdb']);
+          unlink($joinedModel);
+
+          // Create the ensemble entry
+          $id = $ensemble['id'];
+          $_SESSION['ensembles'][$id] = $ensemble;
+        }
+        unlink($tmp3);
+        unlink($tmp4);
+
         return $id;
     }//}}}
     else // "standard" x-ray structure with one model {{{
@@ -685,8 +739,9 @@ function downgradePDB($inpath, $outpath)
 *
 * $inpath       the full filename for the PDB file to be processed
 * $outpath      the full filename for the destination PDB. Will be overwritten.
+* $blength      not used for this function, but needed for ensemble calls
 */
-function reduceTrim($inpath, $outpath)
+function reduceTrim($inpath, $outpath, $blength='ecloud')
 {
     // USER  MOD is fatal to Coot and other programs, so we strip them ALL.
     exec("reduce -quiet -trim -allalt $inpath | awk '\$0 !~ /^USER  MOD/' > $outpath");
@@ -701,6 +756,7 @@ function reduceTrim($inpath, $outpath)
 *
 * $inpath       the full filename for the PDB file to be processed
 * $outpath      the full filename for the destination PDB. Will be overwritten.
+* $blength      either 'ecloud' or 'nuclear' to select desired x-H distances
 */
 function reduceNoBuild($inpath, $outpath, $blength='ecloud')
 {
@@ -730,6 +786,7 @@ function reduceNoBuild($inpath, $outpath, $blength='ecloud')
 *
 * $inpath       the full filename for the PDB file to be processed
 * $outpath      the full filename for the destination PDB. Will be overwritten.
+* $blength      either 'ecloud' or 'nuclear' to select desired x-H distances
 */
 function reduceBuild($inpath, $outpath, $blength='ecloud')
 {
@@ -786,6 +843,8 @@ function reduceEnsemble($ensID, $reduceFunc = 'reduceNoBuild')
     $idList     = array();
     $pdbList    = array();
 
+    $reduce_blength = $_SESSION['reduce_blength'];
+
     foreach($ens['models'] as $modelNum => $modelID)
     {
         $oldModel   = $_SESSION['models'][$modelID];
@@ -796,7 +855,7 @@ function reduceEnsemble($ensID, $reduceFunc = 'reduceNoBuild')
         $outpath    .= '/'.$outname;
         $inpath     = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$oldModel['pdb'];
         // FUNKY: calls the function whose name is stored in the variable $reduceFunc
-        $reduceFunc($inpath, $outpath);
+        $reduceFunc($inpath, $outpath, $reduce_blength);
 
         $newModel['stats']          = pdbstat($outpath);
         $newModel['parent']         = $modelID;
@@ -813,8 +872,10 @@ function reduceEnsemble($ensID, $reduceFunc = 'reduceNoBuild')
     $ensemble = createEnsemble($ensID."H");
     $ensemble['models']     = $idList;
     $ensemble['history']    = "Ensemble of ".count($idList)." models derived from $ens[pdb] by $reduceFunc";
-    $newModel['isReduced']  = ($reduceFunc != 'reduceTrim');
-    $newModel['isBuilt']    = ($reduceFunc == 'reduceBuild');
+    //$newModel['isReduced']  = ($reduceFunc != 'reduceTrim');
+    //$newModel['isBuilt']    = ($reduceFunc == 'reduceBuild');
+    $ensemble['isReduced']  = ($reduceFunc != 'reduceTrim');
+    $ensemble['isBuilt']    = ($reduceFunc == 'reduceBuild');
     $ensemble['isUserSupplied'] = $ens['isUserSupplied'];
 
     $joinedModel = joinPdbModels($pdbList);

@@ -229,10 +229,18 @@ if(isset($id))
 
     if($model['stats']['originalInputH'])
     {
-      foreach($_SESSION['models'] as $id_m => $model_m)
-        {
+      $cur = $_SESSION['lastUsedModelID'];
+      if(isset($_SESSION['ensembles'][$cur]))
+      {
+        $orig = "the original ensemble (or individual model)";
+      }
+      else
+      {
+        foreach($_SESSION['models'] as $id_m => $model_m)
+          {
             if($_SESSION['lastUsedModelID'] != $id_m) $orig = $model_m['pdb'];
-        }
+          }
+      }
       $s .= "<p><div class='alert'>The hydrogen atoms from your input model have been removed.<br>\n";
       $s .= "You will be able to add hydrogens at either electron cloud positions (default), which are best for X-ray crystallographic models, <br>";
       $s .= "or at nuclear positions, which are best for NMR models, neutron diffraction models, etc.<br>";

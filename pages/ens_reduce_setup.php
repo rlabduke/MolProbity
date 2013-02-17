@@ -7,7 +7,7 @@ require_once(MP_BASE_DIR.'/lib/model.php');
 
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
 class ens_reduce_setup_delegate extends BasicDelegate {
-    
+
 #{{{ display - creates the UI for this page
 ############################################################################
 /**
@@ -18,7 +18,7 @@ class ens_reduce_setup_delegate extends BasicDelegate {
 function display($context)
 {
     echo $this->pageHeader("Add hydrogens");
-    
+
     if(count($_SESSION['ensembles']) > 0)
     {
         // Choose a default model to select
@@ -78,6 +78,18 @@ function display($context)
         echo "<td><small>Add missing H, optimize H-bond networks, leave other atoms alone (<code>Reduce -nobuild</code>)</small></td></tr>\n";
         echo "</table></p>\n";
 
+        echo "<h3>Select x-H bond-length:</h3>";
+        echo "<p><table width='100%' border='0'>\n";
+        if($context['method'] == 'nuclear') { $check1 = ""; $check2 = "checked"; }
+        else                                { $check1 = "checked"; $check2 = ""; }
+        echo "<tr valign='top'><td width='300'><input type='radio' name='blength' value='ecloud' $check1> <b>Electron cloud x-H</b><td>";
+        echo "<td><small>Use electron cloud x-H bond lengths and vdW radii.\nIdeal for most cases, especially X-ray crystal structures.";
+        echo "</small></td></tr>\n";
+        echo "<tr><td colspan='2'>&nbsp;</td></tr>\n"; // vertical spacer
+        echo "<tr valign='top' align='left'><td width='300'><input type='radio' name='blength' value='nuclear' $check2> <b>Nuclear x-H</b><td>";
+        echo "<td><small>Use nuclear x-H bond lengths and vdW radii.\nIdeal for NMR, neutron diffraction, etc.</small></td></tr>\n";
+        echo "</table></p>\n";
+
         echo "<p><table width='100%' border='0'><tr>\n";
         echo "<td><input type='submit' name='cmd' value='Start adding H &gt;'></td>\n";
         echo "<td align='right'><input type='submit' name='cmd' value='Cancel'></td>\n";
@@ -95,9 +107,9 @@ function display($context)
         echo "No ensembles are available. Please <a href='".makeEventURL("onCall", "upload_setup.php")."'>upload or fetch a PDB file</a> in order to continue.\n";
         echo makeEventForm("onReturn");
         echo "<p><input type='submit' name='cmd' value='Cancel'></p></form>\n";
-        
+
     }
-    
+
     echo $this->pageFooter();
 }
 #}}}########################################################################
@@ -115,14 +127,15 @@ function onAddH()
         pageReturn();
         return;
     }
-    
+
     // Otherwise, moving forward:
-    if(isset($req['ensID']) && isset($req['method']))
+    if(isset($req['ensID']) && isset($req['method']) && isset($req['blength']))
     {
         unset($_SESSION['bgjob']); // Clean up any old data
         $_SESSION['bgjob']['ensID']     = $req['ensID'];
         $_SESSION['bgjob']['method']    = $req['method'];
-        
+        $_SESSION['bgjob']['reduce_blength'] = $req['blength'];
+
         mpLog("reduce-ensemble:User ran default Reduce -$req[method] job on an ensemble");
         // launch background job
         pageGoto("job_progress.php");
@@ -133,6 +146,7 @@ function onAddH()
         $context = getContext();
         if(isset($req['ensID']))    $context['ensID'] = $req['ensID'];
         if(isset($req['method']))   $context['method'] = $req['method'];
+        if(isset($req['blength']))   $context['blength'] = $req['blength'];
         setContext($context);
     }
 }

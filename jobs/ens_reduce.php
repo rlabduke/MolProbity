@@ -1,7 +1,7 @@
 <?php # (jEdit options) :folding=explicit:collapseFolds=1:
 /*****************************************************************************
     This file runs the Reduce to add missing H without doing a full -build.
-    
+
 INPUTS (via $_SESSION['bgjob']):
     ensID           ID code for the ensemble to process
     method          either 'build' or 'nobuild'
@@ -32,7 +32,7 @@ OUTPUTS (via $_SESSION['bgjob']):
 // 6. Record this PHP script's PID in case it needs to be killed.
     $_SESSION['bgjob']['processID'] = posix_getpid();
     mpSaveSession();
-    
+
 #{{{ a_function_definition - sumary_statement_goes_here
 ############################################################################
 /**
@@ -46,6 +46,9 @@ OUTPUTS (via $_SESSION['bgjob']):
 $oldEnsID = $_SESSION['bgjob']['ensID'];
 $oldEns = $_SESSION['ensembles'][$oldEnsID];
 $method = $_SESSION['bgjob']['method'];
+
+$reduce_blength = $_SESSION['bgjob']['reduce_blength'];
+$_SESSION['reduce_blength'] = $reduce_blength;
 
 // Set up progress message
 $tasks['reduce'] = "Add H with <code>reduce -$method</code>";
