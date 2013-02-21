@@ -6,7 +6,7 @@
 *****************************************************************************/
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
 class ens_aacgeom_setup_delegate extends BasicDelegate {
-    
+
 #{{{ display - creates the UI for this page
 ############################################################################
 /**
@@ -16,7 +16,7 @@ class ens_aacgeom_setup_delegate extends BasicDelegate {
 function display($context)
 {
     echo $this->pageHeader("Analyze all-atom contacts and geometry");
-    
+
     //{{{ Script to set default choices based on model properties.
 ?><script language='JavaScript'>
 <!--
@@ -39,22 +39,22 @@ function hideKinOpts()
 function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
 {
     selectionHasH = doAAC
-    
+
     document.forms[0].kinClashes.checked        = doAAC
+    document.forms[0].kinHbonds.checked         = doAAC
     if(!doAAC) // turn these off only
     {
-        document.forms[0].kinHbonds.checked         = doAAC
         document.forms[0].kinContacts.checked       = doAAC && !isBig
     }
     //document.forms[0].chartClashlist.checked    = doAAC
-    
+
     document.forms[0].kinRama.checked           = hasProtein
     document.forms[0].kinRota.checked           = hasProtein
     document.forms[0].kinCBdev.checked          = hasProtein
     //document.forms[0].chartRama.checked         = hasProtein
     //document.forms[0].chartRota.checked         = hasProtein
     //document.forms[0].chartCBdev.checked        = hasProtein
-    
+
     document.forms[0].kinBaseP.checked          = hasNucAcid
     //document.forms[0].chartBaseP.checked        = hasNucAcid
 }
@@ -67,7 +67,7 @@ function checkSettingsBeforeSubmit()
         || document.forms[0].kinContacts.checked
         //|| document.forms[0].chartClashlist.checked
         );
-        
+
     if(!selectionHasH && doAAC)
     {
         return window.confirm("The file you choose may not have all its H atoms added."
@@ -86,7 +86,7 @@ function checkSettingsBeforeSubmit()
         // Choose a default model to select
         $lastUsedID = $context['ensID'];
         if(!$lastUsedID) $lastUsedID = $_SESSION['lastUsedModelID'];
-        
+
         echo makeEventForm("onRunAnalysis");
         echo "<h3>Select an ensemble to work with:</h3>";
         echo "<p><table width='100%' border='0' cellspacing='0' cellpadding='2'>\n";
@@ -104,7 +104,7 @@ function checkSettingsBeforeSubmit()
             $hasNucAcid = ($stats['nucacids'] > 0 ? "true" : "false");
             $pdbSize = filesize($_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$ensemble['pdb']);
             $isBig = ($pdbSize > 1<<20 ? "true" : "false");
-            
+
             // Alternate row colors:
             $c == MP_TABLE_ALT1 ? $c = MP_TABLE_ALT2 : $c = MP_TABLE_ALT1;
             echo " <tr bgcolor='$c'>\n";
@@ -163,7 +163,7 @@ function checkSettingsBeforeSubmit()
         echo makeEventForm("onReturn");
         echo "<p><input type='submit' name='cmd' value='Cancel'></p></form>\n";
     }
-    
+
     echo $this->pageFooter();
 }
 #}}}########################################################################
@@ -181,16 +181,16 @@ function onRunAnalysis()
         pageReturn();
         return;
     }
-    
+
     // Otherwise, moving forward:
     if(isset($req['ensID']))
     {
         $_SESSION['lastUsedModelID'] = $req['ensID']; // this is now the current "model"
         unset($_SESSION['bgjob']); // Clean up any old data
         $_SESSION['bgjob'] = $req;
-        
+
         mpLog("aacgeom:Running all-atom contact and geometric analyses");
-        
+
         // The chartXXX vars aren't defined in this interface (yet), but they don't hurt anything...
         if($req['kinClashes'] || $req['kinHbonds'] || $req['kinContacts'] || $req['chartClashlist'])
             mpLog("aacgeom-aac:Generataing all-atom contact data of some type");
@@ -198,12 +198,12 @@ function onRunAnalysis()
         if($req['kinRota'] || $req['chartRota'])    mpLog("aacgeom-rota:Doing rotamer analysis");
         if($req['kinCBdev'] || $req['chartCBdev'])  mpLog("aacgeom-cbdev:Doing C-beta deviation analysis");
         if($req['kinBaseP'] || $req['chartBaseP'])  mpLog("aacgeom-basep:Validating base-phosphate distances vs sugar puckers");
-        
+
         // doMultiGraph hasn't been renamed to doCharts yet...
         if($req['doKinemage'])      mpLog("aacgeom-mkin:Multi-criterion validation kinemage");
         //if($req['doCharts'])        mpLog("aacgeom-mchart:Multi-criterion validation chart");
         if($req['doMultiGraph'])    mpLog("aacgeom-mchart:Multi-criterion validation chart");
-        
+
         // launch background job
         pageGoto("job_progress.php");
         launchBackground(MP_BASE_DIR."/jobs/ens_aacgeom.php", "generic_done.php", 5);
