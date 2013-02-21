@@ -50,8 +50,16 @@ $method = $_SESSION['bgjob']['method'];
 $reduce_blength = $_SESSION['bgjob']['reduce_blength'];
 $_SESSION['reduce_blength'] = $reduce_blength;
 
+$flags = '';
+
+$reduce_method = $method;
+
 // Set up progress message
-$tasks['reduce'] = "Add H with <code>reduce -$method</code>";
+if($reduce_blength == 'nuclear')
+{
+  $reduce_method = "$method -nuclear";
+}
+$tasks['reduce'] = "Add H with <code>reduce -$reduce_method</code>";
 $tasks['notebook'] = "Add entry to lab notebook";
 
 setProgress($tasks, 'reduce'); // updates the progress display if running as a background job
@@ -79,6 +87,9 @@ if($hcount)
     if($hcount['adj']) $entry .= "The positions of $hcount[adj] hydrogens were adjusted to optimize H-bonding.\n";
 }
 $entry .= "Asn/Gln/His flips were ".($method == 'build' ? "" : "not")." optimized.\n";
+if($reduce_blength == 'ecloud') $flags = 'electron-cloud';
+else $flags = 'nuclear';
+$entry .= "<p>Reduce placed hydrogens at $flags positions.\n";
 $entry .= "<p>You can now <a href='$url'>download the annotated PDB file</a> (".formatFilesize(filesize($pdb)).").</p>\n";
 $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
     "Added H with -$method to get $newEns[pdb]",

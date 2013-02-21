@@ -242,7 +242,7 @@ if(isset($id))
           }
       }
       $s .= "<p><div class='alert'>The hydrogen atoms from your input model have been removed.<br>\n";
-      $s .= "You will be able to add hydrogens at either electron cloud positions (default), which are best for X-ray crystallographic models, <br>";
+      $s .= "You will be able to add hydrogens at either electron cloud positions".(count($idList) > 1 ? "" : " (default)").", which are best for X-ray crystallographic models, <br>";
       $s .= "or at nuclear positions, which are best for NMR models, neutron diffraction models, etc.<br>";
       $s .= "<br>If you prefer to use the input hydrogen positions, please select $orig from the 'Currently working on' list on the next page.</div></p>";
     }

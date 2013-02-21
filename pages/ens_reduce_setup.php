@@ -80,10 +80,10 @@ function display($context)
 
         echo "<h3>Select x-H bond-length:</h3>";
         echo "<p><table width='100%' border='0'>\n";
-        if($context['method'] == 'nuclear') { $check1 = ""; $check2 = "checked"; }
-        else                                { $check1 = "checked"; $check2 = ""; }
-        echo "<tr valign='top'><td width='300'><input type='radio' name='blength' value='ecloud' $check1> <b>Electron cloud x-H</b><td>";
-        echo "<td><small>Use electron cloud x-H bond lengths and vdW radii.\nIdeal for most cases, especially X-ray crystal structures.";
+        if($context['method'] == 'ecloud') { $check1 = "checked"; $check2 = ""; }
+        else                                { $check1 = ""; $check2 = "checked"; }
+        echo "<tr valign='top'><td width='300'><input type='radio' name='blength' value='ecloud' $check1> <b>Electron-cloud x-H</b><td>";
+        echo "<td><small>Use electron-cloud x-H bond lengths and vdW radii.\nIdeal for most cases, especially X-ray crystal structures.";
         echo "</small></td></tr>\n";
         echo "<tr><td colspan='2'>&nbsp;</td></tr>\n"; // vertical spacer
         echo "<tr valign='top' align='left'><td width='300'><input type='radio' name='blength' value='nuclear' $check2> <b>Nuclear x-H</b><td>";

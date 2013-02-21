@@ -166,7 +166,7 @@ function displayModels($context)
     // Warning about default being to trim hydrogens
     echo("<div class=alert>Due to the parameter adjustments to hydrogen bondlengths and van der Waals radii, the current default behavior for MolProbity is
       to remove hydrogens, if they are present, before analysis. Please re-add hydrogens using the \"Add hydrogens\" option below, where you will have the option
-      to choose the default electron-cloud position hydrogens (i.e. for crystal structures) or nuclear-position hydrogens (i.e. for neutron-diffraction structures or for NMR structures).
+      to choose either the default electron-cloud position hydrogens (i.e. for crystal structures) or nuclear-position hydrogens (i.e. for neutron-diffraction structures or for NMR structures).
         </div>");
 
     if(count($_SESSION['models']) > 1)
