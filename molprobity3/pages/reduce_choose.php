@@ -8,7 +8,7 @@ require_once(MP_BASE_DIR.'/lib/labbook.php');
 
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
 class reduce_choose_delegate extends BasicDelegate {
-    
+
 #{{{ display - creates the UI for this page
 ############################################################################
 /**
@@ -24,13 +24,14 @@ class reduce_choose_delegate extends BasicDelegate {
 function display($context)
 {
     echo $this->pageHeader("Review flips");
-    
+
     $id = $context['modelID'];
     $model = $_SESSION['models'][$id];
     $pdb = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$model['pdb'];
-    
+    $flags = '';
+
     $changes = decodeReduceUsermods($pdb);
-    
+
     // Check to see if any cliques couldn't be solved by looking for scores = -9.9e+99
     // At the same time, check to see if anything at all was flipped...
     $didnt_solve = $did_flip = false;
@@ -47,9 +48,11 @@ function display($context)
     If this is a problem, please download Reduce and run it with a higher <code>-limit</code> setting.</div></center>
     <p>
     ';
-    
+
     $nqkin = $_SESSION['dataDir'].'/'.MP_DIR_KINS."/$model[prefix]flipnq.kin";
     $hiskin = $_SESSION['dataDir'].'/'.MP_DIR_KINS."/$model[prefix]fliphis.kin";
+    if($_SESSION['reduce_blength'] == 'ecloud') $flags = 'electron-cloud';
+    else $flags = 'nuclear';
     if(file_exists($nqkin) && file_exists($hiskin))
     {
         echo "These Flipkin kinemages illustrate the changes Reduce made.\n";
@@ -58,9 +61,10 @@ function display($context)
         echo "<li>" . linkKinemage("$model[prefix]flipnq.kin") . "</li>\n";
         echo "<li>" . linkKinemage("$model[prefix]fliphis.kin") . "</li>\n";
         echo "</ul>\n";
+        echo "Reduce placed hydrogens at $flags positions.\n";
         echo "<hr>\n";
     }
-    
+
     echo makeEventForm("onRerunReduce");
     echo "<input type='hidden' name='modelID' value='$id'>\n";
     if(! $did_flip && ! $context['showAllNQH'])
@@ -68,7 +72,7 @@ function display($context)
         echo "Reduce didn't flip any groups while adding hydrogens to your file.\n";
         echo "This <b>may</b> indicate that all of the Asn's, Gln's, and His's in your structure are oriented correctly.\n";
         echo "(<a href='".makeEventURL("onShowAllNQH", true)."'>Show all Asn/Gln/His</a>)";
-    
+
         echo "<p><input type='submit' name='cmd' value='Continue &gt;'>\n";
     }
     else
@@ -77,7 +81,7 @@ function display($context)
         echo "Please leave selected the residues you would like to flip, and unselect those you wish not to flip.\n";
         if($context['showAllNQH'])  echo "(<a href='".makeEventURL("onShowAllNQH", false)."'>Show flipped Asn/Gln/His only</a>)";
         else                        echo "(<a href='".makeEventURL("onShowAllNQH", true)."'>Show all Asn/Gln/His</a>)";
-    
+
         echo "<p><table border='0' cellspacing='0' width='100%'>\n";
         echo "<tr bgcolor='".MP_TABLE_HIGHLIGHT."'>";
         echo "<td align='center'><b>Flip?</b></td>\n";
@@ -97,7 +101,7 @@ function display($context)
             {
                 if($changes[4][$c] == "FLIP" or $changes[4][$c] == "CLS-FL") { $checked = "checked"; }
                 else                                                         { $checked = "";        }
-                
+
                 echo "<tr bgcolor='$color'>\n";
                 echo "<td align='center'><input type='checkbox' $checked name='doflip[$c]' value='1'></td>\n";
                 echo "<td align='center'>" . $changes[1][$c] . "</td>\n";
@@ -116,7 +120,7 @@ function display($context)
         echo "<p><input type='submit' name='cmd' value='Regenerate H, applying only selected flips &gt;'>\n";
         echo "<br><small>(If you didn't make any changes, we won't recalculate.)</small>\n";
     }
-    
+
     echo "</form>\n";
     echo $this->pageFooter();
 }
@@ -135,11 +139,12 @@ function onRerunReduce()
     $model      = $_SESSION['models'][$modelID];
     $pdb        = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$model['pdb'];
     $url        = $_SESSION['dataURL'].'/'.MP_DIR_MODELS.'/'.$model['pdb'];
-    
+
     // If all changes were accepted, we will not need to re-run Reduce.
     // We're going to construct a lab notebook entry at the same time.
     $changes = decodeReduceUsermods($pdb);
     $rerun = false;
+    $flags = '';
     $n = count($changes[0]); // How many changes are in the table?
     $autoflip = "<p>The following residues were flipped automatically by Reduce:\n<ul>\n";
     $userflip = "<p>The following residues were flipped manually by the user:\n<ul>\n";
@@ -168,9 +173,9 @@ function onRerunReduce()
     $autoflip .= "</ul>\n</p>\n";
     $userflip .= "</ul>\n</p>\n";
     $userkeep .= "</ul>\n</p>\n";
-    
+
     $hcount = countReduceChanges($pdb);
-    
+
     $parent = $_SESSION['models'][ $model['parent'] ];
     $entry = "Reduce was run on $parent[pdb] to add and optimize hydrogens, and optimize Asn, Gln, and His flips, yielding $model[pdb].\n";
     if($hcount)
@@ -179,6 +184,9 @@ function onRerunReduce()
         if($hcount['std']) $entry .= "$hcount[std] H were repositioned to standardize bond lengths.\n";
         if($hcount['adj']) $entry .= "The positions of $hcount[adj] hydrogens were adjusted to optimize H-bonding.\n";
     }
+    if($_SESSION['reduce_blength'] == 'ecloud') $flags = 'electron-cloud';
+    else $flags = 'nuclear';
+    $entry .= "<p>Reduce placed hydrogens at $flags positions.\n";
     $entry .= "<p>Reduce used <a href=http://kinemage.biochem.duke.edu/software/reduce.php> reduce_wwPDB_het_dict.txt </a> as the het dictonary.\n";
     $entry .= "<p>You can now download the optimized and annotated <a href='$url'>PDB file with hydrogens</a>";
     $entry .= " or <a href='download_trimmed.php?$_SESSION[sessTag]&file=$pdb'>without hydrogens (flips only)</a>.</p>\n";
@@ -198,10 +206,12 @@ function onRerunReduce()
     if(strpos($autoflip, "<li>") !== false) $entry .= $autoflip;
     if(strpos($userflip, "<li>") !== false) $entry .= $userflip;
     if(strpos($userkeep, "<li>") !== false) $entry .= $userkeep;
-    
+
     // Go ahead and make the notebook entry inline -- this can't take more than 1-2 sec.
-    if($rerun)  $title = "Added H with -build and user overrides to get $model[pdb]";
-    else        $title = "Added H with -build to get $model[pdb]";
+    if($_SESSION['reduce_blength'] == 'ecloud') $flags = '-build';
+    else $flags = '-build -nuclear';
+    if($rerun)  $title = "Added H with $flags and user overrides to get $model[pdb]";
+    else        $title = "Added H with $flags to get $model[pdb]";
     unset($_SESSION['bgjob']); // Clean up any old data
     $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
         $title,
@@ -212,7 +222,7 @@ function onRerunReduce()
     );
     $_SESSION['bgjob']['modelID']   = $_REQUEST['modelID'];
     $_SESSION['bgjob']['doflip']    = $_REQUEST['doflip'];
-    
+
     // User requested changes; re-launch Reduce
     if($rerun)
     {
