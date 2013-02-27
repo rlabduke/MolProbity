@@ -5,6 +5,7 @@ INPUTS / SWITCHES (via $_SERVER['argv']):
     inDir           the a directory of files ending in ".pdb"
     outDir          a place to put the output files
     -q              quiet mode (no progress messages)
+    -nuclear        use nuclear x-H distances
 
 OUTPUTS / RESULTS:
     Runs Reduce on all files using "no build" settings
@@ -60,11 +61,13 @@ OUTPUTS / RESULTS:
 ############################################################################
 // Default options
 $optVerbose = true;
+$optNuclear = false;
 
 // First argument is the name of this script...
 if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
 {
     if($arg == '-q')            $optVerbose = false;
+    if($arg == '-nuclear')      $optNuclear = true;
     elseif(!isset($inDir))      $inDir = $arg;
     elseif(!isset($outDir))     $outDir = $arg;
     else                        die("Too many or unrecognized arguments: '$arg'\n");
@@ -83,8 +86,14 @@ if($optVerbose)
 
 foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
 {
-    if($optVerbose) echo "reduce -nobuild $inFile ...\n";
-    reduceNoBuild($inDir.'/'.$inFile, $outDir.'/'.$inFile);
+    $blength = 'ecloud';
+    if($optVerbose)
+    {
+      if($optNuclear) echo "reduce -nobuild -nuclear $inFile ...\n";
+      else echo "reduce -nobuild $inFile ...\n";
+    }
+    if($optNuclear) $blength = 'nuclear';
+    reduceNoBuild($inDir.'/'.$inFile, $outDir.'/'.$inFile, $blength);
 }
 
 ############################################################################
