@@ -45,23 +45,24 @@ function summaryAnalysis($modelID)
 {
     global $optStats, $optClash, $optCbeta, $optRota, $optRama, $optGeom, $optPuck, $optSuite;
     $out = "";
-    
+
     $model =& $_SESSION['models'][$modelID];
-    
+    $reduce_blength = $_SESSION['reduce_blength'];
+
     if($optStats)
     {
         $pdbstats = $model['stats'];
         $out .= ":$pdbstats[chains]:$pdbstats[residues]:$pdbstats[nucacids]:$pdbstats[resolution]:$pdbstats[rvalue]:$pdbstats[rfree]";
     }
-    
+
     // Run analysis; load data
     $pdbfile = $_SESSION['dataDir'].'/'.MP_DIR_MODELS."/$model[pdb]";
     $rawDir  = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA;
         if(!file_exists($rawDir)) mkdir($rawDir, 0777);
-    
+
     if($optClash)
     {
-        runClashlist($pdbfile, "$rawDir/$model[prefix]clash.data");
+        runClashlist($pdbfile, "$rawDir/$model[prefix]clash.data", $reduce_blength);
         $clash = loadClashlist("$rawDir/$model[prefix]clash.data");
         $clashstats = runClashStats($pdbstats['resolution'], $clash['scoreAll'], $clash['scoreBlt40']);
         $out .= ":" . $clash['scoreAll'] . ":" . $clash['scoreBlt40'];
@@ -153,7 +154,7 @@ function summaryAnalysis($modelID)
       $badSuites = findSuitenameOutliers($suites);
       $out .= ":" . count($badSuites) . ":" . count($suites);
     }
-    
+
     $out .= "\n"; // end of this line
     return $out;
 }
@@ -192,8 +193,8 @@ if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
     elseif($arg == '-norota')   $optRota = false;
     elseif($arg == '-norama')   $optRama = false;
     elseif($arg == '-nogeom')   $optGeom = false;
-    elseif($arg == '-dopucker')  $optPuck = true;
-    elseif($arg == '-dosuite')   $optSuite = true;
+    elseif($arg == '-dopucker') $optPuck = true;
+    elseif($arg == '-dosuite')  $optSuite = true;
     elseif(!isset($inDir))      $inDir = $arg;
     else                        die("Too many or unrecognized arguments: '$arg'\n");
 }
@@ -205,7 +206,13 @@ if($optMode == 'filter')
     mpCopy("php://stdin", $inpath);
     mpStartSession(true); // create a new session
     // Need to ignore segIDs for stupid Top500 with seg new_ for all H
-    $id = addModelOrEnsemble($inpath, basename($inpath), false, true);
+    $id = addModelOrEnsemble(
+            $inpath,
+            basename($inpath),
+            false,
+            true,
+            true,
+            false);
     if(isset($_SESSION['ensembles'][$id]))
     {
         foreach($_SESSION['ensembles'][$id]['models'] as $modelID)
@@ -251,7 +258,13 @@ foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
     mpStartSession(true); // create a new session
     $inpath = $inDir.'/'.$inFile;
     // Need to ignore segIDs for stupid Top500 with seg new_ for all H
-    $id = addModelOrEnsemble($inpath, basename($inpath), false, true);
+    $id = addModelOrEnsemble(
+            $inpath,
+            basename($inpath),
+            false,
+            true,
+            true,
+            false);
     if(isset($_SESSION['ensembles'][$id]))
     {
         foreach($_SESSION['ensembles'][$id]['models'] as $modelID)

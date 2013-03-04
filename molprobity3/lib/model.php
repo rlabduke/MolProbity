@@ -91,7 +91,13 @@ function createEnsemble($ensembleID)
 * or an ensemble ID (for multi-MODEL input)
 * which of course then links to the individual model IDs.
 */
-function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSegID = false, $isUserSupplied = true)
+function addModelOrEnsemble(
+           $tmpPdb,
+           $origName,
+           $isCnsFormat = false,
+           $ignoreSegID = false,
+           $isUserSupplied = true,
+           $trim_input_H = true)
 {
     // Try stripping file extension
     if(preg_match('/^(.+)\.(pdb|xyz|ent)$/i', $origName, $m))
@@ -109,7 +115,7 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
     list($stats, $segmap) = preparePDB($tmpPdb, $tmp2, $isCnsFormat, $ignoreSegID);
     $stats = convertToPDBv3($tmp2, $tmp3);
     /* this section is for trimming Hs by default */
-    if ($stats['has_most_H']) {
+    if ($stats['has_most_H'] && $trim_input_H) {
       removeHydrogens($tmp3, $tmp4);
       //$stats = pdbstat($tmp4);
     }
@@ -148,6 +154,7 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
             $model['stats']                 = pdbstat($file);
             if ($model['stats']['originalInputH']) $inputHasH = true;
             if ($model['stats']['non_ecloud_H']) $hasNuclearH = true;
+            if ($inputHasH && $hasNuclearH) $_SESSION['reduce_blength'] = 'nuclear';
             $model['history']               = "Model $modelNum from file uploaded by user";
             $model['isUserSupplied']        = $isUserSupplied;
             if($segmap) $model['segmap']    = $segmap;
@@ -242,6 +249,7 @@ function addModelOrEnsemble($tmpPdb, $origName, $isCnsFormat = false, $ignoreSeg
         $model['stats']                 = $stats;
         if ($model['stats']['originalInputH']) $inputHasH = true;
         if ($model['stats']['non_ecloud_H']) $hasNuclearH = true;
+        if ($inputHasH && $hasNuclearH) $_SESSION['reduce_blength'] = 'nuclear';
         $historyText = "";
         if (filesAreIdentical($tmpPdb, $tmp4))  $historyText  = 'Original file ';
         else                                    $historyText  = 'File (modified) ';

@@ -393,7 +393,7 @@ function pdbstat($pdbfilename)
 #{{{ analyzeHydrogens - checks lengths of Hs
 function analyzeHydrogens($infile) {
     #$tmp1   = mpTempfile("tmp_dangle");
-    echo "Analyzing Hydrogens\n";
+    #echo "Analyzing Hydrogens\n";
 
     exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -validate -hydrogens -outliers -sigma=0 $infile | wc -l", $allHs);
     exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -validate -hydrogens -outliers $infile | wc -l", $outliers);
