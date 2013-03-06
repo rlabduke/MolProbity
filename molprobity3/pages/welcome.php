@@ -77,7 +77,7 @@ from your web browser.</p>
 <li>New Top8000 Ramachandran validation information.</li>
 <li>Updated All-atom analysis summary table to also show outlier-counts.</li>
 <li>Allows use of both electron cloud and nuclear x-H bond-lengths.</li>
-<li>Occupancy cutoff for clashscore now set to 0.1. Clashscore calculation include all alternates.</li>
+<li>Occupancy cutoff for clashscore now set to 0.1. Clashscore calculation includes all alternates.</li>
 </ul>
 </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>
 
