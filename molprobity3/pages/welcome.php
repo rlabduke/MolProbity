@@ -72,11 +72,12 @@ as part of the refinement cycle.</p>
 Create and view interactive 3-D graphics
 from your web browser.</p>
 
-<h3>What's new in 4.00a:</h3><ul>
+<h3>What's new in 4.01a:</h3><ul>
 <li>Updated Reduce-added hydrogen lengths to be more consistent with other crystallography software.</li>
 <li>New Top8000 Ramachandran validation information.</li>
 <li>Updated All-atom analysis summary table to also show outlier-counts.</li>
 <li>Allows use of both electron cloud and nuclear x-H bond-lengths.</li>
+<li>Occupancy cutoff for clashscore now set to 0.1. Clashscore calculation include all alternates.</li>
 </ul>
 </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>
 
