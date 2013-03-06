@@ -604,7 +604,9 @@ function calcCbetaStats($cbdev)
 ############################################################################
 function runClashlist($infile, $outfile, $blength="ecloud")
 {
-    exec("clashlist $infile $blength > $outfile");
+    $bcutval = 40;
+    $ocutval = 10;
+    exec("clashlist $infile $bcutval $ocutval $blength > $outfile");
 }
 #}}}########################################################################
 

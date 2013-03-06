@@ -109,8 +109,8 @@ function mpStartSession($createIfNeeded = false)
             mpSessGC(MP_SESSION_LIFETIME);
 
             // Main data directories
-            mkdir($dataDir, 0777); // Default mode; is modified by UMASK too.
-            mkdir("$dataDir/".MP_DIR_SYSTEM, 0777);
+            mkdir($dataDir, 0770); // Default mode; is modified by UMASK too.
+            mkdir("$dataDir/".MP_DIR_SYSTEM, 0770);
 
             // Others specified in config.php must be created on demand.
 
