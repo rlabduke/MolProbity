@@ -777,11 +777,11 @@ function reduceNoBuild($inpath, $outpath, $blength='ecloud')
     if ($blength == 'ecloud')
     {
       //exec("reduce -quiet -oh -his -flip -norotmet -pen9999 -keep -allalt $inpath > $outpath");
-      exec("reduce -quiet -nobuild $inpath > $outpath");
+      exec("reduce -quiet -nobuild9999 $inpath > $outpath");
     }
     elseif ($blength == 'nuclear')
     {
-      exec("reduce -quiet -nobuild -nuclear $inpath > $outpath");
+      exec("reduce -quiet -nobuild9999 -nuclear $inpath > $outpath");
     }
 }
 #}}}########################################################################
