@@ -53,11 +53,11 @@ $_SESSION['reduce_blength'] = $reduce_blength;
 // Set up progress message
 if($reduce_blength == 'ecloud')
 {
-  $tasks['reduce'] = "Add H with <code>reduce -nobuild</code>";
+  $tasks['reduce'] = "Add H with <code>reduce -nobuild9999</code>";
 }
 elseif($reduce_blength == 'nuclear')
 {
-  $tasks['reduce'] = "Add H with <code>reduce -nobuild -nuclear</code>";
+  $tasks['reduce'] = "Add H with <code>reduce -nobuild9999 -nuclear</code>";
 }
 $tasks['notebook'] = "Add entry to lab notebook";
 
@@ -73,11 +73,11 @@ $newModel['stats']          = pdbstat($outpath);
 $newModel['parent']         = $modelID;
 if($reduce_blength == 'ecloud')
 {
-  $newModel['history']        = "Derived from $model[pdb] by Reduce -nobuild";
+  $newModel['history']        = "Derived from $model[pdb] by Reduce -nobuild9999";
 }
 if($reduce_blength == 'nuclear')
 {
-  $newModel['history']        = "Derived from $model[pdb] by Reduce -nobuild -nuclear";
+  $newModel['history']        = "Derived from $model[pdb] by Reduce -nobuild9999 -nuclear";
 }
 $newModel['isUserSupplied'] = $model['isUserSupplied'];
 $newModel['isReduced']      = true;
@@ -99,7 +99,7 @@ if($hcount)
 $entry .= "Asn/Gln/His flips were not optimized.\n";
 $entry .= "<p>You can now <a href='$url'>download the annotated PDB file</a> (".formatFilesize(filesize($pdb)).").</p>\n";
 $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
-    "Added H with -nobuild to get $newModel[pdb]",
+    "Added H with -nobuild9999 to get $newModel[pdb]",
     $entry,
     "$modelID|$newModel[id]", // applies to both old and new model
     "auto",
