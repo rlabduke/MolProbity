@@ -836,8 +836,8 @@ function runRamachandran($infile, $outfile)
 */
 function loadRamachandran($datafile)
 {
-    //$data = array_slice(file($datafile), 1); // drop first line
-    $data = file($datafile);
+    $data = array_slice(file($datafile), 1); // drop first line
+    //$data = file($datafile);
     $ret = array();
     foreach($data as $line)
     {
