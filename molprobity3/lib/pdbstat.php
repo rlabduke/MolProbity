@@ -50,9 +50,15 @@ function describePdbStats($pdbstats, $useHTML = true)
             if($pdbstats['originalInputH'])
             {
               if($pdbstats['non_ecloud_H'])
+              {
                 $details[] = "Explicit hydrogens present in original input file at nuclear positions. Hydrogens have been removed.";
+                $_SESSION['reduce_blength'] = 'nuclear';
+              }
               else
+              {
                 $details[] = "Explicit hydrogens present in original input file at electron cloud positions. Hydrogens have been removed.";
+                $_SESSION['reduce_blength'] = 'ecloud';
+              }
             }
             elseif($pdbstats['has_most_H'])
                 $details[] = "Explicit hydrogens are present.";
