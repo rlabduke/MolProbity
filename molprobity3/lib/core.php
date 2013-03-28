@@ -1,14 +1,14 @@
 <?php # (jEdit options) :folding=explicit:collapseFolds=1:
 /*****************************************************************************
     Defines core functions for MolProbity pages.
-    
+
     This file should be included by every top-level page in MolProbity.
     Furthermore, every top-level page should call either
-    
+
         mpInitEnvirons()        (special pages like the job monitor)
              -OR-
         mpStartSession()        (most normal pages)
-    
+
     in order to obtain all the usual resources that every page expects.
 *****************************************************************************/
 // Someone else MUST have defined this before including us!
@@ -52,7 +52,7 @@ function mpPageHeader($title, $active = "none", $refresh = "", $headContent = ""
     <link rel="shortcut icon" href="favicon.ico">
     <meta name="ROBOTS" content="INDEX, NOFOLLOW">
 ';
-    
+
     if($refresh != "")
         $s .= "    <meta http-equiv='refresh' content='$refresh'>\n";
 
@@ -67,7 +67,7 @@ window.alert("You cannot use your browser\'s back button in MolProbity,"
 -->
 </script>
 ';*/
-    
+
     if($headContent) $s .= "\n$headContent\n";
 
     $s .= '</head>
@@ -80,7 +80,7 @@ window.alert("You cannot use your browser\'s back button in MolProbity,"
     </div></td>
 </tr>
 ';
-    
+
     if($active == "none")
     {
         $s .= '<tr><td valign="top" colspan="2">
@@ -98,7 +98,7 @@ window.alert("You cannot use your browser\'s back button in MolProbity,"
     <div class="pagecontent">
 ';
     }
-    
+
     // Warn the user about bad events. (Alternative JavaScript version above.)
     if($GLOBALS['badEventOccurred'])
         $s .= "<div class='alert'>You cannot use your browser's back button in MolProbity,
@@ -184,6 +184,8 @@ function mpNavBar_call($page, $title)
 ############################################################################
 function mpPageFooter()
 {
+    $reduce_blength = $_SESSION['reduce_blength'];
+    if ($reduce_blength == '') $reduce_blength = 'ecloud'; #default
     return '
     </div>
 </td></tr>
@@ -191,6 +193,7 @@ function mpPageFooter()
     <div class="pagefooter">
 About <a href="help/about.html" target="_blank">MolProbity</a>
 | Website for <a href="http://kinemage.biochem.duke.edu" target="_blank">the Richardson Lab</a>
+| Using '.$reduce_blength.' x-H
 | Internal reference '.MP_VERSION.'
     </div>
 </td></tr>
@@ -222,38 +225,38 @@ About <a href="help/about.html" target="_blank">MolProbity</a>
 function launchBackground($script, $whereNext, $delay = 5)
 {
     if($_SESSION['bgjob']['isRunning']) return false;
-    
+
     // No! Caller probably put some data in there already for this new job!
     // This has to be done in the launch functions instead.
     //unset($_SESSION['bgjob']); // Clean up any old data
-    
+
     // Remove old progress file
     $progress = "$_SESSION[dataDir]/".MP_DIR_SYSTEM."/progress";
     if(file_exists($progress)) unlink($progress);
-    
+
     unset($_SESSION['bgjob']['processID']);
     $_SESSION['bgjob']['isRunning']     = true;
     $_SESSION['bgjob']['startTime']     = time();
     $_SESSION['bgjob']['refreshRate']   = $delay;
     $_SESSION['bgjob']['whereNext']     = $whereNext;
-    
+
     $errlog = $_SESSION['dataDir']."/".MP_DIR_SYSTEM."/errors";
-    
+
     // Make sure session variables are written to disk.
     // session_write_close() doesn't take effect until end of script
     mpSaveSession();
     // Otherwise, end-of-script write can truncate the file to nothing
     // just as the background job is starting, leading to random failure (?)
     mpSessReadOnly(true);
-    
+
     // Save current dir so we can exec script in it's own dir.
     $pwd = getcwd();
     chdir(dirname($script));
-    
+
     // Run the script in the background
     $cmd = "php -f $script '".session_id()."' >> $errlog 2>&1 &";
     exec($cmd);
-    
+
     // Restore the current dir
     chdir($pwd);
 }
@@ -298,7 +301,7 @@ function getProgressTasks()
 {
     global $__progress_tasks__;
     return $__progress_tasks__;
-}    
+}
 #}}}########################################################################
 
 #{{{ listDir - lists a directory's contents without recursion
@@ -319,7 +322,7 @@ function listDir($dir)
             if ($file != "." && $file != "..")
             {
                 $list[] = $file;
-            } 
+            }
         }
         closedir($handle);
         return $list;
@@ -354,7 +357,7 @@ function listRecursive($dir)
                         $list[$file] = $sublist;
                 }
                 else    $list[$file] = $file;
-            } 
+            }
         }
         closedir($handle);
         return $list;
@@ -382,9 +385,9 @@ function sortFilesAlpha($list)
     }
     ksort($d);
     ksort($f);
-    
+
     return array_merge($d, $f);
-    
+
     // This version mixes files and directories
     /*foreach($list as $el)
     {
@@ -392,7 +395,7 @@ function sortFilesAlpha($list)
             $el = sortFilesAlpha($el);
     }
     ksort($list);
-    
+
     return $list;*/
 }
 #}}}########################################################################
@@ -432,14 +435,14 @@ function linkAnyFile($fname, $name = null, $image = null)
         $subdir = MP_DIR_KINS;
     }
     if(!$subdir) return;
-    
+
     // Link the file
     $path = "$_SESSION[dataDir]/$subdir/$fname";
     $link = "$_SESSION[dataURL]/$subdir/$fname";
     $size = formatFilesize(filesize($path));
     $python_file = false;
     if($name == null) $name = $fname;
-    
+
     // Choose the right action(s) -- see pages/file_browser.php for origin
     if(endsWith($fname, ".kin") || endsWith($fname, ".kin.gz"))
         $links = array(
@@ -469,7 +472,7 @@ function linkAnyFile($fname, $name = null, $image = null)
         $links = array(array('url' => "$link", 'label' => "Python Script", 'blank' => false));
     else
         $links = array(array('url' => "$link", 'label' => "Download", 'blank' => false));
-    
+
     $isFirst = true;
     $linkText = "";
     foreach($links as $link)
@@ -487,7 +490,7 @@ function linkAnyFile($fname, $name = null, $image = null)
             $linkText .= "<a href='$link[url]'".($link['blank'] ? " target='_blank'" : "").">$link[label]</a>";
         }
     }
-    
+
     if($image == null)
         $s = "<b>$name</b> ($size): $linkText";
     else
@@ -495,7 +498,7 @@ function linkAnyFile($fname, $name = null, $image = null)
         $link = reset($links);
         $s = "<a href='$link[url]'".($link['blank'] ? " target='_blank'" : "")."><img src='$image' alt='$name ($size)'></a><br>$linkText ($size)";
     }
-    
+
     return $s;
 }
 #}}}########################################################################
@@ -558,14 +561,14 @@ function makeZipForSession()
     if(is_array($_SESSION['archives'])) foreach($_SESSION['archives'] as $archive)
         @unlink("$_SESSION[dataDir]/$archive");
     unset($_SESSION['archives']);
-    
+
     $inpath = $_SESSION['dataDir'];
     $tmppath = makeZipForFolder($inpath);
     $outname = "molprobity.zip";
     $outpath = "$_SESSION[dataDir]/$outname";
     copy($tmppath, $outpath);
     unlink($tmppath);
-    
+
     $_SESSION['archives'][] = $outname;
     return $outname;
 }
@@ -614,7 +617,7 @@ function mpReadfile($filepath)
     // It's not enough to extend the time; we may need more memory too.
     // In theory we shouldn't, but I guess the garbage collector leaks.
     ini_set('memory_limit', -1); // no limit
-    
+
     $chunksize = 1*(1024*1024); // how many bytes per chunk
     $buffer = '';
     $cnt = 0;
@@ -630,7 +633,7 @@ function mpReadfile($filepath)
         $cnt += strlen($buffer);
     }
     fclose($handle);
-    
+
     set_time_limit($old_limit); // restore prev. limit
     return $cnt; // return num. bytes delivered like readfile() does.
 }
@@ -677,7 +680,7 @@ function mpUnserialize($text)
 {
     // pro: fast, standard, and safe; con: sometimes mangles floats
     #return unserialize($text);
-    
+
     // pro: fast and float-safe; con: opens vulnerability for arbitrary code injection
     // The startsWith() call is just a sanity check, and is easily evaded:
     //  array(0 => exec('rm -rf /'), ...)
@@ -689,7 +692,7 @@ function mpUnserialize($text)
     //
     if(startsWith($text, 'array')) return eval("return $text;");
     else return false;
-    
+
     // pro: standards-based and safe; con: done in pure PHP so slow as hell
     # ...PHP-JSON library call here...
 }
@@ -759,7 +762,7 @@ function censorFileName($origName, $allowedExt = null)
     // Remove multiple underscores, for consistency/aesthetics
     $origName = preg_replace('/_{2,}/', '_', $origName);
     if($origName == '') $origName = "null_name"; // I don't think this is possible...
-    
+
     // Extension testing
     if($allowedExt != null)
     {

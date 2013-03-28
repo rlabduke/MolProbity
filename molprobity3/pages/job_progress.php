@@ -5,7 +5,7 @@
 *****************************************************************************/
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
 class job_progress_delegate extends BasicDelegate {
-    
+
 #{{{ display - creates the UI for this page
 ############################################################################
 /**
@@ -33,7 +33,7 @@ function display($context)
         $_SESSION['bgjob']['whereNext'] = "welcome.php";
         mpSaveSession();
     }
-    
+
     $ellapsed = time() - $_SESSION['bgjob']['startTime'];
     if($_SESSION['bgjob']['isRunning'] && !$_SESSION['bgjob']['processID'] && $ellapsed > 5)
     {
@@ -63,7 +63,7 @@ function display($context)
         if($ellapsed > 30 && $rate < 5)         $rate = 5;  // after 30 sec, refresh every 5 sec
         elseif($ellapsed > 120 && $rate < 10)   $rate = 10; // after 2 min,  refresh every 10 sec
         elseif($ellapsed > 1200 && $rate < 30)  $rate = 30; // after 20 min, refresh every 30 sec
-        
+
         $refresh    = "$rate; URL=$url";
         echo $this->pageHeader("Job is running...", "none", $refresh);
         echo "<p><center>\n";
