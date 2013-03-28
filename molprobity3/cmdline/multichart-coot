@@ -46,29 +46,63 @@ if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
 if(!isset($inFile))         die("No input file specified.\n");
 elseif(!is_file($inFile))   die("Input file '$inFile' does not exist.\n");
 
-$tmp = mpTempfile("tmp_remark42_");
+mpStartSession(true); // create a new session
 
-runRotamer($inFile, $tmp);
-$rota = loadRotamer($tmp);
-unlink($tmp);
+$inpath = $inFile;
+$modelID = addModelOrEnsemble(
+             $inpath,
+             basename($inpath),
+             false,
+             true,
+             true,
+             false);
 
-runRamachandran($inFile, $tmp);
-$rama = loadRamachandran($tmp);
-unlink($tmp);
+$model =& $_SESSION['models'][$modelID];
+$reduce_blength = $_SESSION['reduce_blength'];
+//$bcutval = 40; TO-DO - make these user controllable
+//$ocutval = 10;
+$pdbfile = $_SESSION['dataDir'].'/'.MP_DIR_MODELS."/$model[pdb]";
+$rawDir  = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA;
+    if(!file_exists($rawDir)) mkdir($rawDir, 0777);
+$filename = basename($pdbfile);
 
-runClashlist($inFile, $tmp);
-$clash = loadClashlist($tmp);
-unlink($tmp);
+$stats = $model['stats'];
+$hasProtein = ($stats['sidechains'] > 0 ? True : False);
+$hasNucAcid = ($stats['nucacids'] > 0 ? True : False);
 
-runCbetaDev($inFile, $tmp);
-$cbdev = loadCbetaDev($tmp);
-unlink($tmp);
+if($hasProtein)
+{
+  runRotamer($pdbfile, "$rawDir/$model[prefix]rota.data");
+  $rota = loadRotamer("$rawDir/$model[prefix]rota.data");
 
-runBasePhosPerp($inFile, $tmp);
-$pperp = loadBasePhosPerp($tmp);
-unlink($tmp);
+  runRamachandran($pdbfile, "$rawDir/$model[prefix]rama.data");
+  $rama = loadRamachandran("$rawDir/$model[prefix]rama.data");
 
-makeCootMulticritChart($inFile, "php://stdout", $clash, $rama, $rota, $cbdev, $pperp)
+  runCbetaDev($pdbfile, "$rawDir/$model[prefix]cbdev.data");
+  $cbdev = loadCbetaDev("$rawDir/$model[prefix]cbdev.data");
+}
+else
+{
+  $rota = null;
+  $rama = null;
+  $cbdev = null;
+}
+
+runClashlist($pdbfile, "$rawDir/$model[prefix]clash.data", $reduce_blength);
+$clash = loadClashlist("$rawDir/$model[prefix]clash.data");
+
+if($hasNucAcid)
+{
+  runBasePhosPerp($pdbfile, "$rawDir/$model[prefix]pperp.data");
+  $pperp = loadBasePhosPerp("$rawDir/$model[prefix]pperp.data");
+}
+{
+  $pperp = null;
+}
+
+makeCootMulticritChart($pdbfile, "php://stdout", $clash, $rama, $rota, $cbdev, $pperp);
+
+mpDestroySession();
 
 ############################################################################
 // Clean up and go home

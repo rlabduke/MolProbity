@@ -69,7 +69,7 @@ $reduce_blength = $_SESSION['reduce_blength'];
 //$ocutval = 10;
 $pdbfile = $_SESSION['dataDir'].'/'.MP_DIR_MODELS."/$model[pdb]";
 $rawDir  = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA;
-    if(!file_exists($rawDir)) mkdir($rawDir, 0777);
+if(!file_exists($rawDir)) mkdir($rawDir, 0777);
 $filename = basename($pdbfile);
 
 $stats = $model['stats'];
@@ -109,11 +109,10 @@ if($hasNucAcid)
 
   runValidationReport($pdbfile, "$rawDir/$model[prefix]rna.data", "rna");
 }
-/*else
 {
   $pperp = null;
   $suites = null;
-}*/
+}
 
 if($hasProtein && $hasNucAcid)
 {

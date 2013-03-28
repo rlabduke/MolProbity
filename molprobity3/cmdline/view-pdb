@@ -44,6 +44,7 @@ OUTPUTS:
 #$optCbeta   = true;
 #$optRota    = true;
 #$optRama    = true;
+$optNuclear = false;
 $optVerbose = true;
 $optGzipKin = true;
 $optMultikin = array(
@@ -68,71 +69,106 @@ if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
     #elseif($arg == '-nocbeta')  $optCbeta = false;
     #elseif($arg == '-norota')   $optRota = false;
     #elseif($arg == '-norama')   $optRama = false;
-    #else                        $pdbCodeList[] = $arg;
-    $pdbCodeList[] = $arg;
+    if($arg == '-nuclear')       $optNuclear = true;
+    else                        $pdbCodeList[] = $arg;
+    #$pdbCodeList[] = $arg;
 }
 if(count($pdbCodeList) == 0)
     die("Must provide at least one PDB code on the command line!\n");
-    
+
 // Loop through all PDBs
 foreach($pdbCodeList as $pdbCode)
 {
-    $infileH = $pdbCode."H.pdb";
-    if(!file_exists($infileH))
-    {
-        if($optVerbose) echo "Getting PDB file for $pdbCode...\n";
-        $infile = getPdbModel($pdbCode);
-        if($optVerbose) echo "Adding hydrogens with -build for $pdbCode...\n";
-        reduceBuild($infile, $infileH);
-        unlink($infile);
-    }
-    else echo "$infileH already exists!\n";
-    
-    $mapfile = "$pdbCode.2fofc.omap";
-    if(!file_exists($mapfile))
-    {
-        if($optVerbose) echo "Getting electron density map for $pdbCode...\n";
-        $tmpmap = getEdsMap($pdbCode, 'omap', '2fofc');
-        if($tmpmap != null)
-        {
-            //rename($tmpmap, $mapfile);
-            // Otherwise permissions are weird
-            copy($tmpmap, $mapfile);
-            unlink($tmpmap);
-        }
-        else echo "Unable to get map for $pdbCode!\n";
-    }
-    else echo "$mapfile already exists!\n";
-    
-    $mapfile = "$pdbCode.fofc.omap";
-    if(!file_exists($mapfile))
-    {
-        if($optVerbose) echo "Getting electron density map for $pdbCode...\n";
-        $tmpmap = getEdsMap($pdbCode, 'omap', 'fofc');
-        if($tmpmap != null)
-        {
-            //rename($tmpmap, $mapfile);
-            // Otherwise permissions are weird
-            copy($tmpmap, $mapfile);
-            unlink($tmpmap);
-        }
-        else echo "Unable to get map for $pdbCode!\n";
-    }
-    else echo "$mapfile already exists!\n";
-    
-    $kinfile = $pdbCode."H-multi.kin";
-    if(!file_exists($kinfile))
-    {
-        if($optVerbose) echo "Making multicrit kinemage for $pdbCode...\n";
-        makeMulticritKin2(
-            array($infileH),
-            $kinfile,
-            $optMultikin);
-        // Needed to get separate disulfides, which I want for the SS study.
-        exec("prekin -cass -append -nogroup $infileH >> $kinfile");
-        if($optGzipKin) destructiveGZipFile($kinfile);
-    }
-    else echo "$kinfile already exists!\n";
+  mpStartSession(true); // create a new session
+
+  if($optVerbose) echo "Getting PDB file for $pdbCode...\n";
+  $infile = getPdbModel($pdbCode);
+
+  $inpath = $infile;
+  $modelID = addModelOrEnsemble(
+               $inpath,
+               basename($inpath),
+               false,
+               true,
+               true,
+               false);
+
+  $model =& $_SESSION['models'][$modelID];
+  //$reduce_blength = $_SESSION['reduce_blength'];
+  //$bcutval = 40; TO-DO - make these user controllable
+  //$ocutval = 10;
+  $pdbfile = $_SESSION['dataDir'].'/'.MP_DIR_MODELS."/$model[pdb]";
+  $rawDir  = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA;
+  if(!file_exists($rawDir)) mkdir($rawDir, 0777);
+  $filename = basename($pdbfile);
+
+  //$stats = $model['stats'];
+  //$hasProtein = ($stats['sidechains'] > 0 ? True : False);
+  //$hasNucAcid = ($stats['nucacids'] > 0 ? True : False);
+
+  $infileH = $pdbCode."FH.pdb";
+
+  if ($optNuclear)
+  {
+    $reduce_blength = 'nuclear';
+    $_SESSION['reduce_blength'] = 'nuclear';
+  }
+  else $reduce_blength = 'ecloud';
+
+  if($optVerbose)
+  {
+    if($optNuclear) echo "Adding hydrogens with -build -nuclear for $pdbCode...\n";
+    else echo "Adding hydrogens with -build for $pdbCode...\n";
+  }
+  reduceBuild($pdbfile, $infileH, $reduce_blength);
+  unlink($infile);
+
+  $mapfile = "$pdbCode.2fofc.omap";
+  if(!file_exists($mapfile))
+  {
+      if($optVerbose) echo "Getting electron density map for $pdbCode...\n";
+      $tmpmap = getEdsMap($pdbCode, 'omap', '2fofc');
+      if($tmpmap != null)
+      {
+          //rename($tmpmap, $mapfile);
+          // Otherwise permissions are weird
+          copy($tmpmap, $mapfile);
+          unlink($tmpmap);
+      }
+      else echo "Unable to get map for $pdbCode!\n";
+  }
+  else echo "$mapfile already exists!\n";
+
+  $mapfile = "$pdbCode.fofc.omap";
+  if(!file_exists($mapfile))
+  {
+      if($optVerbose) echo "Getting electron density map for $pdbCode...\n";
+      $tmpmap = getEdsMap($pdbCode, 'omap', 'fofc');
+      if($tmpmap != null)
+      {
+          //rename($tmpmap, $mapfile);
+          // Otherwise permissions are weird
+          copy($tmpmap, $mapfile);
+          unlink($tmpmap);
+      }
+      else echo "Unable to get map for $pdbCode!\n";
+  }
+  else echo "$mapfile already exists!\n";
+
+  $kinfile = $pdbCode."H-multi.kin";
+  if(!file_exists($kinfile))
+  {
+      if($optVerbose) echo "Making multicrit kinemage for $pdbCode...\n";
+      makeMulticritKin2(
+          array($infileH),
+          $kinfile,
+          $optMultikin);
+      // Needed to get separate disulfides, which I want for the SS study.
+      exec("prekin -cass -append -nogroup $infileH >> $kinfile");
+      if($optGzipKin) destructiveGZipFile($kinfile);
+  }
+  else echo "$kinfile already exists!\n";
+  mpDestroySession();
 }
 
 ############################################################################
