@@ -132,7 +132,8 @@ if(!defined("MP_DIR_CHARTS"))
 // Don't change this! It will break user bookmarks.
     define("MP_SESSION_NAME", "MolProbSID");
 
+// MOVED TO lib/core.php to allow for svn tagging - JJH 130409
 // Current "internal reference" version number. Please DO NOT change.
-    define("MP_VERSION", "4.01a");
+//    define("MP_VERSION", "4.01a");
 
 ?>
