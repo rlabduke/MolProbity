@@ -104,7 +104,7 @@ from your web browser.</p>
 <p><b><?php echo "<a href='".makeEventURL("onGoto", "helper_hydrogens.php")."'>About hydrogens</a>"; ?>:</b>
 Why have the hydrogen bondlengths changed?</p>
 <p><b><a href='help/java.html' target='_blank'>Installing Java</a></b>: how to make kinemage graphics work in your browser.</p>
-<p><b><a href='get_molprobity.php' target='_blank'>Download MolProbity</a></b>: how can I run a private MolProbity server, or run from the command line?</p>
+<p><b><?php echo "<a href='".makeEventURL("onGoto", "get_molprobity.php")."'>Download MolProbity</a>"; ?></b>: how can I run a private MolProbity server, or run from the command line?</p>
 <p><small><i>NB: the back button doesn't work inside MolProbity</i></small></p><!-- by request of DCR -->
 </td></tr></table>
 <?php
