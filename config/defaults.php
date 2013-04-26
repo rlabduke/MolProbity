@@ -62,7 +62,7 @@ if(!defined("MP_REDUCE_LIMIT"))
 //  Default is 0000.
 //  For highest security, use 0077.
 if(!defined("MP_UMASK"))
-    define("MP_UMASK", 0);
+    define("MP_UMASK", 0007);
 
 // Default timezone. See lib/timezones.php for allowed keys.
 // If left undefined (commented out), MolProbity can usually guess correctly.
@@ -127,12 +127,13 @@ if(!defined("MP_DIR_CHARTS"))
 //  of the MolProbity source code. Please DO NOT modify this
 //  entry; this is how we get feedback about bugs, etc.
 //  Change MP_EMAIL_WEBMASTER instead.
-    define("MP_EMAIL_AUTHOR", "vbc3@duke.edu");
+    define("MP_EMAIL_AUTHOR", "jjh19@duke.edu");
 
 // Don't change this! It will break user bookmarks.
     define("MP_SESSION_NAME", "MolProbSID");
 
+// MOVED TO lib/core.php to allow for svn tagging - JJH 130409
 // Current "internal reference" version number. Please DO NOT change.
-    define("MP_VERSION", "4.00a");
+//    define("MP_VERSION", "4.01a");
 
 ?>

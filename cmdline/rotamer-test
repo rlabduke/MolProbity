@@ -44,20 +44,20 @@ elseif(!is_file($inFile))   die("Input file '$inFile' does not exist.\n");
 
 $tmp = tempnam(".", "tmp_rota_");
 
-//runRotamer($inFile, $tmp);
-//$rota = loadRotamer($tmp);
-//unlink($tmp);
-////print_r($rota);
-//$out = findRotaOutliers($rota);
-//print_r($out);
-
-
-runRamachandran($inFile, $tmp);
-$rama = loadRamachandran($tmp);
+runRotamer($inFile, $tmp);
+$rota = loadRotamer($tmp);
 unlink($tmp);
-print_r($rama);
-$out = findRamaOutliers($rama);
+//print_r($rota);
+$out = findRotaOutliers($rota);
 print_r($out);
+
+
+//runRamachandran($inFile, $tmp);
+//$rama = loadRamachandran($tmp);
+//unlink($tmp);
+//print_r($rama);
+//$out = findRamaOutliers($rama);
+//print_r($out);
 
 ############################################################################
 // Clean up and go home

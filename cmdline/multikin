@@ -75,13 +75,34 @@ if($optVerbose)
 
 foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
 {
-    if($optVerbose) echo "Making multi-criterion kinemage for $inFile ...\n";
     $outFile = basename($inFile, ".pdb") . ".kin";
+
+    mpStartSession(true); // create a new session
+    $inpath = $inDir.'/'.$inFile;
+    $modelID = addModelOrEnsemble(
+                 $inpath,
+                 basename($inpath),
+                 false,
+                 true,
+                 true,
+                 false);
+
+    $model =& $_SESSION['models'][$modelID];
+    $pdbfile = $_SESSION['dataDir'].'/'.MP_DIR_MODELS."/$model[pdb]";
+    $reduce_blength = $_SESSION['reduce_blength'];
+
+    if($optVerbose)
+    {
+      echo "Making multi-criterion kinemage for $inFile using $reduce_blength x-H vdW radii ...\n";
+    }
+
     makeMulticritKin2(
-        array($inDir.'/'.$inFile),
+        array($pdbfile),
         $outDir.'/'.$outFile,
         $optMultikin);
     if($optGzipKin) destructiveGZipFile($outDir.'/'.$outFile);
+
+    mpDestroySession();
 }
 
 ############################################################################

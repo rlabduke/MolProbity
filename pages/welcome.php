@@ -72,11 +72,12 @@ as part of the refinement cycle.</p>
 Create and view interactive 3-D graphics
 from your web browser.</p>
 
-<h3>What's new in 4.00a:</h3><ul>
+<h3>What's new in 4.01a:</h3><ul>
 <li>Updated Reduce-added hydrogen lengths to be more consistent with other crystallography software.</li>
 <li>New Top8000 Ramachandran validation information.</li>
 <li>Updated All-atom analysis summary table to also show outlier-counts.</li>
 <li>Allows use of both electron cloud and nuclear x-H bond-lengths.</li>
+<li>Occupancy cutoff for clashscore now set to 0.1. Clashscore calculation includes all alternates.</li>
 </ul>
 </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>
 
@@ -103,7 +104,7 @@ from your web browser.</p>
 <p><b><?php echo "<a href='".makeEventURL("onGoto", "helper_hydrogens.php")."'>About hydrogens</a>"; ?>:</b>
 Why have the hydrogen bondlengths changed?</p>
 <p><b><a href='help/java.html' target='_blank'>Installing Java</a></b>: how to make kinemage graphics work in your browser.</p>
-<p><b><a href='get_molprobity.php' target='_blank'>Download MolProbity</a></b>: how can I run a private MolProbity server, or run from the command line?</p>
+<p><b><?php echo "<a href='".makeEventURL("onGoto", "get_molprobity.php")."'>Download MolProbity</a>"; ?></b>: how can I run a private MolProbity server, or run from the command line?</p>
 <p><small><i>NB: the back button doesn't work inside MolProbity</i></small></p><!-- by request of DCR -->
 </td></tr></table>
 <?php
@@ -638,7 +639,8 @@ function toggleUploadOptions()
       Read more about this change <a style=\"color: #66FFFF\" href='".makeEventURL("onGoto", "helper_hydrogens.php")."'>here</a>.
       <p>Ramachandran scoring has also been updated to use new six-category distributions, derived from a larger
       <a style=\"color: #66FFFF\" href='http://kinemage.biochem.duke.edu/databases/top8000.php' target='_blank'>Top8000</a> dataset of high quality PDB files.
-        <br><br>Please don't hesitate to report any <a style=\"color: #66FFFF\" href='".makeEventURL("onGoto", "feedback_setup.php")."'>bugs</a> you may encounter.</strong></div>");
+        <br><br>Please don't hesitate to report any <a style=\"color: #66FFFF\" href='".makeEventURL("onGoto", "feedback_setup.php")."'>bugs</a> you may encounter.
+        <br><br>If you prefer to use the previous MolProbity3, please go to <a style=\"color: #66FFFF\" href='http://helix.research.duhs.duke.edu/' target='_blank'>http://helix.research.duhs.duke.edu</a>.</strong></div>");
 
 }
 

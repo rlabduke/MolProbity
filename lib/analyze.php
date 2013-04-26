@@ -604,7 +604,9 @@ function calcCbetaStats($cbdev)
 ############################################################################
 function runClashlist($infile, $outfile, $blength="ecloud")
 {
-    exec("clashlist $infile $blength > $outfile");
+    $bcutval = 40;
+    $ocutval = 10;
+    exec("clashlist $infile $bcutval $ocutval $blength > $outfile");
 }
 #}}}########################################################################
 
@@ -724,7 +726,10 @@ function runRotamer($infile, $outfile)
 {
     // Very large files (1htq) need extra memory
     //exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/hless.jar hless.Rotamer -raw $infile > $outfile");
-    exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.rotarama.Rotalyze $infile > $outfile");
+    //java-based
+    //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.rotarama.Rotalyze $infile > $outfile");
+    //cctbx-based
+    exec("phenix.rotalyze $infile > $outfile");
 }
 #}}}########################################################################
 
@@ -756,8 +761,22 @@ function loadRotamer($datafile)
     $ret = array();
     foreach($data as $line)
     {
+        echo "In loop\n";
         $line = explode(':', rtrim($line));
+        if ($line[0]==''){
+          continue;
+        }
+        elseif (preg_match("/^#/",$line[0])){
+          continue;
+        }
+        elseif (preg_match("/^SUMMARY/",$line[0])){
+          continue;
+        }
+        elseif (preg_match("/^residue/",$line[0])){
+          continue;
+        }
         $cnit = $line[0];
+        $cnit = substr($cnit,0,6).substr($cnit,7,3);
         $decomp = decomposeResName($cnit);
         $ret[$cnit] = array(
             'resName'   => $cnit,
@@ -765,19 +784,22 @@ function loadRotamer($datafile)
             'chainID'   => $decomp['chainID'],
             'resNum'    => $decomp['resNum'],
             'insCode'   => $decomp['insCode'],
-            'scorePct'  => $line[1] + 0,
-            'chi1'      => $line[2],
-            'chi2'      => $line[3],
-            'chi3'      => $line[4],
-            'chi4'      => $line[5],
-            'rotamer'   => $line[6]
+            'occupancy' => $line[1],
+            'scorePct'  => $line[2] + 0,
+            'chi1'      => $line[3],
+            'chi2'      => $line[4],
+            'chi3'      => $line[5],
+            'chi4'      => $line[6],
+            'rotamer'   => $line[7]
         );
         // This converts numbers to numbers and leaves "" as it is.
         if($ret[$cnit]['chi1'] !== '') $ret[$cnit]['chi1'] += 0;
         if($ret[$cnit]['chi2'] !== '') $ret[$cnit]['chi2'] += 0;
         if($ret[$cnit]['chi3'] !== '') $ret[$cnit]['chi3'] += 0;
         if($ret[$cnit]['chi4'] !== '') $ret[$cnit]['chi4'] += 0;
+        echo "added rota entry\n";
     }
+    echo $ret;
     return $ret;
 }
 #}}}########################################################################
@@ -834,8 +856,8 @@ function runRamachandran($infile, $outfile)
 */
 function loadRamachandran($datafile)
 {
-    //$data = array_slice(file($datafile), 1); // drop first line
-    $data = file($datafile);
+    $data = array_slice(file($datafile), 1); // drop first line
+    //$data = file($datafile);
     $ret = array();
     foreach($data as $line)
     {
@@ -1338,6 +1360,34 @@ function decomposeResName($name)
 {
     return array(
         'resType'   => substr($name, 6, 3),
+        'chainID'   => substr($name, 0, 1),
+        'resNum'    => trim(substr($name, 1, 4))+0,
+        'insCode'   => substr($name, 5, 1)
+    );
+}
+#}}}########################################################################
+
+#{{{ decomposeResNameCctbx - breaks a 9-character packed name into pieces
+############################################################################
+/**
+* Decomposes this:
+*   resName         a formatted name for the residue: 'cnnnnittt'
+*                       c: Chain ID, space for none
+*                       n: sequence number, right justified, space padded
+*                       i: insertion code, space for none
+*                       t: residue type (ALA, LYS, etc.), all caps,
+*                          left justified, space padded
+*
+* Into this (as an array):
+*   resType         3-letter residue code (e.g. ALA)
+*   chainID         1-letter chain ID or ' '
+*   resNum          residue number
+*   insCode         insertion code or ' '
+*/
+function decomposeResNameCctbx($name)
+{
+    return array(
+        'resType'   => substr($name, 7, 3),
         'chainID'   => substr($name, 0, 1),
         'resNum'    => trim(substr($name, 1, 4))+0,
         'insCode'   => substr($name, 5, 1)

@@ -57,7 +57,8 @@ elseif(!is_dir($outDir))    die("Output directory '$outDir' does not exist.\n");
 
 foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
 {
-  
+  mpStartSession(true); // create a new session
+
   $inFile = realpath($inDir).'/'.$inFile;
   echo "reading ".$inFile."\n";
 
@@ -65,47 +66,94 @@ foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
   echo "writing ".$outFile."\n";
 
 
-$tmp = mpTempfile();
-$tmp2 = mpTempfile();
+  $inpath = $inFile;
+  $modelID = addModelOrEnsemble(
+               $inpath,
+               basename($inpath),
+               false,
+               true,
+               true,
+               false);
 
-runRotamer($inFile, $tmp);
-$rota = loadRotamer($tmp);
-unlink($tmp);
+  $model =& $_SESSION['models'][$modelID];
+  $reduce_blength = $_SESSION['reduce_blength'];
+  //$bcutval = 40; TO-DO - make these user controllable
+  //$ocutval = 10;
+  $pdbfile = $_SESSION['dataDir'].'/'.MP_DIR_MODELS."/$model[pdb]";
+  $rawDir  = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA;
+  if(!file_exists($rawDir)) mkdir($rawDir, 0777);
+  $filename = basename($pdbfile);
 
-runRamachandran($inFile, $tmp);
-$rama = loadRamachandran($tmp);
-unlink($tmp);
+  $stats = $model['stats'];
+  $hasProtein = ($stats['sidechains'] > 0 ? True : False);
+  $hasNucAcid = ($stats['nucacids'] > 0 ? True : False);
 
-runClashlist($inFile, $tmp);
-$clash = loadClashlist($tmp);
-unlink($tmp);
+  if($hasProtein)
+  {
+    runRotamer($pdbfile, "$rawDir/$model[prefix]rota.data");
+    $rota = loadRotamer("$rawDir/$model[prefix]rota.data");
 
-runCbetaDev($inFile, $tmp);
-$cbdev = loadCbetaDev($tmp);
-unlink($tmp);
+    runRamachandran($pdbfile, "$rawDir/$model[prefix]rama.data");
+    $rama = loadRamachandran("$rawDir/$model[prefix]rama.data");
 
-runBasePhosPerp($inFile, $tmp);
-$pperp = loadBasePhosPerp($tmp);
-unlink($tmp);
+    runCbetaDev($pdbfile, "$rawDir/$model[prefix]cbdev.data");
+    $cbdev = loadCbetaDev("$rawDir/$model[prefix]cbdev.data");
 
-runSuitenameReport($inFile, $tmp);
-$suites = loadSuitenameReport($tmp);
-unlink($tmp);
+    runValidationReport($pdbfile, "$rawDir/$model[prefix]geom.data", "protein");
+  }
+  else
+  {
+    $rota = null;
+    $rama = null;
+    $cbdev = null;
+  }
 
-runValidationReport($inFile, $tmp, "protein");
-runValidationReport($inFile, $tmp2, "rna");
-$bbonds = array_merge(loadValidationBondReport($tmp,"protein"), loadValidationBondReport($tmp2, "rna"));
-if (count($bbonds) == 0) $bbonds = null;
-$bangles = array_merge(loadValidationAngleReport($tmp, "protein"), loadValidationAngleReport($tmp2, "rna"));
-if (count($bangles) == 0) $bangles = null;
-unlink($tmp);
-unlink($tmp2);
+  runClashlist($pdbfile, "$rawDir/$model[prefix]clash.data", $reduce_blength);
+  $clash = loadClashlist("$rawDir/$model[prefix]clash.data");
 
-if($mode == 'coot')
-    makeCootClusteredChart($inFile, $outFile, $clash, $rama, $rota, $cbdev, $pperp);
-else
-    writeMulticritChart($inFile, "/dev/null", $outFile, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles);
+  if($hasNucAcid)
+  {
+    runBasePhosPerp($pdbfile, "$rawDir/$model[prefix]pperp.data");
+    $pperp = loadBasePhosPerp("$rawDir/$model[prefix]pperp.data");
 
+    runSuitenameReport($pdbfile, "$rawDir/$model[prefix]suite.data");
+    $suites = loadSuitenameReport("$rawDir/$model[prefix]suite.data");
+
+    runValidationReport($pdbfile, "$rawDir/$model[prefix]rna.data", "rna");
+  }
+  {
+    $pperp = null;
+    $suites = null;
+  }
+
+  if($hasProtein && $hasNucAcid)
+  {
+    $bbonds = array_merge(loadValidationBondReport("$rawDir/$model[prefix]geom.data","protein"), loadValidationBondReport("$rawDir/$model[prefix]rna.data", "rna"));
+    if (count($bbonds) == 0) $bbonds = null;
+    $bangles = array_merge(loadValidationAngleReport("$rawDir/$model[prefix]geom.data", "protein"), loadValidationAngleReport("$rawDir/$model[prefix]rna.data", "rna"));
+    if (count($bangles) == 0) $bangles = null;
+  }
+  elseif($hasProtein)
+  {
+    $bbonds = loadValidationBondReport("$rawDir/$model[prefix]geom.data", "protein");
+    if (count($bbonds) == 0) $bbonds = null;
+    $bangles = loadValidationAngleReport("$rawDir/$model[prefix]geom.data", "protein");
+    if (count($bangles) == 0) $bangles = null;
+  }
+  elseif($hasNucAcid)
+  {
+    $bbonds = loadValidationBondReport("$rawDir/$model[prefix]rna.data", "rna");
+    if (count($bbonds) == 0) $bbonds = null;
+    $bangles = loadValidationAngleReport("$rawDir/$model[prefix]rna.data", "rna");
+    if (count($bangles) == 0) $bangles = null;
+  }
+
+  if($mode == 'coot')
+    makeCootClusteredChart($pdbfile, $outFile, $clash, $rama, $rota, $cbdev, $pperp);
+  else
+    writeMulticritChart($pdbfile, "/dev/null", $outFile, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles);
+
+  mpDestroySession();
 }
 ############################################################################
 // Clean up and go home

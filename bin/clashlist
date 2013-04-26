@@ -18,10 +18,12 @@
 ##
 
 ## Cutoff values for occupancy (always used) and B-factor (done w/ and w/out).
-bcutval=40
-ocutval=33
+#bcutval=40
+#ocutval=33
 
-blength=$2
+bcutval=$2
+ocutval=$3
+blength=$4
 
 ## Find number of atoms below B cutoff.  Full number of atoms found below.
 if [ "$blength" == "ecloud" ]; then
@@ -30,7 +32,8 @@ else
 probe_flags="-q -mc -het -dumpatominfo -nuclear"
 fi
 
-bcna=`probe $probe_flags "alta blt$bcutval ogt$ocutval not water" $1|cut -d: -f2`
+#do not count waters
+bcna=`probe $probe_flags "blt$bcutval ogt$ocutval not water" $1|cut -d: -f2`
 
 ## Temp files for datastorage.
 ## "$$" expands to the process ID, to avoid name collisions.
@@ -44,25 +47,25 @@ else
 probe_flags="-c -q -mc -het -once -nuclear"
 fi
 
-probe $probe_flags "alta ogt$ocutval not water" "none" $1 |\
+probe $probe_flags "ogt$ocutval not water" "none" $1 |\
 awk -F: '
 /^atoms selected:/ { na = $2 + 0.0 }
 /^potential dots:/ { pd = $2 + 0.0 }
 /^potential area:/ { pa = $2 + 0.0 }
 END {
  printf("#atom-potential-summary:%s: %d: %d: %.4g\n", name, na, pd, pa)
-}' name=$3 - >$tmpfile
+}' name=$5 - >$tmpfile
 
 ## Process Probe unformatted output to find clashes between atoms.
 ## Don't include water in 'src' search set b/c we don't want it listed in the output
 ## unless it clashes with a protein/nucleic acid residue.
 if [ "$blength" == "ecloud" ]; then
-probe_flags="-u -q -mc -het -once"
+probe_flags="-u -q -mc -het -stdbonds -once"
 else
-probe_flags="-u -q -mc -het -once -nuclear"
+probe_flags="-u -q -mc -het -stdbonds -nuclear -once"
 fi
 
-probe $probe_flags "alta ogt$ocutval not water" "alta ogt$ocutval" $1 |\
+probe $probe_flags "ogt$ocutval not water" "ogt$ocutval" $1 |\
 awk -F: 'BEGIN {
 ## Total Probe score (weighted clash + Hb + exp[vdW]), not clashscore
    totalScore = 0.0
@@ -146,7 +149,7 @@ END {
    name,  clashscore, scoreBcut,bcut)
 
 
-}' name=$3 bcut=$bcutval nabcut="$bcna" $tmpfile - > $tmpf2
+}' name=$5 bcut=$bcutval nabcut="$bcna" $tmpfile - > $tmpf2
 ## Send residue (not atom) pair names through cluster (A:B),
 ## get back clusters that list all the residues linked by (non H-bond) clashes.
 ## (1:3:*CLUSTER*:A:B:C)

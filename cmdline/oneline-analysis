@@ -45,23 +45,28 @@ function summaryAnalysis($modelID)
 {
     global $optStats, $optClash, $optCbeta, $optRota, $optRama, $optGeom, $optPuck, $optSuite;
     $out = "";
-    
+
     $model =& $_SESSION['models'][$modelID];
-    
+    $reduce_blength = $_SESSION['reduce_blength'];
+    //$bcutval = 40; TO-DO - make these user controllable
+    //$ocutval = 10;
+
+    $out .= ":$reduce_blength";
+
     if($optStats)
     {
         $pdbstats = $model['stats'];
         $out .= ":$pdbstats[chains]:$pdbstats[residues]:$pdbstats[nucacids]:$pdbstats[resolution]:$pdbstats[rvalue]:$pdbstats[rfree]";
     }
-    
+
     // Run analysis; load data
     $pdbfile = $_SESSION['dataDir'].'/'.MP_DIR_MODELS."/$model[pdb]";
     $rawDir  = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA;
         if(!file_exists($rawDir)) mkdir($rawDir, 0777);
-    
+
     if($optClash)
     {
-        runClashlist($pdbfile, "$rawDir/$model[prefix]clash.data");
+        runClashlist($pdbfile, "$rawDir/$model[prefix]clash.data", $reduce_blength);
         $clash = loadClashlist("$rawDir/$model[prefix]clash.data");
         $clashstats = runClashStats($pdbstats['resolution'], $clash['scoreAll'], $clash['scoreBlt40']);
         $out .= ":" . $clash['scoreAll'] . ":" . $clash['scoreBlt40'];
@@ -74,7 +79,7 @@ function summaryAnalysis($modelID)
         $badCbeta = findCbetaOutliers($cbdev);
         $cbStats = calcCbetaStats($cbdev);
         $out .= ":" . count($badCbeta) . ":" . count($cbdev);
-        $out .= ":$cbStats[max]:$cbStats[median]:".round($cbStats['mean'], 3);
+        //$out .= ":$cbStats[max]:$cbStats[median]:".round($cbStats['mean'], 3);
     }
     if($optRota)
     {
@@ -153,7 +158,7 @@ function summaryAnalysis($modelID)
       $badSuites = findSuitenameOutliers($suites);
       $out .= ":" . count($badSuites) . ":" . count($suites);
     }
-    
+
     $out .= "\n"; // end of this line
     return $out;
 }
@@ -192,8 +197,8 @@ if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
     elseif($arg == '-norota')   $optRota = false;
     elseif($arg == '-norama')   $optRama = false;
     elseif($arg == '-nogeom')   $optGeom = false;
-    elseif($arg == '-dopucker')  $optPuck = true;
-    elseif($arg == '-dosuite')   $optSuite = true;
+    elseif($arg == '-dopucker') $optPuck = true;
+    elseif($arg == '-dosuite')  $optSuite = true;
     elseif(!isset($inDir))      $inDir = $arg;
     else                        die("Too many or unrecognized arguments: '$arg'\n");
 }
@@ -205,7 +210,13 @@ if($optMode == 'filter')
     mpCopy("php://stdin", $inpath);
     mpStartSession(true); // create a new session
     // Need to ignore segIDs for stupid Top500 with seg new_ for all H
-    $id = addModelOrEnsemble($inpath, basename($inpath), false, true);
+    $id = addModelOrEnsemble(
+            $inpath,
+            basename($inpath),
+            false,
+            true,
+            true,
+            false);
     if(isset($_SESSION['ensembles'][$id]))
     {
         foreach($_SESSION['ensembles'][$id]['models'] as $modelID)
@@ -233,10 +244,10 @@ if($optVerbose)
     echo "#INPUT  : ".realpath($inDir)."\n";
 
     // Describe the output of this script
-    echo "#pdbFileName";
+    echo "#pdbFileName:x-H_type";
     if($optStats)   echo ":chains:residues:nucacids:resolution:rvalue:rfree";
     if($optClash)   echo ":clashscore:clashscoreB<40:minresol:maxresol:n_samples:pct_rank:pct_rank40";
-    if($optCbeta)   echo ":cbeta>0.25:numCbeta:maxCbeta:medianCbeta:meanCbeta";
+    if($optCbeta)   echo ":cbeta>0.25:numCbeta";//:maxCbeta:medianCbeta:meanCbeta"; removed by jjh
     if($optRota)    echo ":rota<1%:numRota";
     if($optRama)    echo ":ramaOutlier:ramaAllowed:ramaFavored:numRama";
     if($optGeom)    echo ":pct_badbonds:pct_badangles";
@@ -251,7 +262,13 @@ foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
     mpStartSession(true); // create a new session
     $inpath = $inDir.'/'.$inFile;
     // Need to ignore segIDs for stupid Top500 with seg new_ for all H
-    $id = addModelOrEnsemble($inpath, basename($inpath), false, true);
+    $id = addModelOrEnsemble(
+            $inpath,
+            basename($inpath),
+            false,
+            true,
+            true,
+            false);
     if(isset($_SESSION['ensembles'][$id]))
     {
         foreach($_SESSION['ensembles'][$id]['models'] as $modelID)

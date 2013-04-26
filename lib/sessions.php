@@ -36,6 +36,11 @@ function mpInitEnvirons()
     // Set PATH for executable programs
     putenv("PATH=".mpGetPath());
 
+    // Source cctbx environment
+    putenv("PATH=".cctbxGetPath());
+    //system("source ".MP_BASE_DIR."/build/setpaths.sh"); //bash
+    //system("source ".MP_BASE_DIR."/build/setpaths.csh"); //tcsh
+
     // Also set location of Reduce's heterogen dictionary
     // Better here than on command line b/c it affects e.g. flipkin too
     putenv("REDUCE_HET_DICT=".MP_REDUCE_HET_DICT);
@@ -64,6 +69,20 @@ function mpGetPath()
     return $mpPath;
 }
 #}}}########################################################################
+
+#{{{ cctbxGetPath - gets path for cctbx executables
+function cctbxGetPath()
+{
+    $cctbxPath = MP_BASE_DIR."/build/bin";
+
+    if(MP_BIN_PATH != "")
+      $cctbxPath = MP_BIN_PATH.":$cctbxPath";
+
+    if(getenv("PATH") != "")
+      $cctbxPath .= ":".getenv("PATH");
+
+    return $cctbxPath;
+}
 
 #{{{ mpCheckSessionID - verifies that an ID has the expected form
 ############################################################################
@@ -109,8 +128,8 @@ function mpStartSession($createIfNeeded = false)
             mpSessGC(MP_SESSION_LIFETIME);
 
             // Main data directories
-            mkdir($dataDir, 0777); // Default mode; is modified by UMASK too.
-            mkdir("$dataDir/".MP_DIR_SYSTEM, 0777);
+            mkdir($dataDir, 0770); // Default mode; is modified by UMASK too.
+            mkdir("$dataDir/".MP_DIR_SYSTEM, 0770);
 
             // Others specified in config.php must be created on demand.
 

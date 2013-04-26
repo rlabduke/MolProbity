@@ -50,9 +50,15 @@ function describePdbStats($pdbstats, $useHTML = true)
             if($pdbstats['originalInputH'])
             {
               if($pdbstats['non_ecloud_H'])
+              {
                 $details[] = "Explicit hydrogens present in original input file at nuclear positions. Hydrogens have been removed.";
+                $_SESSION['reduce_blength'] = 'nuclear';
+              }
               else
+              {
                 $details[] = "Explicit hydrogens present in original input file at electron cloud positions. Hydrogens have been removed.";
+                $_SESSION['reduce_blength'] = 'ecloud';
+              }
             }
             elseif($pdbstats['has_most_H'])
                 $details[] = "Explicit hydrogens are present.";
@@ -393,7 +399,7 @@ function pdbstat($pdbfilename)
 #{{{ analyzeHydrogens - checks lengths of Hs
 function analyzeHydrogens($infile) {
     #$tmp1   = mpTempfile("tmp_dangle");
-    echo "Analyzing Hydrogens\n";
+    #echo "Analyzing Hydrogens\n";
 
     exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -validate -hydrogens -outliers -sigma=0 $infile | wc -l", $allHs);
     exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -validate -hydrogens -outliers $infile | wc -l", $outliers);

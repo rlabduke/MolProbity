@@ -72,7 +72,7 @@ function display($context)
         echo "</small></td></tr>\n";
         echo "<tr><td colspan='2'>&nbsp;</td></tr>\n"; // vertical spacer
         echo "<tr valign='top'><td width='300'><input type='radio' name='method' value='nobuild' $check2> <b>No flips</b><td>";
-        echo "<td><small>Add missing H, optimize H-bond networks, leave other atoms alone (<code>Reduce -nobuild</code>)</small></td></tr>\n";
+        echo "<td><small>Add missing H, optimize H-bond networks, leave other atoms alone (<code>Reduce -nobuild9999</code>)</small></td></tr>\n";
         echo "</table></p>\n";
 
         echo "<h3>Select x-H bond-length:</h3>";
@@ -156,16 +156,24 @@ function onAddH()
         $_SESSION['bgjob']['makeFlipkin']    = $req['makeFlipkin'];
         $_SESSION['bgjob']['reduce_blength'] = $req['blength'];
 
+        $_SESSION['reduce_blength'] = $_SESSION['bgjob']['reduce_blength'];
+
         if($req['method'] == 'build')
         {
-            mpLog("reduce-build:User ran default Reduce -build job; flipkins=".$_REQUEST['makeFlipkin']);
+            if($_SESSION['bgjob']['reduce_blength'] == 'ecloud')
+              mpLog("reduce-build:User ran default Reduce -build job; flipkins=".$_REQUEST['makeFlipkin']);
+            else
+              mpLog("reduce-build:User ran default Reduce -build -nuclear job; flipkins=".$_REQUEST['makeFlipkin']);
             // launch background job
             pageGoto("job_progress.php");
             launchBackground(MP_BASE_DIR."/jobs/reduce-build.php", "reduce_choose.php", 5);
         }
         elseif($req['method'] == 'nobuild')
         {
-            mpLog("reduce-nobuild:User ran Reduce without -build flag");
+            if($_SESSION['bgjob']['reduce_blength'] == 'ecloud')
+              mpLog("reduce-nobuild:User ran Reduce with -nobuild9999 flag");
+            else
+              mpLog("reduce-nobuild:User ran Reduce with -nobuild9999 -nuclear flag");
             // launch background job
             pageGoto("job_progress.php");
             launchBackground(MP_BASE_DIR."/jobs/reduce-nobuild.php", "generic_done.php", 5);

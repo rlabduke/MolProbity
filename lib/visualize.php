@@ -620,6 +620,7 @@ function makeBadPPerpKin($infile, $outfile)
 */
 function makeProbeDots($infile, $outfile, $hbDots = false, $vdwDots = false, $clashDots = true, $clashLimit = null)
 {
+    $ocutval = 10;
     $options = "";
     if(!$hbDots)                                 $options .= " -nohbout";
     if(!$vdwDots)                                $options .= " -novdwout";
@@ -628,9 +629,9 @@ function makeProbeDots($infile, $outfile, $hbDots = false, $vdwDots = false, $cl
 
     // -dotmaster adds a "dots" master -- useful when using this kin with Probe remote update
     if ($clashLimit == null) {
-      exec("probe $options -4H -quiet -noticks -nogroup -dotmaster -mc -self 'alta' $infile >> $outfile");
+      exec("probe $options -4H -quiet -noticks -nogroup -dotmaster -mc -het -stdbonds -self 'ogt$ocutval' $infile >> $outfile");
     } else {
-      exec("probe $options -DIVlow$clashLimit -4H -quiet -noticks -nogroup -dotmaster -mc -self 'alta' $infile >> $outfile");
+      exec("probe $options -DIVlow$clashLimit -4H -quiet -noticks -nogroup -dotmaster -mc -het -stdbonds -self 'ogt$ocutval' $infile >> $outfile");
     }
 }
 #}}}########################################################################
