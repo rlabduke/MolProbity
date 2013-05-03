@@ -4,7 +4,7 @@
 *****************************************************************************/
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
 class helper_nmr_delegate extends BasicDelegate {
-    
+
 #{{{ display - creates the UI for this page
 ############################################################################
 /**
@@ -17,7 +17,7 @@ function display($context)
 <div class='feature'>
     We currently have no tutorials for NMR structures, but many of the principles of analyzing crystal structures still apply.
     See our
-    <a href='http://kinemage.biochem.duke.edu/teaching/csh/' target='_blank'>Cold Spring Harbor tutorial on MolProbity</a>
+    <a href='http://kinemage.biochem.duke.edu/teaching/workshop/CSHL2012/' target='_blank'>2012 Cold Spring Harbor tutorial on MolProbity</a>
     as well as our <a href='<?php echo makeEventURL("onGoto", "helper_xray.php") ?>'>guide to analyzing X-ray structures</a>.
 </div>
 
