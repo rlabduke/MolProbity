@@ -4,8 +4,8 @@
     require_once(MP_BASE_DIR.'/lib/core.php');
     require_once(MP_BASE_DIR.'/lib/analyze.php');
     require_once(MP_BASE_DIR.'/lib/visualize.php');
-    
-      
+
+
 //Functions for ROTAMER OUTLIERS
 #{{{ makeBadRotamerKinNMR
 function makeBadRotamerKinNMR($infile, $outfile, $rota, $color = 'orange', $cutoff = 1.0)
@@ -16,7 +16,7 @@ function makeBadRotamerKinNMR($infile, $outfile, $rota, $color = 'orange', $cuto
 		$worst[] = $res['resName'];
 	}
 	$sc = resGroupsForPrekin(groupAdjacentRes($worst));
-	
+
 	$h = fopen($outfile, 'a');
 	// changed to @subgroup
 	fwrite($h, "@subgroup {bad rotamers} dominant\n");
@@ -35,7 +35,7 @@ function makeBadRamaKinNMR($infile, $outfile, $rama, $color = 'red')
             $worst[] = $res['resName'];
     }
     $mc = resGroupsForPrekin(groupAdjacentRes($worst));
-    
+
     $h = fopen($outfile, 'a');
     //changed to @subgroup, added @vectorlist, and changed color to red for rama outliers
     fwrite($h, "@subgroup {Rama outliers} \n@vectorlist {Rama outliers} color= red \n");
@@ -48,7 +48,7 @@ function makeBadRamaKinNMR($infile, $outfile, $rama, $color = 'red')
 #{{{ nmrMultiKin - rot, rama, noe, clashes all in subgroups, multimodel support
 
 // $pdbname - array of pdbs to be iterated and subsequently appended into the kin (all same file)
-// $constraints - NOE constraints file, must not include dihedral angle constraints.  
+// $constraints - NOE constraints file, must not include dihedral angle constraints.
 // $kinName - name of output .kin file, should make consistent with input pdb name (parts are appended).
 
 
@@ -62,13 +62,14 @@ function nmrMultiKin($pdbname, $constraints, $kinName)
 		 if($first)
 		 {
 			 //commands run on the first .pdb opened
-			 
+
 			 //create a base kin w/ mainchain and h-bonds
 			 echo("prekin -mchb -lots -animate -show 'mc(white),sc(blue)' $pdb > $kinName");
 			 exec("prekin -mchb -lots -animate -show 'mc(white),sc(blue)' $pdb > $kinName");
-			 
+
 			 //dots h-bonds and clashes
-			 exec("probe -mc -stdbonds -NOGroup -NOVDWOUT -quiet -noticks -self 'All' $pdb > $kinName");
+			 exec("probe -mc -NOGroup -NOVDWOUT -quiet -noticks -self 'All' $pdb > $kinName");
+			 //exec("probe -mc -stdbonds -NOGroup -NOVDWOUT -quiet -noticks -self 'All' $pdb > $kinName");
 			 //modifies the probe output to includ ea mc Dots master
 			 //$h = fopen('probetempdata', 'r');
 			 //$k = fopen($kinName, 'a');
@@ -87,7 +88,7 @@ function nmrMultiKin($pdbname, $constraints, $kinName)
 			// fclose($k);
 			// fclose($h);
 			// unlink("probetempdata");
-			 
+
 			 //sc dots only. h-bonds and clashes
 			// exec("probe -stdbonds -NOGroup -NOVDWOUT -quiet -noticks -name 'sc-x dots' -self 'alta' $pdb >> 'probetempdata'");
 			 //modifies the probe output to include a sc Dots master
@@ -108,7 +109,7 @@ function nmrMultiKin($pdbname, $constraints, $kinName)
 			// fclose($k);
 			// fclose($h);
 			// unlink("probetempdata");
-			 
+
 			 //append as subgroup the violations only from noe-display set w/ r^6 summation
 			 echo("noe-display -cv -s viol -ds+ -fs -k $pdb $constraints < /dev/null >> $kinName");
 			 exec("noe-display -cv -s viol -ds+ -fs -k $pdb $constraints < /dev/null >> $kinName");
@@ -120,22 +121,23 @@ function nmrMultiKin($pdbname, $constraints, $kinName)
 			 runRamachandran($pdb, "runRamaTemp.data");
 			 $loadRamaOut = loadRamachandran("runRamaTemp.data");
 			 makeBadRamaKinNMR($pdb, $kinName, $loadRamaOut);
-			 
+
 			 //separates so not running this 'first' on any others... (for supressing @kinemage)
 			 $first = false;
-			 
+
 		 }
 		 else
 		 {
 			 //commands run on all subsequent .pdb files opened
-			 
+
 			 //create a base kin w/ mainchain and h-bonds and colors them
 			 echo("prekin -mchb -lots -append -animate -show 'mc(white),sc(blue)' $pdb >> $kinName");
 			 exec("prekin -mchb -lots -append -animate -show 'mc(white),sc(blue)' $pdb >> $kinName");
-			 
+
 			 //mc dots only.  h-bonds and clashes
-			
-			 exec("probe -mc -stdbonds -NOGroup -NOVDWOUT -quiet -noticks -self 'All' $pdb >> $kinName");
+
+			 exec("probe -mc -NOGroup -NOVDWOUT -quiet -noticks -self 'All' $pdb >> $kinName");
+			 //exec("probe -mc -stdbonds -NOGroup -NOVDWOUT -quiet -noticks -self 'All' $pdb >> $kinName");
 			 //modifies the probe output to includ ea mc Dots master
 			 //$h = fopen('probetempdata', 'r');
 			 //$k = fopen($kinName, 'a');
@@ -154,7 +156,7 @@ function nmrMultiKin($pdbname, $constraints, $kinName)
 			 //fclose($k);
 			 //fclose($h);
 			 //unlink("probetempdata");
-			 
+
 			 //sc dots only. h-bonds and clashes
 			 //exec("probe -stdbonds -NOGroup -NOVDWOUT -quiet -noticks -name 'sc-x dots' -self 'alta' $pdb >> 'probetempdata'");
 			 //modifies the probe output to include a sc Dots master
@@ -175,8 +177,8 @@ function nmrMultiKin($pdbname, $constraints, $kinName)
 			 //fclose($k);
 			 //fclose($h);
 			 //unlink("probetempdata");
-			 
-			 
+
+
 			 //append as subgroup the violations only from noe-display set w/ r^6 summation
 			 echo("noe-display -cv -s viol -ds+ -fs -k $pdb $constraints < /dev/null >> $kinName");
 			 exec("noe-display -cv -s viol -ds+ -fs -k $pdb $constraints < /dev/null >> $kinName");
@@ -188,13 +190,13 @@ function nmrMultiKin($pdbname, $constraints, $kinName)
 			 runRamachandran($pdb, "runRamaTemp.data");
 			 $loadRamaOut = loadRamachandran("runRamaTemp.data");
 			 makeBadRamaKinNMR($pdb, $kinName, $loadRamaOut);
-			 
+
 		 }
 		 unlink("runRamaTemp.data");
 		 unlink("runRotTemp.data");
-		
+
 	 }
-	 
+
 } //end of nmrMultiKin
 #}}}
 
@@ -229,12 +231,12 @@ In the -X, -Z plane:
 - in order from 1 at -1 and going on up
 
 
-For a hypothetical two models a and b, the kinemage pseudo code for the plotted data 
+For a hypothetical two models a and b, the kinemage pseudo code for the plotted data
 is the following:
 
 grids and labels etc
 
-group a 
+group a
 
 dot list rotamer outlier % (rota % master)
 x,y,z (typical x, y plot for global measures)
@@ -242,25 +244,25 @@ resolution (1.7), value (24.54), model # slice placement (1)
 {    24.54%} 170.00 24.54 -10.0
 
 dot list romater outliers (rota outliers)
-x,y,z (typical -x, -z plot for tracking along a model and comparing b/w models) 
+x,y,z (typical -x, -z plot for tracking along a model and comparing b/w models)
 res# (a neg number), 0, model # slice placement (neg number)
 {    12 ASN} -12.000 0.000 -10.0
 {    76 ILE} -76.000 0.000 -10.0
 
-other measures will be similar... 
+other measures will be similar...
 
 
 */
 
 
-//$pdbname is an array of pdb file names, 
+//$pdbname is an array of pdb file names,
 //$Chartkin is the output kin file which is overwritten
 function makeChartKin($pdbname, $ChartKin)
 {
 	$caption = "caption goes here";
-	
+
 	$out = fopen ($ChartKin, 'w');
-	
+
 	fwrite ($out,"@kinemage \n");
 
 	fwrite ($out," \n");
@@ -471,11 +473,11 @@ foreach($pdbname as $pdb)
 //overall stats needed for each pdb file
 
 // crystallographic resolution of the model
-$stats = pdbstat($pdb); 
+$stats = pdbstat($pdb);
 $resolution = $stats['resolution'];
 
 /*
-$ConstPerRes =   
+$ConstPerRes =
 // NMR constraints per Residue in the model
 */
 
@@ -505,15 +507,15 @@ foreach ($RotaOut as $ResName => $score)
 	$x = ($rota[$ResName]['resNum']) * -1.000;
 	$y = round($rota[$ResName]['scorePct'],2);
 	$z = $modelcounter * -10.000;
-	
+
 	// if x = 0, go to next one...
 	if($x == 0)
 	{
-	continue;	
+	continue;
 	}
-	
+
 	fwrite ($out,"{". basename($pdb,".pdb"). " " . $ResName ."}$x $y $z \n");
-	
+
 }
 
 // plotting % rotamer outlier data
@@ -522,7 +524,7 @@ foreach ($RotaOut as $ResName => $score)
 // plots the model
 
 $numRotaOut = count( findRotaOutliers($rota) );
-// can include a factor here 
+// can include a factor here
 $percentoutlier = round( (($numRotaOut / $numRes) * 100), 2);
 // multiplication by 100 is the scaleing 'fudge' factor
 $x = $resolution * 100;
@@ -541,10 +543,10 @@ $modelcounter= $modelcounter + 1;
 //end of the for each loop going through the PDB files
 }
 
-	
+
 	fclose ($out);
-	
-	
+
+
 }
 
 

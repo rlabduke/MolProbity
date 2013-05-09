@@ -60,9 +60,11 @@ END {
 ## Don't include water in 'src' search set b/c we don't want it listed in the output
 ## unless it clashes with a protein/nucleic acid residue.
 if [ "$blength" == "ecloud" ]; then
-probe_flags="-u -q -mc -het -stdbonds -once"
+probe_flags="-u -q -mc -het -once"
+#probe_flags="-u -q -mc -het -stdbonds -once"
 else
-probe_flags="-u -q -mc -het -stdbonds -nuclear -once"
+probe_flags="-u -q -mc -het -nuclear -once"
+#probe_flags="-u -q -mc -het -stdbonds -nuclear -once"
 fi
 
 probe $probe_flags "ogt$ocutval not water" "ogt$ocutval" $1 |\
