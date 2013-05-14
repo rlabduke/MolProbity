@@ -345,7 +345,7 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
     $tasks['scrublines'] = "Convert linefeeds to UNIX standard (\\n)";
     $tasks['stripusermod'] = "Strip out old USER MOD records from <code>reduce</code>";
     $tasks['pdbstat'] = "Analyze contents of PDB file";
-    $tasks['segmap'] = "Convert segment IDs to chain IDs (if needed)";
+    //$tasks['segmap'] = "Convert segment IDs to chain IDs (if needed)";
     $tasks['cnsnames'] = "Convert CNS atom names to PDB standard (if needed)";
     $tasks['pdbstat2'] = "Re-analyze contents of final PDB file";
     //$tasks['remediate'] = "Convert PDB to version 3 format (if needed)";
@@ -361,6 +361,7 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
     // Get PDB statistics so we know if we have CNS atom names
     setProgress($tasks, 'pdbstat'); // updates the progress display if running as a background job
     $stats = pdbstat($tmp2);
+    /*
     // Try to determine if we need to make chain IDs from segment IDs
     setProgress($tasks, 'segmap'); // updates the progress display if running as a background job
     $segToChainMapping = trim(`cksegid.pl $tmp2`);
@@ -380,10 +381,12 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
         echo "*** Unable to automagically correct XPLOR/CNS segIDs";
         $segToChainMapping = "";
     }
+    */
     // Run PDBCNS if we need to (tmp2 is most recent file):
     // - if we have CNS-style atom names
     // - if we have CNS-style records in the header (3 or more)
     // - if the user told us these were CNS coordinates
+    $segToChainMapping = "";
     setProgress($tasks, 'cnsnames'); // updates the progress display if running as a background job
     if(/*has CNS atom names or*/ $stats['fromcns'] >= 3 || $isCNS)
     {
@@ -945,7 +948,7 @@ function decodeReduceUsermods($file)
     {
         // Look for Asn, Gln, and His marked by Reduce
         #if( eregi("^USER  MOD........:......(ASN|GLN|HIS)", $s) )
-        if(preg_match('/^USER  MOD (Set|Single).*?:.{7}(ASN|GLN|HIS)/i', $s))
+        if(preg_match('/^USER  MOD (Set|Single).*?:.{7,9}(ASN|GLN|HIS)/i', $s))
         {
             //echo "found user mod ".$s."\n";
             // Break it down into colon-delimited fields.
@@ -970,8 +973,16 @@ function decodeReduceUsermods($file)
 
             // Better to group ins code with number than res type.
             // I don't *think* anything depended on the old behavior.
-            // CNIT:       C  NNNNI  TTT
-            preg_match('/^.(.)(.....)(...)/', $field[1], $f1);
+            if(!$_SESSION['useSEGID'])
+            {
+              // CNIT:       CC  NNNNI  TTT
+              preg_match('/^(..)(.....)(...)/', $field[1], $f1);
+            }
+            else
+            {
+              // CNIT:       CCCC  NNNNI  TTT
+              preg_match('/^(....)(.....)(...)/', $field[1], $f1);
+            }
             $changes[1][$c] = trim($f1[1]);
             $changes[2][$c] = trim($f1[2]);
             $changes[3][$c] = trim($f1[3]);

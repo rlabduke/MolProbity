@@ -30,6 +30,8 @@ function describePdbStats($pdbstats, $useHTML = true)
     if(isset($pdbstats['resolution'])) $details[] = "This is a crystal structure at ".$pdbstats['resolution']." A resolution.";
 
     // # of chains and residues
+    if($_SESSION['useSEGID'])
+      $details[] = "Using segIDs in place of chainIDs.";
     $details[] = $pdbstats['chains']." chain(s) is/are present [".$pdbstats['unique_chains']." unique chain(s)]";
     $details[] = "A total of ".$pdbstats['residues']." residues are present.";
 
@@ -154,6 +156,9 @@ function pdbstat($pdbfilename)
     $allAlts = array();     # total number of alternates (set of res)
     $rValue = array();      # various kinds of R value
     $rFree = array();       # various kinds of Rfree
+    $compnd = "";
+    $chainID_count = 0;     # number of records w/ non-blank chainID
+    $segID_count = 0;       # number of records w/ non-blank segID
 
     // for testing whether there are any old format atom lines.
     $hashFile = file(MP_BASE_DIR."/lib/PDBv2toPDBv3.hashmap.txt");
@@ -173,13 +178,14 @@ function pdbstat($pdbfilename)
         $s = rtrim(fgets($file, 1024));
 
         # These will be meaningless for some lines, but that's OK
-        $chain   = substr($s,21,1); # Chain ID (one letter)
-            if($chain == " ") $chain = "_";
+        $chain   = substr($s,20,2); # Chain ID (two chars)
+            if($chain == "  ") $chain = "__";
         $resno   = substr($s,22,4); # Residue number (four chars)
         $icode   = substr($s,26,1); # Insertion code (one char)
         $restype = substr($s,17,3); # Residue type (three chars)
         $atom    = substr($s,12,5); # Atom (four) + alt (one)
-        $id = $chain.$resno.$icode.$restype; # 9-character residue ID
+        $segid   = substr($s,72,4); # segid (four)
+        $id = $chain.$resno.$icode.$restype; # 10-character residue ID
 
         # Switch on record type
         if(startsWith($s, "ENDMDL")) { $models++; }
@@ -237,12 +243,16 @@ function pdbstat($pdbfilename)
             if(startsWith($s, "ATOM"))
             {
                 $chainids[$chain] = $chain; # record chain IDs used
+                $segids[$segid] = $segid; # record seg IDs used
+                if($chain != "__") $chainID_count += 1;
+                if($segid != "    ") $segID_count += 1;
                 # Start of a new residue?
                 if($id != $rescode)
                 {
                     $residues++;
                     $rescode = $id;
                     $chains[$chain] .= $restype.'/'; # need slashes for correct substring test, below
+                    $segments[$segid] .= $restype.'/';
                 }
 
                 # Atom name == CB?
@@ -349,16 +359,54 @@ function pdbstat($pdbfilename)
     }
     else $unique_chains = 1;
 
+    # Determine number of entries in $segids that are unique
+    if(count($segments) > 1)
+    {
+        $ch = array_values($segments);
+        $unique_segids = 0;
+
+        for($i = 0; $i < count($ch); $i++)
+        {
+            for($j = $i+1; $j < count($ch); $j++)
+            {
+                # Chains are "identical" if either is a substring of the other.
+                if(strlen($ch[$i]) < strlen($ch[$j]))
+                {
+                    if(strpos($ch[$i], $ch[$j]) !== FALSE) { continue 2; }
+                }
+                else
+                {
+                    if(strpos($ch[$j], $ch[$i]) !== FALSE) { continue 2; }
+                }
+            }
+            $unique_segids++;
+        }
+    }
+    else $unique_segids = 1;
+
     if ($hydrogens+$hnonpolar > 0) {
       $nonECloudH = analyzeHydrogens($pdbfilename);
+    }
+
+    if ( ($chainID_count == 0) && ($segID_count > 0) ) {
+      $_SESSION['useSEGID'] = true;
     }
 
     # Output
     $ret['compnd']          = $compnd;
     $ret['models']          = $models;
-    $ret['chains']          = count($chains);
-    $ret['chainids']        = $chainids;
-    $ret['unique_chains']   = $unique_chains;
+    if (!$_SESSION['useSEGID'])
+    {
+      $ret['chains']          = count($chains);
+      $ret['chainids']        = $chainids;
+      $ret['unique_chains']   = $unique_chains;
+    }
+    else
+    {
+      $ret['chains']          = count($segids);
+      $ret['chainids']        = $segids;
+      $ret['unique_chains']   = $unique_segids;
+    }
     $ret['residues']        = $residues;
     $ret['sidechains']      = $cbetas;
     $ret['nucacids']        = $nucacids;

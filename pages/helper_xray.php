@@ -4,7 +4,7 @@
 *****************************************************************************/
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
 class helper_xray_delegate extends BasicDelegate {
-    
+
 #{{{ display - creates the UI for this page
 ############################################################################
 /**
@@ -16,7 +16,7 @@ function display($context)
 ?>
 <div class='feature'>
     <b>For a more detailed tutorial</b>, including references, see our
-    <a href='http://kinemage.biochem.duke.edu/teaching/csh/' target='_blank'>Cold Spring Harbor tutorial on MolProbity</a>!
+    <a href='http://kinemage.biochem.duke.edu/teaching/workshop/CSHL2012/' target='_blank'>2012 Cold Spring Harbor tutorial on MolProbity</a>!
 </div>
 
 Use this guide to help you evaluate the reliablity of a structural model determined by X-ray crystallography --
