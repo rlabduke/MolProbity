@@ -12,7 +12,7 @@
     in order to obtain all the usual resources that every page expects.
 *****************************************************************************/
 // Current "internal reference" version number. Please DO NOT change.
-define("MP_VERSION", "4.01a"); // initialize MP version number (w/ svn revision # if exported from svn)
+define("MP_VERSION", "4.02b"); // initialize MP version number (w/ svn revision # if exported from svn)
 
 // Someone else MUST have defined this before including us!
 if(!defined('MP_BASE_DIR')) die("MP_BASE_DIR is not defined.");
@@ -187,6 +187,12 @@ function mpNavBar_call($page, $title)
 ############################################################################
 function mpPageFooter()
 {
+    $segid_txt = '';
+    $segid_status = $_SESSION['useSEGID'];
+    if($segid_status)
+    {
+      $segid_txt = '| Using SEGIDs ';
+    }
     $reduce_blength = $_SESSION['reduce_blength'];
     if ($reduce_blength == '') $reduce_blength = 'ecloud'; #default
     return '
@@ -195,8 +201,8 @@ function mpPageFooter()
 <tr><td colspan="2">
     <div class="pagefooter">
 About <a href="help/about.html" target="_blank">MolProbity</a>
-| Website for <a href="http://kinemage.biochem.duke.edu" target="_blank">the Richardson Lab</a>
-| Using '.$reduce_blength.' x-H
+| Website for <a href="http://kinemage.biochem.duke.edu" target="_blank">the Richardson Lab</a> '.
+$segid_txt.'| Using '.$reduce_blength.' x-H
 | Internal reference '.MP_VERSION.'
     </div>
 </td></tr>
@@ -596,7 +602,8 @@ function destructiveGZipFile($path)
 */
 function mpTempfile($prefix = 'tmp_misc_')
 {
-    return tempnam(MP_BASE_DIR."/tmp", $prefix);
+    #return tempnam(MP_BASE_DIR."/tmp", $prefix);
+    return tempnam(MP_JOB_DATA_DIR."/tmp", $prefix);
 }
 #}}}########################################################################
 

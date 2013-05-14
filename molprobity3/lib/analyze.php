@@ -409,7 +409,15 @@ function runAnalysis($modelID, $opts)
 ############################################################################
 function runBasePhosPerp($infile, $outfile)
 {
-    exec("prekin -pperptoline -pperpdump $infile > $outfile");
+    if(!$_SESSION['useSEGID'])
+    {
+      $opt = "-pperptoline -pperpdump";
+    }
+    else
+    {
+      $opt = "-pperptoline -pperpdump -segid";
+    }
+    exec("prekin $opt $infile > $outfile");
 }
 #}}}########################################################################
 
@@ -449,7 +457,7 @@ function loadBasePhosPerp($datafile)
             //echo strtoupper(substr($line[3],0,-1))."\n";
             $entry = array(
                 'resType'   => strtoupper(substr($line[2],1,-1)),
-                'chainID'   => strtoupper(substr($line[3],2,-1)),
+                'chainID'   => strtoupper(substr($line[3],1,-1)),
                 'resNum'    => trim(substr($line[4], 0, -2)) + 0,
                 'insCode'   => strtoupper(substr($line[4], -2, 1)),
                 '5Pdist'    => $line[5] + 0,
@@ -495,7 +503,14 @@ function findBasePhosPerpOutliers($input)
 ############################################################################
 function runCbetaDev($infile, $outfile)
 {
-    exec("prekin -cbdevdump $infile > $outfile");
+    if(!$_SESSION['useSEGID'])
+    {
+      exec("prekin -cbdevdump $infile > $outfile");
+    }
+    else #use segid in place of chainid
+    {
+      exec("prekin -cbdevdump -segid $infile > $outfile");
+    }
 }
 #}}}########################################################################
 
@@ -504,7 +519,7 @@ function runCbetaDev($infile, $outfile)
 /**
 * Returns an array of entries, one per residue. Their keys:
 *   altConf         alternate conformer flag, or ' ' for none
-*   resName         a formatted name for the residue: 'cnnnnittt'
+*   resName         a formatted name for the residue: 'ccnnnnittt'
 *                       c: Chain ID, space for none
 *                       n: sequence number, right justified, space padded
 *                       i: insertion code, space for none
@@ -530,7 +545,7 @@ function loadCbetaDev($datafile)
             $entry = array(
                 'altConf'   => strtoupper($line[1]),
                 'resType'   => strtoupper($line[2]),
-                'chainID'   => trim(strtoupper($line[3])),
+                'chainID'   => strtoupper($line[3]),
                 'resNum'    => trim(substr($line[4], 0, -1)) + 0,
                 'insCode'   => substr($line[4], -1),
                 'dev'       => $line[5] + 0,
@@ -646,10 +661,20 @@ function loadClashlist($datafile)
         if($datum{0} == ':')
         {
             $line = explode(':', $datum);
-            $res1 = substr($line[2], 1, 9);
-            $atm1 = substr($line[2], 11, 5);
-            $res2 = substr($line[3], 1, 9);
-            $atm2 = substr($line[3], 11, 5);
+            if (!$_SESSION['useSEGID'])
+            {
+              $res1 = substr($line[2], 0, 10);
+              $atm1 = substr($line[2], 11, 5);
+              $res2 = substr($line[3], 0, 10);
+              $atm2 = substr($line[3], 11, 5);
+            }
+            else
+            {
+              $res1 = substr($line[2], 0, 12);
+              $atm1 = substr($line[2], 13, 5);
+              $res2 = substr($line[3], 0, 12);
+              $atm2 = substr($line[3], 13, 5);
+            }
             $dist = abs(trim($line[4])+0);
             if(!isset($clashes[$res1]) || $clashes[$res1] < $dist)
             {
@@ -1011,7 +1036,7 @@ function runValidationReport($infile, $outfile, $moltype)
 */
 function loadValidationBondReport($datafile, $moltype)
 {
-#1TC6.pdb:1:A: 250: :VAL:N-CA-C:99.511:-4.255
+#1TC6.pdb:1: A: 250: :VAL:N-CA-C:99.511:-4.255
     $data = file($datafile);
     //$ret = array(); // needs to return null if no data!
     $hash1_1 = array();
@@ -1338,12 +1363,22 @@ function calcLocalBadness($infile, $range, $clash, $rama, $rota, $cbdev, $pperp)
 */
 function decomposeResName($name)
 {
-    return array(
-        'resType'   => substr($name, 6, 3),
-        'chainID'   => substr($name, 0, 1),
-        'resNum'    => trim(substr($name, 1, 4))+0,
-        'insCode'   => substr($name, 5, 1)
-    );
+    if(!$_SESSION['useSEGID'])
+    {
+      return array(
+        'resType'   => substr($name, 7, 3),
+        'chainID'   => substr($name, 0, 2),
+        'resNum'    => trim(substr($name, 2, 4))+0,
+        'insCode'   => substr($name, 6, 1));
+    }
+    else
+    {
+      return array(
+        'resType'   => substr($name, 9, 3),
+        'chainID'   => substr($name, 0, 4),
+        'resNum'    => trim(substr($name, 4, 4))+0,
+        'insCode'   => substr($name, 8, 1));
+    }
 }
 #}}}########################################################################
 
@@ -1351,7 +1386,14 @@ function decomposeResName($name)
 ############################################################################
 function pdbComposeResName($pdbline)
 {
-    return substr($pdbline, 21, 6) . substr($pdbline, 17, 3);
+    if(!$_SESSION['useSEGID'])
+    {
+      return substr($pdbline, 20, 7) . substr($pdbline, 17, 3);
+    }
+    else
+    {
+      return substr($pdbline, 72, 4) . substr($pdbline, 22, 5) . substr($pdbline, 17, 3);
+    }
 }
 #}}}########################################################################
 
@@ -1577,17 +1619,34 @@ function groupAdjacentRes($resList)
     $out = array();
     if(is_array($resList)) foreach($resList as $res)
     {
-        $num = substr($res, 1, 4) + 0;
-        // If old run is ending, append it and start fresh:
-        if(isset($run) && !($num - $prevNum <= 1 && $chainID == $res{0}))
+        if(!$_SESSION['useSEGID'])
         {
-            $out[$chainID][] = $run;
-            unset($run);
+          $num = substr($res, 2, 4) + 0;
+          // If old run is ending, append it and start fresh:
+          if(isset($run) && !($num - $prevNum <= 1 && $chainID == $res{0}))
+          {
+              $out[$chainID][] = $run;
+              unset($run);
+          }
+          // Append this residue to the current run (which is potentially empty)
+          $prevNum    = $num;
+          $chainID    = substr($res,0,2);
+          $run[]      = $res;
         }
-        // Append this residue to the current run (which is potentially empty)
-        $prevNum    = $num;
-        $chainID    = $res{0};
-        $run[]      = $res;
+        else
+        {
+          $num = substr($res, 4, 4) + 0;
+          // If old run is ending, append it and start fresh:
+          if(isset($run) && !($num - $prevNum <= 1 && $chainID == $res{0}))
+          {
+              $out[$chainID][] = $run;
+              unset($run);
+          }
+          // Append this residue to the current run (which is potentially empty)
+          $prevNum    = $num;
+          $chainID    = substr($res,0,4);
+          $run[]      = $res;
+        }
     }
 
     // Append the last run, if any

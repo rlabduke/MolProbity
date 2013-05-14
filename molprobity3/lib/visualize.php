@@ -43,7 +43,15 @@ function convertKinToPostscript($infile)
 ############################################################################
 function makeCbetaDevPlot($infile, $outfile)
 {
-    exec("prekin -cbdevdump $infile | java -cp ".MP_BASE_DIR."/lib/hless.jar hless.CBScatter > $outfile");
+    if(!$_SESSION['useSEGID'])
+    {
+      $opt = "-cbdevdump";
+    }
+    else
+    {
+      $opt = "-cbdevdump -segid";
+    }
+    exec("prekin $opt $infile | java -cp ".MP_BASE_DIR."/lib/hless.jar hless.CBScatter > $outfile");
 }
 #}}}########################################################################
 
@@ -65,15 +73,23 @@ function makeFlipkin($inpath, $outpathAsnGln, $outpathHis)
     // so it doesn't need to appear on the command line here.
     //exec("flipkin -limit" . MP_REDUCE_LIMIT . " $inpath > $outpathAsnGln");
     //exec("flipkin -limit" . MP_REDUCE_LIMIT . " -h $inpath > $outpathHis");
-    if($_SESSION['reduce_blength'] == 'ecloud')
+    if($_SESSION['useSEGID'])
     {
-      exec("flipkin $inpath > $outpathAsnGln");
-      exec("flipkin -h $inpath > $outpathHis");
+      $flip_params = "-s $inpath";
     }
     else
     {
-      exec("flipkin -n $inpath > $outpathAsnGln");
-      exec("flipkin -n -h $inpath > $outpathHis");
+      $flip_params = "$inpath";
+    }
+    if($_SESSION['reduce_blength'] == 'ecloud')
+    {
+      exec("flipkin $flip_params > $outpathAsnGln");
+      exec("flipkin -h $flip_params > $outpathHis");
+    }
+    else
+    {
+      exec("flipkin -n $flip_params > $outpathAsnGln");
+      exec("flipkin -n -h $flip_params > $outpathHis");
     }
 }
 #}}}########################################################################
@@ -94,14 +110,41 @@ function resGroupsForPrekin($data)
     $out = array();
     foreach($data as $chainID => $chain)
     {
-        if($chainID == ' ') $chainID = '_';
-        $line   = "-chainid $chainID -range \"";
+        /* old version
+        //if($chainID == ' ') $chainID = '_';
+        if($chainID[0] == ' ' && $chainID[1] == ' ')
+        {
+          $chainID[0] = '_';
+          $chainID[1] = '_';
+        }
+        //if($chainID[0] == ' ') $chainID[0] = '_';
+        //if($chainID[1] == ' ') $chainID[1] = '_';
+        echo("chainID = '$chainID'\n");
+        if( ($chainID[0] == '_' || $chainID[0] == ' ') && $chainID[1] != '_')
+        {
+          $line   = "-chainid $chainID[1] -range \"";
+        }
+        else
+        {
+          $line   = "-chainid $chainID -range \"";
+        }
+        */
+
+        $line = "-chainid $chainID -range \"";
         $comma  = false;
         foreach($chain as $run)
         {
             reset($run);
-            $first  = trim(substr(current($run), 1, 4));;
-            $last   = trim(substr(end($run), 1, 4));
+            if(!$_SESSION['useSEGID'])
+            {
+              $first  = trim(substr(current($run), 2, 4));;
+              $last   = trim(substr(end($run), 2, 4));
+            }
+            else
+            {
+              $first  = trim(substr(current($run), 4, 4));;
+              $last   = trim(substr(end($run), 4, 4));
+            }
             if($comma) $line .= ',';
             else $comma = true;
             $line .= "$first-$last";
@@ -153,7 +196,14 @@ function makeMulticritKin($infiles, $outfile, $opt, $nmrConstraints = null)
     foreach($infiles as $infile)
     {
         // Animate is used only for multi-model kins.
-        exec("prekin -quiet -lots -append ".($isMultiModel ? "-animate" : "")." -onegroup $infile >> $outfile");
+        if(!$_SESSION['useSEGID'])
+        {
+          exec("prekin -quiet -lots -append ".($isMultiModel ? "-animate" : "")." -onegroup $infile >> $outfile");
+        }
+        else
+        {
+          exec("prekin -quiet -segid -lots -append ".($isMultiModel ? "-animate" : "")." -onegroup $infile >> $outfile");
+        }
 
         if($opt['ribbons'])
         {
@@ -306,7 +356,14 @@ function makeMulticritKin2($infiles, $outfile, $opt, $viewRes = array(), $nmrCon
     {
         // Animate is used even for single models, so they can be appended later.
         //echo("prekin -quiet -lots -append -animate -onegroup $infile >> $outfile\n");
-        exec("prekin -quiet -lots -append -animate -onegroup $infile >> $outfile");
+        if(!$_SESSION['useSEGID'])
+        {
+          exec("prekin -quiet -lots -append -animate -onegroup $infile >> $outfile");
+        }
+        else
+        {
+          exec("prekin -quiet -segid -lots -append -animate -onegroup $infile >> $outfile");
+        }
 
         #echo "before ribbon options\n";
         if($opt['ribbons'])
@@ -482,12 +539,20 @@ function makeAltConfKin($infile, $outfile, $mcColor = 'brown', $scColor = 'brown
     $scGrp  = groupAdjacentRes(array_keys($alts['sc']));
     $mc     = resGroupsForPrekin($mcGrp);
     $sc     = resGroupsForPrekin($scGrp);
+    if(!$_SESSION['useSEGID'])
+    {
+      $opt = "-quiet";
+    }
+    else
+    {
+      $opt = "-quiet -segid";
+    }
 
     foreach($mc as $mcRange)
-        exec("prekin -quiet -append -nogroup -listmaster 'mc alt confs' -bval -scope $mcRange -show 'mc($mcColor)' $infile >> $outfile");
+        exec("prekin $opt -append -nogroup -listmaster 'mc alt confs' -bval -scope $mcRange -show 'mc($mcColor)' $infile >> $outfile");
 
     foreach($sc as $scRange)
-        exec("prekin -quiet -append -nogroup -listmaster 'sc alt confs' -bval -scope $scRange -show 'sc($scColor)' $infile >> $outfile");
+        exec("prekin $opt -append -nogroup -listmaster 'sc alt confs' -bval -scope $scRange -show 'sc($scColor)' $infile >> $outfile");
 }
 #}}}########################################################################
 
@@ -563,8 +628,24 @@ function makeBadRotamerKin($infile, $outfile, $rota = null, $color = 'gold', $cu
 
     foreach($sc as $chainID => $scRange)
     {
-        //echo("prekin -quiet -append -nogroup -nosubgroup -listname 'chain $chainID' -listmaster 'rotamer outliers' -bval -scope $scRange -show 'sc($color)' $infile >> $outfile\n");
-        exec("prekin -quiet -append -nogroup -nosubgroup -listname 'chain $chainID' -listmaster 'rotamer outliers' -bval -scope $scRange -show 'sc($color)' $infile >> $outfile");
+        if(!$_SESSION['useSEGID'])
+        {
+          $opt = "-quiet";
+        }
+        else
+        {
+          $opt = "-quiet -segid";
+        }
+        //echo("prekin $opt -append -nogroup -nosubgroup -listname 'chain $chainID' -listmaster 'rotamer outliers' -bval -scope $scRange -show 'sc($color)' $infile >> $outfile\n");
+        /*if( ($chainID[0] == ' ' || $chainID[0] == '_') && $chainID[1] != '_')
+        {
+          exec("prekin $opt -append -nogroup -nosubgroup -listname 'chain $chainID[1]' -listmaster 'rotamer outliers' -bval -scope $scRange -show 'sc($color)' $infile >> $outfile");
+        }
+        else
+        {
+          exec("prekin $opt -append -nogroup -nosubgroup -listname 'chain $chainID' -listmaster 'rotamer outliers' -bval -scope $scRange -show 'sc($color)' $infile >> $outfile");
+        }*/
+        exec("prekin $opt -append -nogroup -nosubgroup -listname 'chain $chainID' -listmaster 'rotamer outliers' -bval -scope $scRange -show 'sc($color)' $infile >> $outfile");
     }
 }
 #}}}########################################################################
@@ -588,7 +669,9 @@ function makeBadCbetaBalls($infile, $outfile)
     fclose($h);
 
     // C-beta deviation balls >= 0.25A
-    $cbeta_dev_script =
+    if(!$_SESSION['useSEGID'])
+    {
+      $cbeta_dev_script =
 'BEGIN { doprint = 0; bigbeta = 0; }
 $0 ~ /^@/ { doprint = 0; }
 $0 ~ /^@(point)?master/ { print $0 }
@@ -596,8 +679,28 @@ $0 ~ /^@balllist/ { doprint = 1; print $0 " master= {Cbeta dev}"; }
 { bigbeta = 0 }
 match($0, /^\{ cb .+ r=([0-9]\.[0-9]+) /, frag) { gsub(/gold|pink/, "magenta"); bigbeta = (frag[1]+0 >= 0.25); }
 doprint && bigbeta';
+    }
+    else
+    {
+      $cbeta_dev_script =
+'BEGIN { doprint = 0; bigbeta = 0; }
+$0 ~ /^@/ { doprint = 0; }
+$0 ~ /^@(point)?master/ { print $0 }
+$0 ~ /^@balllist/ { doprint = 1; print $0 " master= {Cbeta dev}"; }
+{ bigbeta = 0 }
+match($0, /^\{ cb .+ r=([0-9]\.[0-9]+) /, frag) { gsub(/gold|pink/, "magenta"); bigbeta = (frag[1]+0 >= 0.25); }
+doprint && bigbeta';
+    }
 
-    exec("prekin -append -quiet -cbetadev $infile | gawk '$cbeta_dev_script' >> $outfile");
+    if(!$_SESSION['useSEGID'])
+    {
+      $opt = "-quiet";
+    }
+    else
+    {
+      $opt = "-quiet -segid";
+    }
+    exec("prekin -append $opt -cbetadev $infile | gawk '$cbeta_dev_script' >> $outfile");
 }
 #}}}########################################################################
 
@@ -609,7 +712,15 @@ function makeBadPPerpKin($infile, $outfile)
     fwrite($h, "@subgroup {base-phos perp} dominant master= {base-P outliers}\n");
     fclose($h);
 
-    exec("prekin -quiet -append -nogroup -pperptoline -pperpoutliers $infile >> $outfile");
+    if(!$_SESSION['useSEGID'])
+    {
+      $opt = "-quiet";
+    }
+    else
+    {
+      $opt = "-quiet -segid";
+    }
+    exec("prekin $opt -append -nogroup -pperptoline -pperpoutliers $infile >> $outfile");
 }
 #}}}########################################################################
 
@@ -646,7 +757,15 @@ function makeProbeDots($infile, $outfile, $hbDots = false, $vdwDots = false, $cl
 */
 function makeRainbowRibbons($infile, $outfile)
 {
-    exec("prekin -quiet -append -nogroup -colornc -bestribbon $infile >> $outfile");
+    if(!$_SESSION['useSEGID'])
+    {
+      $opt = "-quiet";
+    }
+    else
+    {
+      $opt = "-quiet -segid";
+    }
+    exec("prekin $opt -append -nogroup -colornc -bestribbon $infile >> $outfile");
 }
 #}}}########################################################################
 
@@ -698,7 +817,15 @@ mode==2 && match($0, /(^\{ *[^ ]+ ([^}]+))(\} *[PL] )(.+$)/, frag) {
 mode==2 { print $0; }';
 
     $tmp = mpTempfile("tmp_kin_");
-    exec("prekin -append -bestribbon -nogroup $infile > $tmp");
+    if(!$_SESSION['useSEGID'])
+    {
+      $opt = "-append";
+    }
+    else
+    {
+      $opt = "-append -segid";
+    }
+    exec("prekin $opt -bestribbon -nogroup $infile > $tmp");
     exec("gawk '$bbB_ribbon_script' $infile $tmp >> $outfile");
     unlink($tmp);
 }
@@ -713,7 +840,15 @@ mode==2 { print $0; }';
 function makeBfactorScale($infile, $outfile)
 {
     $colors = "-colorscale 'blue,5,purple,10,magenta,15,hotpink,20,red,30,orange,40,gold,50,yellow,60,yellowtint,80,white'";
-    exec("prekin -quiet -append -nogroup -listmaster 'B factors' -bval -scope -show 'mc,sc' -bcol $colors $infile >> $outfile");
+    if(!$_SESSION['useSEGID'])
+    {
+      $opt = "-quiet";
+    }
+    else
+    {
+      $opt = "-quiet -segid";
+    }
+    exec("prekin $opt -append -nogroup -listmaster 'B factors' -bval -scope -show 'mc,sc' -bcol $colors $infile >> $outfile");
 }
 #}}}########################################################################
 
@@ -726,7 +861,15 @@ function makeBfactorScale($infile, $outfile)
 function makeOccupancyScale($infile, $outfile)
 {
     $colors = "-colorscale 'white,0.02,lilactint,0.33,lilac,0.66,purple,0.99,gray,1.01,green'";
-    exec("prekin -quiet -append -nogroup -listmaster 'occupancy' -bval -scope -show 'mc,sc' -ocol $colors $infile >> $outfile");
+    if(!$_SESSION['useSEGID'])
+    {
+      $opt = "-quiet";
+    }
+    else
+    {
+      $opt = "-quiet -segid";
+    }
+    exec("prekin $opt -append -nogroup -listmaster 'occupancy' -bval -scope -show 'mc,sc' -ocol $colors $infile >> $outfile");
 }
 #}}}########################################################################
 
@@ -1260,8 +1403,16 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
       foreach($res as $cnit => $eval)
       {
         if($outliersOnly && !$eval['any_isbad']) continue;
-        $cni = substr($cnit, 0, 6);
-        $type = substr($cnit, 6, 3);
+        if(!$_SESSION['useSEGID'])
+        {
+          $cni = substr($cnit, 0, 7);
+          $type = substr($cnit, 7, 3);
+        }
+        else
+        {
+          $cni = substr($cnit, 0, 9);
+          $type = substr($cnit, 9, 3);
+        }
         $row = array();
         //$row[] = array('html' => $cnit,             'sort_val' => $eval['order']+0);
         $row[] = array('html' => $cni,              'sort_val' => $eval['order']+0);

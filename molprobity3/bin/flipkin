@@ -38,6 +38,7 @@
    my $probe_chain_length = 1;
    my $isHis = 0;
    my $nuclear = 0;
+   my $segid = 0;
    my $extraFixFile = '';
    my $dbFile = '';
    my $limitFlag = '';
@@ -47,6 +48,7 @@
       if    (/^-[Hh]$/) { $isHis = 1; }                         # -h
       elsif (/^-[Vv]$/) { $verb = ''; }                         # -v
       elsif (/^-[Nn]$/) { $nuclear = 1; }                       # -n
+      elsif (/^-[Ss]$/) { $segid = 1; }                         # -s
       elsif (/^-[Ll][Ii][Mm][Ii][Tt]\d+$/) { $limitFlag = $_; } # -limit#
       elsif (/^-[Ff][Ii][Xx]$/) {                               # -fix file
          if (defined($ARGV[0])) {
@@ -136,6 +138,7 @@
          my ($class, $funcGroup, $prevAction) = split(':', $rec, 4);
          if    (length($funcGroup) == 14 ) { $probe_chain_length = 1; }
          elsif (length($funcGroup) == 15 ) { $probe_chain_length = 2; }
+         elsif (length($funcGroup) == 17 ) { $probe_chain_length = 4; }
          $funcGroup =~ tr/a-z/A-Z/;
          my $matchpat = ($funcGroup =~ /${respattern}/) ? 1 : 0;
 
@@ -151,6 +154,10 @@
             }
             elsif ($probe_chain_length == 2) {
                printf FIX "%1.1s:%s:first pass %s\n",
+                           $opposite, $funcGroup, $prevAction;
+            }
+            elsif ($probe_chain_length == 4) {
+              printf FIX "%1.1s:%s:first pass %s\n",
                            $opposite, $funcGroup, $prevAction;
             }
 
@@ -178,6 +185,10 @@
                   printf FIX "r%s:%s:first pass %s\n",
                            $angle, $funcGroup, $prevAction;
                }
+               elsif ($probe_chain_length == 4) {
+                  printf FIX "r%s:%s:first pass %s\n",
+                           $angle, $funcGroup, $prevAction;
+               }
             }
             elsif ($funcGroup =~ /ASN|GLN|HIS/) {
                my $action = 'o';
@@ -186,6 +197,10 @@
                               $action, $funcGroup, $prevAction;
                }
                elsif ($probe_chain_length == 2) {
+                  printf FIX "%1.1s:%s:first pass %s\n",
+                              $action, $funcGroup, $prevAction;
+               }
+               elsif ($probe_chain_length == 4) {
                   printf FIX "%1.1s:%s:first pass %s\n",
                               $action, $funcGroup, $prevAction;
                }
@@ -222,6 +237,10 @@
                printf FIX "r %s:%s:first pass %s - %s.%s\n",
                         $angle, $funcGroup, $prevAction, $setID, $subset;
             }
+            elsif ($probe_chain_length == 4) {
+               printf FIX "r %s:%s:first pass %s - %s.%s\n",
+                        $angle, $funcGroup, $prevAction, $setID, $subset;
+            }
          }
          elsif ($funcGroup =~ /ASN|GLN|HIS/) {
             my $action = 'o';
@@ -230,6 +249,10 @@
                         $action, $funcGroup, $prevAction, $setID, $subset;
             }
             elsif ($probe_chain_length == 2) {
+               printf FIX "%1.1s:%s:first pass %s - %s.%s\n",
+                        $action, $funcGroup, $prevAction, $setID, $subset;
+            }
+            elsif ($probe_chain_length == 4) {
                printf FIX "%1.1s:%s:first pass %s - %s.%s\n",
                         $action, $funcGroup, $prevAction, $setID, $subset;
             }
@@ -326,6 +349,9 @@
             elsif ($probe_chain_length == 2) {
                $flips{substr($restype, 0, 10)} = $action;
             }
+            elsif ($probe_chain_length == 4) {
+               $flips{substr($restype, 0, 12)} = $action;
+            }
          }
       }
       if (/^ATOM|^atom/) {
@@ -342,6 +368,10 @@
          elsif ($probe_chain_length == 2) {
             $chain   = substr($card, 20, 2);
             $ics = ($chain eq '  ') ? '' : $inscode;
+         }
+         elsif ($probe_chain_length == 4) {
+            $chain   = substr($card, 72, 4); #segid field
+            $ics = ($chain eq '    ') ? '' : $inscode;
          }
 
          if ($res =~ /${respattern}/) {
@@ -373,6 +403,10 @@
                   }
                   elsif ($probe_chain_length == 2) {
                      $descr = sprintf('%2s%4s%1.1s%-3s',
+                                   $chain, $resid, $inscode, $res);
+                  }
+                  elsif ($probe_chain_length == 4) {
+                     $descr = sprintf('%4s%4s%1.1s%-3s',
                                    $chain, $resid, $inscode, $res);
                   }
 
@@ -416,7 +450,12 @@
    my $probeParams;
 
    unlink($kintmp);
-   $pkin = "prekin -append -in $redpdb -out $kintmp -scope -bval";
+   if ($segid) {
+     $pkin = "prekin -append -segid -in $redpdb -out $kintmp -scope -bval";
+   }
+   else {
+     $pkin = "prekin -append -in $redpdb -out $kintmp -scope -bval";
+   }
    system("$pkin -show \"mc(white),hy(gray)\"");
    system("$pkin -show \"sc(cyan),hy(gray)\" " .
                 "-excludesc \"asn,gln,cys,ser,thr,his,lys,met,tyr\"");
@@ -436,7 +475,12 @@
 
    unlink($kintmp);
 
-   $pkin = "prekin -append -in $redpdb -out $kintmp -scope -bval";
+   if ($segid) {
+     $pkin = "prekin -append -segid -in $redpdb -out $kintmp -scope -bval";
+   }
+   else {
+     $pkin = "prekin -append -in $redpdb -out $kintmp -scope -bval";
+   }
    if ($nuclear) {
      $probeParams = "-dens12 -lens -nogroup -3 -q -wat -het -both -nuclear";
    }
@@ -468,7 +512,12 @@
 
    unlink($kintmp);
 
-   $pkin = "prekin -append -in $flipdb -out $kintmp -scope -bval -code \"$fileID\"";
+   if ($segid) {
+     $pkin = "prekin -append -segid -in $flipdb -out $kintmp -scope -bval -code \"$fileID\"";
+   }
+   else {
+     $pkin = "prekin -append -in $flipdb -out $kintmp -scope -bval -code \"$fileID\"";
+   }
    if ($nuclear) {
      $probeParams = "-dens12 -lens -nogroup -3 -q -wat -het -both -nuclear";
    }

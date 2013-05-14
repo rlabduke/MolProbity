@@ -39,6 +39,22 @@ function mpInitEnvirons()
     // Also set location of Reduce's heterogen dictionary
     // Better here than on command line b/c it affects e.g. flipkin too
     putenv("REDUCE_HET_DICT=".MP_REDUCE_HET_DICT);
+
+    // Initialize location for job files
+    if(!defined('MP_JOB_DATA_DIR'))
+    {
+      //try global environmental variable
+      //$job_loc = getenv('MP_JOB_DATA_DIR');
+      $job_loc = getenv('MP_JOB_DATA_DIR');
+      if($job_loc)
+      {
+        define("MP_JOB_DATA_DIR", $job_loc);
+      }
+      else
+      {
+        define("MP_JOB_DATA_DIR", MP_BASE_DIR."/public_html/data/");
+      }
+    }
 }
 #}}}########################################################################
 
@@ -99,7 +115,8 @@ function mpStartSession($createIfNeeded = false)
     mpCheckSessionID(session_id()); // just in case
 
     // Check to make sure we have a working directory for this user.
-    $dataDir = MP_BASE_DIR."/public_html/data/".session_id();
+    //$dataDir = MP_BASE_DIR."/public_html/data/".session_id();
+    $dataDir = MP_JOB_DATA_DIR.session_id();
     if(!file_exists($dataDir))
     {
         if($createIfNeeded)
@@ -111,6 +128,7 @@ function mpStartSession($createIfNeeded = false)
             // Main data directories
             mkdir($dataDir, 0770); // Default mode; is modified by UMASK too.
             mkdir("$dataDir/".MP_DIR_SYSTEM, 0770);
+            mkdir("$dataDir/tmp", 0770);
 
             // Others specified in config.php must be created on demand.
 
@@ -125,6 +143,7 @@ function mpStartSession($createIfNeeded = false)
             $_SESSION['models']         = array(); // no models to start with
             $_SESSION['ensembles']      = array(); // no ensembles to start with
             $_SESSION['reduce_blength'] = "ecloud"; // x-H distance
+            $_SESSION['useSEGID']       = false;
 
             // TODO: perform other tasks to start a session
             // Create databases, etc, etc.
@@ -203,7 +222,8 @@ function mpSessClose()
 function mpSessRead($id)
 {
     mpCheckSessionID($id); // just in case something nasty is in there
-    $dataDir    = MP_BASE_DIR."/public_html/data/$id";
+    //$dataDir    = MP_BASE_DIR."/public_html/data/$id";
+    $dataDir = MP_JOB_DATA_DIR.$id;
     $sessFile   = "$dataDir/".MP_DIR_SYSTEM."/session";
 
     // Read in session data, if present
@@ -231,7 +251,8 @@ function mpSessWrite($id, $sessData)
     if($__mpsess_readonly__) return false;
 
     mpCheckSessionID($id); // just in case something nasty is in there
-    $dataDir    = MP_BASE_DIR."/public_html/data/$id";
+    //$dataDir    = MP_BASE_DIR."/public_html/data/$id";
+    $dataDir    = MP_JOB_DATA_DIR.$id;
     $sessFile   = "$dataDir/".MP_DIR_SYSTEM."/session";
 
     // Write the session data
@@ -247,7 +268,8 @@ function mpSessWrite($id, $sessData)
 function mpSessDestroy($id)
 {
     mpCheckSessionID($id); // just in case something nasty is in there
-    $dataDir    = MP_BASE_DIR."/public_html/data/$id";
+    //$dataDir    = MP_BASE_DIR."/public_html/data/$id";
+    $dataDir = MP_JOB_DATA_DIR.$id;
 
     // This actually seems to be most robust and portable... unlink() is very awkward
     `rm -rf '$dataDir'`;
@@ -273,7 +295,8 @@ function mpSessGC($maxlifetime)
     // 1. Enumerate IDs of all active sessions.
     $start = microtime(); // seconds, as string
     $session_ids = array();
-    $baseDataDir = MP_BASE_DIR."/public_html/data";
+    //$baseDataDir = MP_BASE_DIR."/public_html/data";
+    $baseDataDir = substr(MP_JOB_DATA_DIR, 0, strlen(MP_JOB_DATA_DIR)-1);
     $h = opendir($baseDataDir);
     while( ($id = readdir($h)) != false )
     {
@@ -309,7 +332,8 @@ function mpSessGC($maxlifetime)
 function mpSessSetTTL($id, $timeToLive)
 {
     mpCheckSessionID($id); // just in case something nasty is in there
-    $dataDir = MP_BASE_DIR."/public_html/data/$id";
+    //$dataDir = MP_BASE_DIR."/public_html/data/$id";
+    $dataDir = MP_JOB_DATA_DIR.$id;
     if($fp = @fopen("$dataDir/".MP_DIR_SYSTEM."/lifetime", "w"))
     {
         $time = time();
@@ -339,7 +363,8 @@ function mpSessTimeToLive($id)
 function mpSessLifetime($id)
 {
     mpCheckSessionID($id); // just in case something nasty is in there
-    $dataDir = MP_BASE_DIR."/public_html/data/$id";
+    //$dataDir = MP_BASE_DIR."/public_html/data/$id";
+    $dataDir = MP_JOB_DATA_DIR.$id;
     if($fp = @fopen("$dataDir/".MP_DIR_SYSTEM."/lifetime", "r"))
     {
         $lastTouched = trim(fgets($fp, 1024)) + 0;
@@ -361,7 +386,8 @@ function mpSessLifetime($id)
 function mpSessSizeOnDisk($id)
 {
     mpCheckSessionID($id); // just in case something nasty is in there
-    $dataDir    = MP_BASE_DIR."/public_html/data/$id";
+    //$dataDir    = MP_BASE_DIR."/public_html/data/$id";
+    $dataDir    = MP_JOB_DATA_DIR.$id;
     return `du -sk '$dataDir'` * 1024;
 }
 #}}}########################################################################
@@ -381,7 +407,8 @@ function mpEnumerateSessions()
 {
     $sesslist = array();
 
-    $baseDataDir = MP_BASE_DIR."/public_html/data";
+    //$baseDataDir = MP_BASE_DIR."/public_html/data";
+    $baseDataDir = substr(MP_JOB_DATA_DIR, 0, strlen(MP_JOB_DATA_DIR)-1);
     $h = opendir($baseDataDir);
     while( ($id = readdir($h)) != false )
     {
