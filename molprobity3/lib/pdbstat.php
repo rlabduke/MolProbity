@@ -69,6 +69,7 @@ function describePdbStats($pdbstats, $useHTML = true)
             else
                 $details[] = "No explicit hydrogen atoms are included.";
             if($pdbstats['deuteriums'] > 0)
+                echo "deuteriums = ".$pdbstats['deuteriums'];
                 $details[] = "Deuterium atoms present. Assuming neutron diffraction.";
         }
 
@@ -322,7 +323,8 @@ function pdbstat($pdbfilename)
                 }
                 $key = $atom_name." ".$resn;
                 //echo "|".$key."|\n";
-                if ($key !== " HA2 GLY") { // TEMP FIX: because HA2 GLY is both old AND new format,
+                if ($key !== " HA2 GLY" && $key !== " C4A FAD" &&
+                    $key !== " C5A FAD" && $key !== " H6  FAD") { // TEMP FIX: because HA2 GLY is both old AND new format,
                                            // Remediator messes it up.
                   if(array_key_exists($key, $hash)) {
                     $v2format++;
