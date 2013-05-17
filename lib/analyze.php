@@ -801,7 +801,11 @@ function loadRotamer($datafile)
           continue;
         }
         $cnit = $line[0];
-        $cnit = substr($cnit,0,6).substr($cnit,7,3);
+        if(strlen($cnit)==10)
+        {
+          $cnit = ' '.$cnit;
+        }
+        $cnit = substr($cnit,0,6).substr($cnit,7,4);
         $decomp = decomposeResName($cnit);
         $ret[$cnit] = array(
             'resName'   => $cnit,
