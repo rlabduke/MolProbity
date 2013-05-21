@@ -109,6 +109,8 @@ if(!defined("MP_DIR_MODELS"))
     define("MP_DIR_MODELS", "coordinates");         // PDB files
 if(!defined("MP_DIR_EDMAPS"))
     define("MP_DIR_EDMAPS", "electron_density");    // electron density
+if(!defined("MP_DIR_XRAYDATA"))
+    define("MP_DIR_XRAYDATA", "xray_data");         // xray data (mtzs, xxxx-sf.cif)
 if(!defined("MP_DIR_TOPPAR"))
     define("MP_DIR_TOPPAR", "dictionaries");        // het dicts, etc. (named for CNS TOPology and PARameter)
 if(!defined("MP_DIR_KINS"))

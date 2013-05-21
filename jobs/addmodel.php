@@ -140,6 +140,10 @@ if(isset($_SESSION['bgjob']['pdbCode']))
             $_SESSION['bgjob']['isCnsFormat'],
             $_SESSION['bgjob']['ignoreSegID'],
             false /* came from public database */);
+        if(isset($_SESSION['bgjob']['xray']))
+            {
+                addXraydata(strtolower($code), $id);
+            }
 
         // Clean up temp files
         unlink($tmpfile);
@@ -155,17 +159,26 @@ if(isset($_SESSION['bgjob']['pdbCode']))
 else
 {
     // Remove illegal chars from the upload file name
-    $origName = censorFileName($_SESSION['bgjob']['origName'], array("pdb", "ent", "xyz"));
+    $origName = censorFileName($_SESSION['bgjob']['origName'], array("pdb", "ent", "xyz", "mtz"));
     $fileSource = "local disk";
 
-    $id = addModelOrEnsemble($_SESSION['bgjob']['tmpPdb'],
-        $origName,
-        $_SESSION['bgjob']['isCnsFormat'],
-        $_SESSION['bgjob']['ignoreSegID'],
-        true /* came from upload */);
+    if(isset($_SESSION['bgjob']['tmpPdb'])) 
+    {
+        $id = addModelOrEnsemble($_SESSION['bgjob']['tmpPdb'],
+            $origName,
+            $_SESSION['bgjob']['isCnsFormat'],
+            $_SESSION['bgjob']['ignoreSegID'],
+            true /* came from upload */);
+        // Clean up temp files
+        unlink($_SESSION['bgjob']['tmpPdb']);
+    }
+    elseif(isset($_SESSION['bgjob']['tmpMtz'])) 
+    {
+        addMtz($_SESSION['bgjob']['tmpMtz'], $origName);
+        // Clean up temp files
+        unlink($_SESSION['bgjob']['tmpMtz']);
+    }
 
-    // Clean up temp files
-    unlink($_SESSION['bgjob']['tmpPdb']);
 }
 
 // Automatic labbook entry

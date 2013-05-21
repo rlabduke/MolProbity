@@ -154,7 +154,8 @@ function checkSettingsBeforeSubmit()
     <br><label><input type='checkbox' name='chartCBdev' value='1'> C&beta; deviations</label>
     <br><label><input type='checkbox' name='chartBaseP' value='1'> RNA sugar pucker analysis</label>
     <br><label><input type='checkbox' name='chartSuite' value='1'> RNA backbone conformations</label>
-    <p><label><input type='checkbox' name='chartCoot' value='1'> Chart for use with Coot (may take a long time, but should take less than 1 hour) </label>
+    <p><label><input type='checkbox' name='chartHoriz' value='1'> Horizontal chart with real-space correlation data</label>
+    <br><label><input type='checkbox' name='chartCoot' value='1'> Chart for use with Coot (may take a long time, but should take less than 1 hour) </label>
     <br><label><input type='checkbox' name='chartImprove' value='1'> Suggest / report on automatic structure fix-ups</label>
     <br><label><input type='checkbox' name='chartMulti' value='1' onclick='hideMultiOpts()'> Create html version of multi-chart</label>
     <div class='indent' id='multi_opts'>
@@ -224,10 +225,41 @@ function onRunAnalysis()
         
         if($req['doKinemage'])      mpLog("aacgeom-mkin:Multi-criterion validation kinemage");
         if($req['doCharts'])        mpLog("aacgeom-mchart:Multi-criterion validation chart");
-        
-        // launch background job
-        pageGoto("job_progress.php");
-        launchBackground(MP_BASE_DIR."/jobs/aacgeom.php", "generic_done.php", 5);
+        $modelID = $_SESSION['bgjob']['modelID'];
+        // $model   = $_SESSION['models'][$modelID];
+        if($req['chartHoriz'] and !isset($_SESSION['models'][$modelID]['mtz_file']))
+        {
+            // check to see if there is one mtz. If so, then link it to the
+            // model being analyzed automatically
+            $xrayDir = $_SESSION['dataDir'].'/'.MP_DIR_XRAYDATA;
+            if(file_exists($xrayDir))
+            {
+                $mtzs = array();
+                $handle = opendir($xrayDir);
+                while(false !== ($entry = readdir($handle)))
+                {
+                    if(substr($entry, -4) != ".mtz") continue;
+                    $mtzs[] = $entry;
+                }
+                if(count($mtzs) == 1)
+                {
+                    $_SESSION['models'][$modelID]['mtz_file'] = $xrayDir.'/'.$mtzs[0];
+                    // launch background job
+                    pageGoto("job_progress.php");
+                    launchBackground(MP_BASE_DIR."/jobs/aacgeom.php", "generic_done.php", 5);
+                }
+                else
+                    pageCall("link_model_2_mtz.php", array('modelID' => $modelID));
+            }
+            else
+                pageCall("link_model_2_mtz.php", array('modelID' => $modelID));
+        }
+        else
+        {
+            // launch background job
+            pageGoto("job_progress.php");
+            launchBackground(MP_BASE_DIR."/jobs/aacgeom.php", "generic_done.php", 5);
+        }
     }
 }
 #}}}########################################################################

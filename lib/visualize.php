@@ -6,7 +6,9 @@
 require_once(MP_BASE_DIR.'/lib/pdbstat.php');
 require_once(MP_BASE_DIR.'/lib/analyze.php');
 require_once(MP_BASE_DIR.'/lib/sortable_table.php');
+require_once(MP_BASE_DIR.'/lib/horizontal_table.php');
 require_once(MP_BASE_DIR.'/lib/eff_resol.php');
+require_once(MP_BASE_DIR.'/lib/strings.php');
 
 #{{{ makeRamachandranKin - creates a kinemage-format Ramachandran plot
 ############################################################################
@@ -1191,6 +1193,8 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
 *   sortable_table.php; see that code for documentation.
 * $snapfile will be overwritten with an HTML snapshot of the unsorted table;
 *   if null, this will be skipped.
+* $resout is the file name for the table of residue analysis required for horiz
+*   chart. if null, this will be skipped.
 * $clash    is the data structure from loadClashlist()
 * $rama     is the data structure from loadRamachandran()
 * $rota     is the data structure from loadRotamer()
@@ -1199,7 +1203,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
 * $suites   is the data structure from loadSuitenameReport()
 * Any of them can be set to null if the data is unavailable.
 */
-function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $outliersOnly = false, $doHtmlTable = true)
+function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $outliersOnly = false, $doHtmlTable = true)
 {
     $startTime = time();
     //{{{ Process validation data
@@ -1355,6 +1359,16 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     //}}} Process validation data
     //echo "Processing validation data took ".(time() - $startTime)." seconds\n";
 
+    // $res needs to be saved in raw_data for the horoizontal chart
+    if($resout)
+    {
+        // $out = fopen("/Users/bradleyhintze/Sites/moltbx/public_html/data/0f22e0b41365896f225cae5b9558f37a/raw_data/try.txt", 'wb');
+        // fwrite($out, mpSerialize($res));
+        // fclose($out);
+        $out = fopen($resout, 'wb');
+        fwrite($out, mpSerialize($res));
+        fclose($out);
+    }
     // Set up output data structure
     $table = array('prequel' => '', 'headers' => array(), 'rows' => array(), 'footers' => array(), 'sequel' => '');
 
@@ -1492,6 +1506,262 @@ function writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota,
     }
 }
 #}}}########################################################################
+
+#{{{ writeHorizontalChart - compose table of quality metrics at once in 2-D
+############################################################################
+/**
+* $resout       is the residue table file created by writeMulticritChart
+* $rscc_file    is the formatted rscc file
+* $multi_table  is the multi crit chart (to get the prequel)
+* $outfile      is the name out file that this function will write to
+* $raw_rscc_out is the raw rscc file
+*/
+function writeHorizontalChart($resout, $rscc_file, $multi_table, $outfile, $rscc_prequel_out)
+{
+    $startTime = time();
+    // get prequel
+    $in = fopen($multi_table, 'rb');
+    clearstatcache();
+    $data = fread($in, filesize($multi_table));
+    fclose($in);
+    $multi = mpUnserialize($data);
+    $prequel = $multi['prequel'];
+    $in = fopen($resout, 'rb');
+    clearstatcache();
+    $data = fread($in, filesize($resout));
+    fclose($in);
+    $res_table = mpUnserialize($data);
+    $rscc_table = csv_to_array($rscc_file, ',');
+    
+    // {{{ integrate rscc into $res_table annd set $horiz_table
+    foreach($rscc_table as $info)
+    {
+        if(!array_key_exists($info['res_id'], $res_table)) continue;
+        $res_table[$info['res_id']]['worst_b_bb'] = $info['worst_b_bb'];
+        $res_table[$info['res_id']]['worst_cc_bb'] = $info['worst_cc_bb'];
+        $res_table[$info['res_id']]['worst_2fo-fc_bb'] = $info['worst_2fo-fc_bb'];
+        $res_table[$info['res_id']]['worst_b_sc'] = $info['worst_b_sc'];
+        $res_table[$info['res_id']]['worst_cc_sc'] = $info['worst_cc_sc'];
+        $res_table[$info['res_id']]['worst_2fo-fc_sc'] = $info['worst_2fo-fc_sc'];
+    }
+    // params = bb Density, sc Density, Clash, Ramachandran, Rotamer,
+    //          cB deviation, Bond length, Bond angle');
+    $mp_params = array('bb Density','sc Density','Clash','Ramachandran','Rotamer','cB deviation','Bond length','Bond angle');
+    $horiz_table = array();
+    // create array for horizontal table
+    foreach($mp_params as $param) 
+    {
+        $horiz_table[$param] = array();
+        foreach($res_table as $resid => $info)
+        if(substr($resid, -3) != "HOH") $horiz_table[$param][$resid] = array();
+    }
+    // }}}
+    
+    // {{{ set parameters
+    
+    // {{{ set bb Density
+    foreach($horiz_table['bb Density'] as $resid => $info)
+    {
+        $horiz_table['bb Density'][$resid]['value'] = array();
+        $horiz_table['bb Density'][$resid]['value']['2fo-fc'] = $res_table[$resid]['worst_2fo-fc_bb'];
+        $horiz_table['bb Density'][$resid]['value']['cc'] = $res_table[$resid]['worst_cc_bb'];
+        $s = "<center>Backbone Density<br />cc : ";
+        $s .= $horiz_table['bb Density'][$resid]['value']['cc']."<br />2Fo-Fc : ";
+        $s .= $horiz_table['bb Density'][$resid]['value']['2fo-fc']."</center>";
+        $horiz_table['bb Density'][$resid]['html'] = $s;
+        $img = "no_out.png";
+        if($horiz_table['bb Density'][$resid]['value']['2fo-fc'] < 1.1 || $horiz_table['bb Density'][$resid]['value']['cc'] < 0.75)
+            $img = "density_outA.png";
+        if($horiz_table['bb Density'][$resid]['value']['2fo-fc'] < 0.8 || $horiz_table['bb Density'][$resid]['value']['cc'] < 0.6)
+            $img = "density_outB.png";
+        $horiz_table['bb Density'][$resid]['image'] = $img;
+    }
+    // }}}
+    
+    // {{{ set sc Density
+    foreach($horiz_table['sc Density'] as $resid => $info)
+    {
+        $horiz_table['sc Density'][$resid]['value'] = array();
+        $horiz_table['sc Density'][$resid]['value']['2fo-fc'] = $res_table[$resid]['worst_2fo-fc_sc'];
+        $horiz_table['sc Density'][$resid]['value']['cc'] = $res_table[$resid]['worst_cc_sc'];
+        $s = "<center>Backbone Density<br />cc : ";
+        $s .= $horiz_table['sc Density'][$resid]['value']['cc']."<br />2Fo-Fc : ";
+        $s .= $horiz_table['sc Density'][$resid]['value']['2fo-fc']."</center>";
+        $horiz_table['sc Density'][$resid]['html'] = $s;
+        $img = "no_out.png";
+        if($horiz_table['sc Density'][$resid]['value']['2fo-fc'] < 1.1 || $horiz_table['sc Density'][$resid]['value']['cc'] < 0.75)
+            $img = "density_outA.png";
+        if($horiz_table['sc Density'][$resid]['value']['2fo-fc'] < 0.8 || $horiz_table['sc Density'][$resid]['value']['cc'] < 0.6)
+            $img = "density_outB.png";
+        if(endsWith($resid, "GLY")  || endsWith($resid, "gly")) 
+        {
+            $horiz_table['sc Density'][$resid]['value']['2fo-fc'] = '-';
+            $horiz_table['sc Density'][$resid]['value']['cc'] = '-';
+            $img = "null.png";
+        }
+        $horiz_table['sc Density'][$resid]['image'] = $img;
+    }
+    // }}}
+    
+    // {{{ set Clash
+    foreach($horiz_table['Clash'] as $resid => $info)
+    {
+        if($res_table[$resid]['clash_isbad'])
+        {
+            $horiz_table['Clash'][$resid]['value'] = $res_table[$resid]['clash_val'];
+            // $info['value'] = $res_table[$resid]['clash_val'];
+            $horiz_table['Clash'][$resid]['html'] = $res_table[$resid]['clash'];
+            if($horiz_table['Clash'][$resid]['value'] < 0.7) $img = "clash_outA.png";
+            elseif($horiz_table['Clash'][$resid]['value'] < 1.0) $img = "clash_outC.png";
+            else $img = "clash_outD.png";
+            $horiz_table['Clash'][$resid]['image'] = $img;
+        }
+        else
+        {
+            $horiz_table['Clash'][$resid]['value'] = 0;
+            $horiz_table['Clash'][$resid]['html'] = "<center>-</center>";
+            $horiz_table['Clash'][$resid]['image'] = "no_out.png";
+        }
+    }
+    // }}}
+    
+    // {{{ set Ramachandran
+    foreach($horiz_table['Ramachandran'] as $resid => $info)
+    {
+        $horiz_table['Ramachandran'][$resid]['value'] = $res_table[$resid]['rama_val'];
+        $horiz_table['Ramachandran'][$resid]['html'] = $res_table[$resid]['rama'];
+        if($res_table[$resid]['rama_isbad']) $img = "rama_out.png";
+        else $img = "no_out.png";
+        $horiz_table['Ramachandran'][$resid]['image'] = $img;
+    }
+    // }}}
+    
+    // {{{ set Rotamer
+    foreach($horiz_table['Rotamer'] as $resid => $info)
+    {
+        $horiz_table['Rotamer'][$resid]['value'] = $res_table[$resid]['rota_val'];
+        $horiz_table['Rotamer'][$resid]['html'] = $res_table[$resid]['rota'];
+        if($res_table[$resid]['rota_isbad']) $img = "rotamer_out.png";
+        else $img = "no_out.png";
+        if(endsWith($resid, "GLY")  || endsWith($resid, "gly")) $img = "null.png";
+        $horiz_table['Rotamer'][$resid]['image'] = $img;
+    }
+    // }}}
+    
+    // {{{ set cB deviation
+    foreach($horiz_table['cB deviation'] as $resid => $info)
+    {
+        if($res_table[$resid]['cbdev_isbad'])
+        {
+            $horiz_table['cB deviation'][$resid]['value'] = $res_table[$resid]['cbdev_val'];
+            $horiz_table['cB deviation'][$resid]['html'] = $res_table[$resid]['cbdev'];
+            $horiz_table['cB deviation'][$resid]['image'] = "cBd_out.png";
+        }
+        else
+        {
+            $horiz_table['cB deviation'][$resid]['value'] = 0;
+            $horiz_table['cB deviation'][$resid]['html'] = "<center>-</center>";
+            $horiz_table['cB deviation'][$resid]['image'] = "no_out.png";
+        }
+    }
+    // }}}
+    
+    // {{{ set Bond length
+    foreach($horiz_table['Bond length'] as $resid => $info)
+    {
+        if($res_table[$resid]['bbonds_isbad'])
+        {
+            $horiz_table['Bond length'][$resid]['value'] = $res_table[$resid]['bbonds_isbad'];
+            $horiz_table['Bond length'][$resid]['html'] = $res_table[$resid]['bbonds'];
+            $horiz_table['Bond length'][$resid]['image'] = "bl_out.png";
+        }
+        else
+        {
+            $horiz_table['Bond length'][$resid]['value'] = 0;
+            $horiz_table['Bond length'][$resid]['html'] = "<center>-</center>";
+            $horiz_table['Bond length'][$resid]['image'] = "no_out.png";
+        }
+    }
+    // }}}
+    
+    // {{{ set Bond angle
+    foreach($horiz_table['Bond angle'] as $resid => $info)
+    {
+        if($res_table[$resid]['bangles_isbad'])
+        {
+            $horiz_table['Bond angle'][$resid]['value'] = $res_table[$resid]['bangles_isbad'];
+            $horiz_table['Bond angle'][$resid]['html'] = $res_table[$resid]['bangles'];
+            $horiz_table['Bond angle'][$resid]['image'] = "ba_out.png";
+        }
+        else
+        {
+            $horiz_table['Bond angle'][$resid]['value'] = 0;
+            $horiz_table['Bond angle'][$resid]['html'] = "<center>-</center>";
+            $horiz_table['Bond angle'][$resid]['image'] = "no_out.png";
+        }
+    }
+    // }}}
+    
+    // }}}
+    
+    $table1 = array();
+    $table1['prequel'] = $prequel;
+    $table1['rscc_prequel'] = getRsccPrequel($horiz_table, $rscc_prequel_out);
+    $table1['horiz_table'] = $horiz_table;
+    $out = fopen($outfile, 'wb');
+    fwrite($out, mpSerialize($table1));
+    fclose($out);
+    echo "Formatting horizontal chart table took ".(time() - $startTime)." seconds\n";
+    
+}
+#}}}
+
+#{{{ getRsccPrequel
+function getRsccPrequel($horiz_table, $raw_rscc_file)
+{
+    // get info from rawrscc
+    if(!file_exists($raw_rscc_file) || !is_readable($raw_rscc_file))
+        return FALSE;
+    $in = fopen($raw_rscc_file, 'rb');
+    clearstatcache();
+    $html = fread($in, filesize($raw_rscc_file));
+    fclose($in);
+    $bb_desity_out = 0;
+    $sc_desity_out = 0;
+    foreach($horiz_table['bb Density'] as $resid => $info)
+    {
+        if($info['image'] != 'no_out.png') $bb_desity_out++;
+    }
+    foreach($horiz_table['sc Density'] as $resid => $info)
+    {
+        if($info['image'] != 'no_out.png') $sc_desity_out++;
+    }
+    $html = str_replace("*REPLACE_MESC*", $sc_desity_out, $html);
+    $html = str_replace("*REPLACE_MEBB*", $bb_desity_out, $html);
+    return $html;
+}
+
+#}}}
+
+#{{{ csv_to_array
+function csv_to_array($filename='', $delimiter=',')
+{
+    if(!file_exists($filename) || !is_readable($filename))
+        return FALSE;
+
+    $header = NULL;
+    $lines = file($filename, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    $data = array();
+    $header = explode(",", $lines[0]);
+    foreach($lines as $key => $line) 
+    {
+        if($key === 0) continue;
+        $la = explode(",", $line);
+        $data[] = array_combine($header, $la);
+    }
+    return $data;
+}
+#}}}
 
 #{{{ makeCootMulticritChart - Scheme script for Coot's interesting-things-gui
 ############################################################################

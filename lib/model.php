@@ -75,6 +75,63 @@ function createEnsemble($ensembleID)
 }
 #}}}########################################################################
 
+#{{{ addXraydata - adds xray data using phenix.fetch_pdb --mtz xxxx
+############################################################################
+/**
+* This function fetches data with phenix.fetch_pdb --mtz xxxx
+*   pdbCode     the PBD code
+*/
+function addXraydata($pdbCode, $id)
+{
+    $outpath = $_SESSION['dataDir'].'/'.MP_DIR_XRAYDATA;
+    if(!file_exists($outpath)) mkdir($outpath, 0777);
+    $tasks = getProgressTasks();
+    $tasks['xray'] = "Get Xray data";
+    setProgress($tasks, 'xray');
+    exec("phenix.fetch_pdb --mtz --out=$outpath ".$pdbCode);
+    $filename = $outpath.'/'.$pdbCode.'.mtz';
+    if(file_exists($filename) and is_readable($filename))
+        $_SESSION['models'][$id]['mtz_file'] = $filename;
+}
+# }}}
+
+#{{{ addMtz - adds mtz format ensuring that it is the correct format.
+############################################################################
+/**
+* This function checks that the mtz being uploaded is the correct format
+*   tmpMtz     the (temporary) file where the upload is stored.
+*   origName        the name of the file on the user's system.
+*/
+function addMtz($tmpMtz, $origName)
+{
+    $outpath = $_SESSION['dataDir'].'/'.MP_DIR_XRAYDATA;
+    if(!file_exists($outpath)) mkdir($outpath, 0777);
+    $tasks = getProgressTasks();
+    $tasks['mtz_check'] = "Checking the mtz format";
+    setProgress($tasks, 'mtz_check');
+    $filename = $outpath.'/'.$origName;
+    // copy($tmpMtz, $filename);
+    $tf = mtzFormatCorrect($tmpMtz);
+    if($tf) copy($tmpMtz, $filename);
+}
+# }}}
+
+# {{{ mtzFormatCorrect - checks mtz format
+############################################################################
+/**
+* This function checks that the given mtz is the correct format
+*   tmpMtz     the (temporary) file where the upload is stored.
+*/
+function mtzFormatCorrect($tmpMtz)
+{
+    $a = array();
+    $pathToUtils = MP_BASE_DIR.'/bin/cctbx_utils.py';
+    exec("libtbx.python $pathToUtils mtz_amplitudes_check $tmpMtz", $a);
+    if($a[0] == "True") return TRUE;
+    else return FALSE;
+}
+# }}}
+
 #{{{ addModelOrEnsemble - adds an up/downloaded model to the session
 ############################################################################
 /**

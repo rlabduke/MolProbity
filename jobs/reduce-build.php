@@ -71,6 +71,9 @@ reduceBuild($pdb, $outpath, $reduce_blength);
 
 $newModel['stats']          = pdbstat($outpath);
 $newModel['parent']         = $modelID;
+// transfer mtz to reduced model
+if(isset($_SESSION['models'][$modelID]['mtz_file']))
+    $newModel['mtz_file'] = $_SESSION['models'][$modelID]['mtz_file'];
 
 if($reduce_blength == 'ecloud')
 {

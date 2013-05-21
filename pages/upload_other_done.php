@@ -32,6 +32,7 @@ function display($context)
     {
         $type = $context['type'];
         if($type == 'kin')          $this->displayKin($context);
+        elseif($type == 'xray')     $this->displayXray($context);
         elseif($type == 'map')      $this->displayMap($context);
         elseif($type == 'hetdict')  $this->displayHetDict($context);
     }
@@ -45,6 +46,25 @@ function displayKin($context)
     echo $this->pageHeader("Kinemage $context[kinName] added");
     echo "Your kinemage has been uploaded. You may now view it in KiNG:\n";
     echo "<ul><li>".linkKinemage($context['kinName'])."</li></ul>\n";
+    echo "<p>" . makeEventForm("onReturn");
+    echo "<input type='submit' name='cmd' value='Continue &gt;'>\n</form></p>\n";
+    echo $this->pageFooter();
+}
+#}}}########################################################################
+
+#{{{ displayXray
+############################################################################
+function displayXray($context)
+{
+    echo $this->pageHeader("Xray $context[xrayName] added");
+    echo "<p>The following mtz files are now available:\n";
+    echo "<ul>\n";
+    foreach($_SESSION['mtzs'] as $mtz)
+    {
+        $xrayPath = "$_SESSION[dataDir]/".MP_DIR_XRAYDATA."/$mtz";
+        echo "<li><b>$mtz</b> (".formatFilesize(filesize($xrayPath)).")</li>\n";
+    }
+    echo "</ul>\n</p>\n";
     echo "<p>" . makeEventForm("onReturn");
     echo "<input type='submit' name='cmd' value='Continue &gt;'>\n</form></p>\n";
     echo $this->pageFooter();

@@ -24,6 +24,7 @@ function display($context)
 {
     echo $this->pageHeader("Main page", "welcome");
 
+    // echo mpSerialize($_SESSION['models']);
     if(count($_SESSION['models']) > 0 && $_SESSION['lastUsedModelID'])
     {
         echo "<h5 class='welcome'>Suggested Tools (<a href='".makeEventURL("onGoto", "sitemap.php")."'>all tools</a>)</h5>\n";
@@ -602,7 +603,9 @@ function toggleUploadOptions()
     <td>type:
         <select name='fetchType'>
             <option value='pdb'>PDB coords</option>
+            <option value='pdb_xray'>PDB coords & xray data</option>
             <option value='biolunit'>Biol. unit (PDB only)</option>
+            <option value='biolunit_xray'>Biol. unit & xray data (PDB only)</option>
             <option value='eds_2fofc'>2Fo-Fc map (EDS)</option>
             <option value='eds_fofc'>Fo-Fc map (EDS)</option>
         </select>
@@ -613,6 +616,7 @@ function toggleUploadOptions()
     <td>type:
         <select name='uploadType'>
             <option value='pdb'>PDB coords</option>
+            <option value='xray'>xray data (mtz format)</option>
             <option value='kin'>kinemage</option>
             <option value='map'>ED map</option>
             <option value='hetdict'>het dict</option>
@@ -771,6 +775,7 @@ function onUploadOrFetch()
     if($hasUpload)
     {
         if($_REQUEST['uploadType'] == 'pdb')         $upload_delegate->onUploadPdbFile();
+        elseif($_REQUEST['uploadType'] == 'xray')    $upload_delegate->onUploadXray();
         elseif($_REQUEST['uploadType'] == 'kin')     $upload_delegate->onUploadKinemage();
         elseif($_REQUEST['uploadType'] == 'map')     $upload_delegate->onUploadMapFile();
         elseif($_REQUEST['uploadType'] == 'hetdict') $upload_delegate->onUploadHetDictFile();
@@ -778,6 +783,17 @@ function onUploadOrFetch()
     elseif($hasFetch)
     {
         if($_REQUEST['fetchType'] == 'pdb')          $upload_delegate->onFetchPdbFile();
+        elseif($_REQUEST['fetchType'] == 'pdb_xray')
+        {
+            $_REQUEST['xray'] = 1;
+            $upload_delegate->onFetchPdbFile();
+        }
+        elseif($_REQUEST['fetchType'] == 'biolunit_xray')
+        {
+            $_REQUEST['biolunit'] = 1;
+            $_REQUEST['xray'] = 1;
+            $upload_delegate->onFetchPdbFile();
+        }
         elseif($_REQUEST['fetchType'] == 'biolunit')
         {
             $_REQUEST['biolunit'] = 1;

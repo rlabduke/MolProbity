@@ -151,8 +151,11 @@ foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
   if($mode == 'coot')
     makeCootClusteredChart($pdbfile, $outFile, $clash, $rama, $rota, $cbdev, $pperp);
   else
-    writeMulticritChart($pdbfile, "/dev/null", $outFile, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles);
-
+  {
+    $resout = null;
+    writeMulticritChart($pdbfile, "/dev/null", $outFile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles);
+  }
+  
   mpDestroySession();
 }
 ############################################################################

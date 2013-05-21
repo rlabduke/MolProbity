@@ -218,6 +218,7 @@ function onFetchPdbFile()
     
     unset($_SESSION['bgjob']); // Clean up any old data
     $_SESSION['bgjob']['pdbCode']       = $req['pdbCode'];
+    $_SESSION['bgjob']['xray']          = $req['xray'];
     $_SESSION['bgjob']['isCnsFormat']   = false;
     $_SESSION['bgjob']['ignoreSegID']   = false;
     $_SESSION['bgjob']['biolunit']      = $req['biolunit'];
@@ -289,6 +290,59 @@ function onUploadKinemage()
     }
 }
 #}}}########################################################################
+
+#{{{ onUploadXray
+############################################################################
+/**
+* Documentation for this function.
+*/
+function onUploadXray()
+{
+    $req = $_REQUEST;
+    if($_REQUEST['cmd'] == "Cancel")
+    {
+        pageReturn();
+    }
+    else
+    {
+        $xrayName = censorFileName($_FILES['uploadFile']['name'], array('mtz')); // make sure no spaces, etc.
+        $xrayPath = "$_SESSION[dataDir]/".MP_DIR_XRAYDATA;
+        if(!file_exists($xrayPath)) mkdir($xrayPath, 0777);
+        $xrayPath .= "/$xrayName";
+        $tmpfile = mpTempfile("tmp_mtz");
+        if( !$_FILES['uploadFile']['error'] && $_FILES['uploadFile']['size'] > 0
+        && !file_exists($xrayPath) && move_uploaded_file($_FILES['uploadFile']['tmp_name'], $tmpfile))
+        {
+            $tf = mtzFormatCorrect($tmpfile);
+            if($tf) 
+            {
+                mpLog("mtz-upload:User uploaded an mtz file");
+                copy($tmpfile, $xrayPath);
+                $_SESSION['mtzs'][$xrayName] = $xrayName;
+                pageGoto("upload_other_done.php", array('type' => 'xray', 'xrayName' => $xrayName));
+            }
+            else $this->doUploadError('xray', $xrayPath);
+        }
+        else $this->doUploadError('xray', $xrayPath);
+    }
+}
+#}}}########################################################################
+
+# {{{ mtzFormatCorrect - checks mtz format
+############################################################################
+/**
+* This function checks that the given mtz is the correct format
+*   tmpMtz     the (temporary) file where the upload is stored.
+*/
+function mtzFormatCorrect($tmpMtz)
+{
+    $a = array();
+    $pathToUtils = MP_BASE_DIR.'/bin/cctbx_utils.py';
+    exec("libtbx.python $pathToUtils mtz_amplitudes_check $tmpMtz", $a);
+    if($a[0] == "True") return TRUE;
+    else return FALSE;
+}
+# }}}
 
 #{{{ onUploadMapFile
 ############################################################################

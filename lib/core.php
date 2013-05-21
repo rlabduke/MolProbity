@@ -458,8 +458,10 @@ function linkAnyFile($fname, $name = null, $image = null)
             array('url' => "viewking.php?$_SESSION[sessTag]&url=$link", 'label' => "View in KiNG", 'blank' => true),
             array('url' => "$link", 'label' => "Download", 'blank' => false),
         );
-    elseif(endsWith($fname, ".table"))
+    elseif(endsWith($fname, "multi.table"))
         $links = array(array('url' => "viewtable.php?$_SESSION[sessTag]&file=$path", 'label' => "View", 'blank' => true));
+    elseif(endsWith($fname, "horiz.table"))
+        $links = array(array('url' => "viewhoriztable.php?$_SESSION[sessTag]&file=$path", 'label' => "View", 'blank' => true));
     elseif(endsWith($fname, ".html"))
         $links = array(array('url' => "viewtext.php?$_SESSION[sessTag]&file=$path&mode=html", 'label' => "View", 'blank' => true));
     elseif(endsWith($fname, ".txt"))

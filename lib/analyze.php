@@ -45,6 +45,7 @@ require_once(MP_BASE_DIR.'/lib/model.php'); // for making kinemages
 *       chartCBdev      do CB dev plots and analysis?
 *       chartBaseP      check base-phosphate perpendiculars?
 *       chartSuite      check RNA backbone conformations?
+*       chartHoriz      do horizontal chart?
 *       chartCoot       do coot chart?
 *       chartMulti      do html multi chart?
 *       chartNotJustOut include residues that have no problems in the list?
@@ -71,8 +72,12 @@ function runAnalysis($modelID, $opts)
     $chartDir   = $_SESSION['dataDir'].'/'.MP_DIR_CHARTS;
     $chartURL   = $_SESSION['dataURL'].'/'.MP_DIR_CHARTS;
         if(!file_exists($chartDir)) mkdir($chartDir, 0777);
+    $xrayDir    = $_SESSION['dataDir'].'/'.MP_DIR_XRAYDATA;
     $infile     = "$modelDir/$model[pdb]";
     $reduce_blength = $_SESSION['reduce_blength'];
+    if(isset($model['mtz_file'])) 
+        $mtz_file = $model['mtz_file'];
+    else $mtz_file = $_SESSION['models'][$model['parent']]['mtz_file'];
 
     if($opts['chartRama'])      $tasks['rama'] = "Do Ramachandran analysis and make plots";
     if($opts['chartRota'])      $tasks['rota'] = "Do rotamer analysis";
@@ -85,6 +90,11 @@ function runAnalysis($modelID, $opts)
     if($opts['chartImprove'])   $tasks['improve'] = "Suggest / report on fixes";
     if($opts['doCharts']&&!$opts['chartMulti'])       $tasks['chartsummary'] = "Create summary chart";
     if($opts['chartMulti'])     $tasks['multichart'] = "Create multi-criterion chart";
+    if($opts['chartHoriz'])     
+    {
+        $tasks['runRSCC'] = "Run real-space correlation";
+        $tasks['charthoriz'] = "Create horizontal RSCC chart";
+    }
     if($opts['chartCoot'])      $tasks['cootchart'] = "Create chart for use in Coot";
     if($opts['doKinemage'])     $tasks['multikin'] = "Create multi-criterion kinemage";
 
@@ -193,6 +203,22 @@ function runAnalysis($modelID, $opts)
     }
     //}}} Run all-atom contact programs and offer kins to user
 
+    //{{{ Run real-space correlation
+    $model['raw_rscc_name'] = "$model[parent]_raw.rscc";
+    $model['rscc_name']     = "$model[parent].rscc";
+    $rscc_out = "$xrayDir/$model[parent].rscc";
+    $rscc_prequel_out = "$xrayDir/$model[parent]_prequel.rscc";
+    if($opts['chartHoriz']) 
+    {
+        $startTime = time();
+        setProgress($tasks, 'runRSCC');
+        runRscc($infile, $mtz_file, $rscc_out, $rscc_prequel_out);
+        echo "runRscc ran for ".(time() - $startTime)." seconds\n";
+        echo $mtz_file;
+        echo isset($mtz_file);
+    }
+    //}}}
+    
     //{{{ Report on improvements (that could be) made by MolProbity
     $improveText = "";
     if($opts['chartImprove'] && ($clash || $rota))
@@ -267,7 +293,7 @@ function runAnalysis($modelID, $opts)
     }
     //}}} Report on improvements (that could be) made by by MolProbity
 
-    //{{{ Build multi-criterion chart, kinemage
+    //{{{ Build multi-criterion chart, kinemage, horizontal, chart
     if($opts['doCharts'])
     {
         $startTime = time();
@@ -278,13 +304,19 @@ function runAnalysis($modelID, $opts)
         }
         $outfile = "$rawDir/$model[prefix]multi.table";
         $snapfile = "$chartDir/$model[prefix]multi.html";
-        writeMulticritChart($infile, $outfile, $snapfile, $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, !$opts['chartNotJustOut'], $opts['chartMulti']);
+        $resout = "$rawDir/$model[prefix]multi_res.table";
+        writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, !$opts['chartNotJustOut'], $opts['chartMulti']);
         if($opts['chartMulti']) {
           $tasks['multichart'] .= " - <a href='viewtable.php?$_SESSION[sessTag]&file=$outfile' target='_blank'>preview</a>\n";
           setProgress($tasks, 'multichart'); // so the preview link is visible
         } else {
           $tasks['chartsummary'] .= " - <a href='viewtable.php?$_SESSION[sessTag]&file=$outfile' target='_blank'>preview</a>\n";
           setProgress($tasks, 'chartsummary'); // so the preview link is visible
+        }
+        if($opts['chartHoriz']) {
+          setProgress($tasks, 'charthoriz');
+          $horiz_table_file = "$rawDir/$model[prefix]horiz.table";
+          writeHorizontalChart($resout, $rscc_out, $outfile, $horiz_table_file, $rscc_prequel_out);
         }
         if($opts['chartCoot']) {
           setProgress($tasks, 'cootchart');
@@ -363,6 +395,9 @@ function runAnalysis($modelID, $opts)
             if($opts['chartCoot']) {
               $entry .= "<td>".linkAnyFile("$model[prefix]multi-coot.scm", "To-do list for Coot", "img/multichart-coot.jpg")."<br><small><i>Open this in Coot 0.1.2 or later using Calculate | Run Script...</i></small></td>\n";
               #$entry .= "<td>".linkAnyFile("$model[prefix]multi-coot.py", "To-do list for Coot Python", "img/multichart-coot.jpg")."<br><small><i>Open this in Coot 0.1.2 or later using Calculate | Run Script...</i></small></td>\n";
+            }
+            if($opts['chartHoriz']) {
+              $entry .= "<td>".linkAnyFile("$model[prefix]horiz.table", "Horizontal Chart", "img/multichart_horiz.jpg")."</td>\n";
             }
         }
         $entry .= "</tr></table>\n";
@@ -625,6 +660,16 @@ function runClashlist($infile, $outfile, $blength="ecloud")
 }
 #}}}########################################################################
 
+#{{{ runRscc - generates rscc data
+############################################################################
+function runRscc($pdb_infile, $mtz_infile, $outfile, $rawoutfile)
+{
+    $cmd = MP_BASE_DIR."/bin/runRSCC.py";
+    exec("python $cmd pdb_in=$pdb_infile mtz_in=$mtz_infile prequel=$rawoutfile > $outfile");
+    ///exec("phenix.real_space_correlation $pdb_infile $mtz_infile detail=atom > $outfile");
+}
+#}}}########################################################################
+
 #{{{ loadClashlist - loads Clashlist output into an array
 ############################################################################
 /**
@@ -786,7 +831,7 @@ function loadRotamer($datafile)
     $ret = array();
     foreach($data as $line)
     {
-        echo "In loop\n";
+        // echo "In loop\n";
         $line = explode(':', rtrim($line));
         if ($line[0]==''){
           continue;
@@ -826,7 +871,7 @@ function loadRotamer($datafile)
         if($ret[$cnit]['chi2'] !== '') $ret[$cnit]['chi2'] += 0;
         if($ret[$cnit]['chi3'] !== '') $ret[$cnit]['chi3'] += 0;
         if($ret[$cnit]['chi4'] !== '') $ret[$cnit]['chi4'] += 0;
-        echo "added rota entry\n";
+        // echo "added rota entry\n";
     }
     echo $ret;
     return $ret;
