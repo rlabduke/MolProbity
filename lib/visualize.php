@@ -15,7 +15,7 @@ require_once(MP_BASE_DIR.'/lib/strings.php');
 function makeRamachandranKin($infile, $outfile)
 {
     //exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/hless.jar hless.Ramachandran -nosummary $infile > $outfile");
-    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -kinplot $infile > $outfile");
+    exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -kinplot $infile > $outfile");
 }
 #}}}########################################################################
 
@@ -23,7 +23,7 @@ function makeRamachandranKin($infile, $outfile)
 ############################################################################
 function makeRamachandranPDF($infile, $outfile)
 {
-    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -pdf $infile $outfile");
+    exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -pdf $infile $outfile");
 }
 #}}}########################################################################
 
@@ -61,7 +61,7 @@ function makeCbetaDevPlot($infile, $outfile)
 ############################################################################
 function makeSuitenameKin($infile, $outfile)
 {
-    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle rnabb $infile | suitename -kinemage > $outfile");
+    exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle rnabb $infile | suitename -kinemage > $outfile");
 }
 #}}}########################################################################
 
@@ -575,7 +575,7 @@ function makeBadRamachandranKin($infile, $outfile, $rama = null, $color = 'green
     //exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/hless.jar hless.Ramachandran -nosummary -outliers $color < $infile >> $outfile");
 
     // New ramachandran kin from chiropraxis
-    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -kinmarkup $infile >> $outfile");
+    exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -kinmarkup $infile >> $outfile");
 
     // This uses Prekin, but just produces chunks of mainchain. Hard to see.
     /*if(!$rama)
@@ -656,8 +656,8 @@ function makeBadRotamerKin($infile, $outfile, $rota = null, $color = 'gold', $cu
 ############################################################################
 function makeBadGeomKin($infile, $outfile) {
     //$out = fopen($outfile, 'a');
-    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -kin -sub -validate -protein $infile >> $outfile");
-    exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -kin -sub -validate -rna $infile >> $outfile");
+    exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -kin -sub -validate -protein $infile >> $outfile");
+    exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -kin -sub -validate -rna $infile >> $outfile");
     //exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.dangle.Dangle -kin -validate -dna $infile >> $outfile");
 }
 #}}}########################################################################
