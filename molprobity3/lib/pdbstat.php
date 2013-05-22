@@ -69,8 +69,10 @@ function describePdbStats($pdbstats, $useHTML = true)
             else
                 $details[] = "No explicit hydrogen atoms are included.";
             if($pdbstats['deuteriums'] > 0)
-                echo "deuteriums = ".$pdbstats['deuteriums'];
-                $details[] = "Deuterium atoms present. Assuming neutron diffraction.";
+            {
+              #echo "deuteriums = ".$pdbstats['deuteriums'];
+              $details[] = "Deuterium atoms present. Assuming neutron diffraction.";
+            }
         }
 
         if($pdbstats['hets'] > 0)
