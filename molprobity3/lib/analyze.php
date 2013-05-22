@@ -951,8 +951,11 @@ function loadSuitenameReport($datafile)
         if(startsWith($line, " all general case widths")) break;
         $line = explode(':', rtrim($line));
         if (count($line)==5) { // missing colon due to name length issue in suitename
-          $linestart = array(substr($line[0], 32));
-          $line = array_merge($linestart, $line);
+          //$linestart = array(substr($line[0], 32));  // this code doesn't appear to correctly fix the second element of the array
+          //$line = array_merge($linestart, $line);    // this code doesn't appear to correctly fix the second element of the array
+          $linestart = array(substr($line[0], 0, 32), substr($line[0], 32));
+          $line = array_merge($linestart, array_slice($line, 1));
+          //echo $line[0].":".$line[1].":".$line[2].":".$line[3]."\n";
         }
         if (count($line) > 1) {
           $cnit = $line[2].$line[3].$line[4].substr($line[5],0,3);
