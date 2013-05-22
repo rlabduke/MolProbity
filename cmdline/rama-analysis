@@ -3,7 +3,7 @@
 /*****************************************************************************
     Processes a directory full of PDB files non-recursively and outputs
     a list of all the Ramachanadran scores
-    
+
  -> We assume all files already have H's added! <-
 
 INPUTS (via $_SERVER['argv']):
@@ -61,16 +61,29 @@ while(($infile = readdir($h)) !== false)
     $infile = "$inDir/$infile";
     if(is_file($infile) && endsWith($infile, ".pdb"))
     {
+        mpStartSession(true);
+        $id = addModelOrEnsemble(
+            $infile,
+            basename($infile),
+            false,
+            true,
+            true,
+            false);
+
         $filename = basename($infile);
-        $tmp = mpTempfile();
-        
+        $model   =& $_SESSION['models'][$id];
+        $pdbfile = $_SESSION['dataDir'].'/'.MP_DIR_MODELS."/$model[pdb]";
+        $rawDir  = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA;
+        if(!file_exists($rawDir)) mkdir($rawDir, 0777);
+        $outfile = "$rawDir/$model[prefix]rama.data";
+
         // Run analysis; load data
-        runRamachandran($infile, $tmp);
-        $rama = loadRamachandran($tmp);
-        unlink($tmp);
-        
+        runRamachandran($pdbfile, $outfile);
+        $rama = loadRamachandran($outfile);
+
         foreach($rama as $r)
             echo "$filename:$r[chainID]:$r[resType]:".trim($r['resNum'].$r['insCode']).":$r[phi]:$r[psi]:$r[scorePct]:$r[eval]:$r[type]\n";
+        mpDestroySession();
     }
 }
 closedir($h);
