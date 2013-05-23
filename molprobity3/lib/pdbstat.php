@@ -456,7 +456,7 @@ function analyzeHydrogens($infile) {
     exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -validate -hydrogens -outliers -sigma=0 $infile | wc -l", $allHs);
     exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -validate -hydrogens -outliers $infile | wc -l", $outliers);
 
-    if ($allHs > 0) $fract = ($outliers[0]-1)/($allHs[0]-1);
+    if ($allHs[0] > 1) $fract = ($outliers[0]-1)/($allHs[0]-1);
     else            $fract = 0;
 
     return $fract;
