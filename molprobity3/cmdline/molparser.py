@@ -3,6 +3,9 @@
 from math import log
 import sys, os, getopt, re, pprint
 
+#{{{ variables
+quiet = False
+#}}}
 
 #{{{ parse_cmdline
 #parse the command line--------------------------------------------------------------------------
@@ -17,6 +20,8 @@ def parse_cmdline():
     if o in ("-h", "--help"):
       help()
       sys.exit()
+    if o in ("-q", "--quiet"):
+      
   #if len(args) < 2:
   #  sys.stderr.write("\n**ERROR: User must specify output directory and input PDB file\n")
   #  sys.exit(help())
@@ -32,25 +37,31 @@ def parse_cmdline():
 
 #{{{ help
 def help():
-  print """USAGE:   python molparser.py [MP output files]
+  print """
+This script parses the output files from the various programs in MP to duplicate
+a set of the oneline analysis.  This script reimplements a significant portion 
+of analysis.php.  
+
+USAGE:   python molparser.py [MP output files]
   
-  [MP output files] In order: clashlist output
-                              cbetadev output
-                              rota output
-                              rama output
-                              protein bond geometry output
-                              rna bond geometry output
-                              base ppperp output
-                              suitname output
+  [MP output files] In order: pdbname (string)
+                              model number
+                              clashlist output file
+                              cbetadev output file
+                              rota output file
+                              rama output file
+                              protein bond geometry output file
+                              rna bond geometry output file
+                              base ppperp output file
+                              suitname output file
 
 FLAGS:
   -h     Print this help message
 """
 #}}}
    
-
-#{{{ analyze_file
-def analyze_file(arg):
+#{{{ debug
+def debug(arg):
   print os.path.dirname(os.path.realpath(arg))
   #in_file = os.path.basename(arg)
   #in_file, ext = os.path.splitext(in_file)
@@ -642,6 +653,8 @@ def calcMPscore(clash, rota, rama):
     return -1
   else:
     cs = clash['scoreAll']
+    if (cs == -1):
+      return -1
     ro = 100.0 * len(findRotaOutliers(rota)) / len(rota)
     ramaScore = {};
     for r in rama.itervalues():
@@ -690,21 +703,23 @@ def recomposeResName(chain, resnum, inscode, restype):
 
 #{{{ oneline_analysis
 def oneline_analysis(files):
-  print "#pdbFileName:clashscore:clashscoreB<40:cbeta>0.25:numCbeta:rota<1%:numRota:ramaOutlier:ramaAllowed:ramaFavored:numRama:numbadbonds:numbonds:pct_badbonds:pct_resbadbonds:numbadangles:numangles:pct_badangles:pct_resbadangles:MolProbityScore:numPperpOutliers:numPperp:numSuiteOutliers:numSuites"
-  out = ""
+  if (!quiet):
+    print "#pdbFileName:model:clashscore:clashscoreB<40:cbeta>0.25:numCbeta:rota<1%:numRota:ramaOutlier:ramaAllowed:ramaFavored:numRama:numbadbonds:numbonds:pct_badbonds:pct_resbadbonds:numbadangles:numangles:pct_badangles:pct_resbadangles:MolProbityScore:numPperpOutliers:numPperp:numSuiteOutliers:numSuites"
   
-  clash = loadClashlist(files[0])
+  out = files[0]+":"+files[1]+":"
+  
+  clash = loadClashlist(files[2])
   out = out+":" + repr(clash['scoreAll']) + ":" + repr(clash['scoreBlt40'])
   
-  cbdev = loadCbetaDev(files[1])
+  cbdev = loadCbetaDev(files[3])
   badCbeta = findCbetaOutliers(cbdev)
   out = out+":" + repr(len(badCbeta)) + ":" + repr(len(cbdev))
   
-  rota = loadRotamer(files[2])
+  rota = loadRotamer(files[4])
   badRota = findRotaOutliers(rota);
   out = out+":" + repr(len(badRota)) + ":" + repr(len(rota))
   
-  rama = loadRamachandran(files[3])
+  rama = loadRamachandran(files[5])
   #pprint.pprint(rama)
   ramaScore = {}
   for res, r in rama.iteritems():
@@ -714,8 +729,8 @@ def oneline_analysis(files):
       ramaScore[ r['eval'] ] = 1
   out = out+":" + (repr(ramaScore['OUTLIER'])) + ":" + (repr(ramaScore['Allowed'])) + ":" + (repr(ramaScore['Favored'])) + ":" + repr(len(rama))
   
-  geom = loadBondGeometryReport(files[4], "protein")
-  geom.update(loadBondGeometryReport(files[5], "rna"))
+  geom = loadBondGeometryReport(files[6], "protein")
+  geom.update(loadBondGeometryReport(files[7], "rna"))
   #pprint.pprint(geom)
   bondOut = findBondGeomOutliers(geom)
   angleOut = findAngleGeomOutliers(geom)
@@ -747,17 +762,16 @@ def oneline_analysis(files):
   else:
     out = out+"::"
      
-  pperp = loadBasePhosPerp(files[6])
+  pperp = loadBasePhosPerp(files[8])
   badPperp = findBasePhosPerpOutliers(pperp)
   out = out+":"+repr(len(badPperp))+":"+repr(len(pperp))
 
-  suites = loadSuitenameReport(files[7])
+  suites = loadSuitenameReport(files[9])
   badSuites = findSuitenameOutliers(suites)
   out = out+":"+repr(len(badSuites))+":"+repr(len(suites))
 
   print out
 #}}}
-
 
 if __name__ == "__main__":
   opts, args = parse_cmdline()
