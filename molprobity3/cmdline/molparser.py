@@ -21,7 +21,7 @@ def parse_cmdline():
       help()
       sys.exit()
     if o in ("-q", "--quiet"):
-      
+      quiet = True
   #if len(args) < 2:
   #  sys.stderr.write("\n**ERROR: User must specify output directory and input PDB file\n")
   #  sys.exit(help())
@@ -703,10 +703,10 @@ def recomposeResName(chain, resnum, inscode, restype):
 
 #{{{ oneline_analysis
 def oneline_analysis(files):
-  if (!quiet):
+  if (not quiet):
     print "#pdbFileName:model:clashscore:clashscoreB<40:cbeta>0.25:numCbeta:rota<1%:numRota:ramaOutlier:ramaAllowed:ramaFavored:numRama:numbadbonds:numbonds:pct_badbonds:pct_resbadbonds:numbadangles:numangles:pct_badangles:pct_resbadangles:MolProbityScore:numPperpOutliers:numPperp:numSuiteOutliers:numSuites"
   
-  out = files[0]+":"+files[1]+":"
+  out = files[0]+":"+files[1]
   
   clash = loadClashlist(files[2])
   out = out+":" + repr(clash['scoreAll']) + ":" + repr(clash['scoreBlt40'])
