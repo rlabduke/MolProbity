@@ -227,7 +227,7 @@ function runAnalysis($modelID, $opts)
             {
                 $improveText .= "<div class='feature'>By adding H to this model and allowing Asn/Gln/His flips, you have already ";
                 $improveText .= implode(" and ", $improvementList);
-                $improveText .= ".  <b>Make sure you download the modified PDB to take advantage of these improvements!</b></div>\n";
+                $improveText .= ".  <br /><b>Make sure you download the modified PDB to take advantage of these improvements! <br />NOTE: Atom positions have changed, so refinement to idealize geometry is necessary.</b></div>\n";
             }
         }
         elseif($mainClashscore > 0 || $mainRotaCount > 0) // if file was run through reduce at all, flips were not allowed
