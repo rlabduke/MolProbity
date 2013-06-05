@@ -247,8 +247,14 @@ function pdbstat($pdbfilename)
             {
                 $chainids[$chain] = $chain; # record chain IDs used
                 $segids[$segid] = $segid; # record seg IDs used
-                if($chain != "__") $chainID_count += 1;
-                if($segid != "    ") $segID_count += 1;
+                if($chain != "__")
+                {
+                  $chainID_count += 1;
+                }
+                if(trim($segid) != "")
+                {
+                  $segID_count += 1;
+                }
                 # Start of a new residue?
                 if($id != $rescode)
                 {
