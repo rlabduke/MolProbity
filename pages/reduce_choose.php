@@ -188,8 +188,16 @@ function onRerunReduce()
     else $flags = 'nuclear';
     $entry .= "<p>Reduce placed hydrogens at $flags positions.\n";
     $entry .= "<p>Reduce used <a href=http://kinemage.biochem.duke.edu/software/reduce.php> reduce_wwPDB_het_dict.txt </a> as the het dictonary.\n";
-    $entry .= "<p>You can now download the optimized and annotated <a href='$url'>PDB file with hydrogens</a>";
-    $entry .= " or <a href='download_trimmed.php?$_SESSION[sessTag]&file=$pdb'>without hydrogens (flips only)</a>.</p>\n";
+    if($doflip && ($n > 0))
+    {
+      $entry .= "<p>You can now download this atom-shifted and annotated <a href='$url'>PDB file with hydrogens</a>";
+      $entry .= " or <a href='download_trimmed.php?$_SESSION[sessTag]&file=$pdb'>without hydrogens (flips only)</a> <b>which should be re-refined before deposition.</b></p>\n";
+    }
+    else
+    {
+      $entry .= "<p>You can now download the optimized and annotated <a href='$url'>PDB file with hydrogens</a>";
+      $entry .= " or <a href='download_trimmed.php?$_SESSION[sessTag]&file=$pdb'>without hydrogens (flips only)</a>.</p>\n";
+    }
 
     $nqkin = $_SESSION['dataDir'].'/'.MP_DIR_KINS."/$model[prefix]flipnq.kin";
     $hiskin = $_SESSION['dataDir'].'/'.MP_DIR_KINS."/$model[prefix]fliphis.kin";

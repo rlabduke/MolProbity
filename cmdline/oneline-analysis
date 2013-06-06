@@ -105,31 +105,45 @@ function summaryAnalysis($modelID)
       $bonds = array_merge(loadValidationBondReport("$rawDir/$model[prefix]geom.data", "protein"), loadValidationBondReport("$rawDir/$model[prefix]rnageom.data", "rna"));
       $angles = array_merge(loadValidationAngleReport("$rawDir/$model[prefix]geom.data", "protein"), loadValidationAngleReport("$rawDir/$model[prefix]rnageom.data", "rna"));
       //echo "finished loading val report\n";
-      $total = 0;
-      $outCount = 0;
+      $total = 0; // total residues
+      $totalBonds = 0;
+      $outCount = 0; // residues with at least one bond outlier
+      $outBondCount = 0;
       foreach($bonds as $cnit => $item) {
         //if($item['type'] == 'protein') {
           if($item['isOutlier']) {
+            $outBondCount += $item['outCount'];
             $outCount += 1;
           }
+          $totalBonds += $item['bondCount'];
           $total += 1;
         //}
       }
-      if ($total > 0) $out .= ":".sprintf("%.2f", 100.0 * $outCount / $total);
-      else            $out .= ":-1";
+      if ($total > 0) {
+        $out .= ":$outBondCount:$totalBonds:".sprintf("%.2f", 100.0 * $outBondCount / $totalBonds);
+        $out .= ":".sprintf("%.2f", 100.0 * $outCount / $total);
+      }
+      else            $out .= ":-1:-1:-1:-1";
       //echo "outliers:$outCount total:$total";
-      $total = 0;
-      $outCount = 0;
+      $total = 0; // total residues
+      $totalAng = 0; 
+      $outCount = 0; // residues with at least one angle outlier
+      $outAngCount = 0;
       foreach($angles as $cnit => $item) {
         //if($item['type'] == 'protein') {
           if($item['isOutlier']) {
+            $outAngCount += $item['outCount'];
             $outCount += 1;
           }
+          $totalAng += $item['angCount'];
           $total += 1;
         //}
       }
-      if ($total > 0) $out .= ":".sprintf("%.2f", 100.0 * $outCount / $total);
-      else            $out .= ":-1";
+      if ($total > 0) {
+        $out .= ":$outAngCount:$totalAng:".sprintf("%.2f", 100.0 * $outAngCount / $totalAng);
+        $out .= ":".sprintf("%.2f", 100.0 * $outCount / $total);
+      }
+      else            $out .= ":-1:-1:-1:-1";
       //echo "\noutliers:$outCount total:$total\n";
     }
     if($optClash && $optRota && $optRama)
@@ -250,7 +264,7 @@ if($optVerbose)
     if($optCbeta)   echo ":cbeta>0.25:numCbeta";//:maxCbeta:medianCbeta:meanCbeta"; removed by jjh
     if($optRota)    echo ":rota<1%:numRota";
     if($optRama)    echo ":ramaOutlier:ramaAllowed:ramaFavored:numRama";
-    if($optGeom)    echo ":pct_badbonds:pct_badangles";
+    if($optGeom)    echo ":numbadbonds:numbonds:pct_badbonds:pct_resbadbonds:numbadangles:numangles:pct_badangles:pct_resbadangles";
     if($optClash && $optRota && $optRama) echo ":MolProbityScore:Mol_pct_rank";
     if($optPuck)    echo ":numPperpOutliers:numPperp";
     if($optSuite)   echo ":numSuiteOutliers:numSuites";

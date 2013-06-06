@@ -82,7 +82,11 @@ while(($infile = readdir($h)) !== false)
         $rama = loadRamachandran($outfile);
 
         foreach($rama as $r)
-            echo "$filename:$r[chainID]:$r[resType]:".trim($r['resNum'].$r['insCode']).":$r[phi]:$r[psi]:$r[scorePct]:$r[eval]:$r[type]\n";
+        {
+            //echo "$filename:$r[chainID]:$r[resType]:".trim($r['resNum'].$r['insCode']).":$r[phi]:$r[psi]:$r[scorePct]:$r[eval]:$r[type]\n";
+            $format = "$filename:$r[chainID]:$r[resType]:"."%4d".$r['insCode'].":$r[phi]:$r[psi]:$r[scorePct]:$r[eval]:$r[type]\n";
+            echo sprintf($format, $r['resNum']);
+        }
         mpDestroySession();
     }
 }
