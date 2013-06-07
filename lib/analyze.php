@@ -75,7 +75,7 @@ function runAnalysis($modelID, $opts)
     $xrayDir    = $_SESSION['dataDir'].'/'.MP_DIR_XRAYDATA;
     $infile     = "$modelDir/$model[pdb]";
     $reduce_blength = $_SESSION['reduce_blength'];
-    if(isset($model['mtz_file'])) 
+    if(isset($model['mtz_file']))
         $mtz_file = $model['mtz_file'];
     else $mtz_file = $_SESSION['models'][$model['parent']]['mtz_file'];
 
@@ -90,7 +90,7 @@ function runAnalysis($modelID, $opts)
     if($opts['chartImprove'])   $tasks['improve'] = "Suggest / report on fixes";
     if($opts['doCharts']&&!$opts['chartMulti'])       $tasks['chartsummary'] = "Create summary chart";
     if($opts['chartMulti'])     $tasks['multichart'] = "Create multi-criterion chart";
-    if($opts['chartHoriz'])     
+    if($opts['chartHoriz'])
     {
         $tasks['runRSCC'] = "Run real-space correlation";
         $tasks['charthoriz'] = "Create horizontal RSCC chart";
@@ -208,7 +208,7 @@ function runAnalysis($modelID, $opts)
     $model['rscc_name']     = "$model[parent].rscc";
     $rscc_out = "$xrayDir/$model[parent].rscc";
     $rscc_prequel_out = "$xrayDir/$model[parent]_prequel.rscc";
-    if($opts['chartHoriz']) 
+    if($opts['chartHoriz'])
     {
         $startTime = time();
         setProgress($tasks, 'runRSCC');
@@ -218,7 +218,7 @@ function runAnalysis($modelID, $opts)
         echo isset($mtz_file);
     }
     //}}}
-    
+
     //{{{ Report on improvements (that could be) made by MolProbity
     $improveText = "";
     if($opts['chartImprove'] && ($clash || $rota))
@@ -540,11 +540,13 @@ function runCbetaDev($infile, $outfile)
 {
     if(!$_SESSION['useSEGID'])
     {
-      exec("prekin -cbdevdump $infile > $outfile");
+      //exec("prekin -cbdevdump $infile > $outfile");
+      exec("phenix.cbetadev $infile > $outfile");
     }
     else #use segid in place of chainid
     {
-      exec("prekin -cbdevdump -segid $infile > $outfile");
+      //exec("prekin -cbdevdump -segid $infile > $outfile");
+      exec("phenix.cbetadev $infile > $outfile");
     }
 }
 #}}}########################################################################
@@ -577,6 +579,18 @@ function loadCbetaDev($datafile)
         if($line != "" && !startsWith($line, 'pdb:alt:res:'))
         {
             $line = explode(':', $line);
+            if ($line[0]==''){
+              continue;
+            }
+            elseif (preg_match("/^#/",$line[0])){
+              continue;
+            }
+            elseif (preg_match("/^SUMMARY/",$line[0])){
+              continue;
+            }
+            elseif (preg_match("/^filename/",$line[0])){
+              continue;
+            }
             $entry = array(
                 'altConf'   => strtoupper($line[1]),
                 'resType'   => strtoupper($line[2]),
@@ -904,7 +918,8 @@ function findRotaOutliers($rota)
 function runRamachandran($infile, $outfile)
 {
     //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/hless.jar hless.Ramachandran -nokin -raw $infile > $outfile");
-    exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -raw $infile > $outfile");
+    //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -raw $infile > $outfile");
+    exec("phenix.ramalyze $infile > $outfile");
 }
 #}}}########################################################################
 
@@ -936,7 +951,24 @@ function loadRamachandran($datafile)
     foreach($data as $line)
     {
         $line = explode(':', rtrim($line));
+        if ($line[0]==''){
+          continue;
+        }
+        elseif (preg_match("/^#/",$line[0])){
+          continue;
+        }
+        elseif (preg_match("/^SUMMARY/",$line[0])){
+          continue;
+        }
+        elseif (preg_match("/^residue/",$line[0])){
+          continue;
+        }
         $cnit = $line[0];
+        if(strlen($cnit)==10)
+        {
+          $cnit = ' '.$cnit;
+        }
+        $cnit = substr($cnit,0,6).substr($cnit,7,4);
         $decomp = decomposeResName($cnit);
         $ret[$cnit] = array(
             'resName'   => $cnit,
