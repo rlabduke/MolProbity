@@ -12,7 +12,6 @@ quiet = False
 def parse_cmdline():
   try:
     opts, args = getopt.getopt(sys.argv[1:], 'h',['help'])
-    return opts, args;
   except getopt.GetoptError:
     help()
     sys.exit()
@@ -22,9 +21,10 @@ def parse_cmdline():
       sys.exit()
     if o in ("-q", "--quiet"):
       quiet = True
-  #if len(args) < 2:
-  #  sys.stderr.write("\n**ERROR: User must specify output directory and input PDB file\n")
-  #  sys.exit(help())
+  if len(args) < 2:
+    sys.stderr.write("\n**ERROR: User must specify output directory and input PDB file\n")
+    sys.exit(help())
+  return opts, args;
   #else:
   #  outdir = args[0]
   #  if (os.path.isdir(outdir)):
@@ -722,12 +722,18 @@ def oneline_analysis(files):
   rama = loadRamachandran(files[5])
   #pprint.pprint(rama)
   ramaScore = {}
+  ramaScore['OUTLIER'] = 0
+  ramaScore['Allowed'] = 0
+  ramaScore['Favored'] = 0
   for res, r in rama.iteritems():
     if r['eval'] in ramaScore:
       ramaScore[ r['eval'] ] = ramaScore[r['eval']] + 1
     else:
       ramaScore[ r['eval'] ] = 1
-  out = out+":" + (repr(ramaScore['OUTLIER'])) + ":" + (repr(ramaScore['Allowed'])) + ":" + (repr(ramaScore['Favored'])) + ":" + repr(len(rama))
+  if ramaScore['OUTLIER'] == 0 and ramaScore['Allowed'] == 0 and ramaScore['Favored'] == 0:
+    out = out+"::::"
+  else:
+    out = out+":" + (repr(ramaScore['OUTLIER'])) + ":" + (repr(ramaScore['Allowed'])) + ":" + (repr(ramaScore['Favored'])) + ":" + repr(len(rama))
   
   geom = loadBondGeometryReport(files[6], "protein")
   geom.update(loadBondGeometryReport(files[7], "rna"))
