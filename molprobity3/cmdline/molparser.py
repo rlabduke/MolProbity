@@ -709,7 +709,7 @@ def oneline_analysis(files):
   out = files[0]+":"+files[1]
   
   clash = loadClashlist(files[2])
-  out = out+":" + repr(clash['scoreAll']) + ":" + repr(clash['scoreBlt40'])
+  out = out+":" + ("%.2f" % (clash['scoreAll'])) + ":" + ("%.2f" % (clash['scoreBlt40']))
   
   cbdev = loadCbetaDev(files[3])
   badCbeta = findCbetaOutliers(cbdev)
