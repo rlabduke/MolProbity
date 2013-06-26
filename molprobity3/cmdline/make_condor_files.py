@@ -95,7 +95,7 @@ def write_super_dag(outdir, list_of_pdblists):
   outfile = os.path.join(os.path.realpath(outdir), out_name)
   out=open(outfile, 'wr')
   for indx, pdbs in enumerate(list_of_pdblists):
-    num = '{:0>3}'.format(indx)
+    num = '{0:0>3}'.format(indx)
     out.write("SUBDAG EXTERNAL "+num+" moldag"+num+".dag\n")
     write_mol_dag(outdir, num, pdbs)
   out.close()
@@ -107,20 +107,22 @@ def write_mol_dag(outdir, num, pdbs):
   outfile = os.path.join(os.path.realpath(outdir), out_name)
   out=open(outfile, 'wr')
   
-  out.write("Jobstate_log logs/mol.jobstate.log\n")
-  out.write("NODE_STATUS_FILE mol.status 3600\n")
+  out.write("Jobstate_log logs/mol"+num+".jobstate.log\n")
+  out.write("NODE_STATUS_FILE mol"+num+".status 3600\n")
   out.write("\n")
   
   parent_childs = "" # create parent_childs part of dag file now so only have to loop once thru pdbs
+  pdb_list = []
   for pdb_file in pdbs:
+    pdb_list.append(os.path.basename(pdb_file))
     pdb, ext = os.path.splitext(os.path.basename(pdb_file))
     out.write("Job clash"+pdb+" clashlist.sub\n")
-    out.write("VARS clash"+pdb+" PDB=\""+pdb_file+"\"\n")
+    out.write("VARS clash"+pdb+" PDB=\""+pdb_file+"\" PDBNAME=\""+pdb+"\"\n")
     out.write("\n")
     parent_childs = parent_childs+"PARENT clash"+pdb+" CHILD local"+num+"\n"
   
   out.write("Job local"+num+" local.sub\n")
-  out.write("VARS local"+num+" PDB=\""+" ".join(pdbs)+"\"\n")
+  out.write("VARS local"+num+" PDBS=\""+" ".join(pdb_list)+"\"\n")
   out.write("VARS local"+num+" NUMBER=\""+num+"\"\n")
   out.write(parent_childs)
   
@@ -143,11 +145,12 @@ def run_clashlist(outdir, arg):
 #}}}
 
 #{{{ write_file
-def write_file(outdir, out_name, file_text):
+def write_file(outdir, out_name, file_text, permissions=0644):
   outfile = os.path.join(os.path.realpath(outdir), out_name)
   out=open(outfile, 'wr')
   out.write(file_text)
   out.close()
+  os.chmod(outfile, permissions)
 #}}}
 
 #{{{ write_local_run
@@ -192,7 +195,7 @@ Notify_user  = vbchen@bmrb.wisc.edu
 notification = Error
 
 Executable	= local_run.sh
-Arguments	=  $(PDB)
+Arguments	=  $(PDBS)
 
 log		= logs/local$(NUMBER).log
 output		= logs/local$(NUMBER).out
@@ -210,7 +213,7 @@ clash_sub = """universe = vanilla
 Notify_user  = vbchen@bmrb.wisc.edu
 notification = Error
 
-requirements = ((TARGET.FileSystemDomain == "bmrb.wisc.edu") || (TARGET.FileSystemDomain == ".bmrb.wisc.edu"))
+#requirements = ((TARGET.FileSystemDomain == "bmrb.wisc.edu") || (TARGET.FileSystemDomain == ".bmrb.wisc.edu"))
 
 Executable	= {0}/bin/clashlist
 Arguments	= $(PDB) 40 10
@@ -219,8 +222,8 @@ should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 transfer_input_files = $(PDB),{0}/bin/linux/probe,{0}/bin/linux/cluster
 
-log		= logs/clashlist.log
-output		= results/$(PDB)-clashlist
+log  		= logs/clashlist.log
+output	= results/$(PDBNAME)-clashlist
 error		= logs/clashlist.err
 copy_to_spool	= False
 priority	= 0
@@ -236,12 +239,14 @@ if __name__ == "__main__":
     outdir = os.path.join(indir, "condor_sub_files")
     if not os.path.exists(outdir):
       os.makedirs(outdir)
+      os.makedirs(os.path.join(outdir,"logs"))
+      os.makedirs(os.path.join(outdir,"results"))
     else:
       sys.stderr.write("\"condor_sub_files\" directory detected in \""+indir+"\", please delete it before running this script\n")
       sys.exit()
     list_of_lists = split_pdbs(indir, total_file_size_limit)
     write_super_dag(outdir, list_of_lists)
-    write_file(outdir, "local_run.sh", local_run.format(molprobity_home, pdb="{pdb}"))
+    write_file(outdir, "local_run.sh", local_run.format(molprobity_home, pdb="{pdb}"), 0755)
     write_file(outdir, "local.sub", local_sub)
     write_file(outdir, "clashlist.sub", clash_sub.format(molprobity_home))
   else:
