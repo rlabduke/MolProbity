@@ -112,9 +112,9 @@ def write_mol_dag(outdir, num, pdbs):
   out.write("\n")
   
   parent_childs = "" # create parent_childs part of dag file now so only have to loop once thru pdbs
-  pdb_list = []
+  #pdb_list = []
   for pdb_file in pdbs:
-    pdb_list.append(os.path.basename(pdb_file))
+    #pdb_list.append(os.path.basename(pdb_file))
     pdb, ext = os.path.splitext(os.path.basename(pdb_file))
     out.write("Job clash"+pdb+" clashlist.sub\n")
     out.write("VARS clash"+pdb+" PDB=\""+pdb_file+"\" PDBNAME=\""+pdb+"\"\n")
@@ -122,7 +122,7 @@ def write_mol_dag(outdir, num, pdbs):
     parent_childs = parent_childs+"PARENT clash"+pdb+" CHILD local"+num+"\n"
   
   out.write("Job local"+num+" local.sub\n")
-  out.write("VARS local"+num+" PDBS=\""+" ".join(pdb_list)+"\"\n")
+  out.write("VARS local"+num+" PDBS=\""+" ".join(pdbs)+"\"\n")
   out.write("VARS local"+num+" NUMBER=\""+num+"\"\n")
   out.write(parent_childs)
   
@@ -161,29 +161,31 @@ local_run = """#!/bin/sh
 
 for pdb in "$@"
 do
+pdbbase=`basename $pdb .pdb` #should be just the name of the pdb without the .pdb extension
+#echo $pdbbase
 # Chiropraxis
-java -cp {0}/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -raw $pdb > results/${pdb}-ramalyze
+java -cp {0}/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -raw $pdb > results/${pdbbase}-ramalyze
 
 # Rotalyze
-java -cp {0}/lib/chiropraxis.jar chiropraxis.rotarama.Rotalyze $pdb > results/${pdb}-rotalyze
+java -cp {0}/lib/chiropraxis.jar chiropraxis.rotarama.Rotalyze $pdb > results/${pdbbase}-rotalyze
 
 # Prekin -pperp
-{0}/bin/linux/prekin -pperptoline -pperpdump $pdb > results/${pdb}-prekin_pperp
+{0}/bin/linux/prekin -pperptoline -pperpdump $pdb > results/${pdbbase}-prekin_pperp
 
 # Dangle rna
-java -cp {0}/lib/dangle.jar dangle.Dangle -rna -validate -outliers -sigma=0.0 $pdb > results/${pdb}-dangle_rna
+java -cp {0}/lib/dangle.jar dangle.Dangle -rna -validate -outliers -sigma=0.0 $pdb > results/${pdbbase}-dangle_rna
 
 # c-beta dev
-{0}/bin/linux/prekin -cbdevdump $pdb > results/${pdb}-cbdev
+{0}/bin/linux/prekin -cbdevdump $pdb > results/${pdbbase}-cbdev
 
 # Dangle protein
-java -cp {0}/lib/dangle.jar dangle.Dangle -protein -validate -outliers -sigma=0.0 $pdb > results/${pdb}-dangle_protein
+java -cp {0}/lib/dangle.jar dangle.Dangle -protein -validate -outliers -sigma=0.0 $pdb > results/${pdbbase}-dangle_protein
 
 # Suitename
-java -Xmx512m -cp {0}/lib/dangle.jar dangle.Dangle rnabb $pdb | {0}/bin/linux/suitename  -report > results/${pdb}-suitename
+java -Xmx512m -cp {0}/lib/dangle.jar dangle.Dangle rnabb $pdb | {0}/bin/linux/suitename  -report > results/${pdbbase}-suitename
 
 # Analyze the results
-{0}/cmdline/molparser.py -q $pdb 1 results/${pdb}-clashlist results/${pdb}-cbdev results/${pdb}-rotalyze results/${pdb}-ramalyze results/${pdb}-dangle_protein results/${pdb}-dangle_rna results/${pdb}-prekin_pperp results/${pdb}-suitename
+{0}/cmdline/molparser.py -q $pdb 1 results/${pdbbase}-clashlist results/${pdbbase}-cbdev results/${pdbbase}-rotalyze results/${pdbbase}-ramalyze results/${pdbbase}-dangle_protein results/${pdbbase}-dangle_rna results/${pdbbase}-prekin_pperp results/${pdbbase}-suitename
 done
 """
 #}}}
@@ -216,7 +218,7 @@ notification = Error
 #requirements = ((TARGET.FileSystemDomain == "bmrb.wisc.edu") || (TARGET.FileSystemDomain == ".bmrb.wisc.edu"))
 
 Executable	= {0}/bin/clashlist
-Arguments	= $(PDB) 40 10
+Arguments	= $(PDBNAME).pdb 40 10
 
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
@@ -246,7 +248,7 @@ if __name__ == "__main__":
       sys.exit()
     list_of_lists = split_pdbs(indir, total_file_size_limit)
     write_super_dag(outdir, list_of_lists)
-    write_file(outdir, "local_run.sh", local_run.format(molprobity_home, pdb="{pdb}"), 0755)
+    write_file(outdir, "local_run.sh", local_run.format(molprobity_home, pdbbase="{pdbbase}"), 0755)
     write_file(outdir, "local.sub", local_sub)
     write_file(outdir, "clashlist.sub", clash_sub.format(molprobity_home))
   else:
