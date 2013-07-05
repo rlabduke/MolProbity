@@ -1,44 +1,78 @@
 #!/usr/bin/python
 # (jEdit options) :folding=explicit:collapseFolds=1:
 import sys, os, getopt, re, subprocess
+from optparse import OptionParser
 
 # THIS FILE MUST BE IN THE MOLPROBITY CMDLINE DIRECTORY!!!
 
 #number_to_run = 50
-total_file_size_limit = 10000000 # 10 MB by default
+
 
 #{{{ parse_cmdline
 #parse the command line--------------------------------------------------------------------------
 def parse_cmdline():
-  try:
-    #opts, args = getopt.getopt(sys.argv[1:], 'hn:',['help', 'number='])
-    opts, args = getopt.getopt(sys.argv[1:], 'hl',['help', 'limit='])
-  except getopt.GetoptError as err:
-    print str(err)
-    help()
-    sys.exit()
-  for o, a in opts:
-    if o in ("-h", "--help"):
-      help()
-      sys.exit()
-    elif o in ("-l", "--limit"):
-      if a > 1000000: # no less than 1 MB
-        global total_file_size_limit
-        total_file_size_limit = a
-      else:
-        sys.stderr.write("\n**ERROR: -limit cannot be less than 1000000\n")
-        sys.exit(help())
-  return args
+  parser = OptionParser()
+  parser.add_option("-l", "--limit", action="store", type="int", 
+    dest="total_file_size_limit", default=10000000,
+    help="change total file size in each separate job")
+  parser.add_option("-t", "--type", action="store", type="string", 
+    dest="bond_type", default="nuclear",
+    help="specify hydrogen bond length for clashes (nuclear or ecloud)")
+  opts, args = parser.parse_args()
+  if opts.total_file_size_limit < 1000000:
+    sys.stderr.write("\n**ERROR: -limit cannot be less than 1000000\n")
+    sys.exit(parser.print_help())
+  if not (opts.bond_type == "nuclear" or opts.bond_type == "ecloud"):
+    sys.stderr.write("\n**ERROR: -type must be ecloud or nuclear\n")
+    sys.exit(parser.print_help())
   if len(args) < 1:
     sys.stderr.write("\n**ERROR: User must specify input directory\n")
     sys.exit(help())
-  else:
+  else:  
     indir = args[0]
     if (os.path.isdir(indir)):
-      return indir
+      return opts, indir
     else:
       sys.stderr.write("\n**ERROR: First argument must be a directory!\n")
       sys.exit(help())
+  #global total_file_size_limit
+  #global bond_type
+  #total_file_size_limit = 10000000 # 10 MB by default
+  #bond_type = "nuclear"
+  #try:
+  #  #opts, args = getopt.getopt(sys.argv[1:], 'hn:',['help', 'number='])
+  #  opts, args = getopt.getopt(sys.argv[1:], 'hlt',['help', 'limit=', 'type='])
+  #except getopt.GetoptError as err:
+  #  print str(err)
+  #  help()
+  #  sys.exit()
+  #for o, a in opts:
+  #  if o in ("-h", "--help"):
+  #    help()
+  #    sys.exit()
+  #  elif o in ("-l", "--limit"):
+  #    if a > 1000000: # no less than 1 MB
+  #      total_file_size_limit = a
+  #    else:
+  #      sys.stderr.write("\n**ERROR: -limit cannot be less than 1000000\n")
+  #      sys.exit(help())
+  #  elif o in ("-t", "--type"):
+  #    if a == "ecloud":
+  #      bond_type = "ecloud"
+  #    elif not a == "nuclear":
+  #      sys.stderr.write("\n**ERROR: -type must be ecloud or nuclear\n")
+  #      sys.exit(help())
+  #return args
+  #if len(args) < 1:
+  #  sys.stderr.write("\n**ERROR: User must specify input directory\n")
+  #  sys.exit(help())
+  #else:
+  #  indir = args[0]
+  #  if (os.path.isdir(indir)):
+  #    return indir
+  #  else:
+  #    sys.stderr.write("\n**ERROR: First argument must be a directory!\n")
+  #    sys.exit(help())
 #------------------------------------------------------------------------------------------------
 #}}}
 
@@ -113,18 +147,32 @@ def write_mol_dag(outdir, num, pdbs):
   
   parent_childs = "" # create parent_childs part of dag file now so only have to loop once thru pdbs
   #pdb_list = []
+  #for pdb_file in pdbs:
+  #  #pdb_list.append(os.path.basename(pdb_file))
+  #  pdb, ext = os.path.splitext(os.path.basename(pdb_file))
+  #  out.write("Job clash"+pdb+" clashlist.sub\n")
+  #  out.write("VARS clash"+pdb+" PDB=\""+pdb_file+"\" PDBNAME=\""+pdb+"\"\n")
+  #  out.write("\n")
+  #  parent_childs = parent_childs+"PARENT clash"+pdb+" CHILD local"+num+"\n"
+  base_pdbs = []
+  pdb_remaps = []
+  #relative_pdbs = []
   for pdb_file in pdbs:
-    #pdb_list.append(os.path.basename(pdb_file))
-    pdb, ext = os.path.splitext(os.path.basename(pdb_file))
-    out.write("Job clash"+pdb+" clashlist.sub\n")
-    out.write("VARS clash"+pdb+" PDB=\""+pdb_file+"\" PDBNAME=\""+pdb+"\"\n")
-    out.write("\n")
-    parent_childs = parent_childs+"PARENT clash"+pdb+" CHILD local"+num+"\n"
+    base_pdbs.append(os.path.basename(pdb_file))
+    base_pdb, ext = os.path.splitext(os.path.basename(pdb_file))
+    pdb_remaps.append(base_pdb+"-clashlist=results/"+base_pdb+"-clashlist") # for transferring clashlist output to results folder
+    #relative_pdbs.append(os.path.join("..", os.path.basename(pdb_file)))
+  out.write("Job clash"+num+" clashlist.sub\n")
+  out.write("VARS clash"+num+" PDBS=\""+" ".join(base_pdbs)+"\"\n") #space separated list of PDBS for commandline input
+  out.write("VARS clash"+num+" PDBSINPUT=\""+",".join(pdbs)+"\"\n") #comma separated list of PDBS for condor transfering
+  out.write("VARS clash"+num+" PDBREMAPS=\""+";".join(pdb_remaps)+"\"\n")
+  out.write("VARS clash"+num+" NUMBER=\""+num+"\"\n")
+  #out.write(parent_childs)
   
   out.write("Job local"+num+" local.sub\n")
   out.write("VARS local"+num+" PDBS=\""+" ".join(pdbs)+"\"\n")
   out.write("VARS local"+num+" NUMBER=\""+num+"\"\n")
-  out.write(parent_childs)
+  out.write("PARENT clash"+num+" CHILD local"+num+"\n")
   
   out.close()
 #}}}
@@ -209,6 +257,20 @@ queue
 """
 #}}}
 
+#{{{ write_clashlistsh
+clash_sh = """#!/bin/sh
+
+mkdir results
+
+for pdb in "$@"
+do
+pdbbase=`basename $pdb .pdb` #should be just the name of the pdb without the .pdb extension
+./clashlist $pdb 40 10 {bondtype} > ${pdbbase}-clashlist
+
+done
+"""
+#}}}
+
 #{{{ write_clashlistsub
 clash_sub = """universe = vanilla
 
@@ -217,16 +279,18 @@ notification = Error
 
 #requirements = ((TARGET.FileSystemDomain == "bmrb.wisc.edu") || (TARGET.FileSystemDomain == ".bmrb.wisc.edu"))
 
-Executable	= {0}/bin/clashlist
-Arguments	= $(PDBNAME).pdb 40 10
+Executable	= clashlist.sh
+Arguments	= $(PDBS)
 
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
-transfer_input_files = $(PDB),{0}/bin/linux/probe,{0}/bin/linux/cluster
+transfer_input_files = $(PDBSINPUT),{0}/bin/linux/probe,{0}/bin/linux/cluster,{0}/bin/clashlist
+#transfer_output_files = results/
+transfer_output_remaps = "$(PDBREMAPS)"
 
-log  		= logs/clashlist.log
-output	= results/$(PDBNAME)-clashlist
-error		= logs/clashlist.err
+log  		= logs/clashlist$(NUMBER).log
+#output = logs/clashlist$(NUMBER).out
+error		= logs/clashlist$(NUMBER).err
 copy_to_spool	= False
 priority	= 0
 
@@ -236,7 +300,8 @@ queue
 
 if __name__ == "__main__":
   molprobity_home = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-  indir = parse_cmdline()[0]
+
+  opts, indir = parse_cmdline()
   if os.path.exists(indir):
     outdir = os.path.join(indir, "condor_sub_files")
     if not os.path.exists(outdir):
@@ -246,10 +311,12 @@ if __name__ == "__main__":
     else:
       sys.stderr.write("\"condor_sub_files\" directory detected in \""+indir+"\", please delete it before running this script\n")
       sys.exit()
-    list_of_lists = split_pdbs(indir, total_file_size_limit)
+    #print opts.total_file_size_limit
+    list_of_lists = split_pdbs(indir, opts.total_file_size_limit)
     write_super_dag(outdir, list_of_lists)
     write_file(outdir, "local_run.sh", local_run.format(molprobity_home, pdbbase="{pdbbase}"), 0755)
     write_file(outdir, "local.sub", local_sub)
+    write_file(outdir, "clashlist.sh", clash_sh.format(bondtype=opts.bond_type, pdb="{pdb}", pdbbase="{pdbbase}"), 0755)
     write_file(outdir, "clashlist.sub", clash_sub.format(molprobity_home))
   else:
     sys.stderr.write(indir + " does not seem to exist!\n")
