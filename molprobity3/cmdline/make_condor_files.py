@@ -90,9 +90,30 @@ FLAGS:
 #}}}
 
 #{{{ split_pdbs
-def split_pdbs(in_dir, size_limit):
+def split_pdbs_to_models(mp_home, indir, outdir):
+  if (os.path.isdir(indir)):
+    files = os.listdir(indir)
+    files.sort()
+    #print files
+    for f in files:
+      #arg_file = os.path.join(arg, f)
+      full_file = os.path.realpath(f)
+      #print full_file
+      if (not os.path.isdir(full_file)):
+        root, ext = os.path.splitext(f)
+        if (ext == ".pdb"):
+          #print full_file
+          #print os.path.join(mp_home, "cmdline", "split-models")
+          subprocess.call([os.path.join(mp_home, "cmdline", "split-models"), "-q", full_file, outdir])
+
+#}}}
+
+#{{{ divide_pdbs
+def divide_pdbs(in_dir, size_limit):
+  #print os.path.realpath(in_dir)
   if (os.path.isdir(in_dir)):
-    files = os.listdir(in_dir)
+    files = os.listdir(os.path.realpath(in_dir))
+    #print files
     files.sort()
     #print arg
     list_of_lists = []
@@ -101,8 +122,10 @@ def split_pdbs(in_dir, size_limit):
     list_of_lists.append(pdb_list)
     #print files
     for f in files:
+      #print f
       #arg_file = os.path.join(arg, f)
-      full_file = os.path.realpath(f)
+      full_file = os.path.abspath(os.path.join(in_dir, f))
+      #print full_file
       if (not os.path.isdir(full_file)):
         root, ext = os.path.splitext(f)
         if (ext == ".pdb"):
@@ -118,7 +141,7 @@ def split_pdbs(in_dir, size_limit):
             list_size = os.path.getsize(full_file)
     if len(list_of_lists) > 500:
       sys.stderr.write("\n**ERROR: More than 500 jobs needed, try choosing a larger -limit\n")
-      sys.exit(help())
+      sys.exit()
     return list_of_lists
     #print list_of_lists
 #}}}
@@ -308,11 +331,13 @@ if __name__ == "__main__":
       os.makedirs(outdir)
       os.makedirs(os.path.join(outdir,"logs"))
       os.makedirs(os.path.join(outdir,"results"))
+      os.makedirs(os.path.join(outdir,"pdbs"))
     else:
       sys.stderr.write("\"condor_sub_files\" directory detected in \""+indir+"\", please delete it before running this script\n")
       sys.exit()
+    split_pdbs_to_models(molprobity_home, indir, os.path.join(outdir, "pdbs"))
     #print opts.total_file_size_limit
-    list_of_lists = split_pdbs(indir, opts.total_file_size_limit)
+    list_of_lists = divide_pdbs(os.path.join(outdir, "pdbs"), opts.total_file_size_limit)
     write_super_dag(outdir, list_of_lists)
     write_file(outdir, "local_run.sh", local_run.format(molprobity_home, pdbbase="{pdbbase}"), 0755)
     write_file(outdir, "local.sub", local_sub)
