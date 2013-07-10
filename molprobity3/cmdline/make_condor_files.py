@@ -148,9 +148,16 @@ def divide_pdbs(in_dir, size_limit):
 
 #{{{ write_super_dag
 def write_super_dag(outdir, list_of_pdblists):
+  config_name = "supermol.config"
+  config_file = os.path.join(os.path.realpath(outdir), config_name)
+  config = open(config_file, 'wr')
+  config.write("DAGMAN_MAX_JOBS_SUBMITTED = 30")
+  config.write("DAGMAN_SUBMIT_DELAY = 15")
+  config.close()
   out_name = "supermol.dag"
   outfile = os.path.join(os.path.realpath(outdir), out_name)
   out=open(outfile, 'wr')
+  out.write("CONFIG "+ config_file)
   for indx, pdbs in enumerate(list_of_pdblists):
     num = '{0:0>3}'.format(indx)
     out.write("SUBDAG EXTERNAL "+num+" moldag"+num+".dag\n")
