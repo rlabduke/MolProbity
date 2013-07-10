@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # (jEdit options) :folding=explicit:collapseFolds=1:
-import sys, os, getopt, re, subprocess
+import sys, os, getopt, re, subprocess, shutil
 from optparse import OptionParser
+import time
 
 # THIS FILE MUST BE IN THE MOLPROBITY CMDLINE DIRECTORY!!!
 
@@ -13,14 +14,14 @@ from optparse import OptionParser
 def parse_cmdline():
   parser = OptionParser()
   parser.add_option("-l", "--limit", action="store", type="int", 
-    dest="total_file_size_limit", default=10000000,
+    dest="total_file_size_limit", default=50000000,
     help="change total file size in each separate job")
   parser.add_option("-t", "--type", action="store", type="string", 
     dest="bond_type", default="nuclear",
     help="specify hydrogen bond length for clashes (nuclear or ecloud)")
   opts, args = parser.parse_args()
-  if opts.total_file_size_limit < 1000000:
-    sys.stderr.write("\n**ERROR: -limit cannot be less than 1000000\n")
+  if opts.total_file_size_limit < 10000000:
+    sys.stderr.write("\n**ERROR: -limit cannot be less than 10000000 (10M)\n")
     sys.exit(parser.print_help())
   if not (opts.bond_type == "nuclear" or opts.bond_type == "ecloud"):
     sys.stderr.write("\n**ERROR: -type must be ecloud or nuclear\n")
@@ -89,7 +90,7 @@ FLAGS:
 """
 #}}}
 
-#{{{ split_pdbs
+#{{{ split_pdbs_to_models
 def split_pdbs_to_models(mp_home, indir, outdir):
   if (os.path.isdir(indir)):
     files = os.listdir(indir)
@@ -104,8 +105,35 @@ def split_pdbs_to_models(mp_home, indir, outdir):
         if (ext == ".pdb"):
           #print full_file
           #print os.path.join(mp_home, "cmdline", "split-models")
-          subprocess.call([os.path.join(mp_home, "cmdline", "split-models"), "-q", full_file, outdir])
+          s_time = time.time()
+          #subprocess.call([os.path.join(mp_home, "cmdline", "split-models"), "-q", full_file, outdir])
+          split_pdb(full_file, outdir)          
+          e_time = time.time()
+          print repr(e_time - s_time) + " seconds?"
+#}}}
 
+#{{{ split_pdb
+def split_pdb(pdb_file, outdir):
+  model_files = []
+  keep_lines = False
+  pdb_name, ext = os.path.splitext(os.path.basename(pdb_file))
+  pdb_in=open(pdb_file)
+  mod_num = 0
+  for line in pdb_in:
+    start = line[0:6]
+    if start == "MODEL ":
+      keep_lines = True
+      mod_num = int(line[5:25].strip())
+      model_name = os.path.join(outdir, pdb_name+("_%03d.pdb" % (mod_num)))
+      model_out = open(model_name, 'wr')
+    elif start == "ENDMDL":
+      keep_lines = False
+      model_out.close()
+    elif keep_lines:
+      model_out.write(line)
+  pdb_in.close()
+  if mod_num == 0: # takes care of the case where there's only one model, so no MODEL or ENDMDL
+    shutil.copyfile(pdb_file, os.path.join(outdir, pdb_name+"_001.pdb"))
 #}}}
 
 #{{{ divide_pdbs
@@ -151,13 +179,13 @@ def write_super_dag(outdir, list_of_pdblists):
   config_name = "supermol.config"
   config_file = os.path.join(os.path.realpath(outdir), config_name)
   config = open(config_file, 'wr')
-  config.write("DAGMAN_MAX_JOBS_SUBMITTED = 30")
+  config.write("DAGMAN_MAX_JOBS_SUBMITTED = 30\n")
   config.write("DAGMAN_SUBMIT_DELAY = 15")
   config.close()
   out_name = "supermol.dag"
   outfile = os.path.join(os.path.realpath(outdir), out_name)
   out=open(outfile, 'wr')
-  out.write("CONFIG "+ config_file)
+  out.write("CONFIG "+ config_file+"\n\n")
   for indx, pdbs in enumerate(list_of_pdblists):
     num = '{0:0>3}'.format(indx)
     out.write("SUBDAG EXTERNAL "+num+" moldag"+num+".dag\n")
@@ -268,13 +296,66 @@ done
 """
 #}}}
 
+#{{{ write_local_run_py
+#From Jon Wedell
+local_run_py = """#!/usr/bin/python
+
+import sys
+import subprocess
+import os
+
+# Run a command without blocking
+def syscmd(outfile, *commands):
+    if outfile != subprocess.PIPE:
+        outfile = open(outfile, "w")
+    return subprocess.Popen(list(commands),stdout=outfile,stderr=subprocess.PIPE, stdin=subprocess.PIPE)
+
+# Wait for a subprocess to finish and print it's stderr if it exists
+def reap(the_cmd):
+    the_cmd.wait()
+    err = the_cmd.stderr.read()
+    if err != "":
+        sys.stderr.write(err)
+
+for pdb in sys.argv[1:]:
+
+    cmds = []
+    pdbbase = os.path.basename(pdb)[:-4]
+    model_num = pdbbase[-3:]
+
+    cmds.append(syscmd("results/"+pdbbase+"-ramalyze","java","-cp","{0}/lib/chiropraxis.jar", "chiropraxis.rotarama.Ramalyze", "-raw", pdb))
+    cmds.append(syscmd("results/"+pdbbase+"-rotalyze","java","-cp","{0}/lib/chiropraxis.jar", "chiropraxis.rotarama.Rotalyze", pdb))
+    cmds.append(syscmd("results/"+pdbbase+"-dangle_rna","java","-cp","{0}/lib/dangle.jar", "dangle.Dangle", "-rna", "-validate", "-outliers", "-sigma=0.0", pdb))
+    cmds.append(syscmd("results/"+pdbbase+"-dangle_protein","java","-cp","{0}/lib/dangle.jar", "dangle.Dangle", "-protein", "-validate", "-outliers", "-sigma=0.0", pdb))
+    cmds.append(syscmd("results/"+pdbbase+"-prekin_pperp","{0}/bin/linux/prekin", "-pperptoline", "-pperpdump", pdb))
+    cmds.append(syscmd("results/"+pdbbase+"-cbdev", "{0}/bin/linux/prekin", "-cbdevdump", pdb))
+
+    cmd1 = syscmd(subprocess.PIPE, "java","-Xmx512m", "-cp","{0}/lib/dangle.jar", "dangle.Dangle", "rnabb", pdb)
+    cmd1_out = cmd1.stdout.read()
+    cmd1.wait()
+    cmd2 = syscmd("results/"+pdbbase+"-suitename", "{0}/bin/linux/suitename", "-report")
+    cmd2.stdin.write(cmd1_out)
+    cmd2.stdin.flush()
+    cmd2.stdin.close()
+
+    for cmd in cmds:
+        reap(cmd)
+    reap(cmd1)
+    reap(cmd2)
+
+    cmd9 = syscmd(subprocess.PIPE, "{0}/cmdline/molparser.py", "-q", pdb, model_num, "results/"+pdbbase+"-clashlist", "results/"+pdbbase+"-cbdev", "results/"+pdbbase+"-rotalyze", "results/"+pdbbase+"-ramalyze", "results/"+pdbbase+"-dangle_protein", "results/"+pdbbase+"-dangle_rna", "results/"+pdbbase+"-prekin_pperp", "results/"+pdbbase+"-suitename")
+    reap(cmd9)
+    print cmd9.stdout.read()
+"""
+#}}}
+
 #{{{ write_localsub
 local_sub = """universe = local
 
 Notify_user  = vbchen@bmrb.wisc.edu
 notification = Error
 
-Executable	= local_run.sh
+Executable	= local_run.py
 Arguments	=  $(PDBS)
 
 log		= logs/local$(NUMBER).log
@@ -346,7 +427,8 @@ if __name__ == "__main__":
     #print opts.total_file_size_limit
     list_of_lists = divide_pdbs(os.path.join(outdir, "pdbs"), opts.total_file_size_limit)
     write_super_dag(outdir, list_of_lists)
-    write_file(outdir, "local_run.sh", local_run.format(molprobity_home, pdbbase="{pdbbase}"), 0755)
+    #write_file(outdir, "local_run.sh", local_run.format(molprobity_home, pdbbase="{pdbbase}"), 0755)
+    write_file(outdir, "local_run.py", local_run_py.format(molprobity_home), 0755)
     write_file(outdir, "local.sub", local_sub)
     write_file(outdir, "clashlist.sh", clash_sh.format(bondtype=opts.bond_type, pdb="{pdb}", pdbbase="{pdbbase}"), 0755)
     write_file(outdir, "clashlist.sub", clash_sub.format(molprobity_home))
