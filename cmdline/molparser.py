@@ -2,29 +2,34 @@
 # (jEdit options) :folding=explicit:collapseFolds=1:
 from math import log
 import sys, os, getopt, re, pprint
-
-#{{{ variables
-quiet = False
-#}}}
+from optparse import OptionParser
 
 #{{{ parse_cmdline
 #parse the command line--------------------------------------------------------------------------
 def parse_cmdline():
-  try:
-    opts, args = getopt.getopt(sys.argv[1:], 'h',['help'])
-    return opts, args;
-  except getopt.GetoptError:
-    help()
-    sys.exit()
-  for o, a in opts:
-    if o in ("-h", "--help"):
-      help()
-      sys.exit()
-    if o in ("-q", "--quiet"):
-      quiet = True
+  parser = OptionParser()
+  parser.add_option("-q", "--quiet", action="store_true", dest="quiet",
+    help="quiet mode")
+  opts, args = parser.parse_args()
+  if len(args) < 10:
+    sys.stderr.write("\n**ERROR: Must have 10 arguments!\n")
+    sys.exit(help())
+  return opts, args
+  #try:
+  #  opts, args = getopt.getopt(sys.argv[1:], 'h',['help'])
+  #except getopt.GetoptError:
+  #  help()
+  #  sys.exit()
+  #for o, a in opts:
+  #  if o in ("-h", "--help"):
+  #    help()
+  #    sys.exit()
+  #  if o in ("-q", "--quiet"):
+  #    quiet = True
   #if len(args) < 2:
   #  sys.stderr.write("\n**ERROR: User must specify output directory and input PDB file\n")
   #  sys.exit(help())
+  #return opts, args;
   #else:
   #  outdir = args[0]
   #  if (os.path.isdir(outdir)):
@@ -702,14 +707,14 @@ def recomposeResName(chain, resnum, inscode, restype):
 #}}}
 
 #{{{ oneline_analysis
-def oneline_analysis(files):
+def oneline_analysis(files, quiet):
   if (not quiet):
     print "#pdbFileName:model:clashscore:clashscoreB<40:cbeta>0.25:numCbeta:rota<1%:numRota:ramaOutlier:ramaAllowed:ramaFavored:numRama:numbadbonds:numbonds:pct_badbonds:pct_resbadbonds:numbadangles:numangles:pct_badangles:pct_resbadangles:MolProbityScore:numPperpOutliers:numPperp:numSuiteOutliers:numSuites"
   
   out = files[0]+":"+files[1]
   
   clash = loadClashlist(files[2])
-  out = out+":" + repr(clash['scoreAll']) + ":" + repr(clash['scoreBlt40'])
+  out = out+":" + ("%.2f" % (clash['scoreAll'])) + ":" + ("%.2f" % (clash['scoreBlt40']))
   
   cbdev = loadCbetaDev(files[3])
   badCbeta = findCbetaOutliers(cbdev)
@@ -722,12 +727,18 @@ def oneline_analysis(files):
   rama = loadRamachandran(files[5])
   #pprint.pprint(rama)
   ramaScore = {}
+  ramaScore['OUTLIER'] = 0
+  ramaScore['Allowed'] = 0
+  ramaScore['Favored'] = 0
   for res, r in rama.iteritems():
     if r['eval'] in ramaScore:
       ramaScore[ r['eval'] ] = ramaScore[r['eval']] + 1
     else:
       ramaScore[ r['eval'] ] = 1
-  out = out+":" + (repr(ramaScore['OUTLIER'])) + ":" + (repr(ramaScore['Allowed'])) + ":" + (repr(ramaScore['Favored'])) + ":" + repr(len(rama))
+  if ramaScore['OUTLIER'] == 0 and ramaScore['Allowed'] == 0 and ramaScore['Favored'] == 0:
+    out = out+"::::"
+  else:
+    out = out+":" + (repr(ramaScore['OUTLIER'])) + ":" + (repr(ramaScore['Allowed'])) + ":" + (repr(ramaScore['Favored'])) + ":" + repr(len(rama))
   
   geom = loadBondGeometryReport(files[6], "protein")
   geom.update(loadBondGeometryReport(files[7], "rna"))
@@ -776,7 +787,7 @@ def oneline_analysis(files):
 if __name__ == "__main__":
   opts, args = parse_cmdline()
   #analyze_file(args)
-  oneline_analysis(args)
+  oneline_analysis(args, opts.quiet)
   #for arg in args:
   #  if os.path.exists(arg):
   #    if (os.path.isfile(arg)):

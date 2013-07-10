@@ -85,6 +85,11 @@ if($optVerbose)
 
 $baseName = basename($inFile, ".pdb");
 $splitFiles = splitPdbModels($inFile);
+if (empty($splitFiles)) { // covers case if the PDB has only one model.  
+  $tmpFile = mpTempfile("tmp_pdb_1");
+  copy($inFile, $tmpFile);
+  $splitFiles = array( 1 => $tmpFile);
+}
 foreach($splitFiles as $number => $outFile)
 {
     //$destFile = $baseName.'_'.trim($number).'.pdb';

@@ -36,15 +36,15 @@ function getProbeFlags($opt)
 {
     // Set up command line flags
     $flags = "";
-    
+
     // Dot removal distance (topological)
     $remove_flags = array("4" => "-4H", "3" => "-3", "2" => "-2", "1" => "-1");
     $flags .= " ".$remove_flags[$opt['remove_dist']];
-    
+
     // Set up coloring scheme
     $color_schemes = array("gap" => "-gap", "atom" => "-atom", "base" => "-colorbase", "gray" => "-outcolor gray");
     $flags .= " ".$color_schemes[$opt['color_by']];
-    
+
     // Check booleans
     if(! $opt['show_clashes'])  $flags .= " -noclashout";
     if(! $opt['show_hbonds'])   $flags .= " -nohbout";
@@ -55,53 +55,67 @@ function getProbeFlags($opt)
     if(  $opt['wat2wat'])       $flags .= " -wat2wat";
     if(  $opt['drop_flag'])     $flags .= " -drop";
     if(  $opt['elem_masters'])  $flags .= " -elem";
-    
+
     // Set mode of action:
     $modes = array("both" => "-both", "once" => "-once", "self" => "-self", "out" => "-out");
     $flags .= " ".$modes[$opt['probe_mode']];
-    
+
     // Set flags common to both patterns:
     $pat_suffix = "";
     if($opt['alta'])    $pat_suffix .= " alta";
     if($opt['blt40'])   $pat_suffix .= " blt40";
     if($opt['ogt33'])   $pat_suffix .= " ogt33";
-    
+
     // Calculate both patterns with respect to chains
-    if(count($opt['src_chains']) > 0)   $src_chains = "chain".implode(',chain', $opt['src_chains']);
-    else                                $src_chains = "";
-    if(count($opt['targ_chains']) > 0)  $targ_chains = "chain".implode(',chain', $opt['targ_chains']);
-    else                                $targ_chains = "";
-    
+    if(count($opt['src_chains']) > 0)
+    {
+      $src_chains = "chain".implode(',chain', $opt['src_chains']);
+      $src_chains = str_replace("chain ", "chain_", $src_chains); //2-char chainIDs
+    }
+    else
+    {
+      $src_chains = "";
+    }
+    if(count($opt['targ_chains']) > 0)
+    {
+      $targ_chains = "chain".implode(',chain', $opt['targ_chains']);
+      $targ_chains = str_replace("chain ", "chain_", $targ_chains); //2-char chainIDs
+    }
+    else
+    {
+      $targ_chains = "";
+    }
+
     // Calculate both patterns with respect to protein/water/hets
     $allowedGroups = array('protein', 'dna', 'rna', 'water', 'het');
-    
+
     // 1.  This version INcludes the various classes -- but some atoms are none of the above.
-    //$src_groups = implode(',', array_intersect($allowedGroups, explode(',', implode(',', 
+    //$src_groups = implode(',', array_intersect($allowedGroups, explode(',', implode(',',
     //    array($opt['src_prot'], $opt['src_nucacid'], $opt['src_waters'], $opt['src_hets'])))));
-    //$targ_groups = implode(',', array_intersect($allowedGroups, explode(',', implode(',', 
+    //$targ_groups = implode(',', array_intersect($allowedGroups, explode(',', implode(',',
     //    array($opt['targ_prot'], $opt['targ_nucacid'], $opt['targ_waters'], $opt['targ_hets'])))));
     //$flags .= " '(".$src_chains.") (".$src_groups.") ".$pat_suffix."'";
     //if($opt['probe_mode'] == "both" || $opt['probe_mode'] == "once")
     //    $flags .= " '(".$targ_chains.") (".$targ_groups.") ".$pat_suffix."'";
-    
+
     // 2.  This version EXcludes the classes that are not selected, making it more robust.
-    //$src_groups = implode('|', array_diff($allowedGroups, explode(',', implode(',', 
+    //$src_groups = implode('|', array_diff($allowedGroups, explode(',', implode(',',
     //    array($opt['src_prot'], $opt['src_nucacid'], $opt['src_waters'], $opt['src_hets'])))));
-    //$targ_groups = implode('|', array_diff($allowedGroups, explode(',', implode(',', 
+    //$targ_groups = implode('|', array_diff($allowedGroups, explode(',', implode(',',
     //    array($opt['targ_prot'], $opt['targ_nucacid'], $opt['targ_waters'], $opt['targ_hets'])))));
     //$flags .= " '(".$src_chains.") ".($src_groups == "" ? "" : "(not ($src_groups))")." ".$pat_suffix."'";
     //if($opt['probe_mode'] == "both" || $opt['probe_mode'] == "once")
     //    $flags .= " '(".$targ_chains.") ".($targ_groups == "" ? "" : "(not ($targ_groups))")." ".$pat_suffix."'";
-    
+
     // 3.  Some things are BOTH e.g. nucleic acid AND het (e.g. ATP)
     // So in that case, the exclusion removes dots that we expect to be there.
     // One way of addressing that is given in createProbeSelection.
-    
+
     $flags .= " '(".$src_chains.") ".createProbeSelection('src', $opt)." ".$pat_suffix."'";
     if($opt['probe_mode'] == "both" || $opt['probe_mode'] == "once")
         $flags .= " '(".$targ_chains.") ".createProbeSelection('targ', $opt)." ".$pat_suffix."'";
-    
-    
+
+
     return $flags;
 }
 #}}}########################################################################
@@ -126,7 +140,7 @@ function createProbeSelection($prefix, $opt)
         $to_exclude[] = '(het protein)';
     if(!$opt[$prefix.'_nucacid'] && !$opt[$prefix.'_hets'])
         $to_exclude[] = '(het (dna,rna))';
-    
+
     if(count($to_exclude) == 0) return "";
     else return "(not (".implode('|', $to_exclude)."))";
     /* The "exclusive" version of this code */
@@ -142,7 +156,7 @@ function createProbeSelection($prefix, $opt)
     // The catch-all always includes things that don't fit one of the above groups.
     // For this to really work, it needs an "other" checkbox.
     $to_include[] = '(not (protein,dna,rna,water,het))';
-    
+
     if(count($to_exclude) == 0) return "(not all)";
     else return '('.implode(',' $to_include).')';
     /* The "inclusive" version of this code */
