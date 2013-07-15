@@ -105,11 +105,11 @@ def split_pdbs_to_models(mp_home, indir, outdir):
         if (ext == ".pdb"):
           #print full_file
           #print os.path.join(mp_home, "cmdline", "split-models")
-          s_time = time.time()
+          #s_time = time.time()
           #subprocess.call([os.path.join(mp_home, "cmdline", "split-models"), "-q", full_file, outdir])
           split_pdb(full_file, outdir)          
-          e_time = time.time()
-          print repr(e_time - s_time) + " seconds?"
+          #e_time = time.time()
+          #print repr(e_time - s_time) + " seconds?"
 #}}}
 
 #{{{ split_pdb
@@ -235,21 +235,6 @@ def write_mol_dag(outdir, num, pdbs):
   out.close()
 #}}}
 
-#{{{ run_clashlist
-def run_clashlist(outdir, arg):
-  in_file = os.path.basename(arg)
-  in_file, ext = os.path.splitext(in_file)
-  out_name = in_file+"-clashlist.data"
-  out_name_err = in_file+"-clashlist.err"
-  outfile = os.path.join(os.path.realpath(outdir), out_name)
-  outfileerr = os.path.join(os.path.realpath(outdir), out_name_err)
-  out=open(outfile, 'wr')
-  err=open(outfileerr, 'wr')
-  test = subprocess.call(["clashlist", arg, "40", "10"], stdout=out, stderr=err)
-  out.close()
-  err.close()
-#}}}
-
 #{{{ write_file
 def write_file(outdir, out_name, file_text, permissions=0644):
   outfile = os.path.join(os.path.realpath(outdir), out_name)
@@ -311,11 +296,11 @@ def syscmd(outfile, *commands):
     return subprocess.Popen(list(commands),stdout=outfile,stderr=subprocess.PIPE, stdin=subprocess.PIPE)
 
 # Wait for a subprocess to finish and print it's stderr if it exists
-def reap(the_cmd):
+def reap(the_cmd, pdb):
     the_cmd.wait()
     err = the_cmd.stderr.read()
     if err != "":
-        sys.stderr.write(err)
+        sys.stderr.write(pdb+" had the following error\\n"+err)
 
 for pdb in sys.argv[1:]:
 
@@ -323,7 +308,7 @@ for pdb in sys.argv[1:]:
     pdbbase = os.path.basename(pdb)[:-4]
     model_num = pdbbase[-3:]
 
-    cmds.append(syscmd("results/"+pdbbase+"-ramalyze","java","-cp","{0}/lib/chiropraxis.jar", "chiropraxis.rotarama.Ramalyze", "-raw", pdb))
+    cmds.append(syscmd("results/"+pdbbase+"-ramalyze","java","-cp","{0}/lib/chiropraxis.jar", "chiropraxis.rotarama.Ramalyze", "-raw", "-quiet", pdb))
     cmds.append(syscmd("results/"+pdbbase+"-rotalyze","java","-cp","{0}/lib/chiropraxis.jar", "chiropraxis.rotarama.Rotalyze", pdb))
     cmds.append(syscmd("results/"+pdbbase+"-dangle_rna","java","-cp","{0}/lib/dangle.jar", "dangle.Dangle", "-rna", "-validate", "-outliers", "-sigma=0.0", pdb))
     cmds.append(syscmd("results/"+pdbbase+"-dangle_protein","java","-cp","{0}/lib/dangle.jar", "dangle.Dangle", "-protein", "-validate", "-outliers", "-sigma=0.0", pdb))
@@ -339,13 +324,13 @@ for pdb in sys.argv[1:]:
     cmd2.stdin.close()
 
     for cmd in cmds:
-        reap(cmd)
-    reap(cmd1)
-    reap(cmd2)
+        reap(cmd, pdbbase)
+    reap(cmd1, pdbbase)
+    reap(cmd2, pdbbase)
 
     cmd9 = syscmd(subprocess.PIPE, "{0}/cmdline/molparser.py", "-q", pdb, model_num, "results/"+pdbbase+"-clashlist", "results/"+pdbbase+"-cbdev", "results/"+pdbbase+"-rotalyze", "results/"+pdbbase+"-ramalyze", "results/"+pdbbase+"-dangle_protein", "results/"+pdbbase+"-dangle_rna", "results/"+pdbbase+"-prekin_pperp", "results/"+pdbbase+"-suitename")
-    reap(cmd9)
-    print cmd9.stdout.read()
+    reap(cmd9, pdbbase)
+    print cmd9.stdout.read().strip()
 """
 #}}}
 
