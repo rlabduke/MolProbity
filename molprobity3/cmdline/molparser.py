@@ -598,9 +598,13 @@ def findGeomOutliers(geom, b_or_angle):
   worst = {}
   if(len(geom) > 0):
     for res, data in geom.iteritems():
+      #print data
       if b_or_angle == 'bond' or b_or_angle =='angle':
-        if(data['is'+b_or_angle+'Outlier']):
-          worst[data['resName']] = data[b_or_angle+'outCount']
+        if 'is'+b_or_angle+'Outlier' in data: # catches case where a residue doesnt have any bonds and/or angles, like in some hets
+          if(data['is'+b_or_angle+'Outlier']):
+            worst[data['resName']] = data[b_or_angle+'outCount']
+ 
+          
   #ksort($worst); // Put the residues into a sensible order
   return worst
   
@@ -667,7 +671,10 @@ def calcMPscore(clash, rota, rama):
       if not evalu in ramaScore:
         ramaScore[evalu] = 0
       ramaScore[evalu] = ramaScore[evalu]+1
-    ra = 100.0 - (100.0 * ramaScore['Favored'] / len(rama))
+    if 'Favored' not in ramaScore:
+      ra = 0
+    else:
+      ra = 100.0 - (100.0 * ramaScore['Favored'] / len(rama))
 
     return 0.42574*log(1+cs) + 0.32996*log(1+max(0,ro-1)) + 0.24979*log(1+max(0,ra-2)) + 0.5;
 
@@ -753,12 +760,14 @@ def oneline_analysis(files, quiet):
   totalBonds = 0
   totalAngles = 0
   for res, data in geom.iteritems():
-    if(data['isbondOutlier']):
-      outBondCount += data['bondoutCount']
-    totalBonds += data['bondCount']
-    if(data['isangleOutlier']):
-      outAngleCount += data['angleoutCount']
-    totalAngles += data['angleCount']
+    if 'isbondOutlier' in data:
+      if(data['isbondOutlier']):
+        outBondCount += data['bondoutCount']
+      totalBonds += data['bondCount']
+    if 'isangleOutlier' in data:
+      if(data['isangleOutlier']):
+        outAngleCount += data['angleoutCount']
+      totalAngles += data['angleCount']
   if (totalRes > 0):
     out = out+":"+repr(outBondCount)+":"+repr(totalBonds)+":"+("%.2f" % (100.0 * outBondCount / totalBonds))
     out = out+":"+("%.2f" % (100.0 * outBondResCount / totalRes))
