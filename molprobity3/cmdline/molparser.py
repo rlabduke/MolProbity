@@ -603,7 +603,8 @@ def findGeomOutliers(geom, b_or_angle):
         if 'is'+b_or_angle+'Outlier' in data: # catches case where a residue doesnt have any bonds and/or angles, like in some hets
           if(data['is'+b_or_angle+'Outlier']):
             worst[data['resName']] = data[b_or_angle+'outCount']
- 
+        else:
+          sys.stderr.write("Odd geometry data detected; possibly het residues or missing residues\n")
           
   #ksort($worst); // Put the residues into a sensible order
   return worst
@@ -670,6 +671,7 @@ def calcMPscore(clash, rota, rama):
       evalu = r['eval']
       if not evalu in ramaScore:
         ramaScore[evalu] = 0
+        sys.stderr.write("Odd rama data detected; maybe het residues or missing residues\n")
       ramaScore[evalu] = ramaScore[evalu]+1
     if 'Favored' not in ramaScore:
       ra = 0
