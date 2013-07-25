@@ -671,7 +671,7 @@ def calcMPscore(clash, rota, rama):
       evalu = r['eval']
       if not evalu in ramaScore:
         ramaScore[evalu] = 0
-        sys.stderr.write("Odd rama data detected; maybe het residues or missing residues\n")
+        #sys.stderr.write("Odd rama data detected; maybe het residues or missing residues\n")
       ramaScore[evalu] = ramaScore[evalu]+1
     if 'Favored' not in ramaScore:
       ra = 0
@@ -777,6 +777,7 @@ def oneline_analysis(files, quiet):
     out = out+":"+("%.2f" % (100.0 * outAngleResCount / totalRes))
   else:
     out = out+":-1:-1:-1:-1:-1:-1:-1:-1"
+    sys.stderr.write("No standard residues detected!\n")
     
   if ((len(rota) != 0) and (len(rama) != 0)):
     mps = calcMPscore(clash, rota, rama)
