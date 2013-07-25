@@ -179,8 +179,8 @@ def write_super_dag(outdir, list_of_pdblists):
   config_name = "supermol.config"
   config_file = os.path.join(os.path.realpath(outdir), config_name)
   config = open(config_file, 'wr')
-  config.write("DAGMAN_MAX_JOBS_SUBMITTED = 30\n")
-  config.write("DAGMAN_SUBMIT_DELAY = 15")
+  config.write("DAGMAN_MAX_JOBS_SUBMITTED = 5\n")
+  config.write("DAGMAN_SUBMIT_DELAY = 60")
   config.close()
   out_name = "supermol.dag"
   outfile = os.path.join(os.path.realpath(outdir), out_name)
@@ -312,6 +312,7 @@ for pdb in sys.argv[1:]:
     cmds.append(syscmd("results/"+pdbbase+"-rotalyze","java","-cp","{0}/lib/chiropraxis.jar", "chiropraxis.rotarama.Rotalyze", pdb))
     cmds.append(syscmd("results/"+pdbbase+"-dangle_rna","java","-cp","{0}/lib/dangle.jar", "dangle.Dangle", "-rna", "-validate", "-outliers", "-sigma=0.0", pdb))
     cmds.append(syscmd("results/"+pdbbase+"-dangle_protein","java","-cp","{0}/lib/dangle.jar", "dangle.Dangle", "-protein", "-validate", "-outliers", "-sigma=0.0", pdb))
+    cmds.append(syscmd("results/"+pdbbase+"-dangle_dna","java","-cp","{0}/lib/dangle.jar", "dangle.Dangle", "-dna", "-validate", "-outliers", "-sigma=0.0", pdb))
     cmds.append(syscmd("results/"+pdbbase+"-prekin_pperp","{0}/bin/linux/prekin", "-pperptoline", "-pperpdump", pdb))
     cmds.append(syscmd("results/"+pdbbase+"-cbdev", "{0}/bin/linux/prekin", "-cbdevdump", pdb))
 
@@ -328,7 +329,7 @@ for pdb in sys.argv[1:]:
     reap(cmd1, pdbbase)
     reap(cmd2, pdbbase)
 
-    cmd9 = syscmd(subprocess.PIPE, "{0}/cmdline/molparser.py", "-q", pdb, model_num, "results/"+pdbbase+"-clashlist", "results/"+pdbbase+"-cbdev", "results/"+pdbbase+"-rotalyze", "results/"+pdbbase+"-ramalyze", "results/"+pdbbase+"-dangle_protein", "results/"+pdbbase+"-dangle_rna", "results/"+pdbbase+"-prekin_pperp", "results/"+pdbbase+"-suitename")
+    cmd9 = syscmd(subprocess.PIPE, "{0}/cmdline/molparser.py", "-q", pdb, model_num, "results/"+pdbbase+"-clashlist", "results/"+pdbbase+"-cbdev", "results/"+pdbbase+"-rotalyze", "results/"+pdbbase+"-ramalyze", "results/"+pdbbase+"-dangle_protein", "results/"+pdbbase+"-dangle_rna", "results/"+pdbbase+"-dangle_dna", "results/"+pdbbase+"-prekin_pperp", "results/"+pdbbase+"-suitename")
     reap(cmd9, pdbbase)
     print cmd9.stdout.read().strip()
 """

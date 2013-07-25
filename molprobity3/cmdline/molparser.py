@@ -11,8 +11,8 @@ def parse_cmdline():
   parser.add_option("-q", "--quiet", action="store_true", dest="quiet",
     help="quiet mode")
   opts, args = parser.parse_args()
-  if len(args) < 10:
-    sys.stderr.write("\n**ERROR: Must have 10 arguments!\n")
+  if len(args) < 11:
+    sys.stderr.write("\n**ERROR: Must have 11 arguments!\n")
     sys.exit(help())
   return opts, args
   #try:
@@ -751,6 +751,7 @@ def oneline_analysis(files, quiet):
   
   geom = loadBondGeometryReport(files[6], "protein")
   geom.update(loadBondGeometryReport(files[7], "rna"))
+  geom.update(loadBondGeometryReport(files[8], "dna"))
   #pprint.pprint(geom)
   bondOut = findBondGeomOutliers(geom)
   angleOut = findAngleGeomOutliers(geom)
@@ -785,11 +786,11 @@ def oneline_analysis(files, quiet):
   else:
     out = out+"::"
      
-  pperp = loadBasePhosPerp(files[8])
+  pperp = loadBasePhosPerp(files[9])
   badPperp = findBasePhosPerpOutliers(pperp)
   out = out+":"+repr(len(badPperp))+":"+repr(len(pperp))
 
-  suites = loadSuitenameReport(files[9])
+  suites = loadSuitenameReport(files[10])
   badSuites = findSuitenameOutliers(suites)
   out = out+":"+repr(len(badSuites))+":"+repr(len(suites))
 
