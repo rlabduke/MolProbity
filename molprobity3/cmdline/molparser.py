@@ -784,7 +784,7 @@ def oneline_analysis(files, quiet):
     mps = calcMPscore(clash, rota, rama)
     out = out+(":%.2f" % mps)
   else:
-    out = out+"::"
+    out = out+":"
      
   pperp = loadBasePhosPerp(files[9])
   badPperp = findBasePhosPerpOutliers(pperp)
