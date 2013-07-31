@@ -1,4 +1,7 @@
 #! /bin/sh
+#a horrible thing to do temporarily to test clashlist
+export PATH=$PATH:/home/vbc3/public_html/molprobity3/bin/linux
+
 #name: clashlistcluster (combination of clashlistscore and clcl)
 #author: Mike Word
 #date written: 6/6/99
@@ -26,7 +29,7 @@ ocutval=$3
 blength=$4
 
 ## Find number of atoms below B cutoff.  Full number of atoms found below.
-if [ "$blength" == "ecloud" ]; then
+if [ "$blength" = "ecloud" ]; then
 probe_flags="-q -mc -het -dumpatominfo"
 else
 probe_flags="-q -mc -het -dumpatominfo -nuclear"
@@ -41,7 +44,7 @@ tmpfile=/tmp/junk.$$.clashlistscore.`date '+%H%M%S'`
 tmpf2=/tmp/junk2.$$.clashlistscore.`date '+%H%M%S'`
 
 ## Count all atoms (no B cutoff) and also possible dots, possible surface area
-if [ "$blength" == "ecloud" ]; then
+if [ "$blength" = "ecloud" ]; then
 probe_flags="-c -q -mc -het -once"
 else
 probe_flags="-c -q -mc -het -once -nuclear"
@@ -59,7 +62,7 @@ END {
 ## Process Probe unformatted output to find clashes between atoms.
 ## Don't include water in 'src' search set b/c we don't want it listed in the output
 ## unless it clashes with a protein/nucleic acid residue.
-if [ "$blength" == "ecloud" ]; then
+if [ "$blength" = "ecloud" ]; then
 probe_flags="-u -q -mc -het -once"
 #probe_flags="-u -q -mc -het -stdbonds -once"
 else
