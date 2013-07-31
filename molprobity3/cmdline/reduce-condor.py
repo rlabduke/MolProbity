@@ -20,8 +20,8 @@ def parse_cmdline():
     dest="bond_type", default="nuclear",
     help="specify hydrogen bond length for clashes (nuclear or ecloud)")
   opts, args = parser.parse_args()
-  if opts.total_file_size_limit < 10000000:
-    sys.stderr.write("\n**ERROR: -limit cannot be less than 10000000 (10M)\n")
+  if opts.total_file_size_limit < 1000000:
+    sys.stderr.write("\n**ERROR: -limit cannot be less than 1000000 (1M)\n")
     sys.exit(parser.print_help())
   if not (opts.bond_type == "nuclear" or opts.bond_type == "ecloud"):
     sys.stderr.write("\n**ERROR: -type must be ecloud or nuclear\n")
@@ -140,14 +140,19 @@ def write_file(outdir, out_name, file_text, permissions=0644):
 #{{{ write_reducesh
 reduce_sh = """#!/bin/sh
 
-# Get the pdb file location from args
-#pdb=$1
+# Get the number of seconds to sleep before running
+sleepseconds=$1
 
+sleep $sleepseconds
+
+#removes first argument
+shift
 for pdb in "$@"
 do
+sleep 1
 pdbbase=`basename $pdb .pdb` #should be just the name of the pdb without the .pdb extension
 
-{0}/reduce -nobuild -nuclear $pdb > pdbs/${pdbbase}-trim.pdb
+{0}/reduce -nobuild -nuclear $pdb > pdbs/${pdbbase}H.pdb
 
 done
 """
@@ -161,8 +166,6 @@ notification = Error
 
 #requirements = ((TARGET.FileSystemDomain == "bmrb.wisc.edu") || (TARGET.FileSystemDomain == ".bmrb.wisc.edu"))
 #requirements = (machine == inspiron17)
-
-next_job_start_delay = 60
 
 #Executable     = /condor/vbchen/molprobity_runs/condor/reduce.sh
 Executable     = reduce.sh
@@ -178,9 +181,11 @@ priority        = 0
 def make_reduce_sub(list_of_lists):
   args = ""
   #print list_of_lists
+  sleep_seconds = 0
   for indx, pdbs in enumerate(list_of_lists):
-    args = args+"Arguments       = "+" ".join(pdbs)+"\n"
+    args = args+"Arguments       = "+repr(sleep_seconds)+" "+" ".join(pdbs)+"\n"
     args = args+"queue\n\n"
+    sleep_seconds = sleep_seconds + 60
   return reduce_sub+args
     
 #}}}
