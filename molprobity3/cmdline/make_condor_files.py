@@ -336,7 +336,7 @@ for pdb in sys.argv[1:]:
 #}}}
 
 #{{{ write_localsub
-local_sub = """universe = local
+local_sub = """universe = vanilla
 
 Notify_user  = vbchen@bmrb.wisc.edu
 notification = Error
@@ -392,6 +392,13 @@ copy_to_spool	= False
 priority	= 0
 
 queue
+"""
+#}}}
+
+#{{{ write_post_sh
+post_sh = """#!/bin/sh
+
+cat logs/local*.out > logs/oneline.out.csv
 """
 #}}}
 
