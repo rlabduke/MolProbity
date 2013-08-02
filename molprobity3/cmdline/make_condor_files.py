@@ -14,14 +14,14 @@ import time
 def parse_cmdline():
   parser = OptionParser()
   parser.add_option("-l", "--limit", action="store", type="int", 
-    dest="total_file_size_limit", default=50000000,
+    dest="total_file_size_limit", default=10000000,
     help="change total file size in each separate job")
   parser.add_option("-t", "--type", action="store", type="string", 
     dest="bond_type", default="nuclear",
     help="specify hydrogen bond length for clashes (nuclear or ecloud)")
   opts, args = parser.parse_args()
-  if opts.total_file_size_limit < 10000000:
-    sys.stderr.write("\n**ERROR: -limit cannot be less than 10000000 (10M)\n")
+  if opts.total_file_size_limit < 5000000:
+    sys.stderr.write("\n**ERROR: -limit cannot be less than 5000000 (5M)\n")
     sys.exit(parser.print_help())
   if not (opts.bond_type == "nuclear" or opts.bond_type == "ecloud"):
     sys.stderr.write("\n**ERROR: -type must be ecloud or nuclear\n")
@@ -288,6 +288,7 @@ local_run_py = """#!/usr/bin/python
 import sys
 import subprocess
 import os
+import time
 
 # Run a command without blocking
 def syscmd(outfile, *commands):
@@ -303,7 +304,7 @@ def reap(the_cmd, pdb):
         sys.stderr.write(pdb+" had the following error\\n"+err)
 
 for pdb in sys.argv[1:]:
-
+    s_time = time.time()
     cmds = []
     pdbbase = os.path.basename(pdb)[:-4]
     model_num = pdbbase[-3:]
@@ -332,6 +333,8 @@ for pdb in sys.argv[1:]:
     cmd9 = syscmd(subprocess.PIPE, "{0}/cmdline/molparser.py", "-q", pdb, model_num, "results/"+pdbbase+"-clashlist", "results/"+pdbbase+"-cbdev", "results/"+pdbbase+"-rotalyze", "results/"+pdbbase+"-ramalyze", "results/"+pdbbase+"-dangle_protein", "results/"+pdbbase+"-dangle_rna", "results/"+pdbbase+"-dangle_dna", "results/"+pdbbase+"-prekin_pperp", "results/"+pdbbase+"-suitename")
     reap(cmd9, pdbbase)
     print cmd9.stdout.read().strip()
+    e_time = time.time()
+    sys.stderr.write(repr(e_time - s_time) + " seconds(?) for local of "+pdbbase+"\\n")
 """
 #}}}
 
