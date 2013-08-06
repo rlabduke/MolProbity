@@ -276,7 +276,7 @@ java -cp {0}/lib/dangle.jar dangle.Dangle -protein -validate -outliers -sigma=0.
 java -Xmx512m -cp {0}/lib/dangle.jar dangle.Dangle rnabb $pdb | {0}/bin/linux/suitename  -report > results/${pdbbase}-suitename
 
 # Analyze the results
-{0}/cmdline/molparser.py -q $pdb 1 results/${pdbbase}-clashlist results/${pdbbase}-cbdev results/${pdbbase}-rotalyze results/${pdbbase}-ramalyze results/${pdbbase}-dangle_protein results/${pdbbase}-dangle_rna results/${pdbbase}-prekin_pperp results/${pdbbase}-suitename
+{0}/cmdline/molparser.py -q $pdb 1 results/${pdbbase}-clashlist results/${pdbbase}-cbdev results/${pdbbase}-rotalyze results/${pdbbase}-ramalyze results/${pdbbase}-dangle_protein results/${pdbbase}-dangle_rna results/${pdbbase}-dangle_dna results/${pdbbase}-prekin_pperp results/${pdbbase}-suitename
 done
 """
 #}}}

@@ -57,6 +57,7 @@ USAGE:   python molparser.py [MP output files]
                               rama output file
                               protein bond geometry output file
                               rna bond geometry output file
+                              dna bond geometry output file
                               base ppperp output file
                               suitname output file
 
