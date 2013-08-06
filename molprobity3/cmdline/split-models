@@ -62,11 +62,13 @@ OUTPUTS / RESULTS:
 ############################################################################
 // Default options
 $optVerbose = true;
+$padModelNumbers = true;
 
 // First argument is the name of this script...
 if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
 {
     if($arg == '-q')            $optVerbose = false;
+    elseif($arg == '-n')        $padModelNumbers = false;
     elseif(!isset($inFile))     $inFile = $arg;
     elseif(!isset($outDir))     $outDir = $arg;
     else                        die("Too many or unrecognized arguments: '$arg'\n");
@@ -85,15 +87,21 @@ if($optVerbose)
 
 $baseName = basename($inFile, ".pdb");
 $splitFiles = splitPdbModels($inFile);
-if (empty($splitFiles)) { // covers case if the PDB has only one model.  
+if (empty($splitFiles)) { // covers case if the PDB has only one model.
   $tmpFile = mpTempfile("tmp_pdb_1");
   copy($inFile, $tmpFile);
   $splitFiles = array( 1 => $tmpFile);
 }
 foreach($splitFiles as $number => $outFile)
 {
-    //$destFile = $baseName.'_'.trim($number).'.pdb';
-    $destFile = sprintf($baseName.'_%02d.pdb', $number);
+    if(!$padModelNumbers)
+    {
+      $destFile = $baseName.'_'.trim($number).'.pdb';
+    }
+    else
+    {
+      $destFile = sprintf($baseName.'_%02d.pdb', $number);
+    }
     if($optVerbose) echo "$inFile > $destFile\n";
     copy($outFile, $outDir.'/'.$destFile);
     unlink($outFile);
