@@ -152,7 +152,7 @@ do
 sleep 1
 pdbbase=`basename $pdb .pdb` #should be just the name of the pdb without the .pdb extension
 
-{0}/reduce -nobuild -nuclear $pdb > pdbs/${pdbbase}H.pdb
+{0}/reduce -q -nobuild -nuclear $pdb > pdbs/${pdbbase}H.pdb
 
 done
 """
@@ -170,8 +170,6 @@ notification = Error
 #Executable     = /condor/vbchen/molprobity_runs/condor/reduce.sh
 Executable     = reduce.sh
 
-log             = logs/reduce.log
-output          = results/reduce.out
 error           = logs/reduce.err
 copy_to_spool   = False
 priority        = 0
@@ -184,6 +182,7 @@ def make_reduce_sub(list_of_lists):
   sleep_seconds = 0
   for indx, pdbs in enumerate(list_of_lists):
     args = args+"Arguments       = "+repr(sleep_seconds)+" "+" ".join(pdbs)+"\n"
+    args = args+"log         = logs/reduce"+repr(indx)+".log\n"
     args = args+"queue\n\n"
     sleep_seconds = sleep_seconds + 60
   return reduce_sub+args

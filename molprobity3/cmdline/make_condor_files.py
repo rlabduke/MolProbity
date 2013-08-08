@@ -13,10 +13,10 @@ import time
 #parse the command line--------------------------------------------------------------------------
 def parse_cmdline():
   parser = OptionParser()
-  parser.add_option("-l", "--limit", action="store", type="int", 
+  parser.add_option("-l", "--limit", action="store", type="int",
     dest="total_file_size_limit", default=10000000,
     help="change total file size in each separate job")
-  parser.add_option("-t", "--type", action="store", type="string", 
+  parser.add_option("-t", "--type", action="store", type="string",
     dest="bond_type", default="nuclear",
     help="specify hydrogen bond length for clashes (nuclear or ecloud)")
   opts, args = parser.parse_args()
@@ -29,7 +29,7 @@ def parse_cmdline():
   if len(args) < 1:
     sys.stderr.write("\n**ERROR: User must specify input directory\n")
     sys.exit(help())
-  else:  
+  else:
     indir = args[0]
     if (os.path.isdir(indir)):
       return opts, indir
@@ -80,11 +80,11 @@ def parse_cmdline():
 #{{{ help
 def help():
   print """USAGE:   python make_condor_files.py [input_directory_of_pdbs]
-  
-  Takes as input a directory containing pdbs, and generates a directory 'condor_sub_files' 
-  within that directory containing all the scripts needed to run molprobity analysis on a 
+
+  Takes as input a directory containing pdbs, and generates a directory 'condor_sub_files'
+  within that directory containing all the scripts needed to run molprobity analysis on a
   HTCondor cluster.
-  
+
 FLAGS:
   -h     Print this help message
 """
@@ -107,7 +107,7 @@ def split_pdbs_to_models(mp_home, indir, outdir):
           #print os.path.join(mp_home, "cmdline", "split-models")
           #s_time = time.time()
           #subprocess.call([os.path.join(mp_home, "cmdline", "split-models"), "-q", full_file, outdir])
-          split_pdb(full_file, outdir)          
+          split_pdb(full_file, outdir)
           #e_time = time.time()
           #print repr(e_time - s_time) + " seconds?"
 #}}}
@@ -167,8 +167,8 @@ def divide_pdbs(in_dir, size_limit):
             pdb_list.append(full_file)
             list_of_lists.append(pdb_list)
             list_size = os.path.getsize(full_file)
-    if len(list_of_lists) > 500:
-      sys.stderr.write("\n**ERROR: More than 500 jobs needed, try choosing a larger -limit\n")
+    if len(list_of_lists) > 5000:
+      sys.stderr.write("\n**ERROR: More than 5000 jobs needed, try choosing a larger -limit\n")
       sys.exit()
     return list_of_lists
     #print list_of_lists
@@ -187,7 +187,7 @@ def write_super_dag(outdir, list_of_pdblists):
   out=open(outfile, 'wr')
   out.write("CONFIG "+ config_file+"\n\n")
   for indx, pdbs in enumerate(list_of_pdblists):
-    num = '{0:0>3}'.format(indx)
+    num = '{0:0>4}'.format(indx)
     out.write("SUBDAG EXTERNAL "+num+" moldag"+num+".dag\n")
     write_mol_dag(outdir, num, pdbs)
   out.close()
@@ -198,11 +198,11 @@ def write_mol_dag(outdir, num, pdbs):
   out_name = "moldag"+num+".dag"
   outfile = os.path.join(os.path.realpath(outdir), out_name)
   out=open(outfile, 'wr')
-  
+
   out.write("Jobstate_log logs/mol"+num+".jobstate.log\n")
   out.write("NODE_STATUS_FILE mol"+num+".status 3600\n")
   out.write("\n")
-  
+
   parent_childs = "" # create parent_childs part of dag file now so only have to loop once thru pdbs
   #pdb_list = []
   #for pdb_file in pdbs:
@@ -226,12 +226,12 @@ def write_mol_dag(outdir, num, pdbs):
   out.write("VARS clash"+num+" PDBREMAPS=\""+";".join(pdb_remaps)+"\"\n")
   out.write("VARS clash"+num+" NUMBER=\""+num+"\"\n")
   #out.write(parent_childs)
-  
+
   out.write("Job local"+num+" local.sub\n")
   out.write("VARS local"+num+" PDBS=\""+" ".join(pdbs)+"\"\n")
   out.write("VARS local"+num+" NUMBER=\""+num+"\"\n")
   out.write("PARENT clash"+num+" CHILD local"+num+"\n")
-  
+
   out.close()
 #}}}
 
@@ -305,17 +305,19 @@ def reap(the_cmd, pdb):
 
 for pdb in sys.argv[1:]:
     s_time = time.time()
-    cmds = []
     pdbbase = os.path.basename(pdb)[:-4]
     model_num = pdbbase[-3:]
 
-    cmds.append(syscmd("results/"+pdbbase+"-ramalyze","java","-cp","{0}/lib/chiropraxis.jar", "chiropraxis.rotarama.Ramalyze", "-raw", "-quiet", pdb))
-    cmds.append(syscmd("results/"+pdbbase+"-rotalyze","java","-cp","{0}/lib/chiropraxis.jar", "chiropraxis.rotarama.Rotalyze", pdb))
-    cmds.append(syscmd("results/"+pdbbase+"-dangle_rna","java","-cp","{0}/lib/dangle.jar", "dangle.Dangle", "-rna", "-validate", "-outliers", "-sigma=0.0", pdb))
-    cmds.append(syscmd("results/"+pdbbase+"-dangle_protein","java","-cp","{0}/lib/dangle.jar", "dangle.Dangle", "-protein", "-validate", "-outliers", "-sigma=0.0", pdb))
-    cmds.append(syscmd("results/"+pdbbase+"-dangle_dna","java","-cp","{0}/lib/dangle.jar", "dangle.Dangle", "-dna", "-validate", "-outliers", "-sigma=0.0", pdb))
-    cmds.append(syscmd("results/"+pdbbase+"-prekin_pperp","{0}/bin/linux/prekin", "-pperptoline", "-pperpdump", pdb))
-    cmds.append(syscmd("results/"+pdbbase+"-cbdev", "{0}/bin/linux/prekin", "-cbdevdump", pdb))
+
+
+    reap(syscmd("results/"+pdbbase+"-clashlist", "./clashlist", pdb, '40', '10', 'nuclear'), pdbbase)
+    reap(syscmd("results/"+pdbbase+"-ramalyze","java","-cp","{0}/lib/chiropraxis.jar", "chiropraxis.rotarama.Ramalyze", "-raw", "-quiet", pdb), pdbbase)
+    reap(syscmd("results/"+pdbbase+"-rotalyze","java","-cp","{0}/lib/chiropraxis.jar", "chiropraxis.rotarama.Rotalyze", pdb), pdbbase)
+    reap(syscmd("results/"+pdbbase+"-dangle_rna","java","-cp","{0}/lib/dangle.jar", "dangle.Dangle", "-rna", "-validate", "-outliers", "-sigma=0.0", pdb), pdbbase)
+    reap(syscmd("results/"+pdbbase+"-dangle_protein","java","-cp","{0}/lib/dangle.jar", "dangle.Dangle", "-protein", "-validate", "-outliers", "-sigma=0.0", pdb), pdbbase)
+    reap(syscmd("results/"+pdbbase+"-dangle_dna","java","-cp","{0}/lib/dangle.jar", "dangle.Dangle", "-dna", "-validate", "-outliers", "-sigma=0.0", pdb), pdbbase)
+    reap(syscmd("results/"+pdbbase+"-prekin_pperp","{0}/bin/linux/prekin", "-pperptoline", "-pperpdump", pdb), pdbbase)
+    reap(syscmd("results/"+pdbbase+"-cbdev", "{0}/bin/linux/prekin", "-cbdevdump", pdb), pdbbase)
 
     cmd1 = syscmd(subprocess.PIPE, "java","-Xmx512m", "-cp","{0}/lib/dangle.jar", "dangle.Dangle", "rnabb", pdb)
     cmd1_out = cmd1.stdout.read()
@@ -325,8 +327,6 @@ for pdb in sys.argv[1:]:
     cmd2.stdin.flush()
     cmd2.stdin.close()
 
-    for cmd in cmds:
-        reap(cmd, pdbbase)
     reap(cmd1, pdbbase)
     reap(cmd2, pdbbase)
 
@@ -344,14 +344,14 @@ local_sub = """universe = vanilla
 Notify_user  = vbchen@bmrb.wisc.edu
 notification = Error
 
-Executable	= local_run.py
-Arguments	=  $(PDBS)
+Executable  = local_run.py
+Arguments   =  $(PDBS)
 
-log		= logs/local$(NUMBER).log
-output		= logs/local$(NUMBER).out
-error		= logs/local$(NUMBER).err
-copy_to_spool	= False
-priority	= 0
+log     = logs/local$(NUMBER).log
+output      = logs/local$(NUMBER).out
+error       = logs/local$(NUMBER).err
+copy_to_spool   = False
+priority    = 0
 
 queue
 """
@@ -379,8 +379,8 @@ notification = Error
 
 #requirements = ((TARGET.FileSystemDomain == "bmrb.wisc.edu") || (TARGET.FileSystemDomain == ".bmrb.wisc.edu"))
 
-Executable	= clashlist.sh
-Arguments	= $(PDBS)
+Executable  = clashlist.sh
+Arguments   = $(PDBS)
 
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
@@ -388,11 +388,11 @@ transfer_input_files = $(PDBSINPUT),{0}/bin/linux/probe,{0}/bin/linux/cluster,{0
 #transfer_output_files = results/
 transfer_output_remaps = "$(PDBREMAPS)"
 
-log  		= logs/clashlist$(NUMBER).log
+log         = logs/clashlist$(NUMBER).log
 #output = logs/clashlist$(NUMBER).out
-error		= logs/clashlist$(NUMBER).err
-copy_to_spool	= False
-priority	= 0
+error       = logs/clashlist$(NUMBER).err
+copy_to_spool   = False
+priority    = 0
 
 queue
 """
