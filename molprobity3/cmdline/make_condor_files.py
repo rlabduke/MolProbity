@@ -251,7 +251,7 @@ def write_oneline_dag(outdir, list_of_pdblists):
     num = '{0:0>4}'.format(indx)
     #out.write("SUBDAG EXTERNAL "+num+" moldag"+num+".dag\n")
     #out.write("Jobstate_log logs/mol"+num+".jobstate.log\n")
-    out.write("NODE_STATUS_FILE oneline"+num+".status 3600\n")
+    out.write("NODE_STATUS_FILE onelinedag.status 3600\n")
     out.write("\n")
 
     parent_childs = "" # create parent_childs part of dag file now so only have to loop once thru pdbs
@@ -386,7 +386,7 @@ for pdb in sys.argv[1:]:
     reap(cmd1, pdbbase)
     reap(cmd2, pdbbase)
 
-    cmd9 = syscmd(subprocess.PIPE, "{0}/cmdline/molparser.py", "-q", pdb, model_num, "results/"+pdb_code+"/"+pdbbase+"-clashlist", "results/"+pdb_code+"/"+pdbbase+"-cbdev", "results/"+pdb_code+"/"+pdbbase+"-rotalyze", "results/"+pdb_code+"/"+pdbbase+"-ramalyze", "results/"+pdb_code+"/"+pdbbase+"-dangle_protein", "results/"+pdb_code+"/"+pdbbase+"-dangle_rna", "results/"+pdb_code+"/"+pdbbase+"-dangle_dna", "results/"+pdb_code+"/"+pdbbase+"-prekin_pperp", "results/"+pdb_code+"/"+pdbbase+"-suitename")
+    cmd9 = syscmd(subprocess.PIPE, "{0}/cmdline/molparser.py", "-q", pdb_code, model_num, "results/"+pdb_code+"/"+pdbbase+"-clashlist", "results/"+pdb_code+"/"+pdbbase+"-cbdev", "results/"+pdb_code+"/"+pdbbase+"-rotalyze", "results/"+pdb_code+"/"+pdbbase+"-ramalyze", "results/"+pdb_code+"/"+pdbbase+"-dangle_protein", "results/"+pdb_code+"/"+pdbbase+"-dangle_rna", "results/"+pdb_code+"/"+pdbbase+"-dangle_dna", "results/"+pdb_code+"/"+pdbbase+"-prekin_pperp", "results/"+pdb_code+"/"+pdbbase+"-suitename")
     reap(cmd9, pdbbase)
     print cmd9.stdout.read().strip()
     e_time = time.time()

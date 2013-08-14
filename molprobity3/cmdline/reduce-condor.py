@@ -184,7 +184,10 @@ def make_reduce_sub(list_of_lists):
     args = args+"Arguments       = "+repr(sleep_seconds)+" "+" ".join(pdbs)+"\n"
     args = args+"log         = logs/reduce"+repr(indx)+".log\n"
     args = args+"queue\n\n"
-    sleep_seconds = sleep_seconds + 60
+    if sleep_seconds > 300:
+      sleep_seconds = sleep_seconds + 5
+    else:
+      sleep_seconds = sleep_seconds + 30
   return reduce_sub+args
     
 #}}}
