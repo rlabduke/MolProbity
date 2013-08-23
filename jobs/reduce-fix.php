@@ -2,7 +2,7 @@
 /*****************************************************************************
     This file runs the user-configured Reduce -build command on an existing
     model in this session and creates a new PDB in this model.
-    
+
 INPUTS (via $_SESSION['bgjob']):
     modelID         ID code for model to process
     doflip[]        an array of booleans, where the keys match the second index
@@ -31,7 +31,7 @@ OUTPUTS (via $_SESSION['bgjob']):
 // 6. Record this PHP script's PID in case it needs to be killed.
     $_SESSION['bgjob']['processID'] = posix_getpid();
     mpSaveSession();
-    
+
 #{{{ a_function_definition - sumary_statement_goes_here
 ############################################################################
 /**
@@ -43,8 +43,18 @@ OUTPUTS (via $_SESSION['bgjob']):
 # MAIN - the beginning of execution for this page
 ############################################################################
 $doflip = $_SESSION['bgjob']['doflip'];
-$modelID = $_SESSION['bgjob']['modelID'];
-$model = $_SESSION['models'][$modelID];
+$nqh_regularize = $_SESSION['nqh_regularize'];
+if(!$nqh_regularize)
+{
+  $modelID = $_SESSION['bgjob']['modelID'];
+  $model = $_SESSION['models'][$modelID];
+}
+else
+{
+  $minModelID = $_SESSION['bgjob']['modelID'];
+  $modelID = $_SESSION['models'][$minModelID]['modelID_pre_min'];
+  $model = $_SESSION['models'][$modelID];
+}
 $pdb = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$model['pdb'];
 
 $changes = decodeReduceUsermods($pdb);
@@ -73,8 +83,9 @@ if(! $rerun)
 else
 {
     $tasks['reduce'] = "Add H with user-selected Asn/Gln/His flips using <code>reduce -fix</code>";
+    $tasks['regularize'] = "Regularize flipped N/Q/H geometry with <code>CCTBX</code> (if necessary)";
     setProgress($tasks, 'reduce');
-    
+
     $outname    = $model['pdb']; // Just overwrite the default Reduce -build one
     $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
     if(!file_exists($outpath)) mkdir($outpath, 0777); // shouldn't ever happen, but might...
@@ -88,7 +99,24 @@ else
     {
         reduceFix($parentPDB, $outpath, $flipfile);
     }
-    
+
+    if($nqh_regularize)
+    {
+       #can we just overwrite the previous minimized version?
+       setProgress($tasks, 'regularize');
+       $flipInpath = $outpath;
+       #$minModel = createModel($modelID."FH_reg");
+       $minModelID = $_SESSION['bgjob']['modelID'];
+       $minModel = $_SESSION['models'][$minModelID];
+       $outname2 = $minModel['pdb'];
+       $outpath2 = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
+       $outpath2 .= '/'.$outname2;
+       $temp = $_SESSION['dataDir'].'/tmp';
+       if(file_exists($flipInpath))
+       {
+         regularizeNQH($flipInpath, $outpath2, $temp);
+       }
+    }
     setProgress($tasks, null); // all done
 }
 

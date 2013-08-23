@@ -50,6 +50,8 @@ $pdb = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$model['pdb'];
 $reduce_blength = $_SESSION['bgjob']['reduce_blength'];
 $_SESSION['reduce_blength'] = $reduce_blength;
 
+$_SESSION['nqh_regularize'] = false;
+
 // Set up progress message
 if ($reduce_blength == 'ecloud')
 {
@@ -59,7 +61,14 @@ elseif($reduce_blength == 'nuclear')
 {
   $tasks['reduce'] = "Add H with <code>reduce -build -nuclear</code>";
 }
-if($_SESSION['bgjob']['makeFlipkin']) $tasks['flipkin'] = "Create Asn/Gln and His <code>flipkin</code> kinemages";
+if($_SESSION['bgjob']['nqh_regularize'])
+{
+  $tasks['regularize'] = "Regularize flipped N/Q/H geometry with <code>CCTBX</code> (if necessary)";
+}
+if($_SESSION['bgjob']['makeFlipkin'])
+{
+  $tasks['flipkin'] = "Create Asn/Gln and His <code>flipkin</code> kinemages";
+}
 
 setProgress($tasks, 'reduce');
 $newModel = createModel($modelID."FH");
@@ -68,9 +77,22 @@ $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
 if(!file_exists($outpath)) mkdir($outpath, 0777); // shouldn't ever happen, but might...
 $outpath .= '/'.$outname;
 reduceBuild($pdb, $outpath, $reduce_blength);
-
 $newModel['stats']          = pdbstat($outpath);
 $newModel['parent']         = $modelID;
+
+$changes = decodeReduceUsermods($outpath);
+// Check to see if any cliques couldn't be solved by looking for scores = -9.9e+99
+// At the same time, check to see if anything at all was flipped...
+$didnt_solve = $did_flip = false;
+$n = count($changes[0]); // How many changes are in the table?
+for($c = 0; $c < $n; $c++)
+{
+    if($changes[6][$c] == "-9.9e+99")
+        $didnt_solve = true;
+    if(!$did_flip && ($changes[4][$c] == "FLIP" || $changes[4][$c] == "CLS-FL"))
+        $did_flip = true;
+}
+
 // transfer mtz to reduced model
 if(isset($_SESSION['models'][$modelID]['mtz_file']))
     $newModel['mtz_file'] = $_SESSION['models'][$modelID]['mtz_file'];
@@ -90,14 +112,58 @@ $_SESSION['models'][ $newModel['id'] ] = $newModel;
 $_SESSION['bgjob']['modelID'] = $newModel['id'];
 $_SESSION['lastUsedModelID'] = $newModel['id']; // this is now the current model
 
+if($did_flip && $_SESSION['bgjob']['nqh_regularize'])
+{
+  setProgress($tasks, 'regularize');
+  $flipInpath = $outpath;
+  $minModel = createModel($modelID."FH_reg");
+  $outname2 = $minModel['pdb'];
+  $outpath2 = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
+  $outpath2 .= '/'.$outname2;
+  $temp = $_SESSION['dataDir'].'/tmp';
+  if(file_exists($flipInpath))
+  {
+    regularizeNQH($flipInpath, $outpath2, $temp);
+  }
+  $minModel['stats']           = pdbstat($outpath2);
+  $minModel['parent']          = $modelID;
+  $minModel['modelID_pre_min'] = $newModel['id']; // for reduce-fix
+
+  // transfer mtz to reduced model
+  if(isset($_SESSION['models'][$modelID]['mtz_file']))
+    $minModel['mtz_file'] = $_SESSION['models'][$modelID]['mtz_file'];
+
+  if($reduce_blength == 'ecloud')
+  {
+    $minModel['history']        = "Derived from $model[pdb] by Reduce -build w/ CCTBX regularization";
+  }
+  elseif($reduce_blength == 'nuclear')
+  {
+    $minModel['history']        = "Derived from $model[pdb] by Reduce -build -nuclear w/ CCTBX regularization";
+  }
+  $minModel['isUserSupplied'] = $model['isUserSupplied'];
+  $minModel['isReduced']      = true;
+  $minModel['isBuilt']        = true;
+  $minModel['isRegularized']  = true;
+  $_SESSION['models'][ $minModel['id'] ] = $minModel;
+  $_SESSION['bgjob']['modelID'] = $minModel['id'];
+  $_SESSION['lastUsedModelID'] = $minModel['id']; // this is now the current model
+  $_SESSION['nqh_regularize'] = $_SESSION['bgjob']['nqh_regularize'];
+}
+
 if($_SESSION['bgjob']['makeFlipkin'])
 {
     setProgress($tasks, 'flipkin');
     $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_KINS;
     if(!file_exists($outpath)) mkdir($outpath, 0777);
-    makeFlipkin($_SESSION['dataDir'].'/'.MP_DIR_MODELS."/$newModel[pdb]",
-        "$outpath/$newModel[prefix]flipnq.kin",
-        "$outpath/$newModel[prefix]fliphis.kin");
+    $curModel = $_SESSION['models'][$_SESSION['lastUsedModelID']];
+    $inPath = $_SESSION['dataDir'].'/'.MP_DIR_MODELS."/$curModel[pdb]";
+    if(file_exists($inPath))
+    {
+      makeFlipkin($inPath,
+        "$outpath/$curModel[prefix]flipnq.kin",
+        "$outpath/$curModel[prefix]fliphis.kin");
+    }
 }
 
 setProgress($tasks, null);

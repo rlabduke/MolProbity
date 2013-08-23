@@ -800,6 +800,21 @@ function downgradePDB($inpath, $outpath)
 }
 #}}}########################################################################
 
+#{{{ regularizeNQH - regularize NQH geometry following flip
+############################################################################
+/**
+* regularize geometry - powered by CCTBX
+*
+* $inpath       the full filename for the PDB file to be processed
+* $outpath      the full filename for the destination PDB. Will be overwritten.
+* $temp         temp directory location
+*/
+function regularizeNQH($inpath, $outpath, $temp)
+{
+  #echo "libtbx.python ".MP_BASE_DIR."/bin/nqh_minimize.py $inpath $outpath $temp";
+  exec("libtbx.python ".MP_BASE_DIR."/bin/nqh_minimize.py $inpath $outpath $temp");
+}
+
 #{{{ reduceTrim - removes H from a PDB file
 ############################################################################
 /**

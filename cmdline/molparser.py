@@ -11,8 +11,8 @@ def parse_cmdline():
   parser.add_option("-q", "--quiet", action="store_true", dest="quiet",
     help="quiet mode")
   opts, args = parser.parse_args()
-  if len(args) < 10:
-    sys.stderr.write("\n**ERROR: Must have 10 arguments!\n")
+  if len(args) < 11:
+    sys.stderr.write("\n**ERROR: Must have 11 arguments!\n")
     sys.exit(help())
   return opts, args
   #try:
@@ -57,6 +57,7 @@ USAGE:   python molparser.py [MP output files]
                               rama output file
                               protein bond geometry output file
                               rna bond geometry output file
+                              dna bond geometry output file
                               base ppperp output file
                               suitname output file
 
@@ -598,9 +599,14 @@ def findGeomOutliers(geom, b_or_angle):
   worst = {}
   if(len(geom) > 0):
     for res, data in geom.iteritems():
+      #print data
       if b_or_angle == 'bond' or b_or_angle =='angle':
-        if(data['is'+b_or_angle+'Outlier']):
-          worst[data['resName']] = data[b_or_angle+'outCount']
+        if 'is'+b_or_angle+'Outlier' in data: # catches case where a residue doesnt have any bonds and/or angles, like in some hets
+          if(data['is'+b_or_angle+'Outlier']):
+            worst[data['resName']] = data[b_or_angle+'outCount']
+        else:
+          sys.stderr.write("Odd geometry data detected; possibly het residues or missing residues\n")
+          
   #ksort($worst); // Put the residues into a sensible order
   return worst
   
@@ -666,8 +672,12 @@ def calcMPscore(clash, rota, rama):
       evalu = r['eval']
       if not evalu in ramaScore:
         ramaScore[evalu] = 0
+        #sys.stderr.write("Odd rama data detected; maybe het residues or missing residues\n")
       ramaScore[evalu] = ramaScore[evalu]+1
-    ra = 100.0 - (100.0 * ramaScore['Favored'] / len(rama))
+    if 'Favored' not in ramaScore:
+      ra = 0
+    else:
+      ra = 100.0 - (100.0 * ramaScore['Favored'] / len(rama))
 
     return 0.42574*log(1+cs) + 0.32996*log(1+max(0,ro-1)) + 0.24979*log(1+max(0,ra-2)) + 0.5;
 
@@ -742,6 +752,7 @@ def oneline_analysis(files, quiet):
   
   geom = loadBondGeometryReport(files[6], "protein")
   geom.update(loadBondGeometryReport(files[7], "rna"))
+  geom.update(loadBondGeometryReport(files[8], "dna"))
   #pprint.pprint(geom)
   bondOut = findBondGeomOutliers(geom)
   angleOut = findAngleGeomOutliers(geom)
@@ -753,12 +764,14 @@ def oneline_analysis(files, quiet):
   totalBonds = 0
   totalAngles = 0
   for res, data in geom.iteritems():
-    if(data['isbondOutlier']):
-      outBondCount += data['bondoutCount']
-    totalBonds += data['bondCount']
-    if(data['isangleOutlier']):
-      outAngleCount += data['angleoutCount']
-    totalAngles += data['angleCount']
+    if 'isbondOutlier' in data:
+      if(data['isbondOutlier']):
+        outBondCount += data['bondoutCount']
+      totalBonds += data['bondCount']
+    if 'isangleOutlier' in data:
+      if(data['isangleOutlier']):
+        outAngleCount += data['angleoutCount']
+      totalAngles += data['angleCount']
   if (totalRes > 0):
     out = out+":"+repr(outBondCount)+":"+repr(totalBonds)+":"+("%.2f" % (100.0 * outBondCount / totalBonds))
     out = out+":"+("%.2f" % (100.0 * outBondResCount / totalRes))
@@ -766,18 +779,19 @@ def oneline_analysis(files, quiet):
     out = out+":"+("%.2f" % (100.0 * outAngleResCount / totalRes))
   else:
     out = out+":-1:-1:-1:-1:-1:-1:-1:-1"
+    sys.stderr.write("No standard residues detected!\n")
     
   if ((len(rota) != 0) and (len(rama) != 0)):
     mps = calcMPscore(clash, rota, rama)
     out = out+(":%.2f" % mps)
   else:
-    out = out+"::"
+    out = out+":"
      
-  pperp = loadBasePhosPerp(files[8])
+  pperp = loadBasePhosPerp(files[9])
   badPperp = findBasePhosPerpOutliers(pperp)
   out = out+":"+repr(len(badPperp))+":"+repr(len(pperp))
 
-  suites = loadSuitenameReport(files[9])
+  suites = loadSuitenameReport(files[10])
   badSuites = findSuitenameOutliers(suites)
   out = out+":"+repr(len(badSuites))+":"+repr(len(suites))
 

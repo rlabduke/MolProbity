@@ -228,8 +228,8 @@ function onRerunReduce()
         "auto",
         "add_h.png"
     );
-    $_SESSION['bgjob']['modelID']   = $_REQUEST['modelID'];
-    $_SESSION['bgjob']['doflip']    = $_REQUEST['doflip'];
+    $_SESSION['bgjob']['modelID']        = $_REQUEST['modelID'];
+    $_SESSION['bgjob']['doflip']         = $_REQUEST['doflip'];
 
     // User requested changes; re-launch Reduce
     if($rerun)
