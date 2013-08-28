@@ -31,7 +31,7 @@ def finalize_coords(filename, outfile, updated_coords):
   out_f.close()
 
 def run(args):
-  log = StringIO()
+  #log = StringIO()
   filename = args[0]
   outfile = args[1]
   temp_dir = args[2]
@@ -65,7 +65,7 @@ def run(args):
   print >> p, restrain
   print >> p, sigma
   print >> p, directory
-  print >> p, "pdb_interpretation.stop_for_unknowns=False"
+  print >> p, "stop_for_unknowns=False"
   p.close()
   temp_pdb = os.path.join(temp_dir, "nqh_flips.pdb")
   out = file(temp_pdb, 'w')
@@ -81,6 +81,9 @@ def run(args):
   min_args = []
   min_args.append(filename)
   min_args.append(params)
+
+  log_file = os.path.join(temp_dir, "nqh.log")
+  log = file(log_file, 'w')
 
   o = geometry_minimization.run(min_args, log=log)
 

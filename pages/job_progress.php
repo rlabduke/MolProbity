@@ -77,6 +77,17 @@ function display($context)
             echo "<br><small>If needed, you can <a href='$url&abort={$_SESSION[bgjob][processID]}'>abort this job</a>.\n";
         echo $this->pageFooter();
     }
+    elseif($_SESSION['bgjob']['cctbxError'])
+    {
+        $url        = makeEventURL("onGoto", "feedback_setup.php");
+        $refresh    = "10; URL=$url";
+        echo $this->pageHeader("CCTBX job failed");//, "none", $refresh);
+        echo "<p>It appears that your CCTBX-powered job failed.\n";
+        echo "<br>This is probably due to a syntax error in one of the CCTBX scripts.\n";
+        echo "<br>See the session error log for hints, and please report the bug using the Feedback tool.\n";
+        echo "<p><a href='$url'>Click here</a> to continue.\n";
+        echo $this->pageFooter();
+    }
     else
     {
         $url        = makeEventURL("onGoto", $_SESSION['bgjob']['whereNext'], $_SESSION['bgjob']);

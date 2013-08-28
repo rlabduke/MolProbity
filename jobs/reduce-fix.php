@@ -116,6 +116,14 @@ else
        {
          regularizeNQH($flipInpath, $outpath2, $temp);
        }
+       if(!file_exists($outpath2))
+       {
+         unset($_SESSION['bgjob']['processID']);
+         $_SESSION['bgjob']['endTime']   = time();
+         $_SESSION['bgjob']['isRunning'] = false;
+         $_SESSION['bgjob']['cctbxError'] = true;
+         die();
+       }
     }
     setProgress($tasks, null); // all done
 }

@@ -125,6 +125,14 @@ if($did_flip && $_SESSION['bgjob']['nqh_regularize'])
   {
     regularizeNQH($flipInpath, $outpath2, $temp);
   }
+  if(!file_exists($outpath2))
+  {
+    unset($_SESSION['bgjob']['processID']);
+    $_SESSION['bgjob']['endTime']   = time();
+    $_SESSION['bgjob']['isRunning'] = false;
+    $_SESSION['bgjob']['cctbxError'] = true;
+    die();
+  }
   $minModel['stats']           = pdbstat($outpath2);
   $minModel['parent']          = $modelID;
   $minModel['modelID_pre_min'] = $newModel['id']; // for reduce-fix
