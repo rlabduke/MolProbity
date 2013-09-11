@@ -15,7 +15,7 @@
 </tr>
 <tr><td valign="top" colspan="2">
     <div class="pagecontent_alone">
-    
+
 <!------------------------------------------------------------------------------
   --- "HELP!" section ----------------------------------------------------------
   ----------------------------------------------------------------------------->
@@ -41,18 +41,18 @@ If you don't see anything, or just see an error message, keep reading to learn h
         document.writeln("<div class='alert'>");
         document.writeln("Java is disabled in your browser or is not installed.");
         document.writeln("Please enable it through your browser's Preferences or Settings menu, and/or");
-        document.writeln("<a href='http://java.sun.com/getjava/' target='_blank'>click here to download and install Java.</a>");
+        document.writeln("<a href='http://www.oracle.com/technetwork/java/javase/downloads/index.html' target='_blank'>click here to download and install Java.</a>");
         document.writeln("</div><br>");
     }
 // -->
 </script>
 
 <hr>
-<h2>For those in a hurry: <a href="http://java.sun.com/getjava/" target=_blank>get Java now</a>!</h2>
+<h2>For those in a hurry: <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html" target=_blank>get Java now</a>!</h2>
 <hr>
 
 <h2>What is Java?</h2>
-Java is a technology developed by <a href="http://www.sun.com" target=_blank>Sun Microsystems</a>
+Java is a technology originally developed by <b>Sun Microsystems</b> and now developed and hosted by <a href="http://www.oracle.com/index.html" target=_blank>Oracle</a>
 that allows you to run small programs, called <i>applets</i>, inside your web browser.
 
 <h2>Who can use Java?</h2>
@@ -61,10 +61,10 @@ Most browsers, like <a href="http://www.microsoft.com/" target=_blank>Microsoft 
 <a href="http://www.apple.com/safari/" target=_blank>Safari</a>,
 <a href="http://www.netscape.com/" target=_blank>Netscape Navigator</a>,
 <a href="http://www.mozilla.org/" target=_blank>Mozilla, and Firefox</a>,
-use the Java Virtual Machine (JVM) provided by Sun.
+use the Java Runtime Environment (JRE) provided by Oracle.
 This is sometimes called a "plug-in".
-<p>You may already have Java available on your computer -- 
-Macintosh OS X comes with Java built-in, and Netscape Navigator 6 includes Sun's JVM as part of the browser package. 
+<p>You may already have Java available on your computer --
+Macintosh OS X comes with Java built-in (version 1.6.0 as of Sept. 2013), and Netscape Navigator 6 includes Sun's JVM as part of the browser package.
 Most Windows computers do not come with Java installed, but don't worry -- it's easy to do it yourself.
 
 <h2>How do I get Java?</h2>
@@ -89,18 +89,18 @@ Mac OS 9 and earlier do not support modern versions of Java at all -- sorry.
 <h2>Help! It didn't work...</h2>
 <ul>
 <li><i>for Windows:</i>
-<p>If you don't already have Java, go to <a href="http://java.sun.com/" target=_blank>java.sun.com</a>
-and download the Java 2, Standard Edition (J2SE) Java Runtime Environment (JRE).
-We recommend getting the newest version (1.5.0 as of this writing).
+<p>If you don't already have Java, go to <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html" target=_blank>www.oracle.com</a>
+and download the Java SE Java Runtime Environment (JRE).
+We recommend getting the newest version (Java SE 7u40 as of September 2013).
 <p>When prompted to save the file or open it, choose "Open" and follow the instructions that appear.
 Or, save the file and run it later, following the instructions it displays.
 <p>IE, Netscape, Mozilla, and Firefox should now make use of Java automatically, without further configuration.
 If you're running something else, consult that browser's documentation. Sorry!
 </li>
 <li><i>for Linux:</i>
-<p>If you don't already have Java, go to <a href="http://java.sun.com/" target=_blank>java.sun.com</a>
-and download the Java 2, Standard Edition (J2SE) Java Runtime Environment (JRE).
-We recommend getting the newest version (1.5.0 as of this writing).
+<p>If you don't already have Java, go to <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html" target=_blank>www.oracle.com</a>
+and download the the Java SE Java Runtime Environment (JRE).
+We recommend getting the newest version (Java SE 7u40 as of September 2013).
 <p>Get either the RPM (RedHat) or the GNUZIP/Tar (any Linux) shell script, save it to disk, and execute it.
 For the GNUZIP/Tar script, make sure you're in the directory where you want Java installed before running it -- e.g. <code>/usr/local</code>.
 Sun provides more detailed instructions, but it should be straightforward.
@@ -114,17 +114,15 @@ and set the path to Java executable to something like <code>/usr/local/jre/bin/j
 <p>For other browsers, you're on your own -- but you're smart enough to use Linux, you can figure it out.
 </li>
 <li><i>for the Macintosh:</i>
-<p>There are known issues with (1) the Netscape 7.0/Mozilla 1.1 browsers and Jaguar (OS X 10.2)
-and (2) the JDK 1.4.1 Developer Previews and any browser other than IE.
-<p>If you're using Netscape or Mozilla and blank space appears where you expect an applet,
-you may need to remove the default plugin from the application bundle.
-Using the Finder, control-click on the Netscape/Mozilla application, and choose
-"Show Package Contents". Navigate down to find the Java Plugin, and delete it.
-<p>If you've downloaded the JDK 1.4.1 and get only a box where you expect an applet,
-you'll need to change back to 1.3.1. To determine the version you're currently using,
-type <code>java -version</code> in a command shell. To change to version 1.3.1 if you're using
-something else, type <code>sudo /usr/local/bin/jsettestjdk 1.3.1</code>&nbsp;
-These commands are documented in materials that came with the JDK download.
+<p>The current version of OS X (Mountain Lion 10.8.4) comes with a system Java 1.6.0 installed,
+but does not include a browser plugin. To install a browser plugin, you'll need to go to
+<a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html" target=_blank>www.oracle.com</a>
+and download the the Java SE Java Runtime Environment (JRE).
+We recommend getting the newest version (Java SE 7u40 as of September 2013).</p>
+<p>NOTE: The latest plugin version (1.7.0 as of September 2013) is only available as a 64-bit plugin.
+<a href="https://www.google.com/intl/en/chrome/browser/" target=_blank>Google Chrome</a> is only available as a 32-bit application for OS X, so this plugin is not compatible. Please use
+<a href="http://www.apple.com/safari/" target=_blank>Safari</a> or
+<a href="http://www.mozilla.org/en-US/firefox/new/" target=_blank>Firefox</a> with MolProbity on OS X.
 </li>
 </ul>
 
@@ -156,7 +154,7 @@ and many protections are built into Java to prevent applets from making changes 
 That said, no piece of complex software (like Java or KiNG) can be guaranteed to be
 free from bugs and potential vulnerabilities.
 All use of this site is at your own risk.
- 
+
 
     </div>
 </td></tr>
