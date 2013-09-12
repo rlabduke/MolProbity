@@ -194,8 +194,10 @@ function runAnalysis($modelID, $opts)
         $startTime = time();
         setProgress($tasks, 'clashlist'); // updates the progress display if running as a background job
         $outfile = "$chartDir/$model[prefix]clashlist.txt";
-        runClashlist($infile, $outfile, $reduce_blength);
-        $clash = loadClashlist($outfile);
+        #runClashlist($infile, $outfile, $reduce_blength);
+        runClashscore($infile, $outfile, $reduce_blength);
+        #$clash = loadClashlist($outfile);
+        $clash = loadClashscore($outfile);
         //$clashPct = runClashStats($model['stats']['resolution'], $clash['scoreAll'], $clash['scoreBlt40']);
         $tasks['clashlist'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=plain' target='_blank'>preview</a>\n";
         setProgress($tasks, 'clashlist'); // so the preview link is visible
@@ -244,8 +246,10 @@ function runAnalysis($modelID, $opts)
                 unlink($outfile);
             // Clashes
                 $outfile = mpTempfile("tmp_clashlist_");
-                runClashlist($altpdb, $outfile, $reduce_blength);
-                $altclash = loadClashlist($outfile);
+                #runClashlist($altpdb, $outfile, $reduce_blength);
+                runClashscore($altpdb, $outfile, $reduce_blength);
+                #$altclash = loadClashlist($outfile);
+                $altclash = loadClashscore($outfile);
                 if($altclash['scoreAll'] > $mainClashscore)
                     $improvementList[] = "improved your clashscore by ".($altclash['scoreAll'] - $mainClashscore)." points";
                 unlink($outfile);
@@ -275,8 +279,10 @@ function runAnalysis($modelID, $opts)
             if($mainClashscore > 0)
             {
                 $outfile = mpTempfile("tmp_clashlist_");
-                runClashlist($altpdb, $outfile, $reduce_blength);
-                $altclash = loadClashlist($outfile);
+                #runClashlist($altpdb, $outfile, $reduce_blength);
+                runClashscore($altpdb, $outfile, $reduce_blength);
+                #$altclash = loadClashlist($outfile);
+                $altclash = loadClashscore($outfile);
                 if($altclash['scoreAll'] < $mainClashscore)
                     $improvementList[] = "improve your clashscore by ".($mainClashscore - $altclash['scoreAll'])." points";
                 unlink($outfile);
@@ -674,6 +680,24 @@ function runClashlist($infile, $outfile, $blength="ecloud")
 }
 #}}}########################################################################
 
+#{{{ runClashscore - generates clash data with phenix.clashscore
+############################################################################
+function runClashscore($infile, $outfile, $blength="ecloud")
+{
+    #$bcutval = 40;
+    #$ocutval = 10;
+    #exec("clashlist $infile $bcutval $ocutval $blength > $outfile");
+    if($blength == "ecloud")
+    {
+      exec("phenix.clashscore b_factor_cutoff=40 $infile > $outfile");
+    }
+    elseif($blength == "nuclear")
+    {
+      exec("phenix.clashscore b_factor_cutoff=40 nuclear=True $infile > $outfile");
+    }
+}
+#}}}########################################################################
+
 #{{{ runRscc - generates rscc data
 ############################################################################
 function runRscc($pdb_infile, $mtz_infile, $outfile, $rawoutfile)
@@ -751,6 +775,79 @@ function loadClashlist($datafile)
     $ret['clashes-with'] = $clashes_with;
 
     return $ret;
+}
+#{{{ loadClashscore - loads Clashscore output into an array
+############################################################################
+/**
+* Returns an array with the following keys:
+*   scoreAll        the overall clashscore
+*   scoreBlt40      the score for atoms with B < 40
+*   clashes         an array with 'cnnnnittt' residue names as keys
+*                   (see loadCbetaDev() for explanation of naming)
+*                   and maximum clashes as values (positive Angstroms).
+*                   NB: only clashes >= 0.40A are currently listed.
+*   clashes-with    same keys as "clashes", values are:
+*                       'srcatom' => atom from this residue making bigest clash
+*                       'dstatom' => atom it clashes with
+*                       'dstcnit' => chain/residue it clashes with
+*/
+function loadClashscore($datafile)
+{
+  $data = file($datafile);
+  $sum = array_values(array_slice($data, -2)); // last 2 lines with new indexes
+  $scoreAll = explode(" ", $sum[0]);
+  $scoreBlt40 = explode(" ", $sum[1]);
+  $ret['scoreAll']    = round(($scoreAll[2]+0), 2);
+  $ret['scoreBlt40']  = round(($scoreBlt40[7]+0), 2);
+
+  // Parse data about individual clashes
+  $clashes = array(); // in case there are no clashes
+  $clashes_with = array();
+  foreach($data as $datum)
+  {
+    $line = explode(':', $datum);
+    if (trim($line[0])==''){
+      continue;
+    }
+    elseif (preg_match("/^#/",$line[0])){
+      continue;
+    }
+    elseif (preg_match("/^Bad Clashes/",$line[0])){
+      continue;
+    }
+    elseif (preg_match("/^clashscore/",$line[0])){
+      continue;
+    }
+    if (!$_SESSION['useSEGID'])
+    {
+      $res1 = substr($line[0], 0, 10);
+      $atm1 = substr($line[0], 11, 5);
+      $res2 = substr($line[0], 16, 10);
+      $atm2 = substr($line[0], 27, 5);
+    }
+    else
+    {
+      $res1 = substr($line[0], 0, 12);
+      $atm1 = substr($line[0], 13, 5);
+      $res2 = substr($line[0], 18, 12);
+      $atm2 = substr($line[0], 29, 5);
+    }
+    $dist = abs(trim($line[1])+0);
+    if(!isset($clashes[$res1]) || $clashes[$res1] < $dist)
+    {
+      $clashes[$res1] = $dist;
+      $clashes_with[$res1] = array('srcatom' => $atm1, 'dstatom' => $atm2, 'dstcnit' => $res2);
+    }
+    if(!isset($clashes[$res2]) || $clashes[$res2] < $dist)
+    {
+      $clashes[$res2] = $dist;
+      $clashes_with[$res2] = array('srcatom' => $atm2, 'dstatom' => $atm1, 'dstcnit' => $res1);
+    }
+  }
+  $ret['clashes'] = $clashes;
+  $ret['clashes-with'] = $clashes_with;
+
+  return $ret;
 }
 #}}}########################################################################
 
