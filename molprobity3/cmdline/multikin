@@ -46,6 +46,7 @@ $optMultikin = array(
     'altconf'   => true,
     'rama'      => true,
     'rota'      => true,
+    'geom'      => true,
     'cbdev'     => true,
     'pperp'     => true,
     'clashdots' => true,
@@ -75,6 +76,7 @@ if($optVerbose)
 
 foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
 {
+    #echo $inFile."\n";
     $outFile = basename($inFile, ".pdb") . ".kin";
 
     mpStartSession(true); // create a new session
@@ -87,19 +89,33 @@ foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
                  true,
                  false);
 
+    #echo "modID: ".$modelID."\n";
     $model =& $_SESSION['models'][$modelID];
-    $pdbfile = $_SESSION['dataDir'].'/'.MP_DIR_MODELS."/$model[pdb]";
+    $ensemble =& $_SESSION['ensembles'][$modelID];
     $reduce_blength = $_SESSION['reduce_blength'];
+    #echo "model: ".isset($model)."\n";
+    #echo "ensemble: \n";
+    #print_r($ensemble);
+    if (isset($model)) {
+      $pdbfile = array($_SESSION['dataDir'].'/'.MP_DIR_MODELS."/$model[pdb]");
+    }
+    if (isset($ensemble)) {
+      $pdbfile = array();
+      foreach($ensemble['models'] as $splitmodel) {
+        // adds each model pdb to the end of the $pdbfile array
+        $pdbfile[] = $_SESSION['dataDir'].'/'.MP_DIR_MODELS."/$splitmodel.pdb";
+      }
+    }
 
     if($optVerbose)
     {
       echo "Making multi-criterion kinemage for $inFile using $reduce_blength x-H vdW radii ...\n";
     }
-
+    
     makeMulticritKin2(
-        array($pdbfile),
-        $outDir.'/'.$outFile,
-        $optMultikin);
+      $pdbfile,
+      $outDir.'/'.$outFile,
+      $optMultikin);
     if($optGzipKin) destructiveGZipFile($outDir.'/'.$outFile);
 
     mpDestroySession();
