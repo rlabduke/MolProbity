@@ -36,10 +36,24 @@ function mpSendEmailViaSmtp($senderName, $senderAddr, $subject, $body)
     $mail->AddReplyTo($senderAddr, $senderName);
     $mail->AddAddress(MP_EMAIL_AUTHOR);
     $mail->AddAddress(MP_EMAIL_WEBMASTER);
-    //if(defined("MP_EMAIL_WEBMASTER2")) {
+    if(defined("MP_EMAIL_WEBMASTER2")) {
       $mail->AddAddress(MP_EMAIL_WEBMASTER2);
-      //$mail->AddAddress(MP_EMAIL_WEBMASTER3);
-    //}
+    }
+    if(defined("MP_EMAIL_WEBMASTER3")) {
+      $mail->AddAddress(MP_EMAIL_WEBMASTER3);
+    }
+    if(defined("MP_EMAIL_WEBMASTER4")) {
+      $mail->AddAddress(MP_EMAIL_WEBMASTER4);
+    }
+    if(defined("MP_EMAIL_WEBMASTER5")) {
+      $mail->AddAddress(MP_EMAIL_WEBMASTER5);
+    }
+    if(defined("MP_EMAIL_WEBMASTER6")) {
+      $mail->AddAddress(MP_EMAIL_WEBMASTER6);
+    }
+    if(defined("MP_EMAIL_PI")) {
+      $mail->AddAddress(MP_EMAIL_PI);
+    }
 
     $mail->Subject = $subject;
     $mail->Body = $body;
