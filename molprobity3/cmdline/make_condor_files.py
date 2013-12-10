@@ -8,7 +8,6 @@ import time
 
 #number_to_run = 50
 
-
 #{{{ parse_cmdline
 #parse the command line--------------------------------------------------------------------------
 def parse_cmdline():
@@ -36,44 +35,6 @@ def parse_cmdline():
     else:
       sys.stderr.write("\n**ERROR: First argument must be a directory!\n")
       sys.exit(help())
-  #global total_file_size_limit
-  #global bond_type
-  #total_file_size_limit = 10000000 # 10 MB by default
-  #bond_type = "nuclear"
-  #try:
-  #  #opts, args = getopt.getopt(sys.argv[1:], 'hn:',['help', 'number='])
-  #  opts, args = getopt.getopt(sys.argv[1:], 'hlt',['help', 'limit=', 'type='])
-  #except getopt.GetoptError as err:
-  #  print str(err)
-  #  help()
-  #  sys.exit()
-  #for o, a in opts:
-  #  if o in ("-h", "--help"):
-  #    help()
-  #    sys.exit()
-  #  elif o in ("-l", "--limit"):
-  #    if a > 1000000: # no less than 1 MB
-  #      total_file_size_limit = a
-  #    else:
-  #      sys.stderr.write("\n**ERROR: -limit cannot be less than 1000000\n")
-  #      sys.exit(help())
-  #  elif o in ("-t", "--type"):
-  #    if a == "ecloud":
-  #      bond_type = "ecloud"
-  #    elif not a == "nuclear":
-  #      sys.stderr.write("\n**ERROR: -type must be ecloud or nuclear\n")
-  #      sys.exit(help())
-  #return args
-  #if len(args) < 1:
-  #  sys.stderr.write("\n**ERROR: User must specify input directory\n")
-  #  sys.exit(help())
-  #else:
-  #  indir = args[0]
-  #  if (os.path.isdir(indir)):
-  #    return indir
-  #  else:
-  #    sys.stderr.write("\n**ERROR: First argument must be a directory!\n")
-  #    sys.exit(help())
 #------------------------------------------------------------------------------------------------
 #}}}
 
@@ -247,12 +208,13 @@ def write_oneline_dag(outdir, list_of_pdblists):
   outfile = os.path.join(os.path.realpath(outdir), out_name)
   out=open(outfile, 'wr')
   out.write("CONFIG "+ config_file+"\n\n")
+  out.write("NODE_STATUS_FILE onelinedag.status 3600\n")
+  out.write("\n")
+  postjobs = ""
   for indx, pdbs in enumerate(list_of_pdblists):
     num = '{0:0>4}'.format(indx)
     #out.write("SUBDAG EXTERNAL "+num+" moldag"+num+".dag\n")
     #out.write("Jobstate_log logs/mol"+num+".jobstate.log\n")
-    out.write("NODE_STATUS_FILE onelinedag.status 3600\n")
-    out.write("\n")
 
     parent_childs = "" # create parent_childs part of dag file now so only have to loop once thru pdbs
     #pdb_list = []
@@ -282,10 +244,12 @@ def write_oneline_dag(outdir, list_of_pdblists):
     out.write("VARS oneline"+num+" PDBS=\""+" ".join(pdbs)+"\"\n")
     out.write("VARS oneline"+num+" NUMBER=\""+num+"\"\n\n")
     #out.write("PARENT clash"+num+" CHILD local"+num+"\n")
+    postjobs = postjobs+"oneline"+num + " "
     
+  #out.write("JOB post post_process.sh\n")
+  #out.write("SCRIPT POST "+postjobs+"post_process.sh")
   out.close()
 #}}}
-
 
 #{{{ write_file
 def write_file(outdir, out_name, file_text, permissions=0644):
@@ -482,11 +446,11 @@ queue
 """
 #}}}
 
-
 #{{{ write_post_sh
 post_sh = """#!/bin/sh
 
-cat logs/local*.out > logs/oneline.out.csv
+cat logs/oneline*.out > logs/alloneline.out.csv
+cat logs/oneline*.err > logs/alloneline.err
 """
 #}}}
 
@@ -495,7 +459,8 @@ if __name__ == "__main__":
 
   opts, indir = parse_cmdline()
   if os.path.exists(indir):
-    outdir = os.path.join(indir, "condor_sub_files")
+    indir_base = os.path.basename(os.path.realpath(indir))
+    outdir = os.path.join(indir, "condor_sub_files_"+indir_base)
     if not os.path.exists(outdir):
       os.makedirs(outdir)
       os.makedirs(os.path.join(outdir,"logs"))
@@ -511,10 +476,12 @@ if __name__ == "__main__":
     write_oneline_dag(outdir, list_of_lists)
     write_file(outdir, "oneline.py", oneline_py.format(molprobity_home), 0755)
     write_file(outdir, "oneline.sub", oneline_sub.format(molprobity_home))
+    write_file(outdir, "post_process.sh", post_sh, 0755)
     #write_file(outdir, "local_run.sh", local_run.format(molprobity_home, pdbbase="{pdbbase}"), 0755)
     #write_file(outdir, "local_run.py", local_run_py.format(molprobity_home), 0755)
     #write_file(outdir, "local.sub", local_sub)
     #write_file(outdir, "clashlist.sh", clash_sh.format(bondtype=opts.bond_type, pdb="{pdb}", pdbbase="{pdbbase}"), 0755)
     #write_file(outdir, "clashlist.sub", clash_sub.format(molprobity_home))
+    
   else:
     sys.stderr.write(indir + " does not seem to exist!\n")

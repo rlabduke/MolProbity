@@ -772,7 +772,7 @@ def oneline_analysis(files, quiet):
       if(data['isangleOutlier']):
         outAngleCount += data['angleoutCount']
       totalAngles += data['angleCount']
-  if (totalRes > 0):
+  if (totalRes > 0 and totalBonds > 0 and totalAngles > 0): # catches a bug with PNA residues
     out = out+":"+repr(outBondCount)+":"+repr(totalBonds)+":"+("%.2f" % (100.0 * outBondCount / totalBonds))
     out = out+":"+("%.2f" % (100.0 * outBondResCount / totalRes))
     out = out+":"+repr(outAngleCount)+":"+repr(totalAngles)+":"+("%.2f" % (100.0 * outAngleCount / totalAngles))
