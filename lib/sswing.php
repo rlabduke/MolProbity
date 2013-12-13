@@ -42,7 +42,7 @@ function pdbSwapCoords($inpath, $outpath, $swap)
 /**
 * Runs SSWING and removes the files it creates. Returns new coords in same
 * format as for pdbSwapCoords(), above.
-* 
+*
 * pdbfile       full path to the input PDB file
 * mapfile       a CCP4-format electron density map file
 * workdir       the directory to work in, where tmp files are created
@@ -53,7 +53,7 @@ function runSswing($pdbfile, $mapfile, $workdir, $cnit, $goFast = true)
 {
     $oldwd = getcwd();
     chdir($workdir);
-    
+
     $cmd = "sswing -s";
     if($goFast) $cmd .= " -f";
     //$cmd .= " -d"; // for debugging
@@ -62,7 +62,7 @@ function runSswing($pdbfile, $mapfile, $workdir, $cnit, $goFast = true)
     $cmd .= " >> sswing.err.log 2>&1";
     echo($cmd."\n"); // for debugging
     exec($cmd);
-    
+
     $swap = array();
     $h = fopen('sidechainPDB.pdb', 'rb');
     if($h)
@@ -81,7 +81,7 @@ function runSswing($pdbfile, $mapfile, $workdir, $cnit, $goFast = true)
         unlink('sidechainPDB.pdb');
     }
     else echo "*** Unable to open sidechainPDB.pdb from SSWING run\n";
-    
+
     chdir($oldwd);
     return $swap;
 }
@@ -96,14 +96,14 @@ function runSswing($pdbfile, $mapfile, $workdir, $cnit, $goFast = true)
 function makeSswingKin($pdb1, $pdb2, $outfile, $cnit)
 {
         if(file_exists($outfile)) unlink($outfile);
-        
+
         $stats = describePdbStats( pdbstat($pdb1), false );
         $h = fopen($outfile, 'a');
         fwrite($h, "@text\n");
         fwrite($h, "Sidechains have been refit by SSWING. Details of the input file:\n\n");
         foreach($stats as $stat) fwrite($h, "[+]   $stat\n");
         fwrite($h, "@kinemage 1\n");
-        
+
         // Calculate views for each residue in CNIT
         $ctr = computeResCenters($pdb1);
         foreach($cnit as $res)
@@ -112,13 +112,15 @@ function makeSswingKin($pdb1, $pdb2, $outfile, $cnit)
             $c = $ctr[$res];
             fwrite($h, "@{$i}viewid {{$res}}\n@{$i}span 12\n@{$i}zslab 100\n@{$i}center $c[x] $c[y] $c[z]\n");
         }
-        
+
         fclose($h);
         exec("prekin -quiet -append -animate -onegroup -show 'mc,sc(peach),ca,hy,ht,wa' $pdb1 >> $outfile");
-        exec("probe -quiet -noticks -nogroup -self 'alta' $pdb1 >> $outfile");
+        exec("phenix.probe -quiet -noticks -nogroup -self 'alta' $pdb1 >> $outfile");
+        //exec("probe -quiet -noticks -nogroup -self 'alta' $pdb1 >> $outfile");
         exec("prekin -quiet -append -animate -onegroup -show 'mc,sc(sky),ca,hy,ht,wa' $pdb2 >> $outfile");
-        exec("probe -quiet -noticks -nogroup -self 'alta' $pdb2 >> $outfile");
-        
+        exec("phenix.probe -quiet -noticks -nogroup -self 'alta' $pdb2 >> $outfile");
+        //exec("probe -quiet -noticks -nogroup -self 'alta' $pdb2 >> $outfile");
+
 }
 #}}}########################################################################
 

@@ -49,6 +49,7 @@ require_once(MP_BASE_DIR.'/lib/model.php'); // for making kinemages
 *       chartCoot       do coot chart?
 *       chartMulti      do html multi chart?
 *       chartNotJustOut include residues that have no problems in the list?
+*       chartAltloc     remove redundant residue rows when altlocs present?
 *       chartImprove    compare to reduce -(no)build results to show improvement?
 *
 * This function returns some HTML suitable for using in a lab notebook entry.
@@ -311,7 +312,7 @@ function runAnalysis($modelID, $opts)
         $outfile = "$rawDir/$model[prefix]multi.table";
         $snapfile = "$chartDir/$model[prefix]multi.html";
         $resout = "$rawDir/$model[prefix]multi_res.table";
-        writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, !$opts['chartNotJustOut'], $opts['chartMulti']);
+        writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, !$opts['chartNotJustOut'], $opts['chartMulti'], $opts['chartAltloc']);
         if($opts['chartMulti']) {
           $tasks['multichart'] .= " - <a href='viewtable.php?$_SESSION[sessTag]&file=$outfile' target='_blank'>preview</a>\n";
           setProgress($tasks, 'multichart'); // so the preview link is visible
@@ -501,6 +502,7 @@ function loadBasePhosPerp($datafile)
                 'chainID'   => strtoupper(substr($line[3],1,-1)),
                 'resNum'    => trim(substr($line[4], 0, -2)) + 0,
                 'insCode'   => strtoupper(substr($line[4], -2, 1)),
+                'altloc'    => ' ', //limitation - doesn't currently handle altloc
                 '5Pdist'    => $line[5] + 0,
                 '3Pdist'    => $line[6] + 0,
                 'delta'     => $line[7] + 0,
@@ -512,6 +514,7 @@ function loadBasePhosPerp($datafile)
             $entry['resName']   = $entry['chainID']
                                 . str_pad($entry['resNum'], 4, ' ', STR_PAD_LEFT)
                                 . $entry['insCode']
+                                . $entry['altloc']
                                 . str_pad($entry['resType'], 3, ' ', STR_PAD_RIGHT);
             $ret[] = $entry;
         }
@@ -610,9 +613,13 @@ function loadCbetaDev($datafile)
             if($entry['chainID'] == ""){
                 $entry['chainID'] = " ";
             }
+            if(strlen($entry['chainID'])==1){
+                $entry['chainID'] = ' '.$entry['chainID'];
+            }
             $entry['resName']   = $entry['chainID']
                                 . str_pad($entry['resNum'], 4, ' ', STR_PAD_LEFT)
-                                . $entry['insCode']
+                                . $entry['insCode'] //not sure where this goes?
+                                . $entry['altConf']
                                 . str_pad($entry['resType'], 3, ' ', STR_PAD_RIGHT);
             $ret[] = $entry;
         }
@@ -812,6 +819,9 @@ function loadClashscore($datafile)
     elseif (preg_match("/^#/",$line[0])){
       continue;
     }
+    elseif (preg_match("/^Using /",$line[0])){
+      continue;
+    }
     elseif (preg_match("/^Bad Clashes/",$line[0])){
       continue;
     }
@@ -820,17 +830,17 @@ function loadClashscore($datafile)
     }
     if (!$_SESSION['useSEGID'])
     {
-      $res1 = substr($line[0], 0, 10);
-      $atm1 = substr($line[0], 11, 5);
-      $res2 = substr($line[0], 16, 10);
-      $atm2 = substr($line[0], 27, 5);
+      $res1 = substr($line[0], 0, 11);
+      $atm1 = substr($line[0], 12, 5);
+      $res2 = substr($line[0], 17, 11);
+      $atm2 = substr($line[0], 28, 5);
     }
     else
     {
-      $res1 = substr($line[0], 0, 12);
-      $atm1 = substr($line[0], 13, 5);
-      $res2 = substr($line[0], 18, 12);
-      $atm2 = substr($line[0], 29, 5);
+      $res1 = substr($line[0], 0, 13);
+      $atm1 = substr($line[0], 14, 5);
+      $res2 = substr($line[0], 19, 13);
+      $atm2 = substr($line[0], 30, 5);
     }
     $dist = abs(trim($line[1])+0);
     if(!isset($clashes[$res1]) || $clashes[$res1] < $dist)
@@ -957,11 +967,11 @@ function loadRotamer($datafile)
           continue;
         }
         $cnit = $line[0];
-        if(strlen($cnit)==10)
+        /*if(strlen($cnit)==10)
         {
           $cnit = ' '.$cnit;
         }
-        $cnit = substr($cnit,0,6).substr($cnit,7,4);
+        $cnit = substr($cnit,0,6).substr($cnit,7,4);*/
         $decomp = decomposeResName($cnit);
         $ret[$cnit] = array(
             'resName'   => $cnit,
@@ -969,6 +979,7 @@ function loadRotamer($datafile)
             'chainID'   => $decomp['chainID'],
             'resNum'    => $decomp['resNum'],
             'insCode'   => $decomp['insCode'],
+            'altID'     => $decomp['altID'],
             'occupancy' => $line[1],
             'scorePct'  => $line[2] + 0,
             'chi1'      => $line[3],
@@ -1061,11 +1072,12 @@ function loadRamachandran($datafile)
           continue;
         }
         $cnit = $line[0];
-        if(strlen($cnit)==10)
+        /*if(strlen($cnit)==10)
         {
           $cnit = ' '.$cnit;
         }
         $cnit = substr($cnit,0,6).substr($cnit,7,4);
+        echo $cnit."\n";*/
         $decomp = decomposeResName($cnit);
         $ret[$cnit] = array(
             'resName'   => $cnit,
@@ -1073,6 +1085,7 @@ function loadRamachandran($datafile)
             'chainID'   => $decomp['chainID'],
             'resNum'    => $decomp['resNum'],
             'insCode'   => $decomp['insCode'],
+            'altID'     => $decomp['altID'],
             'scorePct'  => $line[1] + 0,
             'phi'       => $line[2] + 0,
             'psi'       => $line[3] + 0,
@@ -1156,7 +1169,8 @@ function loadSuitenameReport($datafile)
           //echo $line[0].":".$line[1].":".$line[2].":".$line[3]."\n";
         }
         if (count($line) > 1) {
-          $cnit = $line[2].$line[3].$line[4].substr($line[5],0,3);
+          $altloc = ' '; //limitation - dangle/suitename does not handle altlocs
+          $cnit = $line[2].$line[3].$line[4].$altloc.substr($line[5],0,3);
           //$decomp = decomposeResName($cnit);
           $conf = substr($line[5],9,2);
           $ret[$cnit] = array(
@@ -1213,7 +1227,8 @@ function runSuitenameString($infile, $outfile)
 ############################################################################
 function runValidationReport($infile, $outfile, $moltype)
 {
-    exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -$moltype -validate -outliers -sigma=0.0 $infile > $outfile");
+    //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -$moltype -validate -outliers -sigma=0.0 $infile > $outfile");
+    exec("mmtbx.mp_geo $infile $outfile");
 }
 #}}}########################################################################
 
@@ -1237,15 +1252,23 @@ function runValidationReport($infile, $outfile, $moltype)
 */
 function loadValidationBondReport($datafile, $moltype)
 {
-#1TC6.pdb:1: A: 250: :VAL:N-CA-C:99.511:-4.255
+#1m5u.pdb: A:  10: :B:ASP:CG--OD1:1.839:31.054
     $data = file($datafile);
     //$ret = array(); // needs to return null if no data!
     $hash1_1 = array();
     foreach($data as $line)
     {
-        if(startsWith($line, "#")) continue;
+        //if(startsWith($line, "#")) continue;
+        //if(startsWith($line, "#bonds"))
+        //{
+        //  $line = explode(':', rtrim($line));
+        //  $n_outliers = $line[1];
+        //  $n_total = $line[2];
+        //  continue;
+        //}
         $line = explode(':', rtrim($line));
-        $cnit = $line[2].$line[3].$line[4].$line[5];
+        $cnit = $line[1].$line[2].$line[3].$line[4].$line[5];
+        //echo "'".$cnit."'\n";
         //$decomp = decomposeResName($cnit);
         $measure = $line[6];
         $value = $line[7] + 0;
@@ -1311,7 +1334,7 @@ function loadValidationBondReport($datafile, $moltype)
 */
 function loadValidationAngleReport($datafile, $moltype)
 {
-#1TC6.pdb:1:A: 250: :VAL:N-CA-C:99.511:-4.255
+#1m5u.pdb: A:  10: :B:ASP:OD1-CG-OD2:109.733:5.486
     $data = file($datafile);
     //$ret = array(); // needs to return null if no data!
     //$hash1_1 = array();
@@ -1319,9 +1342,9 @@ function loadValidationAngleReport($datafile, $moltype)
     //$cnit = "";
     foreach($data as $line)
     {
-        if(startsWith($line, "#")) continue;
+        //if(startsWith($line, "#")) continue;
         $line = explode(':', rtrim($line));
-        $cnit = $line[2].$line[3].$line[4].$line[5];
+        $cnit = $line[1].$line[2].$line[3].$line[4].$line[5];
         //$decomp = decomposeResName($cnit);
         $measure = $line[6];
         $value = $line[7] + 0;
@@ -1387,6 +1410,24 @@ function findGeomOutliers($geom)
     ksort($worst); // Put the residues into a sensible order
     return $worst;
 }
+#}}}########################################################################
+
+#{{{ findGeomTotal - count total residues, accounting for alternates
+############################################################################
+//function findGeomTotal($geom)
+//{
+//    $altTrim = array();
+//    if(is_array($geom)) foreach($geom as $res)
+//    {
+//        $altloc = substr($res['resName'],7,1);
+//        if ($altloc != ' ')
+//        {
+//          $b_key = substr($res['resName'],0,7).' '.substr($res['resName'],8,3);
+//
+//        }
+//    }
+//}
+
 #}}}########################################################################
 
 #{{{ hasMoltype - determines if a geometry array has residues of type moltype
@@ -1545,6 +1586,7 @@ function calcLocalBadness($infile, $range, $clash, $rama, $rota, $cbdev, $pperp)
 }
 #}}}########################################################################
 
+# old, deprecated version - removed on 131127 by JJH
 #{{{ decomposeResName - breaks a 9-character packed name into pieces
 ############################################################################
 /**
@@ -1562,7 +1604,7 @@ function calcLocalBadness($infile, $range, $clash, $rama, $rota, $cbdev, $pperp)
 *   resNum          residue number
 *   insCode         insertion code or ' '
 */
-function decomposeResName($name)
+/*function decomposeResName($name)
 {
     if(!$_SESSION['useSEGID'])
     {
@@ -1580,7 +1622,49 @@ function decomposeResName($name)
         'resNum'    => trim(substr($name, 4, 4))+0,
         'insCode'   => substr($name, 8, 1));
     }
+}*/
+
+#{{{ decomposeResName - breaks a 11-character packed name into pieces
+############################################################################
+/**
+* Decomposes this: ' A  10 AASP'
+*   resName         a formatted name for the residue: 'ccnnnnilttt'
+*                       c: 2-char Chain ID, space for none
+*                       n: sequence number, right justified, space padded
+*                       i: insertion code, space for none
+*                       l: alternate ID, space for none
+*                       t: residue type (ALA, LYS, etc.), all caps,
+*                          left justified, space padded
+*
+* Into this (as an array):
+*   resType         3-letter residue code (e.g. ALA)
+*   chainID         2-letter chain ID or '  '
+*   resNum          residue number
+*   insCode         insertion code or ' '
+*   altID           alternate ID or ' '
+*/
+function decomposeResName($name)
+{
+    if(!$_SESSION['useSEGID'])
+    {
+      return array(
+        'resType'   => substr($name, 8, 3),
+        'chainID'   => substr($name, 0, 2),
+        'resNum'    => trim(substr($name, 2, 4))+0,
+        'insCode'   => substr($name, 6, 1),
+        'altID'     => substr($name, 7, 1));
+    }
+    else
+    {
+      return array(
+        'resType'   => substr($name, 10, 3),
+        'chainID'   => substr($name, 0, 4),
+        'resNum'    => trim(substr($name, 4, 4))+0,
+        'insCode'   => substr($name, 8, 1),
+        'altID'     => substr($name, 9, 1));
+    }
 }
+
 #}}}########################################################################
 
 #{{{ decomposeResNameCctbx - breaks a 9-character packed name into pieces
@@ -1611,17 +1695,17 @@ function decomposeResNameCctbx($name)
 }
 #}}}########################################################################
 
-#{{{ pdbComposeResName - makes a 9-char res ID from a PDB ATOM line
+#{{{ pdbComposeResName - makes a 11-char res ID from a PDB ATOM line
 ############################################################################
 function pdbComposeResName($pdbline)
 {
     if(!$_SESSION['useSEGID'])
     {
-      return substr($pdbline, 20, 7) . substr($pdbline, 17, 3);
+      return substr($pdbline, 20, 7) . substr($pdbline, 16, 4);
     }
     else
     {
-      return substr($pdbline, 72, 4) . substr($pdbline, 22, 5) . substr($pdbline, 17, 3);
+      return substr($pdbline, 72, 4) . substr($pdbline, 22, 5) . substr($pdbline, 16, 4);
     }
 }
 #}}}########################################################################
@@ -1688,6 +1772,29 @@ function listResidues($infile)
     }
     fclose($in);
 
+    return $out;
+}
+#}}}########################################################################
+
+#{{{ mapAlternates - find all alternates for each residue
+############################################################################
+function mapAlternates($res)
+{
+    $out = array();
+
+    foreach($res as $k => $v)
+    {
+      $altloc = substr($v, 7, 1);
+      $key = substr($v,0,7).' '.substr($v,8,3);
+      if ($altloc != ' ')
+      {
+        if (!isset($out[$key]))
+        {
+          $out[$key] = array();
+        }
+        $out[$key][] = $altloc;
+      }
+    }
     return $out;
 }
 #}}}########################################################################
@@ -1776,6 +1883,7 @@ function listResidueBfactors($infile)
         if(startsWith($s, "ATOM") || startsWith($s, "HETATM"))
         {
             $cnit = pdbComposeResName($s);
+            //echo "'".$cnit."'\n";
             $Bfact = substr($s, 60, 6) + 0;
             $res[$cnit] = max($Bfact, $res[$cnit]);
             $atom = substr($s, 12, 4);

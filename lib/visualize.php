@@ -343,7 +343,8 @@ function makeMulticritKin2($infiles, $outfile, $opt, $viewRes = array(), $nmrCon
     // This *is* useful for looking at old multikins...
     fwrite($h, "\n\n\n");
     fwrite($h, exec("prekin -version")."\n");
-    $reduce_help = explode("\n", shell_exec("reduce -help 2>&1"));
+    $reduce_help = explode("\n", shell_exec("phenix.reduce -help 2>&1"));
+    //$reduce_help = explode("\n", shell_exec("reduce -help 2>&1"));
     fwrite($h, "$reduce_help[0]\n");
     //fwrite($h, "Probe: ".exec("probe -version")."\n"); -- Probe puts its version in the @caption
 
@@ -742,10 +743,12 @@ function makeProbeDots($infile, $outfile, $hbDots = false, $vdwDots = false, $cl
 
     // -dotmaster adds a "dots" master -- useful when using this kin with Probe remote update
     if ($clashLimit == null) {
-      exec("probe $options -4H -quiet -noticks -nogroup -dotmaster -mc -het -self 'ogt$ocutval' $infile >> $outfile");
+      exec("phenix.probe $options -4H -quiet -noticks -nogroup -dotmaster -mc -het -self 'ogt$ocutval' $infile >> $outfile");
+      //exec("probe $options -4H -quiet -noticks -nogroup -dotmaster -mc -het -self 'ogt$ocutval' $infile >> $outfile");
       //exec("probe $options -4H -quiet -noticks -nogroup -dotmaster -mc -het -stdbonds -self 'ogt$ocutval' $infile >> $outfile");
     } else {
-      exec("probe $options -DIVlow$clashLimit -4H -quiet -noticks -nogroup -dotmaster -mc -het -self 'ogt$ocutval' $infile >> $outfile");
+      exec("phenix.probe $options -DIVlow$clashLimit -4H -quiet -noticks -nogroup -dotmaster -mc -het -self 'ogt$ocutval' $infile >> $outfile");
+      //exec("probe $options -DIVlow$clashLimit -4H -quiet -noticks -nogroup -dotmaster -mc -het -self 'ogt$ocutval' $infile >> $outfile");
       //exec("probe $options -DIVlow$clashLimit -4H -quiet -noticks -nogroup -dotmaster -mc -het -stdbonds -self 'ogt$ocutval' $infile >> $outfile");
     }
 }
@@ -1203,12 +1206,24 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
 * $suites   is the data structure from loadSuitenameReport()
 * Any of them can be set to null if the data is unavailable.
 */
-function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $outliersOnly = false, $doHtmlTable = true)
+function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $outliersOnly = false, $doHtmlTable = true, $cleanupAltloc = true)
 {
     $startTime = time();
     //{{{ Process validation data
     // Make sure all residues are represented, and in the right order.
     $res = listResidues($infile);
+    //foreach($res as $k => $v)
+    //{
+    //  echo $k.$v."\n";
+    //}
+    $alts = mapAlternates($res);
+    //foreach($alts as $k => $v)
+    //{
+    //  foreach($alts[$k] as $i => $j)
+    //  {
+    //    echo $k.$j."\n";
+    //  }
+    //}
     $Bfact = listResidueBfactors($infile);
     $Bfact = $Bfact['res'];
 
@@ -1340,7 +1355,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
         foreach($bbonds as $cnit => $item) {
             if ($item['isOutlier']) {
                 $res[$cnit]['bbonds_val'] = abs($item['sigma']);
-                $res[$cnit]['bbonds'] = "$item[count] OUTLIER(S)<br><small>worst is $item[measure]: $item[sigma] &sigma</small>";
+                $res[$cnit]['bbonds'] = "$item[count] OUTLIER(S)<br><small>worst is $item[measure]: $item[sigma] &sigma;</small>";
                 $res[$cnit]['bbonds_isbad'] = true;
                 $res[$cnit]['any_isbad'] = true;
             }
@@ -1350,7 +1365,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
         foreach($bangles as $cnit => $item) {
             if ($item['isOutlier']) {
                 $res[$cnit]['bangles_val'] = abs($item['sigma']);
-                $res[$cnit]['bangles'] = "$item[count] OUTLIER(S)<br><small>worst is $item[measure]: $item[sigma] &sigma</small>";
+                $res[$cnit]['bangles'] = "$item[count] OUTLIER(S)<br><small>worst is $item[measure]: $item[sigma] &sigma;</small>";
                 $res[$cnit]['bangles_isbad'] = true;
                 $res[$cnit]['any_isbad'] = true;
             }
@@ -1358,6 +1373,129 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
     }
     //}}} Process validation data
     //echo "Processing validation data took ".(time() - $startTime)." seconds\n";
+
+    //check for alternates
+    foreach($res as $cnit => $current)
+    {
+      $altloc = substr($cnit, 7, 1);
+      if ($altloc != ' ')
+      {
+        $b_key = substr($cnit,0,7).' '.substr($cnit,8,3);
+        if (isset($res[$b_key])) //make sure this exists
+        {
+          //clash
+          if (!isset($res[$cnit]['clash']))
+          {
+            $res[$cnit]['clash_val'] = $res[$b_key]['clash_val'];
+            $res[$cnit]['clash'] = $res[$b_key]['clash'];
+            $res[$cnit]['clash_isbad'] = $res[$b_key]['clash_isbad'];
+            $res[$cnit]['any_isbad'] = $res[$b_key]['any_isbad'];
+          }
+
+          //rama
+          if (!isset($res[$cnit]['rama']))
+          {
+            $res[$cnit]['rama_val'] = $res[$b_key]['rama_val'];
+            $res[$cnit]['rama'] = $res[$b_key]['rama'];
+            if (isset($res[$b_key]['rama_isbad']))
+            {
+              $res[$cnit]['rama_isbad'] = $res[$b_key]['rama_isbad'];
+              $res[$cnit]['any_isbad'] = $res[$b_key]['any_isbad'];
+            }
+          }
+
+          //rota
+          if (!isset($res[$cnit]['rota']))
+          {
+            $res[$cnit]['rota_val'] = $res[$b_key]['rota_val'];
+            $res[$cnit]['rota'] = $res[$b_key]['rota'];
+            if (isset($res[$b_key]['rota_isbad']))
+            {
+              $res[$cnit]['rota_isbad'] = $res[$b_key]['rota_isbad'];
+              $res[$cnit]['any_isbad'] = $res[$b_key]['any_isbad'];
+            }
+          }
+
+          //cbdev
+          if (!isset($res[$cnit]['cbdev_val']))
+          {
+            $res[$cnit]['cbdev_val'] = $res[$b_key]['cbdev_val'];
+            $res[$cnit]['cbdev'] = $res[$b_key]['cbdev'];
+            if (isset($res[$b_key]['rama_isbad']))
+            {
+              $res[$cnit]['cbdev_isbad'] = $res[$b_key]['cbdev_isbad'];
+              $res[$cnit]['any_isbad'] = $res[$b_key]['any_isbad'];
+            }
+          }
+
+          //pperp
+          if (!isset($res[$cnit]['pperp']))
+          {
+            if (isset($res[$b_key]['pperp']))
+            {
+              $res[$cnit]['pperp_val'] = $res[$b_key]['pperp_val'];
+              $res[$cnit]['pperp'] = $res[$b_key]['pperp'];
+              $res[$cnit]['pperp_isbad'] = $res[$b_key]['pperp_isbad'];
+              $res[$cnit]['any_isbad'] = $res[$b_key]['any_isbad'];
+            }
+          }
+
+          //suites
+          if (!isset($res[$cnit]['rota']))
+          {
+            $res[$cnit]['suites_val'] = $res[$b_key]['suites_val'];
+            $res[$cnit]['suites'] = $res[$b_key]['suites'];
+            if (isset($res[$b_key]['suites_isbad']))
+            {
+              $res[$cnit]['suites_isbad'] = $res[$b_key]['suites_isbad'];
+              $res[$cnit]['any_isbad'] = $res[$b_key]['any_isbad'];
+            }
+          }
+
+          //bbonds
+          if (!isset($res[$cnit]['bbonds']))
+          {
+            if (isset($res[$b_key]['bbonds_isbad']))
+            {
+              $res[$cnit]['bbonds_val'] = $res[$b_key]['bbonds_val'];
+              $res[$cnit]['bbonds'] = $res[$b_key]['bbonds'];
+              $res[$cnit]['bbonds_isbad'] = $res[$b_key]['bbonds_isbad'];
+              $res[$cnit]['any_isbad'] = $res[$b_key]['any_isbad'];
+            }
+          }
+
+          //bangles
+          if (!isset($res[$cnit]['bangles']))
+          {
+            if (isset($res[$b_key]['bangles_isbad']))
+            {
+              $res[$cnit]['bangles_val'] = $res[$b_key]['bangles_val'];
+              $res[$cnit]['bangles'] = $res[$b_key]['bangles'];
+              $res[$cnit]['bangles_isbad'] = $res[$b_key]['bangles_isbad'];
+              $res[$cnit]['any_isbad'] = $res[$b_key]['any_isbad'];
+            }
+          }
+          //Bfactor
+          if (isset($res[$b_key]['resHiB']))
+          {
+            $res[$cnit]['resHiB'] = max($res[$cnit]['resHiB'], $res[$b_key]['resHiB']);
+          }
+        }
+      }
+    }
+
+    //remove redundant ' ' entries for residues with alternates
+    if ($cleanupAltloc)
+    {
+      foreach($alts as $cnit => $alt)
+      {
+        foreach($alts[$cnit] as $i => $j)
+        {
+          $b_key = substr($cnit,0,7).' '.substr($cnit,8,3);
+          unset($res[$b_key]);
+        }
+      }
+    }
 
     // $res needs to be saved in raw_data for the horoizontal chart
     if($resout)
@@ -1381,6 +1519,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
     if ($doHtmlTable) {
       $header1 = array();
       $header1[] = array('html' => "<b>#</b>",                                            'sort' => 1);
+      $header1[] = array('html' => "<b>Alt</b>",                                          'sort' => 1);
       $header1[] = array('html' => "<b>Res</b>",                                          'sort' => 1);
       $header1[] = array('html' => "<b>High B</b>",                                       'sort' => -1);
       if(is_array($clash))  $header1[] = array('html' => "<b>Clash &gt; 0.4&Aring;</b>",  'sort' => -1);
@@ -1389,10 +1528,11 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
       if(is_array($cbdev))  $header1[] = array('html' => "<b>C&beta; deviation</b>",      'sort' => -1);
       if(is_array($pperp))  $header1[] = array('html' => "<b>Base-P perp. dist.</b>",     'sort' => -1);
       if(is_array($suites)) $header1[] = array('html' => "<b>RNA suite conf.</b>",        'sort' => 1);
-      if(is_array($bbonds)) $header1[] = array('html' => "<b>Bond lengths.</b>",      'sort' => -1);
-      if(is_array($bangles)) $header1[] = array('html' => "<b>Bond angles.</b>",      'sort' => -1);
+      if(is_array($bbonds)) $header1[] = array('html' => "<b>Bond lengths</b>",      'sort' => -1);
+      if(is_array($bangles)) $header1[] = array('html' => "<b>Bond angles</b>",      'sort' => -1);
 
       $header2 = array();
+      $header2[] = array('html' => "");
       $header2[] = array('html' => "");
       $header2[] = array('html' => "");
       $header2[] = array('html' => sprintf("Avg: %.2f", array_sum($Bfact)/count($Bfact)));
@@ -1420,16 +1560,20 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
         if(!$_SESSION['useSEGID'])
         {
           $cni = substr($cnit, 0, 7);
-          $type = substr($cnit, 7, 3);
+          $alt = substr($cnit, 7, 1);
+          $type = substr($cnit, 8, 3);
         }
         else
         {
           $cni = substr($cnit, 0, 9);
-          $type = substr($cnit, 9, 3);
+          $alt = substr($cnit, 9, 1);
+          $type = substr($cnit, 10, 3);
         }
+        //$cni = "'".$cni."'";
         $row = array();
         //$row[] = array('html' => $cnit,             'sort_val' => $eval['order']+0);
         $row[] = array('html' => $cni,              'sort_val' => $eval['order']+0);
+        $row[] = array('html' => $alt,              'sort_val' => $alt);
         $row[] = array('html' => $type,             'sort_val' => $type);
         $row[] = array('html' => $eval['resHiB'],   'sort_val' => $eval['resHiB']+0);
         foreach(array('clash', 'rama', 'rota', 'cbdev', 'pperp', 'suites', 'bbonds', 'bangles') as $type)
@@ -1532,7 +1676,7 @@ function writeHorizontalChart($resout, $rscc_file, $multi_table, $outfile, $rscc
     fclose($in);
     $res_table = mpUnserialize($data);
     $rscc_table = csv_to_array($rscc_file, ',');
-    
+
     // {{{ integrate rscc into $res_table annd set $horiz_table
     foreach($rscc_table as $info)
     {
@@ -1549,16 +1693,16 @@ function writeHorizontalChart($resout, $rscc_file, $multi_table, $outfile, $rscc
     $mp_params = array('bb Density','sc Density','Clash','Ramachandran','Rotamer','cB deviation','Bond length','Bond angle');
     $horiz_table = array();
     // create array for horizontal table
-    foreach($mp_params as $param) 
+    foreach($mp_params as $param)
     {
         $horiz_table[$param] = array();
         foreach($res_table as $resid => $info)
         if(substr($resid, -3) != "HOH") $horiz_table[$param][$resid] = array();
     }
     // }}}
-    
+
     // {{{ set parameters
-    
+
     // {{{ set bb Density
     foreach($horiz_table['bb Density'] as $resid => $info)
     {
@@ -1577,7 +1721,7 @@ function writeHorizontalChart($resout, $rscc_file, $multi_table, $outfile, $rscc
         $horiz_table['bb Density'][$resid]['image'] = $img;
     }
     // }}}
-    
+
     // {{{ set sc Density
     foreach($horiz_table['sc Density'] as $resid => $info)
     {
@@ -1593,7 +1737,7 @@ function writeHorizontalChart($resout, $rscc_file, $multi_table, $outfile, $rscc
             $img = "density_outA.png";
         if($horiz_table['sc Density'][$resid]['value']['2fo-fc'] < 0.8 || $horiz_table['sc Density'][$resid]['value']['cc'] < 0.6)
             $img = "density_outB.png";
-        if(endsWith($resid, "GLY")  || endsWith($resid, "gly")) 
+        if(endsWith($resid, "GLY")  || endsWith($resid, "gly"))
         {
             $horiz_table['sc Density'][$resid]['value']['2fo-fc'] = '-';
             $horiz_table['sc Density'][$resid]['value']['cc'] = '-';
@@ -1602,7 +1746,7 @@ function writeHorizontalChart($resout, $rscc_file, $multi_table, $outfile, $rscc
         $horiz_table['sc Density'][$resid]['image'] = $img;
     }
     // }}}
-    
+
     // {{{ set Clash
     foreach($horiz_table['Clash'] as $resid => $info)
     {
@@ -1624,7 +1768,7 @@ function writeHorizontalChart($resout, $rscc_file, $multi_table, $outfile, $rscc
         }
     }
     // }}}
-    
+
     // {{{ set Ramachandran
     foreach($horiz_table['Ramachandran'] as $resid => $info)
     {
@@ -1635,7 +1779,7 @@ function writeHorizontalChart($resout, $rscc_file, $multi_table, $outfile, $rscc
         $horiz_table['Ramachandran'][$resid]['image'] = $img;
     }
     // }}}
-    
+
     // {{{ set Rotamer
     foreach($horiz_table['Rotamer'] as $resid => $info)
     {
@@ -1647,7 +1791,7 @@ function writeHorizontalChart($resout, $rscc_file, $multi_table, $outfile, $rscc
         $horiz_table['Rotamer'][$resid]['image'] = $img;
     }
     // }}}
-    
+
     // {{{ set cB deviation
     foreach($horiz_table['cB deviation'] as $resid => $info)
     {
@@ -1665,7 +1809,7 @@ function writeHorizontalChart($resout, $rscc_file, $multi_table, $outfile, $rscc
         }
     }
     // }}}
-    
+
     // {{{ set Bond length
     foreach($horiz_table['Bond length'] as $resid => $info)
     {
@@ -1683,7 +1827,7 @@ function writeHorizontalChart($resout, $rscc_file, $multi_table, $outfile, $rscc
         }
     }
     // }}}
-    
+
     // {{{ set Bond angle
     foreach($horiz_table['Bond angle'] as $resid => $info)
     {
@@ -1701,9 +1845,9 @@ function writeHorizontalChart($resout, $rscc_file, $multi_table, $outfile, $rscc
         }
     }
     // }}}
-    
+
     // }}}
-    
+
     $table1 = array();
     $table1['prequel'] = $prequel;
     $table1['rscc_prequel'] = getRsccPrequel($horiz_table, $rscc_prequel_out);
@@ -1712,7 +1856,7 @@ function writeHorizontalChart($resout, $rscc_file, $multi_table, $outfile, $rscc
     fwrite($out, mpSerialize($table1));
     fclose($out);
     echo "Formatting horizontal chart table took ".(time() - $startTime)." seconds\n";
-    
+
 }
 #}}}
 
@@ -1753,7 +1897,7 @@ function csv_to_array($filename='', $delimiter=',')
     $lines = file($filename, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     $data = array();
     $header = explode(",", $lines[0]);
-    foreach($lines as $key => $line) 
+    foreach($lines as $key => $line)
     {
         if($key === 0) continue;
         $la = explode(",", $line);

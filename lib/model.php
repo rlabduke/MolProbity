@@ -828,7 +828,7 @@ function regularizeNQH($inpath, $outpath, $temp)
 function reduceTrim($inpath, $outpath, $blength='ecloud')
 {
     // USER  MOD is fatal to Coot and other programs, so we strip them ALL.
-    exec("reduce -quiet -trim -allalt $inpath | awk '\$0 !~ /^USER  MOD/' > $outpath");
+    exec("phenix.reduce -quiet -trim -allalt $inpath | awk '\$0 !~ /^USER  MOD/' > $outpath");
 }
 #}}}########################################################################
 
@@ -853,11 +853,11 @@ function reduceNoBuild($inpath, $outpath, $blength='ecloud')
     if ($blength == 'ecloud')
     {
       //exec("reduce -quiet -oh -his -flip -norotmet -pen9999 -keep -allalt $inpath > $outpath");
-      exec("reduce -quiet -nobuild9999 $inpath > $outpath");
+      exec("phenix.reduce -quiet -nobuild9999 $inpath > $outpath");
     }
     elseif ($blength == 'nuclear')
     {
-      exec("reduce -quiet -nobuild9999 -nuclear $inpath > $outpath");
+      exec("phenix.reduce -quiet -nobuild9999 -nuclear $inpath > $outpath");
     }
 }
 #}}}########################################################################
@@ -879,11 +879,11 @@ function reduceBuild($inpath, $outpath, $blength='ecloud')
     //exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -build -allalt $inpath > $outpath");
     if ($blength == 'ecloud')
     {
-      exec("reduce -quiet -build $inpath > $outpath");
+      exec("phenix.reduce -quiet -build $inpath > $outpath");
     }
     elseif ($blength == 'nuclear')
     {
-      exec("reduce -quiet -build -nuclear $inpath > $outpath");
+      exec("phenix.reduce -quiet -build -nuclear $inpath > $outpath");
     }
 }
 #}}}########################################################################
@@ -905,7 +905,7 @@ function reduceFix($inpath, $outpath, $flippath)
     // $_SESSION[hetdict] is used to set REDUCE_HET_DICT environment variable,
     // so it doesn't need to appear on the command line here.
     //exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -build -fix $flippath -allalt $inpath > $outpath");
-    exec("reduce -quiet -build -fix $flippath -allalt $inpath > $outpath");
+    exec("phenix.reduce -quiet -build -fix $flippath -allalt $inpath > $outpath");
 }
 #}}}########################################################################
 

@@ -17,14 +17,20 @@ def parse_cmdline():
     dest="total_file_size_limit", default=50000000,
     help="change total file size in each separate job")
   parser.add_option("-t", "--type", action="store", type="string", 
-    dest="bond_type", default="nuclear",
+    dest="bond_type", default="default",
     help="specify hydrogen bond length for clashes (nuclear or ecloud)")
+  parser.add_option("-b", "--build", action="store", type="string",
+    dest="build_type", default="default",
+    help="specify whether to use -build or -nobuild for running reduce")
   opts, args = parser.parse_args()
   if opts.total_file_size_limit < 1000000:
     sys.stderr.write("\n**ERROR: -limit cannot be less than 1000000 (1M)\n")
     sys.exit(parser.print_help())
   if not (opts.bond_type == "nuclear" or opts.bond_type == "ecloud"):
-    sys.stderr.write("\n**ERROR: -type must be ecloud or nuclear\n")
+    sys.stderr.write("\n**ERROR: -type must be specified as ecloud or nuclear\n")
+    sys.exit(parser.print_help())
+  if not (opts.build_type == "build" or opts.build_type == "nobuild"):
+    sys.stderr.write("\n**ERROR: -build must be specified as build or nobuild\n")
     sys.exit(parser.print_help())
   if len(args) < 1:
     sys.stderr.write("\n**ERROR: User must specify input directory\n")
@@ -121,8 +127,8 @@ def divide_pdbs(in_dir, size_limit):
             pdb_list.append(full_file)
             list_of_lists.append(pdb_list)
             list_size = os.path.getsize(full_file)
-    if len(list_of_lists) > 500:
-      sys.stderr.write("\n**ERROR: More than 500 jobs needed, try choosing a larger -limit\n")
+    if len(list_of_lists) > 1000:
+      sys.stderr.write("\n**ERROR: More than 1000 jobs needed, try choosing a larger -limit\n")
       sys.exit()
     return list_of_lists
     #print list_of_lists
@@ -152,7 +158,7 @@ do
 sleep 1
 pdbbase=`basename $pdb .pdb` #should be just the name of the pdb without the .pdb extension
 
-{0}/reduce -q -nobuild -nuclear $pdb > pdbs/${pdbbase}H.pdb
+{0}/reduce -q -{buildtype} -{bondtype} $pdb > pdbs/${pdbbase}H.pdb
 
 done
 """
@@ -170,7 +176,6 @@ notification = Error
 #Executable     = /condor/vbchen/molprobity_runs/condor/reduce.sh
 Executable     = reduce.sh
 
-error           = logs/reduce.err
 copy_to_spool   = False
 priority        = 0
 
@@ -183,6 +188,7 @@ def make_reduce_sub(list_of_lists):
   for indx, pdbs in enumerate(list_of_lists):
     args = args+"Arguments       = "+repr(sleep_seconds)+" "+" ".join(pdbs)+"\n"
     args = args+"log         = logs/reduce"+repr(indx)+".log\n"
+    args = args+"error      = logs/reduce"+repr(indx)+".err\n"
     args = args+"queue\n\n"
     if sleep_seconds > 300:
       sleep_seconds = sleep_seconds + 5
@@ -211,7 +217,12 @@ if __name__ == "__main__":
     list_of_lists = divide_pdbs(indir, opts.total_file_size_limit)
     #write_super_dag(outdir, list_of_lists)
     #write_file(outdir, "local_run.sh", local_run.format(molprobity_home, pdbbase="{pdbbase}"), 0755)
-    write_file(outdir, "reduce.sh", reduce_sh.format(os.path.join(molprobity_home, "bin", "linux"), pdbbase="{pdbbase}"), 0755)
+    pdb = "{pdbbase}F"
+    build = "nobuild"
+    if opts.build_type=="build":
+      pdb = "{pdbbase}F"
+      build = "build"
+    write_file(outdir, "reduce.sh", reduce_sh.format(os.path.join(molprobity_home, "bin", "linux"), buildtype=build, bondtype=opts.bond_type, pdbbase=pdb), 0755)
     write_file(outdir, "reduce.sub", make_reduce_sub(list_of_lists))
   else:
     sys.stderr.write(indir + " does not seem to exist!\n")

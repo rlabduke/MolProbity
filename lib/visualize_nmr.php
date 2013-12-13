@@ -68,7 +68,8 @@ function nmrMultiKin($pdbname, $constraints, $kinName)
 			 exec("prekin -mchb -lots -animate -show 'mc(white),sc(blue)' $pdb > $kinName");
 
 			 //dots h-bonds and clashes
-			 exec("probe -mc -NOGroup -NOVDWOUT -quiet -noticks -self 'All' $pdb > $kinName");
+			 exec("phenix.probe -mc -NOGroup -NOVDWOUT -quiet -noticks -self 'All' $pdb > $kinName");
+			 //exec("probe -mc -NOGroup -NOVDWOUT -quiet -noticks -self 'All' $pdb > $kinName");
 			 //exec("probe -mc -stdbonds -NOGroup -NOVDWOUT -quiet -noticks -self 'All' $pdb > $kinName");
 			 //modifies the probe output to includ ea mc Dots master
 			 //$h = fopen('probetempdata', 'r');
@@ -136,7 +137,8 @@ function nmrMultiKin($pdbname, $constraints, $kinName)
 
 			 //mc dots only.  h-bonds and clashes
 
-			 exec("probe -mc -NOGroup -NOVDWOUT -quiet -noticks -self 'All' $pdb >> $kinName");
+			 exec("phenix.probe -mc -NOGroup -NOVDWOUT -quiet -noticks -self 'All' $pdb >> $kinName");
+			 //exec("probe -mc -NOGroup -NOVDWOUT -quiet -noticks -self 'All' $pdb >> $kinName");
 			 //exec("probe -mc -stdbonds -NOGroup -NOVDWOUT -quiet -noticks -self 'All' $pdb >> $kinName");
 			 //modifies the probe output to includ ea mc Dots master
 			 //$h = fopen('probetempdata', 'r');

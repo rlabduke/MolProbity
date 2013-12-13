@@ -166,7 +166,8 @@ function onelinepack($pdbname, $pdbproberesult)
 		$numres = $pdbstatresults['residues'];
 
 		//dots numbers
-		$proberesult = shell_exec("probe -mc -self 'ALL' -ONELINE $pdb ");
+		$proberesult = shell_exec("phenix.probe -mc -self 'ALL' -ONELINE $pdb ");
+		//$proberesult = shell_exec("probe -mc -self 'ALL' -ONELINE $pdb ");
 		//$proberesult = shell_exec("probe -mc  -stdbonds -self 'ALL' -ONELINE $pdb ");
 
 		// open up the oneline and add in number of atoms and number of residues

@@ -1,13 +1,13 @@
 #! /bin/bash
 
+if [ $# -eq 1 ]
+then
+    sf_user=$1
+fi
+
 mkdir sources
 mkdir build
 cd sources
-
-#rm -f {boost,scons,annlib}_hot.tar.gz
-#curl http://cci.lbl.gov/hot/boost_hot.tar.gz -o boost_hot.tar.gz
-#curl http://cci.lbl.gov/hot/scons_hot.tar.gz -o scons_hot.tar.gz
-#curl http://cci.lbl.gov/hot/annlib_hot.tar.gz -o annlib_hot.tar.gz
 
 curl http://kinemage.biochem.duke.edu/molprobity/boost.tar.gz -o boost.tar.gz
 curl http://kinemage.biochem.duke.edu/molprobity/scons.tar.gz -o scons.tar.gz
@@ -31,7 +31,13 @@ tar zxf chem_data.tar.gz
 tar zxf lapack_fem.tar.gz
 tar zxf tntbx.tar.gz
 
-svn co https://svn.code.sf.net/p/cctbx/code/trunk cctbx_project
+if [ -n "$sf_user" ]
+then
+    svn co https://$sf_user@svn.code.sf.net/p/cctbx/code/trunk cctbx_project
+else
+    svn co https://svn.code.sf.net/p/cctbx/code/trunk cctbx_project
+fi
+
 svn co https://quiddity.biochem.duke.edu/svn/reduce/trunk reduce
 svn co https://quiddity.biochem.duke.edu/svn/probe/trunk probe
 
@@ -40,3 +46,7 @@ cd ../build
 python ../sources/cctbx_project/libtbx/configure.py mmtbx
 
 make
+
+source ../build/setpaths.sh
+
+mmtbx.rebuild_rotarama_cache

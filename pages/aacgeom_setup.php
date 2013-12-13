@@ -5,7 +5,7 @@
 *****************************************************************************/
 // We use a uniquely named wrapper class to avoid re-defining display(), etc.
 class aacgeom_setup_delegate extends BasicDelegate {
-    
+
 #{{{ display - creates the UI for this page
 ############################################################################
 /**
@@ -15,7 +15,7 @@ class aacgeom_setup_delegate extends BasicDelegate {
 function display($context)
 {
     echo $this->pageHeader("Analyze all-atom contacts and geometry");
-    
+
     //{{{ Script to set default choices based on model properties.
 ?><script language='JavaScript'>
 <!--
@@ -45,12 +45,12 @@ function hideMultiOpts()
 function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
 {
     selectionHasH = doAAC
-    
+
     document.forms[0].kinClashes.checked        = doAAC
     document.forms[0].kinHbonds.checked         = doAAC
     document.forms[0].kinContacts.checked       = doAAC && !isBig
     document.forms[0].chartClashlist.checked    = doAAC
-    
+
     document.forms[0].kinRama.checked           = hasProtein
     document.forms[0].kinRota.checked           = hasProtein
     document.forms[0].kinCBdev.checked          = hasProtein
@@ -59,16 +59,17 @@ function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
     document.forms[0].chartRota.checked         = hasProtein
     document.forms[0].chartCBdev.checked        = hasProtein
     document.forms[0].chartGeom.checked        = (hasProtein || hasNucAcid)
-    
+
     document.forms[0].kinBaseP.checked          = hasNucAcid
     document.forms[0].kinSuite.checked          = hasNucAcid
     document.forms[0].chartBaseP.checked        = hasNucAcid
     document.forms[0].chartSuite.checked        = hasNucAcid
-    
+
     //document.forms[0].chartCoot.checked         = !isBig
     document.forms[0].chartImprove.checked      = (hasProtein && doAAC)
     document.forms[0].chartMulti.checked        = (hasProtein || hasNucAcid)
     document.forms[0].chartNotJustOut.checked   = !isBig
+    document.forms[0].chartAltloc.checked       = (hasProtein || hasNucAcid)
 }
 
 // Try to make sure we have H if we're doing AAC
@@ -78,7 +79,7 @@ function checkSettingsBeforeSubmit()
         || document.forms[0].kinHbonds.checked
         || document.forms[0].kinContacts.checked
         || document.forms[0].chartClashlist.checked);
-        
+
     if(!selectionHasH && doAAC)
     {
         return window.confirm("The file you choose may not have all its H atoms added."
@@ -96,7 +97,7 @@ function checkSettingsBeforeSubmit()
         // Choose a default model to select
         $lastUsedID = $context['modelID'];
         if(!$lastUsedID) $lastUsedID = $_SESSION['lastUsedModelID'];
-        
+
         echo makeEventForm("onRunAnalysis");
         echo "<h3>Select a model to work with:</h3>";
         echo "<p><table width='100%' border='0' cellspacing='0' cellpadding='2'>\n";
@@ -112,7 +113,7 @@ function checkSettingsBeforeSubmit()
             $hasNucAcid = ($stats['nucacids'] > 0 ? "true" : "false");
             $pdbSize = filesize($_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$model['pdb']);
             $isBig = ($pdbSize > 1<<20 ? "true" : "false");
-            
+
             // Alternate row colors:
             $c == MP_TABLE_ALT1 ? $c = MP_TABLE_ALT2 : $c = MP_TABLE_ALT1;
             echo " <tr bgcolor='$c'>\n";
@@ -160,6 +161,7 @@ function checkSettingsBeforeSubmit()
     <br><label><input type='checkbox' name='chartMulti' value='1' onclick='hideMultiOpts()'> Create html version of multi-chart</label>
     <div class='indent' id='multi_opts'>
     <label><input type='checkbox' name='chartNotJustOut' value='1'> List all residues in multi-chart, not just outliers</label>
+    <br><label><input type='checkbox' name='chartAltloc' value='1'> Remove residue rows with ' ' altloc when other alternate(s) present</label>
     </div>
     </div>
 </div>
@@ -184,9 +186,9 @@ function checkSettingsBeforeSubmit()
         echo "No models are available. Please <a href='".makeEventURL("onCall", "upload_setup.php")."'>upload or fetch a PDB file</a> in order to continue.\n";
         echo makeEventForm("onReturn");
         echo "<p><input type='submit' name='cmd' value='Cancel'></p></form>\n";
-        
+
     }
-    
+
     echo $this->pageFooter();
 }
 #}}}########################################################################
@@ -204,16 +206,16 @@ function onRunAnalysis()
         pageReturn();
         return;
     }
-    
+
     // Otherwise, moving forward:
     if(isset($req['modelID']))
     {
         $_SESSION['lastUsedModelID'] = $req['modelID']; // this is now the current model
         unset($_SESSION['bgjob']); // Clean up any old data
         $_SESSION['bgjob'] = $req;
-        
+
         mpLog("aacgeom:Running all-atom contact and geometric analyses");
-        
+
         if($req['kinClashes'] || $req['kinHbonds'] || $req['kinContacts'] || $req['chartClashlist'])
             mpLog("aacgeom-aac:Generataing all-atom contact data of some type");
         if($req['kinRama'] || $req['chartRama'])    mpLog("aacgeom-rama:Doing Ramachandran analysis");
@@ -222,7 +224,7 @@ function onRunAnalysis()
         if($req['kinCBdev'] || $req['chartCBdev'])  mpLog("aacgeom-cbdev:Doing C-beta deviation analysis");
         if($req['kinBaseP'] || $req['chartBaseP'])  mpLog("aacgeom-basep:Validating base-phosphate distances vs sugar puckers");
         if($req['kinSuite'] || $req['chartSuite'])  mpLog("aacgeom-suite:Validating RNA backbone conformations");
-        
+
         if($req['doKinemage'])      mpLog("aacgeom-mkin:Multi-criterion validation kinemage");
         if($req['doCharts'])        mpLog("aacgeom-mchart:Multi-criterion validation chart");
         $modelID = $_SESSION['bgjob']['modelID'];
