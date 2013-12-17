@@ -40,11 +40,12 @@ OUTPUTS / RESULTS:
 $optVerbose = true;
 $optGzipKin = true;
 $optMultikin = array(
-    'ribbons'   => true,
+    'ribbons'   => false,
     'Bscale'    => true,
     'Qscale'    => true,
     'altconf'   => true,
     'rama'      => true,
+    'geom'      => true,
     'rota'      => true,
     'geom'      => true,
     'cbdev'     => true,

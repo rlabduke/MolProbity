@@ -719,9 +719,9 @@ def recomposeResName(chain, resnum, inscode, restype):
 #{{{ oneline_analysis
 def oneline_analysis(files, quiet):
   if (not quiet):
-    print "#pdbFileName:model:clashscore:clashscoreB<40:cbeta>0.25:numCbeta:rota<1%:numRota:ramaOutlier:ramaAllowed:ramaFavored:numRama:numbadbonds:numbonds:pct_badbonds:pct_resbadbonds:numbadangles:numangles:pct_badangles:pct_resbadangles:MolProbityScore:numPperpOutliers:numPperp:numSuiteOutliers:numSuites"
+    print "#fileName:pdb:model:clashscore:clashscoreB<40:cbeta>0.25:numCbeta:rota<1%:numRota:ramaOutlier:ramaAllowed:ramaFavored:numRama:numbadbonds:numbonds:pct_badbonds:pct_resbadbonds:numbadangles:numangles:pct_badangles:pct_resbadangles:MolProbityScore:numPperpOutliers:numPperp:numSuiteOutliers:numSuites"
   
-  out = files[0]+":"+files[1]
+  out = os.path.basename(files[0])+":"+(os.path.basename(files[0])[:-4])[:4]+":"+files[1]
   
   clash = loadClashlist(files[2])
   out = out+":" + ("%.2f" % (clash['scoreAll'])) + ":" + ("%.2f" % (clash['scoreBlt40']))

@@ -53,14 +53,15 @@ FLAGS:
 
 #{{{ split_pdbs_to_models
 def split_pdbs_to_models(mp_home, indir, outdir):
+  #print "indir: "+indir
   if (os.path.isdir(indir)):
     files = os.listdir(indir)
     files.sort()
     #print files
     for f in files:
       #arg_file = os.path.join(arg, f)
-      full_file = os.path.realpath(f)
-      #print full_file
+      full_file = os.path.join(indir,f)
+      #print "full_file: "+full_file
       if (not os.path.isdir(full_file)):
         root, ext = os.path.splitext(f)
         if (ext == ".pdb"):
@@ -128,8 +129,8 @@ def divide_pdbs(in_dir, size_limit):
             pdb_list.append(full_file)
             list_of_lists.append(pdb_list)
             list_size = os.path.getsize(full_file)
-    if len(list_of_lists) > 5000:
-      sys.stderr.write("\n**ERROR: More than 5000 jobs needed, try choosing a larger -limit\n")
+    if len(list_of_lists) > 10000:
+      sys.stderr.write("\n**ERROR: More than 10000 jobs needed, try choosing a larger -limit\n")
       sys.exit()
     return list_of_lists
     #print list_of_lists
@@ -210,7 +211,7 @@ def write_oneline_dag(outdir, list_of_pdblists):
   out.write("CONFIG "+ config_file+"\n\n")
   out.write("NODE_STATUS_FILE onelinedag.status 3600\n")
   out.write("\n")
-  postjobs = ""
+  postjobs = "PARENT "
   for indx, pdbs in enumerate(list_of_pdblists):
     num = '{0:0>4}'.format(indx)
     #out.write("SUBDAG EXTERNAL "+num+" moldag"+num+".dag\n")
@@ -246,8 +247,8 @@ def write_oneline_dag(outdir, list_of_pdblists):
     #out.write("PARENT clash"+num+" CHILD local"+num+"\n")
     postjobs = postjobs+"oneline"+num + " "
     
-  #out.write("JOB post post_process.sh\n")
-  #out.write("SCRIPT POST "+postjobs+"post_process.sh")
+  out.write("JOB post post_process.sub\n")
+  out.write(postjobs+"CHILD post\n")
   out.close()
 #}}}
 
@@ -350,7 +351,7 @@ for pdb in sys.argv[1:]:
     reap(cmd1, pdbbase)
     reap(cmd2, pdbbase)
 
-    cmd9 = syscmd(subprocess.PIPE, "{0}/cmdline/molparser.py", "-q", pdb_code, model_num, "results/"+pdb_code+"/"+pdbbase+"-clashlist", "results/"+pdb_code+"/"+pdbbase+"-cbdev", "results/"+pdb_code+"/"+pdbbase+"-rotalyze", "results/"+pdb_code+"/"+pdbbase+"-ramalyze", "results/"+pdb_code+"/"+pdbbase+"-dangle_protein", "results/"+pdb_code+"/"+pdbbase+"-dangle_rna", "results/"+pdb_code+"/"+pdbbase+"-dangle_dna", "results/"+pdb_code+"/"+pdbbase+"-prekin_pperp", "results/"+pdb_code+"/"+pdbbase+"-suitename")
+    cmd9 = syscmd(subprocess.PIPE, "{0}/cmdline/molparser.py", "-q", pdb, model_num, "results/"+pdb_code+"/"+pdbbase+"-clashlist", "results/"+pdb_code+"/"+pdbbase+"-cbdev", "results/"+pdb_code+"/"+pdbbase+"-rotalyze", "results/"+pdb_code+"/"+pdbbase+"-ramalyze", "results/"+pdb_code+"/"+pdbbase+"-dangle_protein", "results/"+pdb_code+"/"+pdbbase+"-dangle_rna", "results/"+pdb_code+"/"+pdbbase+"-dangle_dna", "results/"+pdb_code+"/"+pdbbase+"-prekin_pperp", "results/"+pdb_code+"/"+pdbbase+"-suitename")
     reap(cmd9, pdbbase)
     print cmd9.stdout.read().strip()
     e_time = time.time()
@@ -359,17 +360,15 @@ for pdb in sys.argv[1:]:
 #}}}
 
 #{{{ write_localsub
-local_sub = """universe = vanilla
+local_sub = """universe = local
 
 Notify_user  = vbchen@bmrb.wisc.edu
 notification = Error
 
-Executable  = local_run.py
-Arguments   =  $(PDBS)
+Executable  = post_process.sh
 
-log     = logs/local$(NUMBER).log
-output      = logs/local$(NUMBER).out
-error       = logs/local$(NUMBER).err
+log     = logs/post.log
+error       = logs/post.err
 copy_to_spool   = False
 priority    = 0
 
@@ -454,10 +453,12 @@ cat logs/oneline*.err > logs/alloneline.err
 """
 #}}}
 
-if __name__ == "__main__":
+#{{{ make_files
+def make_files(indir, file_size_limit):
   molprobity_home = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+  #print "mp home: " + molprobity_home
+  #print "indir: " + indir
 
-  opts, indir = parse_cmdline()
   if os.path.exists(indir):
     indir_base = os.path.basename(os.path.realpath(indir))
     outdir = os.path.join(indir, "condor_sub_files_"+indir_base)
@@ -471,7 +472,7 @@ if __name__ == "__main__":
       sys.exit()
     split_pdbs_to_models(molprobity_home, indir, os.path.join(outdir, "pdbs"))
     #print opts.total_file_size_limit
-    list_of_lists = divide_pdbs(os.path.join(outdir, "pdbs"), opts.total_file_size_limit)
+    list_of_lists = divide_pdbs(os.path.join(outdir, "pdbs"), file_size_limit)
     #write_super_dag(outdir, list_of_lists)
     write_oneline_dag(outdir, list_of_lists)
     write_file(outdir, "oneline.py", oneline_py.format(molprobity_home), 0755)
@@ -479,9 +480,16 @@ if __name__ == "__main__":
     write_file(outdir, "post_process.sh", post_sh, 0755)
     #write_file(outdir, "local_run.sh", local_run.format(molprobity_home, pdbbase="{pdbbase}"), 0755)
     #write_file(outdir, "local_run.py", local_run_py.format(molprobity_home), 0755)
-    #write_file(outdir, "local.sub", local_sub)
+    write_file(outdir, "post_process.sub", local_sub)
     #write_file(outdir, "clashlist.sh", clash_sh.format(bondtype=opts.bond_type, pdb="{pdb}", pdbbase="{pdbbase}"), 0755)
     #write_file(outdir, "clashlist.sub", clash_sub.format(molprobity_home))
     
   else:
     sys.stderr.write(indir + " does not seem to exist!\n")
+#}}}
+
+
+if __name__ == "__main__":
+
+  opts, indir = parse_cmdline()
+  make_files(indir, opts.total_file_size_limit)
