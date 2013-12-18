@@ -102,8 +102,10 @@ function summaryAnalysis($modelID)
     // Run analysis; load data
     if($optClash)
     {
-        runClashlist($pdbfile, "$rawDir/$model[prefix]clash.data", $reduce_blength);
-        $clash = loadClashlist("$rawDir/$model[prefix]clash.data");
+        //runClashlist($pdbfile, "$rawDir/$model[prefix]clash.data", $reduce_blength);
+        //$clash = loadClashlist("$rawDir/$model[prefix]clash.data");
+        runClashscore($pdbfile, "$rawDir/$model[prefix]clash.data", $reduce_blength);
+        $clash = loadClashscore("$rawDir/$model[prefix]clash.data");
     }
     if($optCbeta)
     {

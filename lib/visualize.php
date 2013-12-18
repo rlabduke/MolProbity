@@ -653,12 +653,13 @@ function makeBadRotamerKin($infile, $outfile, $rota = null, $color = 'gold', $cu
 }
 #}}}########################################################################
 
-#{{{ makeBadGeomKin - appends mc of Ramachandran outliers
+#{{{ makeBadGeomKin - appends bond and angle outliers
 ############################################################################
 function makeBadGeomKin($infile, $outfile) {
     //$out = fopen($outfile, 'a');
-    exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -kin -sub -validate -protein $infile >> $outfile");
-    exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -kin -sub -validate -rna $infile >> $outfile");
+    exec("mmtbx.mp_geo pdb=$infile out_file=$outfile outliers_only=True kinemage=True");
+    //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -kin -sub -validate -protein $infile >> $outfile");
+    //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -kin -sub -validate -rna $infile >> $outfile");
     //exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.dangle.Dangle -kin -validate -dna $infile >> $outfile");
 }
 #}}}########################################################################
@@ -1305,12 +1306,12 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
             {
                 //echo "pperp ".$item['resName']."\n";
                 $reasons = array();
-                if    ($item['deltaOut'] && $item['epsilonOut'] && $item['3Pdist'] < 3.0) $reasons[] = "&delta & &epsilon outlier <br> (base-p distance indicates 2'-endo";
-                elseif($item['deltaOut'] && $item['epsilonOut'] && $item['3Pdist'] >= 3.0) $reasons[] = "&delta & &epsilon outlier <br> (base-p distance indicates 3'-endo";
-                elseif($item['deltaOut'] && $item['3Pdist'] < 3.0)   $reasons[] = "&delta outlier <br> (base-p distance indicates 2'-endo";
-                elseif($item['deltaOut'] && $item['3Pdist'] >= 3.0) $reasons[] = "&delta outlier <br> (base-p distance indicates 3'-endo";
-                elseif($item['epsilonOut'] && $item['3Pdist'] < 3.0)   $reasons[] = "&epsilon outlier <br> (base-p distance indicates 2'-endo";
-                elseif($item['epsilonOut'] && $item['3Pdist'] >= 3.0) $reasons[] = "&epsilon outlier <br> (base-p distance indicates 3'-endo";
+                if    ($item['deltaOut'] && $item['epsilonOut'] && $item['3Pdist'] < 3.0) $reasons[] = "&delta; & &epsilon; outlier <br> (base-p distance indicates 2'-endo";
+                elseif($item['deltaOut'] && $item['epsilonOut'] && $item['3Pdist'] >= 3.0) $reasons[] = "&delta; & &epsilon; outlier <br> (base-p distance indicates 3'-endo";
+                elseif($item['deltaOut'] && $item['3Pdist'] < 3.0)   $reasons[] = "&delta; outlier <br> (base-p distance indicates 2'-endo";
+                elseif($item['deltaOut'] && $item['3Pdist'] >= 3.0) $reasons[] = "&delta; outlier <br> (base-p distance indicates 3'-endo";
+                elseif($item['epsilonOut'] && $item['3Pdist'] < 3.0)   $reasons[] = "&epsilon; outlier <br> (base-p distance indicates 2'-endo";
+                elseif($item['epsilonOut'] && $item['3Pdist'] >= 3.0) $reasons[] = "&epsilon; outlier <br> (base-p distance indicates 3'-endo";
                 $res[$item['resName']]['pperp_val'] = 1; // no way to quantify this
                 $res[$item['resName']]['pperp'] = "suspect sugar pucker  -  ".implode(", ", $reasons).")";
                 $res[$item['resName']]['pperp_isbad'] = true;
@@ -1323,15 +1324,15 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
         foreach($suites as $cnit => $item)
         {
             $res[$cnit]['suites_val'] = $item['suiteness'];
-            $bin = "&delta&delta&gamma $item[bin]";
-            if($bin == '&delta&delta&gamma trig')
+            $bin = "&delta;-1&delta;&gamma; $item[bin]";
+            if($bin == '&delta;-1&delta;&gamma; trig')
             {
-                $bin = "&delta&delta&gamma none (triaged  $item[triage]  )";
+                $bin = "&delta;-1&delta;&gamma; none (triaged  $item[triage]  )";
                 $res[$cnit]['suites_val'] = -1; // sorts to very top
             }
-            elseif($bin == '&delta&delta&gamma inc ')
+            elseif($bin == '&delta;-1&delta;&gamma; inc ')
             {
-                $bin = '&delta&delta&gamma none (incomplete)';
+                $bin = '&delta;-1&delta;&gamma; none (incomplete)';
                 $res[$cnit]['suites_val'] = 0.0001; // sorts just below all outliers
             }
             elseif(preg_match('/7D dist/', $item['triage']))
@@ -1497,12 +1498,14 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
       }
     }
 
+    //foreach ($bbonds as $cnit => $alt)
+    //{
+    //  echo $bbonds[$cnit]['resName']."\n";
+    //}
+
     // $res needs to be saved in raw_data for the horoizontal chart
     if($resout)
     {
-        // $out = fopen("/Users/bradleyhintze/Sites/moltbx/public_html/data/0f22e0b41365896f225cae5b9558f37a/raw_data/try.txt", 'wb');
-        // fwrite($out, mpSerialize($res));
-        // fclose($out);
         $out = fopen($resout, 'wb');
         fwrite($out, mpSerialize($res));
         fclose($out);
@@ -1537,13 +1540,13 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
       $header2[] = array('html' => "");
       $header2[] = array('html' => sprintf("Avg: %.2f", array_sum($Bfact)/count($Bfact)));
       if(is_array($clash))  $header2[] = array('html' => "Clashscore: $clash[scoreAll]");
-      if(is_array($rama))   $header2[] = array('html' => "Outliers: ".count(findRamaOutliers($rama))." of ".count($rama));
-      if(is_array($rota))   $header2[] = array('html' => "Poor rotamers: ".count(findRotaOutliers($rota))." of ".count($rota));
-      if(is_array($cbdev))  $header2[] = array('html' => "Outliers: ".count(findCbetaOutliers($cbdev))." of ".count($cbdev));
-      if(is_array($pperp))  $header2[] = array('html' => "Outliers: ".count(findBasePhosPerpOutliers($pperp))." of ".count($pperp));
-      if(is_array($suites)) $header2[] = array('html' => "Outliers: ".count(findSuitenameOutliers($suites))." of ".count($suites));
-      if(is_array($bbonds)) $header2[] = array('html' => "Outliers: ".count(findGeomOutliers($bbonds))." of ".count($bbonds));
-      if(is_array($bangles)) $header2[] = array('html' => "Outliers: ".count(findGeomOutliers($bangles))." of ".count($bangles));
+      if(is_array($rama))   $header2[] = array('html' => "Outliers: ".count(findRamaOutliers($rama))." of ".findAltTotal($rama));
+      if(is_array($rota))   $header2[] = array('html' => "Poor rotamers: ".count(findRotaOutliers($rota))." of ".findAltTotal($rota));
+      if(is_array($cbdev))  $header2[] = array('html' => "Outliers: ".count(findCbetaOutliers($cbdev))." of ".findAltTotal($cbdev));
+      if(is_array($pperp))  $header2[] = array('html' => "Outliers: ".count(findBasePhosPerpOutliers($pperp))." of ".findAltTotal($pperp));
+      if(is_array($suites)) $header2[] = array('html' => "Outliers: ".count(findSuitenameOutliers($suites))." of ".findAltTotal($suites));
+      if(is_array($bbonds)) $header2[] = array('html' => "Outliers: ".count(findGeomOutliers($bbonds))." of ".findAltTotal($bbonds));
+      if(is_array($bangles)) $header2[] = array('html' => "Outliers: ".count(findGeomOutliers($bangles))." of ".findAltTotal($bangles));
 
       $table['headers'] = array($header1, $header2);
     }

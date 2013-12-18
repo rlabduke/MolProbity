@@ -66,8 +66,10 @@ function summaryAnalysis($modelID)
 
     if($optClash)
     {
-        runClashlist($pdbfile, "$rawDir/$model[prefix]clash.data", $reduce_blength);
-        $clash = loadClashlist("$rawDir/$model[prefix]clash.data");
+        //runClashlist($pdbfile, "$rawDir/$model[prefix]clash.data", $reduce_blength);
+        //$clash = loadClashlist("$rawDir/$model[prefix]clash.data");
+        runClashscore($pdbfile, "$rawDir/$model[prefix]clash.data", $reduce_blength);
+        $clash = loadClashscore("$rawDir/$model[prefix]clash.data");
         $clashstats = runClashStats($pdbstats['resolution'], $clash['scoreAll'], $clash['scoreBlt40']);
         $out .= ":" . $clash['scoreAll'] . ":" . $clash['scoreBlt40'];
         $out .= ":$clashstats[minresol]:$clashstats[maxresol]:$clashstats[n_samples]:$clashstats[pct_rank]:$clashstats[pct_rank40]";
@@ -126,7 +128,7 @@ function summaryAnalysis($modelID)
       else            $out .= ":-1:-1:-1:-1";
       //echo "outliers:$outCount total:$total";
       $total = 0; // total residues
-      $totalAng = 0; 
+      $totalAng = 0;
       $outCount = 0; // residues with at least one angle outlier
       $outAngCount = 0;
       foreach($angles as $cnit => $item) {
@@ -302,5 +304,5 @@ foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
 
 ############################################################################
 // Clean up and go home
-//mpDestroySession(); // only call this if we created one
+mpDestroySession(); // only call this if we created one
 ?>

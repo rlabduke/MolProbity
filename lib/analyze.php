@@ -80,14 +80,14 @@ function runAnalysis($modelID, $opts)
         $mtz_file = $model['mtz_file'];
     else $mtz_file = $_SESSION['models'][$model['parent']]['mtz_file'];
 
-    if($opts['chartRama'])      $tasks['rama'] = "Do Ramachandran analysis and make plots";
-    if($opts['chartRota'])      $tasks['rota'] = "Do rotamer analysis";
-    if($opts['chartCBdev'])     $tasks['cbeta'] = "Do C&beta; deviation analysis and make kins";
+    if($opts['chartRama'])      $tasks['rama'] = "Do Ramachandran analysis and make plots (<code>phenix.ramalyze</code>)";
+    if($opts['chartRota'])      $tasks['rota'] = "Do rotamer analysis (<code>phenix.rotalyze</code>)";
+    if($opts['chartCBdev'])     $tasks['cbeta'] = "Do C&beta; deviation analysis and make kins (<code>phenix.cbetadev</code>)";
     if($opts['chartBaseP'])     $tasks['base-phos'] = "Do RNA sugar pucker analysis";
     if($opts['chartSuite'])     $tasks['suitename'] = "Do RNA backbone conformations analysis";
-    if($opts['chartGeom'])      $tasks['geomValidation'] = "Do bond length and angle geometry analysis";
+    if($opts['chartGeom'])      $tasks['geomValidation'] = "Do bond length and angle geometry analysis (<code>mmtbx.mp_geo</code>)";
 
-    if($opts['chartClashlist']) $tasks['clashlist'] = "Run <code>clashlist</code> to find bad clashes and clashscore";
+    if($opts['chartClashlist']) $tasks['clashlist'] = "Run <code>phenix.clashscore</code> to find bad clashes and clashscore";
     if($opts['chartImprove'])   $tasks['improve'] = "Suggest / report on fixes";
     if($opts['doCharts']&&!$opts['chartMulti'])       $tasks['chartsummary'] = "Create summary chart";
     if($opts['chartMulti'])     $tasks['multichart'] = "Create multi-criterion chart";
@@ -175,15 +175,17 @@ function runAnalysis($modelID, $opts)
     if($opts['chartGeom'])
     {
         setProgress($tasks, 'geomValidation'); // updates the progress display if running as a background job
-        $protfile = "$rawDir/$model[prefix]protvalidation.data";
-        runValidationReport($infile, $protfile, "protein");
-        $rnafile = "$rawDir/$model[prefix]rnavalidation.data";
-        runValidationReport($infile, $rnafile, "rna");
+        $geomfile = "$rawDir/$model[prefix]geomvalidation.data";
+        runValidationReport($infile, $geomfile);
+        //$protfile = "$rawDir/$model[prefix]protvalidation.data";
+        //runValidationReport($infile, $protfile, "protein");
+        //$rnafile = "$rawDir/$model[prefix]rnavalidation.data";
+        //runValidationReport($infile, $rnafile, "rna");
         //$validate_bond  = loadValidationBondReport($protfile,"protein");
         //if (is_array($validate_bond))
-        $validate_bond  = array_merge(loadValidationBondReport($protfile,"protein"), loadValidationBondReport($rnafile, "rna"));
+        $validate_bond  = array_merge(loadValidationBondReport($geomfile,"protein"), loadValidationBondReport($geomfile, "rna"));
         if (count($validate_bond) == 0) $validate_bond = null;
-        $validate_angle = array_merge(loadValidationAngleReport($protfile, "protein"), loadValidationAngleReport($rnafile, "rna"));
+        $validate_angle = array_merge(loadValidationAngleReport($geomfile, "protein"), loadValidationAngleReport($geomfile, "rna"));
         if (count($validate_angle) == 0) $validate_angle = null;
     }
     //}}} Run nucleic acid geometry programs and offer kins to user
@@ -995,7 +997,6 @@ function loadRotamer($datafile)
         if($ret[$cnit]['chi4'] !== '') $ret[$cnit]['chi4'] += 0;
         // echo "added rota entry\n";
     }
-    echo $ret;
     return $ret;
 }
 #}}}########################################################################
@@ -1225,10 +1226,10 @@ function runSuitenameString($infile, $outfile)
 
 #{{{ runValidationReport - finds >4sigma geometric outliers for protein and RNA
 ############################################################################
-function runValidationReport($infile, $outfile, $moltype)
+function runValidationReport($infile, $outfile)
 {
     //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -$moltype -validate -outliers -sigma=0.0 $infile > $outfile");
-    exec("mmtbx.mp_geo $infile $outfile");
+    exec("mmtbx.mp_geo pdb=$infile out_file=$outfile outliers_only=False bonds_and_angles=True");
 }
 #}}}########################################################################
 
@@ -1273,6 +1274,15 @@ function loadValidationBondReport($datafile, $moltype)
         $measure = $line[6];
         $value = $line[7] + 0;
         $sigma = $line[8] + 0;
+        $type = $line[9];
+        if ($moltype == "protein")
+        {
+          if ($type != "PROTEIN") continue;
+        }
+        elseif ($moltype == "rna")
+        {
+          if ($type != "NA") continue;
+        }
         if (preg_match("/--/", $measure)) {
             if (array_key_exists($cnit, $hash1_1)) {
                 $old_sigma_bond  = $hash1_1[$cnit]['sigma'];
@@ -1349,6 +1359,15 @@ function loadValidationAngleReport($datafile, $moltype)
         $measure = $line[6];
         $value = $line[7] + 0;
         $sigma = $line[8] + 0;
+        $type = $line[9];
+        if ($moltype == "protein")
+        {
+          if ($type != "PROTEIN") continue;
+        }
+        elseif ($moltype == "rna")
+        {
+          if ($type != "NA") continue;
+        }
         if (preg_match("/-.-/",$measure) || preg_match("/-..-/",$measure) || preg_match("/-...-/",$measure)) {
             if (array_key_exists($cnit, $hash1_2)) {
                 $old_outlier_sigma = $hash1_2[$cnit]['sigma'];
@@ -1412,22 +1431,28 @@ function findGeomOutliers($geom)
 }
 #}}}########################################################################
 
-#{{{ findGeomTotal - count total residues, accounting for alternates
+#{{{ findAltTotal - count total residues, accounting for alternates
 ############################################################################
-//function findGeomTotal($geom)
-//{
-//    $altTrim = array();
-//    if(is_array($geom)) foreach($geom as $res)
-//    {
-//        $altloc = substr($res['resName'],7,1);
-//        if ($altloc != ' ')
-//        {
-//          $b_key = substr($res['resName'],0,7).' '.substr($res['resName'],8,3);
-//
-//        }
-//    }
-//}
-
+function findAltTotal($metric)
+{
+    $total = count($metric);
+    $altTrim = array();
+    if(is_array($metric)) foreach($metric as $res)
+    {
+        $altloc = substr($res['resName'],7,1);
+        if ($altloc != ' ')
+        {
+          $b_key = substr($res['resName'],0,7).' '.substr($res['resName'],8,3);
+          //if (isset($res['resName'][$b_key]))
+          if (isset($metric[$b_key]))
+          {
+            $altTrim[$b_key] = 1;
+          }
+        }
+    }
+    $total -= count($altTrim);
+    return $total;
+}
 #}}}########################################################################
 
 #{{{ hasMoltype - determines if a geometry array has residues of type moltype
