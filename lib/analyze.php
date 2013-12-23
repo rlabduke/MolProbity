@@ -245,7 +245,16 @@ function runAnalysis($modelID, $opts)
                 $altrota = loadRotamer($outfile);
                 $altRotaCount = count(findRotaOutliers($altrota));
                 if($altRotaCount > $mainRotaCount)
-                    $improvementList[] = "fixed ".($altRotaCount - $mainRotaCount)." bad rotamers";
+                {
+                    if ($altRotaCount - $mainRotaCount > 1)
+                    {
+                      $improvementList[] = "fixed ".($altRotaCount - $mainRotaCount)." bad rotamers";
+                    }
+                    else
+                    {
+                      $improvementList[] = "fixed ".($altRotaCount - $mainRotaCount)." bad rotamer";
+                    }
+                }
                 unlink($outfile);
             // Clashes
                 $outfile = mpTempfile("tmp_clashlist_");

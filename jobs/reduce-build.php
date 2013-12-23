@@ -143,11 +143,11 @@ if($did_flip && $_SESSION['bgjob']['nqh_regularize'])
 
   if($reduce_blength == 'ecloud')
   {
-    $minModel['history']        = "Derived from $model[pdb] by Reduce -build w/ CCTBX regularization";
+    $minModel['history']        = "Derived from $model[pdb] by Reduce -build w/ CCTBX side-chain regularization";
   }
   elseif($reduce_blength == 'nuclear')
   {
-    $minModel['history']        = "Derived from $model[pdb] by Reduce -build -nuclear w/ CCTBX regularization";
+    $minModel['history']        = "Derived from $model[pdb] by Reduce -build -nuclear w/ CCTBX side-chain regularization";
   }
   $minModel['isUserSupplied'] = $model['isUserSupplied'];
   $minModel['isReduced']      = true;
