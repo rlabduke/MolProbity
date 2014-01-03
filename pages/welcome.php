@@ -73,12 +73,13 @@ as part of the refinement cycle.</p>
 Create and view interactive 3-D graphics
 from your web browser.</p>
 
-<h3>What's new in 4.02b:</h3><ul>
+<h3>What's new in 4.1:</h3><ul>
+<li>Validation analysis now powered by CCTBX. Also adds geometry regularization for N/Q/H flip corrections.</li>
+<li>Alternate conformations now handled for validation analysis.</li>
 <li>Updated Reduce-added hydrogen lengths to be more consistent with other crystallography software.</li>
-<li>New Top8000 Ramachandran validation information.</li>
-<li>Allows use of both electron cloud and nuclear x-H bond-lengths, monitored in real-time.</li>
+<li>New <a style=\"color: #66FFFF\" href='http://kinemage.biochem.duke.edu/databases/top8000.php' target='_blank'>Top8000</a> Ramachandran validation information.</li>
+<li>Allows use of both electron cloud and nuclear x-H bond-lengths.</li>
 <li>Full support for 2-character CHAINIDs added. 4-character SEGIDs also supported in place of CHAINIDs.</li>
-<li>Occupancy cutoff for clashscore now set to 0.1. Clashscore calculation includes all alternates.</li>
 </ul>
 </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>
 
@@ -101,6 +102,12 @@ from your web browser.</p>
     <a href="http://kinemage.biochem.duke.edu/lab/papers.php" target="_blank">KiNG (Kinemage, Next Generation):
     A versatile interactive molecular and scientific visualization program.</a>
     Protein Science 18:2403-2409.
+    </small></p>
+<p><b><a href='help/about.html' target='_blank'>Cite CCTBX</a></b>:
+    <small>Grosse-Kunstleve et al. (2002)
+    <a href="http://scripts.iucr.org/cgi-bin/paper?ks0118" target="_blank">The Computational Crystallography Toolbox:
+    crystallographic algorithms in a reusable software framework.</a>
+    J. Appl. Cryst. 35:126-136.
     </small></p>
 <p><b><?php echo "<a href='".makeEventURL("onGoto", "helper_hydrogens.php")."'>About hydrogens</a>"; ?>:</b>
 Why have the hydrogen bondlengths changed?</p>
@@ -637,14 +644,16 @@ function toggleUploadOptions()
     //    Any uploaded files will be converted to PDB v3 if necessary; you will have an option to convert modified files back to PDB v2.3 if desired.
     //    <br><br>Please don't hesitate to report any bugs you may encounter; sorry for any inconvenience.</strong></div>");
 
-    echo("<div class=alert><strong>We have updated Reduce to add hydrogens at a length more consistent with electron-cloud positions, and accordingly
+    echo("<div class=alert><strong>MolProbity4 structure validation is now powered by CCTBX, bringing added functionality and
+      more consistency with <a style=\"color: #66FFFF\" href='http://www.phenix-online.org' target='_blank'>Phenix</a>. Read more about this change <a style=\"color: #66FFFF\" href='".makeEventURL("onGoto", "helper_cctbx.php")."'>here</a>.
+      <br><br>We have updated Reduce to add hydrogens at a length more consistent with electron-cloud positions, and accordingly
       adjusted the Van der Waals radii in Probe to compensate for the change.  This will affect comparison of results calculated with older versions of MolProbity,
       but generally results in lower clashscores. For analyses using nuclear-position hydrogens, you have the option of selecting nuclear x-H positions when adding hydrogens.
       Read more about this change <a style=\"color: #66FFFF\" href='".makeEventURL("onGoto", "helper_hydrogens.php")."'>here</a>.
       <p>Ramachandran scoring has also been updated to use new six-category distributions, derived from a larger
       <a style=\"color: #66FFFF\" href='http://kinemage.biochem.duke.edu/databases/top8000.php' target='_blank'>Top8000</a> dataset of high quality PDB files.
-        <br><br>Please don't hesitate to report any <a style=\"color: #66FFFF\" href='".makeEventURL("onGoto", "feedback_setup.php")."'>bugs</a> you may encounter.
-        <br><br>If you prefer to use the previous MolProbity3, please go to <a style=\"color: #66FFFF\" href='http://helix.research.duhs.duke.edu/' target='_blank'>http://helix.research.duhs.duke.edu</a>.</strong></div>");
+        <br><br>Please don't hesitate to report any <a style=\"color: #66FFFF\" href='".makeEventURL("onGoto", "feedback_setup.php")."'>bugs</a> you may encounter.</strong></div>");
+       // <br><br>If you prefer to use the previous MolProbity3, please go to <a style=\"color: #66FFFF\" href='http://helix.research.duhs.duke.edu/' target='_blank'>http://helix.research.duhs.duke.edu</a>.</strong></div>");
 
 }
 

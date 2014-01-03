@@ -851,7 +851,7 @@ function loadClashscore($datafile)
       $res1 = substr($line[0], 0, 13);
       $atm1 = substr($line[0], 14, 5);
       $res2 = substr($line[0], 19, 13);
-      $atm2 = substr($line[0], 30, 5);
+      $atm2 = substr($line[0], 32, 5);
     }
     $dist = abs(trim($line[1])+0);
     if(!isset($clashes[$res1]) || $clashes[$res1] < $dist)
