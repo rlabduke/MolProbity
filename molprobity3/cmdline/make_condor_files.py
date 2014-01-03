@@ -3,7 +3,7 @@
 import sys, os, getopt, re, subprocess, shutil
 from optparse import OptionParser
 import time
-
+import gzip
 # THIS FILE MUST BE IN THE MOLPROBITY CMDLINE DIRECTORY!!!
 
 #number_to_run = 50
@@ -18,6 +18,9 @@ def parse_cmdline():
   parser.add_option("-t", "--type", action="store", type="string",
     dest="bond_type", default="nuclear",
     help="specify hydrogen bond length for clashes (nuclear or ecloud)")
+  parser.add_option("-r", "--reduce", action="store", type="boolean",
+    dest="run_reduce", default="false",
+    help="run reduce to add hydrogens first (use -t to specify length)")
   opts, args = parser.parse_args()
   if opts.total_file_size_limit < 5000000:
     sys.stderr.write("\n**ERROR: -limit cannot be less than 5000000 (5M)\n")
@@ -72,14 +75,19 @@ def split_pdbs_to_models(mp_home, indir, outdir):
           split_pdb(full_file, outdir)
           #e_time = time.time()
           #print repr(e_time - s_time) + " seconds?"
+        if (ext == ".gz"):
+          split_pdb(full_file, outdir, True)
 #}}}
 
 #{{{ split_pdb
-def split_pdb(pdb_file, outdir):
+def split_pdb(pdb_file, outdir, gzip_file = False):
   model_files = []
   keep_lines = False
   pdb_name, ext = os.path.splitext(os.path.basename(pdb_file))
-  pdb_in=open(pdb_file)
+  if gzip_file:
+    pdb_in = gzip.open(pdb_file)
+  else:
+    pdb_in=open(pdb_file)
   mod_num = 0
   for line in pdb_in:
     start = line[0:6]
@@ -454,7 +462,7 @@ cat logs/oneline*.err > logs/alloneline.err
 #}}}
 
 #{{{ make_files
-def make_files(indir, file_size_limit):
+def make_files(indir, file_size_limit, bond_type):
   molprobity_home = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
   #print "mp home: " + molprobity_home
   #print "indir: " + indir
@@ -488,8 +496,7 @@ def make_files(indir, file_size_limit):
     sys.stderr.write(indir + " does not seem to exist!\n")
 #}}}
 
-
 if __name__ == "__main__":
 
   opts, indir = parse_cmdline()
-  make_files(indir, opts.total_file_size_limit)
+  make_files(indir, opts.total_file_size_limit, opts.bond_type)
