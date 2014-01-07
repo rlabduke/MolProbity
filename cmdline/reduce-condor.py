@@ -198,10 +198,9 @@ def make_reduce_sub(list_of_lists):
     
 #}}}
 
-if __name__ == "__main__":
+#{{{ make_reduce_files
+def make_reduce_files(indir, file_size_limit, build_type, bond_type):
   molprobity_home = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-
-  opts, indir = parse_cmdline()
   if os.path.exists(indir):
     outdir = os.path.join(indir, "reduce_condor_files")
     if not os.path.exists(outdir):
@@ -214,15 +213,22 @@ if __name__ == "__main__":
       sys.exit()
     #split_pdbs_to_models(molprobity_home, indir, os.path.join(outdir, "pdbs"))
     #print opts.total_file_size_limit
-    list_of_lists = divide_pdbs(indir, opts.total_file_size_limit)
+    list_of_lists = divide_pdbs(indir, file_size_limit)
     #write_super_dag(outdir, list_of_lists)
     #write_file(outdir, "local_run.sh", local_run.format(molprobity_home, pdbbase="{pdbbase}"), 0755)
     pdb = "{pdbbase}F"
     build = "nobuild"
-    if opts.build_type=="build":
+    if build_type=="build":
       pdb = "{pdbbase}F"
       build = "build"
-    write_file(outdir, "reduce.sh", reduce_sh.format(os.path.join(molprobity_home, "bin", "linux"), buildtype=build, bondtype=opts.bond_type, pdbbase=pdb), 0755)
+    write_file(outdir, "reduce.sh", reduce_sh.format(os.path.join(molprobity_home, "bin", "linux"), buildtype=build, bondtype=bond_type, pdbbase=pdb), 0755)
     write_file(outdir, "reduce.sub", make_reduce_sub(list_of_lists))
   else:
     sys.stderr.write(indir + " does not seem to exist!\n")
+#}}}
+
+
+if __name__ == "__main__":
+
+  opts, indir = parse_cmdline()
+  make_reduce_files(indir, opts.total_file_size_limits, opts.build_type)
