@@ -14,12 +14,6 @@
 if(!defined("MP_EMAIL_WEBMASTER"))
     define("MP_EMAIL_WEBMASTER", "webmaster@$_SERVER[SERVER_NAME]");
 
-if(!defined("MP_EMAIL_WEBMASTER2"))
-  define("MP_EMAIL_WEBMASTER2", "webmaster@kinemage.biochem.duke.edu");
-
-if(!defined("MP_EMAIL_WEBMASTER3"))
-  define("MP_EMAIL_WEBMASTER3", "jjh19@duke.edu");
-
 // MP_BIN_PATH
 //  Directory(s) where all MolProbity-specific binary
 //  executables are stored. Remember, apache must
@@ -127,7 +121,7 @@ if(!defined("MP_DIR_CHARTS"))
 //  of the MolProbity source code. Please DO NOT modify this
 //  entry; this is how we get feedback about bugs, etc.
 //  Change MP_EMAIL_WEBMASTER instead.
-    define("MP_EMAIL_AUTHOR", "jjh19@duke.edu");
+    define("MP_EMAIL_AUTHOR", "arendall@duke.edu");
 
 // Don't change this! It will break user bookmarks.
     define("MP_SESSION_NAME", "MolProbSID");
