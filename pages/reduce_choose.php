@@ -87,6 +87,7 @@ function display($context)
         echo "<td align='center'><b>Flip?</b></td>\n";
         echo "<td align='center'><b>Chain</b></td>\n";
         echo "<td align='right'><b>Res#</b></td>\n";
+        echo "<td align='center'><b>Alt</b></td>\n";
         echo "<td align='center'><b>Res ID</b></td>\n";
         echo "<td align='left'><b>Orig</b></td>\n";
         echo "<td align='left'><b>Flip</b></td>\n";
@@ -106,6 +107,7 @@ function display($context)
                 echo "<td align='center'><input type='checkbox' $checked name='doflip[$c]' value='1'></td>\n";
                 echo "<td align='center'>" . $changes[1][$c] . "</td>\n";
                 echo "<td align='right'>" . $changes[2][$c] . "</td>\n";
+                echo "<td align='center'>" . $changes[13][$c] . "</td>\n";
                 echo "<td align='center'>" . $changes[3][$c] . "</td>\n";
                 echo "<td align='left'>" . $changes[8][$c] . "</td>\n";
                 echo "<td align='left'>" . $changes[10][$c] . "</td>\n";
@@ -157,17 +159,17 @@ function onRerunReduce()
         {
             if($doflip[$c])
             {
-                $autoflip .= "<li>{$changes[1][$c]} {$changes[2][$c]} {$changes[3][$c]}</li>\n";
+                $autoflip .= "<li>{$changes[1][$c]} {$changes[2][$c]} {$changes[3][$c]} {$changes[13][$c]}</li>\n";
             }
             else
             {
-                $userkeep .= "<li>{$changes[1][$c]} {$changes[2][$c]} {$changes[3][$c]}</li>\n";
+                $userkeep .= "<li>{$changes[1][$c]} {$changes[2][$c]} {$changes[3][$c]} {$changes[13][$c]}</li>\n";
                 $rerun = true;
             }
         }
         elseif($doflip[$c])
         {
-            $userflip .= "<li>{$changes[1][$c]} {$changes[2][$c]} {$changes[3][$c]}</li>\n";
+            $userflip .= "<li>{$changes[1][$c]} {$changes[2][$c]} {$changes[3][$c]} {$changes[13][$c]}</li>\n";
         }
     }
     $autoflip .= "</ul>\n</p>\n";

@@ -1010,6 +1010,7 @@ function reduceEnsemble($ensID, $reduceFunc = 'reduceNoBuild')
 * $changes[10]     the flipped orientation score, after f=
 * $changes[11]         empty (no clash) or a ! (clash)
 * $changes[12]     the flip category: either F, X, C, or K
+* $changes[13]     the altloc, if any //JJH 140107
 */
 function decodeReduceUsermods($file)
 {
@@ -1031,7 +1032,9 @@ function decodeReduceUsermods($file)
             // Most values can be done without knowing whether or not this is a flip.
             $changes[0][$c] = $field[1];
             /** Original, highly inefficient code! */
-            $changes[1][$c] = trim(preg_replace("/^(.).*$/i", "\\1", $field[1]));
+            // This code was not actually commented out, but is redundant
+            // removed by JJH 140107
+            /*$changes[1][$c] = trim(preg_replace("/^(.).*$/i", "\\1", $field[1]));
             $changes[2][$c] = trim(preg_replace("/^.(....).*$/i", "\\1", $field[1]));
             $changes[3][$c] = trim(preg_replace("/^.....(....).*$/i", "\\1", $field[1]));
             // skip 4 and 5 for now
@@ -1041,24 +1044,26 @@ function decodeReduceUsermods($file)
             $changes[9][$c] = trim(preg_replace("/^sc=......... ..o=([^!]+)(!?),f=([^!]+)(!?).*$/i", "\\2", $field[3]));
             $changes[10][$c] = trim(preg_replace("/^sc=......... ..o=([^!]+)(!?),f=([^!\)]+)(!?).*$/i", "\\3", $field[3]));
             $changes[11][$c] = trim(preg_replace("/^sc=......... ..o=([^!]+)(!?),f=([^!]+)(!?).*$/i", "\\4", $field[3]));
-            $changes[12][$c] = trim(preg_replace("/^sc=......... ([FXCK]).*$/i", "\\1", $field[3]));
+            $changes[12][$c] = trim(preg_replace("/^sc=......... ([FXCK]).*$/i", "\\1", $field[3])); //JJH 140107 */
             /** Original, highly inefficient code! */
 
             // Better to group ins code with number than res type.
             // I don't *think* anything depended on the old behavior.
             if(!$_SESSION['useSEGID'])
             {
-              // CNIT:       CC  NNNNI  TTT
-              preg_match('/^(..)(.....)(...)/', $field[1], $f1);
+              //: A  49 GLN    A:
+              // CNIT:       CC  NNNNI  TTT      L
+              preg_match('/^(..)(.....)(...)....(.)/', $field[1], $f1);
             }
             else
             {
-              // CNIT:       CCCC  NNNNI  TTT
-              preg_match('/^(....)(.....)(...)/', $field[1], $f1);
+              // CNIT:       CCCC  NNNNI  TTT      L
+              preg_match('/^(....)(.....)(...)....(.)/', $field[1], $f1);
             }
-            $changes[1][$c] = trim($f1[1]);
-            $changes[2][$c] = trim($f1[2]);
-            $changes[3][$c] = trim($f1[3]);
+            $changes[1][$c]  = trim($f1[1]);
+            $changes[2][$c]  = trim($f1[2]);
+            $changes[3][$c]  = trim($f1[3]);
+            $changes[13][$c] = trim($f1[4]); //JJH 140107
             // skip 4 and 5 for now
             if(preg_match('/^sc=(........\d?)([! ]) +?([FXCK]?)\(o=([^!]+)(!?),f=([^!\)]+)(!?)\)?/', $field[3], $f3))
             {
@@ -1142,7 +1147,7 @@ function decodeReduceUsermods($file)
         // Sort table. BE SURE to list ALL COLUMNS here, or data will be scrambled!!!
         array_multisort($changes[0],  $changes[1],  $changes[2],  $changes[3],  $changes[4],
                         $changes[5],  $changes[6],  $changes[7],  $changes[8],  $changes[9],
-                        $changes[10], $changes[11], $changes[12]);
+                        $changes[10], $changes[11], $changes[12], $changes[13]);
     }
 
     return $changes;
