@@ -36,7 +36,7 @@ found <a href='help/about.html' target='_blank'>here</a>.</p>
 <code>doc/installing.html</code>.</p>
 
 <?php
-$file = "molprobity4-".MP_VERSION.".tgz";
+$file = "moltbx-".MP_VERSION.".tgz";
 if(file_exists($file) && filesize($file) > 0)
 {
     echo "<p><b>Download now: <a href='$file'>".basename($file)."</a></b>";
