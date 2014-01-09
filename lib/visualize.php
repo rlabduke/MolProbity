@@ -1340,6 +1340,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
                 $bin = "$bin ( $item[triage] )";
             }
 
+            //echo $cnit."\n";
             if($item['isOutlier'])
             {
                 $res[$cnit]['suites'] = "OUTLIER<br><small>$bin</small>";
@@ -1442,7 +1443,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
           }
 
           //suites
-          if (!isset($res[$cnit]['rota']))
+          if (!isset($res[$cnit]['suites']))
           {
             $res[$cnit]['suites_val'] = $res[$b_key]['suites_val'];
             $res[$cnit]['suites'] = $res[$b_key]['suites'];

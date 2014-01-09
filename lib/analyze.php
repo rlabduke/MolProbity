@@ -1131,7 +1131,8 @@ function findRamaOutliers($rama)
 ############################################################################
 function runSuitenameReport($infile, $outfile)
 {
-    exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle rnabb $infile | suitename -report > $outfile");
+    //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle rnabb $infile | suitename -report > $outfile");
+    exec("mmtbx.mp_geo rna_backbone=True pdb=$infile | suitename -report -pointIDfields 7 -altIDfield 6 > $outfile");
 }
 #}}}########################################################################
 
@@ -1154,6 +1155,7 @@ function runSuitenameReport($infile, $outfile)
 */
 function loadSuitenameReport($datafile)
 {
+# OLD VERSION - did not account for alternate conform
 # 404d.pdb:1:A:   1: :  G inc  __ 0.000
 # 404d.pdb:1:A:   2: :  A 33 p 1a 0.544
 # 404d.pdb:1:A:   3: :  A trig !! 0.000 alpha
@@ -1164,6 +1166,20 @@ function loadSuitenameReport($datafile)
 # 404d.pdb:1:A:   8: :  A 33 t !! 0.000 7D dist 1c
 # 404d.pdb:1:A:   9: :  G 33 p 1a 0.294
 # 404d.pdb:1:A:  10: :  C 33 p 1a 0.739
+#
+# NEW VERSION - uses mmtbx.mp_geo in place of dangle - JJH 140108
+# adds additional column for altloc (indicated with L)
+#              L
+# :1: A:   1: : :  G inc  __ 0.000
+# :1: A:   2: : :  A 33 p 1a 0.544
+# :1: A:   3: : :  A trig !! 0.000 alpha
+# :1: A:   4: : :  G 33 t 1c 0.135
+# :1: A:   5: : :  A 33 p 1a 0.579
+# :1: A:   6: : :  G 33 t 1c 0.180
+# :1: A:   7: : :  A 33 p 1a 0.458
+# :1: A:   8: : :  A 33 t !! 0.000 7D dist 1c
+# :1: A:   9: : :  G 33 p 1a 0.294
+# :1: A:  10: : :  C 33 p 1a 0.739
 
     $data = file($datafile);
     //$ret = array(); // needs to return null if no data!
@@ -1171,7 +1187,7 @@ function loadSuitenameReport($datafile)
     {
         if(startsWith($line, " all general case widths")) break;
         $line = explode(':', rtrim($line));
-        if (count($line)==5) { // missing colon due to name length issue in suitename
+        if (count($line)==6) { // missing colon due to name length issue in suitename
           //$linestart = array(substr($line[0], 32));  // this code doesn't appear to correctly fix the second element of the array
           //$line = array_merge($linestart, $line);    // this code doesn't appear to correctly fix the second element of the array
           $linestart = array(substr($line[0], 0, 32), substr($line[0], 32));
@@ -1179,10 +1195,11 @@ function loadSuitenameReport($datafile)
           //echo $line[0].":".$line[1].":".$line[2].":".$line[3]."\n";
         }
         if (count($line) > 1) {
-          $altloc = ' '; //limitation - dangle/suitename does not handle altlocs
-          $cnit = $line[2].$line[3].$line[4].$altloc.substr($line[5],0,3);
+          $altloc = $line[5]; //added by JJH 140108
+          $cnit = $line[2].$line[3].$line[4].$altloc.substr($line[6],0,3);
+          echo $cnit."\n";
           //$decomp = decomposeResName($cnit);
-          $conf = substr($line[5],9,2);
+          $conf = substr($line[6],9,2);
           $ret[$cnit] = array(
             'resName'   => $cnit,
             //'resType'   => $decomp['resType'],
@@ -1190,9 +1207,9 @@ function loadSuitenameReport($datafile)
             //'resNum'    => $decomp['resNum'],
             //'insCode'   => $decomp['insCode'],
             'conformer' => $conf,
-            'suiteness' => substr($line[5],12,5) + 0,
-            'bin'       => substr($line[5],4,4),
-            'triage'    => substr($line[5],18),
+            'suiteness' => substr($line[6],12,5) + 0,
+            'bin'       => substr($line[6],4,4),
+            'triage'    => substr($line[6],18),
             'isOutlier' => ($conf == '!!')
           );
         }
