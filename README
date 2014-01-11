@@ -1,0 +1,22 @@
+Installing the moltbx version of MolProbity:
+
+1. Run the configure.sh script. This will install cctbx_project and needed components in moltbx/sources:
+
+    build list:
+     annlib
+     annlib_adaptbx
+     boost
+     cbflib
+     ccp4io
+     ccp4io_adaptbx
+     cctbx_project
+     chem_data
+     lapack_fem
+     probe
+     reduce
+     scons
+     tntbx
+
+and then will compile and configure in moltbx/build.
+
+2. Run setup.sh to configure the webserver. Make sure that the machine's Apache configuration can point to the moltbx/public_html directory.
