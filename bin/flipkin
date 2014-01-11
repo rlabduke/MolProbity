@@ -33,6 +33,7 @@
 #  10/25/2006 - I Davis -      - added -code to Prekin run on flipdb PDB file
 #   7/31/2007 - J Headd and R Immormino -    - fixed hydrogens on hets
 #  11/29/2007 - RMI            - updated for two character chains
+#  01/11/2014 - JJH            - changed to phenix.reduce and phenix.probe
    use strict;
 
    my $probe_chain_length = 1;
@@ -267,12 +268,12 @@
 
    my $runReduce;
    if ($nuclear) {
-     $runReduce = "reduce -quiet -trim $redpdb | " .
-                    "reduce $verb $limitFlag $dbFile -build -nuclear -fix $fixFile - > $flipdb";
+     $runReduce = "phenix.reduce -quiet -trim $redpdb | " .
+                    "phenix.reduce $verb $limitFlag $dbFile -build -nuclear -fix $fixFile - > $flipdb";
    }
    else {
-     $runReduce = "reduce -quiet -trim $redpdb | " .
-                    "reduce $verb $limitFlag $dbFile -build -fix $fixFile - > $flipdb";
+     $runReduce = "phenix.reduce -quiet -trim $redpdb | " .
+                    "phenix.reduce $verb $limitFlag $dbFile -build -fix $fixFile - > $flipdb";
    }
    my $rc = system($runReduce);
 
@@ -493,7 +494,7 @@
    system("echo \"\@group \{movable\}\" >> $kintmp");
    system("$pkin -show \"sc(cyan),hy(gray)\" -sc \"cys,ser,thr,${nselSC},lys,met,tyr\"");
    system("echo \"\@group \{contacts\}\" >> $kintmp");
-   system("probe $probeParams " .
+   system("phenix.probe $probeParams " .
          "\"${prbSC} sc alta ogt1 not (beta,atom1HG_,atom2HG_,atom3HG_)\" " .
          "\"not water alta ogt1 | water alta blt40 ogt66\" $redpdb >> $kintmp");
 
@@ -530,7 +531,7 @@
    system("echo \"\@group \{movable\}\" >> $kintmp");
    system("$pkin -show \"sc(cyan),hy(gray)\" -sc \"cys,ser,thr,${nselSC},lys,met,tyr\"");
    system("echo \"\@group \{contacts\}\" >> $kintmp");
-   system("probe $probeParams " .
+   system("phenix.probe $probeParams " .
          "\"${prbSC} sc alta ogt1 not (beta,atom1HG_,atom2HG_,atom3HG_)\" " .
          "\"not water alta ogt1 | water alta blt40 ogt66\" $flipdb >> $kintmp");
 
