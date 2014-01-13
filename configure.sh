@@ -33,13 +33,13 @@ tar zxf tntbx.tar.gz
 
 if [ -n "$sf_user" ]
 then
-    svn co https://$sf_user@svn.code.sf.net/p/cctbx/code/trunk cctbx_project
+    svn --non-interactive --trust-server-cert co https://$sf_user@svn.code.sf.net/p/cctbx/code/trunk cctbx_project
 else
-    svn co https://svn.code.sf.net/p/cctbx/code/trunk cctbx_project
+    svn --non-interactive --trust-server-cert co https://svn.code.sf.net/p/cctbx/code/trunk cctbx_project
 fi
 
-svn co https://quiddity.biochem.duke.edu/svn/reduce/trunk reduce
-svn co https://quiddity.biochem.duke.edu/svn/probe/trunk probe
+svn --non-interactive --trust-server-cert co https://quiddity.biochem.duke.edu/svn/reduce/trunk reduce
+svn --non-interactive --trust-server-cert co https://quiddity.biochem.duke.edu/svn/probe/trunk probe
 
 cd ../build
 

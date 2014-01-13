@@ -655,8 +655,8 @@ function toggleUploadOptions()
       Read more about this change <a style=\"color: #66FFFF\" href='".makeEventURL("onGoto", "helper_hydrogens.php")."'>here</a>.
       <p>Ramachandran scoring has also been updated to use new six-category distributions, derived from a larger
       <a style=\"color: #66FFFF\" href='http://kinemage.biochem.duke.edu/databases/top8000.php' target='_blank'>Top8000</a> dataset of high quality PDB files.
-        <br><br>Please don't hesitate to report any <a style=\"color: #66FFFF\" href='".makeEventURL("onGoto", "feedback_setup.php")."'>bugs</a> you may encounter.</strong></div>");
-       // <br><br>If you prefer to use the previous MolProbity3, please go to <a style=\"color: #66FFFF\" href='http://helix.research.duhs.duke.edu/' target='_blank'>http://helix.research.duhs.duke.edu</a>.</strong></div>");
+        <br><br>Please don't hesitate to report any <a style=\"color: #66FFFF\" href='".makeEventURL("onGoto", "feedback_setup.php")."'>bugs</a> you may encounter.
+        <br><br>If for some reason you need to use MolProbity4 version 4.02, which is now a retired legacy version, please go to <a style=\"color: #66FFFF\" href='http://rutile.biochem.duke.edu/' target='_blank'>http://rutile.biochem.duke.edu</a>.</strong></div>");
 
 }
 
