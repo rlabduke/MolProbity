@@ -1132,7 +1132,7 @@ function findRamaOutliers($rama)
 function runSuitenameReport($infile, $outfile)
 {
     //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle rnabb $infile | suitename -report > $outfile");
-    exec("mmtbx.mp_geo rna_backbone=True pdb=$infile | suitename -report -pointIDfields 7 -altIDfield 6 > $outfile");
+    exec("mmtbx.mp_geo rna_backbone=True pdb=$infile | phenix.suitename -report -pointIDfields 7 -altIDfield 6 > $outfile");
 }
 #}}}########################################################################
 
@@ -1245,7 +1245,9 @@ function runSuitenameString($infile, $outfile)
     // Unix "fold" is used to wrap long lines to reasonable lengths,
     // so they display OK in the <PRE> region of the HTML page.
     // 60 was selected because it makes counting to specific positions easier (20 suites/line)
-    exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle rnabb $infile | suitename -string -oneline | fold -w 60 > $outfile");
+    //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle rnabb $infile | suitename -string -oneline | fold -w 60 > $outfile");
+    exec("mmtbx.mp_geo rna_backbone=True pdb=$infile | phenix.suitename -string -oneline -pointIDfields 7 -altIDfield 6 | fold -w 60 > $outfile");
+
 }
 #}}}########################################################################
 

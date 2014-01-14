@@ -40,6 +40,7 @@ fi
 
 svn --non-interactive --trust-server-cert co https://quiddity.biochem.duke.edu/svn/reduce/trunk reduce
 svn --non-interactive --trust-server-cert co https://quiddity.biochem.duke.edu/svn/probe/trunk probe
+svn --non-interactive --trust-server-cert co https://quiddity.biochem.duke.edu/svn/suitename
 
 cd ../build
 
