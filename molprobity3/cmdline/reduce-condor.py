@@ -216,7 +216,7 @@ def make_reduce_files(indir, file_size_limit, build_type, bond_type):
     list_of_lists = divide_pdbs(indir, file_size_limit)
     #write_super_dag(outdir, list_of_lists)
     #write_file(outdir, "local_run.sh", local_run.format(molprobity_home, pdbbase="{pdbbase}"), 0755)
-    pdb = "{pdbbase}F"
+    pdb = "{pdbbase}"
     build = "nobuild"
     if build_type=="build":
       pdb = "{pdbbase}F"
@@ -231,4 +231,4 @@ def make_reduce_files(indir, file_size_limit, build_type, bond_type):
 if __name__ == "__main__":
 
   opts, indir = parse_cmdline()
-  make_reduce_files(indir, opts.total_file_size_limits, opts.build_type)
+  make_reduce_files(indir, opts.total_file_size_limit, opts.build_type, opts.bond_type)
