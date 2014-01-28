@@ -36,14 +36,14 @@ def parse_cmdline():
   #  sys.exit(parser.print_help())
   if len(args) < 1:
     sys.stderr.write("\n**ERROR: User must specify input directory\n")
-    sys.exit(help())
+    sys.exit(parser.print_help())
   else:
     indir = args[0]
     if (os.path.isdir(indir)):
       return opts, indir
     else:
       sys.stderr.write("\n**ERROR: First argument must be a directory!\n")
-      sys.exit(help())
+      sys.exit(parser.print_help())
 #------------------------------------------------------------------------------------------------
 #}}}
 
@@ -359,7 +359,7 @@ for dir in sys.argv[1:]:
         if not os.path.exists("results/"+pdb_code):
             os.makedirs("results/"+pdb_code)
         
-        reap(syscmd("results/"+pdb_code+"/"+pdbbase+"-clashlist", "./clashlist", pdb, '40', '10', 'nuclear'), pdbbase)
+        reap(syscmd("results/"+pdb_code+"/"+pdbbase+"-clashlist", "./clashlist", pdb, '40', '10', '{bondtype}'), pdbbase)
         reap(syscmd("results/"+pdb_code+"/"+pdbbase+"-ramalyze","java","-cp","{0}/lib/chiropraxis.jar", "chiropraxis.rotarama.Ramalyze", "-raw", "-quiet", pdb), pdbbase)
         reap(syscmd("results/"+pdb_code+"/"+pdbbase+"-rotalyze","java","-cp","{0}/lib/chiropraxis.jar", "chiropraxis.rotarama.Rotalyze", pdb), pdbbase)
         reap(syscmd("results/"+pdb_code+"/"+pdbbase+"-dangle_rna","java","-cp","{0}/lib/dangle.jar", "dangle.Dangle", "-rna", "-validate", "-outliers", "-sigma=0.0", pdb), pdbbase)
@@ -476,7 +476,7 @@ def make_files(indir, file_size_limit, bond_type):
     write_oneline_dag(outdir, list_of_lists, bond_type)
     write_file(outdir, "reduce.sh", reduce_sh.format(molprobity_home, buildtype="{buildtype}", bondtype="{bondtype}", outdir="{outdir}", pdbbase="{pdbbase}"), 0755)
     write_file(outdir, "reduce.sub", reduce_sub.format(molprobity_home))
-    write_file(outdir, "oneline.py", oneline_py.format(molprobity_home), 0755)
+    write_file(outdir, "oneline.py", oneline_py.format(molprobity_home, bondtype=bond_type), 0755)
     write_file(outdir, "oneline.sub", oneline_sub.format(molprobity_home))
     write_file(outdir, "post_process.sh", post_sh, 0755)
     #write_file(outdir, "local_run.sh", local_run.format(molprobity_home, pdbbase="{pdbbase}"), 0755)
