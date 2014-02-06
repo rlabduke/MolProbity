@@ -1056,7 +1056,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             if ($outCount/$total < 0.002)    $bg = $bgFair;
             if ($outCount/$total == 0.0)    $bg = $bgGood;
             else                            $bg = $bgPoor;
-            $entry .= "<td>Bad backbone bonds:</td><td bgcolor='$bg'>$outCount / $total</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: 0%</td></tr>\n";
+            $entry .= "<td>Bad bonds:</td><td bgcolor='$bg'>$outCount / $total</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: 0%</td></tr>\n";
         }
         if(hasMoltype($bangles, "protein"))
         {
@@ -1077,7 +1077,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             if ($outCount/$total < 0.005)    $bg = $bgFair;
             if ($outCount/$total < 0.001)    $bg = $bgGood;
             else                            $bg = $bgPoor;
-            $entry .= "<td>Bad backbone angles:</td><td bgcolor='$bg'>$outCount / $total</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <0.1%</td></tr>\n";
+            $entry .= "<td>Bad angles:</td><td bgcolor='$bg'>$outCount / $total</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <0.1%</td></tr>\n";
         }
     }// end of protein-specific stats
     $nucleicRows = 0;
