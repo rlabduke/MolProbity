@@ -90,13 +90,19 @@ def split_pdb(pdb_file, outdir, gzip_file = False):
   model_files = []
   keep_lines = False
   pdb_name, ext = os.path.splitext(os.path.basename(pdb_file))
+  print pdb_name+"\n"
+  if pdb_name.startswith("pdb") and pdb_name.endswith(".ent"):
+    pdb_name = pdb_name[3:-4]
+  print pdb_name+"\n"
   if gzip_file:
     pdb_in = gzip.open(pdb_file)
   else:
     pdb_in=open(pdb_file)
   mod_num = 0
+  all_file = ""
   for line in pdb_in:
     start = line[0:6]
+    all_file = all_file+line
     if start == "MODEL ":
       keep_lines = True
       mod_num = int(line[5:25].strip())
@@ -107,9 +113,11 @@ def split_pdb(pdb_file, outdir, gzip_file = False):
       model_out.close()
     elif keep_lines:
       model_out.write(line)
-  pdb_in.close()
   if mod_num == 0: # takes care of the case where there's only one model, so no MODEL or ENDMDL
-    shutil.copyfile(pdb_file, os.path.join(outdir, pdb_name+"_001.pdb"))
+    model_out = open(os.path.join(outdir, pdb_name+"_001.pdb"), 'wr')
+    model_out.write(all_file)
+    model_out.close()
+  pdb_in.close()    
 #}}}
 
 #{{{ divide_pdbs
@@ -143,6 +151,18 @@ def divide_pdbs(in_dir, size_limit):
             pdb_list.append(full_file)
             list_of_lists.append(pdb_list)
             list_size = os.path.getsize(full_file)
+        if (ext == ".gz"):
+          root2, ext = os.path.splitext(root)
+          if (ext == ".ent"):
+            if (list_size <= size_limit):
+              pdb_list.append(full_file)
+              #print pdb_list
+              list_size = list_size + os.path.getsize(full_file)/0.6 # assumming ~60%compression by gzip
+            else: 
+              pdb_list = []
+              pdb_list.append(full_file)
+              list_of_lists.append(pdb_list)
+              list_size = os.path.getsize(full_file)/0.6
     if len(list_of_lists) > 10000:
       sys.stderr.write("\n**ERROR: More than 10000 jobs needed, try choosing a larger -limit\n")
       sys.exit()
@@ -152,7 +172,6 @@ def divide_pdbs(in_dir, size_limit):
 
 #{{{ split_pdbs_to_dirs
 def split_pdbs_to_dirs(outdir, list_of_pdblists):
-  print list_of_pdblists
   for indx, pdbs in enumerate(list_of_pdblists):
     num = '{0:0>4}'.format(indx)
     numpath = os.path.join(outdir, "pdbs", num)
@@ -224,10 +243,10 @@ def write_oneline_dag(outdir, list_of_pdblists, bondtype):
       out.write("VARS reducer"+buildtype+num+" ARGS= \""+" ".join((repr(sleep_seconds), os.path.join(out_pdb_dir, num, "reduce-"+buildtype), buildtype, bondtype, os.path.join(out_pdb_dir, num, "orig")))+"\"\n")
       out.write("VARS reducer"+buildtype+num+" NUMBER=\""+buildtype+num+"\"\n\n")
 
-      if sleep_seconds > 150:
-        sleep_seconds = sleep_seconds + 5
+      if sleep_seconds > 120:
+        sleep_seconds = sleep_seconds + 1
       else:
-        sleep_seconds = sleep_seconds + 10
+        sleep_seconds = sleep_seconds + 4
 
       parent_childs = "" # create parent_childs part of dag file now so only have to loop once thru pdbs
       base_pdbs = []
@@ -241,13 +260,15 @@ def write_oneline_dag(outdir, list_of_pdblists, bondtype):
       #out.write("VARS oneline"+buildtype+num+" PDBS=\""+" ".join(pdbs)+"\"\n")
       out.write("VARS oneline"+buildtype+num+" DIR=\""+os.path.join(out_pdb_dir, num, "reduce-"+buildtype)+"\"\n")
       out.write("VARS oneline"+buildtype+num+" NUMBER=\""+buildtype+num+"\"\n")
-      out.write("PARENT reducer"+buildtype+num+" CHILD oneline"+buildtype+num+"\n\n")
+      out.write("PARENT reducer"+buildtype+num+" CHILD oneline"+buildtype+num+"\n")
+      out.write("RETRY oneline"+buildtype+num+" 3\n\n")
       postjobs = postjobs+"oneline"+buildtype+num + " "
     
     out.write("Job onelineorig"+num+" oneline.sub\n")
     #out.write("VARS oneline"+buildtype+num+" PDBS=\""+" ".join(pdbs)+"\"\n")
     out.write("VARS onelineorig"+num+" DIR=\""+os.path.join(out_pdb_dir, num, "orig")+"\"\n")
-    out.write("VARS onelineorig"+num+" NUMBER=\"orig"+num+"\"\n\n")
+    out.write("VARS onelineorig"+num+" NUMBER=\"orig"+num+"\"\n")
+    out.write("RETRY onelineorig"+num+" 3\n\n")
     postjobs = postjobs+"onelineorig"+num + " "
     
   out.write("JOB post post_process.sub\n")
@@ -283,9 +304,9 @@ if [ $buildtype = "build" ]
   then
     pdbbase="${pdbbase}F"
 fi
-echo "Error code pre reduce: $? \n" >&2
+echo "Error code pre reduce: $? \\n" >&2
 ./reduce -q -trim $pdb | ./reduce -q -${buildtype} -${bondtype} - > ${outdir}/${pdbbase}H.pdb
-echo "Error code post reduce: $? \n" >&2
+echo "Error code post reduce: $? \\n" >&2
 done
 done
 """
@@ -348,7 +369,7 @@ def reap(the_cmd, pdb):
 os.makedirs("results")
 
 for dir in sys.argv[1:]:
-    for file in os.listdir(dir):
+    for file in sorted(os.listdir(dir)):
         pdb = os.path.join(dir, file)
         sys.stderr.write(pdb+" analysis\\n")
         s_time = time.time()
@@ -405,6 +426,11 @@ transfer_input_files = {0}/bin/linux/probe,{0}/bin/linux/cluster,{0}/bin/clashli
 transfer_output_files = results
 #transfer_output_remaps = "$(PDBREMAPS)"
 
+maxRunTime = 7200
+periodic_remove = JobStatus == 2 && \
+ ( (CurrentTime - EnteredCurrentStatus) + \
+   RemoteWallClockTime - CumulativeSuspensionTime < $(maxRunTime) )
+
 log         = logs/oneline$(NUMBER).log
 output      = logs/oneline$(NUMBER).out
 error       = logs/oneline$(NUMBER).err
@@ -441,6 +467,8 @@ cat logs/onelinenobuild*.out > logs/allonelinenobuild.out.csv
 cat logs/onelinenobuild*.err > logs/allonelinenobuild.err
 cat logs/onelinebuild*.out > logs/allonelinebuild.out.csv
 cat logs/onelinebuild*.err > logs/allonelinebuild.err
+tar -zcf pdbs.tgz pdbs/
+rm -rf pdbs/
 """
 #}}}
 
