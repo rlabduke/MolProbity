@@ -90,10 +90,10 @@ def split_pdb(pdb_file, outdir, gzip_file = False):
   model_files = []
   keep_lines = False
   pdb_name, ext = os.path.splitext(os.path.basename(pdb_file))
-  print pdb_name+"\n"
+  #print pdb_name+"\n"
   if pdb_name.startswith("pdb") and pdb_name.endswith(".ent"):
     pdb_name = pdb_name[3:-4]
-  print pdb_name+"\n"
+  #print pdb_name+"\n"
   if gzip_file:
     pdb_in = gzip.open(pdb_file)
   else:
@@ -427,9 +427,9 @@ transfer_output_files = results
 #transfer_output_remaps = "$(PDBREMAPS)"
 
 maxRunTime = 7200
-periodic_remove = JobStatus == 2 && \
- ( (CurrentTime - EnteredCurrentStatus) + \
-   RemoteWallClockTime - CumulativeSuspensionTime < $(maxRunTime) )
+periodic_remove = JobStatus == 2 && \\
+ (((CurrentTime - EnteredCurrentStatus) + \\
+   (RemoteWallClockTime - CumulativeSuspensionTime)) > $(maxRunTime) )
 
 log         = logs/oneline$(NUMBER).log
 output      = logs/oneline$(NUMBER).out
