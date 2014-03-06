@@ -156,6 +156,11 @@ function addModelOrEnsemble(
            $isUserSupplied = true,
            $trim_input_H = true)
 {
+    // Save original in original_uplads
+    $outpath = $_SESSION['dataDir'].'/'.MP_DIR_ORIGS;
+    if(!file_exists($outpath)) mkdir($outpath, 0777);
+    $filename = $outpath.'/'.$origName;
+    copy($tmpPdb, $filename);
     // Try stripping file extension
     if(preg_match('/^(.+)\.(pdb|xyz|ent)$/i', $origName, $m))
         $origID = $m[1];
