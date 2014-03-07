@@ -255,7 +255,7 @@ def loadRotamer(datafile):
 #
 def loadRamachandran(datafile):
   data = file(datafile).readlines()[1:] # drop first line
-  ret = {};
+  ret = {}
   for line in data:
     splitline = line.split(":") 
     cnit = splitline[0]
@@ -272,7 +272,7 @@ def loadRamachandran(datafile):
       'phi'     : float(splitline[2]),
       'psi'     : float(splitline[3]),
       'eval'    : splitline[4],
-      'type'    : splitline[5]
+      'type'    : splitline[5].strip()
     }
   return ret
 #}}}########################################################################
@@ -301,7 +301,7 @@ def loadRamachandran(datafile):
 #
 def loadBasePhosPerp(datafile):
   data = open(datafile)
-  ret = []
+  ret = {}
   for line in data:
     line = line.strip();
     if(line != "" and not line.startswith(':pdb:res:')):
@@ -322,7 +322,7 @@ def loadBasePhosPerp(datafile):
         'outlier'   : (deltaOut or epsilonOut)
       }
       entry['resName'] = recomposeResName(entry['chainID'], entry['resNum'], entry['insCode'], entry['resType'])
-      ret.append(entry)
+      ret[entry['resName']] = entry
   return ret
 #}}}########################################################################
 
@@ -575,7 +575,7 @@ def findSuitenameOutliers(suites):
 def findBasePhosPerpOutliers(pperps):
   worst = {}
   if(len(pperps)>0):
-    for data in pperps:
+    for res, data in pperps.iteritems():
       if(data['outlier']):
         worst[data['resName']] = delta_or_epsilon(data)
   #ksort($worst); // Put the residues into a sensible order
@@ -798,6 +798,8 @@ def oneline_analysis(files, quiet):
   print out
 #}}}
 
+# Takes as input a whole series of different results files from MP analysis
+# e.g. clashlist, ramalyze, rotalyze, dangle, pperp, cbdev, etc.
 if __name__ == "__main__":
   opts, args = parse_cmdline()
   #analyze_file(args)
