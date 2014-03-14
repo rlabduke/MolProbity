@@ -480,6 +480,77 @@ def loadBondGeometryReport(datafile, moltype):
   return ret
 #}}}########################################################################
 
+#{{{ loadTauOmegaReport
+def loadTauOmegaReport(datafile):
+  ret = {}
+  with open(datafile) as f:
+    for line in f:
+      if(line.startswith("#")):
+        continue
+      #print "line"+line
+      splitline = line.strip().split(':')
+      cnit = splitline[2]+splitline[3]+splitline[4]+splitline[5]
+      decomp = decomposeResName(cnit)
+      for i, e in enumerate(splitline):
+        if e == "__?__":
+          splitline[i] = "nan"
+      ret[cnit] = {
+        'resName'   : cnit,
+        'resType'   : decomp['resType'],
+        'chainID'   : decomp['chainID'],
+        'resNum'    : decomp['resNum'],
+        'insCode'   : decomp['insCode'],
+        'tau'       : float(splitline[6]),
+        'omega'     : float(splitline[7])
+      }
+  return ret
+#}}}
+
+#{{{ loadDisulfidesReport
+def loadDisulfidesReport(datafile):
+  ret = {}
+  with open(datafile) as f:
+    for line in f:
+      if(line.startswith("#")):
+        continue
+      splitline = line.strip().split(':')
+      cnit = splitline[2]+splitline[3]+splitline[4]+splitline[5]
+      decomp = decomposeResName(cnit)
+      for i, e in enumerate(splitline):
+        if e == "__?__":
+          splitline[i] = "nan"
+      ret[cnit] = {
+        'resName'   : cnit,
+        'resType'   : decomp['resType'],
+        'chainID'   : decomp['chainID'],
+        'resNum'    : decomp['resNum'],
+        'insCode'   : decomp['insCode'],
+        'chi1'      : float(splitline[8]),
+        'chi2'      : float(splitline[9]),
+        'chi3'      : float(splitline[10]),
+        'chi2prime' : float(splitline[11]),
+        'chi1prime' : float(splitline[12])
+      }
+  return ret
+#}}}
+
+#{{{ loadMaxBfactor
+def loadMaxBfactor(datafile):
+  ret = {}
+  with open(datafile) as f:
+    for line in f:
+      if(line.startswith("#")):
+        continue
+      splitline = line.strip().split(':')
+      cnit = splitline[2]+splitline[3]+splitline[4]+splitline[5]
+      maxB = float(splitline[6]);
+      ret[cnit] = {
+        'resName' : cnit,
+        'maxB'    : maxB
+      }
+  return ret
+#}}}
+
 #{{{ findClashOutliers - evaluates residues for bad score
 ############################################################################
 #**

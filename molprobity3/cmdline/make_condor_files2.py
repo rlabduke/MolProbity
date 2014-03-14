@@ -422,6 +422,12 @@ for dir in sys.argv[1:]:
             reap(syscmd("results/"+pdb_code+"/"+pdbbase+"-dangle_protein","java","-cp","{0}/lib/dangle.jar", "dangle.Dangle", "-protein", "-validate", "-outliers", "-sigma=0.0", pdb), pdbbase)
         if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-dangle_dna"):
             reap(syscmd("results/"+pdb_code+"/"+pdbbase+"-dangle_dna","java","-cp","{0}/lib/dangle.jar", "dangle.Dangle", "-dna", "-validate", "-outliers", "-sigma=0.0", pdb), pdbbase)
+        if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-dangle_ss"):
+            reap(syscmd("results/"+pdb_code+"/"+pdbbase+"-dangle_ss","java","-cp","{0}/lib/dangle.jar", "dangle.Dangle", "ss", pdb), pdbbase)
+        if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-dangle_tauomega"):
+            reap(syscmd("results/"+pdb_code+"/"+pdbbase+"-dangle_tauomega","java","-cp","{0}/lib/dangle.jar", "dangle.Dangle", "tau", "omega", pdb), pdbbase)
+        if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-dangle_maxb"):
+            reap(syscmd("results/"+pdb_code+"/"+pdbbase+"-dangle_maxb","java","-cp","{0}/lib/dangle.jar", "dangle.Dangle", "maxb maxB /..../", pdb), pdbbase)
         if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-prekin_pperp"):
             reap(syscmd("results/"+pdb_code+"/"+pdbbase+"-prekin_pperp","{0}/bin/linux/prekin", "-pperptoline", "-pperpdump", pdb), pdbbase)
         if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-cbdev"):
@@ -438,7 +444,19 @@ for dir in sys.argv[1:]:
             reap(cmd1, pdbbase)
             reap(cmd2, pdbbase)
         
-        cmd9 = syscmd(subprocess.PIPE, "{0}/cmdline/{script}", "-q", pdb, model_num, "results/"+pdb_code+"/"+pdbbase+"-clashlist", "results/"+pdb_code+"/"+pdbbase+"-cbdev", "results/"+pdb_code+"/"+pdbbase+"-rotalyze", "results/"+pdb_code+"/"+pdbbase+"-ramalyze", "results/"+pdb_code+"/"+pdbbase+"-dangle_protein", "results/"+pdb_code+"/"+pdbbase+"-dangle_rna", "results/"+pdb_code+"/"+pdbbase+"-dangle_dna", "results/"+pdb_code+"/"+pdbbase+"-prekin_pperp", "results/"+pdb_code+"/"+pdbbase+"-suitename")
+        cmd9 = syscmd(subprocess.PIPE, "{0}/cmdline/{script}", "-q", pdb, model_num, 
+                      "results/"+pdb_code+"/"+pdbbase+"-clashlist", 
+                      "results/"+pdb_code+"/"+pdbbase+"-cbdev", 
+                      "results/"+pdb_code+"/"+pdbbase+"-rotalyze", 
+                      "results/"+pdb_code+"/"+pdbbase+"-ramalyze", 
+                      "results/"+pdb_code+"/"+pdbbase+"-dangle_protein", 
+                      "results/"+pdb_code+"/"+pdbbase+"-dangle_rna", 
+                      "results/"+pdb_code+"/"+pdbbase+"-dangle_dna", 
+                      "results/"+pdb_code+"/"+pdbbase+"-prekin_pperp", 
+                      "results/"+pdb_code+"/"+pdbbase+"-suitename",
+                      "results/"+pdb_code+"/"+pdbbase+"-dangle_maxb",
+                      "results/"+pdb_code+"/"+pdbbase+"-dangle_tauomega",
+                      "results/"+pdb_code+"/"+pdbbase+"-dangle_ss")
         print long_reap(cmd9, pdbbase).strip()
         #print cmd9.stdout.read().strip()
         e_time = time.time()
@@ -505,6 +523,12 @@ cat logs/onelinenobuild*.out > logs/allonelinenobuild.out.csv
 cat logs/onelinenobuild*.err > logs/allonelinenobuild.err
 cat logs/onelinebuild*.out > logs/allonelinebuild.out.csv
 cat logs/onelinebuild*.err > logs/allonelinebuild.err
+cat logs/residuerorig*.out > logs/allresiduerorig.out.csv
+cat logs/residuerorig*.err > logs/allresiduerorig.err
+cat logs/residuernobuild*.out > logs/allresiduernobuild.out.csv
+cat logs/residuernobuild*.err > logs/allresiduernobuild.err
+cat logs/residuerbuild*.out > logs/allresiduerbuild.out.csv
+cat logs/residuerbuild*.err > logs/allresiduerbuild.err
 tar -zcf pdbs.tgz pdbs/
 rm -rf pdbs/
 """
