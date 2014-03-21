@@ -1,6 +1,16 @@
 Installing the moltbx version of MolProbity:
 
-1. Run the configure.sh script. This will install cctbx_project and needed components in moltbx/sources:
+Welcome to MolProbity!!
+
+Installation
+
+Installation is fairlly straightforward. First move the moltbx directory (the directory that this README file is in)  to a location where you want it to reside. Note that Apache will have to see moltbx/public_html. Once the moltbx directory is in the proper location, you are redy to install. Open a terminal and goto the moltbx directory.
+
+1. Make sure that configure.sh is exectutable then run configure.sh. 
+
+>>> ./configure.sh
+
+This will install cctbx_project and needed components in moltbx/sources:
 
     build list:
      annlib
@@ -19,4 +29,11 @@ Installing the moltbx version of MolProbity:
 
 and then will compile and configure in moltbx/build.
 
-2. Run setup.sh to configure the webserver. Make sure that the machine's Apache configuration can point to the moltbx/public_html directory.
+
+
+2. Run setup.sh to configure the webserver.
+
+>>> ./setup.sh
+
+Make sure that the machine's Apache configuration can point to the moltbx/public_html directory.
+
