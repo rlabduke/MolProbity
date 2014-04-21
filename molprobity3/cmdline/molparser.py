@@ -491,17 +491,20 @@ def loadTauOmegaReport(datafile):
       splitline = line.strip().split(':')
       cnit = splitline[2]+splitline[3]+splitline[4]+splitline[5]
       decomp = decomposeResName(cnit)
-      for i, e in enumerate(splitline):
+      for i, e in enumerate(splitline[6:8]):
+        #print e
         if e == "__?__":
-          splitline[i] = "nan"
+          splitline[i+6] = ""
+        else:
+          splitline[i+6] = float(splitline[i+6])
       ret[cnit] = {
         'resName'   : cnit,
         'resType'   : decomp['resType'],
         'chainID'   : decomp['chainID'],
         'resNum'    : decomp['resNum'],
         'insCode'   : decomp['insCode'],
-        'tau'       : float(splitline[6]),
-        'omega'     : float(splitline[7])
+        'tau'       : splitline[6],
+        'omega'     : splitline[7]
       }
   return ret
 #}}}

@@ -4,6 +4,8 @@ from math import log
 import sys, os, getopt, re, pprint, collections
 from optparse import OptionParser
 import molparser
+sys.path.append('/home/vbc3/programs/sans/python')
+import bmrb
 
 #{{{ parse_cmdline
 #parse the command line--------------------------------------------------------------------------
@@ -212,51 +214,82 @@ def residue_analysis(files, quiet):
   list_res = list_residues(files[0])
   #print list_res
   #out = []
-  header = ["filename",
-            "pdb_id",
-            "model_num",
-            "chain_id",
-            "resnum",
-            "inscode",
-            "restype",
-            "clash",
-            "srcatom",
-            "dstatom",
-            "dst_chain_id",
-            "dst_resnum",
-            "dst_inscode",
-            "dst_restype",
-            "cbetadev",
-            "rota_score",
-            "rotamer",
-            "rama_phi",
-            "rama_psi",
-            "rama_score",
-            "rama_eval",
-            "rama_type",
-            "bond_out_count",
-            "worst_bond",
-            "worst_bond_val",
-            "worst_bond_sig",
-            "angle_out_count",
-            "worst_angle",
-            "worst_angle_val",
-            "worst_angle_sig",
-            "pperp_out",
-            "suitness_score",
-            "suite_conf",
-            "suite_triage",
-            "max_b_factor",
-            "tau_angle",
-            "omega_dihedral",
-            "disulf_chi1",
-            "disulf_chi2",
-            "disulf_chi3",
-            "disulf_chi2'",
-            "disulf_chi1'",
-            "outlier_count_sep_geom",
-            "outlier_count"
+  #need h position, flip info, 
+  header = ["Filename",
+            "PDB_accession_code",
+            "PDB_model_num",
+            "Hydrogen_positions",
+            "MolProbity_flips",
+            "Two_letter_chain_ID",
+            "PDB_strand_ID",
+            "PDB_residue_no",
+            "PDB_ins_code",
+            "PDB_residue_name",
+            "Assembly_ID",
+            "Entity_assembly_ID",
+            "Entity_ID",
+            "Entry_ID",
+            "Comp_ID",
+            "Comp_index_ID",
+            "Clash_value",
+            "Clash_source_PDB_atom_name",
+            "Clash_destination_PDB_atom_name",
+            "Clash_destination_PDB_strand_ID",
+            "Clash_destination_PDB_residue_no",
+            "Clash_destination_PDB_ins_code",
+            "Clash_destination_PDB_residue_name",
+            "Cbeta_deviation_value",
+            "Rotamer_score",
+            "Rotamer_name",
+            "Ramachandran_phi",
+            "Ramachandran_psi",
+            "Ramachandran_score",
+            "Ramachandran_evaluation",
+            "Ramachandran_type",
+            "Bond_outlier_count",
+            "Worst_bond",
+            "Worst_bond_value",
+            "Worst_bond_sigma",
+            "Angle_outlier_count",
+            "Worst_angle",
+            "Worst_angle_value",
+            "Worst_angle_sigma",
+            "RNA_phosphate_perp_outlier",
+            "RNA_suitness_score",
+            "RNA_suite_conformer",
+            "RNA_suite_triage",
+            "Max_b_factor",
+            "Tau_angle",
+            "Omega_dihedral",
+            "Disulfide_chi1",
+            "Disulfide_chi2",
+            "Disulfide_chi3",
+            "Disulfide_chi2prime",
+            "Disulfide_chi1prime",
+            "Outlier_count_separate_geometry",
+            "Outlier_count",
+            "Entry_ID",
+            "List_ID"
   ]
+  
+  output_dir = (files[14])
+  
+  output_str = os.path.join(output_dir, (os.path.basename(files[0])[:-4])[:4]+"-residue.str")
+  if os.path.isfile(output_str):
+    saver = bmrb.saveframe.fromFile(output_str)
+    loop = saver.getLoopByCategory("Residue_analysis")
+  else:
+    saver = bmrb.saveframe.fromScratch("Structure_validation_residue", "Structure_validation_residue")
+    saver.addTag("Sf_category", "?")
+    saver.addTag("Sf_framecode", "?")
+    saver.addTag("Entry_ID", "?")
+    saver.addTag("List_ID", "?")
+    saver.addTag("Software_label", "molprobity")
+    saver.addTag("Software_version", "4.0")
+    saver.addTag("File_name", os.path.basename(files[0]))
+    saver.addTag("PDB_ID", (os.path.basename(files[0])[:-4])[:4])
+    loop = bmrb.loop.fromScratch(category="Residue_analysis")
+    loop.addColumn(header)
   
   clash = molparser.loadClashlist(files[2])
   cbdev = molparser.loadCbetaDev(files[3])
@@ -296,7 +329,7 @@ def residue_analysis(files, quiet):
   suites = molparser.loadSuitenameReport(files[10])
   badSuites = molparser.findSuitenameOutliers(suites)
   
-  print "#"+(":".join(header))
+  csv_out = "#"+(":".join(header))
   for res in list_res:
     out = []
     outCount = 0
@@ -306,13 +339,30 @@ def residue_analysis(files, quiet):
     #  outCount += 1
     #  outCountSep += 1
     
-    out.append(os.path.basename(files[0]))
-    out.append((os.path.basename(files[0])[:-4])[:4])
-    out.append(files[1])
-    out.append(res[0:2])
-    out.append(res[2:6])
-    out.append(res[6:7])
-    out.append(res[7:10])
+    out.append(os.path.basename(files[0])) # filename
+    out.append((os.path.basename(files[0])[:-4])[:4]) # pdbID
+    out.append(files[1]) # model num
+    flips_used = files[16]
+    #print flips_used
+    #print type(flips_used)
+    #print flips_used == "na"
+    if flips_used == "na":
+      out.append("original")
+    else:
+      out.append(files[15]) # Hydrogen_positions
+    out.append(files[16]) # MolProbity_flips
+    out.append(res[0:2]) # Two_letter_chain_ID
+    out.append(res[1:2]) # PDB_strand_ID
+    out.append(res[2:6]) # PDB_residue_no
+    out.append(res[6:7]) # PDB_ins_code
+    out.append(res[7:10]) # PDB_residue_name
+    
+    out.append("?") # "Assembly_ID",       bmrb specific, to be filled in later
+    out.append("?") # "Entity_assembly_ID",bmrb specific, to be filled in later
+    out.append("?") # "Entity_ID",         bmrb specific, to be filled in later
+    out.append("?") # "Entry_ID",          bmrb specific, to be filled in later
+    out.append("?") # "Comp_ID",           bmrb specific, to be filled in later
+    out.append("?") # "Comp_index_ID",     bmrb specific, to be filled in later
     
     if res in clash['clashes']:
       outCount += 1
@@ -360,20 +410,22 @@ def residue_analysis(files, quiet):
     if (totalRes > 0 and totalBonds > 0 and totalAngles > 0): # catches a bug with PNA residues      
       if res in bondOut:
         outCountSep += 1
-      out.append(geom[res]['bondoutCount'])
-      out.append(geom[res]['worstbondmeasure'])
-      out.append(geom[res]['worstbondvalue'])
-      out.append(geom[res]['worstbondsigma'])
-      #else:
-      #  out.extend(['','','',''])
+      if res in geom:
+        out.append(geom[res]['bondoutCount'])
+        out.append(geom[res]['worstbondmeasure'])
+        out.append(geom[res]['worstbondvalue'])
+        out.append(geom[res]['worstbondsigma'])
+      else:
+        out.extend(['','','',''])
       if res in angleOut:
         outCountSep += 1
-      out.append(geom[res]['angleoutCount'])
-      out.append(geom[res]['worstanglemeasure'])
-      out.append(geom[res]['worstanglevalue'])
-      out.append(geom[res]['worstanglesigma'])
-      #else:
-      #  out.extend(['','','',''])
+      if res in geom:
+        out.append(geom[res]['angleoutCount'])
+        out.append(geom[res]['worstanglemeasure'])
+        out.append(geom[res]['worstanglevalue'])
+        out.append(geom[res]['worstanglesigma'])
+      else:
+        out.extend(['','','',''])
     else:
       out.extend([-1,-1,-1,-1,-1,-1,-1,-1])
       
@@ -420,7 +472,35 @@ def residue_analysis(files, quiet):
       out.extend(["","","","",""])
     
     out.extend([outCountSep,outCount])
-    print ":".join(str(e) for e in out)
+
+    # This is for the entry_ID and list_ID
+    out.extend(["?","?"])
+    
+    csv_out = csv_out+'\n'+":".join(str(e) for e in out)
+    
+    #print len(header)
+    #print len(["." if x=="" else x for x in out])
+    loop.addData(["." if x=="" else x for x in out])
+  #print "loop:"
+  #print loop
+  if not os.path.isfile(output_str):
+    saver.addLoop(loop)
+  #print "saveframe tree:"
+  #print saver.printTree()
+  #print "saveframe [resanalysis]"
+  #print saver['_residue_analysis']
+  #print "saveframe:"
+  output_file = os.path.join(output_dir, (os.path.basename(files[0])[:-4])[:4]+"-residue.csv")
+
+  if os.path.isfile(output_file):
+    sys.stderr.write("output_file: "+output_file+' exists\n')
+  with open(output_file, "a+") as out_write:
+    out_write.write(csv_out)
+    out_write.write('\n')
+  with open(output_str, 'w+') as str_write:
+    str_write.write(str(saver))
+  print saver
+
     
 #}}}
 

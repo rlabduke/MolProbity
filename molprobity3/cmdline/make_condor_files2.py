@@ -4,6 +4,7 @@ import sys, os, getopt, re, subprocess, shutil
 from optparse import OptionParser
 import time
 import gzip
+import pprint
 # THIS FILE MUST BE IN THE MOLPROBITY CMDLINE DIRECTORY!!!
 
 #number_to_run = 50
@@ -169,6 +170,7 @@ def divide_pdbs(in_dir, size_limit):
     if len(list_of_lists) > 10000:
       sys.stderr.write("\n**ERROR: More than 10000 jobs needed, try choosing a larger -limit\n")
       sys.exit()
+    #pprint.pprint(list_of_lists)
     return list_of_lists
     #print list_of_lists
 #}}}
@@ -236,6 +238,7 @@ def write_mpanalysis_dag(outdir, list_of_pdblists, bondtype):
   
   postjobs = "PARENT "
   sleep_seconds = 0
+  pprint.pprint(list_of_pdblists)
   for indx, pdbs in enumerate(list_of_pdblists):
     num = '{0:0>4}'.format(indx)
     #out.write("SUBDAG EXTERNAL "+num+" moldag"+num+".dag\n")
@@ -263,6 +266,7 @@ def write_mpanalysis_dag(outdir, list_of_pdblists, bondtype):
       #out.write("VARS oneline"+buildtype+num+" PDBS=\""+" ".join(pdbs)+"\"\n")
       out.write("VARS oneline"+buildtype+num+" DIR=\""+os.path.join(out_pdb_dir, num, "reduce-"+buildtype)+"\"\n")
       out.write("VARS oneline"+buildtype+num+" NUMBER=\""+buildtype+num+"\"\n")
+      out.write("VARS oneline"+buildtype+num+" BUILD=\""+buildtype+"\"\n")
       out.write("PARENT reducer"+buildtype+num+" CHILD oneline"+buildtype+num+"\n")
       out.write("RETRY oneline"+buildtype+num+" 3\n\n")
       postjobs = postjobs+"oneline"+buildtype+num + " "
@@ -270,6 +274,7 @@ def write_mpanalysis_dag(outdir, list_of_pdblists, bondtype):
       out.write("Job residuer"+buildtype+num+" residuer.sub\n")
       out.write("VARS residuer"+buildtype+num+" DIR=\""+os.path.join(out_pdb_dir, num, "reduce-"+buildtype)+"\"\n")
       out.write("VARS residuer"+buildtype+num+" NUMBER=\""+buildtype+num+"\"\n")
+      out.write("VARS residuer"+buildtype+num+" BUILD=\""+buildtype+"\"\n")
       out.write("PARENT reducer"+buildtype+num+" oneline"+buildtype+num+" CHILD residuer"+buildtype+num+"\n")
       out.write("RETRY residuer"+buildtype+num+" 3\n\n")
       postjobs = postjobs+"residuer"+buildtype+num + " "
@@ -278,6 +283,7 @@ def write_mpanalysis_dag(outdir, list_of_pdblists, bondtype):
     #out.write("VARS oneline"+buildtype+num+" PDBS=\""+" ".join(pdbs)+"\"\n")
     out.write("VARS onelineorig"+num+" DIR=\""+os.path.join(out_pdb_dir, num, "orig")+"\"\n")
     out.write("VARS onelineorig"+num+" NUMBER=\"orig"+num+"\"\n")
+    out.write("VARS onelineorig"+num+" BUILD=\"na\"\n")
     out.write("RETRY onelineorig"+num+" 3\n\n")
     postjobs = postjobs+"onelineorig"+num + " "
     
@@ -285,6 +291,7 @@ def write_mpanalysis_dag(outdir, list_of_pdblists, bondtype):
     #out.write("VARS oneline"+buildtype+num+" PDBS=\""+" ".join(pdbs)+"\"\n")
     out.write("VARS residuerorig"+num+" DIR=\""+os.path.join(out_pdb_dir, num, "orig")+"\"\n")
     out.write("VARS residuerorig"+num+" NUMBER=\"orig"+num+"\"\n")
+    out.write("VARS residuerorig"+num+" BUILD=\"na\"\n")
     out.write("PARENT onelineorig"+num+" CHILD residuerorig"+num+"\n")
     out.write("RETRY residuerorig"+num+" 3\n\n")
     postjobs = postjobs+"residuerorig"+num + " "
@@ -398,7 +405,13 @@ def long_reap(the_cmd, pdb):
 if not os.path.exists("results"):
     os.makedirs("results")
 
-for dir in sys.argv[1:]:
+#build_type = "\\""+sys.argv[1]+"\\""
+build_type = sys.argv[1]
+#print build_type
+#print type(build_type)
+
+for dir in sys.argv[2:]:
+    base_con_dir = os.path.dirname(os.path.dirname(os.path.dirname(dir)))
     for file in sorted(os.listdir(dir)):
         pdb = os.path.join(dir, file)
         sys.stderr.write(pdb+" {script} analysis\\n")
@@ -444,7 +457,9 @@ for dir in sys.argv[1:]:
             reap(cmd1, pdbbase)
             reap(cmd2, pdbbase)
         
-        cmd9 = syscmd(subprocess.PIPE, "{0}/cmdline/{script}", "-q", pdb, model_num, 
+        full_path_results = os.path.join(base_con_dir, "results/")
+        
+        cmd9 = syscmd(subprocess.PIPE, "{0}/cmdline/{script}", "-q", pdb, model_num,
                       "results/"+pdb_code+"/"+pdbbase+"-clashlist", 
                       "results/"+pdb_code+"/"+pdbbase+"-cbdev", 
                       "results/"+pdb_code+"/"+pdbbase+"-rotalyze", 
@@ -456,7 +471,10 @@ for dir in sys.argv[1:]:
                       "results/"+pdb_code+"/"+pdbbase+"-suitename",
                       "results/"+pdb_code+"/"+pdbbase+"-dangle_maxb",
                       "results/"+pdb_code+"/"+pdbbase+"-dangle_tauomega",
-                      "results/"+pdb_code+"/"+pdbbase+"-dangle_ss")
+                      "results/"+pdb_code+"/"+pdbbase+"-dangle_ss",
+                      full_path_results+pdb_code,
+                      "{bondtype}",
+                      build_type)
         print long_reap(cmd9, pdbbase).strip()
         #print cmd9.stdout.read().strip()
         e_time = time.time()
@@ -473,7 +491,7 @@ notification = Error
 #requirements = ((TARGET.FileSystemDomain == "bmrb.wisc.edu") || (TARGET.FileSystemDomain == ".bmrb.wisc.edu"))
 
 Executable  = {script}.py
-Arguments   = $(DIR)
+Arguments   = $(BUILD) $(DIR)
 
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
@@ -532,6 +550,11 @@ cat logs/residuerbuild*.err > logs/allresiduerbuild.err
 tar -zcf pdbs.tgz pdbs/
 rm -rf pdbs/
 """
+#}}}
+
+#{{{ replace_condor_files
+def replace_condor_files():
+  print "this may not be as easy as originally thought"
 #}}}
 
 #{{{ make_files
