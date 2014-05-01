@@ -228,7 +228,6 @@ def residue_analysis(files, quiet):
             "Assembly_ID",
             "Entity_assembly_ID",
             "Entity_ID",
-            "Entry_ID",
             "Comp_ID",
             "Comp_index_ID",
             "Clash_value",
@@ -254,7 +253,7 @@ def residue_analysis(files, quiet):
             "Worst_angle",
             "Worst_angle_value",
             "Worst_angle_sigma",
-            "RNA_phosphate_perp_outlier",
+            "RNA_phosphate_perpendicular_outlier",
             "RNA_suitness_score",
             "RNA_suite_conformer",
             "RNA_suite_triage",
@@ -360,7 +359,6 @@ def residue_analysis(files, quiet):
     out.append("?") # "Assembly_ID",       bmrb specific, to be filled in later
     out.append("?") # "Entity_assembly_ID",bmrb specific, to be filled in later
     out.append("?") # "Entity_ID",         bmrb specific, to be filled in later
-    out.append("?") # "Entry_ID",          bmrb specific, to be filled in later
     out.append("?") # "Comp_ID",           bmrb specific, to be filled in later
     out.append("?") # "Comp_index_ID",     bmrb specific, to be filled in later
     
@@ -497,12 +495,17 @@ def residue_analysis(files, quiet):
   with open(output_file, "a+") as out_write:
     out_write.write(csv_out)
     out_write.write('\n')
+    
+  sys.stderr.write(" ".join(os.listdir(os.path.dirname(output_str))))
   with open(output_str, 'w+') as str_write:
     str_write.write(str(saver))
   print saver
 
     
 #}}}
+
+# for testing
+# molparser.py ../../../1ubqH.pdb 1 1ubqH_001-clashlist 1ubqH_001-cbdev 1ubqH_001-rotalyze 1ubqH_001-ramalyze 1ubqH_001-dangle_protein 1ubqH_001-dangle_rna 1ubqH_001-dangle_dna 1ubqH_001-prekin_pperp 1ubqH_001-suitename 1ubqH_001-dangle_maxb 1ubqH_001-dangle_tauomega 1ubqH_001-dangle_ss .. cmd1 cmd2
 
 # Takes as input a whole series of different results files from MP analysis
 # e.g. clashlist, ramalyze, rotalyze, dangle, pperp, cbdev, etc.

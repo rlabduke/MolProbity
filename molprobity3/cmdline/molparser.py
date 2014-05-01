@@ -3,6 +3,8 @@
 from math import log
 import sys, os, getopt, re, pprint
 from optparse import OptionParser
+sys.path.append('/home/vbc3/programs/sans/python')
+import bmrb
 
 #{{{ parse_cmdline
 #parse the command line--------------------------------------------------------------------------
@@ -792,21 +794,98 @@ def recomposeResName(chain, resnum, inscode, restype):
 
 #{{{ oneline_analysis
 def oneline_analysis(files, quiet):
+  #if (not quiet):
+  #  print "#fileName:pdb:model:clashscore:clashscoreB<40:cbeta>0.25:numCbeta:rota<1%:numRota:ramaOutlier:ramaAllowed:ramaFavored:numRama:numbadbonds:numbonds:pct_badbonds:pct_resbadbonds:numbadangles:numangles:pct_badangles:pct_resbadangles:MolProbityScore:numPperpOutliers:numPperp:numSuiteOutliers:numSuites"
+  header = ["Filename",
+            "PDB_accession_code",
+            "PDB_model_num",
+            "Hydrogen_positions",
+            "MolProbity_flips",
+            "Assembly_ID",
+            "Entity_assembly_ID",
+            "Entity_ID",
+            "Entry_ID",
+            "List_ID",
+            "Clashscore",
+            "Clashscore_B_under_40",
+            "Cbeta_outlier_count",
+            "Cbeta_count",
+            "Rotamer_outlier_count",
+            "Rotamer_count",
+            "Ramachandran_outlier_count",
+            "Ramachandran_allowed_count",
+            "Ramachandran_favored_count",
+            "Ramachandran_count",
+            "Bond_outlier_count",
+            "Bond_count",
+            "Percent_bond_outlier",
+            "Percent_residues_with_bond_outlier",
+            "Angle_outlier_count",
+            "Angle_count",
+            "Percent_angle_outlier",
+            "Percent_residues_with_angle_outlier",
+            "MolProbity_score",
+            "RNA_phosphate_perpendicular_outlier_count",
+            "RNA_phosphate_perpendicular_count",
+            "RNA_suite_outlier_count",
+            "RNA_suite_count"
+  ]
+  print len(header)
   if (not quiet):
-    print "#fileName:pdb:model:clashscore:clashscoreB<40:cbeta>0.25:numCbeta:rota<1%:numRota:ramaOutlier:ramaAllowed:ramaFavored:numRama:numbadbonds:numbonds:pct_badbonds:pct_resbadbonds:numbadangles:numangles:pct_badangles:pct_resbadangles:MolProbityScore:numPperpOutliers:numPperp:numSuiteOutliers:numSuites"
+    print "#"+(":".join(header))
+    
+  output_dir = (files[14])
+  #sys.stderr.write("file-14: "+output_dir+"\n")
+  output_str = os.path.join(output_dir, (os.path.basename(files[0])[:-4])[:4]+"-oneline.str")
+  #sys.stderr.write(output_str+"\n")
+  #sys.stderr.write(str(os.path.isfile(output_str))+"\n")
+  if os.path.isfile(output_str):
+    saver = bmrb.saveframe.fromFile(output_str)
+    loop = saver.getLoopByCategory("Oneline_analysis")
+  else:
+    saver = bmrb.saveframe.fromScratch("Structure_validation_oneline", "Structure_validation_oneline")
+    saver.addTag("Sf_category", "?")
+    saver.addTag("Sf_framecode", "?")
+    saver.addTag("Entry_ID", "?")
+    saver.addTag("List_ID", "?")
+    saver.addTag("Software_label", "molprobity")
+    saver.addTag("Software_version", "4.0")
+    saver.addTag("File_name", os.path.basename(files[0]))
+    saver.addTag("PDB_ID", (os.path.basename(files[0])[:-4])[:4])
+    loop = bmrb.loop.fromScratch(category="Oneline_analysis")
+    loop.addColumn(header)
+    
+  out = []
+  out.append(os.path.basename(files[0]))
+  out.append((os.path.basename(files[0])[:-4])[:4])
+  out.append(files[1])
   
-  out = os.path.basename(files[0])+":"+(os.path.basename(files[0])[:-4])[:4]+":"+files[1]
+  flips_used = files[16]
+  if flips_used == "na":
+    out.append("original")
+  else:
+    out.append(files[15]) # Hydrogen_positions
+  out.append(files[16]) # MolProbity_flips
+  
+  out.append("?") # "Assembly_ID",       bmrb specific, to be filled in later
+  out.append("?") # "Entity_assembly_ID",bmrb specific, to be filled in later
+  out.append("?") # "Entity_ID",         bmrb specific, to be filled in later
+  out.append("?") # "Entry_ID",          bmrb specific
+  out.append("?") # "List_ID",           bmrb specific
   
   clash = loadClashlist(files[2])
-  out = out+":" + ("%.2f" % (clash['scoreAll'])) + ":" + ("%.2f" % (clash['scoreBlt40']))
+  out.append(("%.2f" % (clash['scoreAll'])))
+  out.append(("%.2f" % (clash['scoreBlt40'])))
   
   cbdev = loadCbetaDev(files[3])
   badCbeta = findCbetaOutliers(cbdev)
-  out = out+":" + repr(len(badCbeta)) + ":" + repr(len(cbdev))
+  out.append(repr(len(badCbeta)))
+  out.append(repr(len(cbdev)))
   
   rota = loadRotamer(files[4])
-  badRota = findRotaOutliers(rota);
-  out = out+":" + repr(len(badRota)) + ":" + repr(len(rota))
+  badRota = findRotaOutliers(rota)
+  out.append(repr(len(badRota)))
+  out.append(repr(len(rota)))
   
   rama = loadRamachandran(files[5])
   #pprint.pprint(rama)
@@ -820,9 +899,12 @@ def oneline_analysis(files, quiet):
     else:
       ramaScore[ r['eval'] ] = 1
   if ramaScore['OUTLIER'] == 0 and ramaScore['Allowed'] == 0 and ramaScore['Favored'] == 0:
-    out = out+"::::"
+    out.extend(["","","",""])
   else:
-    out = out+":" + (repr(ramaScore['OUTLIER'])) + ":" + (repr(ramaScore['Allowed'])) + ":" + (repr(ramaScore['Favored'])) + ":" + repr(len(rama))
+    out.append((repr(ramaScore['OUTLIER'])))
+    out.append((repr(ramaScore['Allowed'])))
+    out.append((repr(ramaScore['Favored'])))
+    out.append(repr(len(rama)))
   
   geom = loadBondGeometryReport(files[6], "protein")
   geom.update(loadBondGeometryReport(files[7], "rna"))
@@ -847,36 +929,58 @@ def oneline_analysis(files, quiet):
         outAngleCount += data['angleoutCount']
       totalAngles += data['angleCount']
   if (totalRes > 0 and totalBonds > 0 and totalAngles > 0): # catches a bug with PNA residues
-    out = out+":"+repr(outBondCount)+":"+repr(totalBonds)+":"+("%.2f" % (100.0 * outBondCount / totalBonds))
-    out = out+":"+("%.2f" % (100.0 * outBondResCount / totalRes))
-    out = out+":"+repr(outAngleCount)+":"+repr(totalAngles)+":"+("%.2f" % (100.0 * outAngleCount / totalAngles))
-    out = out+":"+("%.2f" % (100.0 * outAngleResCount / totalRes))
+    out.append(repr(outBondCount))
+    out.append(repr(totalBonds))
+    out.append(("%.2f" % (100.0 * outBondCount / totalBonds)))
+    out.append(("%.2f" % (100.0 * outBondResCount / totalRes)))
+    out.append(repr(outAngleCount))
+    out.append(repr(totalAngles))
+    out.append(("%.2f" % (100.0 * outAngleCount / totalAngles)))
+    out.append(("%.2f" % (100.0 * outAngleResCount / totalRes)))
   else:
-    out = out+":-1:-1:-1:-1:-1:-1:-1:-1"
+    out.extend([-1,-1,-1,-1,-1,-1,-1,-1])
     sys.stderr.write("No standard residues detected!\n")
     
   if ((len(rota) != 0) and (len(rama) != 0)):
     mps = calcMPscore(clash, rota, rama)
-    out = out+(":%.2f" % mps)
+    out.append(("%.2f" % mps))
   else:
-    out = out+":"
+    out.append("")
      
   pperp = loadBasePhosPerp(files[9])
   badPperp = findBasePhosPerpOutliers(pperp)
-  out = out+":"+repr(len(badPperp))+":"+repr(len(pperp))
+  out.append(repr(len(badPperp)))
+  out.append(repr(len(pperp)))
 
   suites = loadSuitenameReport(files[10])
   badSuites = findSuitenameOutliers(suites)
-  out = out+":"+repr(len(badSuites))+":"+repr(len(suites))
+  out.append(repr(len(badSuites)))
+  out.append(repr(len(suites)))
 
-  print out
+  print ":".join(str(e) for e in out)
+  
+  print len(out)
+  
+  loop.addData(["." if x=="" else x for x in out])
+  if not os.path.isfile(output_str):
+    saver.addLoop(loop)
+  sys.stderr.write(" ".join(os.listdir(os.path.dirname(output_str))))
+  with open(output_str, 'w+') as str_write:
+    str_write.write(str(saver))
 #}}}
+
+# for testing
+# molparser.py ../../../1ubqH.pdb 1 1ubqH_001-clashlist 1ubqH_001-cbdev 1ubqH_001-rotalyze 1ubqH_001-ramalyze 1ubqH_001-dangle_protein 1ubqH_001-dangle_rna 1ubqH_001-dangle_dna 1ubqH_001-prekin_pperp 1ubqH_001-suitename 1ubqH_001-dangle_maxb 1ubqH_001-dangle_tauomega 1ubqH_001-dangle_ss .. cmd1 cmd2
 
 # Takes as input a whole series of different results files from MP analysis
 # e.g. clashlist, ramalyze, rotalyze, dangle, pperp, cbdev, etc.
 if __name__ == "__main__":
   opts, args = parse_cmdline()
   #analyze_file(args)
+  "evidently there is a problem with the results dir not getting made first"
+  sys.stderr.write("args: ")
+  for arg in args:
+    sys.stderr.write(arg+" ")
   oneline_analysis(args, opts.quiet)
   #for arg in args:
   #  if os.path.exists(arg):

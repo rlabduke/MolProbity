@@ -90,13 +90,17 @@ def split_pdbs_to_models(indir, outdir):
 #}}}
 
 #{{{ split_pdb
-def split_pdb(pdb_file, outdir, gzip_file = False):
+def split_pdb(pdb_file, outdir, origdir, gzip_file = False):
   model_files = []
   keep_lines = False
   pdb_name, ext = os.path.splitext(os.path.basename(pdb_file))
   #print pdb_name+"\n"
   if pdb_name.startswith("pdb") and pdb_name.endswith(".ent"):
     pdb_name = pdb_name[3:-4]
+    
+  if not os.path.exists(os.path.join(outdir, "results", pdb_name[:4])):
+    os.makedirs(os.path.join(outdir, "results", pdb_name[:4]))
+    
   #print pdb_name+"\n"
   if gzip_file:
     pdb_in = gzip.open(pdb_file)
@@ -110,7 +114,7 @@ def split_pdb(pdb_file, outdir, gzip_file = False):
     if start == "MODEL ":
       keep_lines = True
       mod_num = int(line[5:25].strip())
-      model_name = os.path.join(outdir, pdb_name+("_%03d.pdb" % (mod_num)))
+      model_name = os.path.join(origdir, pdb_name+("_%03d.pdb" % (mod_num)))
       model_out = open(model_name, 'wr')
     elif start == "ENDMDL":
       keep_lines = False
@@ -118,7 +122,7 @@ def split_pdb(pdb_file, outdir, gzip_file = False):
     elif keep_lines:
       model_out.write(line)
   if mod_num == 0: # takes care of the case where there's only one model, so no MODEL or ENDMDL
-    model_out = open(os.path.join(outdir, pdb_name+"_001.pdb"), 'wr')
+    model_out = open(os.path.join(origdir, pdb_name+"_001.pdb"), 'wr')
     model_out.write(all_file)
     model_out.close()
   pdb_in.close()    
@@ -192,9 +196,9 @@ def split_pdbs_to_dirs(outdir, list_of_pdblists):
       if (not os.path.isdir(pdb_file)):
         root, ext = os.path.splitext(pdb_file)
         if (ext == ".pdb"):
-          split_pdb(pdb_file, origpath)
+          split_pdb(pdb_file, outdir, origpath)
         if (ext == ".gz"):
-          split_pdb(pdb_file, origpath, True)
+          split_pdb(pdb_file, outdir, origpath, True)
 #}}}
 
 #{{{ write_super_dag
@@ -370,6 +374,12 @@ def write_file(outdir, out_name, file_text, permissions=0644):
   out.write(file_text)
   out.close()
   os.chmod(outfile, permissions)
+#}}}
+
+#{{{ write_prepare_results_dir
+results_dir = """#!/usr/bin/python
+
+"""
 #}}}
 
 #{{{ write_analysis_py
