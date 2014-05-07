@@ -3,8 +3,8 @@
 from math import log
 import sys, os, getopt, re, pprint
 from optparse import OptionParser
-sys.path.append('/home/vbc3/programs/sans/python')
-import bmrb
+#sys.path.append('/home/vbc3/programs/sans/python')
+#import bmrb
 
 #{{{ parse_cmdline
 #parse the command line--------------------------------------------------------------------------
@@ -12,7 +12,13 @@ def parse_cmdline():
   parser = OptionParser()
   parser.add_option("-q", "--quiet", action="store_true", dest="quiet",
     help="quiet mode")
+  parser.add_option("-s", "--sans", action="store", dest="sans_location", 
+    type="string", default="none",
+    help="sans parser location, needed for nmrstar output")
   opts, args = parser.parse_args()
+  if not opts.sans_location is "none" and not os.path.isdir(opts.sans_location):
+    sys.stderr.write("\n**ERROR: sans location must be a directory!\n")
+    sys.exit(help())
   if len(args) < 11:
     sys.stderr.write("\n**ERROR: Must have 11 arguments!\n")
     sys.exit(help())
@@ -533,8 +539,9 @@ def loadDisulfidesReport(datafile):
         'chi1'      : float(splitline[8]),
         'chi2'      : float(splitline[9]),
         'chi3'      : float(splitline[10]),
-        'chi2prime' : float(splitline[11]),
-        'chi1prime' : float(splitline[12])
+        's-s'       : float(splitline[11]),
+        'chi2prime' : float(splitline[12]),
+        'chi1prime' : float(splitline[13])
       }
   return ret
 #}}}
@@ -792,8 +799,40 @@ def recomposeResName(chain, resnum, inscode, restype):
   return ''.join([chain.rjust(2), repr(resnum).rjust(4), inscode, restype.ljust(3)])
 #}}}
 
+#{{{ write_nmrstar
+def write_nmrstar(header, output_str, out, filename, sans_loc):
+  sys.path.append(sans_loc)
+  import bmrb
+  #print len(header)
+  #print str(header)
+  #print len(out)
+  #print str(out)
+  if os.path.isfile(output_str):
+    saver = bmrb.saveframe.fromFile(output_str)
+    loop = saver.getLoopByCategory("Oneline_analysis")
+  else:
+    saver = bmrb.saveframe.fromScratch("Structure_validation_oneline", "Structure_validation_oneline")
+    saver.addTag("Sf_category", "?")
+    saver.addTag("Sf_framecode", "?")
+    saver.addTag("Entry_ID", "?")
+    saver.addTag("List_ID", "?")
+    saver.addTag("Software_label", "molprobity")
+    saver.addTag("Software_version", "4.0")
+    saver.addTag("File_name", os.path.basename(filename))
+    saver.addTag("PDB_ID", (os.path.basename(filename)[:-4])[:4])
+    loop = bmrb.loop.fromScratch(category="Oneline_analysis")
+    loop.addColumn(header)
+    
+  loop.addData(["." if x=="" else x for x in out])
+  if not os.path.isfile(output_str):
+    saver.addLoop(loop)
+  #sys.stderr.write(" ".join(os.listdir(os.path.dirname(output_str))))
+  with open(output_str, 'w+') as str_write:
+    str_write.write(str(saver))
+#}}}
+
 #{{{ oneline_analysis
-def oneline_analysis(files, quiet):
+def oneline_analysis(files, quiet, sans_location):
   #if (not quiet):
   #  print "#fileName:pdb:model:clashscore:clashscoreB<40:cbeta>0.25:numCbeta:rota<1%:numRota:ramaOutlier:ramaAllowed:ramaFavored:numRama:numbadbonds:numbonds:pct_badbonds:pct_resbadbonds:numbadangles:numangles:pct_badangles:pct_resbadangles:MolProbityScore:numPperpOutliers:numPperp:numSuiteOutliers:numSuites"
   header = ["Filename",
@@ -802,10 +841,6 @@ def oneline_analysis(files, quiet):
             "Hydrogen_positions",
             "MolProbity_flips",
             "Assembly_ID",
-            "Entity_assembly_ID",
-            "Entity_ID",
-            "Entry_ID",
-            "List_ID",
             "Clashscore",
             "Clashscore_B_under_40",
             "Cbeta_outlier_count",
@@ -828,33 +863,13 @@ def oneline_analysis(files, quiet):
             "RNA_phosphate_perpendicular_outlier_count",
             "RNA_phosphate_perpendicular_count",
             "RNA_suite_outlier_count",
-            "RNA_suite_count"
+            "RNA_suite_count",
+            "Entry_ID",
+            "Structure_validation_oneline_list_ID",
   ]
-  print len(header)
   if (not quiet):
     print "#"+(":".join(header))
-    
-  output_dir = (files[14])
-  #sys.stderr.write("file-14: "+output_dir+"\n")
-  output_str = os.path.join(output_dir, (os.path.basename(files[0])[:-4])[:4]+"-oneline.str")
-  #sys.stderr.write(output_str+"\n")
-  #sys.stderr.write(str(os.path.isfile(output_str))+"\n")
-  if os.path.isfile(output_str):
-    saver = bmrb.saveframe.fromFile(output_str)
-    loop = saver.getLoopByCategory("Oneline_analysis")
-  else:
-    saver = bmrb.saveframe.fromScratch("Structure_validation_oneline", "Structure_validation_oneline")
-    saver.addTag("Sf_category", "?")
-    saver.addTag("Sf_framecode", "?")
-    saver.addTag("Entry_ID", "?")
-    saver.addTag("List_ID", "?")
-    saver.addTag("Software_label", "molprobity")
-    saver.addTag("Software_version", "4.0")
-    saver.addTag("File_name", os.path.basename(files[0]))
-    saver.addTag("PDB_ID", (os.path.basename(files[0])[:-4])[:4])
-    loop = bmrb.loop.fromScratch(category="Oneline_analysis")
-    loop.addColumn(header)
-    
+  
   out = []
   out.append(os.path.basename(files[0]))
   out.append((os.path.basename(files[0])[:-4])[:4])
@@ -868,10 +883,6 @@ def oneline_analysis(files, quiet):
   out.append(files[16]) # MolProbity_flips
   
   out.append("?") # "Assembly_ID",       bmrb specific, to be filled in later
-  out.append("?") # "Entity_assembly_ID",bmrb specific, to be filled in later
-  out.append("?") # "Entity_ID",         bmrb specific, to be filled in later
-  out.append("?") # "Entry_ID",          bmrb specific
-  out.append("?") # "List_ID",           bmrb specific
   
   clash = loadClashlist(files[2])
   out.append(("%.2f" % (clash['scoreAll'])))
@@ -956,17 +967,18 @@ def oneline_analysis(files, quiet):
   badSuites = findSuitenameOutliers(suites)
   out.append(repr(len(badSuites)))
   out.append(repr(len(suites)))
+  
+  out.append("?") # "Entry_ID",          bmrb specific
+  out.append("?") # "List_ID",           bmrb specific
 
   print ":".join(str(e) for e in out)
   
-  print len(out)
-  
-  loop.addData(["." if x=="" else x for x in out])
-  if not os.path.isfile(output_str):
-    saver.addLoop(loop)
-  sys.stderr.write(" ".join(os.listdir(os.path.dirname(output_str))))
-  with open(output_str, 'w+') as str_write:
-    str_write.write(str(saver))
+  if sans_location is not "none":
+    output_str = os.path.join(files[14], (os.path.basename(files[0])[:-4])[:4]+"-oneline.str")
+    
+    write_nmrstar(header[2:], output_str, out[2:], files[0], sans_location)
+  #print len(out)
+
 #}}}
 
 # for testing
@@ -977,11 +989,11 @@ def oneline_analysis(files, quiet):
 if __name__ == "__main__":
   opts, args = parse_cmdline()
   #analyze_file(args)
-  "evidently there is a problem with the results dir not getting made first"
-  sys.stderr.write("args: ")
-  for arg in args:
-    sys.stderr.write(arg+" ")
-  oneline_analysis(args, opts.quiet)
+  #"evidently there is a problem with the results dir not getting made first"
+  #sys.stderr.write("args: ")
+  #for arg in args:
+  #  sys.stderr.write(arg+" ")
+  oneline_analysis(args, opts.quiet, opts.sans_location)
   #for arg in args:
   #  if os.path.exists(arg):
   #    if (os.path.isfile(arg)):

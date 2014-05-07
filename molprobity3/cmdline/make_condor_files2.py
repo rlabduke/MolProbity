@@ -20,8 +20,11 @@ def parse_cmdline():
     dest="bond_type", default="nuclear",
     help="specify hydrogen bond length for clashes (nuclear or ecloud)")
   parser.add_option("-u", "--updatescripts", action="store_true",
-    dest="update_scripts", default="false",
+    dest="update_scripts", default=False,
     help="update scripts in a prexisting folder with new versions")
+  parser.add_option("-s", "--sans", action="store", dest="sans_location", 
+    type="string", default="none",
+    help="sans parser location, needed for nmrstar output")
   #parser.add_option("-r", "--reduce", action="store", type="boolean",
   #  dest="run_reduce", default="false",
   #  help="run reduce to add hydrogens first (use -t to specify length)")
@@ -29,6 +32,9 @@ def parse_cmdline():
   #  dest="build_type", default="default",
   #  help="specify whether to use -build or -nobuild for running reduce")
   opts, args = parser.parse_args()
+  if not opts.sans_location is "none" and not os.path.isdir(opts.sans_location):
+    sys.stderr.write("\n**ERROR: sans location must be a directory!\n")
+    sys.exit(help())
   if opts.total_file_size_limit < 5000000:
     sys.stderr.write("\n**ERROR: -limit cannot be less than 5000000 (5M)\n")
     sys.exit(parser.print_help())
@@ -469,7 +475,7 @@ for dir in sys.argv[2:]:
         
         full_path_results = os.path.join(base_con_dir, "results/")
         
-        cmd9 = syscmd(subprocess.PIPE, "{0}/cmdline/{script}", "-q", pdb, model_num,
+        cmd9 = syscmd(subprocess.PIPE, "{0}/cmdline/{script}", "-q",{analyze_opt} pdb, model_num,
                       "results/"+pdb_code+"/"+pdbbase+"-clashlist", 
                       "results/"+pdb_code+"/"+pdbbase+"-cbdev", 
                       "results/"+pdb_code+"/"+pdbbase+"-rotalyze", 
@@ -568,7 +574,7 @@ def replace_condor_files():
 #}}}
 
 #{{{ make_files
-def make_files(indir, file_size_limit, bond_type, update_scripts=False):
+def make_files(indir, file_size_limit, bond_type, sans_location, update_scripts=False):
   molprobity_home = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
   #print "mp home: " + molprobity_home
   #print "indir: " + indir
@@ -576,11 +582,21 @@ def make_files(indir, file_size_limit, bond_type, update_scripts=False):
   if os.path.exists(indir):
     indir_base = os.path.basename(os.path.realpath(indir))
     outdir = os.path.join(indir, "condor_sub_files_"+indir_base)
+    #print update_scripts
     if not os.path.exists(outdir):
       os.makedirs(outdir)
       os.makedirs(os.path.join(outdir,"logs"))
       os.makedirs(os.path.join(outdir,"results"))
       os.makedirs(os.path.join(outdir,"pdbs"))
+    elif update_scripts:
+      for tst_file in os.listdir(outdir):
+        if tst_file.endswith(".sh") or tst_file.endswith(".py") or tst_file.endswith(".sub") or "dag" in tst_file:
+          os.remove(os.path.join(outdir, tst_file))
+      for tst_dir in os.listdir(os.path.join(outdir,"results")):
+        shutil.rmtree(os.path.join(outdir,"results", tst_dir))
+      for tst_file in os.listdir(os.path.join(outdir,"logs")):
+        os.remove(os.path.join(outdir,"logs", tst_file))
+      #sys.exit()
     else:
       sys.stderr.write("\"condor_sub_files\" directory detected in \""+indir+"\", please delete it before running this script\n")
       sys.exit()
@@ -596,11 +612,14 @@ def make_files(indir, file_size_limit, bond_type, update_scripts=False):
     #if build_type=="build":
     #  pdb = "{pdbbase}F"
     #  build = "build"
+    ana_opt = ""
+    if not sans_location is "none":
+      ana_opt = " \"-s\", '"+sans_location+"',"
     write_mpanalysis_dag(outdir, list_of_lists, bond_type)
     write_file(outdir, "reduce.sh", reduce_sh.format(molprobity_home, buildtype="{buildtype}", bondtype="{bondtype}", outdir="{outdir}", pdbbase="{pdbbase}"), 0755)
     write_file(outdir, "reduce.sub", reduce_sub.format(molprobity_home))
-    write_file(outdir, "oneline.py", analysis_py.format(molprobity_home, bondtype=bond_type, script="molparser.py"), 0755)
-    write_file(outdir, "residuer.py", analysis_py.format(molprobity_home, bondtype=bond_type, script="py-residue-analysis.py"), 0755)
+    write_file(outdir, "oneline.py", analysis_py.format(molprobity_home, bondtype=bond_type, analyze_opt=ana_opt, script="molparser.py"), 0755)
+    write_file(outdir, "residuer.py", analysis_py.format(molprobity_home, bondtype=bond_type, analyze_opt=ana_opt, script="py-residue-analysis.py"), 0755)
     write_file(outdir, "oneline.sub", analyze_sub.format(molprobity_home, script="oneline"))
     write_file(outdir, "residuer.sub", analyze_sub.format(molprobity_home, script="residuer"))
     write_file(outdir, "post_process.sh", post_sh, 0755)
@@ -617,4 +636,4 @@ def make_files(indir, file_size_limit, bond_type, update_scripts=False):
 if __name__ == "__main__":
 
   opts, indir = parse_cmdline()
-  make_files(indir, opts.total_file_size_limit, opts.bond_type, opts.update_scripts)
+  make_files(indir, opts.total_file_size_limit, opts.bond_type, opts.sans_location, opts.update_scripts)

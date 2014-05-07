@@ -4,8 +4,8 @@ from math import log
 import sys, os, getopt, re, pprint, collections
 from optparse import OptionParser
 import molparser
-sys.path.append('/home/vbc3/programs/sans/python')
-import bmrb
+#sys.path.append('/home/vbc3/programs/sans/python')
+#import bmrb
 
 #{{{ parse_cmdline
 #parse the command line--------------------------------------------------------------------------
@@ -13,7 +13,13 @@ def parse_cmdline():
   parser = OptionParser()
   parser.add_option("-q", "--quiet", action="store_true", dest="quiet",
     help="quiet mode")
+  parser.add_option("-s", "--sans", action="store", dest="sans_location", 
+    type="string", default="none",
+    help="sans parser location, needed for nmrstar output")
   opts, args = parser.parse_args()
+  if not opts.sans_location is "none" and not os.path.isdir(opts.sans_location):
+    sys.stderr.write("\n**ERROR: sans location must be a directory!\n")
+    sys.exit(help())
   if len(args) < 11:
     sys.stderr.write("\n**ERROR: Must have 11 arguments!\n")
     sys.exit(help())
@@ -209,8 +215,39 @@ def residue_analysis(files, quiet):
     
 #}}}
 
+#{{{ setup_nmrstar
+def setup_nmrstar(header, output_str, filename, sans_loc):
+  sys.path.append(sans_loc)
+  import bmrb
+  if os.path.isfile(output_str):
+    saver = bmrb.saveframe.fromFile(output_str)
+    loop = saver.getLoopByCategory("Residue_analysis")
+  else:
+    saver = bmrb.saveframe.fromScratch("Structure_validation_residue", "Structure_validation_residue")
+    saver.addTag("Sf_category", "?")
+    saver.addTag("Sf_framecode", "?")
+    saver.addTag("Entry_ID", "?")
+    saver.addTag("List_ID", "?")
+    saver.addTag("Software_label", "molprobity")
+    saver.addTag("Software_version", "4.0")
+    saver.addTag("File_name", os.path.basename(filename))
+    saver.addTag("PDB_ID", (os.path.basename(filename)[:-4])[:4])
+    loop = bmrb.loop.fromScratch(category="Residue_analysis")
+    loop.addColumn(header)
+  return saver, loop
+#}}}
+
+#{{{ write_nmrstar
+def write_nmrstar(output_str, saver, loop):
+  if not os.path.isfile(output_str):
+    saver.addLoop(loop)
+  with open(output_str, 'w+') as str_write:
+    str_write.write(str(saver))
+  #print saver
+#}}}
+
 #{{{ residue_analysis
-def residue_analysis(files, quiet):
+def residue_analysis(files, quiet, sans_location):
   list_res = list_residues(files[0])
   #print list_res
   #out = []
@@ -263,32 +300,19 @@ def residue_analysis(files, quiet):
             "Disulfide_chi1",
             "Disulfide_chi2",
             "Disulfide_chi3",
+            "Disulfide_ss",
             "Disulfide_chi2prime",
             "Disulfide_chi1prime",
             "Outlier_count_separate_geometry",
             "Outlier_count",
             "Entry_ID",
-            "List_ID"
+            "Structure_validation_residue_list_ID"
   ]
   
-  output_dir = (files[14])
-  
-  output_str = os.path.join(output_dir, (os.path.basename(files[0])[:-4])[:4]+"-residue.str")
-  if os.path.isfile(output_str):
-    saver = bmrb.saveframe.fromFile(output_str)
-    loop = saver.getLoopByCategory("Residue_analysis")
-  else:
-    saver = bmrb.saveframe.fromScratch("Structure_validation_residue", "Structure_validation_residue")
-    saver.addTag("Sf_category", "?")
-    saver.addTag("Sf_framecode", "?")
-    saver.addTag("Entry_ID", "?")
-    saver.addTag("List_ID", "?")
-    saver.addTag("Software_label", "molprobity")
-    saver.addTag("Software_version", "4.0")
-    saver.addTag("File_name", os.path.basename(files[0]))
-    saver.addTag("PDB_ID", (os.path.basename(files[0])[:-4])[:4])
-    loop = bmrb.loop.fromScratch(category="Residue_analysis")
-    loop.addColumn(header)
+  output_dir = files[14]
+  if sans_location is not "none":
+    output_str = os.path.join(output_dir, (os.path.basename(files[0])[:-4])[:4]+"-residue.str")
+    saver, loop = setup_nmrstar(header[2:], output_str, files[0], sans_location)
   
   clash = molparser.loadClashlist(files[2])
   cbdev = molparser.loadCbetaDev(files[3])
@@ -465,9 +489,9 @@ def residue_analysis(files, quiet):
       out.extend(["",""])
       
     if res in disulf:
-      out.extend([disulf[res]['chi1'],disulf[res]['chi2'],disulf[res]['chi3'],disulf[res]['chi2prime'],disulf[res]['chi1prime']])
+      out.extend([disulf[res]['chi1'],disulf[res]['chi2'],disulf[res]['chi3'],disulf[res]['s-s'],disulf[res]['chi2prime'],disulf[res]['chi1prime']])
     else:
-      out.extend(["","","","",""])
+      out.extend(["","","","","",""])
     
     out.extend([outCountSep,outCount])
 
@@ -475,44 +499,33 @@ def residue_analysis(files, quiet):
     out.extend(["?","?"])
     
     csv_out = csv_out+'\n'+":".join(str(e) for e in out)
-    
-    #print len(header)
-    #print len(["." if x=="" else x for x in out])
-    loop.addData(["." if x=="" else x for x in out])
-  #print "loop:"
-  #print loop
-  if not os.path.isfile(output_str):
-    saver.addLoop(loop)
-  #print "saveframe tree:"
-  #print saver.printTree()
-  #print "saveframe [resanalysis]"
-  #print saver['_residue_analysis']
-  #print "saveframe:"
+    if sans_location is not "none":
+      loop.addData(["." if x=="" else x for x in out][2:])
+
   output_file = os.path.join(output_dir, (os.path.basename(files[0])[:-4])[:4]+"-residue.csv")
 
-  if os.path.isfile(output_file):
-    sys.stderr.write("output_file: "+output_file+' exists\n')
+  #if os.path.isfile(output_file):
+  #  sys.stderr.write("output_file: "+output_file+' exists\n')
   with open(output_file, "a+") as out_write:
     out_write.write(csv_out)
     out_write.write('\n')
     
-  sys.stderr.write(" ".join(os.listdir(os.path.dirname(output_str))))
-  with open(output_str, 'w+') as str_write:
-    str_write.write(str(saver))
-  print saver
+  #sys.stderr.write(" ".join(os.listdir(os.path.dirname(output_str))))
+  if sans_location is not "none":
+    write_nmrstar(output_str, saver, loop)
 
     
 #}}}
 
 # for testing
-# molparser.py ../../../1ubqH.pdb 1 1ubqH_001-clashlist 1ubqH_001-cbdev 1ubqH_001-rotalyze 1ubqH_001-ramalyze 1ubqH_001-dangle_protein 1ubqH_001-dangle_rna 1ubqH_001-dangle_dna 1ubqH_001-prekin_pperp 1ubqH_001-suitename 1ubqH_001-dangle_maxb 1ubqH_001-dangle_tauomega 1ubqH_001-dangle_ss .. cmd1 cmd2
+# py-residue-analysis.py -s '/home/vbc3/programs/sans/python' ../../../1ubqH.pdb 1 1ubqH_001-clashlist 1ubqH_001-cbdev 1ubqH_001-rotalyze 1ubqH_001-ramalyze 1ubqH_001-dangle_protein 1ubqH_001-dangle_rna 1ubqH_001-dangle_dna 1ubqH_001-prekin_pperp 1ubqH_001-suitename 1ubqH_001-dangle_maxb 1ubqH_001-dangle_tauomega 1ubqH_001-dangle_ss .. cmd1 cmd2
 
 # Takes as input a whole series of different results files from MP analysis
 # e.g. clashlist, ramalyze, rotalyze, dangle, pperp, cbdev, etc.
 if __name__ == "__main__":
   opts, args = parse_cmdline()
   #analyze_file(args)
-  residue_analysis(args, opts.quiet)
+  residue_analysis(args, opts.quiet, opts.sans_location)
   #for arg in args:
   #  if os.path.exists(arg):
   #    if (os.path.isfile(arg)):
