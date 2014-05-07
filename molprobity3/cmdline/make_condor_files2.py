@@ -135,7 +135,7 @@ def split_pdb(pdb_file, outdir, origdir, gzip_file = False):
 #}}}
 
 #{{{ divide_pdbs
-def divide_pdbs(in_dir, size_limit):
+def divide_pdbs(in_dir, outdir, size_limit):
   #print os.path.realpath(in_dir)
   if (os.path.isdir(in_dir)):
     files = os.listdir(os.path.realpath(in_dir))
@@ -154,8 +154,16 @@ def divide_pdbs(in_dir, size_limit):
       #print full_file
       if (not os.path.isdir(full_file)):
         root, ext = os.path.splitext(f)
+        #pdb_name, ext = os.path.splitext(os.path.basename(pdb_file))
+        #print pdb_name+"\n"
         if (ext == ".pdb"):
           #print f
+          pdb_name = root
+          if root.startswith("pdb") and root.endswith(".ent"):
+            pdb_name = root[3:-4]
+          
+          if not os.path.exists(os.path.join(outdir, "results", pdb_name[:4])):
+            os.makedirs(os.path.join(outdir, "results", pdb_name[:4]))
           if (list_size <= size_limit):
             pdb_list.append(full_file)
             #print pdb_list
@@ -248,7 +256,7 @@ def write_mpanalysis_dag(outdir, list_of_pdblists, bondtype):
   
   postjobs = "PARENT "
   sleep_seconds = 0
-  pprint.pprint(list_of_pdblists)
+  #pprint.pprint(list_of_pdblists)
   for indx, pdbs in enumerate(list_of_pdblists):
     num = '{0:0>4}'.format(indx)
     #out.write("SUBDAG EXTERNAL "+num+" moldag"+num+".dag\n")
@@ -297,6 +305,9 @@ def write_mpanalysis_dag(outdir, list_of_pdblists, bondtype):
     out.write("RETRY onelineorig"+num+" 3\n\n")
     postjobs = postjobs+"onelineorig"+num + " "
     
+    out.write("PARENT onelineorig"+num+" CHILD onelinebuild"+num+"\n")
+    out.write("PARENT onelinebuild"+num+" CHILD onelinenobuild"+num+"\n\n")
+    
     out.write("Job residuerorig"+num+" residuer.sub\n")
     #out.write("VARS oneline"+buildtype+num+" PDBS=\""+" ".join(pdbs)+"\"\n")
     out.write("VARS residuerorig"+num+" DIR=\""+os.path.join(out_pdb_dir, num, "orig")+"\"\n")
@@ -305,6 +316,9 @@ def write_mpanalysis_dag(outdir, list_of_pdblists, bondtype):
     out.write("PARENT onelineorig"+num+" CHILD residuerorig"+num+"\n")
     out.write("RETRY residuerorig"+num+" 3\n\n")
     postjobs = postjobs+"residuerorig"+num + " "
+    
+    out.write("PARENT residuerorig"+num+" CHILD residuerbuild"+num+"\n")
+    out.write("PARENT residuerbuild"+num+" CHILD residuernobuild"+num+"\n\n")
     
   out.write("JOB post post_process.sub\n")
   out.write(postjobs+"CHILD post\n")
@@ -516,7 +530,7 @@ transfer_input_files = {0}/bin/linux/probe,{0}/bin/linux/cluster,{0}/bin/clashli
 transfer_output_files = results
 #transfer_output_remaps = "$(PDBREMAPS)"
 
-maxRunTime = 7200
+maxRunTime = 21600
 periodic_remove = JobStatus == 2 && \\
  (((CurrentTime - EnteredCurrentStatus) + \\
    (RemoteWallClockTime - CumulativeSuspensionTime)) > $(maxRunTime) )
@@ -603,9 +617,10 @@ def make_files(indir, file_size_limit, bond_type, sans_location, update_scripts=
     #split_pdbs_to_models(indir, os.path.join(outdir, "pdbs"))
     #print opts.total_file_size_limit
     
-    list_of_lists = divide_pdbs(indir, file_size_limit)
+    list_of_lists = divide_pdbs(indir, outdir, file_size_limit)
 
-    split_pdbs_to_dirs(outdir, list_of_lists)
+    if not update_scripts:
+      split_pdbs_to_dirs(outdir, list_of_lists)
 
     #pdb = "{pdbbase}"
     #build = "nobuild"
