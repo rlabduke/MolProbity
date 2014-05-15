@@ -219,10 +219,12 @@ def residue_analysis(files, quiet):
 def setup_nmrstar(header, output_str, filename, sans_loc):
   sys.path.append(sans_loc)
   import bmrb
-  if os.path.isfile(output_str):
-    saver = bmrb.saveframe.fromFile(output_str)
-    loop = saver.getLoopByCategory("Residue_analysis")
-  else:
+  #if os.path.isfile(output_str):
+  #  saver = bmrb.saveframe.fromFile(output_str)
+  #  loop = saver.getLoopByCategory("Residue_analysis")
+  #else:
+
+  if not os.path.isfile(output_str):
     saver = bmrb.saveframe.fromScratch("Structure_validation_residue", "Structure_validation_residue")
     saver.addTag("Sf_category", "?")
     saver.addTag("Sf_framecode", "?")
@@ -232,17 +234,21 @@ def setup_nmrstar(header, output_str, filename, sans_loc):
     saver.addTag("Software_version", "4.0")
     saver.addTag("File_name", os.path.basename(filename))
     saver.addTag("PDB_ID", (os.path.basename(filename)[:-4])[:4])
-    loop = bmrb.loop.fromScratch(category="Residue_analysis")
-    loop.addColumn(header)
-  return saver, loop
+    with open(output_str+".header", "a+") as str_write:
+      str_write.write(saver.getDataAsCSV())
+  loop = bmrb.loop.fromScratch(category="Residue_analysis")
+  loop.addColumn(header)
+  return loop
 #}}}
 
 #{{{ write_nmrstar
-def write_nmrstar(output_str, saver, loop):
+def write_nmrstar(output_str, loop):
+  print_header = False
   if not os.path.isfile(output_str):
-    saver.addLoop(loop)
-  with open(output_str, 'w+') as str_write:
-    str_write.write(str(saver))
+    print_header = True
+  #  saver.addLoop(loop)
+  with open(output_str, 'a+') as str_write:
+    str_write.write(loop.getDataAsCSV(print_header, True))
   #print saver
 #}}}
 
@@ -300,7 +306,9 @@ def residue_analysis(files, quiet, sans_location):
             "Disulfide_chi1",
             "Disulfide_chi2",
             "Disulfide_chi3",
+            "Disulfide_ss_angle",
             "Disulfide_ss",
+            "Disulfide_ss_angle_prime",
             "Disulfide_chi2prime",
             "Disulfide_chi1prime",
             "Outlier_count_separate_geometry",
@@ -311,8 +319,8 @@ def residue_analysis(files, quiet, sans_location):
   
   output_dir = files[14]
   if sans_location is not "none":
-    output_str = os.path.join(output_dir, (os.path.basename(files[0])[:-4])[:4]+"-residue.str")
-    saver, loop = setup_nmrstar(header[2:], output_str, files[0], sans_location)
+    output_str = os.path.join(output_dir, (os.path.basename(files[0])[:-4])[:4]+"-residue-str.csv")
+    loop = setup_nmrstar(header[2:], output_str, files[0], sans_location)
   
   clash = molparser.loadClashlist(files[2])
   cbdev = molparser.loadCbetaDev(files[3])
@@ -352,7 +360,10 @@ def residue_analysis(files, quiet, sans_location):
   suites = molparser.loadSuitenameReport(files[10])
   badSuites = molparser.findSuitenameOutliers(suites)
   
-  csv_out = "#"+(":".join(header))
+  csv_out = ""
+  if not quiet:
+    csv_out = "#"+(":".join(header))
+    
   for res in list_res:
     out = []
     outCount = 0
@@ -489,9 +500,9 @@ def residue_analysis(files, quiet, sans_location):
       out.extend(["",""])
       
     if res in disulf:
-      out.extend([disulf[res]['chi1'],disulf[res]['chi2'],disulf[res]['chi3'],disulf[res]['s-s'],disulf[res]['chi2prime'],disulf[res]['chi1prime']])
+      out.extend([disulf[res]['chi1'],disulf[res]['chi2'],disulf[res]['chi3'],disulf[res]['cb-s-s'],disulf[res]['s-s'],disulf[res]['s-s-cbprime'],disulf[res]['chi2prime'],disulf[res]['chi1prime']])
     else:
-      out.extend(["","","","","",""])
+      out.extend(["","","","","","","",""])
     
     out.extend([outCountSep,outCount])
 
@@ -512,7 +523,7 @@ def residue_analysis(files, quiet, sans_location):
     
   #sys.stderr.write(" ".join(os.listdir(os.path.dirname(output_str))))
   if sans_location is not "none":
-    write_nmrstar(output_str, saver, loop)
+    write_nmrstar(output_str, loop)
 
     
 #}}}

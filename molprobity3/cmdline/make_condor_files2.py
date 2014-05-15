@@ -235,7 +235,7 @@ def write_super_dag(outdir, list_of_pdblists):
 #}}}
 
 #{{{ write_mpanalysis_dag
-def write_mpanalysis_dag(outdir, list_of_pdblists, bondtype):
+def write_mpanalysis_dag(outdir, list_of_pdblists, bondtype, sans_exists):
   config_name = "mpanalysisdag.config"
   config_file = os.path.join(os.path.realpath(outdir), config_name)
   config = open(config_file, 'wr')
@@ -319,6 +319,12 @@ def write_mpanalysis_dag(outdir, list_of_pdblists, bondtype):
     
     out.write("PARENT residuerorig"+num+" CHILD residuerbuild"+num+"\n")
     out.write("PARENT residuerbuild"+num+" CHILD residuernobuild"+num+"\n\n")
+    
+    if sans_exists:
+      out.write("Job starwrite"+num+" starwrite.sub\n")
+      out.write("VARS starwrite"+num+" DIR=\""+os.path.join(out_pdb_dir, num, "orig")+"\"\n")
+      out.write("VARS starwrite"+num+" NUMBER=\""+num+"\"\n")
+      out.write("PARENT residuernobuild"+num+" CHILD starwrite"+num+"\n\n")
     
   out.write("JOB post post_process.sub\n")
   out.write(postjobs+"CHILD post\n")
@@ -440,11 +446,11 @@ build_type = sys.argv[1]
 #print build_type
 #print type(build_type)
 
-for dir in sys.argv[2:]:
-    base_con_dir = os.path.dirname(os.path.dirname(os.path.dirname(dir)))
-    for file in sorted(os.listdir(dir)):
-        pdb = os.path.join(dir, file)
-        sys.stderr.write(pdb+" {script} analysis\\n")
+for dir_name in sys.argv[2:]:
+    base_con_dir = os.path.dirname(os.path.dirname(os.path.dirname(dir_name)))
+    for file_name in sorted(os.listdir(dir_name)):
+        pdb = os.path.join(dir_name, file_name)
+        #sys.stderr.write(pdb+" {script} analysis\\n")
         s_time = time.time()
         pdbbase = os.path.basename(pdb)[:-4]
         model_num = pdbbase.split("_")[1][0:3]
@@ -545,6 +551,75 @@ queue
 """
 #}}}
 
+#{{{ write_post_star_sub
+post_star_sub = """universe = vanilla
+
+Notify_user  = vbchen@bmrb.wisc.edu
+notification = Error
+
+#requirements = ((TARGET.FileSystemDomain == "bmrb.wisc.edu") || (TARGET.FileSystemDomain == ".bmrb.wisc.edu"))
+#requirements = (machine == inspiron17)
+
+Executable     = starwrite.py
+
+copy_to_spool   = False
+priority        = 0
+
+Arguments       = $(DIR)
+log         = logs/starwrite$(NUMBER).log
+error      = logs/starwrite$(NUMBER).err
+queue
+"""
+#}}}
+
+#{{{ write_post_star
+post_star_writer = """#!/usr/bin/python
+
+import sys
+import subprocess
+import os
+import time
+sys.path.append('{sans_loc}')
+import bmrb
+
+pdb_set = set()
+for dir_name in sys.argv[1:]:
+    for file_name in sorted(os.listdir(dir_name)):
+        pdb = os.path.join(dir_name, file_name)
+        pdbbase = os.path.basename(pdb)[:-4]
+        model_num = pdbbase.split("_")[1][0:3]
+        pdb_code = pdbbase[:4]
+        pdb_set.add(pdb_code)
+        print pdb_set
+        
+for pdb_code in pdb_set:
+    s_time = time.time()
+    if os.path.exists(os.path.join("results", pdb_code)):
+        base_path = os.path.join("results", pdb_code)
+        star_csv = os.path.join(base_path, pdb_code+"-residue-str.csv")
+        star_save = os.path.join(base_path, pdb_code+"-residue-str.csv.header")
+        if os.path.exists(star_save):
+            saver = bmrb.saveframe.fromFile(star_save, True)
+        else:
+            sys.stderr.write("# ERROR: saveframe header file missing for: " + pdb_code+"\\n")
+            sys.exit(1)
+        if os.path.exists(star_csv):
+            loop = bmrb.loop.fromFile(star_csv, True)
+            saver.addLoop(loop)
+        else:
+            sys.stderr.write("# ERROR: loop file missing for: " + pdb_code+"\\n")
+            sys.exit(1)
+        with open(os.path.join(base_path, pdb_code+"-residue.str"), 'a+') as str_write:
+            str_write.write(str(saver))
+            #str_write.write(str(loop))
+    else:
+        sys.stderr.write("# ERROR: results missing for: " + pdb_code+"\\n")
+        sys.exit(1)
+    e_time = time.time()
+    sys.stderr.write(repr(e_time - s_time) + " seconds(?) for star write of "+pdb_code+"\\n")
+"""
+#}}}
+
 #{{{ post_sub
 post_sub = """universe = local
 
@@ -580,11 +655,6 @@ cat logs/residuerbuild*.err > logs/allresiduerbuild.err
 tar -zcf pdbs.tgz pdbs/
 rm -rf pdbs/
 """
-#}}}
-
-#{{{ replace_condor_files
-def replace_condor_files():
-  print "this may not be as easy as originally thought"
 #}}}
 
 #{{{ make_files
@@ -628,15 +698,19 @@ def make_files(indir, file_size_limit, bond_type, sans_location, update_scripts=
     #  pdb = "{pdbbase}F"
     #  build = "build"
     ana_opt = ""
-    if not sans_location is "none":
+    sans_exists = not sans_location is "none"
+    if sans_exists:
       ana_opt = " \"-s\", '"+sans_location+"',"
-    write_mpanalysis_dag(outdir, list_of_lists, bond_type)
+    write_mpanalysis_dag(outdir, list_of_lists, bond_type, sans_exists)
     write_file(outdir, "reduce.sh", reduce_sh.format(molprobity_home, buildtype="{buildtype}", bondtype="{bondtype}", outdir="{outdir}", pdbbase="{pdbbase}"), 0755)
     write_file(outdir, "reduce.sub", reduce_sub.format(molprobity_home))
     write_file(outdir, "oneline.py", analysis_py.format(molprobity_home, bondtype=bond_type, analyze_opt=ana_opt, script="molparser.py"), 0755)
     write_file(outdir, "residuer.py", analysis_py.format(molprobity_home, bondtype=bond_type, analyze_opt=ana_opt, script="py-residue-analysis.py"), 0755)
     write_file(outdir, "oneline.sub", analyze_sub.format(molprobity_home, script="oneline"))
     write_file(outdir, "residuer.sub", analyze_sub.format(molprobity_home, script="residuer"))
+    if sans_exists:
+      write_file(outdir, "starwrite.sub", post_star_sub.format())
+      write_file(outdir, "starwrite.py", post_star_writer.format(sans_loc=sans_location), 0755)
     write_file(outdir, "post_process.sh", post_sh, 0755)
     #write_file(outdir, "local_run.sh", local_run.format(molprobity_home, pdbbase="{pdbbase}"), 0755)
     #write_file(outdir, "local_run.py", local_run_py.format(molprobity_home), 0755)

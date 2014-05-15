@@ -539,9 +539,11 @@ def loadDisulfidesReport(datafile):
         'chi1'      : float(splitline[8]),
         'chi2'      : float(splitline[9]),
         'chi3'      : float(splitline[10]),
-        's-s'       : float(splitline[11]),
-        'chi2prime' : float(splitline[12]),
-        'chi1prime' : float(splitline[13])
+        'cb-s-s'    : float(splitline[11]),
+        's-s'       : float(splitline[12]),
+        's-s-cbprime': float(splitline[13]),
+        'chi2prime' : float(splitline[14]),
+        'chi1prime' : float(splitline[15])
       }
   return ret
 #}}}
