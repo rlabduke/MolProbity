@@ -443,7 +443,7 @@ def residue_analysis(files, quiet, sans_location):
     if (totalRes > 0 and totalBonds > 0 and totalAngles > 0): # catches a bug with PNA residues      
       if res in bondOut:
         outCountSep += 1
-      if res in geom:
+      if res in geom and 'bondoutCount' in geom[res]:
         out.append(geom[res]['bondoutCount'])
         out.append(geom[res]['worstbondmeasure'])
         out.append(geom[res]['worstbondvalue'])
@@ -452,7 +452,7 @@ def residue_analysis(files, quiet, sans_location):
         out.extend(['','','',''])
       if res in angleOut:
         outCountSep += 1
-      if res in geom:
+      if res in geom and 'angleoutCount' in geom[res]:
         out.append(geom[res]['angleoutCount'])
         out.append(geom[res]['worstanglemeasure'])
         out.append(geom[res]['worstanglevalue'])
