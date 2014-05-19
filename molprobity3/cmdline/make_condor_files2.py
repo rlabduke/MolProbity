@@ -325,6 +325,7 @@ def write_mpanalysis_dag(outdir, list_of_pdblists, bondtype, sans_exists):
       out.write("VARS starwrite"+num+" DIR=\""+os.path.join(out_pdb_dir, num, "orig")+"\"\n")
       out.write("VARS starwrite"+num+" NUMBER=\""+num+"\"\n")
       out.write("PARENT residuernobuild"+num+" CHILD starwrite"+num+"\n\n")
+      postjobs = postjobs+"starwrite"+num+" "
     
   out.write("JOB post post_process.sub\n")
   out.write(postjobs+"CHILD post\n")
