@@ -43,10 +43,15 @@
 #   10/30/07 - RMI     - v2.1   - Added URI as a Uracil alias 
 #                               - Added -cs to allow stripping of segIDs
 #                               - Fixed residue name conversions to be more robust
+#
+#   05/19/14 - BJH     - v2.1.1 - Stopped puting chain ids in SEGid columns with
+#                                 -c option as this was crashing moltbx.
+#
 use strict;
 
 #my $VersionString = 'pdbcns (version 2.0 - May 4, 2001 -- perl)';
-my $VersionString = 'pdbcns (version 2.1 - Oct 30, 2007 -- perl)'; 
+#my $VersionString = 'pdbcns (version 2.1 - Oct 30, 2007 -- perl)'; 
+my $VersionString = 'pdbcns (version 2.1.1 - May 19, 2014 -- perl)'; 
 my $Version = '2.1.071030'; 
 
 my $hNameIfHasO2Prime  = '';
@@ -597,10 +602,14 @@ while (<>) {
                                 substr($rec, 20, 46), substr($rec,80,0); 
          }
          else {
-            printf "%s%s%s%s%s%s%s\n", substr($rec,  0, 12), $atomName,
+            # OLD CODE not compatible with moltbx. Modified by BJH 20140519
+            # printf "%s%s%s%s%s%s%s\n", substr($rec,  0, 12), $atomName,
+				# substr($rec, 16, 1), $residueName, 
+                                # substr($rec, 20, 56), $chainID,
+                                # substr($rec, 76,  8);
+            printf "%s%s%s%s%s\n", substr($rec,  0, 12), $atomName,
 				substr($rec, 16, 1), $residueName, 
-                                substr($rec, 20, 56), $chainID,
-                                substr($rec, 76,  8);
+                                substr($rec, 20, 60);
          }
       }
    }
