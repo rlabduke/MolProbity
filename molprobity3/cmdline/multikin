@@ -39,8 +39,9 @@ OUTPUTS / RESULTS:
 // Default options
 $optVerbose = true;
 $optGzipKin = true;
+$optEcloud = true;
 $optMultikin = array(
-    'ribbons'   => false,
+    'ribbons'   => true,
     'Bscale'    => true,
     'Qscale'    => true,
     'altconf'   => true,
@@ -59,6 +60,7 @@ $optMultikin = array(
 if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
 {
     if($arg == '-q')            $optVerbose = false;
+    if($arg == '-n')            $optEcloud = false;
     elseif(!isset($inDir))      $inDir = $arg;
     elseif(!isset($outDir))     $outDir = $arg;
     else                        die("Too many or unrecognized arguments: '$arg'\n");
@@ -93,7 +95,11 @@ foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
     #echo "modID: ".$modelID."\n";
     $model =& $_SESSION['models'][$modelID];
     $ensemble =& $_SESSION['ensembles'][$modelID];
-    $reduce_blength = $_SESSION['reduce_blength'];
+    $reduce_blength = 'ecloud';
+    if(!$optEcloud)
+    {
+      $reduce_blength = 'nuclear';
+    }
     #echo "model: ".isset($model)."\n";
     #echo "ensemble: \n";
     #print_r($ensemble);

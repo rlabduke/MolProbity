@@ -868,6 +868,7 @@ def oneline_analysis(files, quiet, sans_location):
             "RNA_suite_count",
             "Entry_ID",
             "Structure_validation_oneline_list_ID",
+            "Macromolecule_types",
   ]
   if (not quiet):
     print "#"+(":".join(header))
@@ -876,6 +877,7 @@ def oneline_analysis(files, quiet, sans_location):
   out.append(os.path.basename(files[0]))
   out.append((os.path.basename(files[0])[:-4])[:4])
   out.append(files[1])
+  macromolecule_type = []
   
   flips_used = files[16]
   if flips_used == "na":
@@ -884,7 +886,7 @@ def oneline_analysis(files, quiet, sans_location):
     out.append(files[15]) # Hydrogen_positions
   out.append(files[16]) # MolProbity_flips
   
-  out.append("?") # "Assembly_ID",       bmrb specific, to be filled in later
+  out.append("") # "Assembly_ID",       bmrb specific, to be filled in later
   
   clash = loadClashlist(files[2])
   out.append(("%.2f" % (clash['scoreAll'])))
@@ -914,6 +916,7 @@ def oneline_analysis(files, quiet, sans_location):
   if ramaScore['OUTLIER'] == 0 and ramaScore['Allowed'] == 0 and ramaScore['Favored'] == 0:
     out.extend(["","","",""])
   else:
+    macromolecule_type.append("protein")
     out.append((repr(ramaScore['OUTLIER'])))
     out.append((repr(ramaScore['Allowed'])))
     out.append((repr(ramaScore['Favored'])))
@@ -921,7 +924,10 @@ def oneline_analysis(files, quiet, sans_location):
   
   geom = loadBondGeometryReport(files[6], "protein")
   geom.update(loadBondGeometryReport(files[7], "rna"))
-  geom.update(loadBondGeometryReport(files[8], "dna"))
+  dna_geom = loadBondGeometryReport(files[8], "dna")
+  geom.update(dna_geom)
+  if len(dna_geom) > 3: # uncertain what a good limit is for considering a structure to have DNA.
+    macromolecule_type.append("dna")
   #pprint.pprint(geom)
   bondOut = findBondGeomOutliers(geom)
   angleOut = findAngleGeomOutliers(geom)
@@ -969,9 +975,16 @@ def oneline_analysis(files, quiet, sans_location):
   badSuites = findSuitenameOutliers(suites)
   out.append(repr(len(badSuites)))
   out.append(repr(len(suites)))
+  if (len(pperp)> 1 and len(suites)>1):
+    macromolecule_type.append("rna")
   
-  out.append("?") # "Entry_ID",          bmrb specific
-  out.append("?") # "List_ID",           bmrb specific
+  out.append("") # "Entry_ID",          bmrb specific
+  out.append("") # "List_ID",           bmrb specific
+  
+  if (len(macromolecule_type) > 0):
+    out.append(",".join(macromolecule_type))
+  else:
+    out.append("unknown")
 
   print ":".join(str(e) for e in out)
   
