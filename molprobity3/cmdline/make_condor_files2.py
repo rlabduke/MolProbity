@@ -31,9 +31,9 @@ def parse_cmdline():
   parser.add_option("-w", "--web", action="store", dest="update_bmrb_website", 
     type="string", default="none",
     help="use this option to auto update results on BMRB website afterwards")
-  parser.add_option("-c", "--core", action="store", dest="cyrange_location", 
-    type="string", default="none",
-    help="cyrange core calculation software location")
+  #parser.add_option("-c", "--core", action="store", dest="cyrange_location", 
+  #  type="string", default="none",
+  #  help="cyrange core calculation software location")
   #parser.add_option("-r", "--reduce", action="store", type="boolean",
   #  dest="run_reduce", default="false",
   #  help="run reduce to add hydrogens first (use -t to specify length)")
@@ -109,9 +109,11 @@ def split_pdb(pdb_file, outdir, origdir, gzip_file = False):
   model_files = []
   keep_lines = False
   pdb_name, ext = os.path.splitext(os.path.basename(pdb_file))
-  #print pdb_name+"\n"
+  print pdb_name
   if pdb_name.startswith("pdb") and pdb_name.endswith(".ent"):
     pdb_name = pdb_name[3:-4]
+  if "-cyranged" in pdb_name:
+    pdb_name = pdb_name[:-4]
     
   if not os.path.exists(os.path.join(outdir, "results", pdb_name[:4])):
     os.makedirs(os.path.join(outdir, "results", pdb_name[:4]))
@@ -184,7 +186,7 @@ def divide_pdbs(in_dir, outdir, size_limit):
             list_size = os.path.getsize(full_file)
         if (ext == ".gz"):
           root2, ext = os.path.splitext(root)
-          if (ext == ".ent"):
+          if (ext == ".ent") or (ext == ".pdb"):
             if (list_size <= size_limit):
               pdb_list.append(full_file)
               #print pdb_list
@@ -244,7 +246,7 @@ def write_super_dag(outdir, list_of_pdblists):
 #}}}
 
 #{{{ write_mpanalysis_dag
-def write_mpanalysis_dag(outdir, list_of_pdblists, bondtype, sans_exists, cyrange_exists, update_bmrb_loc="none"):
+def write_mpanalysis_dag(outdir, list_of_pdblists, bondtype, sans_exists, update_bmrb_loc="none"):
   config_name = "mpanalysisdag.config"
   config_file = os.path.join(os.path.realpath(outdir), config_name)
   config = open(config_file, 'wr')
@@ -270,19 +272,11 @@ def write_mpanalysis_dag(outdir, list_of_pdblists, bondtype, sans_exists, cyrang
     num = '{0:0>4}'.format(indx)
     #out.write("SUBDAG EXTERNAL "+num+" moldag"+num+".dag\n")
     #out.write("Jobstate_log logs/mol"+num+".jobstate.log\n")
-    if cyrange_exists:
-      out.write("Job cyranger"+num+" cyranger.sub\n")
-      out.write("VARS cyranger"+num+" ARGS= \""+os.path.join(out_pdb_dir, num, "orig")+"\"\n")
-      out.write("VARS cyranger"+num+" NUMBER=\""+num+"\"\n\n")
   
     for buildtype in ("build", "nobuild"):
       out.write("Job reducer"+buildtype+num+" reduce.sub\n")
       out.write("VARS reducer"+buildtype+num+" ARGS= \""+" ".join((repr(sleep_seconds), os.path.join(out_pdb_dir, num, "reduce-"+buildtype), buildtype+"9999", bondtype, os.path.join(out_pdb_dir, num, "orig")))+"\"\n")
-      out.write("VARS reducer"+buildtype+num+" NUMBER=\""+buildtype+num+"\"\n")
-      if cyrange_exists:
-        out.write("PARENT cyranger"+num+" CHILD reducer"+buildtype+num+"\n\n")
-      else:
-        out.write("\n")
+      out.write("VARS reducer"+buildtype+num+" NUMBER=\""+buildtype+num+"\"\n\n")
 
       if sleep_seconds > 120:
         sleep_seconds = sleep_seconds + 1
@@ -427,109 +421,6 @@ def write_file(outdir, out_name, file_text, permissions=0644):
   out.write(file_text)
   out.close()
   os.chmod(outfile, permissions)
-#}}}
-
-#{{{ write_cyranger_py
-cyranger_py = """import sys, os, re, pprint, subprocess
-
-# Run a command without blocking
-def syscmd(outfile, *commands):
-  if outfile != subprocess.PIPE:
-    outfile = open(outfile, "w")
-  #print(list(commands))
-  # apparently when using shell=true with subprocess, you need to pass a string instead of a list of arguments
-  return subprocess.Popen(" ".join(list(commands)),stdout=outfile,stderr=subprocess.PIPE, stdin=subprocess.PIPE, shell=True)
-
-#apparently if the output gets too long the system can hang due to the pipes overflowing
-def long_reap(the_cmd, pdb):
-  results = the_cmd.communicate(pdb)
-  err = results[1]
-  if err != "":
-    sys.stderr.write(pdb+" had the following error\\n"+err)
-  return results[0]
-
-def run_cyrange(pdb):
-  cy_out = long_reap(syscmd(subprocess.PIPE, "./cyrange",pdb), pdb)
-  chain_range_dict = {}
-  for line in cy_out.split("\n"):
-    #print line
-    if "Optimal" in line:
-      for element in line.split(" "):
-        if ".." in element:
-          lower,upper = element.strip(",:").split("..")
-          chain = ""
-          low_match = re.match("[A-Za-z]", lower)
-          upp_match = re.match("[A-Za-z]", upper)
-          if low_match and upp_match:
-            #use chain ID
-            chain = lower[0:1]
-            lower = lower[1:]
-            upper = upper[1:]
-          #print chain, lower, upper
-          if chain in chain_range_dict.keys():
-            old_range = chain_range_dict[chain]
-            old_range.extend(range(int(lower), int(upper)+1))
-            chain_range_dict[chain] = old_range
-          else:
-            chain_range_dict[chain] = range(int(lower), int(upper)+1)
-  #print chain_range_dict.keys()
-  if len(chain_range_dict.keys()) == 0:
-    sys.stderr.write(pdb+" failed to generate cyrange results\\n")
-  return chain_range_dict
-
-def trim_pdb(range_dict, pdb_file):
-  file_path, name = os.path.split(pdb_file)
-  out_path = os.path.join(file_path, os.path.splitext(name)[0]+"-cyranged.pdb")
-  with open(pdb_file) as f:
-    with open(out_path, 'wr') as outfile:
-      for line in f:
-        if line.startswith("MODEL") or line.startswith("END") or line.startswith("END"):
-          outfile.write(line)
-        if line.startswith("ATOM"):
-          #print ":"+line[21]+":"
-          #print ":"+line[22:26]+":"
-          chain = line[21]
-          res = line[22:26]
-          if chain in range_dict.keys() and int(res) in range_dict[chain]:
-            outfile.write(line)
-          elif "" in range_dict.keys() and int(res) in range_dict[""]:
-            outfile.write(line)
-
-for arg in sys.argv[1:]:
-  if os.path.isdir(arg):
-    for f in os.listdir(arg):
-      if not f.endswith("-cyranged.pdb") and (f.endswith(".pdb") or f.endswith(".ent")):
-        range_dict = run_cyrange(os.path.join(arg, f))
-        if len(range_dict.keys()) > 0:
-          trim_pdb(range_dict,os.path.join(arg, f))
-  elif os.path.isfile(arg):
-    range_dict = run_cyrange(os.path.realpath(arg))
-    if len(range_dict.keys()) > 0:
-      trim_pdb(range_dict, os.path.realpath(arg))
-"""
-#}}}
-
-#{{{ write_cyranger_sub
-cyranger_sub = """universe = vanilla
-
-Notify_user  = vbchen@bmrb.wisc.edu
-notification = Error
-
-{req}
-#requirements = (machine == inspiron17)
-
-Executable     = cyranger.py
-should_transfer_files = YES
-transfer_input_files = {cyrange_loc}
-
-copy_to_spool   = False
-priority        = 0
-
-Arguments       = $(ARGS)
-log         = logs/cyranger$(NUMBER).log
-error      = logs/cyranger$(NUMBER).err
-queue
-"""
 #}}}
 
 #{{{ write_prepare_results_dir
@@ -786,14 +677,11 @@ rm -rf pdbs/
 """
 #}}}
 
-#{{{ make_files
-def make_files(indir, file_size_limit, bond_type, sans_location, cyrange_location, do_requirement, update_scripts=False, update_bmrb_loc="none"):
-  molprobity_home = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
-  #print "mp home: " + molprobity_home
-  #print "indir: " + indir
-  #print update_bmrb
-
-  if os.path.exists(indir):
+#{{{ prep_dirs
+def prep_dirs(indir, update_scripts=False):
+  if not os.path.exists(indir):
+    sys.stderr.write(indir + " does not seem to exist!\n")
+  else:
     indir_base = os.path.basename(os.path.realpath(indir))
     outdir = os.path.join(indir, "condor_sub_files_"+indir_base)
     #print update_scripts
@@ -814,55 +702,60 @@ def make_files(indir, file_size_limit, bond_type, sans_location, cyrange_locatio
     else:
       sys.stderr.write("\"condor_sub_files\" directory detected in \""+indir+"\", please delete it before running this script\n")
       sys.exit()
-    #split_pdbs_to_models(indir, os.path.join(outdir, "pdbs"))
-    #print opts.total_file_size_limit
-    
-    list_of_lists = divide_pdbs(indir, outdir, file_size_limit)
+    return outdir
+#}}}
 
-    if not update_scripts:
-      split_pdbs_to_dirs(outdir, list_of_lists)
+#{{{ make_files
+def make_files(indir, outdir, file_size_limit, bond_type, sans_location, do_requirement, update_scripts=False, update_bmrb_loc="none"):
+  molprobity_home = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+  #print "mp home: " + molprobity_home
+  #print "indir: " + indir
+  #print update_bmrb
+  print(outdir)
+  list_of_lists = divide_pdbs(indir, outdir, file_size_limit)
+  print(list_of_lists)
 
-    #pdb = "{pdbbase}"
-    #build = "nobuild"
-    #if build_type=="build":
-    #  pdb = "{pdbbase}F"
-    #  build = "build"
-    #print do_requirement
-    if do_requirement == "bmrb":
-      condor_req = "requirements = ((TARGET.FileSystemDomain == \"bmrb.wisc.edu\") || (TARGET.FileSystemDomain == \".bmrb.wisc.edu\"))"
-    else:
-      condor_req = ""
-    #print condor_req+" is req"
-    ana_opt = ""
-    sans_exists = not sans_location is "none"
-    cyrange_exists = not cyrange_location is "none"
-    if sans_exists:
-      ana_opt = " \"-s\", '"+sans_location+"',"
-    if cyrange_exists:
-      write_file(outdir, "cyranger.sub", cyranger_sub.format(req=condor_req, cyrange_loc=cyrange_location))
-      write_file(outdir, "cyranger.py", cyranger_py, 0755)
-    write_mpanalysis_dag(outdir, list_of_lists, bond_type, sans_exists, cyrange_exists, update_bmrb_loc)
-    write_file(outdir, "reduce.sh", reduce_sh.format(molprobity_home, buildtype="{buildtype}", bondtype="{bondtype}", outdir="{outdir}", pdbbase="{pdbbase}"), 0755)
-    write_file(outdir, "reduce.sub", reduce_sub.format(molprobity_home, req=condor_req))
-    write_file(outdir, "oneline.py", analysis_py.format(molprobity_home, bondtype=bond_type, analyze_opt=ana_opt, script="molparser.py"), 0755)
-    write_file(outdir, "residuer.py", analysis_py.format(molprobity_home, bondtype=bond_type, analyze_opt=ana_opt, script="py-residue-analysis.py"), 0755)
-    write_file(outdir, "oneline.sub", analyze_sub.format(molprobity_home, req=condor_req, script="oneline"))
-    write_file(outdir, "residuer.sub", analyze_sub.format(molprobity_home, req=condor_req, script="residuer"))
-    if sans_exists:
-      write_file(outdir, "starwrite.sub", post_star_sub.format(req=condor_req))
-      write_file(outdir, "starwrite.py", post_star_writer.format(sans_loc=sans_location), 0755)
-    write_file(outdir, "post_process.sh", post_sh, 0755)
-    #write_file(outdir, "local_run.sh", local_run.format(molprobity_home, pdbbase="{pdbbase}"), 0755)
-    #write_file(outdir, "local_run.py", local_run_py.format(molprobity_home), 0755)
-    write_file(outdir, "post_process.sub", post_sub)
-    #write_file(outdir, "clashlist.sh", clash_sh.format(bondtype=opts.bond_type, pdb="{pdb}", pdbbase="{pdbbase}"), 0755)
-    #write_file(outdir, "clashlist.sub", clash_sub.format(molprobity_home))
-    
+  if not update_scripts:
+    print("splitting")
+    split_pdbs_to_dirs(outdir, list_of_lists)
+
+  #pdb = "{pdbbase}"
+  #build = "nobuild"
+  #if build_type=="build":
+  #  pdb = "{pdbbase}F"
+  #  build = "build"
+  #print do_requirement
+  if do_requirement == "bmrb":
+    condor_req = "requirements = ((TARGET.FileSystemDomain == \"bmrb.wisc.edu\") || (TARGET.FileSystemDomain == \".bmrb.wisc.edu\"))"
   else:
-    sys.stderr.write(indir + " does not seem to exist!\n")
+    condor_req = ""
+  #print condor_req+" is req"
+  ana_opt = ""
+  sans_exists = not sans_location is "none"
+  if sans_exists:
+    ana_opt = " \"-s\", '"+sans_location+"',"
+  write_mpanalysis_dag(outdir, list_of_lists, bond_type, sans_exists, update_bmrb_loc)
+  write_file(outdir, "reduce.sh", reduce_sh.format(molprobity_home, buildtype="{buildtype}", bondtype="{bondtype}", outdir="{outdir}", pdbbase="{pdbbase}"), 0755)
+  write_file(outdir, "reduce.sub", reduce_sub.format(molprobity_home, req=condor_req))
+  write_file(outdir, "oneline.py", analysis_py.format(molprobity_home, bondtype=bond_type, analyze_opt=ana_opt, script="molparser.py"), 0755)
+  write_file(outdir, "residuer.py", analysis_py.format(molprobity_home, bondtype=bond_type, analyze_opt=ana_opt, script="py-residue-analysis.py"), 0755)
+  write_file(outdir, "oneline.sub", analyze_sub.format(molprobity_home, req=condor_req, script="oneline"))
+  write_file(outdir, "residuer.sub", analyze_sub.format(molprobity_home, req=condor_req, script="residuer"))
+  if sans_exists:
+    write_file(outdir, "starwrite.sub", post_star_sub.format(req=condor_req))
+    write_file(outdir, "starwrite.py", post_star_writer.format(sans_loc=sans_location), 0755)
+  write_file(outdir, "post_process.sh", post_sh, 0755)
+  #write_file(outdir, "local_run.sh", local_run.format(molprobity_home, pdbbase="{pdbbase}"), 0755)
+  #write_file(outdir, "local_run.py", local_run_py.format(molprobity_home), 0755)
+  write_file(outdir, "post_process.sub", post_sub)
+  #write_file(outdir, "clashlist.sh", clash_sh.format(bondtype=opts.bond_type, pdb="{pdb}", pdbbase="{pdbbase}"), 0755)
+  #write_file(outdir, "clashlist.sub", clash_sub.format(molprobity_home))
+    
+
 #}}}
 
 if __name__ == "__main__":
 
   opts, indir = parse_cmdline()
-  make_files(indir, opts.total_file_size_limit, opts.bond_type, opts.sans_location, opts.cyrange_location, opts.requirement, opts.update_scripts, opts.update_bmrb_website)
+  outdir = prep_dirs(indir, opts.update_scripts)
+  make_files(indir, outdir, opts.total_file_size_limit, opts.bond_type, opts.sans_location, opts.requirement, opts.update_scripts, opts.update_bmrb_website)
