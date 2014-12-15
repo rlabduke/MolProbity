@@ -4,6 +4,9 @@ if [ $# -eq 1 ]
 then
     sf_user=$1
 fi
+ 
+curl http://kinemage.biochem.duke.edu/molprobity/base.tar.gz -o base.tar.gz
+tar zxf base.tar.gz
 
 mkdir sources
 mkdir build

@@ -33,7 +33,7 @@ A complete list of appropriate citations can be
 found <a href='help/about.html' target='_blank'>here</a>.</p>
 
 <p>Installation <b>instructions</b> for MolProbity are provided, in the file named
-<code>doc/installing.html</code>.</p>
+<code>README</code>.</p>
 
 <?php
 $file = "moltbx-".MP_VERSION.".tgz";

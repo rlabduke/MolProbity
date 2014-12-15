@@ -4,6 +4,9 @@
 # preserved by Subversion.
 #
 
+#get arcitecture
+MACHINE_TYPE=`uname -m`
+
 # Dumb check to make sure we're in the top-level MP directory
 if [ ! -f setup.sh ]; then
     # Try to change to the right directory
@@ -49,7 +52,14 @@ cd macosx/
 [ -f awk ] || ln -s gawk awk
 cd ..
 cd linux/
-# Nothing to do here...
+# create proper symlinks according to architecture
+if [ ${MACHINE_TYPE} == 'x86_64' ]; then
+  ln -s prekin_64 prekin
+  ln -s scrublines_64 scrublines
+else
+  ln -s prekin_32 prekin
+  ln -s scrublines_32 scrublines
+fi
 cd ..
 cd ..
 
