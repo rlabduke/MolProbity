@@ -42,7 +42,14 @@ function hideMultiOpts()
   else block.style.display = 'none'
 }
 
-function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
+function hideLowResOpts()
+{
+  var block = document.getElementById('lowres_opts')
+  if(document.forms[0].doLowRes.checked) block.style.display = 'block'
+  else block.style.display = 'none'
+}
+
+function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig, isLowRes)
 {
     selectionHasH = doAAC
 
@@ -55,10 +62,12 @@ function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
     document.forms[0].kinRota.checked           = hasProtein
     document.forms[0].kinCBdev.checked          = hasProtein
     document.forms[0].kinGeom.checked           = (hasProtein || hasNucAcid)
+    document.forms[0].kinOmega.checked          = hasProtein
     document.forms[0].chartRama.checked         = hasProtein
     document.forms[0].chartRota.checked         = hasProtein
     document.forms[0].chartCBdev.checked        = hasProtein
-    document.forms[0].chartGeom.checked        = (hasProtein || hasNucAcid)
+    document.forms[0].chartGeom.checked         = (hasProtein || hasNucAcid)
+    document.forms[0].chartOmega.checked        = hasProtein
 
     document.forms[0].kinBaseP.checked          = hasNucAcid
     document.forms[0].kinSuite.checked          = hasNucAcid
@@ -70,6 +79,15 @@ function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
     document.forms[0].chartMulti.checked        = (hasProtein || hasNucAcid)
     document.forms[0].chartNotJustOut.checked   = !isBig
     document.forms[0].chartAltloc.checked       = (hasProtein || hasNucAcid)
+
+    //Low-resolution analyses, all end with Low
+    document.forms[0].doLowRes.checked          = (hasProtein && isLowRes)
+    document.forms[0].kinCablamLow.checked      = (hasProtein && isLowRes)
+// Low-res kinemage options are expected to expand in the future
+//    document.forms[0].kinClashesLow.checked     = (doAAC && isLowRes)
+//    document.forms[0].kinGeomLow.checked        = ((hasProtein || hasNucAcid) && isLowRes)
+
+    document.forms[0].chartCablamLow.checked    = (hasProtein && isLowRes)
 }
 
 // Try to make sure we have H if we're doing AAC
@@ -112,7 +130,8 @@ function checkSettingsBeforeSubmit()
             $hasProtein = ($stats['sidechains'] > 0 ? "true" : "false");
             $hasNucAcid = ($stats['nucacids'] > 0 ? "true" : "false");
             $pdbSize = filesize($_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$model['pdb']);
-            $isBig = ($pdbSize > 1<<20 ? "true" : "false");
+            $isBig = ($pdbSize > 1<<21 ? "true" : "false"); // 1<<20 = 2^20
+            $isLowRes = ($stats['resolution'] > 2.5 ? "true" : "false");
 
             // Alternate row colors:
             $c == MP_TABLE_ALT1 ? $c = MP_TABLE_ALT2 : $c = MP_TABLE_ALT1;
@@ -122,7 +141,7 @@ function checkSettingsBeforeSubmit()
             echo "  <td><b>$model[pdb]</b></td>\n";
             echo "  <td><small>$model[history]</small></td>\n";
             echo " </tr>\n";
-            if($checked) $jsOnLoad = "setAnalyses($doAAC, $hasProtein, $hasNucAcid, $isBig)";
+            if($checked) $jsOnLoad = "setAnalyses($doAAC, $hasProtein, $hasNucAcid, $isBig, $isLowRes)";
         }
         echo "</table></p>\n";
 ?>
@@ -138,6 +157,7 @@ function checkSettingsBeforeSubmit()
     <br><label><input type='checkbox' name='kinRota' value='1'> Rotamer evaluation</label>
     <br><label><input type='checkbox' name='kinGeom' value='1'> Geometry evaluation</label>
     <br><label><input type='checkbox' name='kinCBdev' value='1'> C&beta; deviations</label>
+    <br><label><input type='checkbox' name='kinOmega' value='1'> Cis-Peptide evaluation</label>
     <br><label><input type='checkbox' name='kinBaseP' value='1'> RNA sugar pucker analysis</label>
     <br><label><input type='checkbox' name='kinSuite' value='1'> RNA backbone conformations</label>
     <p><label><input type='checkbox' name='kinForceViews' value='1'> Make views of trouble spots even if it takes longer</label>
@@ -153,6 +173,7 @@ function checkSettingsBeforeSubmit()
     <br><label><input type='checkbox' name='chartRota' value='1'> Rotamer evaluation</label>
     <br><label><input type='checkbox' name='chartGeom' value='1'> Geometry evaluation</label>
     <br><label><input type='checkbox' name='chartCBdev' value='1'> C&beta; deviations</label>
+    <br><label><input type='checkbox' name='chartOmega' value='1'> Cis-Peptide evaluation</label>
     <br><label><input type='checkbox' name='chartBaseP' value='1'> RNA sugar pucker analysis</label>
     <br><label><input type='checkbox' name='chartSuite' value='1'> RNA backbone conformations</label>
     <p><label><input type='checkbox' name='chartHoriz' value='1'> Horizontal chart with real-space correlation data</label>
@@ -163,6 +184,15 @@ function checkSettingsBeforeSubmit()
     <label><input type='checkbox' name='chartNotJustOut' value='1'> List all residues in multi-chart, not just outliers</label>
     <br><label><input type='checkbox' name='chartAltloc' value='1'> Remove residue rows with ' ' altloc when other alternate(s) present</label>
     </div>
+    </div>
+<h5 class='nospaceafter'><label><input type='checkbox' name='doLowRes' value='1' onclick='hideLowResOpts()'> LoRx (Low-resolution Diagnosis)</label></h5>
+    <div class='indent' id='lowres_opts'>
+    <label><input type='checkbox' name='kinCablamLow' value='1'> CaBLAM markup kinemage</label>
+<!--    <br><label><input type='checkbox' name='kinClashesLow' value='1'> Reduced clashes kinemage</label>
+    <br><label><input type='checkbox' name='kinGeomLow' value='1'> Geometry evaluation kinemage</label> -->
+    <p><br><label><input type='checkbox' name='chartCablamLow' value='1'> CaBLAM stats</label>
+<!--    <br><label><input type='checkbox' name='chartClashlistLow' value='1'> Reduced clashes chart </label>
+    <br><label><input type='checkbox' name='chartGeomLow' value='1'> Geometry evaluation chart</label> -->
     </div>
 </div>
 <?php
@@ -274,5 +304,5 @@ function onRunAnalysis()
 //function someFunctionName() {}
 #}}}########################################################################
 
-}//end of class definition
+}//end of aacgeom_setup_delegate class definition
 ?>

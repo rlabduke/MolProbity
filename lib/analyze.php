@@ -83,6 +83,8 @@ function runAnalysis($modelID, $opts)
     if($opts['chartRama'])      $tasks['rama'] = "Do Ramachandran analysis and make plots (<code>phenix.ramalyze</code>)";
     if($opts['chartRota'])      $tasks['rota'] = "Do rotamer analysis (<code>phenix.rotalyze</code>)";
     if($opts['chartCBdev'])     $tasks['cbeta'] = "Do C&beta; deviation analysis and make kins (<code>phenix.cbetadev</code>)";
+    if($opts['chartOmega'])     $tasks['omega'] = "Do cis-peptide analysis (<code>phenix.omegalyze</code>)";
+    if($opts['chartCablamLow']) $tasks['cablam'] = "Do CaBLAM analysis (<code>phenix.cablam_validate</code>)";
     if($opts['chartBaseP'])     $tasks['base-phos'] = "Do RNA sugar pucker analysis";
     if($opts['chartSuite'])     $tasks['suitename'] = "Do RNA backbone conformations analysis";
     if($opts['chartGeom'])      $tasks['geomValidation'] = "Do bond length and angle geometry analysis (<code>mmtbx.mp_geo</code>)";
@@ -98,13 +100,14 @@ function runAnalysis($modelID, $opts)
     }
     if($opts['chartCoot'])      $tasks['cootchart'] = "Create chart for use in Coot";
     if($opts['doKinemage'])     $tasks['multikin'] = "Create multi-criterion kinemage";
+    if($opts['doLowRes'])       $tasks['lowResKin'] = "Create low-resolution multi-criterion kinemage";
 
     //$doRem40 = $opts['chartClashlist'] || $opts['chartRama'] || $opts['chartRota'];
     //if($doRem40)                $tasks['remark40'] = "Create REMARK  40 record for the PDB file";
     //}}} Set up file/directory vars and the task list
 
-    //{{{ Run protein geometry programs and offer kins to user
-    // Ramachandran
+    //{{{ Run geometry programs and offer kins to user
+    //{{{ Ramachandran
     if($opts['chartRama'])
     {
         $startTime = time();
@@ -120,9 +123,9 @@ function runAnalysis($modelID, $opts)
         $tasks['rama'] .= " | <a href='$chartURL/$model[prefix]rama.pdf' target='_blank'>PDF</a>\n";
         setProgress($tasks, 'rama'); // so the preview link is visible
         echo "Ramachandran ran for ".(time() - $startTime)." seconds\n";
-    }
+    }//}}}
 
-    // Rotamers
+    //{{{ Rotamers
     if($opts['chartRota'])
     {
         $startTime = time();
@@ -131,9 +134,9 @@ function runAnalysis($modelID, $opts)
         runRotamer($infile, $outfile);
         $rota = loadRotamer($outfile);
         echo "Rotamers ran for ".(time() - $startTime)." seconds\n";
-    }
+    }//}}}
 
-    // C-beta deviations
+    //{{{ C-beta deviations
     if($opts['chartCBdev'])
     {
         $startTime = time();
@@ -146,18 +149,40 @@ function runAnalysis($modelID, $opts)
         $tasks['cbeta'] .= " - <a href='viewking.php?$_SESSION[sessTag]&url=$kinURL/$model[prefix]cbetadev.kin' target='_blank'>preview</a>";
         setProgress($tasks, 'cbeta'); // so the preview link is visible
         echo "C-beta ran for ".(time() - $startTime)." seconds\n";
-    }
-    //}}} Run programs and offer kins to user
+    }//}}}
+
+    //{{{ Omega peptides
+    if($opts['chartOmega'])
+    {
+        $startTime = time();
+        setProgress($tasks, 'omega');
+        $outfile = "$rawDir/$model[prefix]omega.data";
+        //$outfile = "$rawDir/$model[prefix]omega-clashlist.txt";
+        runOmegalyze($infile, $outfile);
+        $omega = loadOmegalyze($outfile);
+        echo "Omegalyze ran for ".(time() - $startTime)." seconds\n";
+    }//}}}
+
+    //{{{ CaBLAM
+    if($opts['chartCablamLow'])
+    {
+        setProgress($tasks, 'cablam');
+        $outfile = "$rawDir/$model[prefix]cablam.data";
+        runCablam($infile, $outfile);
+        $cablam = loadCablam($outfile);
+    }//}}}
 
     //{{{ Run nucleic acid geometry programs and offer kins to user
-    // Base-phosphate perpendiculars
+    //{{{ Base-phosphate perpendiculars
     if($opts['chartBaseP'])
     {
         setProgress($tasks, 'base-phos'); // updates the progress display if running as a background job
         $outfile = "$rawDir/$model[prefix]pperp.data";
         runBasePhosPerp($infile, $outfile);
         $pperp = loadBasePhosPerp($outfile);
-    }
+    }//}}}
+
+    //{{{ Suitename
     if($opts['chartSuite'])
     {
         setProgress($tasks, 'suitename'); // updates the progress display if running as a background job
@@ -171,7 +196,10 @@ function runAnalysis($modelID, $opts)
         runSuitenameString($infile, $outfile);
 
         makeSuitenameKin($infile, "$kinDir/$model[prefix]suitename.kin");
-    }
+    }//}}}
+    //}}} Run nucleic acid geometry programs and offer kins to user
+
+    //{{{ Bonds and Angles
     if($opts['chartGeom'])
     {
         setProgress($tasks, 'geomValidation'); // updates the progress display if running as a background job
@@ -187,8 +215,9 @@ function runAnalysis($modelID, $opts)
         if (count($validate_bond) == 0) $validate_bond = null;
         $validate_angle = array_merge(loadValidationAngleReport($geomfile, "protein"), loadValidationAngleReport($geomfile, "rna"));
         if (count($validate_angle) == 0) $validate_angle = null;
-    }
-    //}}} Run nucleic acid geometry programs and offer kins to user
+    }//}}}
+
+    //}}} Run programs and offer kins to user
 
     //{{{ Run all-atom contact programs and offer kins to user
     // Clashes
@@ -262,8 +291,8 @@ function runAnalysis($modelID, $opts)
                 runClashscore($altpdb, $outfile, $reduce_blength);
                 #$altclash = loadClashlist($outfile);
                 $altclash = loadClashscore($outfile);
-                if($altclash['scoreAll'] > $mainClashscore)
-                    $improvementList[] = "improved your clashscore by ".($altclash['scoreAll'] - $mainClashscore)." points";
+                if(($altclash['scoreAll'] - $mainClashscore)>=0.005) //0.005 is the smallest change that will still be reported by the sprintf("%.2f") below
+                    $improvementList[] = "improved your clashscore by ".sprintf("%.2f",($altclash['scoreAll'] - $mainClashscore))." points";
                 unlink($outfile);
             if(count($improvementList) > 0)
             {
@@ -295,8 +324,8 @@ function runAnalysis($modelID, $opts)
                 runClashscore($altpdb, $outfile, $reduce_blength);
                 #$altclash = loadClashlist($outfile);
                 $altclash = loadClashscore($outfile);
-                if($altclash['scoreAll'] < $mainClashscore)
-                    $improvementList[] = "improve your clashscore by ".($mainClashscore - $altclash['scoreAll'])." points";
+                if(($mainClashscore - $altclash['scoreAll'])>=0.005) //0.005 is the smallest change that will still be reported by the sprintf("%.2f") below
+                    $improvementList[] = "improve your clashscore by ".sprintf("%.2f",($mainClashscore - $altclash['scoreAll']))." points";
                 unlink($outfile);
             }
             if(count($improvementList) > 0)
@@ -323,7 +352,7 @@ function runAnalysis($modelID, $opts)
         $outfile = "$rawDir/$model[prefix]multi.table";
         $snapfile = "$chartDir/$model[prefix]multi.html";
         $resout = "$rawDir/$model[prefix]multi_res.table";
-        writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, !$opts['chartNotJustOut'], $opts['chartMulti'], $opts['chartAltloc']);
+        writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, $cablam, $omega, !$opts['chartNotJustOut'], $opts['chartMulti'], $opts['chartAltloc']);
         if($opts['chartMulti']) {
           $tasks['multichart'] .= " - <a href='viewtable.php?$_SESSION[sessTag]&file=$outfile' target='_blank'>preview</a>\n";
           setProgress($tasks, 'multichart'); // so the preview link is visible
@@ -358,6 +387,7 @@ function runAnalysis($modelID, $opts)
             'rota'      =>  $opts['kinRota'],
             'geom'      =>  $opts['kinGeom'],
             'cbdev'     =>  $opts['kinCBdev'],
+            'omega'     =>  $opts['kinOmega'],
             'pperp'     =>  $opts['kinBaseP'],
             'clashdots' =>  $opts['kinClashes'],
             'hbdots'    =>  $opts['kinHbonds'],
@@ -383,6 +413,32 @@ function runAnalysis($modelID, $opts)
     }
     //}}} Build multi-criterion chart, kinemage
 
+    //{{{ Low-resolution-specific analyses
+    if($opts['doLowRes'])
+    {
+       if($opts['kinCablamLow'] || $opts['other'])
+       {
+           $startTime = time();
+           setProgress($tasks, 'lowResKin');
+           $lowResKinOpts = array(//first column is opts, second column sets true-false
+               'ribbons'    =>  $opts['kinRibbons'],//pass pdb w/HELIX+SHEET for this
+               'rama'       =>  $opts['kinRama'],
+               'geom'       =>  $opts['kinGeom'],
+               'cbdev'      =>  $opts['kinCBdev'],
+               'omega'      =>  $opts['kinOmega'],
+               'cablam'     =>  $opts['kinCablamLow'],
+               'clashdots'  =>  $opts['kinClashes']
+           );
+           $outfile = "$kinDir/$model[prefix]low_multi.kin";
+           $cablamSecStrucFile = "$modelDir/$model[prefix]cablam_sec_struc_records.pdb";
+           //$viewRes = array(); //Used with opts[kinForceViews], not necessary argument for makeMulticritKin2
+           makeMulticritKinLowRes(array($infile), $outfile, $cablamSecStrucFile, $lowResKinOpts);
+           if(filesize($outfile) > MP_KIN_GZIP_THRESHOLD)  destructiveGZipFile($outfile);
+           echo "do low-res Kinemage ran for ".(time() - $startTime)." seconds\n";
+       }
+    }
+    //}}}
+
     //{{{ Create REMARK  40 and insert into PDB file
     //if(is_array($clash) || is_array($rama) || is_array($rota))
     //{
@@ -397,7 +453,7 @@ function runAnalysis($modelID, $opts)
     if(is_array($clash) || is_array($rama) || is_array($rota) || is_array($cbdev) || is_array($pperp) || is_array($suites))
     {
         $entry .= "<h3>Summary statistics</h3>\n";
-        $entry .= makeSummaryStatsTable($model['stats']['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle);
+        $entry .= makeSummaryStatsTable($model['stats']['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, $cablam, $omega);
     }
     $entry .= $improveText;
     if($opts['doKinemage'] || $opts['doCharts'])
@@ -416,6 +472,11 @@ function runAnalysis($modelID, $opts)
             }
             if($opts['chartHoriz']) {
               $entry .= "<td>".linkAnyFile("$model[prefix]horiz.table", "Horizontal Chart", "img/multichart_horiz.jpg")."</td>\n";
+            }
+        }
+        if($opts['doLowRes']) {
+            if($opts['kinCablamLow'] || $opts['other']) {
+                $entry .= "<td>".linkAnyFile("$model[prefix]low_multi.kin", "LowRes MultiKin", "img/low_multikin.jpg")."</td>\n";
             }
         }
         $entry .= "</tr></table>\n";
@@ -700,18 +761,18 @@ function runClashlist($infile, $outfile, $blength="ecloud")
 
 #{{{ runClashscore - generates clash data with phenix.clashscore
 ############################################################################
-function runClashscore($infile, $outfile, $blength="ecloud")
+function runClashscore($infile, $outfile, $blength="ecloud", $clash_cutoff=-0.4)
 {
     #$bcutval = 40;
     #$ocutval = 10;
     #exec("clashlist $infile $bcutval $ocutval $blength > $outfile");
     if($blength == "ecloud")
     {
-      exec("phenix.clashscore b_factor_cutoff=40 $infile > $outfile");
+      exec("phenix.clashscore b_factor_cutoff=40 clash_cutoff=$clash_cutoff $infile > $outfile");
     }
     elseif($blength == "nuclear")
     {
-      exec("phenix.clashscore b_factor_cutoff=40 nuclear=True $infile > $outfile");
+      exec("phenix.clashscore b_factor_cutoff=40 clash_cutoff=$clash_cutoff nuclear=True $infile > $outfile");
     }
 }
 #}}}########################################################################
@@ -794,6 +855,8 @@ function loadClashlist($datafile)
 
     return $ret;
 }
+#}}}########################################################################
+
 #{{{ loadClashscore - loads Clashscore output into an array
 ############################################################################
 /**
@@ -931,7 +994,7 @@ function runRotamer($infile, $outfile)
     //java-based
     //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.rotarama.Rotalyze $infile > $outfile");
     //cctbx-based
-    exec("phenix.rotalyze $infile > $outfile");
+    exec("phenix.rotalyze data_version=8000 $infile > $outfile");
 }
 #}}}########################################################################
 
@@ -997,7 +1060,8 @@ function loadRotamer($datafile)
             'chi2'      => $line[4],
             'chi3'      => $line[5],
             'chi4'      => $line[6],
-            'rotamer'   => $line[7]
+            'eval'      => $line[7],
+            'rotamer'   => $line[8]
         );
         // This converts numbers to numbers and leaves "" as it is.
         if($ret[$cnit]['chi1'] !== '') $ret[$cnit]['chi1'] += 0;
@@ -1102,6 +1166,14 @@ function loadRamachandran($datafile)
             'eval'      => $line[4],
             'type'      => $line[5]
         );
+        if($ret[$cnit]['type'] == 'Isoleucine or valine')
+            $ret[$cnit]['type'] = 'Ile or Val';
+        elseif ($ret[$cnit]['type'] == 'Trans-proline')
+          $ret[$cnit]['type'] = 'Trans-Pro';
+        elseif ($ret[$cnit]['type'] == 'Cis-proline')
+          $ret[$cnit]['type'] = 'Cis-Pro';
+        elseif ($ret[$cnit]['type'] == 'Pre-proline')
+          $ret[$cnit]['type'] = 'Pre-Pro';
     }
     return $ret;
 }
@@ -1121,6 +1193,106 @@ function findRamaOutliers($rama)
     {
         if($res['eval'] == 'OUTLIER')
             $worst[$res['resName']] = $res['eval'];
+    }
+    ksort($worst); // Put the residues into a sensible order
+    return $worst;
+}
+#}}}########################################################################
+
+#{{{ runOmegalyze - generates rotamer analysis data
+############################################################################
+function runOmegalyze($infile, $outfile)
+{
+    exec("phenix.omegalyze nontrans_only=False $infile > $outfile");
+}
+#}}}########################################################################
+
+#{{{ loadOmegalyze - loads Ramachandran output into an array
+############################################################################
+/**
+* Returns an array of entries, one per residue. Their keys:
+*   resName         a formatted name for the residue: 'cnnnnittt'
+*                       c: Chain ID, space for none
+*                       n: sequence number, right justified, space padded
+*                       i: insertion code, space for none
+*                       t: residue type (ALA, LYS, etc.), all caps,
+*                          left justified, space padded
+*   resType         3-letter residue code (e.g. ALA)
+*   chainID         1-letter chain ID or ' '
+*   resNum          residue number
+*   insCode         insertion code or ' '
+*   type            "General" or "Pro"
+*   omega           the omega (peptide) dihedral
+*   conf            "Trans", "Cis", or "Twisted"
+*/
+function loadOmegalyze($datafile)
+{
+    $data = array_slice(file($datafile), 1); // drop first line
+    //$data = file($datafile);
+    $ret = array();
+    foreach($data as $line)
+    {
+        $line = explode(':', rtrim($line));
+        if ($line[0]==''){
+          continue;
+        }
+        elseif (preg_match("/^#/",$line[0])){
+          continue;
+        }
+        elseif (preg_match("/^SUMMARY/",$line[0])){
+          continue;
+        }
+        elseif (preg_match("/^residue/",$line[0])){
+          continue;
+        }
+        $cnit = $line[0];
+        /*if(strlen($cnit)==10)
+        {
+          $cnit = ' '.$cnit;
+        }
+        $cnit = substr($cnit,0,6).substr($cnit,7,4);
+        echo $cnit."\n";*/
+        $decomp = decomposeResName($cnit);
+        $ret[$cnit] = array(
+            'resName'   => $cnit,
+            'resType'   => $decomp['resType'],
+            'chainID'   => $decomp['chainID'],
+            'resNum'    => $decomp['resNum'],
+            'insCode'   => $decomp['insCode'],
+            'altID'     => $decomp['altID'],
+            'type'      => $line[1],
+            'omega'     => $line[2] + 0,
+            'conf'      => $line[3]
+        );
+    }
+    return $ret;
+}
+#}}}########################################################################
+
+#{{{ findOmegaOutliers - evaluates residues for bad score
+############################################################################
+/**
+* Returns an array of 9-char residue names for residues that
+* fall outside the allowed boundaries for this criteria.
+* Inputs are from appropriate loadXXX() function above.
+* Cis and twisted peptides are not strictly outliers, but the naming convention
+* for these functions is thus preserved.
+*/
+function findOmegaOutliers($omega)
+{
+    $worst = array();
+    if(is_array($omega)) foreach($omega as $res)
+    {
+        //The values set here are used for sorting the MP chart
+        //CisPro should be grouped as non-outliers
+        //All others should be grouped as outliers
+        if($res['conf'] == 'Cis')
+          if($res['type'] == 'Pro')
+            $worst[$res['resName']] = 2;
+          else
+            $worst[$res['resName']] = 1;
+        elseif($res['conf'] == 'Twisted')
+          $worst[$res['resName']] = 2;
     }
     ksort($worst); // Put the residues into a sensible order
     return $worst;
@@ -1251,6 +1423,86 @@ function runSuitenameString($infile, $outfile)
 }
 #}}}########################################################################
 
+#{{{ runCablam - generates CaBLAM analysis data
+############################################################################
+function runCablam($infile, $outfile)
+{
+    exec("phenix.cablam_validate output=text $infile > $outfile");
+}
+#}}}########################################################################
+
+#{{{ loadCablam - loads CaBLAM output into an array
+############################################################################
+/**
+* Returns an array of entries, one per residue. Their keys:
+*   resName         a formatted name for the residue: 'ccnnnnilttt'
+*                       c: Chain ID, space for none
+*                       n: sequence number, right justified, space padded
+*                       i: insertion code, space for none
+*                       l: alternate ID, space for none
+*                       t: residue type (ALA, LYS, etc.), all caps,
+*                          left justified, space padded
+*   resType         3-letter residue code (e.g. ALA)
+*   chainID         1-letter chain ID or ' '
+*   resNum          residue number
+*   insCode         insertion code or ' '
+*   altID           alternate ID or ' '
+*   scorePct        the fraction score from 0 (bad) to 1 (good)
+*   alpha           similarity to alpha helix
+*   beta            similarity to beta sheet
+*   threeten        similarity to threeten helix
+*residue : outlier_type : contour_level : ca_contour_level : sec struc recommendation : alpha score : beta score : threeten score
+*/
+function loadCablam($datafile)
+{
+    $data = array_slice(file($datafile), 1); // drop first line
+    $ret = array();
+    foreach($data as $line)
+    {
+        $line = explode(':', rtrim($line));
+        $cnit = $line[0];
+        $decomp = decomposeResName($cnit);
+        $ret[$cnit] = array(
+            'resName'     => $cnit,
+            'resType'     => $decomp['resType'],
+            'chainID'     => $decomp['chainID'],
+            'resNum'      => $decomp['resNum'],
+            'insCode'     => $decomp['insCode'],
+            'altID'       => $decomp['altID'],
+            'outlierType' => $line[1],
+            'peptideScore'=> $line[2]*100,
+            'caGeomScore' => $line[3]*100,
+            'secStruc'    => $line[4],
+            'alpha'       => $line[5] + 0,
+            'beta'        => $line[6] + 0,
+            'threeten'    => $line[7] + 0
+        );
+    }
+    return $ret;
+}
+#}}}########################################################################
+
+#{{{ findCablamOutliers - evaluates residues for bad score
+/**
+* Returns array of cnit residue names from loadCablam function above
+* Default cutoff level is 0.05 for disfavored; pass 0.01 for disallowed instead
+* ' Peptide Outlier    '
+* ' Peptide Disfavored '
+* ' CA Geo Outlier     '
+**/
+function findCablamOutliers($cablam)
+{
+    $worst = array();
+    if(is_array($cablam)) foreach($cablam as $res)
+    {
+        //This is only used to get a count of outliers
+        if($res['outlierType'] != '                    ')
+            $worst[$res['resName']] = $res['peptideScore'];
+    }
+    ksort($worst);
+    return $worst;
+}
+#}}}
 
 #{{{ runValidationReport - finds >4sigma geometric outliers for protein and RNA
 ############################################################################
@@ -1676,6 +1928,7 @@ function calcLocalBadness($infile, $range, $clash, $rama, $rota, $cbdev, $pperp)
         'insCode'   => substr($name, 8, 1));
     }
 }*/
+#}}}########################################################################
 
 #{{{ decomposeResName - breaks a 11-character packed name into pieces
 ############################################################################

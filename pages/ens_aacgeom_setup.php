@@ -103,7 +103,10 @@ function checkSettingsBeforeSubmit()
             $hasProtein = ($stats['sidechains'] > 0 ? "true" : "false");
             $hasNucAcid = ($stats['nucacids'] > 0 ? "true" : "false");
             $pdbSize = filesize($_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$ensemble['pdb']);
-            $isBig = ($pdbSize > 1<<20 ? "true" : "false");
+            $isBig = ($pdbSize > 1<<21 ? "true" : "false");
+            //isBig is set with some over-clever math
+            //  increased from 1<<20 during the CaBLAM/low-res update due to expanded computing power
+            $isLowRes = ($stats['resolution'] > 2.5 ? "true" : "false");
 
             // Alternate row colors:
             $c == MP_TABLE_ALT1 ? $c = MP_TABLE_ALT2 : $c = MP_TABLE_ALT1;

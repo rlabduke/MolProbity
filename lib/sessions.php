@@ -99,6 +99,7 @@ function cctbxGetPath()
 
     return $cctbxPath;
 }
+#}}}
 
 #{{{ mpCheckSessionID - verifies that an ID has the expected form
 ############################################################################

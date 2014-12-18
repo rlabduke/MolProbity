@@ -390,6 +390,12 @@ function makeMulticritKin2($infiles, $outfile, $opt, $viewRes = array(), $nmrCon
             }
             #echo "Probe dots OK\n";
         }
+        if($opt['omega'])
+        {
+            #"making Cis Peptides...\n";
+            makeBadOmegaKin($infile, $outfile);
+            #"Cis Peptides OK\n";
+        }
         if($opt['rama'])
         {
             #echo "making Rama...\n";
@@ -472,6 +478,76 @@ function makeMulticritKin2($infiles, $outfile, $opt, $viewRes = array(), $nmrCon
     fclose($h);
 }
 #}}}########################################################################
+
+#{{{ makeMulticritKinLowRes - display quality metrics for low-res models in 3-d
+function makeMulticritKinLowRes($infiles, $outfile, $cablamSecStrucFile, $opt, $clashLimit=0.5)
+{
+    if(file_exists($outfile)){
+        if(!unlink($outfile)){
+          echo "delete low-res .kin file failed!\n";
+        }
+    }
+    $pdbstats = pdbstat(reset($infiles));
+    $stats = describePdbStats($pdbstats, false);
+    $h = fopen($outfile, 'a');
+    fwrite($h, "@text\n");
+    foreach($stats as $stat)
+        fwrite($h, "[+]   $stat\n");
+    $isMultiModel = (count($infiles) > 1);
+    if($isMultiModel)
+        fwrite($h, "Statistics for first model only; ".count($infiles)." total models included in the kinemage.\n");
+
+    fwrite($h, "\n\n\n");
+    fwrite($h, exec("prekin -version")."\n");
+    $reduce_help = explode("\n", shell_exec("phenix.reduce -help 2>&1"));
+    fwrite($h, "$reduce_help[0]\n");
+
+    fwrite($h, "@kinemage 1\n");
+    fwrite($h, "@onewidth\n");
+    fclose($h);
+
+    foreach($infiles as $infile)
+    {
+        if(!$_SESSION['useSEGID']) exec("prekin -quiet -lots -append -animate -onegroup $infile >> $outfile");
+        else exec("prekin -quiet -segid -lots -append -animate -onegroup $infile >> $outfile");
+        if($opt['ribbons'])
+        {
+            exec("phenix.cablam_validate output=records_plus_pdb $infile > $cablamSecStrucFile");
+            makeRibbons($cablamSecStrucFile, $outfile);
+            //if($isMultiModel)  makeRainbowRibbons($cablamSecStrucFile, $outfile);
+            //else               makeBfactorRibbons($cablamSecStrucFile, $outfile);
+        }
+        if($opt['clashdots'])
+        {
+            $ocutval = 10;
+            $options = "-nohbout -novdwout";
+            if($_SESSION['reduce_blength'] == 'nuclear') $options .= " -nuclear";
+            //note: probe call has -CIVlow set explicitly
+            exec("phenix.probe $options -DIVlow-0.5 -4H -quiet -noticks -nogroup -dotmaster -mc -het -self 'ogt$ocutval' $infile >> $outfile");
+        }
+        //if($opt['hbdots']) make expanded hbcontacts
+        if($opt['rama']) makeBadRamachandranKin($infile, $outfile);
+        //if($opt['rota']) makeBadRotamerKin($infile, $outfile);
+        if($opt['geom']) makeBadGeomKin($infile, $outfile);
+        if($opt['cbdev']) makeBadCbetaBalls($infile, $outfile);
+        if($opt['omega']) makeBadOmegaKin($infile, $outfile);
+        if($opt['cablam']) makeBadCablamKin($infile, $outfile);
+    }
+    $h = fopen($outfile, 'a');
+    fwrite($h, "@master {mainchain} off\n");
+    fwrite($h, "@master {sidechain} off\n");
+    if($pdbstats['hydrogens'] > 0) fwrite($h, "@master {H's} off\n");
+    if($pdbstats['waters'] > 0)    fwrite($h, "@master {water} off\n");
+    fwrite($h, "@master {Calphas} on\n");
+    fwrite($h, "@master {Virtual BB} on\n");
+
+    if($opt['vdwdots'])   fwrite($h, "@master {vdw contact} off\n");
+    if($opt['clashdots']) fwrite($h, "@master {small overlap} off\n");
+    if($opt['bhdots'])    fwrite($h, "@master {H-bonds} off\n");
+    if($opt['ribbons'])   fwrite($h, "@master {ribbons} off\n");
+    fclose($h);
+}
+#}}}
 
 #{{{ makeResidueViews - creates @view entries for all listed residue
 ############################################################################
@@ -621,7 +697,8 @@ function makeBadRotamerKin($infile, $outfile, $rota = null, $color = 'gold', $cu
 
     foreach($rota as $res)
     {
-        if($res['scorePct'] <= $cutoff)
+        //if($res['scorePct'] <= $cutoff)
+        if($res['eval'] == 'OUTLIER') //top8000 update uses favored-allowed-outlier eval categories
             $worst[] = $res['resName'];
     }
     $sc = resGroupsForPrekin(groupAdjacentRes($worst));
@@ -838,6 +915,15 @@ mode==2 { print $0; }';
 }
 #}}}########################################################################
 
+#{{{ makeRibbons - make ribbon kin colored by prekin defaults
+function makeRibbons($infile, $outfile)
+{
+    if(!$_SESSION['useSEGID']) $opt = "-quiet";
+    else                       $opt = "-quiet -segid";
+    exec("prekin $opt -append -nogroup -bestribbon $infile >> $outfile");
+}
+#}}}
+
 #{{{ makeBfactorScale - mc,sc colored by B-factor
 ############################################################################
 /**
@@ -880,14 +966,26 @@ function makeOccupancyScale($infile, $outfile)
 }
 #}}}########################################################################
 
+#{{{ makeBadCablamKin - CaBLAM outlier markup
+function makeBadCablamKin($infile, $outfile)
+{
+    exec("phenix.cablam_validate output=markup_no_ribbons $infile >> $outfile");
+}
+#}}}
 
+#{{{ makeBadOmegaKin - Cis and Twisted Peptide markup
+function makeBadOmegaKin($infile, $outfile)
+{
+    exec("phenix.omegalyze kinemage=True $infile >> $outfile");
+}
+#}}}
 
 #{{{ makeSummaryStatsTable - HTML table summary of validation statistics
 ############################################################################
 /**
 * Documentation for this function.
 */
-function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles)
+function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $cablam, $omega)
 {
     $entry = "";
     $bgPoor = '#ff9999';
@@ -936,11 +1034,12 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
     }
     $proteinRows = 0;
     if(is_array($rama))    $proteinRows += 2;
-    if(is_array($rota))    $proteinRows += 1;
+    if(is_array($rota))    $proteinRows += 2;
     if(is_array($cbdev))   $proteinRows += 1;
     if(is_array($clash) && is_array($rota) && is_array($rama)) $proteinRows += 1;
     if(hasMoltype($bbonds, "protein")) $proteinRows += 1;
     if(hasMoltype($bangles, "protein")) $proteinRows += 1;
+    if(is_array($omega)) $proteinRows += 1;
     if($proteinRows > 0)
     {
         $entry .= "<tr><td rowspan='$proteinRows' align='center'>Protein<br>Geometry</td>\n";
@@ -954,11 +1053,23 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             if($firstRow) $firstRow = false;
             else $entry .= "<tr>";
 
-            if($rotaOutPct+0 <= 1)      $bg = $bgGood;
-            elseif($rotaOutPct+0 <= 5)  $bg = $bgFair;
-            else                        $bg = $bgPoor;
+            //Rotamer outliers:
+            //if($rotaOutPct+0 <= 1)      $bg = $bgGood; //old top500 cutoff, matched outlier cutoff pct
+            if($rotaOutPct+0 <= 0.3)     $bg = $bgGood; //new top8000 cutoff, matches new outlier cutoff pct
+            //elseif($rotaOutPct+0 <= 5)  $bg = $bgFair; //old top500 cutoff
+            elseif($rotaOutPct+0 <= 1.5) $bg = $bgFair; //new top8000 cutoff, set as 5*(outlier cutoff) same as with top500
+            else                         $bg = $bgPoor;
             $entry .= "<td>Poor rotamers</td><td bgcolor='$bg'>$rotaOut</td><td bgcolor='$bg'>$rotaOutPct%</td>\n";
-            $entry .= "<td>Goal: &lt;1%</td></tr>\n";
+            $entry .= "<td>Goal: &lt;0.3%</td></tr>\n";
+
+            //Rotamer Favored:
+           foreach($rota as $r) { if($r['eval'] == "Favored") $rotaFav++; }
+           $rotaFavPct = sprintf("%.2f", 100.0 * $rotaFav/$rotaTot);
+           if($rotaFavPct+0 >= 98)     $bg = $bgGood; //top8000 cutoff for favored rotamers
+           elseif($rotaFavPct+0 >= 95) $bg = $bgFair; //rotaFav bgGood cutoff was same as for ramaFav, so bgFair cutoff was set the same as well 
+           else                        $bg = $bgPoor;
+           $entry .= "<tr><td>Favored rotamers</td><td bgcolor='$bg'>$rotaFav</td><td bgcolor='$bg'>$rotaFavPct%</td>\n";
+           $entry .= "<td>Goal: &gt;98%</td></tr>\n";
         }
         if(is_array($rama))
         {
@@ -1037,6 +1148,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             $entry .= "<td>C&beta; deviations &gt;0.25&Aring;</td><td bgcolor='$bg'>$cbOut</td><td bgcolor='$bg'>$cbOutPct%</td>\n";
             $entry .= "<td>Goal: 0</td></tr>\n";
         }
+
         if(hasMoltype($bbonds, "protein"))
         {
             if($firstRow) $firstRow = false;
@@ -1053,8 +1165,9 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
                 }
             }
             $geomOutPct = sprintf("%.2f", 100.0 * $outCount / $total);
-            if ($outCount/$total < 0.002)    $bg = $bgFair;
-            if ($outCount/$total == 0.0)    $bg = $bgGood;
+            if ($outCount/$total < 0.002)   $bg = $bgFair;
+            if ($outCount/$total < 0.0001)  $bg = $bgGood; //set based on 4sigma ~= 1 in 10000
+            //if ($outCount/$total == 0.0)    $bg = $bgGood; //old bgGood cutoff, became problematic when we started counting every bond
             else                            $bg = $bgPoor;
             $entry .= "<td>Bad bonds:</td><td bgcolor='$bg'>$outCount / $total</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: 0%</td></tr>\n";
         }
@@ -1077,9 +1190,70 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             if ($outCount/$total < 0.005)    $bg = $bgFair;
             if ($outCount/$total < 0.001)    $bg = $bgGood;
             else                            $bg = $bgPoor;
-            $entry .= "<td>Bad angles:</td><td bgcolor='$bg'>$outCount / $total</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <0.1%</td></tr>\n";
+            $entry .= "<td>Bad angles:</td><td bgcolor='$bg'>$outCount / $total</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: &lt;0.1%</td></tr>\n";
         }
     }// end of protein-specific stats
+    if(is_array($omega))
+    {
+        $totalres = 0;
+        $prototal = 0;
+        $nonprototal = 0;
+        $cisprocount = 0;
+        $cisnonprocount = 0;
+        $twistcount = 0;
+        foreach($omega as $cnit => $item){
+            //$totalres += 1;
+            if($item['type'] == 'Pro'){
+                $prototal += 1;
+                if($item['conf'] == 'Cis') $cisprocount += 1;
+                elseif($item['conf'] == 'Twisted') $twistcount += 1;
+            }
+            elseif($item['type'] == 'General'){
+                $nonprototal += 1;
+                if($item['conf'] == 'Cis') $cisnonprocount += 1;
+                elseif($item['conf'] == 'Twisted') $twistcount += 1;
+            }
+        }
+        $totalres = $prototal + $nonprototal;
+        $cispropct = sprintf("%.2f", 100.0 * $cisprocount / $prototal);
+        $cisnonpropct = sprintf("%.2f", 100.0 * $cisnonprocount / $nonprototal);
+        $twistpct = sprintf("%.2f", 100.0 * $twistcount / $totalres);
+
+        //stoplights:
+        //cis pro yellow is 5 to 10%
+        //cis nonpro is 0.05 to 0.1%
+        //twisted is 0 to 0.1%
+
+        //This is gonna get ugly. The trick is: always print the cisPRO line
+        //Print other lines only if relevant
+        $cispepentry = "";
+        $cispepRows = 1;
+        if($cispropct <= 5.0)      $bg = $bgGood; //5% is statistical expectation for cis-Pro
+        elseif($cispropct <= 10.0) $bg = $bgFair; //set at 2x statistical expectations
+        else                       $bg = $bgPoor;
+        $cisentry .= "<td>Cis Prolines:</td><td bgcolor='$bg'> $cisprocount / $prototal</td><td bgcolor='$bg'> $cispropct% </td>\n<td>Goal: &lt;5%</td></tr>\n";
+        if($cisnonprocount > 0)
+        {
+            $cispepRows += 1;
+            if($cisnonpropct <= 0.05)    $bg = $bgGood; // 0.05% is statistical expectation for cis-nonPro
+            elseif($cisnonpropct <= 0.1) $bg = $bgFair; //set at 2x statistical expectations
+            else                         $bg = $bgPoor;
+            $cisentry .= "<td>Cis nonProlines:</td><td bgcolor='$bg'> $cisnonprocount / $nonprototal</td><td bgcolor='$bg'> $cisnonpropct% </td>\n<td>Goal: &lt;0.05%</td></tr>\n";
+        }
+        if($twistcount > 0)
+        {
+            $cispepRows += 1;
+            if($twistpct  == 0)       $bg = $bgGood; //insufficient statistics, but highly suspicious
+            elseif($twistpct <= 0.1) $bg = $bgFair; //set same as cis-nonPro bgFair cutoff, may be too generous
+            else                     $bg = $bgPoor;
+            $cisentry .= "<td>Twisted Peptides:</td><td bgcolor='$bg'> $twistcount / $totalres</td><td bgcolor='$bg'> $twistpct% </td>\n<td>Goal: 0</td></tr>\n";
+        }
+        $entry .= "<tr><td rowspan='1'> </td>";
+        $entry .= "<td> </td></tr>\n";
+        $entry .= "<tr><td rowspan='$cispepRows' align='center'>Peptide Omegas</td>\n";
+        $firstRow = true;
+        $entry .= $cisentry;
+    }
     $nucleicRows = 0;
     if(is_array($pperp))   $nucleicRows += 1;
     if(is_array($suites))  $nucleicRows += 1;
@@ -1137,7 +1311,8 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             }
             $geomOutPct = sprintf("%.2f", 100.0 * $outCount / $total);
             if ($outCount/$total < 0.002)    $bg = $bgFair;
-            if ($outCount/$total < 0.000001)    $bg = $bgGood;
+            if ($outCount/$total < 0.0001)   $bg = $bgGood; //set based on 4sigma inclusion
+            //if ($outCount/$total < 0.000001)    $bg = $bgGood; //4sigma= 1 in 10,000=0.01%
             else                            $bg = $bgPoor;
             $entry .= "<td>Bad bonds:</td><td bgcolor='$bg'>$outCount / $total</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: 0%</td></tr>\n";
         }
@@ -1163,7 +1338,57 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             $entry .= "<td>Bad angles:</td><td bgcolor='$bg'>$outCount / $total</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <0.1%</td></tr>\n";
         }
     }
+    //Lowres
+    $lowresRows=0;
+    if(is_array($cablam)) $lowresRows+=2;
+    if($lowresRows > 0)
+    {
+      $entry .= "<tr><td rowspan='1'> </td>";
+      $entry .= "<td> </td></tr>\n";
+      //Following text should be added to help instead of entry:
+      //$entry .= "<td>Because the submitted structure has a resolution lower than 2.5&Aring; or because low-resolution measures were selected, the following criteria are provided that may be helpful at low resolution.</td></tr>\n";
+      $entry .= "<tr><td rowspan='$lowresRows' align='center'>LoRx<br>Low-resolution Criteria</td>\n";
+      $firstRow = true;
+      if(is_array($cablam))
+      {
+        $cablamOut = 0;
+        $caGeomOut = 0;
+        //$cablamFav = 0;
+        foreach($cablam as $c)
+        {
+          if($c['outlierType'] == " Peptide Outlier    ") $cablamOut++;
+          elseif($c['outlierType'] == " CA Geo Outlier     ") $caGeomOut++;
+          //elseif($c['outlierType'] != " Peptide Disfavored ") $cablamFav++;
+          //The disfavored category was deemed more info than necessary for the moment in this chart
+        }
+        $cablamTot = count($cablam);
+        $cablamOutPct = sprintf("%.2f", 100.0 * $cablamOut/$cablamTot);
+        //$cablamFavPct = sprintf("%.2f", 100.0 * $cablamFav/$cablamTot);
+        $caGeomPct = sprintf("%.2f", 100.0 * $caGeomOut/$cablamTot);
+
+        if($firstRow) $firstRow = false;
+        else $entry .= "<tr>";
+
+        //CaBLAMout 1% and 5%
+        if($cablamOutPct+0 <= 1.0)    $bg = $bgGood;
+        elseif($cablamOutPct+0 <=5.0) $bg = $bgFair;
+        else                        $bg = $bgPoor;
+        $entry .= "<td>CaBLAM outliers</td><td bgcolor='$bg'>$cablamOut</td><td bgcolor='$bg'>$cablamOutPct%</td>\n";
+        $entry .= "<td>Goal: &lt;1.0%</td></tr>\n";
+        //if($cablamFavPct+0 >= 95.0)    $bg = $bgGood;
+        //elseif($cablamFavPct+0 >=90.0) $bg = $bgFair;
+        //else                        $bg = $bgPoor;
+        //$entry .= "<tr><td>CaBLAM favored</td><td bgcolor='$bg'>$cablamFav</td><td bgcolor='$bg'>$cablamFavPct%</td>\n";
+        //$entry .= "<td>Goal: &gt;95.0%</td></tr>\n";
+        if($caGeomPct+0 <= 0.5)    $bg = $bgGood;
+        elseif($caGeomPct+0 <=1.0) $bg = $bgFair;
+        else                        $bg = $bgPoor;
+        $entry .= "<tr><td>CA Geometry outliers</td><td bgcolor='$bg'>$caGeomOut</td><td bgcolor='$bg'>$caGeomPct%</td>\n";
+        $entry .= "<td>Goal: &lt;0.5%</td></tr>\n";
+      }
+    }
     $entry .= "</table>\n";
+    //Table ended
     $firstRow = true;
     if(is_array($rota) || is_array($rama) || is_array($cbdev) || is_array($bbonds) || is_array($bangles) || is_array($pperp) || is_array($suites)) {
         if($firstRow) $firstRow = false;
@@ -1208,7 +1433,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
 * $suites   is the data structure from loadSuitenameReport()
 * Any of them can be set to null if the data is unavailable.
 */
-function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $outliersOnly = false, $doHtmlTable = true, $cleanupAltloc = true)
+function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $cablam, $omega, $outliersOnly = false, $doHtmlTable = true, $cleanupAltloc = true)
 {
     $startTime = time();
     //{{{ Process validation data
@@ -1235,19 +1460,27 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
         $res[$k] = array('cnit' => $v, 'order' => $orderIndex++, 'resHiB' => $Bfact[$v]);
     }
 
-    if(is_array($clash))
+    $cell_color_mild = '#ffb3cc';
+    $cell_color_bad = '#ff76a9'; //this is used for all xxx_isbad not set otherwise
+    $cell_color_severe = '#ee4d4d';
+    if(is_array($clash))//{{{
     {
         $with = $clash['clashes-with'];
         foreach($clash['clashes'] as $cnit => $worst)
         {
             $res[$cnit]['clash_val'] = $worst;
-            $res[$cnit]['clash'] = "$worst&Aring;<br><small>".$with[$cnit]['srcatom']." with ".$with[$cnit]['dstcnit']." ".$with[$cnit]['dstatom']."</small>";
+            $res[$cnit]['clash'] = sprintf("%.2f",$worst)."&Aring;<br><small>".$with[$cnit]['srcatom']." with ".$with[$cnit]['dstcnit']." ".$with[$cnit]['dstatom']."</small>";
             $res[$cnit]['clash_isbad'] = true;
             $res[$cnit]['any_isbad'] = true;
+            if ($res[$cnit]['clash_val'] < 0.5)
+              $res[$cnit]['clash_color'] = $cell_color_mild;
+            elseif ($res[$cnit]['clash_val'] > 0.9)
+              $res[$cnit]['clash_color'] = $cell_color_severe;
+              //$res[$cnit]['clash_color'] = '#ff3333';
             //echo "clash ".$cnit."\n";
         }
-    }
-    if(is_array($rama))
+    }//}}}
+    if(is_array($rama))//{{{
     {
         foreach($rama as $item)
         {
@@ -1256,50 +1489,131 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
             if (isset($item['type'])) {
               if($item['eval'] == "OUTLIER")
               {
-                $res[$item['resName']]['rama'] = "$item[eval] ($item[scorePct]%)<br><small>$item[type] / $phipsi</small>";
+                $res[$item['resName']]['rama'] = "$item[eval] ($item[scorePct])%)<br><small>$item[type] / $phipsi</small>";
                 $res[$item['resName']]['rama_isbad'] = true;
                 $res[$item['resName']]['any_isbad'] = true;
                 // ensures that all outliers sort to the top, b/c 0.2 is a Gly outlier but not a General outlier
                 $res[$item['resName']]['rama_val'] -= 100.0;
               }
+              elseif ($item['eval'] == "Allowed")
+              {
+                $res[$item['resName']]['rama'] = "$item[eval] ($item[scorePct]%)<br><small>$item[type] / $phipsi</small>";
+                $res[$item['resName']]['rama_isbad'] = true;
+                $res[$item['resName']]['any_isbad'] = true;
+                $res[$item['resName']]['rama_color'] = $cell_color_mild;
+                // ensures that all outliers sort to the top, b/c 0.2 is a Gly outlier but not a General outlier
+                //$res[$item['resName']]['rama_val'] -= 100.0;
+                $res[$item['resName']]['rama_val'] -= 50.0;
+              }
               else
-              $res[$item['resName']]['rama'] = "$item[eval] ($item[scorePct]%)<br><small>$item[type] / $phipsi</small>";
+                $res[$item['resName']]['rama'] = "$item[eval] ($item[scorePct]%)<br><small>$item[type] / $phipsi</small>";
             }
         }
-    }
-    if(is_array($rota))
+    }//}}}
+    if(is_array($rota))//{{{
     {
         foreach($rota as $item)
         {
             $res[$item['resName']]['rota_val'] = $item['scorePct'];
-            if($item['scorePct'] <= 1.0)
+            #if($item['scorePct'] <= 1.0)
+            if($item['eval'] == 'OUTLIER')
             {
-                $res[$item['resName']]['rota'] = "$item[scorePct]%<br><small>chi angles: ".formatChiAngles($item)."</small>";
+                $res[$item['resName']]['rota'] = "$item[eval] ($item[scorePct]%)<br><small>chi angles: ".formatChiAngles($item)."</small>";
                 $res[$item['resName']]['rota_isbad'] = true;
                 $res[$item['resName']]['any_isbad'] = true;
+                $res[$item['resName']]['rota_val'] -= 100.0; //sorting hack
+            }
+            elseif($item['eval'] == 'Allowed')
+            {
+                $res[$item['resName']]['rota'] = "$item[eval] ($item[scorePct]%) <i>$item[rotamer]</i><br><small>chi angles: ".formatChiAngles($item)."</small>";
+                $res[$item['resName']]['rota_color'] = $cell_color_mild;
+                $res[$item['resName']]['rota_val'] -= 50.0; //sorting hack
             }
             else
-                $res[$item['resName']]['rota'] = "$item[scorePct]% (<i>$item[rotamer]</i>)<br><small>chi angles: ".formatChiAngles($item)."</small>";
+                $res[$item['resName']]['rota'] = "$item[eval] ($item[scorePct]%) <i>$item[rotamer]</i><br><small>chi angles: ".formatChiAngles($item)."</small>";
         }
-    }
-    if(is_array($cbdev))
+    }//}}}
+    if(is_array($cablam))//{{{
+    {
+        //note: sorting keys off of cablam_val
+        foreach($cablam as $item)
+        {
+            $outlierType = trim($item['outlierType']);
+            if ($outlierType == "Peptide Outlier") {
+                $res[$item['resName']]['cablam'] = "$item[outlierType] ($item[peptideScore]%)<br><small>$item[secStruc]</small>";
+                $res[$item['resName']]['cablam_val'] = "$item[peptideScore]";
+                $res[$item['resName']]['any_isbad'] = true;
+                $res[$item['resName']]['cablam_isbad'] = true;
+                //$res[$item['resName']]['cablam_color'] = '#ff6699';
+                }
+            elseif ($outlierType == "Peptide Disfavored") {
+                $res[$item['resName']]['cablam'] = "$item[outlierType] ($item[peptideScore]%)<br><small>$item[secStruc]</small>";
+                $res[$item['resName']]['cablam_val'] = "$item[peptideScore]";
+                $res[$item['resName']]['any_isbad'] = true;
+                $res[$item['resName']]['cablam_isbad'] = true;
+                $res[$item['resName']]['cablam_color'] = $cell_color_mild;
+                }
+            elseif ($outlierType == "CA Geo Outlier") {
+                $res[$item['resName']]['cablam'] = "$item[outlierType] ($item[caGeomScore]%)";
+                $res[$item['resName']]['cablam_val'] = "$item[caGeomScore]";
+                $res[$item['resName']]['any_isbad'] = true;
+                $res[$item['resName']]['cablam_isbad'] = true;
+                //$res[$item['resName']]['cablam_color'] = '#999999';//dark grey
+                $res[$item['resName']]['cablam_color'] = $cell_color_severe;
+                }
+            else {
+                $secStruc = ltrim(trim($item['secStruc']),'try');
+                $res[$item['resName']]['cablam'] = "Favored ($item[peptideScore]%)<br><small>$secStruc</small>";
+                $res[$item['resName']]['cablam_val'] = "$item[peptideScore]";
+                }
+        }
+    }//}}}
+    if(is_array($cbdev))//{{{
     {
         foreach($cbdev as $item)
         {
             $res[$item['resName']]['cbdev_val'] = $item['dev'];
             if($item['dev'] >= 0.25)
             {
-                $res[$item['resName']]['cbdev'] = "$item[dev]&Aring;";
+                $res[$item['resName']]['cbdev'] = sprintf("%.2f",$item['dev'])."&Aring;";
                 $res[$item['resName']]['cbdev_isbad'] = true;
                 $res[$item['resName']]['any_isbad'] = true;
+                if($item['dev'] >= 0.7) $res[$item['resName']]['cbdev_color'] = $cell_color_severe;
             }
             else {
                 if($res[$item['resName']]['cbdev'] == null) //for fixing a bug where an ok alt conf dev would get reported instead of the bad dev.
-                    $res[$item['resName']]['cbdev'] = "$item[dev]&Aring;";
+                    $res[$item['resName']]['cbdev'] = sprintf("%.2f",$item['dev'])."&Aring;";
             }
         }
-    }
-    if(is_array($pperp))
+    }//}}}
+    if(is_array($omega))//{{{
+    {
+        foreach($omega as $item)
+        {
+            if($item['conf'] == 'Cis'){
+                $res[$item['resName']]['any_isbad'] = true;
+                if($item['type'] == 'General'){
+                    $res[$item['resName']]['omega'] = "$item[conf] nonPRO<br><small>omega= $item[omega]</small>";
+                    $res[$item['resName']]['omega_val'] = "1"; //for column sort
+                    $res[$item['resName']]['omega_isbad'] = true;}
+                elseif($item['type'] == 'Pro'){
+                    $res[$item['resName']]['omega'] = "$item[conf] PRO<br><small>omega= $item[omega]</small>";
+                    $res[$item['resName']]['omega_val'] = "2"; //for column sort
+                    }
+            }
+            elseif($item['conf'] == 'Twisted'){
+                $res[$item['resName']]['any_isbad'] = true;
+                $res[$item['resName']]['omega_isbad'] = true;
+                if($item['type'] == 'General'){
+                    $res[$item['resName']]['omega'] = "$item[conf] nonPRO<br><small>omega= $item[omega]</small>";
+                    $res[$item['resName']]['omega_val'] = "1";} //for column sort
+                elseif($item['type'] == 'Pro'){
+                    $res[$item['resName']]['omega'] = "$item[conf] PRO<br><small>omega= $item[omega]</small>";
+                    $res[$item['resName']]['omega_val'] = "1";} //for column sort
+            }
+        }
+    }//}}}
+    if(is_array($pperp))//{{{
     {
         foreach($pperp as $item)
         {
@@ -1307,20 +1621,20 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
             {
                 //echo "pperp ".$item['resName']."\n";
                 $reasons = array();
-                if    ($item['deltaOut'] && $item['epsilonOut'] && $item['3Pdist'] < 3.0) $reasons[] = "&delta; & &epsilon; outlier <br> (base-p distance indicates 2'-endo";
-                elseif($item['deltaOut'] && $item['epsilonOut'] && $item['3Pdist'] >= 3.0) $reasons[] = "&delta; & &epsilon; outlier <br> (base-p distance indicates 3'-endo";
-                elseif($item['deltaOut'] && $item['3Pdist'] < 3.0)   $reasons[] = "&delta; outlier <br> (base-p distance indicates 2'-endo";
-                elseif($item['deltaOut'] && $item['3Pdist'] >= 3.0) $reasons[] = "&delta; outlier <br> (base-p distance indicates 3'-endo";
-                elseif($item['epsilonOut'] && $item['3Pdist'] < 3.0)   $reasons[] = "&epsilon; outlier <br> (base-p distance indicates 2'-endo";
-                elseif($item['epsilonOut'] && $item['3Pdist'] >= 3.0) $reasons[] = "&epsilon; outlier <br> (base-p distance indicates 3'-endo";
+                if    ($item['deltaOut'] && $item['epsilonOut'] && $item['3Pdist'] < 3.0)  $reasons[] = "&delta; & &epsilon; outlier <br><small>(P-perp distance implies C2'-endo)</small>";
+                elseif($item['deltaOut'] && $item['epsilonOut'] && $item['3Pdist'] >= 3.0) $reasons[] = "&delta; & &epsilon; outlier <br><small>(P-perp distance implies C3'-endo)</small>";
+                elseif($item['deltaOut'] && $item['3Pdist'] < 3.0)    $reasons[] = "&delta; outlier <br><small>(P-perp distance implies C2'-endo)</small>";
+                elseif($item['deltaOut'] && $item['3Pdist'] >= 3.0)   $reasons[] = "&delta; outlier <br><small>(P-perp distance implies C3'-endo)</small>";
+                elseif($item['epsilonOut'] && $item['3Pdist'] < 3.0)  $reasons[] = "&epsilon; outlier <br><small>(P-perp distance implies C2'-endo)</small>";
+                elseif($item['epsilonOut'] && $item['3Pdist'] >= 3.0) $reasons[] = "&epsilon; outlier <br><small>(P-perp distance implies C3'-endo)</small>";
                 $res[$item['resName']]['pperp_val'] = 1; // no way to quantify this
-                $res[$item['resName']]['pperp'] = "suspect sugar pucker  -  ".implode(", ", $reasons).")";
+                $res[$item['resName']]['pperp'] = "suspect sugar pucker  -  ".implode(", ", $reasons)."";
                 $res[$item['resName']]['pperp_isbad'] = true;
                 $res[$item['resName']]['any_isbad'] = true;
             }
         }
-    }
-    if(is_array($suites))
+    }//}}}
+    if(is_array($suites))//{{{
     {
         foreach($suites as $cnit => $item)
         {
@@ -1351,33 +1665,35 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
             elseif($item['bin'] == 'inc ')
                 $res[$cnit]['suites'] = "conformer: $item[conformer]<br><small>$bin</small>";
             else
-                $res[$cnit]['suites'] = "conformer: $item[conformer]<br><small>$bin, suiteness = $item[suiteness]</small>";
+                $res[$cnit]['suites'] = "conformer: $item[conformer]<br><small>$bin, suiteness = ".sprintf("%.2f",$item[suiteness])."</small>";
         }
-    }
-    if(is_array($bbonds)) {
+    }//}}}
+    if(is_array($bbonds)) {//{{{
         foreach($bbonds as $cnit => $item) {
             if ($item['isOutlier']) {
                 $res[$cnit]['bbonds_val'] = abs($item['sigma']);
-                $res[$cnit]['bbonds'] = "$item[count] OUTLIER(S)<br><small>worst is $item[measure]: $item[sigma] &sigma;</small>";
+                $res[$cnit]['bbonds'] = "$item[count] OUTLIER(S)<br><small>worst is $item[measure]: ".sprintf("%.1f",$item[sigma])." &sigma;</small>";
                 $res[$cnit]['bbonds_isbad'] = true;
                 $res[$cnit]['any_isbad'] = true;
+                if($res[$cnit]['bbonds_val'] >=10 ) $res[$cnit]['bbonds_color'] = $cell_color_severe;
             }
         }
-    }
-    if(is_array($bangles)) {
+    }//}}}
+    if(is_array($bangles)) {//{{{
         foreach($bangles as $cnit => $item) {
             if ($item['isOutlier']) {
                 $res[$cnit]['bangles_val'] = abs($item['sigma']);
-                $res[$cnit]['bangles'] = "$item[count] OUTLIER(S)<br><small>worst is $item[measure]: $item[sigma] &sigma;</small>";
+                $res[$cnit]['bangles'] = "$item[count] OUTLIER(S)<br><small>worst is $item[measure]: ".sprintf("%.1f",$item[sigma])." &sigma;</small>";
                 $res[$cnit]['bangles_isbad'] = true;
                 $res[$cnit]['any_isbad'] = true;
+                if($res[$cnit]['bangles_val'] >=10 ) $res[$cnit]['bangles_color'] = $cell_color_severe;
             }
         }
-    }
+    }//}}}
     //}}} Process validation data
     //echo "Processing validation data took ".(time() - $startTime)." seconds\n";
 
-    //check for alternates
+    //{{{check for alternates
     foreach($res as $cnit => $current)
     {
       $altloc = substr($cnit, 7, 1);
@@ -1386,16 +1702,16 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
         $b_key = substr($cnit,0,7).' '.substr($cnit,8,3);
         if (isset($res[$b_key])) //make sure this exists
         {
-          //clash
+          //{{{clash
           if (!isset($res[$cnit]['clash']))
           {
             $res[$cnit]['clash_val'] = $res[$b_key]['clash_val'];
             $res[$cnit]['clash'] = $res[$b_key]['clash'];
             $res[$cnit]['clash_isbad'] = $res[$b_key]['clash_isbad'];
             $res[$cnit]['any_isbad'] = $res[$b_key]['any_isbad'];
-          }
+          }//}}}
 
-          //rama
+          //{{{rama
           if (!isset($res[$cnit]['rama']))
           {
             $res[$cnit]['rama_val'] = $res[$b_key]['rama_val'];
@@ -1405,9 +1721,9 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
               $res[$cnit]['rama_isbad'] = $res[$b_key]['rama_isbad'];
               $res[$cnit]['any_isbad'] = $res[$b_key]['any_isbad'];
             }
-          }
+          }//}}}
 
-          //rota
+          //{{{rota
           if (!isset($res[$cnit]['rota']))
           {
             $res[$cnit]['rota_val'] = $res[$b_key]['rota_val'];
@@ -1417,9 +1733,9 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
               $res[$cnit]['rota_isbad'] = $res[$b_key]['rota_isbad'];
               $res[$cnit]['any_isbad'] = $res[$b_key]['any_isbad'];
             }
-          }
+          }//}}}
 
-          //cbdev
+          //{{{cbdev
           if (!isset($res[$cnit]['cbdev_val']))
           {
             $res[$cnit]['cbdev_val'] = $res[$b_key]['cbdev_val'];
@@ -1429,9 +1745,9 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
               $res[$cnit]['cbdev_isbad'] = $res[$b_key]['cbdev_isbad'];
               $res[$cnit]['any_isbad'] = $res[$b_key]['any_isbad'];
             }
-          }
+          }//}}}
 
-          //pperp
+          //{{{pperp
           if (!isset($res[$cnit]['pperp']))
           {
             if (isset($res[$b_key]['pperp']))
@@ -1441,9 +1757,9 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
               $res[$cnit]['pperp_isbad'] = $res[$b_key]['pperp_isbad'];
               $res[$cnit]['any_isbad'] = $res[$b_key]['any_isbad'];
             }
-          }
+          }//}}}
 
-          //suites
+          //{{{suites
           if (!isset($res[$cnit]['suites']))
           {
             $res[$cnit]['suites_val'] = $res[$b_key]['suites_val'];
@@ -1453,9 +1769,9 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
               $res[$cnit]['suites_isbad'] = $res[$b_key]['suites_isbad'];
               $res[$cnit]['any_isbad'] = $res[$b_key]['any_isbad'];
             }
-          }
+          }//}}}
 
-          //bbonds
+          //{{{bbonds
           if (!isset($res[$cnit]['bbonds']))
           {
             if (isset($res[$b_key]['bbonds_isbad']))
@@ -1465,9 +1781,9 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
               $res[$cnit]['bbonds_isbad'] = $res[$b_key]['bbonds_isbad'];
               $res[$cnit]['any_isbad'] = $res[$b_key]['any_isbad'];
             }
-          }
+          }//}}}
 
-          //bangles
+          //{{{bangles
           if (!isset($res[$cnit]['bangles']))
           {
             if (isset($res[$b_key]['bangles_isbad']))
@@ -1477,15 +1793,39 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
               $res[$cnit]['bangles_isbad'] = $res[$b_key]['bangles_isbad'];
               $res[$cnit]['any_isbad'] = $res[$b_key]['any_isbad'];
             }
-          }
-          //Bfactor
+          }//}}}
+
+          //{{{omega
+          if (isset($res[$cnit]['omega']))
+          {
+            if (isset($res[$b_key]['omega_isbad']))
+            {
+              $res[$cnit]['omega_val'] = $res[$b_key]['omega_val'];
+              $res[$cnit]['omega'] = $res[$b_key]['omega'];
+              $res[$cnit]['omega_isbad'] = $res[$b_key]['omega_isbad'];
+              $res[$cnit]['any_isbad'] = $res[$b_key]['any_isbad'];
+            }
+          }//}}}
+
+          //{{{Bfactor
           if (isset($res[$b_key]['resHiB']))
           {
             $res[$cnit]['resHiB'] = max($res[$cnit]['resHiB'], $res[$b_key]['resHiB']);
-          }
+          }//}}}
+
+          //{{{CaBLAM
+          if (isset($res[$cnit]['cablam']))
+          {
+            if (isset($res[$b_key]['cablam_isbad']))
+            {
+              $res[$cnit]['cablam_val'] = $res[$b_key]['cablam_val'];
+              $res[$cnit]['cablam'] = $res[$b_key]['cablam'];
+              $res[$cnit]['cablam_isbad'] = $res[$b_key]['cablam_isbad'];
+            }
+          }//}}}
         }
       }
-    }
+    }//}}}
 
     //remove redundant ' ' entries for residues with alternates
     if ($cleanupAltloc)
@@ -1519,7 +1859,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
     //{{{ Table prequel and headers
     // Do summary chart
     $pdbstats = pdbstat($infile);
-    $table['prequel'] = makeSummaryStatsTable($pdbstats['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles);
+    $table['prequel'] = makeSummaryStatsTable($pdbstats['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $cablam, $omega);
 
     if ($doHtmlTable) {
       $header1 = array();
@@ -1531,10 +1871,12 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
       if(is_array($rama))   $header1[] = array('html' => "<b>Ramachandran</b>",           'sort' => 1);
       if(is_array($rota))   $header1[] = array('html' => "<b>Rotamer</b>",                'sort' => 1);
       if(is_array($cbdev))  $header1[] = array('html' => "<b>C&beta; deviation</b>",      'sort' => -1);
+      if(is_array($cablam)) $header1[] = array('html' => "<b>CaBLAM</b>",            'sort' => 1);
       if(is_array($pperp))  $header1[] = array('html' => "<b>Base-P perp. dist.</b>",     'sort' => -1);
       if(is_array($suites)) $header1[] = array('html' => "<b>RNA suite conf.</b>",        'sort' => 1);
       if(is_array($bbonds)) $header1[] = array('html' => "<b>Bond lengths</b>",      'sort' => -1);
       if(is_array($bangles)) $header1[] = array('html' => "<b>Bond angles</b>",      'sort' => -1);
+      if(is_array($omega))  $header1[] = array('html' => "<b>Cis Peptides</b>",             'sort' => 1);
 
       $header2 = array();
       $header2[] = array('html' => "");
@@ -1545,10 +1887,12 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
       if(is_array($rama))   $header2[] = array('html' => "Outliers: ".count(findRamaOutliers($rama))." of ".findAltTotal($rama));
       if(is_array($rota))   $header2[] = array('html' => "Poor rotamers: ".count(findRotaOutliers($rota))." of ".findAltTotal($rota));
       if(is_array($cbdev))  $header2[] = array('html' => "Outliers: ".count(findCbetaOutliers($cbdev))." of ".findAltTotal($cbdev));
+      if(is_array($cablam)) $header2[] = array('html' => "Outliers: ".count(findCablamOutliers($cablam))." of ".findAltTotal($cablam));
       if(is_array($pperp))  $header2[] = array('html' => "Outliers: ".count(findBasePhosPerpOutliers($pperp))." of ".findAltTotal($pperp));
       if(is_array($suites)) $header2[] = array('html' => "Outliers: ".count(findSuitenameOutliers($suites))." of ".findAltTotal($suites));
       if(is_array($bbonds)) $header2[] = array('html' => "Outliers: ".count(findGeomOutliers($bbonds))." of ".findAltTotal($bbonds));
       if(is_array($bangles)) $header2[] = array('html' => "Outliers: ".count(findGeomOutliers($bangles))." of ".findAltTotal($bangles));
+      if(is_array($omega))  $header2[] = array('html' => "Non-Trans: ".count(findOmegaOutliers($omega))." of ".findAltTotal($omega));
 
       $table['headers'] = array($header1, $header2);
     }
@@ -1581,14 +1925,15 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
         $row[] = array('html' => $alt,              'sort_val' => $alt);
         $row[] = array('html' => $type,             'sort_val' => $type);
         $row[] = array('html' => $eval['resHiB'],   'sort_val' => $eval['resHiB']+0);
-        foreach(array('clash', 'rama', 'rota', 'cbdev', 'pperp', 'suites', 'bbonds', 'bangles') as $type)
+        foreach(array('clash', 'rama', 'rota', 'cbdev', 'cablam', 'pperp', 'suites', 'bbonds', 'bangles', 'omega') as $type)
         {
           if(is_array($$type))
           {
             $cell = array();
             if(isset($eval[$type]))             $cell['html'] = $eval[$type];
             else                                $cell['html'] = "-";
-            if(isset($eval[$type.'_isbad']))    $cell['color'] = '#ff6699';
+            if(isset($eval[$type.'_color']))    $cell['color'] = $eval[$type.'_color'];
+            elseif(isset($eval[$type.'_isbad'])) $cell['color'] = $cell_color_bad;
             if(isset($eval[$type.'_val']))      $cell['sort_val'] = $eval[$type.'_val']+0;
             $row[] = $cell;
           }
