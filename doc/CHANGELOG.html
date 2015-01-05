@@ -95,6 +95,44 @@
 ==============================================================================
 ===  CHANGE LOG  =============================================================
 ==============================================================================
+### 4.2 ###
+- Added phenix.omegalyze functionality to search for and mark non-trans peptides
+  Non-trans peptides (Cis-PRO, cis-nonPRO, twisted PRO and twisted nonPRO) are
+  reported in the multicrit table and are marked in the multicrit kinemage with
+  green trapezoids.
+- Updated phenix.rotalyze call to use new rotamer distributions from top8000.
+  Added "Rotamer Favored" and "Rotamer Allowed" categories. Adjusted "stoplight"
+  cutoffs to match new top8000 contours.
+- Added LoRx validation category for low-resolution validations. LoRx mode boxes
+  are automatically checked for x-ray structures with resolution worse than 2.5
+- Added phenix.cablam_validate functionality to LoRx mode.  CaBLAM uses Calpha
+  trace geometry to validate backbone geometry in low-res protein structures.
+  CaBLAM reports validation to the multicrit chart and prints markup to a
+  multicrit kinemage.
+- Added LoRx multicrit kinemage to LoRx mode. This kin shows reduced markup that
+  may avoid information overload in difficult structures. Clash dots are only
+  shown for clashes over 0.5A overlap, and rotamer outliers are omitted.
+- "Stoplight" coloring updated for geometry outliers
+- Major changes to color scheme for multicrit chart. Now three colors, plus
+  default uncolored. Light pink for mild clashes (less than 0.5A overlap) and
+  for "Allowed" conformations. Standard pink for most outliers. Red for severe
+  outliers including clash greater than 0.9A and CaBLAM's CA geometry outliers.
+  These coloring changes started as an attention-focusing tool for LoRx and were
+  then generalized.
+- Changes to CCTBX dependencies, particularly the addition of the 'base'
+  directory which holds python and other dependencies. This has been tested
+  successfully on OSX and linux 64-bit
+
+### 4.1 ###
+- Extensive changes, not fully documented here.
+- Molprobity now runs using cctbx, the same architecture underlying PHENIX
+- Most (but not all) analysis is now handled through commandline calls to phenix
+  programs, e.g. phenix.ramalyze and phenix.clashscore
+- Now does geometry regularition following N/Q/H flips
+- Better handling for alternates
+- Molprobity now has dependencies on cctbx and moltbx that may require different
+  install/build strategies
+
 ### 4.00a ###
 - Changes to allow for selecting e-cloud or neutron length options.
 
