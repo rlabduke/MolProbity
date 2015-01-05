@@ -8,6 +8,8 @@ Installation
 
 Installation is fairlly straightforward. First move the moltbx directory (the directory that this README file is in)  to a location where you want it to reside. Note that Apache will have to see moltbx/public_html. Once the moltbx directory is in the proper location, you are redy to install. Open a terminal and goto the moltbx directory.
 
+Linux users: ensure that gawk is on a path that the server can read (gawk may need to be installed).
+
 1. Make sure that configure.sh is exectutable then run configure.sh. 
 
 >>> ./configure.sh
