@@ -332,13 +332,16 @@ function pdbstat($pdbfilename)
                 }
                 $key = $atom_name." ".$resn;
                 //echo "|".$key."|\n";
-                if ($key !== " HA2 GLY" && $key !== " C4A FAD" &&
-                    $key !== " C5A FAD" && $key !== " H6  FAD") { // TEMP FIX: because HA2 GLY is both old AND new format,
-                                           // Remediator messes it up.
-                  if(array_key_exists($key, $hash)) {
-                    $v2format++;
-                  }
-                }
+                // The following lines were commented out by BJH on 20150114. We 
+                // believe that there are no reasons to run remidiator for v2 atom names.
+                // This likely causes remidator to run on v3 pdbs which it should not do.
+                //if ($key !== " HA2 GLY" && $key !== " C4A FAD" &&
+                //    $key !== " C5A FAD" && $key !== " H6  FAD") { // TEMP FIX: because HA2 GLY is both old AND new format,
+                //                           // Remediator messes it up.
+                //  if(array_key_exists($key, $hash)) {
+                //    $v2format++;
+                //  }
+                //}
             }
         }
     }
