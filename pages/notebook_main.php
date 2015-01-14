@@ -32,8 +32,9 @@ function display($context)
     echo "<h3><a name='top'</a>Table of contents:</h3>\n";
     echo "<div class='indent'>\n";
     $this->printTOC($labbook);
-    echo makeEventForm("onNotebookEdit");
-    echo "<input type='submit' name='cmd' value='Create new entry'>\n</form>\n";
+    //onNotebookEdit removed for security reasons (probably nobody was using it)
+    //echo makeEventForm("onNotebookEdit");
+    //echo "<input type='submit' name='cmd' value='Create new entry'>\n</form>\n";
     echo "</div>\n";
     
     // Actual notebook entries
@@ -54,7 +55,8 @@ function printEntry($num, $entry)
     echo "<a name='entry$num'</a>";
     echo formatLabbookEntry($entry);
     echo "</hr>\n";
-    echo "<p><a href='#top'>Top</a> | <a href='".makeEventURL("onNotebookEdit", $num)."'>Edit</a>\n";
+    echo "<p><a href='#top'>Top</a>";// | <a href='".makeEventURL("onNotebookEdit", $num)."'>Edit</a>\n";
+    //onNotebookEdit removed for security reasons (probably nobody was using it
 }
 #}}}########################################################################
 
