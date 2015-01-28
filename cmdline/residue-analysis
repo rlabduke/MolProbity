@@ -68,7 +68,7 @@ if(count($pdbFileList) == 0)
 echo "#file_name,x-H_type,residue,res_high_B,mc_high_B";
 if($optClash)   echo ",worst_clash,src_atom,dst_atom,dst_residue";
 if($optCbeta)   echo ",CB_dev";
-if($optRota)    echo ",rotamer_score,rotamer_eval";
+if($optRota)    echo ",rotamer_score,rotamer_eval,rotamer";
 if($optRama)    echo ",rama_score,rama_eval,rama_type";
 if($optGeom)    echo ",num_length_out,worst_length,worst_length_value,worst_length_sigma,num_angle_out,worst_angle,worst_angle_value,worst_angle_sigma";
 if($optCountOut) echo ",outlier_count,outlier_count_sep_geom";
@@ -145,7 +145,7 @@ function summaryAnalysis($modelID)
           }
           if(isset($rota[$cnit]))
           {
-            if($rota[$cnit]['scorePct']+0 <= 1.0) {
+            if($rota[$cnit]['eval'] == "OUTLIER") {
               $outCount++;
               $outCountSep++;
             }
@@ -195,9 +195,10 @@ function summaryAnalysis($modelID)
         {
             if(isset($rota[$cnit]))
             {
-                echo ",".$rota[$cnit]['scorePct'];
-                if($rota[$cnit]['scorePct']+0 <= 1.0) echo ",OUTLIER";
-                else echo ",".$rota[$cnit]['rotamer'];
+                echo ",".$rota[$cnit]['scorePct'].",".$rota[$cnit]['eval'];
+                //if($rota[$cnit]['eval'] == "OUTLIER") echo ",OUTLIER,";
+                //else echo ",".$rota[$cnit]['rotamer'];
+                echo ",".$rota[$cnit]['rotamer'];
             }
             else echo ",,";
         }
