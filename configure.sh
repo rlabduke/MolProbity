@@ -54,3 +54,7 @@ make
 source ../build/setpaths.sh
 
 mmtbx.rebuild_rotarama_cache
+
+# git doesn't store empty directories so we're adding the public_html/data directory heere.
+cd ..
+mkdir -p public_html/data
