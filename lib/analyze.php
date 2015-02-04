@@ -884,8 +884,10 @@ function loadClashscore($datafile)
   // Parse data about individual clashes
   $clashes = array(); // in case there are no clashes
   $clashes_with = array();
+  $lines_all = array();
   foreach($data as $datum)
   {
+    $lines_all[$datum]=$datum;
     $line = explode(':', $datum);
     if (trim($line[0])==''){
       continue;
@@ -928,6 +930,7 @@ function loadClashscore($datafile)
       $clashes_with[$res2] = array('srcatom' => $atm2, 'dstatom' => $atm1, 'dstcnit' => $res1);
     }
   }
+  $ret['lines_all'] = $lines_all;
   $ret['clashes'] = $clashes;
   $ret['clashes-with'] = $clashes_with;
 
@@ -1369,7 +1372,7 @@ function loadSuitenameReport($datafile)
         if (count($line) > 1) {
           $altloc = $line[5]; //added by JJH 140108
           $cnit = $line[2].$line[3].$line[4].$altloc.substr($line[6],0,3);
-          echo $cnit."\n";
+          //echo $cnit."\n";
           //$decomp = decomposeResName($cnit);
           $conf = substr($line[6],9,2);
           $ret[$cnit] = array(

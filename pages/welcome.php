@@ -73,17 +73,20 @@ as part of the refinement cycle.</p>
 Create and view interactive 3-D graphics
 from your web browser.</p>
 
-<h3>What's new in 4.1:</h3><ul>
-<li>Validation analysis now powered by CCTBX. Also adds geometry regularization for N/Q/H flip corrections.</li>
-<li>Alternate conformations now handled for validation analysis.</li>
-</ul>
-<h3>What's new in 4.0:</h3><ul>
-<li>Updated Reduce-added hydrogen lengths to be more consistent with other crystallography software.</li>
-<li>New <a style=\"color: #66FFFF\" href='http://kinemage.biochem.duke.edu/databases/top8000.php' target='_blank'>Top8000</a> Ramachandran validation information.</li>
-<li>Allows use of both electron cloud and nuclear x-H bond-lengths.</li>
-<li>Full support for 2-character CHAINIDs added. 4-character SEGIDs also supported in place of CHAINIDs.</li>
-</ul>
-</td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>
+
+<?php
+    echo("<h3>What's new in 4.1:</h3><ul>
+      <li>Validation analysis now powered by CCTBX. Also adds geometry regularization for N/Q/H flip corrections. Read more about this change <a href='".makeEventURL("onGoto", "helper_cctbx.php")."'>here</a>.</li>
+      <li>Alternate conformations now handled for validation analysis.</li>
+      </ul>
+      <h3>What's new in 4.0:</h3><ul>
+      <li>Updated Reduce-added hydrogen lengths to be more consistent with other crystallography software.</li>
+      <li>New <a href='http://kinemage.biochem.duke.edu/databases/top8000.php' target='_blank'>Top8000</a> Ramachandran validation information.</li>
+      <li>Allows use of both electron cloud and nuclear x-H bond-lengths. Read more about this change <a href='".makeEventURL("onGoto", "helper_hydrogens.php")."'>here</a>.</li>
+      <li>Full support for 2-character CHAINIDs added. 4-character SEGIDs also supported in place of CHAINIDs.</li>
+      </ul>
+      </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>");
+?>
 
 
 <h3>Common questions:</h3>
@@ -646,18 +649,18 @@ function toggleUploadOptions()
     //    Any uploaded files will be converted to PDB v3 if necessary; you will have an option to convert modified files back to PDB v2.3 if desired.
     //    <br><br>Please don't hesitate to report any bugs you may encounter; sorry for any inconvenience.</strong></div>");
 
-    echo("<div class=alert><strong>MolProbity4 structure validation now provides many of its validation metrics through CCTBX, the open-source component of the
-      <a style=\"color: #66FFFF\" href='http://www.phenix-online.org' target='_blank'>Phenix</a> crystallographic package. CCTBX allows for consistent validation results with Phenix,
-      as well as added functionality, such as geometry regularization of NQH flips. Read more about this change <a style=\"color: #66FFFF\" href='".makeEventURL("onGoto", "helper_cctbx.php")."'>here</a>.
-      <br><br>We have updated Reduce to add hydrogens at a length more consistent with electron-cloud positions, and accordingly
-      adjusted the Van der Waals radii in Probe to compensate for the change.  This will affect comparison of results calculated with older versions of MolProbity,
-      but generally results in lower clashscores. For analyses using nuclear-position hydrogens, you have the option of selecting nuclear x-H positions when adding hydrogens.
-      Read more about this change <a style=\"color: #66FFFF\" href='".makeEventURL("onGoto", "helper_hydrogens.php")."'>here</a>.
-      <p>Ramachandran scoring has also been updated to use new six-category distributions, derived from a larger
-      <a style=\"color: #66FFFF\" href='http://kinemage.biochem.duke.edu/databases/top8000.php' target='_blank'>Top8000</a> dataset of high quality PDB files.
-        <br><br>Please don't hesitate to report any <a style=\"color: #66FFFF\" href='".makeEventURL("onGoto", "feedback_setup.php")."'>bugs</a> you may encounter.
-        <br><br>If for some reason you need to use MolProbity4 version 4.02, which is now a retired legacy version, please go to <a style=\"color: #66FFFF\" href='http://rutile.biochem.duke.edu/' target='_blank'>http://rutile.biochem.duke.edu</a>.</strong></div>");
-
+//    echo("<div class=alert><strong>MolProbity4 structure validation now provides many of its validation metrics through CCTBX, the open-source component of the
+//      <a style=\"color: #66FFFF\" href='http://www.phenix-online.org' target='_blank'>Phenix</a> crystallographic package. CCTBX allows for consistent validation results with Phenix,
+//      as well as added functionality, such as geometry regularization of NQH flips. Read more about this change <a style=\"color: #66FFFF\" href='".makeEventURL("onGoto", "helper_cctbx.php")."'>here</a>.
+//      <br><br>We have updated Reduce to add hydrogens at a length more consistent with electron-cloud positions, and accordingly
+//      adjusted the Van der Waals radii in Probe to compensate for the change.  This will affect comparison of results calculated with older versions of MolProbity,
+//      but generally results in lower clashscores. For analyses using nuclear-position hydrogens, you have the option of selecting nuclear x-H positions when adding hydrogens.
+//      Read more about this change <a style=\"color: #66FFFF\" href='".makeEventURL("onGoto", "helper_hydrogens.php")."'>here</a>.
+//      <p>Ramachandran scoring has also been updated to use new six-category distributions, derived from a larger
+//      <a style=\"color: #66FFFF\" href='http://kinemage.biochem.duke.edu/databases/top8000.php' target='_blank'>Top8000</a> dataset of high quality PDB files.
+//        <br><br>Please don't hesitate to report any <a style=\"color: #66FFFF\" href='".makeEventURL("onGoto", "feedback_setup.php")."'>bugs</a> you may encounter.
+//        <br><br>If for some reason you need to use MolProbity4 version 4.02, which is now a retired legacy version, please go to <a style=\"color: #66FFFF\" href='http://rutile.biochem.duke.edu/' target='_blank'>http://rutile.biochem.duke.edu</a>.</strong></div>");
+    echo("<div class=feature>CCTBX, which powers this version of MolProbity (4.1), requires stricter adherence to PDB format. If you are having trouble with version 4.1 try using MolProbity4 legacy version 4.02 at <a href='http://rutile.biochem.duke.edu/' target='_blank'>http://rutile.biochem.duke.edu</a>.</div>");
 }
 
 #}}}########################################################################
