@@ -103,8 +103,8 @@ if(is_file($pdbFile) && endsWith($pdbFile, ".pdb"))
         runSuitenameReport($pdbfile, $outfile);
         $snreport = loadSuitenameReport($outfile);
         echo "resName:conformer:suiteness:bin:triage:isOutlier\n";
-//         foreach($snreport as $vr)
-//             echo "$vr[resName]:$vr[conformer]:$vr[suiteness]:$vr[bin]:$vr[triage]:$vr[isOutlier]\n";
+        foreach($snreport as $vr)
+            echo "$vr[resName]:$vr[conformer]:$vr[suiteness]:$vr[bin]:$vr[triage]:$vr[isOutlier]\n";
     }
 
     mpDestroySession();
