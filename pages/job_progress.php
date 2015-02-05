@@ -84,9 +84,8 @@ function display($context)
         $refresh    = "10; URL=$url";
         echo $this->pageHeader("CCTBX job failed");//, "none", $refresh);
         echo "<p>It appears that the PDB you provided has a formatting error.\n";
-        echo "<br>MolProbity believes the formatting error has to do with improper chemical\n";
-        echo "<br>names (a.k.a. element symbols)\n\n";
-        echo "<p>Here is an example of PDB format:o";
+        echo "<br>MolProbity believes the formatting error has to do with improper chemical names (a.k.a. element symbols)\n\n";
+        echo "<p>Here is an example of PDB format:";
         echo "<pre>\n";
         echo "         1         2         3         4         5         6         7         8\n";
         echo "12345678901234567890123456789012345678901234567890123456789012345678901234567890\n";
@@ -106,7 +105,7 @@ function display($context)
         echo "ATOM     45  CD BARG A  -3      13.374  85.886  91.406  0.50 37.66           C\n";
         echo "</pre><p>Chemical names must be in columns 77-78 of the PDB file, right justified (e.g. \" C\"). ";
         echo "<br>For further info please see the <a href='$pdburl' target=\"_blank\">PDB formatting</a> guide.\n";
-        echo "<p><strong>To fix,</strong> please check your fomatting conforms to proper PDB";
+        echo "<p><strong>To fix:</strong> please check your fomatting conforms to proper PDB";
         echo "<br>conventions and try again. If you continue experiencing problems please";
         echo "<br>contact us using the feedback page which you can access on the left-hand";
         echo "<br>navigation bar from the main page.\n";

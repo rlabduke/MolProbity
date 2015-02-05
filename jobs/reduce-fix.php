@@ -118,6 +118,11 @@ else
        }
        if(!file_exists($outpath2))
        {
+         # We are deleting the reduced file because we'd rather not have users
+         # play with the unregularized, nqh-flipped pdb. 
+         unlink($flipInpath);
+         unset($_SESSION['models'][$_SESSION['lastUsedModelID']]);
+         $_SESSION['lastUsedModelID'] = $parentID;
          unset($_SESSION['bgjob']['processID']);
          $_SESSION['bgjob']['endTime']   = time();
          $_SESSION['bgjob']['isRunning'] = false;

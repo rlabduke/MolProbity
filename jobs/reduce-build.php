@@ -71,6 +71,7 @@ if($_SESSION['bgjob']['makeFlipkin'])
 }
 
 setProgress($tasks, 'reduce');
+$prereduceid = $_SESSION['lastUsedModelID'];
 $newModel = createModel($modelID."FH");
 $outname = $newModel['pdb'];
 $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
@@ -127,6 +128,11 @@ if($did_flip && $_SESSION['bgjob']['nqh_regularize'])
   }
   if(!file_exists($outpath2))
   {
+    # We are deleting the reduced file because we'd rather not have users
+    # play with the unregularized, nqh-flipped pdb. 
+    unlink($flipInpath);
+    unset($_SESSION['models'][$_SESSION['lastUsedModelID']]);
+    $_SESSION['lastUsedModelID'] = $prereduceid;
     unset($_SESSION['bgjob']['processID']);
     $_SESSION['bgjob']['endTime']   = time();
     $_SESSION['bgjob']['isRunning'] = false;
