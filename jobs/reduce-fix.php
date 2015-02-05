@@ -121,7 +121,11 @@ else
          unset($_SESSION['bgjob']['processID']);
          $_SESSION['bgjob']['endTime']   = time();
          $_SESSION['bgjob']['isRunning'] = false;
-         $_SESSION['bgjob']['cctbxError'] = true;
+         # there was an error. Let's see if it is an element type issue.
+         $errfile = $_SESSION['dataDir']."/".MP_DIR_SYSTEM."/errors";
+         $elementerror = is_elementerror($errfile);
+         if($elementerror) $_SESSION['bgjob']['elementError'] = true;
+         else $_SESSION['bgjob']['cctbxError'] = true;
          die();
        }
     }
