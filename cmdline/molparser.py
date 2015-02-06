@@ -291,8 +291,8 @@ def loadRamachandran(datafile):
 #   chainID         1-letter chain ID or ' '
 #   resNum          residue number
 #   insCode         insertion code or ' '
-#   5Pdist          distance from the base to the 5' phosphate (?)
-#   3Pdist          distance from the base to the 3' phosphate (?)
+#   Pdist5          distance from the base to the 5' phosphate (?)
+#   Pdist3          distance from the base to the 3' phosphate (?)
 #   delta           delta angle of the sugar ring
 #   deltaOut        true if the sugar pucker (delta) doesn't match dist to 3' P
 #   epsilon         epsilon angle of the backbone
@@ -313,8 +313,8 @@ def loadBasePhosPerp(datafile):
         'chainID'   : splitline[3][1:-1].upper(),
         'resNum'    : int(splitline[4][0:-2].strip()),
         'insCode'   : splitline[4][-2:-1].upper(),
-        '5Pdist'    : float(splitline[5]),
-        '3Pdist'    : float(splitline[6]),
+        'Pdist5'    : float(splitline[5]),
+        'Pdist3'    : float(splitline[6]),
         'delta'     : float(splitline[7]),
         'deltaOut'  : deltaOut,
         'epsilon'   : float(splitline[9]),

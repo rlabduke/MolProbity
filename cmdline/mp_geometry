@@ -40,28 +40,34 @@ OUTPUTS:
 ############################################################################
 // First argument is the name of this script...
 $optBonds    = true;
-$optSuitname = false;
-$optProtein  = true;
+$optSuitename = false;
+$optPuckana = false;
 $optRNA      = false;
 if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
 {
+//     echo ";$arg;\n";
     if($arg == '-bonds')           $optBonds    = true;
-    elseif($arg == '-suitname')
+    elseif($arg == '-suitename')
     {
-        $optSuitname = true;
-        $optBonds    = false;
+        $optSuitename = true;
+        $optBonds     = false;
+        $optPuckana   = false;
     }
-    else $pdbFile = $arg;
+    elseif($arg == '-pucker_analysis')
+    {
+        $optPuckana   = true;
+        $optSuitename = false;
+        $optBonds     = false;
+    }
+    elseif(endsWith($arg, ".pdb")) $pdbFile = $arg;
 }
-if ($optBonds === true && $optSuitname === true) {
-    die("Cannot do bonds and suitname simultaneously. Please choose one \n");
+if ($optBonds === true && $optSuitename === true) {
+    die("Cannot do bonds and suitename simultaneously. Please choose one \n");
 }
 if(! isset($pdbFile))
     die("Must provide at least one PDB file on the command line!\n");
 
-// runClashscore($infile, $outfile, $blength="ecloud", $clash_cutoff=-0.4)
-
-// Loop through all PDBs in the provided directory
+// analyze PDB provided
 
 if(is_file($pdbFile) && endsWith($pdbFile, ".pdb"))
 {
@@ -97,14 +103,23 @@ if(is_file($pdbFile) && endsWith($pdbFile, ".pdb"))
         foreach($vrRNAl as $vr)
             echo "$vr[resName]:$vr[type]:$vr[measure]:$vr[value]:$vr[sigma]:$vr[angCount]:$vr[outCount]\n";
     }
-    if($optSuitname)
+    if($optSuitename)
     {
-        $outfile = "$rawDir/$model[prefix]bonds.data";
+        $outfile = "$rawDir/$model[prefix]suites.data";
         runSuitenameReport($pdbfile, $outfile);
         $snreport = loadSuitenameReport($outfile);
         echo "resName:conformer:suiteness:bin:triage:isOutlier\n";
         foreach($snreport as $vr)
             echo "$vr[resName]:$vr[conformer]:$vr[suiteness]:$vr[bin]:$vr[triage]:$vr[isOutlier]\n";
+    }
+    if($optPuckana)
+    {
+        $outfile = "$rawDir/$model[prefix]bonds.data";
+        runBasePhosPerp($pdbfile, $outfile);
+        $ppreport = loadBasePhosPerp($outfile);
+        echo "resType:chainID:resNum:insCode:altloc:Pdist5:Pdist3:delta:deltaOut:epsilon:epsilonOut:outlier\n";
+        foreach($ppreport as $vr)
+            echo "$vr[resType]:$vr[chainID]:$vr[resNum]:$vr[insCode]:$vr[altloc]:$vr[Pdist5]:$vr[Pdist3]:$vr[delta]:$vr[deltaOut]:$vr[epsilon]:$vr[epsilonOut]:$vr[outlier]\n";
     }
 
     mpDestroySession();

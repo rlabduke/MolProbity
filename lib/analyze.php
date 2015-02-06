@@ -549,8 +549,8 @@ function runBasePhosPerp($infile, $outfile)
 *   chainID         1-letter chain ID or ' '
 *   resNum          residue number
 *   insCode         insertion code or ' '
-*   5Pdist          distance from the base to the 5' phosphate (?)
-*   3Pdist          distance from the base to the 3' phosphate (?)
+*   Pdist5          distance from the base to the 5' phosphate (?)
+*   Pdist3          distance from the base to the 3' phosphate (?)
 *   delta           delta angle of the sugar ring
 *   deltaOut        true if the sugar pucker (delta) doesn't match dist to 3' P
 *   epsilon         epsilon angle of the backbone
@@ -575,8 +575,8 @@ function loadBasePhosPerp($datafile)
                 'resNum'    => trim(substr($line[4], 0, -2)) + 0,
                 'insCode'   => strtoupper(substr($line[4], -2, 1)),
                 'altloc'    => ' ', //limitation - doesn't currently handle altloc
-                '5Pdist'    => $line[5] + 0,
-                '3Pdist'    => $line[6] + 0,
+                'Pdist5'    => $line[5] + 0,
+                'Pdist3'    => $line[6] + 0,
                 'delta'     => $line[7] + 0,
                 'deltaOut'  => $deltaOut,
                 'epsilon'   => $line[9] + 0,
