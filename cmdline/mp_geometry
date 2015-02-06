@@ -82,13 +82,13 @@ if(is_file($pdbFile) && endsWith($pdbFile, ".pdb"))
 
     $filename = basename($pdbFile);
     $model   =& $_SESSION['models'][$id];
-    $pdbfile = $_SESSION['dataDir'].'/'.MP_DIR_MODELS."/$model[pdb]";
+    $pdbFile = $_SESSION['dataDir'].'/'.MP_DIR_MODELS."/$model[pdb]";
     $rawDir  = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA;
     if(!file_exists($rawDir)) mkdir($rawDir, 0777);
     if($optBonds)
     {
         $outfile = "$rawDir/$model[prefix]bonds.data";
-        runValidationReport($pdbfile, $outfile);
+        runValidationReport($pdbFile, $outfile);
         $vrProteinA = loadValidationAngleReport($outfile,"protein");
         $vrProteinL = loadValidationBondReport($outfile,"protein");
         $vrRNAa = loadValidationAngleReport($outfile,"rna");
@@ -106,17 +106,19 @@ if(is_file($pdbFile) && endsWith($pdbFile, ".pdb"))
     if($optSuitename)
     {
         $outfile = "$rawDir/$model[prefix]suites.data";
-        runSuitenameReport($pdbfile, $outfile);
+        runSuitenameReport($pdbFile, $outfile);
         $snreport = loadSuitenameReport($outfile);
+        if(empty($snreport)) die("Empty array: Are you sure there is RNA in the file?\n");
         echo "resName:conformer:suiteness:bin:triage:isOutlier\n";
         foreach($snreport as $vr)
             echo "$vr[resName]:$vr[conformer]:$vr[suiteness]:$vr[bin]:$vr[triage]:$vr[isOutlier]\n";
     }
     if($optPuckana)
     {
-        $outfile = "$rawDir/$model[prefix]bonds.data";
-        runBasePhosPerp($pdbfile, $outfile);
+        $outfile = "$rawDir/$model[prefix]pucker.data";
+        runBasePhosPerp($pdbFile, $outfile);
         $ppreport = loadBasePhosPerp($outfile);
+        if(empty($ppreport)) die("Empty array: Are you sure there is RNA in the file?\n");
         echo "resType:chainID:resNum:insCode:altloc:Pdist5:Pdist3:delta:deltaOut:epsilon:epsilonOut:outlier\n";
         foreach($ppreport as $vr)
             echo "$vr[resType]:$vr[chainID]:$vr[resNum]:$vr[insCode]:$vr[altloc]:$vr[Pdist5]:$vr[Pdist3]:$vr[delta]:$vr[deltaOut]:$vr[epsilon]:$vr[epsilonOut]:$vr[outlier]\n";
