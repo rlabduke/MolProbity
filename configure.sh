@@ -45,9 +45,9 @@ fi
 #svn --non-interactive --trust-server-cert co https://quiddity.biochem.duke.edu/svn/probe/trunk probe
 #svn --non-interactive --trust-server-cert co https://quiddity.biochem.duke.edu/svn/suitename
 
-svn co https://github.com/rlabduke/probe.git/trunk probe
-svn co https://github.com/rlabduke/reduce.git/trunk reduce
-svn co https://github.com/rlabduke/suitename.git/trunk suitename
+svn --non-interactive --trust-server-cert co https://github.com/rlabduke/probe.git/trunk probe
+svn --non-interactive --trust-server-cert co https://github.com/rlabduke/reduce.git/trunk reduce
+svn --non-interactive --trust-server-cert co https://github.com/rlabduke/suitename.git/trunk suitename
 
 cd ../build
 
