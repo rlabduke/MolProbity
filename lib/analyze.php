@@ -1473,7 +1473,7 @@ function loadCablam($datafile)
             'insCode'     => $decomp['insCode'],
             'altID'       => $decomp['altID'],
             'outlierType' => $line[1],
-            'peptideScore'=> $line[2]*100,
+            'cablamScore' => $line[2]*100,
             'caGeomScore' => $line[3]*100,
             'secStruc'    => $line[4],
             'alpha'       => $line[5] + 0,
@@ -1500,7 +1500,7 @@ function findCablamOutliers($cablam)
     {
         //This is only used to get a count of outliers
         if($res['outlierType'] != '                    ')
-            $worst[$res['resName']] = $res['peptideScore'];
+            $worst[$res['resName']] = $res['cablamScore'];
     }
     ksort($worst);
     return $worst;
