@@ -36,22 +36,28 @@ found <a href='help/about.html' target='_blank'>here</a>.</p>
 <code>README</code>.</p>
 
 <?php
-$file = "moltbx-".MP_VERSION.".tgz";
-if(file_exists($file) && filesize($file) > 0)
-{
-    echo "<p><b>Download now: <a href='$file'>".basename($file)."</a></b>";
-    echo ", ".formatFilesize(filesize($file));
-    echo ", last updated ".date('j M Y', filemtime($file))."\n";
-}
-else
-{
+/**$file = "moltbx-".MP_VERSION.".tgz";
+* if(file_exists($file) && filesize($file) > 0)
+* {
+*     echo "<p><b>Download now: <a href='$file'>".basename($file)."</a></b>";
+*     echo ", ".formatFilesize(filesize($file));
+*     echo ", last updated ".date('j M Y', filemtime($file))."\n";
+* }
+* else
+* {
+*     echo "<p><b>General MolProbity downloads have been temporary disabled.</b>  Please";
+*     echo "<a href='".makeEventURL("onGoto", "feedback_setup.php")."'>contact </a>";
+*     echo "us for an up-to-date copy of the source code.";
+* 
+* }*/
 ?>
-<p><b>General MolProbity downloads have been temporary disabled.</b>  Please
-<?php echo "<a href='".makeEventURL("onGoto", "feedback_setup.php")."'>contact </a>"; ?>
-us for an up-to-date copy of the source code.
-<?php
-}
-?>
+
+<p><b>MolProbity is now on GitHub!</b>
+Please use the following url to clone or get a zipped distribution on the web :
+<div align="center" style="font-size:20px">
+<a href='https://github.com/rlabduke/MolProbity.git' target="_blank">https://git-hub.com/rlabduke/MolProbity.git</a>
+</dir>
+<p>
 
 <?php
 $file = "jiffiloop.tgz";
