@@ -1,12 +1,15 @@
-Installing the moltbx version of MolProbity:
+Updated 04-01-2015
+Installing MolProbity:
 
-32 BIT linux may not be supported. Contact the Richarson Lab if this is the case and we will work with you to sort this out. 
+32 BIT linux may not be supported.
 
 Welcome to MolProbity!!
 
 Installation
 
-Installation is fairlly straightforward. First move the moltbx directory (the directory that this README file is in)  to a location where you want it to reside. Note that Apache will have to see moltbx/public_html. Once the moltbx directory is in the proper location, you are redy to install. Open a terminal and goto the moltbx directory.
+Installation is fairlly straightforward. First move the MolProbity directory (the directory that this README file is in)  to a location where you want it to reside. Note that Apache will have to see MolProbity/public_html if you are interested in setting up a web service. Once the MolProbity directory is in the proper location, you are redy to install. Open a terminal and goto the MolProbity directory.
+
+Note that it is not necissary to setup a webserver if you are only interested in running the command-line tools.
 
 Linux users: ensure that gawk is on a path that the server can read (gawk may need to be installed).
 
@@ -14,7 +17,7 @@ Linux users: ensure that gawk is on a path that the server can read (gawk may ne
 
 >>> ./configure.sh
 
-This will install cctbx_project and needed components in moltbx/sources:
+This will install cctbx_project and needed components in MolProbity/sources:
 
     build list:
      annlib
@@ -31,7 +34,7 @@ This will install cctbx_project and needed components in moltbx/sources:
      scons
      tntbx
 
-and then will compile and configure in moltbx/build.
+and then will compile and configure in MolProbity/build.
 
 
 
@@ -39,5 +42,5 @@ and then will compile and configure in moltbx/build.
 
 >>> ./setup.sh
 
-Make sure that the machine's Apache configuration can point to the moltbx/public_html directory.
+If setting up a webserver, make sure that the machine's Apache configuration can point to the MolProbity/public_html directory.
 
