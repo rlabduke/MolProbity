@@ -75,19 +75,24 @@ from your web browser.</p>
 
 
 <?php
-    echo("<h3>What's new in 4.1:</h3><ul>
+//      <h3>What's new in 4.0:</h3><ul>
+//      <li>Updated Reduce-added hydrogen lengths to be more consistent with other crystallography software.</li>
+//      <li>New <a href='http://kinemage.biochem.duke.edu/databases/top8000.php' target='_blank'>Top8000</a> Ramachandran validation information.</li>
+//      <li>Allows use of both electron cloud and nuclear x-H bond-lengths. Read more about this change <a href='".makeEventURL("onGoto", "helper_hydrogens.php")."'>here</a>.</li>
+//      <li>Full support for 2-character CHAINIDs added. 4-character SEGIDs also supported in place of CHAINIDs.</li>
+//      </ul>
+    echo("<h3>What's new in 4.2:</h3><ul>
+      <li>Cis-peptide identification, markup and statistics now available.</li>
+      <li>CaBLAM Calpha-based validation of protein backbone and secondary structure now available.</li>
+      <li>Rotamer validation now uses <a href='http://kinemage.biochem.duke.edu/databases/top8000.php' target='_blank'>Top8000</a> rotamer distributions. Favored vs Allowed distinction introduced for rotamers.</li>
+      <li>New coloring scheme in multicrition chart encodes outlier severity at a glance.</li>
+      </ul>
+      <h3>What's new in 4.1:</h3><ul>
       <li>Validation analysis now powered by CCTBX. Also adds geometry regularization for N/Q/H flip corrections. Read more about this change <a href='".makeEventURL("onGoto", "helper_cctbx.php")."'>here</a>.</li>
       <li>Alternate conformations now handled for validation analysis.</li>
       </ul>
-      <h3>What's new in 4.0:</h3><ul>
-      <li>Updated Reduce-added hydrogen lengths to be more consistent with other crystallography software.</li>
-      <li>New <a href='http://kinemage.biochem.duke.edu/databases/top8000.php' target='_blank'>Top8000</a> Ramachandran validation information.</li>
-      <li>Allows use of both electron cloud and nuclear x-H bond-lengths. Read more about this change <a href='".makeEventURL("onGoto", "helper_hydrogens.php")."'>here</a>.</li>
-      <li>Full support for 2-character CHAINIDs added. 4-character SEGIDs also supported in place of CHAINIDs.</li>
-      </ul>
       </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>");
 ?>
-
 
 <h3>Common questions:</h3>
 <p><b><a href='help/about.html' target='_blank'>Cite MolProbity</a></b>:
