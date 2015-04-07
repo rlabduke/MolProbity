@@ -1355,7 +1355,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
       $entry .= "<td> </td></tr>\n";
       //Following text should be added to help instead of entry:
       //$entry .= "<td>Because the submitted structure has a resolution lower than 2.5&Aring; or because low-resolution measures were selected, the following criteria are provided that may be helpful at low resolution.</td></tr>\n";
-      $entry .= "<tr><td rowspan='$lowresRows' align='center'>LoRx<br>Low-resolution Criteria</td>\n";
+      $entry .= "<tr><td rowspan='$lowresRows' align='center'>Low-resolution Criteria</td>\n";
       $firstRow = true;
       if(is_array($cablam))
       {
