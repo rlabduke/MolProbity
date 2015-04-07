@@ -372,9 +372,11 @@ function makeMulticritKin2($infiles, $outfile, $opt, $viewRes = array(), $nmrCon
         #echo "before ribbon options\n";
         if($opt['ribbons'])
         {
-            //echo("I shouldn't be in here\n");
-            if($isMultiModel)   makeRainbowRibbons($infile, $outfile);
-            else                makeBfactorRibbons($infile, $outfile);
+            makeRainbowRibbons($infile, $outfile);
+            //rainbow ribbons are now default, since change in refinement practices has made b-factor ribbons less useful
+            //consider adding ribbon type selection to user options
+            //if($isMultiModel)   makeRainbowRibbons($infile, $outfile);
+            //else                makeBfactorRibbons($infile, $outfile);
         }
         #echo "after ribbon options\n";
 
