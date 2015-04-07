@@ -1,0 +1,38 @@
+Thank you for Downloading MolProbity! A lot of users want to get MolProbity metrics on a many PDBs. If this is the case for you, the MolProbity command-line tools are what want. Note that it is not necissary to setup a webserver if you are only interested in running the command-line tools. Here are some of the popular tools that may be of use to you.
+
+All the tools are in the cmdline directory and are executable. Run from the unix command line. Instructions for running to follow.
+
+Tool             Description
+clashscore       This tool adds hydrogens and runs probe. It returns a list of
+                 atoms with impossible steric clashes and the clashscore.
+
+mp_geometry      This tool measures bond lengths and angle and returns a colon-
+                 delimited string to stdout where each record corresponds to a
+                 single residue. Each reccord reports either the length or angle
+                 which diviates the furthest from ideal. Also reported is the
+                 number of geometry outliers (either length or angle) in the
+                 given residue.
+
+oneline-analysis This tool returns several metrics on global structure quality
+                 including MolProbity score and the clashscore. This will
+                 return a colon-delimited string to stdout. Note that unlike
+                 the other tools described here, oneline-analysis takes a
+                 directory not a PDB file.
+
+residue-analysis This tool returns metrics on the residue level including geometry
+                 outliers, Ramachandran analysis, rotamer analysis, and clashes. 
+                 This returns a comma-delimited string to stdout where each record
+                 corresponds to a single residue.
+
+
+
+Below are instructions on how to run each tool on the command line. 
+'xxxx.pdb' is the PDB file to be analyzed.
+'directory' is the directory wich contains the PDB files to be analyzed.
+
+Tool              To run 
+clashscore         % /path/to//MolProbity/cmdline/clashscore xxxx.pdb
+mp_geometry        % /path/to//MolProbity/cmdline/mp_geometry xxxx.pdb
+oneline-analysis   % /path/to//MolProbity/cmdline/oneline-analysis directory
+residue-analysis   % /path/to//MolProbity/cmdline/residue-analysis xxxx.pdb
+

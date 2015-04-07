@@ -45,6 +45,7 @@ $optClash     = true;
 $optCbeta     = true;
 $optRota      = true;
 $optRama      = true;
+$optOmega     = true;
 $optGeom      = true;
 $optCountOut  = true;
 $outliersOnly = false;
@@ -57,6 +58,7 @@ if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
     elseif($arg == '-nocbeta')       $optCbeta = false;
     elseif($arg == '-norota')        $optRota = false;
     elseif($arg == '-norama')        $optRama = false;
+    elseif($arg == '-noomega')       $optOmega = false;
     elseif($arg == '-nogeom')        $optGeom = false;
     elseif($arg == '-nocount')       $optCountOut = false;
     elseif($arg == '-outliers_only') $outliersOnly = true;
@@ -70,6 +72,7 @@ if($optClash)   echo ",worst_clash,src_atom,dst_atom,dst_residue";
 if($optCbeta)   echo ",CB_dev";
 if($optRota)    echo ",rotamer_score,rotamer_eval,rotamer";
 if($optRama)    echo ",rama_score,rama_eval,rama_type";
+if($optOmega)   echo ",omega,omega_eval,omega_type";
 if($optGeom)    echo ",num_length_out,worst_length,worst_length_value,worst_length_sigma,num_angle_out,worst_angle,worst_angle_value,worst_angle_sigma";
 if($optCountOut) echo ",outlier_count,outlier_count_sep_geom";
 echo "\n";
@@ -77,7 +80,7 @@ echo "\n";
 
 function summaryAnalysis($modelID)
 {
-    global $optClash, $optCbeta, $optRota, $optRama, $optGeom, $optCountOut, $outliersOnly;
+    global $optClash, $optCbeta, $optRota, $optRama, $optOmega, $optGeom, $optCountOut, $outliersOnly;
     $out = "";
 
     //$filename = basename($infile);
@@ -124,6 +127,11 @@ function summaryAnalysis($modelID)
         runRamachandran($pdbfile, "$rawDir/$model[prefix]rama.data");
         $rama = loadRamachandran("$rawDir/$model[prefix]rama.data");
     }
+    if($optOmega)
+    {
+        runOmegalyze($pdbfile, "$rawDir/$model[prefix]omega.data");
+        $omega = loadOmegalyze("$rawDir/$model[prefix]omega.data");
+    }
     if($optGeom)
     {
       runValidationReport($pdbfile, "$rawDir/$model[prefix]geom.data", "protein");
@@ -153,6 +161,17 @@ function summaryAnalysis($modelID)
           if(isset($rama[$cnit]))
           {
             if($rama[$cnit]['eval'] == "OUTLIER") {
+              $outCount++;
+              $outCountSep++;
+            }
+          }
+          if(isset($omega[$cnit])) //non-proline cis-peptides and all twisted peptides are probable outliers
+          {
+            if($omega[$cnit]['conf'] == "Twisted") {
+              $outCount++;
+              $outCountSep++;
+            }
+            elseif(($omega[$cnit]['conf'] == "Cis") and ($omega[$cnit]['type'] == "General")) {
               $outCount++;
               $outCountSep++;
             }
@@ -206,6 +225,12 @@ function summaryAnalysis($modelID)
         {
             if(isset($rama[$cnit]))
                 echo ",".$rama[$cnit]['scorePct'].",".$rama[$cnit]['eval'].",".$rama[$cnit]['type'];
+            else echo ",,,";
+        }
+        if($optOmega)
+        {
+            if(isset($omega[$cnit]))
+                echo ",".$omega[$cnit]['omega'].",".$omega[$cnit]['conf'].",".$omega[$cnit]['type'];
             else echo ",,,";
         }
         if($optGeom)
