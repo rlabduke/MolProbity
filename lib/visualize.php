@@ -1364,9 +1364,9 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
         //$cablamFav = 0;
         foreach($cablam as $c)
         {
-          if($c['outlierType'] == " Peptide Outlier    ") $cablamOut++;
-          elseif($c['outlierType'] == " CA Geo Outlier     ") $caGeomOut++;
-          //elseif($c['outlierType'] != " Peptide Disfavored ") $cablamFav++;
+          if($c['outlierType'] ==     " CaBLAM Outlier     ") $cablamOut++;
+          elseif($c['outlierType'] == " CA Geom Outlier    ") $caGeomOut++;
+          //elseif($c['outlierType'] != " CaBLAM Disfavored  ") $cablamFav++;
           //The disfavored category was deemed more info than necessary for the moment in this chart
         }
         $cablamTot = count($cablam);
@@ -1547,21 +1547,21 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
         foreach($cablam as $item)
         {
             $outlierType = trim($item['outlierType']);
-            if ($outlierType == "Peptide Outlier") {
-                $res[$item['resName']]['cablam'] = "$item[outlierType] ($item[peptideScore]%)<br><small>$item[secStruc]</small>";
-                $res[$item['resName']]['cablam_val'] = "$item[peptideScore]";
+            if ($outlierType == "CaBLAM Outlier") {
+                $res[$item['resName']]['cablam'] = "$item[outlierType] ($item[cablamScore]%)<br><small>$item[secStruc]</small>";
+                $res[$item['resName']]['cablam_val'] = "$item[cablamScore]";
                 $res[$item['resName']]['any_isbad'] = true;
                 $res[$item['resName']]['cablam_isbad'] = true;
                 //$res[$item['resName']]['cablam_color'] = '#ff6699';
                 }
-            elseif ($outlierType == "Peptide Disfavored") {
-                $res[$item['resName']]['cablam'] = "$item[outlierType] ($item[peptideScore]%)<br><small>$item[secStruc]</small>";
-                $res[$item['resName']]['cablam_val'] = "$item[peptideScore]";
+            elseif ($outlierType == "CaBLAM Disfavored") {
+                $res[$item['resName']]['cablam'] = "$item[outlierType] ($item[cablamScore]%)<br><small>$item[secStruc]</small>";
+                $res[$item['resName']]['cablam_val'] = "$item[cablamScore]";
                 $res[$item['resName']]['any_isbad'] = true;
                 $res[$item['resName']]['cablam_isbad'] = true;
                 $res[$item['resName']]['cablam_color'] = $cell_color_mild;
                 }
-            elseif ($outlierType == "CA Geo Outlier") {
+            elseif ($outlierType == "CA Geom Outlier") {
                 $res[$item['resName']]['cablam'] = "$item[outlierType] ($item[caGeomScore]%)";
                 $res[$item['resName']]['cablam_val'] = "$item[caGeomScore]";
                 $res[$item['resName']]['any_isbad'] = true;
@@ -1571,8 +1571,8 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
                 }
             else {
                 $secStruc = ltrim(trim($item['secStruc']),'try');
-                $res[$item['resName']]['cablam'] = "Favored ($item[peptideScore]%)<br><small>$secStruc</small>";
-                $res[$item['resName']]['cablam_val'] = "$item[peptideScore]";
+                $res[$item['resName']]['cablam'] = "Favored ($item[cablamScore]%)<br><small>$secStruc</small>";
+                $res[$item['resName']]['cablam_val'] = "$item[cablamScore]";
                 }
         }
     }//}}}
