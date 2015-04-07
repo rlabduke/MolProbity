@@ -80,16 +80,16 @@ function runAnalysis($modelID, $opts)
         $mtz_file = $model['mtz_file'];
     else $mtz_file = $_SESSION['models'][$model['parent']]['mtz_file'];
 
-    if($opts['chartRama'])      $tasks['rama'] = "Do Ramachandran analysis and make plots (<code>phenix.ramalyze</code>)";
-    if($opts['chartRota'])      $tasks['rota'] = "Do rotamer analysis (<code>phenix.rotalyze</code>)";
-    if($opts['chartCBdev'])     $tasks['cbeta'] = "Do C&beta; deviation analysis and make kins (<code>phenix.cbetadev</code>)";
-    if($opts['chartOmega'])     $tasks['omega'] = "Do cis-peptide analysis (<code>phenix.omegalyze</code>)";
-    if($opts['chartCablamLow']) $tasks['cablam'] = "Do CaBLAM analysis (<code>phenix.cablam_validate</code>)";
+    if($opts['chartRama'])      $tasks['rama'] = "Do Ramachandran analysis and make plots (<code>ramalyze</code>)";
+    if($opts['chartRota'])      $tasks['rota'] = "Do rotamer analysis (<code>rotalyze</code>)";
+    if($opts['chartCBdev'])     $tasks['cbeta'] = "Do C&beta; deviation analysis and make kins (<code>cbetadev</code>)";
+    if($opts['chartOmega'])     $tasks['omega'] = "Do cis-peptide analysis (<code>omegalyze</code>)";
+    if($opts['chartCablamLow']) $tasks['cablam'] = "Do CaBLAM analysis (<code>cablam_validate</code>)";
     if($opts['chartBaseP'])     $tasks['base-phos'] = "Do RNA sugar pucker analysis";
     if($opts['chartSuite'])     $tasks['suitename'] = "Do RNA backbone conformations analysis";
-    if($opts['chartGeom'])      $tasks['geomValidation'] = "Do bond length and angle geometry analysis (<code>mmtbx.mp_geo</code>)";
+    if($opts['chartGeom'])      $tasks['geomValidation'] = "Do bond length and angle geometry analysis (<code>mp_geo</code>)";
 
-    if($opts['chartClashlist']) $tasks['clashlist'] = "Run <code>phenix.clashscore</code> to find bad clashes and clashscore";
+    if($opts['chartClashlist']) $tasks['clashlist'] = "Run <code>clashscore</code> to find bad clashes and clashscore";
     if($opts['chartImprove'])   $tasks['improve'] = "Suggest / report on fixes";
     if($opts['doCharts']&&!$opts['chartMulti'])       $tasks['chartsummary'] = "Create summary chart";
     if($opts['chartMulti'])     $tasks['multichart'] = "Create multi-criterion chart";
