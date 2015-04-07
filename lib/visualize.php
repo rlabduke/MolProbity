@@ -422,6 +422,12 @@ function makeMulticritKin2($infiles, $outfile, $opt, $viewRes = array(), $nmrCon
             makeBadCbetaBalls($infile, $outfile);
             #"Cbeta OK\n";
         }
+        if($opt['cablam'])
+        {
+            #"making CaBLAM...\n";
+            makeBadCablamKin($infile, $outfile);
+            #"CaBLAM OK\n";
+        }
         if($opt['pperp'])
         {
             #"Making BadPPerp...\n";
@@ -481,75 +487,75 @@ function makeMulticritKin2($infiles, $outfile, $opt, $viewRes = array(), $nmrCon
 }
 #}}}########################################################################
 
-#{{{ makeMulticritKinLowRes - display quality metrics for low-res models in 3-d
-function makeMulticritKinLowRes($infiles, $outfile, $cablamSecStrucFile, $opt, $clashLimit=0.5)
-{
-    if(file_exists($outfile)){
-        if(!unlink($outfile)){
-          echo "delete low-res .kin file failed!\n";
-        }
-    }
-    $pdbstats = pdbstat(reset($infiles));
-    $stats = describePdbStats($pdbstats, false);
-    $h = fopen($outfile, 'a');
-    fwrite($h, "@text\n");
-    foreach($stats as $stat)
-        fwrite($h, "[+]   $stat\n");
-    $isMultiModel = (count($infiles) > 1);
-    if($isMultiModel)
-        fwrite($h, "Statistics for first model only; ".count($infiles)." total models included in the kinemage.\n");
-
-    fwrite($h, "\n\n\n");
-    fwrite($h, exec("prekin -version")."\n");
-    $reduce_help = explode("\n", shell_exec("phenix.reduce -help 2>&1"));
-    fwrite($h, "$reduce_help[0]\n");
-
-    fwrite($h, "@kinemage 1\n");
-    fwrite($h, "@onewidth\n");
-    fclose($h);
-
-    foreach($infiles as $infile)
-    {
-        if(!$_SESSION['useSEGID']) exec("prekin -quiet -lots -append -animate -onegroup $infile >> $outfile");
-        else exec("prekin -quiet -segid -lots -append -animate -onegroup $infile >> $outfile");
-        if($opt['ribbons'])
-        {
-            exec("phenix.cablam_validate output=records_plus_pdb $infile > $cablamSecStrucFile");
-            makeRibbons($cablamSecStrucFile, $outfile);
-            //if($isMultiModel)  makeRainbowRibbons($cablamSecStrucFile, $outfile);
-            //else               makeBfactorRibbons($cablamSecStrucFile, $outfile);
-        }
-        if($opt['clashdots'])
-        {
-            $ocutval = 10;
-            $options = "-nohbout -novdwout";
-            if($_SESSION['reduce_blength'] == 'nuclear') $options .= " -nuclear";
-            //note: probe call has -CIVlow set explicitly
-            exec("phenix.probe $options -DIVlow-0.5 -4H -quiet -noticks -nogroup -dotmaster -mc -het -self 'ogt$ocutval' $infile >> $outfile");
-        }
-        //if($opt['hbdots']) make expanded hbcontacts
-        if($opt['rama']) makeBadRamachandranKin($infile, $outfile);
-        //if($opt['rota']) makeBadRotamerKin($infile, $outfile);
-        if($opt['geom']) makeBadGeomKin($infile, $outfile);
-        if($opt['cbdev']) makeBadCbetaBalls($infile, $outfile);
-        if($opt['omega']) makeBadOmegaKin($infile, $outfile);
-        if($opt['cablam']) makeBadCablamKin($infile, $outfile);
-    }
-    $h = fopen($outfile, 'a');
-    fwrite($h, "@master {mainchain} off\n");
-    fwrite($h, "@master {sidechain} off\n");
-    if($pdbstats['hydrogens'] > 0) fwrite($h, "@master {H's} off\n");
-    if($pdbstats['waters'] > 0)    fwrite($h, "@master {water} off\n");
-    fwrite($h, "@master {Calphas} on\n");
-    fwrite($h, "@master {Virtual BB} on\n");
-
-    if($opt['vdwdots'])   fwrite($h, "@master {vdw contact} off\n");
-    if($opt['clashdots']) fwrite($h, "@master {small overlap} off\n");
-    if($opt['bhdots'])    fwrite($h, "@master {H-bonds} off\n");
-    if($opt['ribbons'])   fwrite($h, "@master {ribbons} off\n");
-    fclose($h);
-}
-#}}}
+####{{{ [flagged for removal] makeMulticritKinLowRes - display quality metrics for low-res models in 3-d
+###function makeMulticritKinLowRes($infiles, $outfile, $cablamSecStrucFile, $opt, $clashLimit=0.5)
+###{
+###    if(file_exists($outfile)){
+###        if(!unlink($outfile)){
+###          echo "delete low-res .kin file failed!\n";
+###        }
+###    }
+###    $pdbstats = pdbstat(reset($infiles));
+###    $stats = describePdbStats($pdbstats, false);
+###    $h = fopen($outfile, 'a');
+###    fwrite($h, "@text\n");
+###    foreach($stats as $stat)
+###        fwrite($h, "[+]   $stat\n");
+###    $isMultiModel = (count($infiles) > 1);
+###    if($isMultiModel)
+###        fwrite($h, "Statistics for first model only; ".count($infiles)." total models included in the kinemage.\n");
+###
+###    fwrite($h, "\n\n\n");
+###    fwrite($h, exec("prekin -version")."\n");
+###    $reduce_help = explode("\n", shell_exec("phenix.reduce -help 2>&1"));
+###    fwrite($h, "$reduce_help[0]\n");
+###
+###    fwrite($h, "@kinemage 1\n");
+###    fwrite($h, "@onewidth\n");
+###    fclose($h);
+###
+###    foreach($infiles as $infile)
+###    {
+###        if(!$_SESSION['useSEGID']) exec("prekin -quiet -lots -append -animate -onegroup $infile >> $outfile");
+###        else exec("prekin -quiet -segid -lots -append -animate -onegroup $infile >> $outfile");
+###        if($opt['ribbons'])
+###        {
+###            exec("phenix.cablam_validate output=records_plus_pdb $infile > $cablamSecStrucFile");
+###            makeRibbons($cablamSecStrucFile, $outfile);
+###            //if($isMultiModel)  makeRainbowRibbons($cablamSecStrucFile, $outfile);
+###            //else               makeBfactorRibbons($cablamSecStrucFile, $outfile);
+###        }
+###        if($opt['clashdots'])
+###        {
+###            $ocutval = 10;
+###            $options = "-nohbout -novdwout";
+###            if($_SESSION['reduce_blength'] == 'nuclear') $options .= " -nuclear";
+###            //note: probe call has -CIVlow set explicitly
+###            exec("phenix.probe $options -DIVlow-0.5 -4H -quiet -noticks -nogroup -dotmaster -mc -het -self 'ogt$ocutval' $infile >> $outfile");
+###        }
+###        //if($opt['hbdots']) make expanded hbcontacts
+###        if($opt['rama']) makeBadRamachandranKin($infile, $outfile);
+###        //if($opt['rota']) makeBadRotamerKin($infile, $outfile);
+###        if($opt['geom']) makeBadGeomKin($infile, $outfile);
+###        if($opt['cbdev']) makeBadCbetaBalls($infile, $outfile);
+###        if($opt['omega']) makeBadOmegaKin($infile, $outfile);
+###        if($opt['cablam']) makeBadCablamKin($infile, $outfile);
+###    }
+###    $h = fopen($outfile, 'a');
+###    fwrite($h, "@master {mainchain} off\n");
+###    fwrite($h, "@master {sidechain} off\n");
+###    if($pdbstats['hydrogens'] > 0) fwrite($h, "@master {H's} off\n");
+###    if($pdbstats['waters'] > 0)    fwrite($h, "@master {water} off\n");
+###    fwrite($h, "@master {Calphas} on\n");
+###    fwrite($h, "@master {Virtual BB} on\n");
+###
+###    if($opt['vdwdots'])   fwrite($h, "@master {vdw contact} off\n");
+###    if($opt['clashdots']) fwrite($h, "@master {small overlap} off\n");
+###    if($opt['bhdots'])    fwrite($h, "@master {H-bonds} off\n");
+###    if($opt['ribbons'])   fwrite($h, "@master {ribbons} off\n");
+###    fclose($h);
+###}
+####}}}
 
 #{{{ makeResidueViews - creates @view entries for all listed residue
 ############################################################################

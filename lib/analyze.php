@@ -100,7 +100,7 @@ function runAnalysis($modelID, $opts)
     }
     if($opts['chartCoot'])      $tasks['cootchart'] = "Create chart for use in Coot";
     if($opts['doKinemage'])     $tasks['multikin'] = "Create multi-criterion kinemage";
-    if($opts['doLowRes'])       $tasks['lowResKin'] = "Create low-resolution multi-criterion kinemage";
+    //if($opts['doLowRes'])       $tasks['lowResKin'] = "Create low-resolution multi-criterion kinemage";
 
     //$doRem40 = $opts['chartClashlist'] || $opts['chartRama'] || $opts['chartRota'];
     //if($doRem40)                $tasks['remark40'] = "Create REMARK  40 record for the PDB file";
@@ -388,6 +388,7 @@ function runAnalysis($modelID, $opts)
             'geom'      =>  $opts['kinGeom'],
             'cbdev'     =>  $opts['kinCBdev'],
             'omega'     =>  $opts['kinOmega'],
+            'cablam'    =>  $opts['kinCablamLow'],
             'pperp'     =>  $opts['kinBaseP'],
             'clashdots' =>  $opts['kinClashes'],
             'hbdots'    =>  $opts['kinHbonds'],
@@ -414,29 +415,30 @@ function runAnalysis($modelID, $opts)
     //}}} Build multi-criterion chart, kinemage
 
     //{{{ Low-resolution-specific analyses
-    if($opts['doLowRes'])
-    {
-       if($opts['kinCablamLow'] || $opts['other'])
-       {
-           $startTime = time();
-           setProgress($tasks, 'lowResKin');
-           $lowResKinOpts = array(//first column is opts, second column sets true-false
-               'ribbons'    =>  $opts['kinRibbons'],//pass pdb w/HELIX+SHEET for this
-               'rama'       =>  $opts['kinRama'],
-               'geom'       =>  $opts['kinGeom'],
-               'cbdev'      =>  $opts['kinCBdev'],
-               'omega'      =>  $opts['kinOmega'],
-               'cablam'     =>  $opts['kinCablamLow'],
-               'clashdots'  =>  $opts['kinClashes']
-           );
-           $outfile = "$kinDir/$model[prefix]low_multi.kin";
-           $cablamSecStrucFile = "$modelDir/$model[prefix]cablam_sec_struc_records.pdb";
-           //$viewRes = array(); //Used with opts[kinForceViews], not necessary argument for makeMulticritKin2
-           makeMulticritKinLowRes(array($infile), $outfile, $cablamSecStrucFile, $lowResKinOpts);
-           if(filesize($outfile) > MP_KIN_GZIP_THRESHOLD)  destructiveGZipFile($outfile);
-           echo "do low-res Kinemage ran for ".(time() - $startTime)." seconds\n";
-       }
-    }
+    //Low-res kinemage is being simplified and merged into main kinemage
+    //if($opts['doLowRes'])
+    //{
+    //  if($opts['kinCablamLow'] || $opts['other'])
+    //  {
+    //      $startTime = time();
+    //      setProgress($tasks, 'lowResKin');
+    //      $lowResKinOpts = array(//first column is opts, second column sets true-false
+    //          'ribbons'    =>  $opts['kinRibbons'],//pass pdb w/HELIX+SHEET for this
+    //          'rama'       =>  $opts['kinRama'],
+    //          'geom'       =>  $opts['kinGeom'],
+    //          'cbdev'      =>  $opts['kinCBdev'],
+    //          'omega'      =>  $opts['kinOmega'],
+    //          'cablam'     =>  $opts['kinCablamLow'],
+    //          'clashdots'  =>  $opts['kinClashes']
+    //      );
+    //      $outfile = "$kinDir/$model[prefix]low_multi.kin";
+    //      $cablamSecStrucFile = "$modelDir/$model[prefix]cablam_sec_struc_records.pdb";
+    //      //$viewRes = array(); //Used with opts[kinForceViews], not necessary argument for makeMulticritKin2
+    //      makeMulticritKinLowRes(array($infile), $outfile, $cablamSecStrucFile, $lowResKinOpts);
+    //      if(filesize($outfile) > MP_KIN_GZIP_THRESHOLD)  destructiveGZipFile($outfile);
+    //      echo "do low-res Kinemage ran for ".(time() - $startTime)." seconds\n";
+    //  }
+    //}
     //}}}
 
     //{{{ Create REMARK  40 and insert into PDB file
@@ -474,11 +476,11 @@ function runAnalysis($modelID, $opts)
               $entry .= "<td>".linkAnyFile("$model[prefix]horiz.table", "Horizontal Chart", "img/multichart_horiz.jpg")."</td>\n";
             }
         }
-        if($opts['doLowRes']) {
-            if($opts['kinCablamLow'] || $opts['other']) {
-                $entry .= "<td>".linkAnyFile("$model[prefix]low_multi.kin", "LowRes MultiKin", "img/low_multikin.jpg")."</td>\n";
-            }
-        }
+        //if($opts['doLowRes']) {
+        //    if($opts['kinCablamLow'] || $opts['other']) {
+        //        $entry .= "<td>".linkAnyFile("$model[prefix]low_multi.kin", "LowRes MultiKin", "img/low_multikin.jpg")."</td>\n";
+        //    }
+        //}
         $entry .= "</tr></table>\n";
         $entry .= "</div>\n";
     }
