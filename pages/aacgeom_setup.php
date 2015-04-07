@@ -63,11 +63,14 @@ function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig, isLowRes)
     document.forms[0].kinCBdev.checked          = hasProtein
     document.forms[0].kinGeom.checked           = (hasProtein || hasNucAcid)
     document.forms[0].kinOmega.checked          = hasProtein
+    document.forms[0].kinCablamLow.checked      = (hasProtein && isLowRes)
+  
     document.forms[0].chartRama.checked         = hasProtein
     document.forms[0].chartRota.checked         = hasProtein
     document.forms[0].chartCBdev.checked        = hasProtein
     document.forms[0].chartGeom.checked         = (hasProtein || hasNucAcid)
     document.forms[0].chartOmega.checked        = hasProtein
+    document.forms[0].chartCablamLow.checked    = (hasProtein && isLowRes)
 
     document.forms[0].kinBaseP.checked          = hasNucAcid
     document.forms[0].kinSuite.checked          = hasNucAcid
@@ -81,13 +84,13 @@ function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig, isLowRes)
     document.forms[0].chartAltloc.checked       = (hasProtein || hasNucAcid)
 
     //Low-resolution analyses, all end with Low
-    document.forms[0].doLowRes.checked          = (hasProtein && isLowRes)
-    document.forms[0].kinCablamLow.checked      = (hasProtein && isLowRes)
+    //document.forms[0].doLowRes.checked          = (hasProtein && isLowRes)
+    
 // Low-res kinemage options are expected to expand in the future
 //    document.forms[0].kinClashesLow.checked     = (doAAC && isLowRes)
 //    document.forms[0].kinGeomLow.checked        = ((hasProtein || hasNucAcid) && isLowRes)
 
-    document.forms[0].chartCablamLow.checked    = (hasProtein && isLowRes)
+    
 }
 
 // Try to make sure we have H if we're doing AAC
@@ -150,14 +153,18 @@ function checkSettingsBeforeSubmit()
 <div class='indent'>
 <h5 class='nospaceafter'><label><input type='checkbox' name='doKinemage' value='1' checked onclick='hideKinOpts()'> 3-D kinemage graphics</label></h5>
     <div class='indent' id='kin_opts'>
-    <label><input type='checkbox' name='kinClashes' value='1'> Clashes</label>
+    <label><b>Universal</b></label>
+    <br><label><input type='checkbox' name='kinClashes' value='1'> Clashes</label>
     <br><label><input type='checkbox' name='kinHbonds' value='1'> Hydrogen bonds</label>
     <br><label><input type='checkbox' name='kinContacts' value='1'> van der Waals contacts</label>
-    <p><label><input type='checkbox' name='kinRama' value='1'> Ramachandran plots</label>
+    <p><label><b>Protein</b></label>
+    <br><label><input type='checkbox' name='kinRama' value='1'> Ramachandran plots</label>
     <br><label><input type='checkbox' name='kinRota' value='1'> Rotamer evaluation</label>
     <br><label><input type='checkbox' name='kinGeom' value='1'> Geometry evaluation</label>
     <br><label><input type='checkbox' name='kinCBdev' value='1'> C&beta; deviations</label>
     <br><label><input type='checkbox' name='kinOmega' value='1'> Cis-Peptide evaluation</label>
+    <br><label><input type='checkbox' name='kinCablamLow' value='1'> CaBLAM backbone markup</label>
+    <p><label><b>RNA</b></label>
     <br><label><input type='checkbox' name='kinBaseP' value='1'> RNA sugar pucker analysis</label>
     <br><label><input type='checkbox' name='kinSuite' value='1'> RNA backbone conformations</label>
     <p><label><input type='checkbox' name='kinForceViews' value='1'> Make views of trouble spots even if it takes longer</label>
@@ -168,12 +175,16 @@ function checkSettingsBeforeSubmit()
     </div>
 <h5 class='nospaceafter'><label><input type='checkbox' name='doCharts' value='1' checked onclick='hideChartOpts()'> Charts, plots, and tables</label></h5>
     <div class='indent' id='chart_opts'>
-    <label><input type='checkbox' name='chartClashlist' value='1'> Clashes &amp; clashscore</label>
+    <label><b>Universal</b></label>
+    <br><label><input type='checkbox' name='chartClashlist' value='1'> Clashes &amp; clashscore</label>
+    <p><label><b>Protein</b></label>
     <br><label><input type='checkbox' name='chartRama' value='1'> Ramachandran plots</label>
     <br><label><input type='checkbox' name='chartRota' value='1'> Rotamer evaluation</label>
     <br><label><input type='checkbox' name='chartGeom' value='1'> Geometry evaluation</label>
     <br><label><input type='checkbox' name='chartCBdev' value='1'> C&beta; deviations</label>
     <br><label><input type='checkbox' name='chartOmega' value='1'> Cis-Peptide evaluation</label>
+    <br><label><input type='checkbox' name='chartCablamLow' value='1'> CaBLAM backbone evaluation</label>
+    <p><label><b>RNA</b></label>
     <br><label><input type='checkbox' name='chartBaseP' value='1'> RNA sugar pucker analysis</label>
     <br><label><input type='checkbox' name='chartSuite' value='1'> RNA backbone conformations</label>
     <p><label><input type='checkbox' name='chartHoriz' value='1'> Horizontal chart with real-space correlation data</label>
@@ -184,15 +195,6 @@ function checkSettingsBeforeSubmit()
     <label><input type='checkbox' name='chartNotJustOut' value='1'> List all residues in multi-chart, not just outliers</label>
     <br><label><input type='checkbox' name='chartAltloc' value='1'> Remove residue rows with ' ' altloc when other alternate(s) present</label>
     </div>
-    </div>
-<h5 class='nospaceafter'><label><input type='checkbox' name='doLowRes' value='1' onclick='hideLowResOpts()'> LoRx (Low-resolution Diagnosis)</label></h5>
-    <div class='indent' id='lowres_opts'>
-    <label><input type='checkbox' name='kinCablamLow' value='1'> CaBLAM markup kinemage</label>
-<!--    <br><label><input type='checkbox' name='kinClashesLow' value='1'> Reduced clashes kinemage</label>
-    <br><label><input type='checkbox' name='kinGeomLow' value='1'> Geometry evaluation kinemage</label> -->
-    <p><br><label><input type='checkbox' name='chartCablamLow' value='1'> CaBLAM stats</label>
-<!--    <br><label><input type='checkbox' name='chartClashlistLow' value='1'> Reduced clashes chart </label>
-    <br><label><input type='checkbox' name='chartGeomLow' value='1'> Geometry evaluation chart</label> -->
     </div>
 </div>
 <?php
