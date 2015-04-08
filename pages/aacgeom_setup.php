@@ -149,7 +149,8 @@ function checkSettingsBeforeSubmit()
         echo "</table></p>\n";
 ?>
 <hr>
-<h3>Choose the outputs you want:</h3>
+<h3 class='nospaceafter'>Choose the outputs you want:</h3>
+Default options have been selected based on the content of the submitted file.
 <div class='indent'>
 <h5 class='nospaceafter'><label><input type='checkbox' name='doKinemage' value='1' checked onclick='hideKinOpts()'> 3-D kinemage graphics</label></h5>
     <div class='indent' id='kin_opts'>
@@ -157,17 +158,18 @@ function checkSettingsBeforeSubmit()
     <br><label><input type='checkbox' name='kinClashes' value='1'> Clashes</label>
     <br><label><input type='checkbox' name='kinHbonds' value='1'> Hydrogen bonds</label>
     <br><label><input type='checkbox' name='kinContacts' value='1'> van der Waals contacts</label>
+    <br><label><input type='checkbox' name='kinGeom' value='1'> Geometry evaluation</label>
     <p><label><b>Protein</b></label>
     <br><label><input type='checkbox' name='kinRama' value='1'> Ramachandran plots</label>
     <br><label><input type='checkbox' name='kinRota' value='1'> Rotamer evaluation</label>
-    <br><label><input type='checkbox' name='kinGeom' value='1'> Geometry evaluation</label>
     <br><label><input type='checkbox' name='kinCBdev' value='1'> C&beta; deviations</label>
     <br><label><input type='checkbox' name='kinOmega' value='1'> Cis-Peptide evaluation</label>
     <br><label><input type='checkbox' name='kinCablamLow' value='1'> CaBLAM backbone markup</label>
     <p><label><b>RNA</b></label>
     <br><label><input type='checkbox' name='kinBaseP' value='1'> RNA sugar pucker analysis</label>
     <br><label><input type='checkbox' name='kinSuite' value='1'> RNA backbone conformations</label>
-    <p><label><input type='checkbox' name='kinForceViews' value='1'> Make views of trouble spots even if it takes longer</label>
+    <p><label><b>Other options</b></label>
+    <br><label><input type='checkbox' name='kinForceViews' value='1'> Make views of trouble spots even if it takes longer</label>
     <br><label><input type='checkbox' name='kinAltConfs' value='1'> Alternate conformations</label>
     <br><label><input type='checkbox' name='kinBfactor' value='1'> Model colored by B-factors</label>
     <br><label><input type='checkbox' name='kinOccupancy' value='1'> Model colored by occupancy</label>
@@ -177,17 +179,18 @@ function checkSettingsBeforeSubmit()
     <div class='indent' id='chart_opts'>
     <label><b>Universal</b></label>
     <br><label><input type='checkbox' name='chartClashlist' value='1'> Clashes &amp; clashscore</label>
+    <br><label><input type='checkbox' name='chartGeom' value='1'> Geometry evaluation</label>
     <p><label><b>Protein</b></label>
     <br><label><input type='checkbox' name='chartRama' value='1'> Ramachandran plots</label>
     <br><label><input type='checkbox' name='chartRota' value='1'> Rotamer evaluation</label>
-    <br><label><input type='checkbox' name='chartGeom' value='1'> Geometry evaluation</label>
     <br><label><input type='checkbox' name='chartCBdev' value='1'> C&beta; deviations</label>
     <br><label><input type='checkbox' name='chartOmega' value='1'> Cis-Peptide evaluation</label>
     <br><label><input type='checkbox' name='chartCablamLow' value='1'> CaBLAM backbone evaluation</label>
     <p><label><b>RNA</b></label>
     <br><label><input type='checkbox' name='chartBaseP' value='1'> RNA sugar pucker analysis</label>
     <br><label><input type='checkbox' name='chartSuite' value='1'> RNA backbone conformations</label>
-    <p><label><input type='checkbox' name='chartHoriz' value='1'> Horizontal chart with real-space correlation data</label>
+    <p><label><b>Other options</b></label>
+    <br><label><input type='checkbox' name='chartHoriz' value='1'> Horizontal chart with real-space correlation data</label>
     <br><label><input type='checkbox' name='chartCoot' value='1'> Chart for use with Coot (may take a long time, but should take less than 1 hour) </label>
     <br><label><input type='checkbox' name='chartImprove' value='1'> Suggest / report on automatic structure fix-ups</label>
     <br><label><input type='checkbox' name='chartMulti' value='1' onclick='hideMultiOpts()'> Create html version of multi-chart</label>
