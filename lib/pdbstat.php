@@ -176,7 +176,7 @@ function pdbstat($pdbfilename)
     //echo sizeof($hash);
 
     $file = fopen($pdbfilename, "r");
-    //if(!$file) return NULL;
+    if(!$file) return NULL;
     while(!feof($file))
     {
         $s = rtrim(fgets($file, 1024));
