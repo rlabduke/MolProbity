@@ -1,3 +1,5 @@
+#!/usr/bin/python
+
 import os
 
 mp4_svn = 'https://quiddity.biochem.duke.edu/svn/molprobity3/branches/moltbx'
