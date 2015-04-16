@@ -9,11 +9,11 @@ Installation
 
 Installation is fairlly straightforward. First move the MolProbity directory (the directory that this README file is in)  to a location where you want it to reside. Note that Apache will have to see MolProbity/public_html if you are interested in setting up a web service. Once the MolProbity directory is in the proper location, you are redy to install. Open a terminal and goto the MolProbity directory.
 
-Note that it is not necissary to setup a webserver if you are only interested in running the command-line tools.
+Note that it is not necessary to setup a webserver if you are only interested in running the command-line tools.
 
 Linux users: ensure that gawk is on a path that the server can read (gawk may need to be installed).
 
-1. Make sure that configure.sh is exectutable then run configure.sh. 
+1. Run configure.sh. 
 
 >>> ./configure.sh
 
