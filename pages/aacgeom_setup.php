@@ -42,12 +42,12 @@ function hideMultiOpts()
   else block.style.display = 'none'
 }
 
-function hideLowResOpts()
-{
-  var block = document.getElementById('lowres_opts')
-  if(document.forms[0].doLowRes.checked) block.style.display = 'block'
-  else block.style.display = 'none'
-}
+//function hideLowResOpts()
+//{
+//  var block = document.getElementById('lowres_opts')
+//  if(document.forms[0].doLowRes.checked) block.style.display = 'block'
+//  else block.style.display = 'none'
+//}
 
 function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig, isLowRes)
 {
