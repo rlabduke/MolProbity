@@ -1,0 +1,259 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Validation Options - MolProbity Help</title>
+  <link rel="StyleSheet" href="../css/default.css" TYPE="text/css">
+  <link rel="shortcut icon" href="../favicon.ico">
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td width"150"><img src="../img/small-logo5.gif" alt="MolProbity logo"></td>
+  <td align="center" valign="bottom"><div class="pageheader">
+    <h1>Validation options</h1>
+  </div></td>
+</tr>
+<tr><td valign="top" colspan="2">
+  <div class="pagecontent_alone">
+
+<!--QUICKNAV------------------------------------------------------------------->
+<h2 class="nospaceafter"><a name="quicknav">Quick navigation</a></h2>
+<div class="indent">
+  <a href="#universal"><b>Universal validations</b></a>
+  <div class="indent">
+    <a href="#clashes">Clashes</a>
+    <br><a href="#hbonds">Hydrogen bonds</a>
+    <br><a href="#vdwcontacts">van der Walls contacts</a>
+    <br><a href="#bondgeometry">Geometry evaluation</a>
+  </div>
+  <a href="#protein"><b>Protein validations</b></a>
+  <div class="indent">
+    <a href="#ramachandran">Ramachandran evaluation</a>
+    <br><a href="#rotamers">Rotamer evaluation</a>
+    <br><a href="#cbdev">C-beta deviations</a>
+    <br><a href="#cispeptides">Cis-peptide evaluation</a>
+    <br><a href="#cablam">CaBLAM backbone evaluation</a>
+  </div>
+  <a href="#rna"><b>RNA validations</b></a>
+  <div class="indent">
+    <a href="#sugarpuckers">RNA sugar pucker analysis</a>
+    <br><a href="#suites">RNA backbone conformations</a>
+  </div>
+</div>
+<hr>
+<hr>
+<!--SECTION UNIVERSAL---------------------------------------------------------->
+<h2><a name="universal">Universal validations</a></h2>
+<hr>
+<!--CLASHES-------------------------------------------------------------------->
+<h3><a name="clashes">Clashes and clashscore</a></h3>
+<h5 class="nospaceafter">Overview</h5>
+Clash analysis is one of the signature validations offered by MolProbity.
+"Clashes" are steric overlaps of 0.4&Aring; or greater between non-bonded atoms.
+Such interactions carry a severe energy penalty and should be avoided.
+<h5 class="nospaceafter">Chart report</h5>
+<div class="nospaceafter">In the multicrit table MolProbity identifies individual clashes and provides an overall "clashscore" for the structure.
+Clashscore is an approximation of the overall severity of the clashes in a structure.
+Severity of individual clashes is color-coded within the table.</div>
+<div class="indent"><b>Mild clashes</b> are steric overlaps &ge;0.4&Aring; but &lt;0.5&Aring;. Mild clashes are colored in light pink.
+<br><b>Most clashes</b> are colored outlier pink.
+<br><b>Severe clashes</b> are steric overlaps &gt;0.9&Aring;. These clashes are colored bright red.
+</div>
+<h5 class="nospaceafter">Kinemage report</h5>
+In the multicrit kinemage, clashes are displayed as hot pink spikes between atoms.
+<h5 class="nospaceafter">Usage notes</h5>
+Clash analysis is one of our most sensitive methods for identifying problems in structures and should always be used.
+However, in difficult structures, it may be necessary to overlook the mild clashes and focus on more severe overlaps.
+In high-resolution structures, mild clashes should be attended to with the same care as their more severe kin.
+<hr>
+<!--HBONDS--------------------------------------------------------------------->
+<h3><a name="hbonds">Hydrogen bonds</a></h3>
+<h5 class="nospaceafter">Overview</h5>
+Hydrogen bonds are close contacts between polar atoms and hydrogen atoms.
+These conatacts are energetically favorable and play an important role in stabilizing macromolecular structures.
+Hydrogen bonds are expected in protein secondary structure, between RNA bases, and elsewhere.
+<h5 class="nospaceafter">Chart report</h5>
+Hydrogen bonding is not currently reported in the multicrit table.
+<h5 class="nospaceafter">Kinemage report</h5>
+In the multicrit kinemage, hydrogen bonds are represented as "pillows" of greentint dots between the bonding atoms.
+These dots fall on the surfaces of the bonding atoms' van der Waals spheres.
+A larger overlap indicates a stronger bond and is represented by a larger "pillow".
+<h5 class="nospaceafter">Usage notes</h5>
+These are usage notes
+<hr>
+<!--VDW CONTACTS--------------------------------------------------------------->
+<h3><a name="vdwcontacts">van der Waals contacts</a></h3>
+<h5 class="nospaceafter">Overview</h5>
+van der Waals contacts are close contacts between non-bonding atoms.
+Contacts between hydrophobic surfaces, especially in the interior of a structure, are generally favorable.
+<h5 class="nospaceafter">Chart report</h5>
+van der Waals contacts are not currently reported in the multicrit table.
+<h5 class="nospaceafter">Kinemage report</h5>
+In the multicrit kinemage, van der Waals contacts are represented but dots between atoms in a variety of colors.
+Cool-colored dots (blues and greens) indicate favorable packing between atoms.
+Warm-color dots (yellow, orange, and red) indicate small steric overlaps that do not rise to the level of <a href="#clashes">Clashes</a>. 
+<h5 class="nospaceafter">Usage notes</h5>
+A paucity of van der Waals contacts may be indicative of underpacking in a model.
+<p>For very large structures, the proliferation of vdw contact dots may slow down kinemage navigation.
+van der Waals contacts are therefore automatically turned off for large structures, but may be turned on if desired.
+<hr>
+<!--BOND GEOMETRY-------------------------------------------------------------->
+<h3><a name="bondgeometry">Geometry evaluation</a></h3>
+<h5 class="nospaceafter">Overview</h5>
+Geometry evaluation checks covalent bond lengths and covalent bond angle against the bond geometry expectations established by Engh and Huber.
+Bond lengths and bond angles that differ from the expected values by more than 4&sigma; are considered outliers.
+<h5 class="nospaceafter">Chart report</h5>
+In the multicrit chart, the worst geometry outlier for each residue is reported.
+Most outliers (4&sigma; to 10&sigma;) are colored outlier pink.
+Particularly severe outliers (those that deviate from the expected value by 10&sigma; or more) are colored birght red.
+<h5 class="nospaceafter">Kinemage report</h5>
+Bond length deviations are marked in the multicrit kinemage with colored springs along the deviant bonds.
+<div class="indent">
+Compressed blue springs indicate covalent bonds that are too short.
+<br>Extended red springs indicate covalent bonds that are too long.
+</div>
+<br>Bond angle deviations are marked with colored fans along the deviant angle.
+<div class="indent">
+Widening blue fans indicate bond angles that are too small.
+<br>Narrowing red fans indicate bond angles that are too wide.
+</div>
+<h5 class="nospaceafter">Usage notes</h5>
+Bond geometry validation is always recommended.
+The expected values for bond geometry are well-established, and deviations from these expectations are generally serious.
+<p><b>Warning:</b> Bond geometry in ligands may be identified as outliers without cause.
+There is a great variety of possible ligands, and the expected bond geometries of all these possibilities are not as well defined as the geometries of protein and RNA.
+<hr>
+<hr>
+<!--SECTION PROTEIN------------------------------------------------------------>
+<h2><a name="protein">Protein Validations</a></h2>
+<hr>
+<!--RAMACHANDRAN--------------------------------------------------------------->
+<h3><a name="ramachandran">Ramachandran evaluation</a></h3>
+<h5 class="nospaceafter">Overview</h5>
+Ramachandran validation is a long-standing evaluation of protein backbone conformation that uses the &phi; and &psi; backbone dihedrals.
+Ramachandran analysis assigns residues to one of three categories: Favored, Allowed, and Outlier.
+<h5 class="nospaceafter">Chart report</h5>
+<div class="nospaceafter">In the multicrit chart, the Favored/Allowed/Outlier status of each residue is reported along with the residue's score reletive to contours of expected Ramachandran behavior.</div>
+<div class="indent">
+<b>Outlier</b> residues are colored in outlier pink.
+<br><b>Allowed</b> residues are colored in light pink.
+About 2% of residues are expected to fall within the Allowed region, so these residues are not necessarily wrong, but bear inspection.
+</div>
+<h5 class="nospaceafter">Kinemage report</h5>
+In the multicrit kinemage, only Outlier residues are reported for Ramachandran analysis.
+These residues are marked with a green line that follows the C&alpha; trace in the vicinity of the outlier residue.
+<h5 class="nospaceafter">Usage notes</h5>
+Ramachandran validation is broadly applicable.
+However, in structures with large modeling errors or many contiguous modeling errors, Ramachcandran analysis can become overwhelmed.
+In such cases, consider <a href="#cablam">CaBLAM validation</a> for an analysis better suited to difficult models.
+<hr>
+<!--ROTAMERS------------------------------------------------------------------->
+<h3><a name="rotamers">Rotamer evaluation</a></h3>
+<h5 class="nospaceafter">Overview</h5>
+This is description of the validation
+<h5 class="nospaceafter">Chart report</h5>
+This is chart representation
+<h5 class="nospaceafter">Kinemage report</h5>
+This is kinemage representations
+<h5 class="nospaceafter">Usage notes</h5>
+These are usage notes
+<hr>
+<!--CB DEVIATION--------------------------------------------------------------->
+<h3><a name="cbdev">Cbeta deviations</a></h3>
+<h5 class="nospaceafter">Overview</h5>
+This is description of the validation
+<h5 class="nospaceafter">Chart report</h5>
+This is chart representation
+<h5 class="nospaceafter">Kinemage report</h5>
+This is kinemage representations
+<h5 class="nospaceafter">Usage notes</h5>
+These are usage notes
+<hr>
+<!--CIS PEPTIDES--------------------------------------------------------------->
+<h3><a name="cispeptides">Cis-peptide evaluation</a></h3>
+<h5 class="nospaceafter">Overview</h5>
+The peptide bond that joins adjacent amino acids has partial double bond character. As a result this bond assumes either a planar trans or a planar cis conformation.
+Trans is the default conformation. The cis conformation is most common preceding proline, and roughly 5% of PRO residues assume a cis conformation. Only about 0.05% of non-proline residues assume a cis conformation.
+This validation identifies cis-peptides and reports whether the cis-peptide content of a structure exceeds the above statistical expectations.
+<p>An additional validation category identifies residues with peptide bond dihedrals far (&gt;30&deg;) from the expected planar trans or planar cis conformations.
+These residues are identified as having <b>Twisted peptides</b>.
+<h5 class="nospaceafter">Chart report</h5>
+<p>In the multicrit chart, non-proline cis-peptides and all twisted peptides are identified as probable outliers.
+Non-proline cis-peptides <b>do</b> occur, but require strong support from the data, like other unusual conformations.
+Cis-prolines are identified for user convenience, but are not marked as probable outliers due to their higher expected occurence.
+<h5 class="nospaceafter">Kinemage report</h5>
+<p>In the multicrit kinemage, cis-peptides are marked with a sea green shape that fills the space between the mainchain trace and the C&alpha; trace at the cis-peptide location.
+Twisted peptides are marked with a similar shape in lime green. The angle between this shape's component triangles serves as a visual indicator of the severity of the twist.
+<h5 class="nospaceafter">Usage notes</h5>
+Cis-peptide validation is always relevant, but is especially important in low-resolution structures and in structures with regions of uncertainty.
+Some methods can introduce extraneous cis-peptides in regions of ambiguous electron density.
+<hr>
+<!--CABLAM--------------------------------------------------------------------->
+<h3><a name="cablam">CaBLAM backbone evaluation</a></h3>
+<h5 class="nospaceafter">Overview</h5>
+CaBLAM is a method for validating the quality of protein backbone, especially of secondary structure elements in structures at resolutions 2.5&Aring; and lower.
+CaBLAM uses the relative orientations of adjacent carbonyl oxygens to identify errors in peptide plane orientation - errors common in low-resolution structures.
+CaBLAM uses C&alpha; geometry - relatively reliable at low resolution - to identify secondary structure elements hidden by those errors.
+<h5 class="nospaceafter">Chart report</h5>
+<div class="nospaceafter">In the multicrit table, CaBLAM produces three residue identifications: CA Geometry Outliers, CaBLAM Outliers, and CaBLAM Disfavored.</div>
+<div class="indent"><b>CA Geom Outlier</b> is the most severe category and indicates a problem with the C&alpha; trace itself, as determined by C&alpha; dihedrals and the C&alpha; virtual angle.
+These errors are roughly analogous to <a href="#bondgeometry">bond length or bond angle</a> outliers.
+<br><b>CaBLAM Outlier</b> indicates a C&alpha; geometry/peptide plane orientation combination falling in the bottom 1% of observed protein behaviors.
+These errors are roughly analogous to <a href="#ramachandran">Ramachandran Outliers</a> in severity.
+<br><b>CaBLAM Disfavored</b> indicates a C&alpha; geometry/peptide plane orientation combination falling the bottom 5% of observed protein behaviors.
+Residues marked this way may have valid conformations, especially in loop regions.
+However, especially in low-resolution structures, residues marked as CaBLAM Disfavored should be treated with more suspicion than the otherwise analogous <a href="#ramachandran">Ramachandran Allowed</a> residues.
+</div>
+<h5 class="nospaceafter">Kinemage report</h5>
+<p>In the multicrit kinemage, CA Geometry Outliers are identified with red bars over the associated C&alpha; virtual angle.
+CaBLAM Outliers and CaBLAM Disfavoreds are marked with bars that trace the carbonyl oxygen dihedral often indicative of modeling errors.
+CaBLAM Outliers use pink, and CaBLAM Disfavoreds use purple.
+<h5 class="nospaceafter">Usage notes</h5>
+CaBLAM is designed to provide validation for structures in the 2.5&Aring;-4.0&Aring; resolution range.
+Within this range, CaBLAM's validation may be more helpful for correcting a structure than Ramachandran analysis.
+At higher resolutions, the errors CaBLAM assesses become less common.
+CaBLAM provides strong validation of secondary structure elements, but is prone to generating apparent false positives in loop regions.
+Remember: Up to 5% of the residues in a structure are <b>expected</b> to be CaBLAM Disfavored!
+<hr>
+<hr>
+<!--SECTION RNA---------------------------------------------------------------->
+<h2><a name="rna">RNA Validations</a></h2>
+<hr>
+<!--SUGAR PUCKERS-------------------------------------------------------------->
+<h3><a name="sugarpuckers">RNA sugar pucker analysis</a></h3>
+<h5 class="nospaceafter">Overview</h5>
+This is description of the validation
+<h5 class="nospaceafter">Chart report</h5>
+This is chart representation
+<h5 class="nospaceafter">Kinemage report</h5>
+This is kinemage representations
+<h5 class="nospaceafter">Usage notes</h5>
+These are usage notes
+<hr>
+<!--SUITES--------------------------------------------------------------------->
+<h3><a name="suites">RNA backbone conformations</a></h3>
+<h5 class="nospaceafter">Overview</h5>
+This is description of the validation
+<h5 class="nospaceafter">Chart report</h5>
+This is chart representation
+<h5 class="nospaceafter">Kinemage report</h5>
+This is kinemage representations
+<h5 class="nospaceafter">Usage notes</h5>
+These are usage notes
+<hr>
+<!----------------------------------------------------------------------------->
+
+
+
+
+
+
+
+<tr><td colspan="2">
+  <div class="pagefooter">
+About <a href="http://kinemage.biochem.duke.edu" target="_blank">the Richardson Lab</a>
+  </div>
+</td></tr>
+</table>
+</body>
+</html>
