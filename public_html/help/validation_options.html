@@ -61,6 +61,7 @@ Severity of individual clashes is color-coded within the table.</div>
 </div>
 <h5 class="nospaceafter">Kinemage report</h5>
 In the multicrit kinemage, clashes are displayed as hot pink spikes between atoms.
+<div class="indent"><img src="validation_options_img/eg_clash_text.jpg" alt="Example clash" height="300" width="300"></div>
 <h5 class="nospaceafter">Usage notes</h5>
 Clash analysis is one of our most sensitive methods for identifying problems in structures and should always be used.
 However, in difficult structures, it may be necessary to overlook the mild clashes and focus on more severe overlaps.
@@ -81,6 +82,7 @@ Hydrogen bonding is not currently reported in the multicrit table.
 In the multicrit kinemage, hydrogen bonds are represented as "pillows" of greentint dots between the bonding atoms.
 These dots fall on the surfaces of the bonding atoms' van der Waals spheres.
 A larger overlap indicates a stronger bond and is represented by a larger "pillow".
+<div class="indent"><img src="validation_options_img/eg_hbonds_text.jpg" alt="Example hydrogen bonds" height="300" width="300"></div>
 <h5 class="nospaceafter">Usage notes</h5>
 Regular hydrogen bonding patterns define protein secondary structure and RNA base pairing.
 Weak or missing bonds in these positions may indicate modeling errors.
@@ -98,6 +100,7 @@ van der Waals contacts are not currently reported in the multicrit table.
 In the multicrit kinemage, van der Waals contacts are represented but dots between atoms in a variety of colors.
 Cool-colored dots (blues and greens) indicate favorable packing between atoms.
 Warm-color dots (yellow, orange, and red) indicate small steric overlaps that do not rise to the level of <a href="#clashes">Clashes</a>. 
+<div class="indent"><img src="validation_options_img/eg_vdw_text.jpg" alt="Example van der Waals contacts" height="300" width="300"></div>
 <h5 class="nospaceafter">Usage notes</h5>
 Sparse van der Waals contacts may be indicative of underpacking in a model.
 <p>For very large structures, the proliferation of vdw contact dots may slow down kinemage navigation.
@@ -120,11 +123,13 @@ Bond length deviations are marked in the multicrit kinemage with colored springs
 <div class="indent">
 Compressed blue springs indicate covalent bonds that are too short.
 <br>Extended red springs indicate covalent bonds that are too long.
+<div class="indent"><img src="validation_options_img/eg_bondlengths_text.jpg" alt="Example bond lengths" height="300" width="605"></div>
 </div>
 <br>Bond angle deviations are marked with colored fans along the deviant angle.
 <div class="indent">
 Widening blue fans indicate bond angles that are too small.
 <br>Narrowing red fans indicate bond angles that are too wide.
+<div class="indent"><img src="validation_options_img/eg_bondangles_text.jpg" alt="Example bond angles" height="300" width="605"></div>
 </div>
 <h5 class="nospaceafter">Usage notes</h5>
 Bond geometry validation is always recommended.
@@ -154,6 +159,7 @@ About 2% of residues are expected to fall within the Allowed region, so these re
 <h5 class="nospaceafter">Kinemage report</h5>
 In the multicrit kinemage, only Outlier residues are reported for Ramachandran analysis.
 These residues are marked with a green line that follows the C&alpha; trace in the vicinity of the outlier residue.
+<div class="indent"><img src="validation_options_img/eg_ramaout_text.jpg" alt="Example rama outlier" height="300" width="300"></div>
 <h5 class="nospaceafter">Usage notes</h5>
 Ramachandran validation is broadly applicable.
 However, in structures with large modeling errors or many contiguous modeling errors, Ramachcandran analysis can become overwhelmed.
@@ -178,6 +184,7 @@ About 2% of sidechains are expected to fall within the Allowed region, so these 
 <h5 class="nospaceafter">Kinemage report</h5>
 In the multicrit kinemage, only Outlier sidechains are reported for rotamer analysis.
 Outlier sidechains are traced in gold.
+<div class="indent"><img src="validation_options_img/eg_rotamer_text.jpg" alt="Example rotamer outlier" height="300" width="300"></div>
 <h5 class="nospaceafter">Usage notes</h5>
 Assignment of specific rotamers is more important in packed regions of a protein than on the unconstrained surface.
 That said, the lack of packing constraint on the surface does not justify modeling of unrealistic rotamers.
@@ -201,6 +208,7 @@ Sufficient deviation from the ideal position indicates a geometry error.
 In the multicrit kinemage, C&beta; deviations appear as purple spheres.
 Each sphere is drawn with its center at the ideal C&beta; position and its edge tangent to the modeled C&beta; position.
 As a result, the radius of the sphere is equal to the deviation, and the size of the sphere visually encodes the severity of the deviation.
+<div class="indent"><img src="validation_options_img/eg_cbdev_text.jpg" alt="Example cbdev" height="300" width="300"></div>
 <h5 class="nospaceafter">Usage notes</h5>
 C&beta; deviations are a backbone geometry validation, so like general <a href="#bondgeometry">bond geometry validation</a>, it is always recommended.
 <h5 class="nospaceafter">Further Information</h5>
@@ -221,6 +229,7 @@ Cis-prolines are identified for user convenience, but are not marked as probable
 <h5 class="nospaceafter">Kinemage report</h5>
 In the multicrit kinemage, cis-peptides are marked with a sea green shape that fills the space between the mainchain trace and the C&alpha; trace at the cis-peptide location.
 Twisted peptides are marked with a similar shape in lime green. The angle between this shape's component triangles serves as a visual indicator of the severity of the twist.
+<div class="indent"><img src="validation_options_img/eg_peptidebonds_text.jpg" alt="Example nontrans peptides" height="300" width="605"></div>
 <h5 class="nospaceafter">Usage notes</h5>
 Cis-peptide validation is always relevant, but is especially important in low-resolution structures and in structures with regions of uncertainty.
 Some methods can introduce extraneous cis-peptides in regions of ambiguous electron density.
@@ -247,6 +256,7 @@ However, especially in low-resolution structures, residues marked as CaBLAM Disf
 In the multicrit kinemage, CA Geometry Outliers are identified with red bars over the associated C&alpha; virtual angle.
 CaBLAM Outliers and CaBLAM Disfavoreds are marked with bars that trace the carbonyl oxygen dihedral often indicative of modeling errors.
 CaBLAM Outliers use pink, and CaBLAM Disfavoreds use purple.
+<div class="indent"><img src="validation_options_img/eg_cablam_text.jpg" alt="Example CaBLAM outliers" height="300" width="910"></div>
 <h5 class="nospaceafter">Usage notes</h5>
 CaBLAM is designed to provide validation for structures in the 2.5&Aring;-4.0&Aring; resolution range.
 Within this range, CaBLAM's validation may be more helpful for correcting a structure than Ramachandran analysis.
