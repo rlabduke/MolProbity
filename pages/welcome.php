@@ -72,7 +72,7 @@ as part of the refinement cycle.</p>
 <p><b><?php echo "<a href='".makeEventURL("onGoto", "helper_kinemage.php")."'>Work with kinemages</a>"; ?>:</b>
 Create and view interactive 3-D graphics
 from your web browser.</p>
-<p><b><a target="_blank" href="../public_html/help/validation_options.html">Guide to validation options</a>:</b>
+<p><b><a target="_blank" href="../public_html/help/validation_options/validation_options.html">Guide to validation options</a>:</b>
 Choose validations appropriate to a structure.</p>
 
 
