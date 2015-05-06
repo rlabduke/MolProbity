@@ -591,6 +591,7 @@ function displayEntries($context, $labbook)
 */
 function displayUpload($context)
 {
+    echo("<div class=feature><strong>Welcome to MolProbity 4.2 beta</strong></div>");
     echo makeEventForm("onUploadOrFetch") . "\n";
     //echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onCall", "upload_setup.php")."'>more options</a>)</h5>";
     echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onCall", "upload_setup.php")."' onclick='toggleUploadOptions(); return false' id='upload_options_link'>more options</a>)</h5>";
