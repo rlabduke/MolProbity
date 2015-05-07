@@ -74,7 +74,7 @@ Word, J. M., Lovell, S. C., LaBean, T. H., Taylor, H. C., Zalis, M. E., Presley,
 <h3><a name="hbonds">Hydrogen bonds</a></h3>
 <h5 class="nospaceafter">Overview</h5>
 Hydrogen bonds are close contacts between polar atoms and hydrogen atoms.
-These conatacts are energetically favorable and play an important role in stabilizing macromolecular structures.
+These contacts are energetically favorable and play an important role in stabilizing macromolecular structures.
 Hydrogen bonds are expected in protein secondary structure, between RNA bases, and elsewhere.
 <h5 class="nospaceafter">Chart report</h5>
 Hydrogen bonding is not currently reported in the multicrit table.
@@ -97,7 +97,7 @@ Contacts between hydrophobic surfaces, especially in the interior of a structure
 <h5 class="nospaceafter">Chart report</h5>
 van der Waals contacts are not currently reported in the multicrit table.
 <h5 class="nospaceafter">Kinemage report</h5>
-In the multicrit kinemage, van der Waals contacts are represented but dots between atoms in a variety of colors.
+In the multicrit kinemage, van der Waals contacts are represented by dots between atoms in a variety of colors.
 Cool-colored dots (blues and greens) indicate favorable packing between atoms.
 Warm-color dots (yellow, orange, and red) indicate small steric overlaps that do not rise to the level of <a href="#clashes">Clashes</a>. 
 <div class="indent"><img src="eg_vdw_text.jpg" alt="Example van der Waals contacts" height="300" width="300"></div>
@@ -112,7 +112,7 @@ Word, J. M., Lovell, S. C., LaBean, T. H., Taylor, H. C., Zalis, M. E., Presley,
 <!--BOND GEOMETRY-------------------------------------------------------------->
 <h3><a name="bondgeometry">Geometry evaluation</a></h3>
 <h5 class="nospaceafter">Overview</h5>
-Geometry evaluation checks covalent bond lengths and covalent bond angle against the bond geometry expectations established by Engh and Huber.
+Geometry evaluation checks covalent bond lengths and covalent bond angles against the bond geometry expectations established by Engh and Huber for protein structures. For RNA structures, bond lengths and bond angles depend on the <a href=#sugarpucker">pucker of the ribose sugar</a>, and are checked against the pucker-specific values implemented in PHENIX. 
 Bond lengths and bond angles that differ from the expected values by more than 4&sigma; are considered outliers.
 <h5 class="nospaceafter">Chart report</h5>
 In the multicrit chart, the worst geometry outlier for each residue is reported.
@@ -272,29 +272,47 @@ Williams, C. J., Hintze, B. J., Richardson, D. C. &amp; Richardson, J. S. (2013)
 <hr>
 <!--SUGAR PUCKERS-------------------------------------------------------------->
 <h3><a name="sugarpuckers">RNA sugar pucker analysis</a></h3>
+
 <h5 class="nospaceafter">Overview</h5>
-This is description of the validation
+The ribose sugar in RNA residues adopts one of the two main pucker conformations: C3'-endo pucker and C2'-endo pucker. The &delta; backbone dihedral angle (C5'-C4'-C3'-O3') encodes the sugar pucker, with the mean value of &delta; angle being 84&deg for C3'-endo, and 145&deg for C2'-endo pucker. The perpendicular distance from the 3' phosphorus atom to the extended line the glycosidic bond vector, called the Pperp distance, is visually and empirically corelated with the sugar pucker, with Pperp distance &ge; 2.9&Aring for C3'-endo and &lt 2.9&Aring for C2'-endo pucker. This validation identifies RNA residues that have incorrectly modeled sugar puckers, by cross-checking the Pperp distance and the &delta; angle value. 
+      
 <h5 class="nospaceafter">Chart report</h5>
-This is chart representation
+In the multicrit chart, two kinds of sugar pucker outliers are reported and colored in outlier pink.  
+<div class="indent">&delta; outlier: where the &delta; angle does not lie in the allowed range for the pucker recommned by the Pperp distance.
+<br> &epsilon; outlier: where the &epsilon; backbone angle lies outside the allowed range of 155&deg - 310&deg. &epsilon; angle outliers are also found to indicate misfit sugar pucker.</div>
+The sugar pucker recommned by the Pperp distance is displayed for both cases.
+
 <h5 class="nospaceafter">Kinemage report</h5>
-This is kinemage representations
+In the multicrit kinemage, sugar pucker outliers are identified by a magenta cross pointing along the glycosidic bond vector. The magenta cross is connected to the 3' phosphorus atom, and the corresponding distance is the Pperp distance. The color of the cross is purple if the residue is only &epsilon; outlier. 
+<div class="indent"><img src="eg_puckerout_text.jpg" alt="Example pucker outlier" height="300" width="300"></div>
+
 <h5 class="nospaceafter">Usage notes</h5>
-These are usage notes
+Our RNA sugar pucker validation is a very robust method for detecting pucker outliers and should always be used. This is especially useful for low resolution structures where the electron density alone is not sufficient to determine the sugar pucker. Very rarely, there may be cases of RNA resiudes adopting a different sugar pucker other than C3'-endo or C2'-endo, especially in active sites. However, they should only be trusted if there is enough evidence for it. 
+
 <h5 class="nospaceafter">Further Information</h5>
-These are references
+Jain, S., Kapral, G. J., Richardson, D. C., &amp; Richardson, J. S. (2014) <b> Getting the Pucker Right in RNA Structures</b>. <i> Computational Crystallography Newsletter</i>, 5:4-7. <a href="http://phenix-online.org/newsletter/CCN_2014_01.pdf#page=4">PDF link</a>
 <hr>
+
 <!--SUITES--------------------------------------------------------------------->
 <h3><a name="suites">RNA backbone conformations</a></h3>
+
 <h5 class="nospaceafter">Overview</h5>
-This is description of the validation
+RNA backbone is known to be rotameric. RNA Ontology Consortium has identified 54 all-angle conformers that the RNA backbone is most likely to adopt. These conformers are defined for the sugar-to-sugar unit for the RNA backbone, called a suite. Each backbone conformer has a two character name. This validation identifies RNA suites that do not belong to any of the known backbone conformers. 
+
 <h5 class="nospaceafter">Chart report</h5>
-This is chart representation
+In the multicrit chart, all complete RNA backbone suites are reported. 
+<div class="indent">Suites that belong to a known conformer, the name of the backbone conformer is displayed, along with its suiteness (a score between 0 and 1, 1 being highest), that measures the match quality of this suite to its assigned conformer. 
+<br>Suites that do not belong to any of the known backbone conformers are reported as outliers and colored in outlier pink. In addition, if any of the backbone dihedral angles of a suite individually lie outside the allowed range of values, it is marked as triaged.  
+</div>
+
 <h5 class="nospaceafter">Kinemage report</h5>
-This is kinemage representations
+Backbone conformer outliers are currently not marked in the multicrit kinemage.
+
 <h5 class="nospaceafter">Usage notes</h5>
-These are usage notes
+The known backbone conformers identify the most likely conformations of the RNA backbone, but they certainly <b>do not cover all the possibilites</b>. Outlier suites can occasionally be valid and interesting. Please do not force your structure to have no backbone conformer outliers. If a backbone conformation fits the electron density and has no other kind of outliers (<a href="#clashes">steric clashes</a>, <a href="#sugarpuckers">pucker outliers</a>, <a href="#bondgeometry">geometry outliers</a>), then it is very likely to be valid. 
+
 <h5 class="nospaceafter">Further Information</h5>
-These are references
+Richardson, J. S., Schneider B., Murray, L. W., Kapral, G. J., Immormino, R. M. et. al. (2008) <b> RNA Backbone: Consensus all-angle conformers and modular string nomenclature (an RNA Ontology Consortium contribution). </b> <i> RNA</i>, 14(3):465-481. <a href="http://rnajournal.cshlp.org/content/14/3/465.full.pdf+html">PDF link</a> 
 <hr>
 <!----------------------------------------------------------------------------->
 
