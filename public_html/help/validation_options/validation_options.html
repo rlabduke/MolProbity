@@ -112,7 +112,7 @@ Word, J. M., Lovell, S. C., LaBean, T. H., Taylor, H. C., Zalis, M. E., Presley,
 <!--BOND GEOMETRY-------------------------------------------------------------->
 <h3><a name="bondgeometry">Geometry evaluation</a></h3>
 <h5 class="nospaceafter">Overview</h5>
-Geometry evaluation checks covalent bond lengths and covalent bond angles against the bond geometry expectations established by Engh and Huber for protein structures. For RNA structures, bond lengths and bond angles depend on the <a href=#sugarpucker">pucker of the ribose sugar</a>, and are checked against the pucker-specific values implemented in PHENIX. 
+Geometry evaluation checks covalent bond lengths and covalent bond angles against the bond geometry expectations established by Engh and Huber for protein structures. For RNA structures, bond lengths and bond angles depend on the <a href="#sugarpuckers">pucker of the ribose sugar</a>, and are checked against the pucker-specific values implemented in PHENIX. 
 Bond lengths and bond angles that differ from the expected values by more than 4&sigma; are considered outliers.
 <h5 class="nospaceafter">Chart report</h5>
 In the multicrit chart, the worst geometry outlier for each residue is reported.
@@ -290,7 +290,9 @@ In the multicrit kinemage, sugar pucker outliers are identified by a magenta cro
 Our RNA sugar pucker validation is a very robust method for detecting pucker outliers and should always be used. This is especially useful for low resolution structures where the electron density alone is not sufficient to determine the sugar pucker. Very rarely, there may be cases of RNA resiudes adopting a different sugar pucker other than C3'-endo or C2'-endo, especially in active sites. However, they should only be trusted if there is enough evidence for it. 
 
 <h5 class="nospaceafter">Further Information</h5>
-Jain, S., Kapral, G. J., Richardson, D. C., &amp; Richardson, J. S. (2014) <b> Getting the Pucker Right in RNA Structures</b>. <i> Computational Crystallography Newsletter</i>, 5:4-7. <a href="http://phenix-online.org/newsletter/CCN_2014_01.pdf#page=4">PDF link</a>
+Jain, S., Kapral, G. J., Richardson, D. C. &amp; Richardson, J. S. (2014) <b> Getting the Pucker Right in RNA Structures</b>. <i> Computational Crystallography Newsletter</i>, 5:4-7. <a href="http://phenix-online.org/newsletter/CCN_2014_01.pdf#page=4">PDF link</a>
+<br>
+Jain, S., Richardson, D. C. &amp; Richardson J. S. (2015) <b> Computational Methods for RNA Structure Validation and Improvement.</b> <i> Methods in Enzymology</i> <a href="http://dx.doi.org/10.1016/bs.mie.2015.01.007">doi:10.1016/bs.mie.2015.01.007</a> 
 <hr>
 
 <!--SUITES--------------------------------------------------------------------->
@@ -313,6 +315,10 @@ The known backbone conformers identify the most likely conformations of the RNA 
 
 <h5 class="nospaceafter">Further Information</h5>
 Richardson, J. S., Schneider B., Murray, L. W., Kapral, G. J., Immormino, R. M. et. al. (2008) <b> RNA Backbone: Consensus all-angle conformers and modular string nomenclature (an RNA Ontology Consortium contribution). </b> <i> RNA</i>, 14(3):465-481. <a href="http://rnajournal.cshlp.org/content/14/3/465.full.pdf+html">PDF link</a> 
+<br>
+Murray, L. W., Arendell, W. B., Richardson, D. C. &amp; Richardson J. S. (2003) <b> RNA Backbone is Rotameric. </b> <i> PNAS </i> 100(24): 13904-13909. <a href="http://dx.doi.org/10.1073/pnas.1835769100">doi:10.1073/pnas.1835769100</a>  
+<br>
+Jain, S., Richardson, D. C. &amp; Richardson J. S. (2015) <b> Computational Methods for RNA Structure Validation and Improvement.</b> <i> Methods in Enzymology</i> <a href="http://dx.doi.org/10.1016/bs.mie.2015.01.007">doi:10.1016/bs.mie.2015.01.007</a> 
 <hr>
 <!----------------------------------------------------------------------------->
 
