@@ -58,6 +58,8 @@ function mpInitEnvirons()
       else
       {
         define("MP_JOB_DATA_DIR", MP_BASE_DIR."/public_html/data/");
+        //error_log("moosefire");
+        error_log("sessions mp_job_data_dir: ".MP_JOB_DATA_DIR);
       }
     }
 }

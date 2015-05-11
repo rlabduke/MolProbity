@@ -605,7 +605,11 @@ function destructiveGZipFile($path)
 function mpTempfile($prefix = 'tmp_misc_')
 {
     #return tempnam(MP_BASE_DIR."/tmp", $prefix);
-    return tempnam(MP_JOB_DATA_DIR."/tmp", $prefix);
+    //return tempnam(MP_JOB_DATA_DIR."/tmp", $prefix);
+    $holdthis = tempnam(MP_JOB_DATA_DIR."/tmp", $prefix);
+    error_log("mpTempfile mp_job_data_dir: ".MP_JOB_DATA_DIR);
+    error_log("mpTempfile tempnam: ".$holdthis);
+    return $holdthis;
 }
 #}}}########################################################################
 
