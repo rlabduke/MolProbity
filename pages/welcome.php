@@ -591,6 +591,7 @@ function displayEntries($context, $labbook)
 */
 function displayUpload($context)
 {
+    echo("<div class=feature><strong>Welcome to MolProbity 4.2 beta</strong></div>");
     echo makeEventForm("onUploadOrFetch") . "\n";
     //echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onCall", "upload_setup.php")."'>more options</a>)</h5>";
     echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onCall", "upload_setup.php")."' onclick='toggleUploadOptions(); return false' id='upload_options_link'>more options</a>)</h5>";
@@ -665,7 +666,7 @@ function toggleUploadOptions()
 //      <a style=\"color: #66FFFF\" href='http://kinemage.biochem.duke.edu/databases/top8000.php' target='_blank'>Top8000</a> dataset of high quality PDB files.
 //        <br><br>Please don't hesitate to report any <a style=\"color: #66FFFF\" href='".makeEventURL("onGoto", "feedback_setup.php")."'>bugs</a> you may encounter.
 //        <br><br>If for some reason you need to use MolProbity4 version 4.02, which is now a retired legacy version, please go to <a style=\"color: #66FFFF\" href='http://rutile.biochem.duke.edu/' target='_blank'>http://rutile.biochem.duke.edu</a>.</strong></div>");
-    echo("<div class=feature>CCTBX, which powers this version of MolProbity (4.1), requires stricter adherence to PDB format. If you are having trouble with version 4.1 try using MolProbity4 legacy version 4.02 at <a href='http://rutile.biochem.duke.edu/' target='_blank'>http://rutile.biochem.duke.edu</a>.</div>");
+    echo("<div class=feature>CCTBX, which powers this version of MolProbity (4.2), requires stricter adherence to PDB format. If you are having trouble with version 4.2 try using MolProbity4 legacy version 4.02 at <a href='http://rutile.biochem.duke.edu/' target='_blank'>http://rutile.biochem.duke.edu</a>.  Note that not all features are supported on legacy 4.02 and we suggest repairing your PDB format instead.</div>");
 }
 
 #}}}########################################################################

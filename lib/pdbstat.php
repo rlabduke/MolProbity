@@ -175,9 +175,10 @@ function pdbstat($pdbfilename)
     }
     //echo sizeof($hash);
 
-    $file = fopen($pdbfilename, "r");
-    if(!$file) return NULL;
-    while(!feof($file))
+    //if !file and @ commentary: we think Jeff wanted this file-exists check to be commented out and pass through no matter what.  We believe the @ syntax will suppress error messages.  Linux 4.2 beta had an issue with infinite errors here.
+    $file = @fopen($pdbfilename, "r");
+    //if(!$file) return NULL;
+    while(!(@feof($file)))
     {
         $s = rtrim(fgets($file, 1024));
 
