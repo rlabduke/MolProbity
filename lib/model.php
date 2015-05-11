@@ -820,6 +820,7 @@ function regularizeNQH($inpath, $outpath, $temp)
   #exec("libtbx.python ".MP_BASE_DIR."/bin/nqh_minimize.py $inpath $outpath $temp");
   exec("mmtbx.nqh_minimize $inpath $outpath $temp");
 }
+#}}}#########################################################################
 
 #{{{ reduceTrim - removes H from a PDB file
 ############################################################################

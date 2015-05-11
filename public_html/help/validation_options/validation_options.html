@@ -52,9 +52,9 @@ Clash analysis is one of the signature validations offered by MolProbity.
 "Clashes" are steric overlaps of 0.4&Aring; or greater between non-bonded atoms.
 Such interactions carry a severe energy penalty and should be avoided.
 <h5 class="nospaceafter">Chart report</h5>
-<div class="nospaceafter">In the multicrit table MolProbity identifies individual clashes and provides an overall "clashscore" for the structure.
+<div class="nospaceafter">In the multicrit chart MolProbity identifies individual clashes and provides an overall "clashscore" for the structure.
 Clashscore is an approximation of the overall severity of the clashes in a structure.
-Severity of individual clashes is color-coded within the table.</div>
+Severity of individual clashes is color-coded within the chart.</div>
 <div class="indent"><b>Mild clashes</b> are steric overlaps &ge;0.4&Aring; but &lt;0.5&Aring;. Mild clashes are colored in light pink.
 <br><b>Most clashes</b> are colored outlier pink.
 <br><b>Severe clashes</b> are steric overlaps &gt;0.9&Aring;. These clashes are colored bright red.
@@ -77,7 +77,7 @@ Hydrogen bonds are close contacts between polar atoms and hydrogen atoms.
 These contacts are energetically favorable and play an important role in stabilizing macromolecular structures.
 Hydrogen bonds are expected in protein secondary structure, between RNA bases, and elsewhere.
 <h5 class="nospaceafter">Chart report</h5>
-Hydrogen bonding is not currently reported in the multicrit table.
+Hydrogen bonding is not currently reported in the multicrit chart.
 <h5 class="nospaceafter">Kinemage report</h5>
 In the multicrit kinemage, hydrogen bonds are represented as "pillows" of greentint dots between the bonding atoms.
 These dots fall on the surfaces of the bonding atoms' van der Waals spheres.
@@ -95,7 +95,7 @@ Word, J. M., Lovell, S. C., LaBean, T. H., Taylor, H. C., Zalis, M. E., Presley,
 van der Waals contacts are close contacts between non-bonding atoms.
 Contacts between hydrophobic surfaces, especially in the interior of a structure, are generally favorable.
 <h5 class="nospaceafter">Chart report</h5>
-van der Waals contacts are not currently reported in the multicrit table.
+van der Waals contacts are not currently reported in the multicrit chart.
 <h5 class="nospaceafter">Kinemage report</h5>
 In the multicrit kinemage, van der Waals contacts are represented by dots between atoms in a variety of colors.
 Cool-colored dots (blues and greens) indicate favorable packing between atoms.
@@ -243,7 +243,7 @@ CaBLAM is a method for validating the quality of protein backbone, especially of
 CaBLAM uses the relative orientations of adjacent carbonyl oxygens to identify errors in peptide plane orientation - errors common in low-resolution structures.
 CaBLAM uses C&alpha; geometry - relatively reliable at low resolution - to identify secondary structure elements hidden by those errors.
 <h5 class="nospaceafter">Chart report</h5>
-<div class="nospaceafter">In the multicrit table, CaBLAM produces three residue identifications: CA Geometry Outliers, CaBLAM Outliers, and CaBLAM Disfavored.</div>
+<div class="nospaceafter">In the multicrit chart, CaBLAM produces three residue identifications: CA Geometry Outliers, CaBLAM Outliers, and CaBLAM Disfavored.</div>
 <div class="indent"><b>CA Geom Outlier</b> is the most severe category and indicates a problem with the C&alpha; trace itself, as determined by C&alpha; dihedrals and the C&alpha; virtual angle.
 These errors are roughly analogous to <a href="#bondgeometry">bond length or bond angle</a> outliers.
 <br><b>CaBLAM Outlier</b> indicates a C&alpha; geometry/peptide plane orientation combination falling in the bottom 1% of observed protein behaviors.
