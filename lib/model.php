@@ -534,8 +534,6 @@ function removeHydrogens($inpath, $outpath) {
     $tmp1   = mpTempfile("tmp_pdb_");
 
     setProgress($tasks, 'reducetrim');
-    error_log("inpath: ".$inpath);
-    error_log("tmp1: ".$tmp1);
     reduceTrim($inpath, $tmp1);
     copy($tmp1, $outpath);
 

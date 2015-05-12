@@ -22,8 +22,7 @@ class welcome_delegate extends file_browser_delegate {
 */
 function display($context)
 {
-    //echo $this->pageHeader("Main page", "welcome");
-    echo $this->pageHeader(MP_JOB_DATA_DIR, "welcome");
+    echo $this->pageHeader("Main page", "welcome");
 
     // echo mpSerialize($_SESSION['models']);
     if(count($_SESSION['models']) > 0 && $_SESSION['lastUsedModelID'])
