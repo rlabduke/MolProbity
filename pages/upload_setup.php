@@ -318,14 +318,14 @@ function onUploadXray()
             {
                 mpLog("mtz-upload:User uploaded an mtz file");
                 copy($tmpfile, $xrayPath);
-		unlink($tmpfile)
+		unlink($tmpfile);
                 $_SESSION['mtzs'][$xrayName] = $xrayName;
                 pageGoto("upload_other_done.php", array('type' => 'xray', 'xrayName' => $xrayName));
             }
-	    unlink($tmpfile)
+	    unlink($tmpfile);
             else $this->doUploadError('xray', $xrayPath);
         }
-	unlink($tmpfile)
+	unlink($tmpfile);
         else $this->doUploadError('xray', $xrayPath);
     }
 }
