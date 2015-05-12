@@ -309,7 +309,7 @@ function onUploadXray()
         $xrayPath = "$_SESSION[dataDir]/".MP_DIR_XRAYDATA;
         if(!file_exists($xrayPath)) mkdir($xrayPath, 0777);
         $xrayPath .= "/$xrayName";
-        $tmpfile = mpTempfile("tmp_mtz_");
+        $tmpfile = mpTempfile("tmp_mtz");
         if( !$_FILES['uploadFile']['error'] && $_FILES['uploadFile']['size'] > 0
         && !file_exists($xrayPath) && move_uploaded_file($_FILES['uploadFile']['tmp_name'], $tmpfile))
         {
@@ -318,14 +318,11 @@ function onUploadXray()
             {
                 mpLog("mtz-upload:User uploaded an mtz file");
                 copy($tmpfile, $xrayPath);
-		unlink($tmpfile)
                 $_SESSION['mtzs'][$xrayName] = $xrayName;
                 pageGoto("upload_other_done.php", array('type' => 'xray', 'xrayName' => $xrayName));
             }
-	    unlink($tmpfile)
             else $this->doUploadError('xray', $xrayPath);
         }
-	unlink($tmpfile)
         else $this->doUploadError('xray', $xrayPath);
     }
 }
