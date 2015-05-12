@@ -62,5 +62,6 @@ mmtbx.rebuild_rotarama_cache
 # git doesn't store empty directories so we're adding the the reqired empty directory here.
 cd ..
 mkdir -p public_html/data
+mkdir -p public_html/data/tmp
 mkdir -p feedback
 mkdir -p tmp

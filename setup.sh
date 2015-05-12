@@ -36,6 +36,7 @@ fi
 
 # Set world-writable permisions on data/ and tmp/
 chmod 777 public_html/data
+chmod 777 public_html/data/tmp
 chmod 777 tmp/
 
 # Set world-writable permisions on feedback/
