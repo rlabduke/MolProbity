@@ -57,6 +57,7 @@ make
 
 source ../build/setpaths.sh
 
+#this configures all the rotamer and ramachandran contour files so rotalyze and ramalyze work.  They are downloaded as hiant text files, this line of code creates them as python pickles
 mmtbx.rebuild_rotarama_cache
 
 # git doesn't store empty directories so we're adding the the reqired empty directory here.
