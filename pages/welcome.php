@@ -596,7 +596,7 @@ function displayUpload($context)
     //This block prints a warning if the server was recently rebooted (30 mins).  I assume putting this check here is acceptable.  SML
     $recent_reboot = False;
     $recent_limit = 1800; //1800 seconds in half an hour
-    //This should be a function but I don't yet know how in PHP
+    //This should be a function returning $recent_reboot but I don't know how in PHP
     //These if statements determine what system we are on
     $host_os = shell_exec("uname");
     if($host_os == "Linux\n") {
@@ -605,14 +605,13 @@ function displayUpload($context)
     	if($reboot_seconds < $recent_limit) {
 	    $recent_reboot = True;
 	}
-    } elseif ($host_os == "Darwin\n") {
+    } elseif ($host_os == "Darwin\n") { //Mac
       	//on BSD/(Mac), sysctl kern.boottime reports uptime seconds in 5th column.  sed strips a comma.
         $reboot_seconds = shell_exec("sysctl kern.boottime | awk '{print $5}' | sed 's/,//g'");
     	if($reboot_seconds < $recent_limit) {
 	    $recent_reboot = True;
 	}
-    } else {
-    //give up on $recent_reboot
+    } else { //give up on $recent_reboot
     $recent_reboot = False;
     }
 
