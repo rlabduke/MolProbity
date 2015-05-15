@@ -592,6 +592,10 @@ function displayEntries($context, $labbook)
 function displayUpload($context)
 {
     echo("<div class=feature><strong>Welcome to MolProbity 4.2 beta</strong></div>");
+    if(true)
+    {
+        echo("<div class=feature><strong>Our MolProbity server was recently rebooted. We apologize for the loss of any jobs you might have had running. Reboots usually occur when the server is overloaded. If you were running large jobs (more than 10,000 atoms) or more than 2 jobs, please consider resubmitting them over a longer period to spread out the load. Thanks for helping us keep MolProbity up and running for everyone.</strong></div>");
+    }	
     echo makeEventForm("onUploadOrFetch") . "\n";
     //echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onCall", "upload_setup.php")."'>more options</a>)</h5>";
     echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onCall", "upload_setup.php")."' onclick='toggleUploadOptions(); return false' id='upload_options_link'>more options</a>)</h5>";
