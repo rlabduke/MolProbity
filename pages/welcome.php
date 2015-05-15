@@ -595,14 +595,19 @@ function displayUpload($context)
 
     //This block prints a warning if the server was recently rebooted (30 mins).  I assume putting this check here is acceptable.  SML
     $recent_reboot = False;
+    $recent_limit = 1800; //1800 seconds in half an hour
     //This should be a function but I don't yet know how in PHP
     //These if statements determine what system we are on
     $host_os = shell_exec("uname");
     echo $host_os;
-    if($host_os == "Linux") {
+    if($host_os == "Linux\n") {
     echo ("Linux!!!");
+    $reboot_seconds = shell_exec("awk '{print $1}' /proc/uptime");
+    echo ($reboot_seconds);
+    echo ($reboot_seconds > $recent_limit);
+    
     $recent_reboot = True;
-    } elseif ($host_os == "Darwin") {
+    } elseif ($host_os == "Darwin\n") {
     $recent_reboot = True;
     } else {
     //give up on $recent_reboot
