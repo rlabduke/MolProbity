@@ -592,12 +592,28 @@ function displayEntries($context, $labbook)
 function displayUpload($context)
 {
     echo("<div class=feature><strong>Welcome to MolProbity 4.2 beta</strong></div>");
+
     //This block prints a warning if the server was recently rebooted (30 mins).  I assume putting this check here is acceptable.  SML
     $recent_reboot = False;
+    //This should be a function but I don't yet know how in PHP
+    //These if statements determine what system we are on
+    $host_os = shell_exec("uname");
+    echo $host_os;
+    if($host_os == "Linux") {
+    echo ("Linux!!!");
+    $recent_reboot = True;
+    } elseif ($host_os == "Darwin") {
+    $recent_reboot = True;
+    } else {
+    //give up on $recent_reboot
+    $recent_reboot = False;
+    }
+
     if(!$recent_reboot)
     {
         echo("<div class=alert><strong>Our MolProbity server was recently rebooted. We apologize for the loss of any jobs you might have had running. Reboots usually occur when the server is overloaded. If you were running large jobs (more than 10,000 atoms) or more than 2 jobs, please consider resubmitting them over a longer period to spread out the load. Thanks for helping us keep MolProbity up and running for everyone.</strong></div>");
-    }	
+    }
+
     echo makeEventForm("onUploadOrFetch") . "\n";
     //echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onCall", "upload_setup.php")."'>more options</a>)</h5>";
     echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onCall", "upload_setup.php")."' onclick='toggleUploadOptions(); return false' id='upload_options_link'>more options</a>)</h5>";
