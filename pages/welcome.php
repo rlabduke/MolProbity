@@ -600,12 +600,14 @@ function displayUpload($context)
     //These if statements determine what system we are on
     $host_os = shell_exec("uname");
     if($host_os == "Linux\n") {
+    	//on Linux, first column of /proc/uptime reports seconds of uptime
         $reboot_seconds = shell_exec("awk '{print $1}' /proc/uptime");
     	if($reboot_seconds < $recent_limit) {
 	    $recent_reboot = True;
 	}
     } elseif ($host_os == "Darwin\n") {
-        $reboot_seconds = shell_exec("awk '{print $1}' /proc/uptime");
+      	//on BSD/(Mac), sysctl kern.boottime reports uptime seconds in 5th column.  sed strips a comma.
+        $reboot_seconds = shell_exec("sysctl kern.boottime | awk '{print $5}' | sed 's/,//g'");
     	if($reboot_seconds < $recent_limit) {
 	    $recent_reboot = True;
 	}
@@ -614,7 +616,7 @@ function displayUpload($context)
     $recent_reboot = False;
     }
 
-    if(!$recent_reboot)
+    if($recent_reboot)
     {
         echo("<div class=alert><strong>Our MolProbity server was recently rebooted. We apologize for the loss of any jobs you might have had running. Reboots usually occur when the server is overloaded. If you were running large jobs (more than 10,000 atoms) or more than 2 jobs, please consider resubmitting them over a longer period to spread out the load. Thanks for helping us keep MolProbity up and running for everyone.</strong></div>");
     }
