@@ -606,8 +606,11 @@ function displayUpload($context)
 	    $recent_reboot = True;
 	}
     } elseif ($host_os == "Darwin\n") { //Mac
-      	//on BSD/(Mac), sysctl kern.boottime reports uptime seconds in 5th column.  sed strips a comma.
-        $reboot_seconds = shell_exec("sysctl kern.boottime | awk '{print $5}' | sed 's/,//g'");
+      	//on BSD/(Mac), sysctl kern.boottime reports boot time (POSIX time) in 5th column.  sed strips a comma.
+	$mac_boot_seconds = shell_exec("sysctl kern.boottime | awk '{print $5}' | sed 's/,//g'");
+	//This gets the current POSIX time
+	$mac_now = shell_exec("date +%s");
+	$reboot_seconds = $mac_now - $mac_boot_seconds;
     	if($reboot_seconds < $recent_limit) {
 	    $recent_reboot = True;
 	}
