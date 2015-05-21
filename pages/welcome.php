@@ -59,7 +59,7 @@ function display($context)
     echo "</div>\n<br>\n<div class='pagecontent'>\n";
 ?>
 <table border='0' width='100%'><tr valign='top'><td width='45%'>
-<h3>Walk-thrus &amp; tutorials:</h3>
+<h3>Walkthroughs &amp; tutorials:</h3>
 <p><b><?php echo "<a href='".makeEventURL("onGoto", "helper_xray.php")."'>Evaluate X-ray structure</a>"; ?>:</b>
 Typical steps for a published X-ray crystal structure
 or one still undergoing refinement.</p>
@@ -83,9 +83,9 @@ from your web browser.</p>
 //      </ul>
     echo("<h3>What's new in 4.2:</h3><ul>
       <li>Cis-peptide identification, markup and statistics now available.</li>
-      <li>CaBLAM Calpha-based validation of protein backbone and secondary structure now available.</li>
+      <li>CaBLAM C&alpha;-based validation of protein backbone and secondary structure now available.</li>
       <li>Rotamer validation now uses <a href='http://kinemage.biochem.duke.edu/databases/top8000.php' target='_blank'>Top8000</a> rotamer distributions. Favored vs Allowed distinction introduced for rotamers.</li>
-      <li>New coloring scheme in multicrition chart encodes outlier severity at a glance.</li>
+      <li>New coloring scheme in multicriterion chart encodes outlier severity at a glance.</li>
       </ul>
       <h3>What's new in 4.1:</h3><ul>
       <li>Validation analysis now powered by CCTBX. Also adds geometry regularization for N/Q/H flip corrections. Read more about this change <a href='".makeEventURL("onGoto", "helper_cctbx.php")."'>here</a>.</li>
