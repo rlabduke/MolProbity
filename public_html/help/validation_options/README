@@ -1,0 +1,9 @@
+README for validation_options
+
+The document validation_options.html is intended as a brief guide to the validations and visualizations used in MolProbity. It should be updated accordingly as new features are added.
+
+The image and .css files used by validation_options.html are kept in the validation_options directory so that this directory can be easily extracted from MolProbity and used as a tutorial.
+
+The images are generally 300x300 pixels at 72dpi. The font for images constructed thus is 15pt Verdana.
+Wider images were made by combining multiple 300x300 pixel images with 5 pixel margins.
+.png would probably be a better format than .jpg, if someone wanted to remake the images.
