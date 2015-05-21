@@ -162,6 +162,7 @@ function pdbstat($pdbfilename)
     $compnd = "";
     $chainID_count = 0;     # number of records w/ non-blank chainID
     $segID_count = 0;       # number of records w/ non-blank segID
+    $nonECloudH = 0.0;      # fraction (?) of non electron cloud hydrogens
 
     // for testing whether there are any old format atom lines.
     $hashFile = file(MP_BASE_DIR."/lib/PDBv2toPDBv3.hashmap.txt");

@@ -59,7 +59,7 @@ function display($context)
     echo "</div>\n<br>\n<div class='pagecontent'>\n";
 ?>
 <table border='0' width='100%'><tr valign='top'><td width='45%'>
-<h3>Walk-thrus &amp; tutorials:</h3>
+<h3>Walkthroughs &amp; tutorials:</h3>
 <p><b><?php echo "<a href='".makeEventURL("onGoto", "helper_xray.php")."'>Evaluate X-ray structure</a>"; ?>:</b>
 Typical steps for a published X-ray crystal structure
 or one still undergoing refinement.</p>
@@ -85,9 +85,9 @@ Choose validations appropriate to a structure.</p>
 //      </ul>
     echo("<h3>What's new in 4.2:</h3><ul>
       <li>Cis-peptide identification, markup and statistics now available.</li>
-      <li>CaBLAM Calpha-based validation of protein backbone and secondary structure now available.</li>
+      <li>CaBLAM C&alpha;-based validation of protein backbone and secondary structure now available.</li>
       <li>Rotamer validation now uses <a href='http://kinemage.biochem.duke.edu/databases/top8000.php' target='_blank'>Top8000</a> rotamer distributions. Favored vs Allowed distinction introduced for rotamers.</li>
-      <li>New coloring scheme in multicrition chart encodes outlier severity at a glance.</li>
+      <li>New coloring scheme in multicriterion chart encodes outlier severity at a glance.</li>
       <li>Online tutorial explaining markup and methods [[CHRIS PUT A LINK HERE]]</li>
       </ul>
       <h3>What's new in 4.1:</h3><ul>
@@ -595,6 +595,37 @@ function displayEntries($context, $labbook)
 function displayUpload($context)
 {
     echo("<div class=feature><strong>Welcome to MolProbity 4.2 beta</strong></div>");
+
+    //This block prints a warning if the server was recently rebooted (30 mins).  I assume putting this check here is acceptable.  SML
+    $recent_reboot = False;
+    $recent_limit = 1800; //1800 seconds in half an hour
+    //This should be a function returning $recent_reboot but I don't know how in PHP
+    //These if statements determine what system we are on
+    $host_os = shell_exec("uname");
+    if($host_os == "Linux\n") {
+    	//on Linux, first column of /proc/uptime reports seconds of uptime
+        $reboot_seconds = shell_exec("awk '{print $1}' /proc/uptime");
+    	if($reboot_seconds < $recent_limit) {
+	    $recent_reboot = True;
+	}
+    } elseif ($host_os == "Darwin\n") { //Mac
+      	//on BSD/(Mac), sysctl kern.boottime reports boot time (POSIX time) in 5th column.  sed strips a comma.
+	$mac_boot_seconds = shell_exec("sysctl kern.boottime | awk '{print $5}' | sed 's/,//g'");
+	//This gets the current POSIX time
+	$mac_now = shell_exec("date +%s");
+	$reboot_seconds = $mac_now - $mac_boot_seconds;
+    	if($reboot_seconds < $recent_limit) {
+	    $recent_reboot = True;
+	}
+    } else { //give up on $recent_reboot
+    $recent_reboot = False;
+    }
+
+    if($recent_reboot)
+    {
+        echo("<div class=alert><strong>Our MolProbity server was recently rebooted. We apologize for the loss of any jobs you might have had running. Reboots are sometimes necessary if the server is overloaded. If you were running large jobs (more than 10,000 atoms) or more than 2 jobs, please consider resubmitting them over a longer period to spread out the load. Thanks for helping us keep our MolProbity downtimes rare.</strong></div>");
+    }
+
     echo makeEventForm("onUploadOrFetch") . "\n";
     //echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onCall", "upload_setup.php")."'>more options</a>)</h5>";
     echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onCall", "upload_setup.php")."' onclick='toggleUploadOptions(); return false' id='upload_options_link'>more options</a>)</h5>";
