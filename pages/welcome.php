@@ -72,7 +72,7 @@ as part of the refinement cycle.</p>
 <p><b><?php echo "<a href='".makeEventURL("onGoto", "helper_kinemage.php")."'>Work with kinemages</a>"; ?>:</b>
 Create and view interactive 3-D graphics
 from your web browser.</p>
-<p><b><a target="_blank" href="../public_html/help/validation_options/validation_options.html">Guide to validation options</a>:</b>
+<p><b><a target="_blank" href="help/validation_options/validation_options.html">Guide to validation options</a>:</b>
 Choose validations appropriate to a structure.</p>
 
 
@@ -88,7 +88,7 @@ Choose validations appropriate to a structure.</p>
       <li>CaBLAM C&alpha;-based validation of protein backbone and secondary structure now available.</li>
       <li>Rotamer validation now uses <a href='http://kinemage.biochem.duke.edu/databases/top8000.php' target='_blank'>Top8000</a> rotamer distributions. Favored vs Allowed distinction introduced for rotamers.</li>
       <li>New coloring scheme in multicriterion chart encodes outlier severity at a glance.</li>
-      <li><a target='_blank' href='../public_html/help/validation_options/validation_options.html'>Online tutorial</a> explaining markup and methods</li>
+      <li><a target='_blank' href='help/validation_options/validation_options.html'>Online tutorial</a> explaining markup and methods</li>
       </ul>
       <h3>What's new in 4.1:</h3><ul>
       <li>Validation analysis now powered by CCTBX. Also adds geometry regularization for N/Q/H flip corrections. Read more about this change <a href='".makeEventURL("onGoto", "helper_cctbx.php")."'>here</a>.</li>
