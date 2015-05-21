@@ -11,3 +11,4 @@ sources/
 feedback/
 tmp/
 *~
+.DS_Store
