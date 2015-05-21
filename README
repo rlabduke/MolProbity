@@ -66,5 +66,5 @@ webserver like Apache to get MolProbity served as a website available
 only on your computer (via localhost). You will need to install
 php-cli or a similar package, then run "php -S localhost:8000" in the
 MolProbity main directory. This sets up a non-public webserver. In a
-browser, navigate to http://localhost:8000/ , and you will have a
-functioning local MolProbity site.
+browser, navigate to http://localhost:8000/public_html/index.php , and
+you will have a functioning local MolProbity site.
