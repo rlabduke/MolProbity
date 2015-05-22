@@ -11,7 +11,7 @@ structure = open(sys.argv[1])
 inAMODEL = False
 
 for eachLine in structure:
-    card = eachLine[0:5]
+    card = eachLine[0:6]
     print card
     if (card == "MODEL "):
         if (inAMODEL):
