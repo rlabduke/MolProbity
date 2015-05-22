@@ -411,7 +411,7 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
     $tasks['cnsnames'] = "Convert CNS atom names to PDB standard (if needed)";
     $tasks['pdbstat2'] = "Re-analyze contents of final PDB file";
     //$tasks['remediate'] = "Convert PDB to version 3 format (if needed)";
-    $tasks['MODEL_consistency'] = "Checking MODEL/ENDMDL card consistency (if needed)"
+    $tasks['MODEL_consistency'] = "Checking MODEL/ENDMDL card consistency (if needed)";
 
     // Process file - this is the part that matters
     // Convert linefeeds to UNIX standard (\n):
