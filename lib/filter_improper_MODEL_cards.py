@@ -11,17 +11,19 @@ structure = open(sys.argv[1])
 inAMODEL = False
 
 for eachLine in structure:
-    if (eachLine[0:5] == "MODEL "):
+    card = eachLine[0:5]
+    print card
+    if (card == "MODEL "):
         if (inAMODEL):
             print "ERROR: found a MODEL card while in a model record!"
             exit(True)
         else:
             inAMODEL = True
             print "entered a MODEL"
-    elif ((eachLine[0:5] == "ATOM  ") and not inAMODEL): #not sure if we care about HETATM
+    elif ((card == "ATOM  ") and not inAMODEL): #not sure if we care about HETATM
         print "ERROR: found an ATOM card while not in a model record!"
         exit(True)
-    elif (eachLine[0:5] == "ENDMDL"):
+    elif (card == "ENDMDL"):
         if (inAMODEL):
             inAMODEL = False
             print "exited a MODEL"
