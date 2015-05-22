@@ -17,12 +17,14 @@ for eachLine in structure:
             exit(True)
         else:
             inAMODEL = True
+            print "entered a MODEL"
     elif ((eachLine[0:5] == "ATOM  ") and not inAMODEL): #not sure if we care about HETATM
         print "ERROR: found an ATOM card while not in a model record!"
         exit(True)
     elif (eachLine[0:5] == "ENDMDL"):
         if (inAMODEL):
             inAMODEL = False
+            print "exited a MODEL"
         else:
             print "ERROR: found ENDMDL while not in a model record!"
             exit(True)
