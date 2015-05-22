@@ -15,9 +15,9 @@ for eachLine in splitlines(structure):
             exit(True)
         else:
             inAMODEL = True
-    else if ((eachLine[0:5] == "ATOM  ") and not inAMODEL): #not sure if we care about HETATM
+    elif ((eachLine[0:5] == "ATOM  ") and not inAMODEL): #not sure if we care about HETATM
         exit(True)
-    else if (eachLine[0:5] == "ENDMDL"):
+    elif (eachLine[0:5] == "ENDMDL"):
         if (inAMODEL):
             inAMODEL = False
         else:
