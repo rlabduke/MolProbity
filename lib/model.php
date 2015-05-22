@@ -493,9 +493,14 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
     //Check MODEL card validity
     setProgress($tasks, 'MODEL_consistency'); // updates the progress display if running as a background job
     //Pseudocode
+    //if MODELs exist
     //call python script lib/filter_improper_MODEL_cards.py
     //emit error message and stop if input was bad
     //otherwise do nothing
+
+    if($stats['models'] != 0) {
+
+    }
 
     setProgress($tasks, 'pdbstat2'); // updates the progress display if running as a background job
     $stats = pdbstat($outpath);
