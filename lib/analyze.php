@@ -87,7 +87,9 @@ function runAnalysis($modelID, $opts)
     if($opts['chartCablamLow']) $tasks['cablam'] = "Do CaBLAM analysis (<code>cablam_validate</code>)";
     if($opts['chartBaseP'])     $tasks['base-phos'] = "Do RNA sugar pucker analysis";
     if($opts['chartSuite'])     $tasks['suitename'] = "Do RNA backbone conformations analysis";
-    if($opts['chartGeom'])      $tasks['geomValidation'] = "Do bond length and angle geometry analysis (<code>mp_geo</code>)";
+    if($model['stats']['use_cdl'])  $geomsg = "Using CDL";
+    else $geomsg = "";
+    if($opts['chartGeom'])      $tasks['geomValidation'] = "Do bond length and angle geometry analysis (<code>mp_geo</code>) $geomsg";
 
     if($opts['chartClashlist']) $tasks['clashlist'] = "Run <code>clashscore</code> to find bad clashes and clashscore";
     if($opts['chartImprove'])   $tasks['improve'] = "Suggest / report on fixes";
@@ -204,7 +206,7 @@ function runAnalysis($modelID, $opts)
     {
         setProgress($tasks, 'geomValidation'); // updates the progress display if running as a background job
         $geomfile = "$rawDir/$model[prefix]geomvalidation.data";
-        runValidationReport($infile, $geomfile);
+        runValidationReport($infile, $geomfile, $model['stats']['use_cdl']);
         //$protfile = "$rawDir/$model[prefix]protvalidation.data";
         //runValidationReport($infile, $protfile, "protein");
         //$rnafile = "$rawDir/$model[prefix]rnavalidation.data";
@@ -1511,10 +1513,10 @@ function findCablamOutliers($cablam)
 
 #{{{ runValidationReport - finds >4sigma geometric outliers for protein and RNA
 ############################################################################
-function runValidationReport($infile, $outfile)
+function runValidationReport($infile, $outfile, $use_cdl)
 {
     //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -$moltype -validate -outliers -sigma=0.0 $infile > $outfile");
-    exec("mmtbx.mp_geo pdb=$infile out_file=$outfile outliers_only=False bonds_and_angles=True");
+    exec("mmtbx.mp_geo pdb=$infile out_file=$outfile cdl=$use_cdl outliers_only=False bonds_and_angles=True");
 }
 #}}}########################################################################
 

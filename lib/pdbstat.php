@@ -163,6 +163,7 @@ function pdbstat($pdbfilename)
     $chainID_count = 0;     # number of records w/ non-blank chainID
     $segID_count = 0;       # number of records w/ non-blank segID
     $nonECloudH = 0.0;      # fraction (?) of non electron cloud hydrogens
+    $use_cdl = FALSE;       # use conformational-dependent library for bb bonds and angles
 
     // for testing whether there are any old format atom lines.
     $hashFile = file(MP_BASE_DIR."/lib/PDBv2toPDBv3.hashmap.txt");
@@ -201,6 +202,7 @@ function pdbstat($pdbfilename)
         elseif(startsWith($s, "REMARK"))
         {
             if(startsWith($s, 'REMARK   3   PROGRAM')) { $refiProg = trim(substr($s, 26, 44)); }
+            elseif(startsWith($s, 'REMARK   3    GEOSTD + MON.LIB. + CDL v1.2')) { $use_cdl = TRUE; }
             elseif(startsWith($s, 'REMARK   3   R VALUE'))
             {
                 if(preg_match('/^REMARK   3   R VALUE +?\(WORKING SET, NO CUTOFF\) : (0?\.0*[1-9][0-9]+)/', $s, $match)) { $rValue['work_nocut'] = $match[1]; }
@@ -441,6 +443,7 @@ function pdbstat($pdbfilename)
     $ret['v2atoms']         = $v2format;
     $ret['all_alts']        = count($allAlts);
     $ret['mc_alts']         = count($mcAlts);
+    $ret['use_cdl']         = $use_cdl;
 
     if(isset($resolution))  $ret['resolution']  = $resolution;
     if(isset($refiProg))    $ret['refiprog']    = $refiProg;

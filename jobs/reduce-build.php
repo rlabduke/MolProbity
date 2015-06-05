@@ -126,12 +126,12 @@ if($did_flip && $_SESSION['bgjob']['nqh_regularize'])
   {
     regularizeNQH($flipInpath, $outpath2, $temp);
   }
+  unset($_SESSION['models'][$_SESSION['lastUsedModelID']]);
   if(!file_exists($outpath2))
   {
     # We are deleting the reduced file because we'd rather not have users
     # play with the unregularized, nqh-flipped pdb. 
     unlink($flipInpath);
-    unset($_SESSION['models'][$_SESSION['lastUsedModelID']]);
     $_SESSION['lastUsedModelID'] = $prereduceid;
     unset($_SESSION['bgjob']['processID']);
     $_SESSION['bgjob']['endTime']   = time();
