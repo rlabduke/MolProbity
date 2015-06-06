@@ -202,7 +202,7 @@ function pdbstat($pdbfilename)
         elseif(startsWith($s, "REMARK"))
         {
             if(startsWith($s, 'REMARK   3   PROGRAM')) { $refiProg = trim(substr($s, 26, 44)); }
-            elseif(startsWith($s, 'REMARK   3    GEOSTD + MON.LIB. + CDL v1.2')) { $use_cdl = TRUE; }
+            elseif(startsWith($s, 'CDL v1.2')) { $use_cdl = TRUE; }
             elseif(startsWith($s, 'REMARK   3   R VALUE'))
             {
                 if(preg_match('/^REMARK   3   R VALUE +?\(WORKING SET, NO CUTOFF\) : (0?\.0*[1-9][0-9]+)/', $s, $match)) { $rValue['work_nocut'] = $match[1]; }
