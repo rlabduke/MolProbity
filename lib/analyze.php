@@ -1516,7 +1516,9 @@ function findCablamOutliers($cablam)
 function runValidationReport($infile, $outfile, $use_cdl)
 {
     //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -$moltype -validate -outliers -sigma=0.0 $infile > $outfile");
-    exec("mmtbx.mp_geo pdb=$infile out_file=$outfile cdl=$use_cdl outliers_only=False bonds_and_angles=True");
+    if($use_cdl) {$uc = "True";}
+    else {$uc = "False"; }
+    exec("mmtbx.mp_geo pdb=$infile out_file=$outfile cdl=$uc outliers_only=False bonds_and_angles=True");
 }
 #}}}########################################################################
 
