@@ -134,9 +134,9 @@ function summaryAnalysis($modelID)
     }
     if($optGeom)
     {
-      runValidationReport($pdbfile, "$rawDir/$model[prefix]geom.data", "protein");
-      $bonds = loadValidationBondReport("$rawDir/$model[prefix]geom.data", "protein");
-      $angles = loadValidationAngleReport("$rawDir/$model[prefix]geom.data", "protein");
+      runValidationReport($pdbfile, "$rawDir/$model[prefix]geom.data", $stats['use_cdl']);
+      $bonds = loadValidationBondReport("$rawDir/$model[prefix]geom.data");
+      $angles = loadValidationAngleReport("$rawDir/$model[prefix]geom.data");
     }
     //unlink($tmp);
 
