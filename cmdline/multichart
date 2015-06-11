@@ -92,8 +92,6 @@ if($hasProtein)
 
   runCaBLAM($pdbfile, "$rawDir/$model[prefix]cablam.data");
   $cablam = loadCablam("$rawDir/$model[prefix]cablam.data");
-
-  runValidationReport($pdbfile, "$rawDir/$model[prefix]geom.data", $stats['use_cdl']);
 }
 else
 {
@@ -107,6 +105,8 @@ else
 runClashscore($pdbfile, "$rawDir/$model[prefix]clashlist.txt", $reduce_blength);
 $clash = loadClashscore("$rawDir/$model[prefix]clashlist.txt");
 
+runValidationReport($pdbfile, "$rawDir/$model[prefix]geom.data", $stats['use_cdl']);
+
 if($hasNucAcid)
 {
   runBasePhosPerp($pdbfile, "$rawDir/$model[prefix]pperp.data");
@@ -114,8 +114,6 @@ if($hasNucAcid)
 
   runSuitenameReport($pdbfile, "$rawDir/$model[prefix]suite.data");
   $suites = loadSuitenameReport("$rawDir/$model[prefix]suite.data");
-
-  runValidationReport($pdbfile, "$rawDir/$model[prefix]rna.data", "rna");
 }
 else
 {
@@ -125,9 +123,9 @@ else
 
 if($hasProtein && $hasNucAcid)
 {
-  $bbonds = array_merge(loadValidationBondReport("$rawDir/$model[prefix]geom.data","protein"), loadValidationBondReport("$rawDir/$model[prefix]rna.data", "rna"));
+  $bbonds = array_merge(loadValidationBondReport("$rawDir/$model[prefix]geom.data","protein"), loadValidationBondReport("$rawDir/$model[prefix]geom.data", "rna"));
   if (count($bbonds) == 0) $bbonds = null;
-  $bangles = array_merge(loadValidationAngleReport("$rawDir/$model[prefix]geom.data", "protein"), loadValidationAngleReport("$rawDir/$model[prefix]rna.data", "rna"));
+  $bangles = array_merge(loadValidationAngleReport("$rawDir/$model[prefix]geom.data", "protein"), loadValidationAngleReport("$rawDir/$model[prefix]geom.data", "rna"));
   if (count($bangles) == 0) $bangles = null;
 }
 elseif($hasProtein)
@@ -139,9 +137,9 @@ elseif($hasProtein)
 }
 elseif($hasNucAcid)
 {
-  $bbonds = loadValidationBondReport("$rawDir/$model[prefix]rna.data", "rna");
+  $bbonds = loadValidationBondReport("$rawDir/$model[prefix]geom.data", "rna");
   if (count($bbonds) == 0) $bbonds = null;
-  $bangles = loadValidationAngleReport("$rawDir/$model[prefix]rna.data", "rna");
+  $bangles = loadValidationAngleReport("$rawDir/$model[prefix]geom.data", "rna");
   if (count($bangles) == 0) $bangles = null;
 }
 
