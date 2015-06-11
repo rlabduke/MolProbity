@@ -201,13 +201,13 @@ function summaryAnalysis($modelID)
         if($optClash)
         {
             if(isset($clash['clashes'][$cnit]))
-                echo ",".$clash['clashes'][$cnit].",".$clash['clashes-with'][$cnit]['srcatom'].",".$clash['clashes-with'][$cnit]['dstatom'].",".$clash['clashes-with'][$cnit]['dstcnit'];
+                echo ",".sprintf("%.2f",$clash['clashes'][$cnit]).",".$clash['clashes-with'][$cnit]['srcatom'].",".$clash['clashes-with'][$cnit]['dstatom'].",".$clash['clashes-with'][$cnit]['dstcnit'];
             else echo ",,,,";
         }
         if($optCbeta)
         {
             if(isset($badCbeta[$cnit]))
-                echo ",".$badCbeta[$cnit];
+                echo ",".sprintf("%.2f",$badCbeta[$cnit]);
             else echo ",";
         }
         if($optRota)
@@ -236,10 +236,10 @@ function summaryAnalysis($modelID)
         if($optGeom)
         {
           if(isset($bonds[$cnit]))
-            echo ",".$bonds[$cnit]['count'].",".$bonds[$cnit]['measure'].",".$bonds[$cnit]['value'].",".$bonds[$cnit]['sigma'];
+            echo ",".$bonds[$cnit]['count'].",".$bonds[$cnit]['measure'].",".$bonds[$cnit]['value'].",".sprintf("%.1f",$bonds[$cnit]['sigma']);
           else echo ",,,,";
           if(isset($angles[$cnit]))
-            echo ",".$angles[$cnit]['count'].",".$angles[$cnit]['measure'].",".$angles[$cnit]['value'].",".$angles[$cnit]['sigma'];
+            echo ",".$angles[$cnit]['count'].",".$angles[$cnit]['measure'].",".$angles[$cnit]['value'].",".sprintf("%.1f",$angles[$cnit]['sigma']);
           else echo ",,,,";
         }
         if($optCountOut)
