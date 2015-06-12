@@ -97,11 +97,11 @@ if(is_file($pdbFile) && endsWith($pdbFile, ".pdb"))
         foreach($vrProteinA as $vr)
             echo "$vr[resName]:$vr[type]:$vr[measure]:$vr[value]:$vr[sigma]:$vr[angCount]:$vr[outCount]\n";
         foreach($vrProteinL as $vr)
-            echo "$vr[resName]:$vr[type]:$vr[measure]:$vr[value]:$vr[sigma]:$vr[angCount]:$vr[outCount]\n";
+            echo "$vr[resName]:$vr[type]:$vr[measure]:$vr[value]:$vr[sigma]:$vr[bondCount]:$vr[outCount]\n";
         foreach($vrRNAa as $vr)
             echo "$vr[resName]:$vr[type]:$vr[measure]:$vr[value]:$vr[sigma]:$vr[angCount]:$vr[outCount]\n";
         foreach($vrRNAl as $vr)
-            echo "$vr[resName]:$vr[type]:$vr[measure]:$vr[value]:$vr[sigma]:$vr[angCount]:$vr[outCount]\n";
+            echo "$vr[resName]:$vr[type]:$vr[measure]:$vr[value]:$vr[sigma]:$vr[bondCount]:$vr[outCount]\n";
     }
     if($optSuitename)
     {
