@@ -38,6 +38,34 @@ OUTPUTS:
 //function someFunctionName() {}
 #}}}########################################################################
 
+#{{{ help - helptext for users
+function showhelp()
+{
+  echo("The residue-analysis script provides residue-by-residue validation statistics.
+residue-analysis accepts certain flags and any number of .pdb files
+
+By default, all validation are ON.
+These flags deactivate selected validations:
+  -noclash
+  -nogeom
+  -nocbeta
+  -norota
+  -norama
+  -noomega
+  -nopucker
+  -nosuite
+  -nocount
+
+  -noprotein (alias for -nocbeta, -norota, -norama, and -noomega)
+  -norna     (alias for -nopucker and -nosuite)
+
+  -outliers_only (return only resiudes containing outliers)
+  -h, -help (display this help)
+
+");
+}
+#}}}
+
 # MAIN - the beginning of execution for this page
 ############################################################################
 // Default options
@@ -47,6 +75,8 @@ $optRota      = true;
 $optRama      = true;
 $optOmega     = true;
 $optGeom      = true;
+$optPucker    = true;
+$optSuite     = true;
 $optCountOut  = true;
 $outliersOnly = false;
 
@@ -60,11 +90,31 @@ if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
     elseif($arg == '-norama')        $optRama = false;
     elseif($arg == '-noomega')       $optOmega = false;
     elseif($arg == '-nogeom')        $optGeom = false;
+    elseif($arg == '-nopucker')      $optPucker = false;
+    elseif($arg == '-nosuite')       $optSuite = false;
     elseif($arg == '-nocount')       $optCountOut = false;
     elseif($arg == '-outliers_only') $outliersOnly = true;
+    elseif($arg == '-noprotein')
+    {
+      $optCbeta = false;
+      $optRota = false;
+      $optRama = false;
+      $optOmega = false;
+    }
+    elseif($arg == '-norna')
+    {
+      $optPucker = false;
+      $optSuite = false;
+    }
+    elseif($arg == '-h' or $arg == '-help')
+    {
+      showhelp();
+      die();
+    }
     else                        $pdbFileList[] = $arg;
 }
 if(count($pdbFileList) == 0)
+    showhelp();
     die("Must provide at least one PDB file on the command line!\n");
 
 echo "#file_name,x-H_type,residue,res_high_B,mc_high_B";
