@@ -179,13 +179,13 @@ function summaryAnalysis($modelID)
           if(isset($badCbeta[$cnit]))         $outCountSep++;
           if(isset($bonds[$cnit]))
           {
-            if($bonds[$cnit]['count']+0 > 0) $outCountSep++;
+            if($bonds[$cnit]['outCount']+0 > 0) $outCountSep++;
           }
           if(isset($angles[$cnit]))
           {
-            if($angles[$cnit]['count']+0 > 0) $outCountSep++;
+            if($angles[$cnit]['outCount']+0 > 0) $outCountSep++;
           }
-          if((isset($badCbeta[$cnit]))or((isset($bonds[$cnit]))and($bonds[$cnit]['count']+0 > 0))or((isset($angles[$cnit]))and($angles[$cnit]['count']+0 > 0))) {
+          if((isset($badCbeta[$cnit]))or((isset($bonds[$cnit]))and($bonds[$cnit]['outCount']+0 > 0))or((isset($angles[$cnit]))and($angles[$cnit]['outCount']+0 > 0))) {
             $outCount++;
           }
           //echo ",".$outCount.",".$outCountSep;
