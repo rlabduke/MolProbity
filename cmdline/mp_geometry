@@ -88,7 +88,7 @@ if(is_file($pdbFile) && endsWith($pdbFile, ".pdb"))
     if($optBonds)
     {
         $outfile = "$rawDir/$model[prefix]bonds.data";
-        runValidationReport($pdbFile, $outfile);
+        runValidationReport($pdbFile, $outfile, $model['stats']['use_cdl']);
         $vrProteinA = loadValidationAngleReport($outfile,"protein");
         $vrProteinL = loadValidationBondReport($outfile,"protein");
         $vrRNAa = loadValidationAngleReport($outfile,"rna");
@@ -123,7 +123,6 @@ if(is_file($pdbFile) && endsWith($pdbFile, ".pdb"))
         foreach($ppreport as $vr)
             echo "$vr[resType]:$vr[chainID]:$vr[resNum]:$vr[insCode]:$vr[altloc]:$vr[Pdist5]:$vr[Pdist3]:$vr[delta]:$vr[deltaOut]:$vr[epsilon]:$vr[epsilonOut]:$vr[outlier]\n";
     }
-
     mpDestroySession();
 } else {
     die("File must have a \"pdb\" extension.\n");
