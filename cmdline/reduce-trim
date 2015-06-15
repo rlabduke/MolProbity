@@ -92,7 +92,8 @@ foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
       "reduce -quiet -trim -allalt $inFile ...\n";
     }
     if($optNuclear) $blength = 'nuclear';
-    reduceTrim($inDir.'/'.$inFile, $outDir.'/'.$inFile, $blength);
+    $outFile = str_replace('.pdb','-trimmed.pdb',$inFile);
+    reduceTrim($inDir.'/'.$inFile, $outDir.'/'.$outFile, $blength);
 }
 
 ############################################################################
