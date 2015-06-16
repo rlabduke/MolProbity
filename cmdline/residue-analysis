@@ -39,6 +39,7 @@ OUTPUTS:
 #}}}########################################################################
 
 #{{{ help - helptext for users
+############################################################################
 function showhelp()
 {
   echo("The residue-analysis script provides residue-by-residue validation statistics.
@@ -64,6 +65,7 @@ These flags deactivate selected validations:
 
 ");
 }
+############################################################################
 #}}}
 
 # MAIN - the beginning of execution for this page
@@ -114,8 +116,10 @@ if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
     else                        $pdbFileList[] = $arg;
 }
 if(count($pdbFileList) == 0)
+{
     showhelp();
     die("Must provide at least one PDB file on the command line!\n");
+}
 
 echo "#file_name,x-H_type,residue,res_high_B,mc_high_B";
 if($optClash)   echo ",worst_clash,src_atom,dst_atom,dst_residue";
@@ -123,6 +127,8 @@ if($optCbeta)   echo ",CB_dev";
 if($optRota)    echo ",rotamer_score,rotamer_eval,rotamer";
 if($optRama)    echo ",rama_score,rama_eval,rama_type";
 if($optOmega)   echo ",omega,omega_eval,omega_type";
+if($optPucker)  echo ",somestuff";
+if($optSuite)   echo ",otherstuff";
 if($optGeom)    echo ",num_length_out,worst_length,worst_length_value,worst_length_sigma,num_angle_out,worst_angle,worst_angle_value,worst_angle_sigma";
 if($optCountOut) echo ",outlier_count,outlier_count_sep_geom";
 echo "\n";
@@ -130,7 +136,7 @@ echo "\n";
 
 function summaryAnalysis($modelID)
 {
-    global $optClash, $optCbeta, $optRota, $optRama, $optOmega, $optGeom, $optCountOut, $outliersOnly;
+    global $optClash, $optCbeta, $optRota, $optRama, $optOmega, $optPucker, $optSuite, $optGeom, $optCountOut, $outliersOnly;
     $out = "";
 
     //$filename = basename($infile);
@@ -188,6 +194,16 @@ function summaryAnalysis($modelID)
       $bonds = loadValidationBondReport("$rawDir/$model[prefix]geom.data", "protein");
       $angles = loadValidationAngleReport("$rawDir/$model[prefix]geom.data", "protein");
     }
+    if($optSuite)
+    {
+      runSuitenameReport($pdbfile, "$rawDir/$model[prefix]suite.data");
+      $suites = loadSuitenameReport("$rawDir/$model[prefix]suite.data");
+    }
+    if($optPucker)
+    {
+      runBasePhosPerp($pdbfile, "$rawDir/$model[prefix]pperp.data");
+      $pperp = loadBasePhosPerp("$rawDir/$model[prefix]pperp.data");
+    }
     //unlink($tmp);
 
     foreach($res as $cnit)
@@ -238,6 +254,23 @@ function summaryAnalysis($modelID)
           if((isset($badCbeta[$cnit]))or((isset($bonds[$cnit]))and($bonds[$cnit]['outCount']+0 > 0))or((isset($angles[$cnit]))and($angles[$cnit]['outCount']+0 > 0))) {
             $outCount++;
           }
+          if(isset($suites[$cnit]))
+          {
+            if($suites[$cnit]['isOutlier'])
+            {
+              $outCount++;
+              $outCountSep++;
+            }
+          }
+          if(isset($pperp[$cnit]))
+          {
+            echo "PPERP FOUND!";
+            if($pperp[$cnit]['outlier'])
+            {
+              $outCount++;
+              $outCountSep++;
+            }
+          }
           //echo ",".$outCount.",".$outCountSep;
         }
 
@@ -283,15 +316,70 @@ function summaryAnalysis($modelID)
                 echo ",".$omega[$cnit]['omega'].",".$omega[$cnit]['conf'].",".$omega[$cnit]['type'];
             else echo ",,,";
         }
+        if($optPucker)
+        {
+          echo "optPucker\n";
+          echo key($pperp)."\n";
+          $purple = array('a' => 'aa', 'b' => 'bb', 'c' => 'cc');
+          while($item = current($pperp))
+          {
+            echo key($pperp)."\n";
+            next($pperp);
+          }
+          //die("done\n");
+          #echo $cnit;
+          if(isset($pperp))
+          {
+            echo "setPucker\n";
+            if($pperp[$cnit]['outlier'])
+            {
+              //delta vs epsilon outlier
+              $puckeroutliertype = '';
+              if($pperp[$cnit]['deltaOut'] && $pperp[$cnit]['epsilonOut'])
+                $puckeroutliertype = 'delta and epsilon';
+              elseif($pperp[$cnit]['deltaOut'])
+                $puckeroutliertype = 'delta';
+              elseif($pperp[$cnit]['epsilonOut'])
+                $puckeroutliertype = 'epsilon';
+              // implied pucker
+              $impliedpucker = '';
+              if($pperp[$cnit]['3Pdist'] < 3.0)
+                $impliedpucker = "C2'-endo";
+              elseif($pperp[$cnit]['3Pdist'] >= 3.0)
+                $impliedpucker = "C3'-endo";
+              //output
+              echo ",".$puckeroutliertype.",".$impliedpucker;
+            }
+            else echo ",setpuck?,setimp";
+          }
+          else echo ",puck?,imp";
+        }
+        if($optSuite)
+        {
+          //THINGS!!
+          $purple = array('a' => 'aa', 'b' => 'bb', 'c' => 'cc');
+          while($item = current($suites))
+          {
+            echo key($suites)."\n";
+            next($suites);
+          }
+          die("done\n");
+          //suitename, suiteness
+          if(isset($suites[$cnit]))
+            echo ",".$suites[$cnit]['conformer'].",".sprintf("%.2f",$suites[$cnit]['suiteness']);
+          else
+            echo ",OO,PP";
+        }
         if($optGeom)
         {
           if(isset($bonds[$cnit]))
-            echo ",".$bonds[$cnit]['count'].",".$bonds[$cnit]['measure'].",".$bonds[$cnit]['value'].",".sprintf("%.1f",$bonds[$cnit]['sigma']);
+            echo ",".$bonds[$cnit]['outCount'].",".$bonds[$cnit]['measure'].",".$bonds[$cnit]['value'].",".sprintf("%.1f",$bonds[$cnit]['sigma']);
           else echo ",,,,";
           if(isset($angles[$cnit]))
-            echo ",".$angles[$cnit]['count'].",".$angles[$cnit]['measure'].",".$angles[$cnit]['value'].",".sprintf("%.1f",$angles[$cnit]['sigma']);
+            echo ",".$angles[$cnit]['outCount'].",".$angles[$cnit]['measure'].",".$angles[$cnit]['value'].",".sprintf("%.1f",$angles[$cnit]['sigma']);
           else echo ",,,,";
         }
+        
         if($optCountOut)
         {
          /* $outCount = 0;
