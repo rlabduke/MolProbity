@@ -303,7 +303,7 @@ function summaryAnalysis($modelID)
                 //else echo ",".$rota[$cnit]['rotamer'];
                 echo ",".$rota[$cnit]['rotamer'];
             }
-            else echo ",,";
+            else echo ",,,";
         }
         if($optRama)
         {
@@ -362,7 +362,7 @@ function summaryAnalysis($modelID)
             echo ",".$angles[$cnit]['outCount'].",".$angles[$cnit]['measure'].",".$angles[$cnit]['value'].",".sprintf("%.1f",$angles[$cnit]['sigma']);
           else echo ",,,,";
         }
-        
+
         if($optCountOut)
         {
          /* $outCount = 0;
