@@ -93,7 +93,8 @@ foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
       else echo "reduce -build $inFile ...\n";
     }
     if($optNuclear) $blength = 'nuclear';
-    reduceBuild($inDir.'/'.$inFile, $outDir.'/'.$inFile, $blength);
+    $outFile = str_replace('.pdb','FH.pdb',$inFile);
+    reduceBuild($inDir.'/'.$inFile, $outDir.'/'.$outFile, $blength);
 }
 
 ############################################################################
