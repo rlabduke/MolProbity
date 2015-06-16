@@ -109,10 +109,10 @@ def split_pdb(pdb_file, outdir, origdir, gzip_file = False):
   model_files = []
   keep_lines = False
   pdb_name, ext = os.path.splitext(os.path.basename(pdb_file))
-  print pdb_name
+  #print pdb_name
   if pdb_name.startswith("pdb") and pdb_name.endswith(".ent"):
     pdb_name = pdb_name[3:-4]
-  if "-cyranged" in pdb_name:
+  if "-cyranged.pdb" in pdb_name:
     pdb_name = pdb_name[:-4]
     
   if not os.path.exists(os.path.join(outdir, "results", pdb_name[:4])):
@@ -155,6 +155,7 @@ def divide_pdbs(in_dir, outdir, size_limit):
     #print arg
     list_of_lists = []
     pdb_list = []
+    pdb_dict = {}
     list_size = 0
     list_of_lists.append(pdb_list)
     #print files
@@ -163,39 +164,75 @@ def divide_pdbs(in_dir, outdir, size_limit):
       #arg_file = os.path.join(arg, f)
       full_file = os.path.abspath(os.path.join(in_dir, f))
       #print full_file
+      # go through all files and group ones with same PDB_ID
       if (not os.path.isdir(full_file)):
         root, ext = os.path.splitext(f)
-        #pdb_name, ext = os.path.splitext(os.path.basename(pdb_file))
-        #print pdb_name+"\n"
-        if (ext == ".pdb"):
-          #print f
+        pdb_name = ""
+        if (ext == ".pdb") or (ext == ".ent"):
           pdb_name = root
-          if root.startswith("pdb") and root.endswith(".ent"):
-            pdb_name = root[3:-4]
-          
-          if not os.path.exists(os.path.join(outdir, "results", pdb_name[:4])):
-            os.makedirs(os.path.join(outdir, "results", pdb_name[:4]))
-          if (list_size <= size_limit):
-            pdb_list.append(full_file)
-            #print pdb_list
-            list_size = list_size + os.path.getsize(full_file)
-          else:
-            pdb_list = []
-            pdb_list.append(full_file)
-            list_of_lists.append(pdb_list)
-            list_size = os.path.getsize(full_file)
         if (ext == ".gz"):
           root2, ext = os.path.splitext(root)
           if (ext == ".ent") or (ext == ".pdb"):
-            if (list_size <= size_limit):
-              pdb_list.append(full_file)
-              #print pdb_list
-              list_size = list_size + os.path.getsize(full_file)/0.6 # assumming ~60%compression by gzip
-            else: 
-              pdb_list = []
-              pdb_list.append(full_file)
-              list_of_lists.append(pdb_list)
-              list_size = os.path.getsize(full_file)/0.6
+            pdb_name = root2
+        if (pdb_name != ""):
+          pdb_id = ""
+          if pdb_name.startswith("pdb"):
+            pdb_id = pdb_name[3:]
+          if "-cyranged" in pdb_name:
+            pdb_id = pdb_name[0:4]
+          if pdb_id in pdb_dict:
+            pdb_set = pdb_dict[pdb_id]
+            pdb_set.append(full_file)
+          else:
+            pdb_dict[pdb_id] = [full_file]
+    #pprint.pprint(pdb_dict)
+    # use the dictionary of pdb_id -> multiple pdbfiles to create separated condor jobs
+    pdb_keys = sorted(pdb_dict.keys())
+    for key in pdb_keys:
+      pdb_files = pdb_dict[key]
+      if (list_size <= size_limit):
+        pdb_list.extend(pdb_files)
+        for pdb_file in pdb_files:
+          comp_factor = 1
+          if pdb_file.endswith(".gz"):
+            comp_factor = 0.6 # assumming ~60%compression by gzip
+          list_size = list_size+os.path.getsize(pdb_file)/comp_factor
+      else:
+        pdb_list = []
+        pdb_list.extend(pdb_files)
+        list_of_lists.append(pdb_list)
+        for pdb_file in pdb_files:
+          comp_factor = 1
+          if pdb_file.endswith(".gz"):
+            comp_factor = 0.6 # assumming ~60%compression by gzip
+          list_size = os.path.getsize(pdb_file)/comp_factor
+#          if (list_size <= size_limit):
+#            pdb_list.append(full_file)
+#            #print pdb_list
+#            list_size = list_size + os.path.getsize(full_file)
+#          else:
+#            pdb_list = []
+#            pdb_list.append(full_file)
+#            list_of_lists.append(pdb_list)
+#            list_size = os.path.getsize(full_file)
+#        if (ext == ".gz"):
+#          root2, ext = os.path.splitext(root)
+#          if (ext == ".ent") or (ext == ".pdb"):
+#            pdb_id = root2
+#            if pdb_id.startswith("pdb") and pdb_id.endswith(".ent"):
+#              pdb_id = pdb_id[3:-4]
+#            if "-cyranged.pdb" in pdb_id:
+#              pdb_id = pdb_id[0:4]
+#            
+#            if (list_size <= size_limit):
+#              pdb_list.append(full_file)
+#              #print pdb_list
+#              list_size = list_size + os.path.getsize(full_file)/0.6 # assumming ~60%compression by gzip
+#            else: 
+#              pdb_list = []
+#              pdb_list.append(full_file)
+#              list_of_lists.append(pdb_list)
+#              list_size = os.path.getsize(full_file)/0.6
     if len(list_of_lists) > 10000:
       sys.stderr.write("\n**ERROR: More than 10000 jobs needed, try choosing a larger -limit\n")
       sys.exit()
@@ -205,6 +242,7 @@ def divide_pdbs(in_dir, outdir, size_limit):
 #}}}
 
 #{{{ split_pdbs_to_dirs
+# splits pdbs into separated models in the pdb/orig directory
 def split_pdbs_to_dirs(outdir, list_of_pdblists):
   for indx, pdbs in enumerate(list_of_pdblists):
     num = '{0:0>4}'.format(indx)
@@ -274,14 +312,20 @@ def write_mpanalysis_dag(outdir, list_of_pdblists, bondtype, sans_exists, update
     #out.write("Jobstate_log logs/mol"+num+".jobstate.log\n")
   
     for buildtype in ("build", "nobuild"):
+      build_flag = "build"
+      if buildtype == "nobuild":
+        build_flag = "nobuild9999"
       out.write("Job reducer"+buildtype+num+" reduce.sub\n")
-      out.write("VARS reducer"+buildtype+num+" ARGS= \""+" ".join((repr(sleep_seconds), os.path.join(out_pdb_dir, num, "reduce-"+buildtype), buildtype+"9999", bondtype, os.path.join(out_pdb_dir, num, "orig")))+"\"\n")
-      out.write("VARS reducer"+buildtype+num+" NUMBER=\""+buildtype+num+"\"\n\n")
+      out.write("VARS reducer"+buildtype+num+" ARGS= \""+" ".join((repr(sleep_seconds), os.path.join(out_pdb_dir, num, "reduce-"+buildtype), build_flag, bondtype, os.path.join(out_pdb_dir, num, "orig")))+"\"\n")
+      out.write("VARS reducer"+buildtype+num+" NUMBER=\""+buildtype+num+"\"\n")
+      out.write("RETRY reducer"+buildtype+num+" 3\n\n")
 
-      if sleep_seconds > 120:
-        sleep_seconds = sleep_seconds + 1
+      if sleep_seconds > 30:
+        sleep_seconds = sleep_seconds + .1
       else:
-        sleep_seconds = sleep_seconds + 4
+        sleep_seconds = sleep_seconds + .5
+      if sleep_seconds > 300:
+        sleep_seconds = 300
 
       parent_childs = "" # create parent_childs part of dag file now so only have to loop once thru pdbs
       base_pdbs = []
@@ -374,17 +418,43 @@ for dir in "$@"
 do
 for pdb in "$dir"/*.pdb
 do
-sleep 1
+sleep 3
 pdbbase=`basename $pdb .pdb` #should be just the name of the pdb without the .pdb extension
 if [ $buildtype = "build" ]
   then
     pdbbase="${pdbbase}F"
 fi
+# deletes file if it already exists, I think some jobs were failing because
+# condor would evict reduce jobs and some empty PDB files were getting made
+# but then wouldn't ever get fixed.
+if [ -f ${outdir}/${pdbbase}H.pdb ]
+  then
+    echo "${outdir}/${pdbbase}H.pdb seems to exist, deleting to make sure" >&2
+    filesize=$(wc -c < ${outdir}/${pdbbase}H.pdb)
+    #if [ $filesize -le 1000 ]
+    #  then
+    #    echo "${outdir}/${pdbbase}H.pdb seems to be very small, deleting" >&2
+    rm ${outdir}/${pdbbase}H.pdb
+    #fi
+fi
 if [ ! -f ${outdir}/${pdbbase}H.pdb ]
   then
-    echo "Error code pre reduce: $? \\n" >&2
-    ./reduce -q -trim $pdb | ./reduce -q -${buildtype} -${bondtype} - > ${outdir}/${pdbbase}H.pdb
-    echo "Error code post reduce: $? \\n" >&2
+    echo "Error code pre reduce: $?" >&2
+    echo "trying to write PDB ${outdir}/${pdbbase}H.pdb" >&2
+    ./reduce -q -trim $pdb | ./reduce -q -${buildtype} -${bondtype} - 1> ${outdir}/${pdbbase}H.pdb 2>&2
+    echo "Error code post reduce: $?" >&2
+    trimsize=$(./reduce -q -trim $pdb | wc -c)
+    if [ $trimsize == 0 ]
+      then
+        echo "reduce trim seems to have created an empty file for ${pdbbase}H.pdb, please check" >&2
+        exit 5
+    fi
+    hsize=$(wc -c < ${outdir}/${pdbbase}H.pdb)
+    if [ $hsize == 0 ]
+      then
+        echo "reduce seems to have created an empty file: ${outdir}/${pdbbase}H.pdb, please check" >&2 
+        exit 6
+    fi
 fi
 done
 done
@@ -449,14 +519,14 @@ def reap(the_cmd, pdb):
     the_cmd.wait()
     err = the_cmd.stderr.read()
     if err != "":
-        sys.stderr.write(pdb+" had the following error\\n"+err)
+        sys.stderr.write(pdb+" had the following error in reap\\n"+err)
 
 #apparently if the output gets too long the system can hang due to the pipes overflowing
 def long_reap(the_cmd, pdb):
     results = the_cmd.communicate()
     err = results[1]
     if err != "":
-        sys.stderr.write(pdb+" had the following error\\n"+err)
+        sys.stderr.write(pdb+" had the following error in long reap\\n"+err)
     return results[0]
 
 if not os.path.exists("results"):
@@ -471,7 +541,7 @@ for dir_name in sys.argv[2:]:
     base_con_dir = os.path.dirname(os.path.dirname(os.path.dirname(dir_name)))
     for file_name in sorted(os.listdir(dir_name)):
         pdb = os.path.join(dir_name, file_name)
-        #sys.stderr.write(pdb+" {script} analysis\\n")
+        sys.stderr.write("starting "+pdb+" {script} analysis\\n")
         s_time = time.time()
         pdbbase = os.path.basename(pdb)[:-4]
         model_num = pdbbase.split("_")[1][0:3]
@@ -480,30 +550,30 @@ for dir_name in sys.argv[2:]:
         if not os.path.exists("results/"+pdb_code):
             os.makedirs("results/"+pdb_code)
         
-        if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-clashlist"):
+        if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-clashlist") or os.stat("results/"+pdb_code+"/"+pdbbase+"-clashlist").st_size == 0:
             reap(syscmd("results/"+pdb_code+"/"+pdbbase+"-clashlist", "./clashlist", pdb, '40', '10', '{bondtype}'), pdbbase)
-        if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-ramalyze"):
+        if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-ramalyze") or os.stat("results/"+pdb_code+"/"+pdbbase+"-ramalyze").st_size == 0:
             reap(syscmd("results/"+pdb_code+"/"+pdbbase+"-ramalyze","java","-cp","{0}/lib/chiropraxis.jar", "chiropraxis.rotarama.Ramalyze", "-raw", "-quiet", pdb), pdbbase)
-        if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-rotalyze"):
+        if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-rotalyze") or os.stat("results/"+pdb_code+"/"+pdbbase+"-rotalyze").st_size == 0:
             reap(syscmd("results/"+pdb_code+"/"+pdbbase+"-rotalyze","java","-cp","{0}/lib/chiropraxis.jar", "chiropraxis.rotarama.Rotalyze", pdb), pdbbase)
-        if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-dangle_rna"):
+        if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-dangle_rna") or os.stat("results/"+pdb_code+"/"+pdbbase+"-dangle_rna").st_size == 0:
             reap(syscmd("results/"+pdb_code+"/"+pdbbase+"-dangle_rna","java","-cp","{0}/lib/dangle.jar", "dangle.Dangle", "-rna", "-validate", "-outliers", "-sigma=0.0", pdb), pdbbase)
-        if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-dangle_protein"):
+        if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-dangle_protein") or os.stat("results/"+pdb_code+"/"+pdbbase+"-dangle_protein").st_size == 0:
             reap(syscmd("results/"+pdb_code+"/"+pdbbase+"-dangle_protein","java","-cp","{0}/lib/dangle.jar", "dangle.Dangle", "-protein", "-validate", "-outliers", "-sigma=0.0", pdb), pdbbase)
-        if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-dangle_dna"):
+        if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-dangle_dna") or os.stat("results/"+pdb_code+"/"+pdbbase+"-dangle_dna").st_size == 0:
             reap(syscmd("results/"+pdb_code+"/"+pdbbase+"-dangle_dna","java","-cp","{0}/lib/dangle.jar", "dangle.Dangle", "-dna", "-validate", "-outliers", "-sigma=0.0", pdb), pdbbase)
-        if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-dangle_ss"):
+        if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-dangle_ss") or os.stat("results/"+pdb_code+"/"+pdbbase+"-dangle_ss").st_size == 0:
             reap(syscmd("results/"+pdb_code+"/"+pdbbase+"-dangle_ss","java","-cp","{0}/lib/dangle.jar", "dangle.Dangle", "ss", pdb), pdbbase)
-        if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-dangle_tauomega"):
+        if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-dangle_tauomega") or os.stat("results/"+pdb_code+"/"+pdbbase+"-dangle_tauomega").st_size == 0:
             reap(syscmd("results/"+pdb_code+"/"+pdbbase+"-dangle_tauomega","java","-cp","{0}/lib/dangle.jar", "dangle.Dangle", "tau", "omega", pdb), pdbbase)
-        if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-dangle_maxb"):
+        if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-dangle_maxb") or os.stat("results/"+pdb_code+"/"+pdbbase+"-dangle_maxb").st_size == 0:
             reap(syscmd("results/"+pdb_code+"/"+pdbbase+"-dangle_maxb","java","-cp","{0}/lib/dangle.jar", "dangle.Dangle", "maxb maxB /..../", pdb), pdbbase)
-        if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-prekin_pperp"):
+        if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-prekin_pperp") or os.stat("results/"+pdb_code+"/"+pdbbase+"-prekin_pperp").st_size == 0:
             reap(syscmd("results/"+pdb_code+"/"+pdbbase+"-prekin_pperp","{0}/bin/linux/prekin", "-pperptoline", "-pperpdump", pdb), pdbbase)
-        if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-cbdev"):
+        if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-cbdev") or os.stat("results/"+pdb_code+"/"+pdbbase+"-cbdev").st_size == 0:
             reap(syscmd("results/"+pdb_code+"/"+pdbbase+"-cbdev", "{0}/bin/linux/prekin", "-cbdevdump", pdb), pdbbase)
         
-        if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-suitename"):
+        if not os.path.exists("results/"+pdb_code+"/"+pdbbase+"-suitename") or os.stat("results/"+pdb_code+"/"+pdbbase+"-suitename").st_size == 0:
             cmd1 = syscmd(subprocess.PIPE, "java","-Xmx512m", "-cp","{0}/lib/dangle.jar", "dangle.Dangle", "rnabb", pdb)
             cmd1_out = cmd1.stdout.read()
             cmd1.wait()
@@ -685,6 +755,8 @@ def prep_dirs(indir, update_scripts=False):
     indir_base = os.path.basename(os.path.realpath(indir))
     outdir = os.path.join(indir, "condor_sub_files_"+indir_base)
     #print update_scripts
+    if os.path.exists(outdir) and not update_scripts:
+      shutil.rmtree(outdir)
     if not os.path.exists(outdir):
       os.makedirs(outdir)
       os.makedirs(os.path.join(outdir,"logs"))
@@ -699,9 +771,9 @@ def prep_dirs(indir, update_scripts=False):
       for tst_file in os.listdir(os.path.join(outdir,"logs")):
         os.remove(os.path.join(outdir,"logs", tst_file))
       #sys.exit()
-    else:
-      sys.stderr.write("\"condor_sub_files\" directory detected in \""+indir+"\", please delete it before running this script\n")
-      sys.exit()
+    #else:
+    #  sys.stderr.write("\"condor_sub_files\" directory detected in \""+indir+"\", please delete it before running this script\n")
+    #  sys.exit()
     return outdir
 #}}}
 

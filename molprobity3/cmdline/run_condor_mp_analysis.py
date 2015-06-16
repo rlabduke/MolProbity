@@ -5,6 +5,8 @@ from optparse import OptionParser
 import time
 import gzip
 import pprint
+sys.path.append((os.path.dirname(os.path.realpath(__file__))))
+#print sys.path
 import make_condor_files2
 #make_condor_files = imp.load_source("make_files", "make_condor_files2.py")
 #divide_pdbs = imp.load_source("divide_pdbs", "make_condor_files2.py")
@@ -17,7 +19,7 @@ def parse_cmdline():
     dest="total_file_size_limit", default=10000000,
     help="change total file size in each separate job")
   parser.add_option("-t", "--type", action="store", type="string",
-    dest="bond_type", default="nuclear",
+    dest="bond_type", default="none",
     help="specify hydrogen bond length for clashes (nuclear or ecloud)")
   parser.add_option("-u", "--updatescripts", action="store_true",
     dest="update_scripts", default=False,
@@ -44,7 +46,7 @@ def parse_cmdline():
   if not opts.sans_location is "none" and not os.path.isdir(opts.sans_location):
     sys.stderr.write("\n**ERROR: sans location must be a directory!\n")
     sys.exit(help())
-  else:
+  elif not opts.sans_location is "none" and os.path.isdir(opts.sans_location):
     opts.sans_location = os.path.realpath(opts.sans_location)
   if opts.total_file_size_limit < 5000000:
     sys.stderr.write("\n**ERROR: -limit cannot be less than 5000000 (5M)\n")
@@ -93,6 +95,7 @@ def rebuild_args(parser, opts, indir):
       rebuilt_args.append(parser._get_all_options()[1:][i].get_opt_string())
       if not opt_value == True:
         rebuilt_args.append(repr(opts.__dict__[dest]).replace("'", ""))
+  print " ".join(rebuilt_args)
   return " ".join(rebuilt_args)
 #}}}
 
@@ -172,12 +175,17 @@ def trim_pdb(range_dict, pdb_file, do_gzip = False):
       if line.startswith("ATOM"):
         #print ":"+line[21]+":"
         #print ":"+line[22:26]+":"
+        nucacid_residues = ["  G", "  A", "  C", "  U", " DG", " DA", " DC", " DT"]
+        resname = line[17:20]
         chain = line[21]
         res = line[22:26]
-        if chain in range_dict.keys() and int(res) in range_dict[chain]:
-          outfile.write(line)
-        elif "" in range_dict.keys() and int(res) in range_dict[""]:
-          outfile.write(line)
+        #fixes bug where cyrange doesn't indicate nucleic acid residues by chain so they don't get removed
+        #since cyrange is currently only protein only
+        if not resname in nucacid_residues: 
+          if chain in range_dict.keys() and int(res) in range_dict[chain]:
+            outfile.write(line)
+          elif "" in range_dict.keys() and int(res) in range_dict[""]:
+            outfile.write(line)
     outfile.close()
 
             
@@ -198,10 +206,13 @@ def process_file(f):
 for arg in sys.argv[1:]:
   if os.path.isdir(arg):
     for f in os.listdir(arg):
+      #print "pre-check "+f
       if not (f.endswith("-cyranged.pdb") or f.endswith("-cyranged.pdb.gz")) and (f.endswith(".pdb") or f.endswith(".ent") or f.endswith(".gz")):
+        #print f
         process_file(os.path.join(arg, f))
   elif os.path.isfile(arg):
-    process_file(os.path.realpath(arg))
+    if not (arg.endswith("-cyranged.pdb") or arg.endswith("-cyranged.pdb.gz")) and (arg.endswith(".pdb") or arg.endswith(".ent") or arg.endswith(".gz")):
+      process_file(os.path.realpath(arg))
 """
 #}}}
 
@@ -250,7 +261,7 @@ queue
 #}}}
 
 #{{{ write_dag
-def write_dag(indir, outdir, list_of_pdblists, rebuilt_args):
+def write_dag(indir, outdir, list_of_pdblists, rebuilt_args, mp_outdir):
   config_name = "supermpdag.config"
   config_file = os.path.join(os.path.realpath(outdir), config_name)
   config = open(config_file, 'wr')
@@ -273,8 +284,11 @@ def write_dag(indir, outdir, list_of_pdblists, rebuilt_args):
       parent_childs.append("cyranger"+num)
     
     out.write("Job mpprep mpprep.sub\n")
-    out.write("VARS mpprep ARGS=\""+indir+" "+rebuilt_args+"\"\n\n")
-    out.write("PARENT "+" ".join(parent_childs)+" CHILD mpprep\n")
+    out.write("VARS mpprep ARGS=\""+indir+" "+rebuilt_args+"\"\n")
+    out.write("PARENT "+" ".join(parent_childs)+" CHILD mpprep\n\n")
+    
+    out.write("SUBDAG EXTERNAL mpanalysis mpanalysisdag.dag DIR "+mp_outdir+"\n")
+    out.write("PARENT mpprep CHILD mpanalysis\n\n")
 #}}}
 
 #{{{ prep_dirs
@@ -285,6 +299,7 @@ def prep_dirs(indir):
     os.makedirs(outdir)
     os.makedirs(os.path.join(outdir, "cylogs"))
     os.makedirs(os.path.join(outdir, "mppreplogs"))
+    os.makedirs(os.path.join(indir, "condor_sub_files_"+indir_base))
   except OSError:
     sys.stderr.write("\"cylogs\" directory detected in \""+indir+"\"\n")
   return outdir
@@ -298,6 +313,7 @@ def make_files(indir, rebuilt_args, file_size_limit, cyrange_loc, do_requirement
     molprobity_home = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
     indir_base = os.path.basename(os.path.realpath(indir))
     outdir = prep_dirs(indir)
+    mp_outdir = os.path.join(indir, "condor_sub_files_"+indir_base)
     #make_condor_files2.prep_dirs(indir, update_scripts)
     if do_requirement == "bmrb":
       condor_req = "requirements = ((TARGET.FileSystemDomain == \"bmrb.wisc.edu\") || (TARGET.FileSystemDomain == \".bmrb.wisc.edu\"))"
@@ -310,11 +326,14 @@ def make_files(indir, rebuilt_args, file_size_limit, cyrange_loc, do_requirement
       make_condor_files2.write_file(outdir, "cyranger.sub", cyranger_sub.format(req=condor_req, cy_loc=cyrange_loc))
       make_condor_files2.write_file(outdir, "cyranger.py", cyranger_py, 0755)
     make_condor_files2.write_file(outdir, "mpprep.sub", mpprep_sub.format(req=condor_req, mp_loc=molprobity_home))
-    write_dag(indir, outdir, list_of_lists, rebuilt_args)
+    write_dag(indir, outdir, list_of_lists, rebuilt_args, mp_outdir)
 #}}}
 
 if __name__ == "__main__":
   opts, indir, rebuilt_args = parse_cmdline()
+  if opts.bond_type == "none":
+    sys.stderr.write("\n**ERROR: User must specify bond type (nuclear or ecloud)\n")
+    sys.exit(parser.print_help())
   make_files(indir, rebuilt_args, opts.total_file_size_limit, opts.cyrange_location, opts.requirement)
   #make_condor_files2.make_files(indir, 
   #                             opts.total_file_size_limit,

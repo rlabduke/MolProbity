@@ -91,7 +91,7 @@ def list_residues(model):
 #}}}
 
 #{{{ residue_analysis_old
-def residue_analysis(files, quiet):
+def residue_analysis_old(files, quiet):
   list_res = list_residues(files[0])
   #print list_res
   out = ""
@@ -263,6 +263,7 @@ def residue_analysis(files, quiet, sans_location):
             "PDB_model_num",
             "Hydrogen_positions",
             "MolProbity_flips",
+            "Cyrange_core_flag",
             "Two_letter_chain_ID",
             "PDB_strand_ID",
             "PDB_residue_no",
@@ -317,7 +318,7 @@ def residue_analysis(files, quiet, sans_location):
             "Structure_validation_residue_list_ID"
   ]
   
-  output_dir = files[14]
+  output_dir = os.path.realpath(files[14])
   if sans_location is not "none":
     output_str = os.path.join(output_dir, (os.path.basename(files[0])[:-4])[:4]+"-residue-str.csv")
     loop = setup_nmrstar(header[2:], output_str, files[0], sans_location)
@@ -360,9 +361,9 @@ def residue_analysis(files, quiet, sans_location):
   suites = molparser.loadSuitenameReport(files[10])
   badSuites = molparser.findSuitenameOutliers(suites)
   
-  csv_out = ""
+  csv_out = []
   if not quiet:
-    csv_out = "#"+(":".join(header))
+    csv_out.append("#"+(":".join(header)))
     
   for res in list_res:
     out = []
@@ -385,17 +386,21 @@ def residue_analysis(files, quiet, sans_location):
     else:
       out.append(files[15]) # Hydrogen_positions
     out.append(files[16]) # MolProbity_flips
+    if "-cyranged" in os.path.basename(files[0]):
+      out.append("core")
+    else:
+      out.append("full") # Cyrange_core_flag (tells whether this structure is core or full
     out.append(res[0:2]) # Two_letter_chain_ID
     out.append(res[1:2]) # PDB_strand_ID
     out.append(res[2:6]) # PDB_residue_no
     out.append(res[6:7]) # PDB_ins_code
     out.append(res[7:10]) # PDB_residue_name
     
-    out.append("?") # "Assembly_ID",       bmrb specific, to be filled in later
-    out.append("?") # "Entity_assembly_ID",bmrb specific, to be filled in later
-    out.append("?") # "Entity_ID",         bmrb specific, to be filled in later
-    out.append("?") # "Comp_ID",           bmrb specific, to be filled in later
-    out.append("?") # "Comp_index_ID",     bmrb specific, to be filled in later
+    out.append("") # "Assembly_ID",       bmrb specific, to be filled in later
+    out.append("") # "Entity_assembly_ID",bmrb specific, to be filled in later
+    out.append("") # "Entity_ID",         bmrb specific, to be filled in later
+    out.append("") # "Comp_ID",           bmrb specific, to be filled in later
+    out.append("") # "Comp_index_ID",     bmrb specific, to be filled in later
     
     if res in clash['clashes']:
       outCount += 1
@@ -507,9 +512,9 @@ def residue_analysis(files, quiet, sans_location):
     out.extend([outCountSep,outCount])
 
     # This is for the entry_ID and list_ID
-    out.extend(["?","?"])
+    out.extend(["",""])
     
-    csv_out = csv_out+'\n'+":".join(str(e) for e in out)
+    csv_out.append(":".join(str(e) for e in out))
     if sans_location is not "none":
       loop.addData(["." if x=="" else x for x in out][2:])
 
@@ -518,7 +523,7 @@ def residue_analysis(files, quiet, sans_location):
   #if os.path.isfile(output_file):
   #  sys.stderr.write("output_file: "+output_file+' exists\n')
   with open(output_file, "a+") as out_write:
-    out_write.write(csv_out)
+    out_write.write("\n".join(csv_out))
     out_write.write('\n')
     
   #sys.stderr.write(" ".join(os.listdir(os.path.dirname(output_str))))
@@ -530,6 +535,7 @@ def residue_analysis(files, quiet, sans_location):
 
 # for testing
 # py-residue-analysis.py -s '/home/vbc3/programs/sans/python' ../../../1ubqH.pdb 1 1ubqH_001-clashlist 1ubqH_001-cbdev 1ubqH_001-rotalyze 1ubqH_001-ramalyze 1ubqH_001-dangle_protein 1ubqH_001-dangle_rna 1ubqH_001-dangle_dna 1ubqH_001-prekin_pperp 1ubqH_001-suitename 1ubqH_001-dangle_maxb 1ubqH_001-dangle_tauomega 1ubqH_001-dangle_ss .. cmd1 cmd2
+# py-residue-analysis.py -s '/home/vbc3/programs/sans/python' ../../../1UBQ.pdb 1 1UBQ_001FH-clashlist 1UBQ_001FH-cbdev 1UBQ_001FH-rotalyze 1UBQ_001FH-ramalyze 1UBQ_001FH-dangle_protein 1UBQ_001FH-dangle_rna 1UBQ_001FH-dangle_dna 1UBQ_001FH-prekin_pperp 1UBQ_001FH-suitename 1UBQ_001FH-dangle_maxb 1UBQ_001FH-dangle_tauomega 1UBQ_001FH-dangle_ss .. cmd1 cmd2
 
 # Takes as input a whole series of different results files from MP analysis
 # e.g. clashlist, ramalyze, rotalyze, dangle, pperp, cbdev, etc.

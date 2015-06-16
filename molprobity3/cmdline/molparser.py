@@ -142,7 +142,7 @@ def loadClashlist(datafile):
         clasheswith[res2] = {'srcatom': atm2, 'dstatom': atm1, 'dstcnit': res1}
   ret["clashes"] = clashes;
   ret["clashes-with"] = clasheswith;
-      
+
   return ret;
 #}}}
 
@@ -842,6 +842,7 @@ def oneline_analysis(files, quiet, sans_location):
             "PDB_model_num",
             "Hydrogen_positions",
             "MolProbity_flips",
+            "Cyrange_core_flag",
             "Assembly_ID",
             "Clashscore",
             "Clashscore_B_under_40",
@@ -885,6 +886,11 @@ def oneline_analysis(files, quiet, sans_location):
   else:
     out.append(files[15]) # Hydrogen_positions
   out.append(files[16]) # MolProbity_flips
+  
+  if "-cyranged" in os.path.basename(files[0]):
+    out.append("core")
+  else:
+    out.append("full") # Cyrange_core_flag (tells whether this structure is core or full
   
   out.append("") # "Assembly_ID",       bmrb specific, to be filled in later
   
