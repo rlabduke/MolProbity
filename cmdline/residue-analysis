@@ -191,8 +191,10 @@ function summaryAnalysis($modelID)
     if($optGeom)
     {
       runValidationReport($pdbfile, "$rawDir/$model[prefix]geom.data", $model['stats']['use_cdl']);
-      $bonds = loadValidationBondReport("$rawDir/$model[prefix]geom.data", "protein");
-      $angles = loadValidationAngleReport("$rawDir/$model[prefix]geom.data", "protein");
+      $bonds = array_merge(loadValidationBondReport("$rawDir/$model[prefix]geom.data","protein"), loadValidationBondReport("$rawDir/$model[prefix]geom.data", "rna"));
+      $angles = array_merge(loadValidationAngleReport("$rawDir/$model[prefix]geom.data","protein"), loadValidationAngleReport("$rawDir/$model[prefix]geom.data", "rna"));
+      if(count($bonds) == 0) $bonds = null;
+      if(count($angles) == 0) $angles = null;
     }
     if($optSuite)
     {
