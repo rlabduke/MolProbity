@@ -127,7 +127,7 @@ if($optCbeta)   echo ",CB_dev";
 if($optRota)    echo ",rotamer_score,rotamer_eval,rotamer";
 if($optRama)    echo ",rama_score,rama_eval,rama_type";
 if($optOmega)   echo ",omega,omega_eval,omega_type";
-if($optPucker)  echo ",somestuff";
+if($optPucker)  echo ",pucker_outlier_type,implied_pucker";
 if($optSuite)   echo ",otherstuff";
 if($optGeom)    echo ",num_length_out,worst_length,worst_length_value,worst_length_sigma,num_angle_out,worst_angle,worst_angle_value,worst_angle_sigma";
 if($optCountOut) echo ",outlier_count,outlier_count_sep_geom";
@@ -264,7 +264,6 @@ function summaryAnalysis($modelID)
           }
           if(isset($pperp[$cnit]))
           {
-            echo "PPERP FOUND!";
             if($pperp[$cnit]['outlier'])
             {
               $outCount++;
@@ -318,19 +317,8 @@ function summaryAnalysis($modelID)
         }
         if($optPucker)
         {
-          echo "optPucker\n";
-          echo key($pperp)."\n";
-          $purple = array('a' => 'aa', 'b' => 'bb', 'c' => 'cc');
-          while($item = current($pperp))
-          {
-            echo key($pperp)."\n";
-            next($pperp);
-          }
-          //die("done\n");
-          #echo $cnit;
           if(isset($pperp))
           {
-            echo "setPucker\n";
             if($pperp[$cnit]['outlier'])
             {
               //delta vs epsilon outlier
@@ -350,20 +338,12 @@ function summaryAnalysis($modelID)
               //output
               echo ",".$puckeroutliertype.",".$impliedpucker;
             }
-            else echo ",setpuck?,setimp";
+            else echo ",,";
           }
-          else echo ",puck?,imp";
+          else echo ",,";
         }
         if($optSuite)
         {
-          //THINGS!!
-          $purple = array('a' => 'aa', 'b' => 'bb', 'c' => 'cc');
-          while($item = current($suites))
-          {
-            echo key($suites)."\n";
-            next($suites);
-          }
-          die("done\n");
           //suitename, suiteness
           if(isset($suites[$cnit]))
             echo ",".$suites[$cnit]['conformer'].",".sprintf("%.2f",$suites[$cnit]['suiteness']);

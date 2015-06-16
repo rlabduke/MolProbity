@@ -592,7 +592,7 @@ function loadBasePhosPerp($datafile)
                                 . $entry['insCode']
                                 . $entry['altloc']
                                 . str_pad($entry['resType'], 3, ' ', STR_PAD_RIGHT);
-            $ret[] = $entry;
+            $ret[$entry['resName']] = $entry;
         }
     }
     return $ret;
