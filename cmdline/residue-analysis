@@ -128,7 +128,7 @@ if($optRota)    echo ",rotamer_score,rotamer_eval,rotamer";
 if($optRama)    echo ",rama_score,rama_eval,rama_type";
 if($optOmega)   echo ",omega,omega_eval,omega_type";
 if($optPucker)  echo ",pucker_outlier_type,implied_pucker";
-if($optSuite)   echo ",otherstuff";
+if($optSuite)   echo ",suitename,d-1dg,triage,suiteness";
 if($optGeom)    echo ",num_length_out,worst_length,worst_length_value,worst_length_sigma,num_angle_out,worst_angle,worst_angle_value,worst_angle_sigma";
 if($optCountOut) echo ",outlier_count,outlier_count_sep_geom";
 echo "\n";
@@ -344,11 +344,12 @@ function summaryAnalysis($modelID)
         }
         if($optSuite)
         {
-          //suitename, suiteness
+          //suitename, delta-1deltagamma, triage, suiteness
+          //Note: ['bin'] can contain the values 'inc ' for incomplete and 'trig' for triaged
           if(isset($suites[$cnit]))
-            echo ",".$suites[$cnit]['conformer'].",".sprintf("%.2f",$suites[$cnit]['suiteness']);
+            echo ",".$suites[$cnit]['conformer'].",".$suites[$cnit]['bin'].",".$suites[$cnit]['triage'].",".sprintf("%.2f",$suites[$cnit]['suiteness']);
           else
-            echo ",OO,PP";
+            echo ",,,,";
         }
         if($optGeom)
         {
