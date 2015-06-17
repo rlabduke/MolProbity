@@ -42,10 +42,11 @@ OUTPUTS:
 ############################################################################
 function showhelp()
 {
-  echo("The residue-analysis script provides residue-by-residue validation statistics.
+  echo("
+The residue-analysis script provides residue-by-residue validation statistics.
 residue-analysis accepts certain flags and any number of .pdb files
 
-By default, all validation are ON.
+By default, all validations are ON.
 These flags deactivate selected validations:
   -noclash
   -nogeom
@@ -128,7 +129,7 @@ if($optRota)    echo ",rotamer_score,rotamer_eval,rotamer";
 if($optRama)    echo ",rama_score,rama_eval,rama_type";
 if($optOmega)   echo ",omega,omega_eval,omega_type";
 if($optPucker)  echo ",pucker_outlier_type,implied_pucker";
-if($optSuite)   echo ",suitename,d-1dg,triage,suiteness";
+if($optSuite)   echo ",suitename,d-1dg_bin,triage,suiteness";
 if($optGeom)    echo ",num_length_out,worst_length,worst_length_value,worst_length_sigma,num_angle_out,worst_angle,worst_angle_value,worst_angle_sigma";
 if($optCountOut) echo ",outlier_count,outlier_count_sep_geom";
 echo "\n";
