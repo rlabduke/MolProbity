@@ -322,14 +322,8 @@ function summaryAnalysis($modelID)
                 $puckeroutliertype = 'delta';
               elseif($pperp[$cnit]['epsilonOut'])
                 $puckeroutliertype = 'epsilon';
-              // implied pucker
-              $impliedpucker = '';
-              if($pperp[$cnit]['3Pdist'] < 3.0)
-                $impliedpucker = "C2'-endo";
-              elseif($pperp[$cnit]['3Pdist'] >= 3.0)
-                $impliedpucker = "C3'-endo";
               //output
-              echo ",".$puckeroutliertype.",".$impliedpucker;
+              echo ",".$puckeroutliertype.",".$pperp[$cnit]['probpucker'];
             }
             else echo ",,";
           }

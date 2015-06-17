@@ -572,6 +572,11 @@ function loadBasePhosPerp($datafile)
             $line = explode(':', $line);
             $deltaOut = (trim($line[8]) ? true : false);
             $epsilonOut = (trim($line[10]) ? true : false);
+            $perpdist = $line[6] + 0;
+            if($perpdist < 2.9) //2.9A is dist cutoff for C2' vs C3' endo pucker  
+              $probpucker = "C2'-endo";
+            else
+              $probpucker = "C3'-endo";
             //echo strtoupper(substr($line[3],0,-1))."\n";
             $entry = array(
                 'resType'   => strtoupper(substr($line[2],1,-1)),
@@ -581,11 +586,13 @@ function loadBasePhosPerp($datafile)
                 'altloc'    => ' ', //limitation - doesn't currently handle altloc
                 'Pdist5'    => $line[5] + 0,
                 'Pdist3'    => $line[6] + 0,
+                '3Pdist'    => $line[6] + 0, //Some functions use this name instead of 'Pdist3'
                 'delta'     => $line[7] + 0,
                 'deltaOut'  => $deltaOut,
                 'epsilon'   => $line[9] + 0,
                 'epsilonOut'=> $epsilonOut,
-                'outlier'   => ($deltaOut || $epsilonOut)
+                'outlier'   => ($deltaOut || $epsilonOut),
+                'probpucker'=> $probpucker
             );
             $entry['resName']   = $entry['chainID']
                                 . str_pad($entry['resNum'], 4, ' ', STR_PAD_LEFT)
