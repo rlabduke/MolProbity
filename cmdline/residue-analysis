@@ -38,11 +38,9 @@ OUTPUTS:
 //function someFunctionName() {}
 #}}}########################################################################
 
-#{{{ help - helptext for users
+#{{{ helptext for users
 ############################################################################
-function showhelp()
-{
-  echo("
+$helptext = "
 The residue-analysis script provides residue-by-residue validation statistics.
 residue-analysis accepts certain flags and any number of .pdb files
 
@@ -64,8 +62,7 @@ These flags deactivate selected validations:
   -outliers_only (return only resiudes containing outliers)
   -h, -help (display this help)
 
-");
-}
+";
 ############################################################################
 #}}}
 
@@ -109,18 +106,11 @@ if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
       $optPucker = false;
       $optSuite = false;
     }
-    elseif($arg == '-h' or $arg == '-help')
-    {
-      showhelp();
-      die();
-    }
+    elseif($arg == '-h' or $arg == '-help') die($helptext);
     else                        $pdbFileList[] = $arg;
 }
 if(count($pdbFileList) == 0)
-{
-    showhelp();
-    die("Must provide at least one PDB file on the command line!\n");
-}
+  die($helptext."Must provide at least one PDB file on the command line!\n");
 
 echo "#file_name,x-H_type,residue,res_high_B,mc_high_B";
 if($optClash)   echo ",worst_clash,src_atom,dst_atom,dst_residue";

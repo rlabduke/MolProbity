@@ -188,10 +188,8 @@ function summaryAnalysis($modelID)
 //function someFunctionName() {}
 #}}}########################################################################
 
-#{{{ showhelp - helptext for users
-function showhelp()
-{
-  echo("
+#{{{ helptext for users
+$helptext = "
 The oneline-analysis script provide whole-structure validation statistics
 oneline-analysis accepts certain flags and a directory of .pdb files
 
@@ -206,18 +204,20 @@ These flags deactivate selected validations:
   -nocbeta     C-beta atom position deviations
   -norota      sidechain rotamer outliers
   -norama      backbone ramachandran outliers
+  -noprotein   turns off all the above protein-specific validations
+If clash, rota, and rama are all on, MPscore and pct rank will be reported
 
 By default, all RNA validations are OFF.
 These flags activate selected validations:
   -dopucker    ribose sugar pucker validation
   -dosuite     RNA backbone suite validation
+  -dorna       turns on all the above rna-specific validations
 
 Other options:
   -h, -help    prints this help text
   -q           'quiet' mode, suppresses printing of column headers
 
-");
-}
+";
 #}}}
 
 # MAIN - the beginning of execution for this page
@@ -247,17 +247,20 @@ if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
     elseif($arg == '-nogeom')   $optGeom = false;
     elseif($arg == '-dopucker') $optPuck = true;
     elseif($arg == '-dosuite')  $optSuite = true;
-    elseif($arg == '-h' or $arg == '-help')
+    elseif($arg == '-noprotein')
     {
-      showhelp();
-      die();
+      $optCbeta = false;
+      $optRota = false;
+      $optRama = false;
     }
+    elseif($arg == '-dorna')
+    {
+      $optPuck = true;
+      $optSuite = true;
+    }
+    elseif($arg == '-h' or $arg == '-help')                      die($helptext);
     elseif(!isset($inDir))      $inDir = $arg;
-    else
-    {
-      showhelp();
-      die("Too many or unrecognized arguments: '$arg'\n");
-    }
+    else          die($helptext."Too many or unrecognized arguments: '$arg'\n");
 }
 
 if($optMode == 'filter')
@@ -293,16 +296,8 @@ if($optMode == 'filter')
     die(); // remaining code is for "batch" mode
 }
 
-if(!isset($inDir))
-{
-  showhelp();
-  die("No input directory specified.\n");
-}
-elseif(!is_dir($inDir))
-{
-  showhelp();
-  die("Input directory '$inDir' does not exist.\n");
-}
+if(!isset($inDir))       die($helptext."No input directory specified.\n");
+elseif(!is_dir($inDir))  die($helptext."Input directory '$inDir' does not exist.\n");
 
 #{{{ column headers
 if($optVerbose)
