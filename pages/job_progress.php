@@ -89,7 +89,7 @@ function display($context)
         echo "<pre>\n";
         echo "         1         2         3         4         5         6         7         8\n";
         echo "12345678901234567890123456789012345678901234567890123456789012345678901234567890\n";
-        echo "ATOM     32  N  AARG A  -3      11.281  86.699  94.383  0.50 35.88           N\n";  
+        echo "ATOM     32  N  AARG A  -3      11.281  86.699  94.383  0.50 35.88           N\n";
         echo "ATOM     33  N  BARG A  -3      11.296  86.721  94.521  0.50 35.60           N\n";
         echo "ATOM     34  CA AARG A  -3      12.353  85.696  94.456  0.50 36.67           C\n";
         echo "ATOM     35  CA BARG A  -3      12.333  85.862  95.041  0.50 36.42           C\n";
@@ -118,7 +118,7 @@ function display($context)
         $refresh    = "10; URL=$url";
         echo $this->pageHeader("CCTBX job failed");//, "none", $refresh);
         echo "<p>It appears that your CCTBX-powered job failed.\n";
-        echo "<br>This is probably due to a syntax error in one of the CCTBX scripts.!\n";
+        echo "<br>This is probably due to a syntax error in one of the CCTBX scripts!\n";
         echo "<br>See the session error log for hints, and please report the bug using the Feedback tool.\n";
         echo "<p><a href='$url'>Click here</a> to continue.\n";
         echo $this->pageFooter();

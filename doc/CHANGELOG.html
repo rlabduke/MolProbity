@@ -122,9 +122,18 @@
 - Changes to CCTBX dependencies, particularly the addition of the 'base'
   directory which holds python and other dependencies. This has been tested
   successfully on OSX and linux 64-bit
+- For bond angles and lengths, the conformation-dependent library (CDL) from 
+  Dunbrack and Karplus will be used rather than Engh and Huber if the PDB header
+  has a REMARK3 with string "CDL v1.2"
+- A new version of Probe that separates the 'bad' overlaps into 'bad' and 'worse'.
+  0.4 <= bad < 0.5 and 0.5 >= worse.  This is not a MolProbity change but is 
+  concurrent with the server version change, but kinemages produced by MolProbity
+  have new categories based on this change.
+- Due to CCTBX integration, PDBs MUST have their element column. We have an
+  automatic error handler to tell the user about this problem and how to fix it.
 
 ### 4.1 ###
-- Extensive changes, not fully documented here.
+- Extensive changes, not fully documented here (or anywhere, whoops).
 - Molprobity now runs using cctbx, the same architecture underlying PHENIX
 - Most (but not all) analysis is now handled through commandline calls to phenix
   programs, e.g. phenix.ramalyze and phenix.clashscore

@@ -89,6 +89,7 @@ Choose validations appropriate to a structure.</p>
       <li>Rotamer validation now uses <a href='http://kinemage.biochem.duke.edu/databases/top8000.php' target='_blank'>Top8000</a> rotamer distributions. Favored vs Allowed distinction introduced for rotamers.</li>
       <li>New coloring scheme in multicriterion chart encodes outlier severity at a glance.</li>
       <li><a target='_blank' href='help/validation_options/validation_options.html'>Online tutorial</a> explaining markup and methods</li>
+      <li>We now use a conformation-dependent library (CDL) from Dunbrack and Karplus for geometry analysis if requested.
       </ul>
       <h3>What's new in 4.1:</h3><ul>
       <li>Validation analysis now powered by CCTBX. Also adds geometry regularization for N/Q/H flip corrections. Read more about this change <a href='".makeEventURL("onGoto", "helper_cctbx.php")."'>here</a>.</li>
@@ -594,8 +595,6 @@ function displayEntries($context, $labbook)
 */
 function displayUpload($context)
 {
-    echo("<div class=feature><strong>Welcome to MolProbity 4.2 beta</strong></div>");
-
     //This block prints a warning if the server was recently rebooted (30 mins).  I assume putting this check here is acceptable.  SML
     $recent_reboot = False;
     $recent_limit = 1800; //1800 seconds in half an hour
