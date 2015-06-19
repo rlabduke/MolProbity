@@ -830,11 +830,11 @@ function makeProbeDots($infile, $outfile, $hbDots = false, $vdwDots = false, $cl
 
     // -dotmaster adds a "dots" master -- useful when using this kin with Probe remote update
     if ($clashLimit == null) {
-      exec("phenix.probe $options -4H -quiet -noticks -nogroup -dotmaster -mc -het -self 'ogt$ocutval' $infile >> $outfile");
+      exec("phenix.probe $options -sepworse -4H -quiet -noticks -nogroup -dotmaster -mc -het -self 'ogt$ocutval' $infile >> $outfile");
       //exec("probe $options -4H -quiet -noticks -nogroup -dotmaster -mc -het -self 'ogt$ocutval' $infile >> $outfile");
       //exec("probe $options -4H -quiet -noticks -nogroup -dotmaster -mc -het -stdbonds -self 'ogt$ocutval' $infile >> $outfile");
     } else {
-      exec("phenix.probe $options -DIVlow$clashLimit -4H -quiet -noticks -nogroup -dotmaster -mc -het -self 'ogt$ocutval' $infile >> $outfile");
+      exec("phenix.probe $options -sepworse -DIVlow$clashLimit -4H -quiet -noticks -nogroup -dotmaster -mc -het -self 'ogt$ocutval' $infile >> $outfile");
       //exec("probe $options -DIVlow$clashLimit -4H -quiet -noticks -nogroup -dotmaster -mc -het -self 'ogt$ocutval' $infile >> $outfile");
       //exec("probe $options -DIVlow$clashLimit -4H -quiet -noticks -nogroup -dotmaster -mc -het -stdbonds -self 'ogt$ocutval' $infile >> $outfile");
     }
