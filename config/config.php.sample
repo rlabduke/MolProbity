@@ -83,6 +83,10 @@ define("MP_BIN_PATH", "/usr/local/php5/bin:/opt/j2/bin:/usr/java/jdk/bin");
 //    ');
 
 // If defined, this banner will display at the top of all pages!
+//Works on mac (?)
 //define("MP_BANNER", "The system will go down for maintainance in ".(int)((strtotime("12pm today")-time())/60)." minutes.  Please download your data and log off.");
+//definitely works on linux
+//define("MP_BANNER", "The system will go down for maintainance in ".(int)((strtotime("1200")-time())/60)." minutes.  Please download your data and log off before that time.");
 
 ?>
+
