@@ -129,9 +129,11 @@
   0.4 <= bad < 0.5 and 0.5 >= worse.  This is not a MolProbity change but is 
   concurrent with the server version change, but kinemages produced by MolProbity
   have new categories based on this change.
+- Due to CCTBX integration, PDBs MUST have their element column. We have an
+  automatic error handler to tell the user about this problem and how to fix it.
 
 ### 4.1 ###
-- Extensive changes, not fully documented here.
+- Extensive changes, not fully documented here (or anywhere, whoops).
 - Molprobity now runs using cctbx, the same architecture underlying PHENIX
 - Most (but not all) analysis is now handled through commandline calls to phenix
   programs, e.g. phenix.ramalyze and phenix.clashscore
