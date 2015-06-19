@@ -804,16 +804,16 @@ function microtimeSubtract($a, $b)
 }
 #}}}########################################################################
 
-#{{{ is_elementerror - oarses the error to see if its a element format isuse
+#{{{ is_elementerror - parses the error to see if it is an element format issue
 ############################################################################
 /**
-* parses the error to see if its a element format isuse
-* $errfile suold be MP_DIR_SYSTEM."/errors"
+* parses the error to see if it is an element format isuse
+* $errfile should be MP_DIR_SYSTEM."/errors"
 */
 function is_elementerror($errfile)
 {
     $s1 = "Conflicting scattering type symbols";
-    $s2 = "unknown scattering type";
+    $s2 = "Unknown scattering type";
     $s3 = "Unknown chemical element type";
     $a = file($errfile);
     if(!file_exists($errfile)) return false;
