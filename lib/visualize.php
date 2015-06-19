@@ -1629,12 +1629,9 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
             {
                 //echo "pperp ".$item['resName']."\n";
                 $reasons = array();
-                if    ($item['deltaOut'] && $item['epsilonOut'] && $item['3Pdist'] < 3.0)  $reasons[] = "&delta; & &epsilon; outlier <br><small>(P-perp distance implies C2'-endo)</small>";
-                elseif($item['deltaOut'] && $item['epsilonOut'] && $item['3Pdist'] >= 3.0) $reasons[] = "&delta; & &epsilon; outlier <br><small>(P-perp distance implies C3'-endo)</small>";
-                elseif($item['deltaOut'] && $item['3Pdist'] < 3.0)    $reasons[] = "&delta; outlier <br><small>(P-perp distance implies C2'-endo)</small>";
-                elseif($item['deltaOut'] && $item['3Pdist'] >= 3.0)   $reasons[] = "&delta; outlier <br><small>(P-perp distance implies C3'-endo)</small>";
-                elseif($item['epsilonOut'] && $item['3Pdist'] < 3.0)  $reasons[] = "&epsilon; outlier <br><small>(P-perp distance implies C2'-endo)</small>";
-                elseif($item['epsilonOut'] && $item['3Pdist'] >= 3.0) $reasons[] = "&epsilon; outlier <br><small>(P-perp distance implies C3'-endo)</small>";
+                if    ($item['deltaOut'] && $item['epsilonOut'])  $reasons[] = "&delta; & &epsilon; outlier <br><small>(P-perp distance implies $item[probpucker])</small>";
+                elseif($item['deltaOut'])    $reasons[] = "&delta; outlier <br><small>(P-perp distance implies $item[probpucker])</small>";
+                elseif($item['epsilonOut'])  $reasons[] = "&epsilon; outlier <br><small>(P-perp distance implies $item[probpucker])</small>";
                 $res[$item['resName']]['pperp_val'] = 1; // no way to quantify this
                 $res[$item['resName']]['pperp'] = "suspect sugar pucker  -  ".implode(", ", $reasons)."";
                 $res[$item['resName']]['pperp_isbad'] = true;

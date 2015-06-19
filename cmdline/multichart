@@ -87,7 +87,11 @@ if($hasProtein)
   runCbetaDev($pdbfile, "$rawDir/$model[prefix]cbdev.data");
   $cbdev = loadCbetaDev("$rawDir/$model[prefix]cbdev.data");
 
-  runValidationReport($pdbfile, "$rawDir/$model[prefix]geom.data", "protein");
+  runOmegalyze($pdbfile, "$rawDir/$model[prefix]omega.data");
+  $omega = loadOmegalyze("$rawDir/$model[prefix]omega.data");
+
+  runCaBLAM($pdbfile, "$rawDir/$model[prefix]cablam.data");
+  $cablam = loadCablam("$rawDir/$model[prefix]cablam.data");
 }
 else
 {
@@ -96,8 +100,12 @@ else
   $cbdev = null;
 }
 
-runClashlist($pdbfile, "$rawDir/$model[prefix]clash.data", $reduce_blength);
-$clash = loadClashlist("$rawDir/$model[prefix]clash.data");
+#runClashlist($pdbfile, "$rawDir/$model[prefix]clash.data", $reduce_blength);
+#$clash = loadClashlist("$rawDir/$model[prefix]clash.data");
+runClashscore($pdbfile, "$rawDir/$model[prefix]clashlist.txt", $reduce_blength);
+$clash = loadClashscore("$rawDir/$model[prefix]clashlist.txt");
+
+runValidationReport($pdbfile, "$rawDir/$model[prefix]geom.data", $model['stats']['use_cdl']);
 
 if($hasNucAcid)
 {
@@ -106,8 +114,6 @@ if($hasNucAcid)
 
   runSuitenameReport($pdbfile, "$rawDir/$model[prefix]suite.data");
   $suites = loadSuitenameReport("$rawDir/$model[prefix]suite.data");
-
-  runValidationReport($pdbfile, "$rawDir/$model[prefix]rna.data", "rna");
 }
 else
 {
@@ -117,9 +123,9 @@ else
 
 if($hasProtein && $hasNucAcid)
 {
-  $bbonds = array_merge(loadValidationBondReport("$rawDir/$model[prefix]geom.data","protein"), loadValidationBondReport("$rawDir/$model[prefix]rna.data", "rna"));
+  $bbonds = array_merge(loadValidationBondReport("$rawDir/$model[prefix]geom.data","protein"), loadValidationBondReport("$rawDir/$model[prefix]geom.data", "rna"));
   if (count($bbonds) == 0) $bbonds = null;
-  $bangles = array_merge(loadValidationAngleReport("$rawDir/$model[prefix]geom.data", "protein"), loadValidationAngleReport("$rawDir/$model[prefix]rna.data", "rna"));
+  $bangles = array_merge(loadValidationAngleReport("$rawDir/$model[prefix]geom.data", "protein"), loadValidationAngleReport("$rawDir/$model[prefix]geom.data", "rna"));
   if (count($bangles) == 0) $bangles = null;
 }
 elseif($hasProtein)
@@ -131,16 +137,17 @@ elseif($hasProtein)
 }
 elseif($hasNucAcid)
 {
-  $bbonds = loadValidationBondReport("$rawDir/$model[prefix]rna.data", "rna");
+  $bbonds = loadValidationBondReport("$rawDir/$model[prefix]geom.data", "rna");
   if (count($bbonds) == 0) $bbonds = null;
-  $bangles = loadValidationAngleReport("$rawDir/$model[prefix]rna.data", "rna");
+  $bangles = loadValidationAngleReport("$rawDir/$model[prefix]geom.data", "rna");
   if (count($bangles) == 0) $bangles = null;
 }
 
+$resout = null; //see lib/visualize.php, has something to do with horiz?
 if($mode == 'coot')
     makeCootClusteredChart($pdbfile, "php://stdout", $clash, $rama, $rota, $cbdev, $pperp);
 else
-    writeMulticritChart($pdbfile, "/dev/null", "php://stdout", $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles);
+    writeMulticritChart($pdbfile, "/dev/null", "php://stdout", $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $cablam, $omega);
 
 mpDestroySession();
 

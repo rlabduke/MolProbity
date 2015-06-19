@@ -53,6 +53,8 @@ $optMultikin = array(
     'clashdots' => true,
     'hbdots'    => true,
     'vdwdots'   => true,
+    'omega'     => true,
+    'cablam'    => true
 );
 
 // First argument is the name of this script...

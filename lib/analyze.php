@@ -87,7 +87,9 @@ function runAnalysis($modelID, $opts)
     if($opts['chartCablamLow']) $tasks['cablam'] = "Do CaBLAM analysis (<code>cablam_validate</code>)";
     if($opts['chartBaseP'])     $tasks['base-phos'] = "Do RNA sugar pucker analysis";
     if($opts['chartSuite'])     $tasks['suitename'] = "Do RNA backbone conformations analysis";
-    if($opts['chartGeom'])      $tasks['geomValidation'] = "Do bond length and angle geometry analysis (<code>mp_geo</code>)";
+    if($model['stats']['use_cdl'])  $geomsg = "Using CDL";
+    else $geomsg = "";
+    if($opts['chartGeom'])      $tasks['geomValidation'] = "Do bond length and angle geometry analysis (<code>mp_geo</code>) $geomsg";
 
     if($opts['chartClashlist']) $tasks['clashlist'] = "Run <code>clashscore</code> to find bad clashes and clashscore";
     if($opts['chartImprove'])   $tasks['improve'] = "Suggest / report on fixes";
@@ -204,7 +206,7 @@ function runAnalysis($modelID, $opts)
     {
         setProgress($tasks, 'geomValidation'); // updates the progress display if running as a background job
         $geomfile = "$rawDir/$model[prefix]geomvalidation.data";
-        runValidationReport($infile, $geomfile);
+        runValidationReport($infile, $geomfile, $model['stats']['use_cdl']);
         //$protfile = "$rawDir/$model[prefix]protvalidation.data";
         //runValidationReport($infile, $protfile, "protein");
         //$rnafile = "$rawDir/$model[prefix]rnavalidation.data";
@@ -570,6 +572,11 @@ function loadBasePhosPerp($datafile)
             $line = explode(':', $line);
             $deltaOut = (trim($line[8]) ? true : false);
             $epsilonOut = (trim($line[10]) ? true : false);
+            $perpdist = $line[6] + 0;
+            if($perpdist < 2.9) //2.9A is dist cutoff for C2' vs C3' endo pucker  
+              $probpucker = "C2'-endo";
+            else
+              $probpucker = "C3'-endo";
             //echo strtoupper(substr($line[3],0,-1))."\n";
             $entry = array(
                 'resType'   => strtoupper(substr($line[2],1,-1)),
@@ -579,18 +586,20 @@ function loadBasePhosPerp($datafile)
                 'altloc'    => ' ', //limitation - doesn't currently handle altloc
                 'Pdist5'    => $line[5] + 0,
                 'Pdist3'    => $line[6] + 0,
+                '3Pdist'    => $line[6] + 0, //Some functions use this name instead of 'Pdist3'
                 'delta'     => $line[7] + 0,
                 'deltaOut'  => $deltaOut,
                 'epsilon'   => $line[9] + 0,
                 'epsilonOut'=> $epsilonOut,
-                'outlier'   => ($deltaOut || $epsilonOut)
+                'outlier'   => ($deltaOut || $epsilonOut),
+                'probpucker'=> $probpucker
             );
             $entry['resName']   = $entry['chainID']
                                 . str_pad($entry['resNum'], 4, ' ', STR_PAD_LEFT)
                                 . $entry['insCode']
                                 . $entry['altloc']
                                 . str_pad($entry['resType'], 3, ' ', STR_PAD_RIGHT);
-            $ret[] = $entry;
+            $ret[$entry['resName']] = $entry;
         }
     }
     return $ret;
@@ -1511,10 +1520,12 @@ function findCablamOutliers($cablam)
 
 #{{{ runValidationReport - finds >4sigma geometric outliers for protein and RNA
 ############################################################################
-function runValidationReport($infile, $outfile)
+function runValidationReport($infile, $outfile, $use_cdl)
 {
     //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -$moltype -validate -outliers -sigma=0.0 $infile > $outfile");
-    exec("mmtbx.mp_geo pdb=$infile out_file=$outfile outliers_only=False bonds_and_angles=True");
+    if($use_cdl) {$uc = "True";}
+    else {$uc = "False"; }
+    exec("mmtbx.mp_geo pdb=$infile out_file=$outfile cdl=$uc outliers_only=False bonds_and_angles=True");
 }
 #}}}########################################################################
 
