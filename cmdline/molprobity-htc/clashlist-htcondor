@@ -1,0 +1,247 @@
+#! /bin/sh
+
+#ZOMG WE DID THIS !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+export PATH="${PATH}:`pwd`"
+
+
+#name: clashlistcluster (combination of clashlistscore and clcl)
+#author: Mike Word
+#date written: 6/6/99
+#modified 8/15/02 by JSR to leave out -3 flag for probe
+#modified 5/5/04 by IWD to avoid divide-by-zero when no atoms have B < 40
+#modified 3/24/06 by IWD to increase -Max for cluster (bombs on PDB file 1iw7)
+#modified 5/8/06 by IWD to use process ID ($$) in name of tmp files
+#purpose: generate tables of clusters of large bumps with a summary line
+# parameters: input.pdb identifier
+# format-
+#  #summary:file:n atoms:n atoms B<40:n potential dots:#.# A^2:n bumps:n bumps B<40:#.# score
+#  name : natoms : a       :       b       :  lowgap : maxB
+# (sorted by cluster max clash with spaces between clusters)
+
+##
+## Interpretive comments by IWD, 9 April 2006. MAY NOT BE CORRECT!
+##
+
+## Cutoff values for occupancy (always used) and B-factor (done w/ and w/out).
+#bcutval=40
+#ocutval=33
+
+bcutval=$2
+ocutval=$3
+blength=$4
+
+## Find number of atoms below B cutoff.  Full number of atoms found below.
+if [ "$blength" = "ecloud" ]; then
+probe_flags="-q -mc -het -dumpatominfo"
+else
+probe_flags="-q -mc -het -dumpatominfo -nuclear"
+fi
+
+#do not count waters
+bcna=`probe $probe_flags "blt$bcutval ogt$ocutval not water" $1|cut -d: -f2`
+
+## Temp files for datastorage.
+## "$$" expands to the process ID, to avoid name collisions.
+tmpfile=/tmp/junk.$$.clashlistscore.`date '+%H%M%S'`
+tmpf2=/tmp/junk2.$$.clashlistscore.`date '+%H%M%S'`
+
+## Count all atoms (no B cutoff) and also possible dots, possible surface area
+if [ "$blength" = "ecloud" ]; then
+probe_flags="-c -q -mc -het -once"
+else
+probe_flags="-c -q -mc -het -once -nuclear"
+fi
+
+probe $probe_flags "ogt$ocutval not water" "none" $1 |\
+awk -F: '
+/^atoms selected:/ { na = $2 + 0.0 }
+/^potential dots:/ { pd = $2 + 0.0 }
+/^potential area:/ { pa = $2 + 0.0 }
+END {
+ printf("#atom-potential-summary:%s: %d: %d: %.4g\n", name, na, pd, pa)
+}' name=$5 - >$tmpfile
+
+## Process Probe unformatted output to find clashes between atoms.
+## Don't include water in 'src' search set b/c we don't want it listed in the output
+## unless it clashes with a protein/nucleic acid residue.
+if [ "$blength" = "ecloud" ]; then
+probe_flags="-u -q -mc -het -once"
+#probe_flags="-u -q -mc -het -stdbonds -once"
+else
+probe_flags="-u -q -mc -het -nuclear -once"
+#probe_flags="-u -q -mc -het -stdbonds -nuclear -once"
+fi
+
+probe $probe_flags "ogt$ocutval not water" "ogt$ocutval" $1 |\
+awk -F: 'BEGIN {
+## Total Probe score (weighted clash + Hb + exp[vdW]), not clashscore
+   totalScore = 0.0
+   limit = -0.4   # how bad a gap has to be before it is counted
+}
+/^#atom-potential-summary:/ {
+## Reload previously calculated number of atoms, dots, surface area.
+   natoms = $3 + 0.0
+   pd     = $4 + 0.0
+   pa     = $5 + 0.0
+   next
+}
+{ totalScore += ($12 + 0.0)
+## Compute both pair names:  "A-B" and "B-A"
+## Use other[] to look up one given the other.
+  atompair = ($4 ":" $5)
+  opp = ($5 ":" $4)
+  other[atompair]=opp
+  other[opp]=atompair
+## Take the larger of the source or target atom B-value
+  mbmp[atompair] = ( $18 > $19 ) ? $18 : $19
+}
+## Note the presence of H-bond dots between an atom pair.
+## These will not show up in the clashlist, however: see below.
+/:hb:/ { hbonds[atompair] = 1; }
+/:so:|:bo:/ {
+## For Small or Bad Overlaps, store the worst overlap so far in lowgap[],
+## if it is at least worse than our limit (0.4A).
+   if ($7 <= limit) {
+      if (atompair in lowgap) {
+         if (lowgap[atompair] > $7) {
+            lowgap[atompair] = $7;
+         }
+      }
+      else {
+         lowgap[atompair] = $7;
+      }
+   }
+}
+END {
+## Bump counts are for computing total clashscore and clashscore for atoms B < 40.
+ bumpcount = 0
+ cutbumpcount = 0
+## Iterate over atom pairs in lowgap[].
+## Only atoms with overlaps worse than limit will appear here.
+ for (atompair in lowgap) {
+   ## Check alternate name for this pair; make sure we have not already processed it.
+   ## Mark both possible names in used[] so we will not process anything twice.
+   opp = other[atompair]
+   if (!((atompair in used) || (opp in used))) {
+      used[atompair] = 1
+      used[opp] = 1
+      ## Check under both names to find worst overlap,
+      ## because we did not symmetrize this earlier.
+      low = lowgap[atompair]
+      if (opp in lowgap) {
+         if (low > lowgap[opp]) {
+            low = lowgap[opp]
+         }
+      }
+      ##########################################################################
+      ## Report the clash to cluster if and only iff the atoms are not H-bonded.
+      ## Thus, H-bonds that get too close and cause spikes WILL NOT be reported.
+      ##########################################################################
+      ishb = hbonds[atompair] + hbonds[opp] + 0
+      if (!ishb) {
+         bumpcount++
+         if (mbmp[atompair] < bcut) { cutbumpcount++ }
+         printf("%s:%6d:%s:   %6.3f:   %6.0f\n",
+            name, natoms, atompair, low, mbmp[atompair])
+      }
+   }
+ }
+ printf("#summary:%s:%d atoms:%d atoms B<%g:%d potential dots:%.1f A^2:%d bumps:%d bumps B<%g:%.4g score\n",
+   name, natoms, nabcut, bcut, pd, pa, bumpcount, cutbumpcount, bcut, totalScore)
+ ## There may be no atoms (more likely, no atoms with B < 40),
+ ## so we must protect against that or face divide-by-zero errors from AWK.
+ clashscore = (natoms > 0 ? (bumpcount*1000/natoms) : -1)
+ scoreBcut  = (nabcut > 0 ? (cutbumpcount*1000/nabcut) : -1)
+ printf("#sum2 :%s:%.2f clashscore : %.2f clashscore B<%g \n",
+   name,  clashscore, scoreBcut,bcut)
+
+
+}' name=$5 bcut=$bcutval nabcut="$bcna" $tmpfile - > $tmpf2
+## Send residue (not atom) pair names through cluster (A:B),
+## get back clusters that list all the residues linked by (non H-bond) clashes.
+## (1:3:*CLUSTER*:A:B:C)
+awk -F: '
+/^[^#]/ {
+   a = substr($3, 1, 9)
+   b = substr($4, 1, 9)
+   printf("%s:%s\n",a, b)
+} ' $tmpf2 | cluster -Max20000 -single -N "*CLUSTER*" -F : -O : - | \
+## Reprocess the output of cluster --
+## what does this accomplish beyond reformatting?
+awk -F: '
+/^[^#]/ {
+   ## These lines are the _output_ of cluster.
+   ## These are processed first.
+   if ($3 == "*CLUSTER*") {
+      clusterid = $1 + 0
+      clustersz = $2 + 0
+      for (i = 4; i < 4 + clustersz; i++) {
+         ## i.e., whichcluster["A 100 LYS"] = 5, for cluster number 5
+         ##       whichcluster["A 101 PHE"] = 5, for cluster number 5
+         ## etc.
+         whichcluster[$i] = clusterid
+      }
+   }
+   ## These lines are the _input_ to cluster ($tmpf2), revisited.
+   ## These are processed second, after all of the output of cluster.
+   ## They are stored for later reprocessing in rec[]
+   else {
+      a = substr($3, 1, 9)
+      ## If we saw the residue for this atom in the output of cluster,
+      ## take the maximum clash magnitude seen so far and store it in
+      ## scorebycluster[cluster_index_for_residue].
+      if (a in whichcluster) { # cluster
+         ac = whichcluster[a] ## cluster index
+         if (ac in scorebycluster) {
+            if ($5 < scorebycluster[ac]) {
+               scorebycluster[ac] = $5 + 0.0
+            }
+         }
+         else {
+            scorebycluster[ac] = $5 + 0.0
+         }
+      }
+      else { # singleton
+         ac = 0
+      }
+      ++nr
+      rec[nr] = $0
+      ## Cluster index for this record (line of input).
+      recC[nr] = ac
+   }
+}
+## Lines starting with a hash are passed thru as-is (#summary, #sum2).
+/^#/ { print }
+END {
+   for(nr in rec) {
+      ac = recC[nr] ## cluster index
+      if (ac > 0) {
+         sc = scorebycluster[ac] ## i.e., worst overlap for this cluster
+      }
+      ## This is in case we have not stored the clash for this cluster --
+      ## how would this come about?
+      else {
+         split(rec[nr], vec, ":")
+         sc = vec[5] + 0.0
+      }
+      printf("%g:%d:%s\n", sc, ac, rec[nr])
+   }
+} ' - $tmpf2 | sort -t: -k1,1n -k7,7n | \
+## Use the Unix utility sort to sort first by worst clash
+## for the cluster, then by individual clash severity.
+awk -F: '
+/^[^#]/ { cl = $2
+   ## Put blank lines between clusters (i.e., when the cluster number changes).
+   if (cl == 0 || cl != lastcluster) {
+      printf("\n")
+      lastcluster = cl
+   }
+   ## Chop off repeated worst clash and cluster index; print
+   ## remaining fields with colons as delimiters.
+   for (i = 3; i <= NF; i++) {
+      printf("%s%s", $i, (i < NF)?":":"\n")
+   }
+}
+/^#/ { print } ' -
+## Clean up temp files.
+rm -f $tmpfile $tmpf2
