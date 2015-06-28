@@ -995,7 +995,7 @@ def oneline_analysis(files, quiet, sans_location):
   print ":".join(str(e) for e in out)
   
   if sans_location is not "none":
-    output_str = os.path.join(files[14], (os.path.basename(files[0])[:-4])[:4]+"-oneline.str")
+    output_str = (os.path.basename(files[0])[:-4])[:4]+"-"+files[16]+"oneline.str"
     
     write_nmrstar(header[2:], output_str, out[2:], files[0], sans_location)
   #print len(out)
@@ -1009,6 +1009,7 @@ def oneline_analysis(files, quiet, sans_location):
 # e.g. clashlist, ramalyze, rotalyze, dangle, pperp, cbdev, etc.
 if __name__ == "__main__":
   opts, args = parse_cmdline()
+  #print args[14]
   #analyze_file(args)
   #"evidently there is a problem with the results dir not getting made first"
   #sys.stderr.write("args: ")
