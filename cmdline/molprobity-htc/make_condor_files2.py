@@ -366,14 +366,21 @@ def write_mpanalysis_dag(outdir, list_of_pdblists, bondtype, sans_tgz, update_bm
       
       for pdb_id in pdb_id_set:
         oneline_remaps.append(pdb_id+"-"+buildtype+"oneline.tar.gz"+os.path.join("=results",pdb_id[1:3],pdb_id+"-"+buildtype+"oneline.tar.gz")) # for transferring output to results folder
-        residuer_remaps.append(pdb_id+"-"+buildtype+"residuer.tar.gz"+os.path.join("=results",pdb_id[1:3],pdb_id+"-"+buildtype+"residuer.tar.gz"))
+        residuer_remaps.append(pdb_id+"-"+buildtype+"residue.tar.gz"+os.path.join("=results",pdb_id[1:3],pdb_id+"-"+buildtype+"residue.tar.gz"))
+        residuer_remaps.append(pdb_id+"-"+buildtype+"-residue.csv"+os.path.join("=results",pdb_id[1:3],pdb_id+"-"+buildtype+"-residue.csv"))
         oneline_outputs.append(pdb_id+"-"+buildtype+"oneline.tar.gz")
-        residuer_outputs.append(pdb_id+"-"+buildtype+"residuer.tar.gz")
+        residuer_outputs.append(pdb_id+"-"+buildtype+"residue.tar.gz")
+        residuer_outputs.append(pdb_id+"-"+buildtype+"-residue.csv")
         if sans_tgz != "none":
           # oneline generates one str file per PDB ID
           oneline_remaps.append(pdb_id+"-"+buildtype+"oneline.str"+os.path.join("=results",pdb_id[1:3],pdb_id+"-"+buildtype+"oneline.str")) 
           oneline_outputs.append(pdb_id+"-"+buildtype+"oneline.str")
           # residuer generates one str file per model
+          residuer_remaps.append(pdb_id+"-"+buildtype+"-residue-str.csv"+os.path.join("=results",pdb_id[1:3],pdb_id+"-"+buildtype+"-residue-str.csv")) 
+          residuer_outputs.append(pdb_id+"-"+buildtype+"-residue-str.csv")
+          residuer_remaps.append(pdb_id+"-"+buildtype+"-residue-str.csv.header"+os.path.join("=results",pdb_id[1:3],pdb_id+"-"+buildtype+"-residue-str.csv.header")) 
+          residuer_outputs.append(pdb_id+"-"+buildtype+"-residue-str.csv.header")
+          
       out.write("Job oneline"+buildtype+num+" oneline.sub\n")
       out.write("VARS oneline"+buildtype+num+" PDBTAR=\""+num+buildtype+".tar.gz"+"\"\n")
       if sans_tgz != "none":
@@ -393,13 +400,24 @@ def write_mpanalysis_dag(outdir, list_of_pdblists, bondtype, sans_tgz, update_bm
       out.write("RETRY oneline"+buildtype+num+" 3\n\n")
       postjobs = postjobs+"oneline"+buildtype+num + " "
       
-#      out.write("Job residuer"+buildtype+num+" residuer.sub\n")
-#      out.write("VARS residuer"+buildtype+num+" DIR=\""+os.path.join(out_pdb_dir, num, "reduce-"+buildtype)+"\"\n")
-#      out.write("VARS residuer"+buildtype+num+" NUMBER=\""+buildtype+num+"\"\n")
-#      out.write("VARS residuer"+buildtype+num+" BUILD=\""+buildtype+"\"\n")
-#      out.write("PARENT reducer"+buildtype+num+" CHILD residuer"+buildtype+num+"\n")
-#      out.write("RETRY residuer"+buildtype+num+" 3\n\n")
-#      postjobs = postjobs+"residuer"+buildtype+num + " "
+      out.write("Job residuer"+buildtype+num+" residuer.sub\n")
+      out.write("VARS residuer"+buildtype+num+" PDBTAR=\""+num+buildtype+".tar.gz"+"\"\n")
+      if sans_tgz != "none":
+        out.write("VARS residuer"+buildtype+num+" SANSTAR=\""+os.path.basename(sans_tgz)+"\"\n")
+      #out.write("VARS residuer"+buildtype+num+" DIR=\""+os.path.join(out_pdb_dir, num, "reduce-"+buildtype)+"\"\n")
+      out.write("VARS residuer"+buildtype+num+" NUMBER=\""+buildtype+num+"\"\n")
+      if buildtype == "orig":
+        out.write("VARS residuer"+buildtype+num+" BUILD=\"orig\"\n")
+        out.write("VARS residuer"+buildtype+num+" PDBTARPATH=\""+os.path.join(out_pdb_dir, num, buildtype, num+buildtype+".tar.gz")+"\"\n")
+      else:             
+        out.write("VARS residuer"+buildtype+num+" BUILD=\""+buildtype+"\"\n")
+        out.write("VARS residuer"+buildtype+num+" PDBTARPATH=\""+os.path.join(out_pdb_dir, num, "reduce-"+buildtype, num+buildtype+".tar.gz")+"\"\n")
+      out.write("VARS residuer"+buildtype+num+" OUTPUTFILES=\""+",".join(residuer_outputs)+"\"\n")
+      out.write("VARS residuer"+buildtype+num+" REMAPS=\""+";".join(residuer_remaps)+"\"\n")
+      if buildtype != "orig":
+        out.write("PARENT reducer"+buildtype+num+" CHILD residuer"+buildtype+num+"\n")
+      out.write("RETRY residuer"+buildtype+num+" 3\n\n")
+      postjobs = postjobs+"residuer"+buildtype+num + " "
     
     #out.write("Job onelineorig"+num+" oneline.sub\n")
     ##out.write("VARS oneline"+buildtype+num+" PDBS=\""+" ".join(pdbs)+"\"\n")
@@ -923,7 +941,8 @@ def make_files(indir, outdir, file_size_limit, bond_type, sans_location, do_requ
   write_file(outdir, "oneline.py", analysis_py.format(molprobity_home, bondtype=bond_type, analyze_opt=ana_opt, sans_transfer=sans_file_transfer, script="molparser.py", script_type="oneline"), 0755)
   write_file(outdir, "residuer.py", analysis_py.format(molprobity_home, bondtype=bond_type, analyze_opt=ana_opt, script="py-residue-analysis.py", script_type="residue"), 0755)
   write_file(outdir, "oneline.sub", analyze_sub.format(molprobity_home, req=analysis_req, sans_transfer=sans_file_transfer, script="molparser.py", script_type="oneline"))
-  write_file(outdir, "residuer.sub", analyze_sub.format(molprobity_home, req=analysis_req, sans_transfer=sans_file_transfer, script="py-residue-analysis.py", script_type="residuer"))
+  #this one includes molparser.py (for file transfer) since residuer requires molparser
+  write_file(outdir, "residuer.sub", analyze_sub.format(molprobity_home, req=analysis_req, sans_transfer=sans_file_transfer, script="py-residue-analysis.py,"+molprobity_home+"/cmdline/molprobity-htc/molparser.py", script_type="residuer"))
   if sans_exists:
     write_file(outdir, "starwrite.sub", post_star_sub.format(req=reduce_req))
     write_file(outdir, "starwrite.py", post_star_writer.format(sans_loc=sans_location), 0755)

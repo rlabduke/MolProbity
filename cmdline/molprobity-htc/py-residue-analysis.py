@@ -320,7 +320,7 @@ def residue_analysis(files, quiet, sans_location):
   
   output_dir = os.path.realpath(files[14])
   if sans_location is not "none":
-    output_str = os.path.join(output_dir, (os.path.basename(files[0])[:-4])[:4]+"-residue-str.csv")
+    output_str = (os.path.basename(files[0])[:-4])[:4]+"-"+files[16]+"-residue-str.csv"
     loop = setup_nmrstar(header[2:], output_str, files[0], sans_location)
   
   clash = molparser.loadClashlist(files[2])
@@ -518,7 +518,7 @@ def residue_analysis(files, quiet, sans_location):
     if sans_location is not "none":
       loop.addData(["." if x=="" else x for x in out][2:])
 
-  output_file = os.path.join(output_dir, (os.path.basename(files[0])[:-4])[:4]+"-residue.csv")
+  output_file = (os.path.basename(files[0])[:-4])[:4]+"-"+files[16]+"-residue.csv"
 
   #if os.path.isfile(output_file):
   #  sys.stderr.write("output_file: "+output_file+' exists\n')
