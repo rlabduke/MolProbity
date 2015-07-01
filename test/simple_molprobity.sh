@@ -22,5 +22,17 @@ phenix.reduce -quiet -trim -allalt $pdbfilepath | '\$0 !~ /^USER  MOD/' > $tmp1
 #This makes the thumbnail kinemage
 prekin -cass -colornc $tmp1 > thumbnail.kin
 
+#reduce proper
+#-build should = -flip
+phenix.reduce -quiet -build $tmp1 > $tmp2
+#mmtbx.nqh_minimize requires 3 arguments, the third is just a tempdir for it to work in
+#arguments are: inpath, outpath, temppath
+mmtbx.nqh_minimize $tmp2 $tmp3 $tempplace
+#flipkin calls, should we wish to add them later:
+#$flip_params is $inpath (or '-s $inpath' if using segIDs)
+###exec("flipkin $flip_params > $outpathAsnGln");
+###exec("flipkin -h $flip_params > $outpathHis");
 
-#reduce
+#Next server step is letting the user choose flips
+#This reduce call should just make all flips
+##Reduce Done##
