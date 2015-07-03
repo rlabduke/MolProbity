@@ -43,8 +43,8 @@ def parse_cmdline():
   #  dest="build_type", default="default",
   #  help="specify whether to use -build or -nobuild for running reduce")
   opts, args = parser.parse_args()
-  if not opts.sans_location is "none" and not os.path.isdir(opts.sans_location):
-    sys.stderr.write("\n**ERROR: sans location must be a directory!\n")
+  if not opts.sans_location is "none" and not os.path.isfile(opts.sans_location) and not opts.sans_location.endswith("tgz"):
+    sys.stderr.write("\n**ERROR: sans location must be a gz file!\n")
     sys.exit(help())
   elif not opts.sans_location is "none" and os.path.isdir(opts.sans_location):
     opts.sans_location = os.path.realpath(opts.sans_location)
@@ -246,7 +246,7 @@ notification = Error
 
 {req}
 
-Executable     = {mp_loc}/cmdline/make_condor_files2.py
+Executable     = {mp_loc}/cmdline/molprobity-htc/make_condor_files2.py
 #should_transfer_files = YES
 #transfer_input_files = 
 
@@ -315,10 +315,10 @@ def make_files(indir, rebuilt_args, file_size_limit, cyrange_loc, do_requirement
     outdir = prep_dirs(indir)
     mp_outdir = os.path.join(indir, "condor_sub_files_"+indir_base)
     #make_condor_files2.prep_dirs(indir, update_scripts)
-    if do_requirement == "bmrb":
-      condor_req = "requirements = ((TARGET.FileSystemDomain == \"bmrb.wisc.edu\") || (TARGET.FileSystemDomain == \".bmrb.wisc.edu\"))"
-    else:
-      condor_req = ""
+    #if do_requirement == "bmrb":
+    condor_req = "requirements = ((TARGET.FileSystemDomain == \"bmrb.wisc.edu\") || (TARGET.FileSystemDomain == \".bmrb.wisc.edu\"))"
+    #else:
+    #  condor_req = ""
     list_of_lists = make_condor_files2.divide_pdbs(indir, outdir, file_size_limit)
     if not cyrange_loc == "none":
       # write cyrange files
