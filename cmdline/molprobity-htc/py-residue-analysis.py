@@ -2,6 +2,7 @@
 # (jEdit options) :folding=explicit:collapseFolds=1:
 from math import log
 import sys, os, getopt, re, pprint, collections
+import datetime
 from optparse import OptionParser
 import molparser
 #sys.path.append('/home/vbc3/programs/sans/python')
@@ -72,6 +73,9 @@ USAGE:   python molparser.py [MP output files]
                               maxBfactor file
                               tau/omega file
                               disulfides file
+                              output_directory
+                              hydrogen-positions (nuclear or ecloud)
+                              molprobity-flips (original/build/nobuild)
 
 FLAGS:
   -h     Print this help message
@@ -225,18 +229,49 @@ def setup_nmrstar(header, output_str, filename, sans_loc):
   #else:
 
   if not os.path.isfile(output_str):
+    entrier = bmrb.entry.fromScratch((os.path.basename(filename)[:-4])[:4]+"_residue")
+    software_saver = bmrb.saveframe.fromScratch("MolProbity", "Software")
+    software_saver.addTag("Sf_category", "software")
+    software_saver.addTag("Sf_framecode", "MolProbity")
+    software_saver.addTag("Entry_ID", "?")
+    software_saver.addTag("ID", "1")
+    software_saver.addTag("Name", "MolProbity")
+    software_saver.addTag("Version", "4.0")
+    software_saver.addTag("Details", ".")
+    software_saver2 = bmrb.saveframe.fromScratch("CYRANGE", "Software")
+    software_saver2.addTag("Sf_category", "software")
+    software_saver2.addTag("Sf_framecode", "CYRANGE")
+    software_saver2.addTag("Entry_ID", "?")
+    software_saver2.addTag("ID", "2")
+    software_saver2.addTag("Name", "CYRANGE")
+    software_saver2.addTag("Version", "2.0")
+    software_saver2.addTag("Details", ".")
+    entrier.addSaveframe(software_saver)
+    entrier.addSaveframe(software_saver2)
+    
     saver = bmrb.saveframe.fromScratch("Structure_validation_residue", "Structure_validation_residue")
-    saver.addTag("Sf_category", "?")
-    saver.addTag("Sf_framecode", "?")
+    saver.addTag("Sf_category", "structure_validation")
+    saver.addTag("Sf_framecode", "Structure_validation_residue")
     saver.addTag("Entry_ID", "?")
-    saver.addTag("List_ID", "?")
-    saver.addTag("Software_label", "molprobity")
-    saver.addTag("Software_version", "4.0")
-    saver.addTag("File_name", os.path.basename(filename))
-    saver.addTag("PDB_ID", (os.path.basename(filename)[:-4])[:4])
-    with open(output_str+".header", "a+") as str_write:
-      str_write.write(saver.getDataAsCSV())
+    saver.addTag("List_ID", "1")
+    #saver.addTag("Software_label", "molprobity")
+    #saver.addTag("Software_version", "4.0")
+    #saver.addTag("File_name", os.path.basename(filename))
+    saver.addTag("PDB_accession_code", (os.path.basename(filename)[:-4])[:4])
+    saver.addTag("Date_analyzed", datetime.date.today().isoformat())
+    entrier.addSaveframe(saver)
+    
+    software_loop = bmrb.loop.fromScratch(category="Residue_analysis_software")
+    loop_tags = ["Software_ID", "Software_label", "Method_ID", "Method_label", "Entry_ID", "Structure_validation_oneline_list_ID"]
+    software_loop.addColumn(loop_tags)
+    software_loop.addData(["1", "MolProbity", ".", ".", "?", "1"])
+    software_loop.addData(["2", "CYRANGE", ".", ".", "?", "1"])
+    saver.addLoop(software_loop)
+    
+    with open(output_str[:-4]+".header", "a+") as str_write:
+      str_write.write(str(entrier))
   loop = bmrb.loop.fromScratch(category="Residue_analysis")
+  header = ["ID"]+header
   loop.addColumn(header)
   return loop
 #}}}
@@ -247,8 +282,10 @@ def write_nmrstar(output_str, loop):
   if not os.path.isfile(output_str):
     print_header = True
   #  saver.addLoop(loop)
+  #print loop.getDataAsCSV(print_header, True)
+  loop_csv = loop.getDataAsCSV(print_header, True)
   with open(output_str, 'a+') as str_write:
-    str_write.write(loop.getDataAsCSV(print_header, True))
+    str_write.write(loop_csv)
   #print saver
 #}}}
 
@@ -258,64 +295,64 @@ def residue_analysis(files, quiet, sans_location):
   #print list_res
   #out = []
   #need h position, flip info, 
-  header = ["Filename",
-            "PDB_accession_code",
-            "PDB_model_num",
-            "Hydrogen_positions",
-            "MolProbity_flips",
-            "Cyrange_core_flag",
-            "Two_letter_chain_ID",
-            "PDB_strand_ID",
-            "PDB_residue_no",
-            "PDB_ins_code",
-            "PDB_residue_name",
-            "Assembly_ID",
-            "Entity_assembly_ID",
-            "Entity_ID",
-            "Comp_ID",
-            "Comp_index_ID",
-            "Clash_value",
-            "Clash_source_PDB_atom_name",
-            "Clash_destination_PDB_atom_name",
-            "Clash_destination_PDB_strand_ID",
-            "Clash_destination_PDB_residue_no",
-            "Clash_destination_PDB_ins_code",
-            "Clash_destination_PDB_residue_name",
-            "Cbeta_deviation_value",
-            "Rotamer_score",
-            "Rotamer_name",
-            "Ramachandran_phi",
-            "Ramachandran_psi",
-            "Ramachandran_score",
-            "Ramachandran_evaluation",
-            "Ramachandran_type",
-            "Bond_outlier_count",
-            "Worst_bond",
-            "Worst_bond_value",
-            "Worst_bond_sigma",
-            "Angle_outlier_count",
-            "Worst_angle",
-            "Worst_angle_value",
-            "Worst_angle_sigma",
-            "RNA_phosphate_perpendicular_outlier",
-            "RNA_suitness_score",
-            "RNA_suite_conformer",
-            "RNA_suite_triage",
-            "Max_b_factor",
-            "Tau_angle",
-            "Omega_dihedral",
-            "Disulfide_chi1",
-            "Disulfide_chi2",
-            "Disulfide_chi3",
-            "Disulfide_ss_angle",
-            "Disulfide_ss",
-            "Disulfide_ss_angle_prime",
-            "Disulfide_chi2prime",
-            "Disulfide_chi1prime",
-            "Outlier_count_separate_geometry",
-            "Outlier_count",
-            "Entry_ID",
-            "Structure_validation_residue_list_ID"
+  header = ["Filename",                                    #0
+            "PDB_accession_code",                          #1
+            "PDB_model_num",                               #2
+            "Hydrogen_positions",                          #3
+            "MolProbity_flips",                            #4
+            "Cyrange_core_flag",                           #5
+            "Two_letter_chain_ID",                         #6
+            "PDB_strand_ID",                               #7
+            "PDB_residue_no",                              #8
+            "PDB_ins_code",                                #9
+            "PDB_residue_name",                            #10
+            "Assembly_ID",                                 #11
+            "Entity_assembly_ID",                          #12
+            "Entity_ID",                                   #13
+            "Comp_ID",                                     #14
+            "Comp_index_ID",                               #15
+            "Clash_value",                                 #16
+            "Clash_source_PDB_atom_name",                  #17
+            "Clash_destination_PDB_atom_name",             #18
+            "Clash_destination_PDB_strand_ID",             #19
+            "Clash_destination_PDB_residue_no",            #20
+            "Clash_destination_PDB_ins_code",              #21
+            "Clash_destination_PDB_residue_name",          #22
+            "Cbeta_deviation_value",                       #23
+            "Rotamer_score",                               #24
+            "Rotamer_name",                                #25
+            "Ramachandran_phi",                            #26
+            "Ramachandran_psi",                            #27
+            "Ramachandran_score",                          #28
+            "Ramachandran_evaluation",                     #29
+            "Ramachandran_type",                           #30
+            "Bond_outlier_count",                          #31
+            "Worst_bond",                                  #32
+            "Worst_bond_value",                            #33
+            "Worst_bond_sigma",                            #34
+            "Angle_outlier_count",                         #35
+            "Worst_angle",                                 #36
+            "Worst_angle_value",                           #37
+            "Worst_angle_sigma",                           #38
+            "RNA_phosphate_perpendicular_outlier",         #39
+            "RNA_suitness_score",                          #40
+            "RNA_suite_conformer",                         #41
+            "RNA_suite_triage",                            #42
+            "Max_b_factor",                                #43
+            "Tau_angle",                                   #44
+            "Omega_dihedral",                              #45
+            "Disulfide_chi1",                              #46
+            "Disulfide_chi2",                              #47
+            "Disulfide_chi3",                              #48
+            "Disulfide_ss_angle",                          #49
+            "Disulfide_ss",                                #50
+            "Disulfide_ss_angle_prime",                    #51
+            "Disulfide_chi2prime",                         #52
+            "Disulfide_chi1prime",                         #53
+            "Outlier_count_separate_geometry",             #54
+            "Outlier_count",                               #55
+            "Entry_ID",                                    #56
+            "Structure_validation_residue_list_ID"         #57
   ]
   
   output_dir = os.path.realpath(files[14])
@@ -512,11 +549,12 @@ def residue_analysis(files, quiet, sans_location):
     out.extend([outCountSep,outCount])
 
     # This is for the entry_ID and list_ID
-    out.extend(["",""])
-    
+    out.extend(["","1"])
+    #print out
     csv_out.append(":".join(str(e) for e in out))
     if sans_location is not "none":
-      loop.addData(["." if x=="" else x for x in out][2:])
+      #add an extra column on front for the "Residue_analysis.ID" for possible use as a primary key 
+      loop.addData(["."]+(["." if x=="" else x for x in out][2:]))
 
   output_file = (os.path.basename(files[0])[:-4])[:4]+"-"+files[16]+"-residue.csv"
 
@@ -536,6 +574,7 @@ def residue_analysis(files, quiet, sans_location):
 # for testing
 # py-residue-analysis.py -s '/home/vbc3/programs/sans/python' ../../../1ubqH.pdb 1 1ubqH_001-clashlist 1ubqH_001-cbdev 1ubqH_001-rotalyze 1ubqH_001-ramalyze 1ubqH_001-dangle_protein 1ubqH_001-dangle_rna 1ubqH_001-dangle_dna 1ubqH_001-prekin_pperp 1ubqH_001-suitename 1ubqH_001-dangle_maxb 1ubqH_001-dangle_tauomega 1ubqH_001-dangle_ss .. cmd1 cmd2
 # py-residue-analysis.py -s '/home/vbc3/programs/sans/python' ../../../1UBQ.pdb 1 1UBQ_001FH-clashlist 1UBQ_001FH-cbdev 1UBQ_001FH-rotalyze 1UBQ_001FH-ramalyze 1UBQ_001FH-dangle_protein 1UBQ_001FH-dangle_rna 1UBQ_001FH-dangle_dna 1UBQ_001FH-prekin_pperp 1UBQ_001FH-suitename 1UBQ_001FH-dangle_maxb 1UBQ_001FH-dangle_tauomega 1UBQ_001FH-dangle_ss .. cmd1 cmd2
+# ../../../MolProbity/cmdline/molprobity-htc/py-residue-analysis.py ../condor_sub_files_0000_old6/pdbs/0000/orig/1a03_001.pdb 001 1a03_001-clashlist 1a03_001-cbdev 1a03_001-rotalyze 1a03_001-ramalyze 1a03_001-dangle_protein 1a03_001-dangle_rna 1a03_001-dangle_dna 1a03_001-prekin_pperp 1a03_001-suitename 1a03_001-dangle_maxb 1a03_001-dangle_tauomega 1a03_001-dangle_ss . nuclear orig
 
 # Takes as input a whole series of different results files from MP analysis
 # e.g. clashlist, ramalyze, rotalyze, dangle, pperp, cbdev, etc.

@@ -2,6 +2,7 @@
 # (jEdit options) :folding=explicit:collapseFolds=1:
 from math import log
 import sys, os, getopt, re, pprint
+import datetime
 from optparse import OptionParser
 #sys.path.append('/home/vbc3/programs/sans/python')
 #import bmrb
@@ -68,6 +69,12 @@ USAGE:   python molparser.py [MP output files]
                               dna bond geometry output file
                               base ppperp output file
                               suitname output file
+                              maxBfactor file   # not used currently for oneline?
+                              tau/omega file    # not used currently for oneline?
+                              disulfides file   # not used currently for oneline?
+                              output_directory  # not used currently for oneline?
+                              hydrogen-positions (nuclear or ecloud)
+                              molprobity-flips (original/build/nobuild)
 
 FLAGS:
   -h     Print this help message
@@ -810,66 +817,97 @@ def write_nmrstar(header, output_str, out, filename, sans_loc):
   #print len(out)
   #print str(out)
   if os.path.isfile(output_str):
-    saver = bmrb.saveframe.fromFile(output_str)
+    entrier = bmrb.entry.fromFile(output_str)
+    saver = entrier.getSaveframeByName("Structure_validation_oneline")
     loop = saver.getLoopByCategory("Oneline_analysis")
   else:
-    saver = bmrb.saveframe.fromScratch("Structure_validation_oneline", "Structure_validation_oneline")
-    saver.addTag("Sf_category", "?")
-    saver.addTag("Sf_framecode", "?")
-    saver.addTag("Entry_ID", "?")
-    saver.addTag("List_ID", "?")
-    saver.addTag("Software_label", "molprobity")
-    saver.addTag("Software_version", "4.0")
-    saver.addTag("File_name", os.path.basename(filename))
-    saver.addTag("PDB_ID", (os.path.basename(filename)[:-4])[:4])
-    loop = bmrb.loop.fromScratch(category="Oneline_analysis")
-    loop.addColumn(header)
+    entrier = bmrb.entry.fromScratch((os.path.basename(filename)[:-4])[:4]+"_oneline")
+    software_saver = bmrb.saveframe.fromScratch("MolProbity", "Software")
+    software_saver.addTag("Sf_category", "software")
+    software_saver.addTag("Sf_framecode", "MolProbity")
+    software_saver.addTag("Entry_ID", "?")
+    software_saver.addTag("ID", "1")
+    software_saver.addTag("Name", "MolProbity")
+    software_saver.addTag("Version", "4.0")
+    software_saver.addTag("Details", ".")
+    software_saver2 = bmrb.saveframe.fromScratch("CYRANGE", "Software")
+    software_saver2.addTag("Sf_category", "software")
+    software_saver2.addTag("Sf_framecode", "CYRANGE")
+    software_saver2.addTag("Entry_ID", "?")
+    software_saver2.addTag("ID", "2")
+    software_saver2.addTag("Name", "CYRANGE")
+    software_saver2.addTag("Version", "2.0")
+    software_saver2.addTag("Details", ".")
+    entrier.addSaveframe(software_saver)
+    entrier.addSaveframe(software_saver2)
     
+    saver = bmrb.saveframe.fromScratch("Structure_validation_oneline", "Structure_validation_oneline")
+    saver.addTag("Sf_category", "structure_validation")
+    saver.addTag("Sf_framecode", "Structure_validation_oneline")
+    saver.addTag("Entry_ID", "?")
+    saver.addTag("List_ID", "1")
+    #saver.addTag("Software_label", "molprobity")
+    #saver.addTag("Software_version", "4.0")
+    #saver.addTag("File_name", os.path.basename(filename))
+    saver.addTag("PDB_accession_code", (os.path.basename(filename)[:-4])[:4])
+    saver.addTag("Date_analyzed", datetime.date.today().isoformat())
+    entrier.addSaveframe(saver)
+
+    software_loop = bmrb.loop.fromScratch(category="Oneline_analysis_software")
+    loop_tags = ["Software_ID", "Software_label", "Method_ID", "Method_label", "Entry_ID", "Structure_validation_oneline_list_ID"]
+    software_loop.addColumn(loop_tags)
+    software_loop.addData(["1", "MolProbity", ".", ".", "?", "1"])
+    software_loop.addData(["2", "CYRANGE", ".", ".", "?", "1"])
+    saver.addLoop(software_loop)
+    loop = bmrb.loop.fromScratch(category="Oneline_analysis")
+    header = ["ID"]+header
+    loop.addColumn(header)
+  out = ["."]+out
   loop.addData(["." if x=="" else x for x in out])
   if not os.path.isfile(output_str):
     saver.addLoop(loop)
   #sys.stderr.write(" ".join(os.listdir(os.path.dirname(output_str))))
   with open(output_str, 'w+') as str_write:
-    str_write.write(str(saver))
+    str_write.write(str(entrier))
 #}}}
 
 #{{{ oneline_analysis
 def oneline_analysis(files, quiet, sans_location):
   #if (not quiet):
   #  print "#fileName:pdb:model:clashscore:clashscoreB<40:cbeta>0.25:numCbeta:rota<1%:numRota:ramaOutlier:ramaAllowed:ramaFavored:numRama:numbadbonds:numbonds:pct_badbonds:pct_resbadbonds:numbadangles:numangles:pct_badangles:pct_resbadangles:MolProbityScore:numPperpOutliers:numPperp:numSuiteOutliers:numSuites"
-  header = ["Filename",
-            "PDB_accession_code",
-            "PDB_model_num",
-            "Hydrogen_positions",
-            "MolProbity_flips",
-            "Cyrange_core_flag",
-            "Assembly_ID",
-            "Clashscore",
-            "Clashscore_B_under_40",
-            "Cbeta_outlier_count",
-            "Cbeta_count",
-            "Rotamer_outlier_count",
-            "Rotamer_count",
-            "Ramachandran_outlier_count",
-            "Ramachandran_allowed_count",
-            "Ramachandran_favored_count",
-            "Ramachandran_count",
-            "Bond_outlier_count",
-            "Bond_count",
-            "Percent_bond_outlier",
-            "Percent_residues_with_bond_outlier",
-            "Angle_outlier_count",
-            "Angle_count",
-            "Percent_angle_outlier",
-            "Percent_residues_with_angle_outlier",
-            "MolProbity_score",
-            "RNA_phosphate_perpendicular_outlier_count",
-            "RNA_phosphate_perpendicular_count",
-            "RNA_suite_outlier_count",
-            "RNA_suite_count",
-            "Entry_ID",
-            "Structure_validation_oneline_list_ID",
-            "Macromolecule_types",
+  header = ["Filename",                                       #0
+            "PDB_accession_code",                             #1
+            "PDB_model_num",                                  #2
+            "Hydrogen_positions",                             #3
+            "MolProbity_flips",                               #4
+            "Cyrange_core_flag",                              #5
+            "Assembly_ID",                                    #6
+            "Clashscore",                                     #7
+            "Clashscore_B_under_40",                          #8
+            "Cbeta_outlier_count",                            #9
+            "Cbeta_count",                                    #10
+            "Rotamer_outlier_count",                          #11
+            "Rotamer_count",                                  #12
+            "Ramachandran_outlier_count",                     #13
+            "Ramachandran_allowed_count",                     #14
+            "Ramachandran_favored_count",                     #15
+            "Ramachandran_count",                             #16
+            "Bond_outlier_count",                             #17
+            "Bond_count",                                     #18
+            "Percent_bond_outlier",                           #19
+            "Percent_residues_with_bond_outlier",             #20
+            "Angle_outlier_count",                            #21
+            "Angle_count",                                    #22
+            "Percent_angle_outlier",                          #23
+            "Percent_residues_with_angle_outlier",            #24
+            "MolProbity_score",                               #25
+            "RNA_phosphate_perpendicular_outlier_count",      #26
+            "RNA_phosphate_perpendicular_count",              #27
+            "RNA_suite_outlier_count",                        #28
+            "RNA_suite_count",                                #29
+            "Entry_ID",                                       #30
+            "Structure_validation_oneline_list_ID",           #31
+            "Macromolecule_types",                            #32
   ]
   if (not quiet):
     print "#"+(":".join(header))
@@ -985,7 +1023,7 @@ def oneline_analysis(files, quiet, sans_location):
     macromolecule_type.append("rna")
   
   out.append("") # "Entry_ID",          bmrb specific
-  out.append("") # "List_ID",           bmrb specific
+  out.append("1") # "List_ID",           bmrb specific
   
   if (len(macromolecule_type) > 0):
     out.append(",".join(macromolecule_type))
@@ -996,8 +1034,12 @@ def oneline_analysis(files, quiet, sans_location):
   
   if sans_location is not "none":
     output_str = (os.path.basename(files[0])[:-4])[:4]+"-"+files[16]+"oneline.str"
-    
-    write_nmrstar(header[2:], output_str, out[2:], files[0], sans_location)
+    # I re-sort the header and results for star file to adhere to NMRSTAR conventions
+    # I couldn't resort the csv output since I think Jon's chart code depends on order.
+    resort_header = header[2:7]+[header[32]]+header[7:32]
+    #print resort_header
+    resort_out = out[2:7]+[out[32]]+out[7:32]
+    write_nmrstar(resort_header, output_str, resort_out, files[0], sans_location)
   #print len(out)
 
 #}}}
