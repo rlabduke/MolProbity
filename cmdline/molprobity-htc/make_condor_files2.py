@@ -27,7 +27,7 @@ def parse_cmdline():
     type="string", default="none",
     help="sans parser tgz location, needed for nmrstar output")
   parser.add_option("-r", "--requirement", action="store", dest="requirement",
-    type="string", default="bmrb",
+    type="string", default="none",
     help="requirements for limiting where condor jobs get submitted (none or bmrb)")
   parser.add_option("-w", "--web", action="store", dest="update_bmrb_website", 
     type="string", default="none",

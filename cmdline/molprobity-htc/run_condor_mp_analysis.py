@@ -28,7 +28,7 @@ def parse_cmdline():
     type="string", default="none",
     help="sans parser location, needed for nmrstar output")
   parser.add_option("-r", "--requirement", action="store", dest="requirement",
-    type="string", default="bmrb",
+    type="string", default="none",
     help="requirements for limiting where condor jobs get submitted (none or bmrb)")
   parser.add_option("-w", "--web", action="store", dest="update_bmrb_website", 
     type="string", default="none",
@@ -301,7 +301,7 @@ def prep_dirs(indir):
     os.makedirs(os.path.join(outdir, "mppreplogs"))
     os.makedirs(os.path.join(indir, "condor_sub_files_"+indir_base))
   except OSError:
-    sys.stderr.write("\"cylogs\" directory detected in \""+indir+"\"\n")
+    sys.stderr.write("\"cylogs\" or \"condor_sub_files\" directory detected in \""+indir+"\"\n")
   return outdir
 #}}}
 
