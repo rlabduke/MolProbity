@@ -37,12 +37,15 @@ mptop_dir="$testscript_dir/.."
 source "$mptop_dir/build/setpaths.sh"
 #source the MP version of the phenix environment
 
+pdbcode=$(basename -s .pdb "$pdbfilepath")
+tempdir="test_$pdbcode"
+#if dir by this name does not exist, make it
+if [ ! -d "$tempdir" ]; then
+  mkdir "$tempdir"
+fi
+
 return 0
 
-#$tempdir = 
-
-#get file from cmdline
-$pdbfilepath = $1 #replaces upload or fetch, takes first argument only
 
 #This script shouldn't have to do remediation
 #code preserved to help set up remediation elsewhere if needed
