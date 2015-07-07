@@ -1,5 +1,37 @@
 #!/usr/bin/env bash
 
+helptext='This is help text'
+hydrogen_position='-ecloud'
+pdbfilepath=''
+
+for i in $@
+do
+  case $i in
+    -h|-help)
+      echo $helptext
+      return 1
+      ;;
+    -nuclear)
+      hydrogen_position='-nuclear'
+      ;;
+  esac
+  if [[ $i == *".pdb" ]]
+  then
+    pdbfilepath=$i
+  fi
+done
+
+if [[ $pdbfilepath == '' ]]
+then
+  echo "No PDB file provided"
+  echo $helptext
+  return 1
+fi
+
+echo $hydrogen_position
+echo $pdbfilepath
+return 0
+
 #$tempdir = 
 
 #get file from cmdline
@@ -36,3 +68,5 @@ mmtbx.nqh_minimize $tmp2 $tmp3 $tempplace
 #Next server step is letting the user choose flips
 #This reduce call should just make all flips
 ##Reduce Done##
+
+
