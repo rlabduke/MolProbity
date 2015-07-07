@@ -30,6 +30,13 @@ fi
 
 echo $hydrogen_position
 echo $pdbfilepath
+
+testscript_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+#the above is taken from http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in/246128#246128
+mptop_dir="$testscript_dir/.."
+source "$mptop_dir/build/setpaths.sh"
+#source the MP version of the phenix environment
+
 return 0
 
 #$tempdir = 
