@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 helptext='This is help text'
-hydrogen_position='-ecloud'
+hydrogen_position='' #ecloud by default
 pdbfilepath=''
 
 for i in $@
@@ -12,7 +12,7 @@ do
       return 1
       ;;
     -nuclear)
-      hydrogen_position='-nuclear'
+      hydrogen_position=' -nuclear'
       ;;
   esac
   if [[ $i == *".pdb" ]]
@@ -23,13 +23,15 @@ done
 
 if [[ $pdbfilepath == '' ]]
 then
-  echo "No PDB file provided"
+  echo "No .pdb file provided"
+  echo $helptext
+  return 1
+elif [[ ! -e "$pdbfilepath" ]];
+then
+  echo "Could not find specified PDB file"
   echo $helptext
   return 1
 fi
-
-echo $hydrogen_position
-echo $pdbfilepath
 
 testscript_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 #the above is taken from http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in/246128#246128
@@ -44,9 +46,6 @@ if [ ! -d "$tempdir" ]; then
   mkdir "$tempdir"
 fi
 
-return 0
-
-
 #This script shouldn't have to do remediation
 #code preserved to help set up remediation elsewhere if needed
 ####prepare and clean PDB file: lib/model.php preparePDB()
@@ -59,17 +58,38 @@ return 0
 ####pdbcns runs here if pdbstat says there are cns atoms
 
 #How do we get the correct phenix environment variables via MolProbity?
+trimmedfile="$pdbcode.trim.pdb"
 #This is using reduce to strip H's
-phenix.reduce -quiet -trim -allalt $pdbfilepath | '\$0 !~ /^USER  MOD/' > $tmp1
+phenix.reduce -quiet -trim -allalt "$pdbfilepath" | awk '$0 !~ /^USER  MOD/' > "$tempdir/$trimmedfile"
+
 #This makes the thumbnail kinemage
-prekin -cass -colornc $tmp1 > thumbnail.kin
+###prekin needs to be set in env
+###prekin -cass -colornc "$tempdir/$trimmedfile" > "$tempdir/thumbnail.kin"
 
 #reduce proper
 #-build should = -flip
-phenix.reduce -quiet -build $tmp1 > $tmp2
-#mmtbx.nqh_minimize requires 3 arguments, the third is just a tempdir for it to work in
-#arguments are: inpath, outpath, temppath
-mmtbx.nqh_minimize $tmp2 $tmp3 $tempplace
+reducedfile="$pdbcode.FH.pdb"
+phenix.reduce -quiet -build"$hydrogen_position" "$tempdir/$trimmedfile" > "$tempdir/$reducedfile"
+
+#determine if reduce did any flips, run nqh_minimize if so:
+anyflips=$(grep "USER  MOD" "$tempdir/$reducedfile" | grep amide)
+if [[ ${#anyflips} -ne 0 ]];
+then
+  #run nqh_minimize
+  minimizedfile="$pdbcode.FHreg.pdb"
+  nqhtempdir="$tempdir/nqhtemp"
+  if [ ! -d "$nqhtempdir" ]; then
+    mkdir "$nqhtempdir"
+  fi
+  #mmtbx.nqh_minimize requires 3 arguments, the third is just a tempdir for it to work in
+  #arguments are: inpath, outpath, temppath
+  mmtbx.nqh_minimize "$tempdir/$reducedfile" "$tempdir/$minimizedfile" "$nqhtempdir"
+else
+  #nqh_minimize breaks on files without flips
+  #set filename for next steps and pass
+  minimizedfile="$reducedfile"
+fi
+
 #flipkin calls, should we wish to add them later:
 #$flip_params is $inpath (or '-s $inpath' if using segIDs)
 ###exec("flipkin $flip_params > $outpathAsnGln");
@@ -78,5 +98,3 @@ mmtbx.nqh_minimize $tmp2 $tmp3 $tempplace
 #Next server step is letting the user choose flips
 #This reduce call should just make all flips
 ##Reduce Done##
-
-
