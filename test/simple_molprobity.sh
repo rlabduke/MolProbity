@@ -108,3 +108,10 @@ fi
 echo "running ramalyze"
 phenix.ramalyze $tempdir/$minimizedfile > $tempdir/$pdbcode.rama
 #this from runRamachandran() in lib/analyze.php
+#not running loadRamachandran because not making multichart
+echo "making ramachandran kin"
+java -Xmx512m -cp $mptop_dir/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -kinplot $tempdir/$minimizedfile > $tempdir/$pdbcode.rama.kin
+echo "making ramachandran pdf"
+java -Xmx512m -cp $mptop_dir/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -pdf $tempdir/$minimizedfile $tempdir/$pdbcode.rama.pdf
+
+echo "running rotalyze"
