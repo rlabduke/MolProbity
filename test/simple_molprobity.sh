@@ -111,7 +111,11 @@ phenix.ramalyze $tempdir/$minimizedfile > $tempdir/$pdbcode.rama
 #not running loadRamachandran because not making multichart
 echo "making ramachandran kin"
 java -Xmx512m -cp $mptop_dir/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -kinplot $tempdir/$minimizedfile > $tempdir/$pdbcode.rama.kin
+#this from makeRamachandranKin($infile, $outfile) in lib/visualize.php
 echo "making ramachandran pdf"
 java -Xmx512m -cp $mptop_dir/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -pdf $tempdir/$minimizedfile $tempdir/$pdbcode.rama.pdf
+#this from function makeRamachandranPDF($infile, $outfile) in lib/visualize.php
 
 echo "running rotalyze"
+phenix.rotalyze data_version=8000 $tempdir/$minimizedfile > $tempdir/$pdbcode.rota
+#this from runRotamer($infile, $outfile) in lib/analyze.php
