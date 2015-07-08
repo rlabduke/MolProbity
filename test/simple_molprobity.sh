@@ -128,3 +128,7 @@ phenix.cbetadev $tempdir/$minimizedfile > $tempdir/$pdbcode.cbdev
 ## $OSTYPE, test for darwin or ! darwin
 #prekin -cbdevdump $tempdir/$minimizedfile | java -cp $mptop_dir/lib/hless.jar hless.CBScatter > $tempdir/$pdbcode.cbdev.kin
 #this from makeCbetaDevPlot($infile, $outfile) in lib/visualize.php
+
+echo "running omegalyze"
+phenix.omegalyze nontrans_only=False $tempdir/$minimizedfile > $tempdir/$pdbcode.omega
+#this from runOmegalyze($infile, $outfile) in lib/analyze.php
