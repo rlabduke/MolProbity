@@ -102,3 +102,9 @@ fi
 #Next server step is letting the user choose flips
 #This reduce call should just make all flips
 ##Reduce Done##
+
+##Start aacgeom.php functionality##
+#runAnalysis() in lib/analyze.php actually handles most of this
+echo "running ramalyze"
+phenix.ramalyze $tempdir/$minimizedfile > $tempdir/$pdbcode.rama
+#this from runRamachandran() in lib/analyze.php
