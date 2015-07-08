@@ -2,7 +2,26 @@
 (
 #parens around the script should keep the phenix sourcing local to this script
 #prevents this script from permanently affecting the terminal from which it runs
-helptext='This is help text'
+helptext="
+This is a testing script for MolProbity.
+It is broadly intended to produce text file outputs to be diff'd against
+  reference data, or to be used to get timing data on Molprobity routines.
+
+This script lacks some of the file parsing and preprocessing handled by the
+  full MolProbity code. As a result, some options must be set by the user with
+  commandline flags.
+
+This script accepts a single PDB file with the .pdb extension.
+
+This script creates a new directory named test_FILENAME in the working directory
+  and outputs files to that directory. Old files of the same name will be
+  overwritten.
+
+Options
+  -nuclear     sets hydrogen bond-lengths to use nuclear positions as in NMR
+  -h -help     prints this help
+
+"
 hydrogen_position='' #ecloud by default
 pdbfilepath=''
 
@@ -10,7 +29,7 @@ for i in $@
 do
   case $i in
     -h|-help)
-      echo $helptext
+      printf "$helptext"
       return 1
       ;;
     -nuclear)
@@ -25,13 +44,13 @@ done
 
 if [[ $pdbfilepath == '' ]]
 then
-  echo "No .pdb file provided"
-  echo $helptext
+  printf "$helptext"
+  echo "No .pdb file provided."
   return 1
 elif [[ ! -e "$pdbfilepath" ]];
 then
-  echo "Could not find specified PDB file"
-  echo $helptext
+  printf "$helptext"
+  echo "Could not find specified PDB file."
   return 1
 fi
 
@@ -42,7 +61,7 @@ mptop_dir="$testscript_dir/.."
 source "$mptop_dir/build/setpaths.sh"
 #source the MP version of the phenix environment
 
-#some programs like prekin are stored in different locations depedning on the OS
+#some programs like prekin are stored in different locations depending on the OS
 #Find the OS and store the appropriate location
 if [[ "$OSTYPE" == "linux-gnu" ]]; then
   osbin="bin/linux"
