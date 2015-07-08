@@ -72,7 +72,7 @@ reducedfile="$pdbcode.FH.pdb"
 phenix.reduce -quiet -build"$hydrogen_position" "$tempdir/$trimmedfile" > "$tempdir/$reducedfile"
 
 #determine if reduce did any flips, run nqh_minimize if so:
-anyflips=$(grep "USER  MOD" "$tempdir/$reducedfile" | grep amide)
+anyflips=$(grep "USER  MOD" "$tempdir/$reducedfile" | grep FLIP)
 if [[ ${#anyflips} -ne 0 ]];
 then
   #run nqh_minimize
