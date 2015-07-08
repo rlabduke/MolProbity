@@ -119,3 +119,12 @@ java -Xmx512m -cp $mptop_dir/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -
 echo "running rotalyze"
 phenix.rotalyze data_version=8000 $tempdir/$minimizedfile > $tempdir/$pdbcode.rota
 #this from runRotamer($infile, $outfile) in lib/analyze.php
+
+echo "running CBDev"
+phenix.cbetadev $tempdir/$minimizedfile > $tempdir/$pdbcode.cbdev
+#this from runCbetaDev($infile, $outfile) in lib/analyze.php
+#echo "making CBDev kinemage"
+##need path to prekin
+## $OSTYPE, test for darwin or ! darwin
+#prekin -cbdevdump $tempdir/$minimizedfile | java -cp $mptop_dir/lib/hless.jar hless.CBScatter > $tempdir/$pdbcode.cbdev.kin
+#this from makeCbetaDevPlot($infile, $outfile) in lib/visualize.php
