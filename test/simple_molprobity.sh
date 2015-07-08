@@ -179,4 +179,18 @@ phenix.omegalyze nontrans_only=False $tempdir/$minimizedfile > $tempdir/$pdbcode
 echo "running CaBLAM"
 phenix.cablam_validate output=text $tempdir/$minimizedfile > $tempdir/$pdbcode.cablam
 #this from runCablam($infile, $outfile) in lib/analyze.php
+
+echo "running pucker analysis"
+$mptop_dir/$osbin/prekin -pperptoline -pperpdump $tempdir/$minimizedfile > $tempdir/$pdbcode.pucker
+#this from runBasePhosPerp($infile, $outfile) in lib/analyze.php
+
+echo "running suitename"
+mmtbx.mp_geo rna_backbone=True pdb=$tempdir/$minimizedfile | phenix.suitename -report -pointIDfields 7 -altIDfield 6 > $tempdir/$pdbcode.suitename
+#this from runSuitenameReport($infile, $outfile) in lib/analyze.php
+echo "running suitestring"
+mmtbx.mp_geo rna_backbone=True pdb=$tempdir/$minimizedfile | phenix.suitename -string -oneline -pointIDfields 7 -altIDfield 6 | fold -w 60 > $tempdir/$pdbcode.suitestring
+#this from runSuitenameString($infile, $outfile) in lib/analyze.php
+echo "making suitename kin"
+mmtbx.mp_geo rna_backbone=True pdb=$tempdir/$minimizedfile | phenix.suitename -kinemage -pointIDfields 7 -altIDfield 6 > $tempdir/$pdbcode.suitename.kin
+#this from makeSuitenameKin($infile, $outfile) in lib/visualize.php
 )
