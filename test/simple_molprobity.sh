@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
-
+(
+#parens around the script should keep the phenix sourcing local to this script
+#prevents this script from permanently affecting the terminal from which it runs
 helptext='This is help text'
 hydrogen_position='' #ecloud by default
 pdbfilepath=''
@@ -33,12 +35,34 @@ then
   return 1
 fi
 
+echo "sourcing MolProbity Phenix environment"
 testscript_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 #the above is taken from http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in/246128#246128
 mptop_dir="$testscript_dir/.."
 source "$mptop_dir/build/setpaths.sh"
-echo "MP phenix env sourced for this terminal"
 #source the MP version of the phenix environment
+
+#some programs like prekin are stored in different locations depedning on the OS
+#Find the OS and store the appropriate location
+if [[ "$OSTYPE" == "linux-gnu" ]]; then
+  osbin="bin/linux"
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+  # Mac OSX
+  osbin="bin/macosx"
+elif [[ "$OSTYPE" == "cygwin" ]]; then
+  # POSIX compatibility layer and Linux environment emulation for Windows
+  osbin="bin/linux"
+elif [[ "$OSTYPE" == "msys" ]]; then
+  # Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
+  echo "WARNING: You seem to be running this script under Windows, some features may not work"
+  osbin="bin/linux"
+elif [[ "$OSTYPE" == "win32" ]]; then
+  echo "WARNING: You seem to be running this script under Windows, some features may not work"
+elif [[ "$OSTYPE" == "freebsd"* ]]; then
+  echo "WARNING: Your OS may not be supported"
+else
+  echo "WARNING: Your OS may not be supported"
+fi
 
 pdbcode=$(basename -s .pdb "$pdbfilepath")
 tempdir="test_$pdbcode"
@@ -65,8 +89,7 @@ phenix.reduce -quiet -trim -allalt "$pdbfilepath" | awk '$0 !~ /^USER  MOD/' > "
 # this reduce commandline from lib/model.php in reduceNoBuild()
 
 #This makes the thumbnail kinemage
-#prekin needs to be set in env
-#prekin -cass -colornc "$tempdir/$trimmedfile" > "$tempdir/thumbnail.kin"
+$mptop_dir/$osbin/prekin -cass -colornc "$tempdir/$trimmedfile" > "$tempdir/thumbnail.kin"
 
 #reduce proper
 #-build should = -flip
@@ -123,10 +146,8 @@ phenix.rotalyze data_version=8000 $tempdir/$minimizedfile > $tempdir/$pdbcode.ro
 echo "running CBDev"
 phenix.cbetadev $tempdir/$minimizedfile > $tempdir/$pdbcode.cbdev
 #this from runCbetaDev($infile, $outfile) in lib/analyze.php
-#echo "making CBDev kinemage"
-##need path to prekin
-## $OSTYPE, test for darwin or ! darwin
-#prekin -cbdevdump $tempdir/$minimizedfile | java -cp $mptop_dir/lib/hless.jar hless.CBScatter > $tempdir/$pdbcode.cbdev.kin
+echo "making CBDev kinemage"
+$mptop_dir/$osbin/prekin -cbdevdump $tempdir/$minimizedfile | java -cp $mptop_dir/lib/hless.jar hless.CBScatter > $tempdir/$pdbcode.cbdev.kin
 #this from makeCbetaDevPlot($infile, $outfile) in lib/visualize.php
 
 echo "running omegalyze"
@@ -136,3 +157,4 @@ phenix.omegalyze nontrans_only=False $tempdir/$minimizedfile > $tempdir/$pdbcode
 echo "running CaBLAM"
 phenix.cablam_validate output=text $tempdir/$minimizedfile > $tempdir/$pdbcode.cablam
 #this from runCablam($infile, $outfile) in lib/analyze.php
+)
