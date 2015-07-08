@@ -37,6 +37,7 @@ testscript_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 #the above is taken from http://stackoverflow.com/questions/59895/can-a-bash-script-tell-what-directory-its-stored-in/246128#246128
 mptop_dir="$testscript_dir/.."
 source "$mptop_dir/build/setpaths.sh"
+echo "MP phenix env sourced for this terminal"
 #source the MP version of the phenix environment
 
 pdbcode=$(basename -s .pdb "$pdbfilepath")
@@ -61,15 +62,17 @@ fi
 trimmedfile="$pdbcode.trim.pdb"
 #This is using reduce to strip H's
 phenix.reduce -quiet -trim -allalt "$pdbfilepath" | awk '$0 !~ /^USER  MOD/' > "$tempdir/$trimmedfile"
+# this reduce commandline from lib/model.php in reduceNoBuild()
 
 #This makes the thumbnail kinemage
-###prekin needs to be set in env
-###prekin -cass -colornc "$tempdir/$trimmedfile" > "$tempdir/thumbnail.kin"
+#prekin needs to be set in env
+#prekin -cass -colornc "$tempdir/$trimmedfile" > "$tempdir/thumbnail.kin"
 
 #reduce proper
 #-build should = -flip
 reducedfile="$pdbcode.FH.pdb"
 phenix.reduce -quiet -build"$hydrogen_position" "$tempdir/$trimmedfile" > "$tempdir/$reducedfile"
+# this from lib/model.php in reduceBuild()
 
 #determine if reduce did any flips, run nqh_minimize if so:
 anyflips=$(grep "USER  MOD" "$tempdir/$reducedfile" | grep FLIP)
@@ -84,6 +87,7 @@ then
   #mmtbx.nqh_minimize requires 3 arguments, the third is just a tempdir for it to work in
   #arguments are: inpath, outpath, temppath
   mmtbx.nqh_minimize "$tempdir/$reducedfile" "$tempdir/$minimizedfile" "$nqhtempdir"
+  #this commandline from lib/model.php in regularizeNQH()
 else
   #nqh_minimize breaks on files without flips
   #set filename for next steps and pass
