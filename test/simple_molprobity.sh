@@ -132,3 +132,7 @@ phenix.cbetadev $tempdir/$minimizedfile > $tempdir/$pdbcode.cbdev
 echo "running omegalyze"
 phenix.omegalyze nontrans_only=False $tempdir/$minimizedfile > $tempdir/$pdbcode.omega
 #this from runOmegalyze($infile, $outfile) in lib/analyze.php
+
+echo "running CaBLAM"
+phenix.cablam_validate output=text $tempdir/$minimizedfile > $tempdir/$pdbcode.cablam
+#this from runCablam($infile, $outfile) in lib/analyze.php
