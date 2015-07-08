@@ -70,7 +70,7 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
   osbin="bin/macosx"
 elif [[ "$OSTYPE" == "cygwin" ]]; then
   # POSIX compatibility layer and Linux environment emulation for Windows
-  osbin="bin/linux"
+  osbin="bin/linux" #probably
 elif [[ "$OSTYPE" == "msys" ]]; then
   # Lightweight shell and GNU utilities compiled for Windows (part of MinGW)
   echo "WARNING: You seem to be running this script under Windows, some features may not work"
@@ -104,6 +104,7 @@ fi
 #How do we get the correct phenix environment variables via MolProbity?
 trimmedfile="$pdbcode.trim.pdb"
 #This is using reduce to strip H's
+echo "running reduce -trim"
 phenix.reduce -quiet -trim -allalt "$pdbfilepath" | awk '$0 !~ /^USER  MOD/' > "$tempdir/$trimmedfile"
 # this reduce commandline from lib/model.php in reduceNoBuild()
 
@@ -113,6 +114,7 @@ $mptop_dir/$osbin/prekin -cass -colornc "$tempdir/$trimmedfile" > "$tempdir/thum
 #reduce proper
 #-build should = -flip
 reducedfile="$pdbcode.FH.pdb"
+echo "running reduce -build (add Hs and do flips)"
 phenix.reduce -quiet -build"$hydrogen_position" "$tempdir/$trimmedfile" > "$tempdir/$reducedfile"
 # this from lib/model.php in reduceBuild()
 
@@ -128,6 +130,7 @@ then
   fi
   #mmtbx.nqh_minimize requires 3 arguments, the third is just a tempdir for it to work in
   #arguments are: inpath, outpath, temppath
+  echo "running nqh_minimize"
   mmtbx.nqh_minimize "$tempdir/$reducedfile" "$tempdir/$minimizedfile" "$nqhtempdir"
   #this commandline from lib/model.php in regularizeNQH()
 else
@@ -162,10 +165,10 @@ echo "running rotalyze"
 phenix.rotalyze data_version=8000 $tempdir/$minimizedfile > $tempdir/$pdbcode.rota
 #this from runRotamer($infile, $outfile) in lib/analyze.php
 
-echo "running CBDev"
+echo "running CBdev"
 phenix.cbetadev $tempdir/$minimizedfile > $tempdir/$pdbcode.cbdev
 #this from runCbetaDev($infile, $outfile) in lib/analyze.php
-echo "making CBDev kinemage"
+echo "making CBdev kinemage"
 $mptop_dir/$osbin/prekin -cbdevdump $tempdir/$minimizedfile | java -cp $mptop_dir/lib/hless.jar hless.CBScatter > $tempdir/$pdbcode.cbdev.kin
 #this from makeCbetaDevPlot($infile, $outfile) in lib/visualize.php
 
