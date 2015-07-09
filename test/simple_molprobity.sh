@@ -23,7 +23,7 @@ Options
   -h -help   prints this help
 
 "
-hydrogen_position='' #ecloud by default
+hydrogen_position='ecloud' #ecloud by default
 usecdl='False'
 pdbfilepath=''
 
@@ -35,7 +35,7 @@ do
       return 1
       ;;
     -nuclear)
-      hydrogen_position=' -nuclear'
+      hydrogen_position='nuclear'
       ;;
     -cdl)
       usecdl='True'
@@ -120,7 +120,11 @@ $mptop_dir/$osbin/prekin -cass -colornc "$tempdir/$trimmedfile" > "$tempdir/thum
 #-build should = -flip
 reducedfile="$pdbcode.FH.pdb"
 echo "running reduce -build (add Hs and do flips)"
-phenix.reduce -quiet -build"$hydrogen_position" "$tempdir/$trimmedfile" > "$tempdir/$reducedfile"
+if [[ $hydrogen_position == "nuclear" ]]; then
+  phenix.reduce -quiet -build -nuclear "$tempdir/$trimmedfile" > "$tempdir/$reducedfile"
+else
+  phenix.reduce -quiet -build "$tempdir/$trimmedfile" > "$tempdir/$reducedfile"
+fi
 # this from lib/model.php in reduceBuild()
 
 #determine if reduce did any flips, run nqh_minimize if so:
@@ -202,4 +206,14 @@ mmtbx.mp_geo rna_backbone=True pdb=$tempdir/$minimizedfile | phenix.suitename -k
 echo "running mp_geo bond geometry"
 mmtbx.mp_geo pdb=$tempdir/$minimizedfile out_file=$tempdir/$pdbcode.geom cdl=$usecdl outliers_only=False bonds_and_angles=True
 #this from runValidationReport($infile, $outfile, $use_cdl) in lib/analyze.php
+
+echo "running clashscore"
+if [[ $hydrogen_position == 'nuclear' ]]; then
+  echo "...in nuclear mode"
+  phenix.clashscore b_factor_cutoff=40 clash_cutoff=-0.4 nuclear=True $tempdir/$minimizedfile > $tempdir/$pdbcode.clash
+else
+  echo "...in ecloud mode"
+  phenix.clashscore b_factor_cutoff=40 clash_cutoff=-0.4 $tempdir/$minimizedfile > $tempdir/$pdbcode.clash
+fi
+#this from runClashscore($infile, $outfile, $blength="ecloud", $clash_cutoff=-0.4) in lib/analyze.php
 )
