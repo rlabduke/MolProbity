@@ -18,11 +18,13 @@ This script creates a new directory named test_FILENAME in the working directory
   overwritten.
 
 Options
-  -nuclear     sets hydrogen bond-lengths to use nuclear positions as in NMR
-  -h -help     prints this help
+  -nuclear   sets hydrogen bond-lengths to use nuclear positions as in NMR
+  -cdl       sets bond geometry validation to use Conformation Dependent Library
+  -h -help   prints this help
 
 "
 hydrogen_position='' #ecloud by default
+usecdl='False'
 pdbfilepath=''
 
 for i in $@
@@ -35,6 +37,8 @@ do
     -nuclear)
       hydrogen_position=' -nuclear'
       ;;
+    -cdl)
+      usecdl='True'
   esac
   if [[ $i == *".pdb" ]]
   then
@@ -63,7 +67,8 @@ source "$mptop_dir/build/setpaths.sh"
 
 #some programs like prekin are stored in different locations depending on the OS
 #Find the OS and store the appropriate location
-if [[ "$OSTYPE" == "linux-gnu" ]]; then
+#if [[ "$OSTYPE" == "linux-gnu" ]]; then
+if [[ "$OSTYPE" == "linux"* ]]; then #should catch more linux types
   osbin="bin/linux"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
   # Mac OSX
@@ -180,7 +185,7 @@ echo "running CaBLAM"
 phenix.cablam_validate output=text $tempdir/$minimizedfile > $tempdir/$pdbcode.cablam
 #this from runCablam($infile, $outfile) in lib/analyze.php
 
-echo "running pucker analysis"
+echo "running prekin pucker analysis"
 $mptop_dir/$osbin/prekin -pperptoline -pperpdump $tempdir/$minimizedfile > $tempdir/$pdbcode.pucker
 #this from runBasePhosPerp($infile, $outfile) in lib/analyze.php
 
@@ -193,4 +198,8 @@ mmtbx.mp_geo rna_backbone=True pdb=$tempdir/$minimizedfile | phenix.suitename -s
 echo "making suitename kin"
 mmtbx.mp_geo rna_backbone=True pdb=$tempdir/$minimizedfile | phenix.suitename -kinemage -pointIDfields 7 -altIDfield 6 > $tempdir/$pdbcode.suitename.kin
 #this from makeSuitenameKin($infile, $outfile) in lib/visualize.php
+
+echo "running mp_geo bond geometry"
+mmtbx.mp_geo pdb=$tempdir/$minimizedfile out_file=$tempdir/$pdbcode.geom cdl=$usecdl outliers_only=False bonds_and_angles=True
+#this from runValidationReport($infile, $outfile, $use_cdl) in lib/analyze.php
 )
