@@ -216,4 +216,12 @@ else
   phenix.clashscore b_factor_cutoff=40 clash_cutoff=-0.4 $tempdir/$minimizedfile > $tempdir/$pdbcode.clash
 fi
 #this from runClashscore($infile, $outfile, $blength="ecloud", $clash_cutoff=-0.4) in lib/analyze.php
-)
+
+#This should cover all of the datafile generation done by MolProbity
+#This also covers the "extra" outputs MolProbity makes available, such as the rama pdf and the CBdev kin
+
+#This does not, however, cover the "major" MolProbity outputs of the multicrit chart and multicrit kin
+#The existing cmdline/multikin script generates the multicrit kin
+#The existing cmdline/multichart script generates the multicrit chart in html format
+#These additional scripts are in php, which amy not be suiteable for all testing purposes
+) #Trailing paranthesis to limit scope of script, see top of file
