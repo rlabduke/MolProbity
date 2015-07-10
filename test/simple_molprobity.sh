@@ -206,6 +206,8 @@ mmtbx.mp_geo rna_backbone=True pdb=$tempdir/$minimizedfile | phenix.suitename -k
 echo "running mp_geo bond geometry"
 mmtbx.mp_geo pdb=$tempdir/$minimizedfile out_file=$tempdir/$pdbcode.geom cdl=$usecdl outliers_only=False bonds_and_angles=True
 #this from runValidationReport($infile, $outfile, $use_cdl) in lib/analyze.php
+sort $tempdir/$pdbcode.geom > $tempdir/$pdbcode.geom.sorted
+#by default, mp_geo produces unsorted output, this should render print order consistent
 
 echo "running clashscore"
 if [[ $hydrogen_position == 'nuclear' ]]; then
