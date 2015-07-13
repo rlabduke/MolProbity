@@ -977,7 +977,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
     if(is_array($clash) && is_array($rota) && is_array($rama)) $proteinRows += 1;
     if(hasMoltype($bbonds, "protein")) $proteinRows += 1;
     if(hasMoltype($bangles, "protein")) $proteinRows += 1;
-    if(is_array($omega)) $proteinRows += 1;
+    //if(is_array($omega)) $proteinRows += 1;
     if($proteinRows > 0)
     {
         $entry .= "<tr><td rowspan='$proteinRows' align='center'>Protein<br>Geometry</td>\n";
@@ -1166,10 +1166,10 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
         //Print other lines only if relevant
         $cispepentry = "";
         $cispepRows = 1;
-        if($cispropct <= 5.0)      $bg = $bgGood; //5% is statistical expectation for cis-Pro
-        elseif($cispropct <= 10.0) $bg = $bgFair; //set at 2x statistical expectations
-        else                       $bg = $bgPoor;
-        $cisentry .= "<td>Cis Prolines:</td><td bgcolor='$bg'> $cisprocount / $prototal</td><td bgcolor='$bg'> $cispropct% </td>\n<td>Goal: &lt;5%</td></tr>\n";
+        //if($cispropct <= 5.0)      $bg = $bgGood; //5% is statistical expectation for cis-Pro
+        //elseif($cispropct <= 10.0) $bg = $bgFair; //set at 2x statistical expectations
+        //else                       $bg = $bgPoor;
+        $cisentry .= "<td>Cis Prolines:</td><td> $cisprocount / $prototal</td><td> $cispropct% </td>\n<td>Expected: &le;1 per chain, or &le;5%</td></tr>\n";
         if($cisnonprocount > 0)
         {
             $cispepRows += 1;
@@ -1186,8 +1186,8 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             else                     $bg = $bgPoor;
             $cisentry .= "<td>Twisted Peptides:</td><td bgcolor='$bg'> $twistcount / $totalres</td><td bgcolor='$bg'> $twistpct% </td>\n<td>Goal: 0</td></tr>\n";
         }
-        $entry .= "<tr><td rowspan='1'> </td>";
-        $entry .= "<td> </td></tr>\n";
+        //$entry .= "<tr><td rowspan='1'> </td>";
+        //$entry .= "<td> </td></tr>\n";
         $entry .= "<tr><td rowspan='$cispepRows' align='center'>Peptide Omegas</td>\n";
         $firstRow = true;
         $entry .= $cisentry;
@@ -1281,8 +1281,8 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
     if(is_array($cablam)) $lowresRows+=2;
     if($lowresRows > 0)
     {
-      $entry .= "<tr><td rowspan='1'> </td>";
-      $entry .= "<td> </td></tr>\n";
+      ////$entry .= "<tr><td rowspan='1'> </td>";
+      ////$entry .= "<td> </td></tr>\n";
       //Following text should be added to help instead of entry:
       //$entry .= "<td>Because the submitted structure has a resolution lower than 2.5&Aring; or because low-resolution measures were selected, the following criteria are provided that may be helpful at low resolution.</td></tr>\n";
       $entry .= "<tr><td rowspan='$lowresRows' align='center'>Low-resolution Criteria</td>\n";
