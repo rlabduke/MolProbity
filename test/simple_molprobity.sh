@@ -225,5 +225,5 @@ fi
 #This does not, however, cover the "major" MolProbity outputs of the multicrit chart and multicrit kin
 #The existing cmdline/multikin script generates the multicrit kin
 #The existing cmdline/multichart script generates the multicrit chart in html format
-#These additional scripts are in php, which amy not be suiteable for all testing purposes
-) #Trailing paranthesis to limit scope of script, see top of file
+#These additional scripts are in php, which amy not be suitable for all testing purposes
+) #Trailing parenthesis to limit scope of script, see top of file
