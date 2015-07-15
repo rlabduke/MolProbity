@@ -68,3 +68,19 @@ php-cli or a similar package, then run "php -S localhost:8000" in the
 MolProbity main directory. This sets up a non-public webserver. In a
 browser, navigate to http://localhost:8000/public_html/index.php , and
 you will have a functioning local MolProbity site.
+
+3. Tweak Apache settings as needed
+
+You may need to edit Apache settings for proper MolProbity
+performance.  The settings file is often called php.ini,
+e.g. /etc/php5/???/php.ini, but it will vary on different computers.
+Two such defaults are:
+
+upload_max_filesize = 2M
+post_max_size = 8M
+
+Something like 50M (for both) may be more appropriate.
+
+An external explanation:
+http://stackoverflow.com/questions/24377403/maximum-upload-size-in-php-and-apache
+http://stackoverflow.com/questions/2184513/php-change-the-maximum-upload-file-size
