@@ -193,14 +193,22 @@ echo "running prekin pucker analysis"
 $mptop_dir/$osbin/prekin -pperptoline -pperpdump $tempdir/$minimizedfile > $tempdir/$pdbcode.pucker
 #this from runBasePhosPerp($infile, $outfile) in lib/analyze.php
 
+echo "running suitename prep"
+#This step is not authentic to MolProbity.
+#Running mmtbx.mp_geo rna_backbone=True once here allows us to speed up the test
+#  and allows us to capture the otherwise invisible intermediate output from mp_geo
+mmtbx.mp_geo rna_backbone=True pdb=$tempdir/$minimizedfile > $tempdir/$pdbcode.suitename_midpoint
 echo "running suitename"
-mmtbx.mp_geo rna_backbone=True pdb=$tempdir/$minimizedfile | phenix.suitename -report -pointIDfields 7 -altIDfield 6 > $tempdir/$pdbcode.suitename
+phenix.suitename -report -pointIDfields 7 -altIDfield 6 < $tempdir/$pdbcode.suitename_midpoint > $tempdir/$pdbcode.suitename
+#Original: mmtbx.mp_geo rna_backbone=True pdb=$tempdir/$minimizedfile | phenix.suitename -report -pointIDfields 7 -altIDfield 6 > $tempdir/$pdbcode.suitename
 #this from runSuitenameReport($infile, $outfile) in lib/analyze.php
 echo "running suitestring"
-mmtbx.mp_geo rna_backbone=True pdb=$tempdir/$minimizedfile | phenix.suitename -string -oneline -pointIDfields 7 -altIDfield 6 | fold -w 60 > $tempdir/$pdbcode.suitestring
+phenix.suitename -string -oneline -pointIDfields 7 -altIDfield 6 < $tempdir/$pdbcode.suitename_midpoint | fold -w 60 > $tempdir/$pdbcode.suitestring
+#Original: mmtbx.mp_geo rna_backbone=True pdb=$tempdir/$minimizedfile | phenix.suitename -string -oneline -pointIDfields 7 -altIDfield 6 | fold -w 60 > $tempdir/$pdbcode.suitestring
 #this from runSuitenameString($infile, $outfile) in lib/analyze.php
 echo "making suitename kin"
-mmtbx.mp_geo rna_backbone=True pdb=$tempdir/$minimizedfile | phenix.suitename -kinemage -pointIDfields 7 -altIDfield 6 > $tempdir/$pdbcode.suitename.kin
+phenix.suitename -kinemage -pointIDfields 7 -altIDfield 6 < $tempdir/$pdbcode.suitename_midpoint > $tempdir/$pdbcode.suitename.kin
+#Original: mmtbx.mp_geo rna_backbone=True pdb=$tempdir/$minimizedfile | phenix.suitename -kinemage -pointIDfields 7 -altIDfield 6 > $tempdir/$pdbcode.suitename.kin
 #this from makeSuitenameKin($infile, $outfile) in lib/visualize.php
 
 echo "running mp_geo bond geometry"
