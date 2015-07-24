@@ -595,6 +595,8 @@ function displayEntries($context, $labbook)
 */
 function displayUpload($context)
 {
+    echo("<div class=feature>Welcome to the MolProbity version 4.2 server!  We've added several new features (see 'What's new in 4.2' below).  Let us know via the feedback link at left if you find any problems.</div>");
+
     //This block prints a warning if the server was recently rebooted (30 mins).  I assume putting this check here is acceptable.  SML
     $recent_reboot = False;
     $recent_limit = 1800; //1800 seconds in half an hour
