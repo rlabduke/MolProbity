@@ -177,7 +177,12 @@ function addModelOrEnsemble(
     list($stats, $segmap) = preparePDB($tmpPdb, $tmp2, $isCnsFormat, $ignoreSegID);
     $stats = convertToPDBv3($tmp2, $tmp3);
     /* this section is for trimming Hs by default */
-    if ($stats['has_most_H'] && $trim_input_H) {
+    ////if ($stats['has_most_H'] && $trim_input_H) {
+    //changed this check so that the presence of any H will cause reduce trim to run
+    //we were seeing some odd behaviors in reduce build for structures with untrimmed H
+    //original upload should be available in dropdown is users want it
+    //'has_most_H' and 'has_any_H' are set in lib/pdbstat.php
+    if ($stats['has_any_H'] && $trim_input_H) {
       removeHydrogens($tmp3, $tmp4);
       //$stats = pdbstat($tmp4);
     }

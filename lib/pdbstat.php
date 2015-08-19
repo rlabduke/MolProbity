@@ -435,7 +435,10 @@ function pdbstat($pdbfilename)
     $ret['deuteriums']      = $deuteriums;
     // Doesn't work for RNA -- too few H.  New criteria:  3+ per residue.
     //$ret['has_most_H']      = ($heavyatoms < 2*($hydrogens+$hnonpolar));
+    // 'has_most_H' controls whether aacgeom can be run on a file, among other things
     $ret['has_most_H']      = (3*$residues < ($hydrogens+$hnonpolar));
+    //'has_any_H' is a new flag for controlling whether reduce trim is run during lib/model.php addModelOrEnsemble()
+    $ret['has_any_H']       = ($hydrogens>0 || $hnonpolar>0);
     $ret['non_ecloud_H']   = $nonECloudH;
     $ret['originalInputH']  = $ret['has_most_H'];
     $ret['hets']            = $hets;
