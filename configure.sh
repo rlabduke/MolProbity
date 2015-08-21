@@ -4,7 +4,17 @@ if [ $# -eq 1 ]
 then
     sf_user=$1
 fi
- 
+
+# checking Python version
+PYV=`python -c 'import sys; print(hex(sys.hexversion))'`
+if (( "$PYV" <= "0x2070000" ))
+then
+  echo you are using python version:
+  python --version
+  echo "MolProbity requires Python 2.7 or newer";
+  exit
+fi
+
 curl http://kinemage.biochem.duke.edu/molprobity/base.tar.gz -o base.tar.gz
 tar zxf base.tar.gz
 
