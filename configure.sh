@@ -31,7 +31,8 @@ if [ ! -f boost.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/
 if [ ! -f scons.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/scons.tar.gz -o scons.tar.gz; fi
 if [ ! -f annlib.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/annlib.tar.gz -o annlib.tar.gz; fi
 if [ ! -f annlib_adaptbx.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/annlib_adaptbx.tar.gz -o annlib_adaptbx.tar.gz; fi
-if [ ! -f cdflib.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/cbflib.tar.gz -o cbflib.tar.gz; fi
+#if [ ! -f cbflib.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/cbflib.tar.gz -o cbflib.tar.gz; fi
+if [ ! -f cbflib.tar.gz ]; then curl http://sourceforge.net/projects/cbflib/files/cbflib/CBFlib_0.9.5/CBFlib-0.9.5.11.tar.gz/download -o cbflib.tar.gz; fi
 if [ ! -f ccp4io.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/ccp4io.tar.gz -o ccp4io.tar.gz; fi
 if [ ! -f ccp4io_adaptbx.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/ccp4io_adaptbx.tar.gz -o ccp4io_adaptbx.tar.gz; fi
 if [ ! -f chem_data.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/chem_data.tar.gz -o chem_data.tar.gz; fi
