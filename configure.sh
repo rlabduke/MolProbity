@@ -25,6 +25,7 @@ else echo already got.; fi
 echo unpacking ...
 tar zxf base.tar.gz
 
+echo creating build directories ...
 if [ ! -d sources ]; then mkdir sources; fi
 if [ ! -d build ]; then mkdir build; fi
 cd sources
