@@ -1,27 +1,42 @@
-#! /bin/bash
+#!/bin/bash
+
+# Merlin 2015-08-24 force use of python2.7
+shopt -s expand_aliases
+alias python="python2.7"
 
 if [ $# -eq 1 ]
 then
     sf_user=$1
 fi
- 
-curl http://kinemage.biochem.duke.edu/molprobity/base.tar.gz -o base.tar.gz
+
+# checking Python version
+PYV=`python -c 'import sys; print(hex(sys.hexversion))'`
+if (( "$PYV" <= "0x2070000" ))
+then
+  echo you are using python version:
+  python --version
+  echo "MolProbity requires Python 2.7 or newer";
+  exit
+fi
+
+if [!-f base.tar.gz]; then curl http://kinemage.biochem.duke.edu/molprobity/base.tar.gz -o base.tar.gz
 tar zxf base.tar.gz
 
 mkdir sources
 mkdir build
 cd sources
 
-curl http://kinemage.biochem.duke.edu/molprobity/boost.tar.gz -o boost.tar.gz
-curl http://kinemage.biochem.duke.edu/molprobity/scons.tar.gz -o scons.tar.gz
-curl http://kinemage.biochem.duke.edu/molprobity/annlib.tar.gz -o annlib.tar.gz
-curl http://kinemage.biochem.duke.edu/molprobity/annlib_adaptbx.tar.gz -o annlib_adaptbx.tar.gz
-curl http://kinemage.biochem.duke.edu/molprobity/cbflib.tar.gz -o cbflib.tar.gz
-curl http://kinemage.biochem.duke.edu/molprobity/ccp4io.tar.gz -o ccp4io.tar.gz
-curl http://kinemage.biochem.duke.edu/molprobity/ccp4io_adaptbx.tar.gz -o ccp4io_adaptbx.tar.gz
-curl http://kinemage.biochem.duke.edu/molprobity/chem_data.tar.gz -o chem_data.tar.gz
-curl http://kinemage.biochem.duke.edu/molprobity/lapack_fem.tar.gz -o lapack_fem.tar.gz
-curl http://kinemage.biochem.duke.edu/molprobity/tntbx.tar.gz -o tntbx.tar.gz
+if [!-f boost.tar.gz]; then curl http://kinemage.biochem.duke.edu/molprobity/boost.tar.gz -o boost.tar.gz
+if [!-f scons.tar.gz]; then curl http://kinemage.biochem.duke.edu/molprobity/scons.tar.gz -o scons.tar.gz
+if [!-f annlib.tar.gz]; then curl http://kinemage.biochem.duke.edu/molprobity/annlib.tar.gz -o annlib.tar.gz
+if [!-f annlib_adaptbx.tar.gz]; then curl http://kinemage.biochem.duke.edu/molprobity/annlib_adaptbx.tar.gz -o annlib_adaptbx.tar.gz
+if [!-f cdflib.tar.gz]; then curl http://kinemage.biochem.duke.edu/molprobity/cbflib.tar.gz -o cbflib.tar.gz
+if [!-f ccp4io.tar.gz]; then curl http://kinemage.biochem.duke.edu/molprobity/ccp4io.tar.gz -o ccp4io.tar.gz
+if [!-f ccp4io_adaptbx.tar.gz]; then curl http://kinemage.biochem.duke.edu/molprobity/ccp4io_adaptbx.tar.gz -o ccp4io_adaptbx.tar.gz
+if [!-f chem_data.tar.gz]; then curl http://kinemage.biochem.duke.edu/molprobity/chem_data.tar.gz -o chem_data.tar.gz
+if [!-f lapack_fem.tar.gz]; then curl http://kinemage.biochem.duke.edu/molprobity/lapack_fem.tar.gz -o lapack_fem.tar.gz
+if [!-f tntbx.tar.gz]; then curl http://kinemage.biochem.duke.edu/molprobity/tntbx.tar.gz -o tntbx.tar.gz
+
 
 tar zxf boost.tar.gz
 tar zxf scons.tar.gz
