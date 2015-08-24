@@ -49,6 +49,7 @@ tar zxf scons.tar.gz
 tar zxf annlib.tar.gz
 tar zxf annlib_adaptbx.tar.gz
 tar zxf cbflib.tar.gz
+mv CBFlib-0.9.5.11 cbflib
 tar zxf ccp4io.tar.gz
 tar zxf ccp4io_adaptbx.tar.gz
 tar zxf chem_data.tar.gz
