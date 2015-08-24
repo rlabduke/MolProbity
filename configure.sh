@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# Merlin 2015-08-24 force use of python2.7
-shopt -s expand_aliases
-alias python="python2.7"
+# uncomment these 2 lines to force use of python2.7
+# shopt -s expand_aliases
+# alias python="python2.7"
 
 if [ $# -eq 1 ]
 then
