@@ -1,0 +1,7 @@
+System Requirements
+Python 2.7 or greater with development libraries (python-devel or python-dev)
+Subversion
+Gawk
+Curl
+Tar
+Make
