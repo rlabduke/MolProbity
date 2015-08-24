@@ -19,7 +19,10 @@ then
   exit
 fi
 
-if [ ! -f base.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/base.tar.gz -o base.tar.gz; fi
+echo getting Molprobity base ...
+if [ ! -f base.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/base.tar.gz -o base.tar.gz; echo got.;
+else echo already got.; fi
+echo unpacking ...
 tar zxf base.tar.gz
 
 if [ ! -d sources ]; then mkdir sources; fi
