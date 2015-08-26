@@ -104,3 +104,5 @@ mkdir -p public_html/data
 mkdir -p public_html/data/tmp
 mkdir -p feedback
 mkdir -p tmp
+
+echo ++++++++++ MolProbity configure.sh finished.
