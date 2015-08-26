@@ -34,10 +34,10 @@ echo ++++++++++ getting sources ...
 if [ -n "$sf_user" ]
 then
     svn --quiet --non-interactive --trust-server-cert co https://$sf_user@svn.code.sf.net/p/cctbx/code/trunk cctbx_project
-    svn --quiet --non-interactive --trust-server-cert co   svn://$sf_user@svn.code.sf.net/p/cbflib/code-0/trunk/CBFlib_bleeding_edge cbflib
+    svn --quiet --non-interactive --trust-server-cert co https://$sf_user@svn.code.sf.net/p/cbflib/code-0/trunk/CBFlib_bleeding_edge cbflib
 else
     svn --quiet --non-interactive --trust-server-cert co https://svn.code.sf.net/p/cctbx/code/trunk cctbx_project
-    svn --quiet --non-interactive --trust-server-cert co   svn://svn.code.sf.net/p/cbflib/code-0/trunk/CBFlib_bleeding_edge cbflib
+    svn --quiet --non-interactive --trust-server-cert co https://svn.code.sf.net/p/cbflib/code-0/trunk/CBFlib_bleeding_edge cbflib
 fi
 
 #svn --non-interactive --trust-server-cert co https://quiddity.biochem.duke.edu/svn/reduce/trunk reduce
