@@ -15,7 +15,7 @@ if (( "$PYV" <= "0x2070000" ))
 then
   echo you are using python version:
   python --version
-  echo "MolProbity requires Python 2.7 or newer";
+  echo "this MolProbity configure script requires Python 2.7 or newer";
   exit
 fi
 
@@ -34,8 +34,10 @@ echo ++++++++++ getting sources ...
 if [ -n "$sf_user" ]
 then
     svn --quiet --non-interactive --trust-server-cert co https://$sf_user@svn.code.sf.net/p/cctbx/code/trunk cctbx_project
+    svn --quiet --non-interactive --trust-server-cert co   svn://$sf_user@svn.code.sf.net/p/cbflib/code-0/trunk/CBFlib cbflib
 else
     svn --quiet --non-interactive --trust-server-cert co https://svn.code.sf.net/p/cctbx/code/trunk cctbx_project
+    svn --quiet --non-interactive --trust-server-cert co   svn://svn.code.sf.net/p/cbflib/code-0/trunk/CBFlib cbflib
 fi
 
 #svn --non-interactive --trust-server-cert co https://quiddity.biochem.duke.edu/svn/reduce/trunk reduce
@@ -50,8 +52,6 @@ if [ ! -f boost.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/
 if [ ! -f scons.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/scons.tar.gz -o scons.tar.gz; fi
 if [ ! -f annlib.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/annlib.tar.gz -o annlib.tar.gz; fi
 if [ ! -f annlib_adaptbx.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/annlib_adaptbx.tar.gz -o annlib_adaptbx.tar.gz; fi
-#if [ ! -f cbflib.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/cbflib.tar.gz -o cbflib.tar.gz; fi
-if [ ! -f cbflib.tar.gz ]; then wget "http://downloads.sourceforge.net/project/cbflib/cbflib/CBFlib_0.9.5/CBFlib-0.9.5.11.tar.gz?r=&ts=1440424898" -O cbflib.tar.gz; fi
 if [ ! -f ccp4io.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/ccp4io.tar.gz -o ccp4io.tar.gz; fi
 if [ ! -f ccp4io_adaptbx.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/ccp4io_adaptbx.tar.gz -o ccp4io_adaptbx.tar.gz; fi
 if [ ! -f chem_data.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/chem_data.tar.gz -o chem_data.tar.gz; fi
@@ -63,8 +63,6 @@ tar zxf boost.tar.gz
 tar zxf scons.tar.gz
 tar zxf annlib.tar.gz
 tar zxf annlib_adaptbx.tar.gz
-tar zxf cbflib.tar.gz
-mv CBFlib-0.9.5.11 cbflib
 tar zxf ccp4io.tar.gz
 tar zxf ccp4io_adaptbx.tar.gz
 tar zxf chem_data.tar.gz
