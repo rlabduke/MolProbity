@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# uncomment these 2 lines to force use of python2.7
-# shopt -s expand_aliases
-# alias python="python2.7"
-
 if [ $# -eq 1 ]
 then
     sf_user=$1
@@ -13,10 +9,16 @@ fi
 PYV=`python -c 'import sys; print(hex(sys.hexversion))'`
 if (( "$PYV" <= "0x2070000" ))
 then
-  echo you are using python version:
-  python --version
-  echo "this MolProbity configure script requires Python 2.7 or newer";
-  exit
+  if type "python2.7" > /dev/null
+  then
+    shopt -s expand_aliases
+    alias python="python2.7"
+  else
+    echo you are using python version:
+    python --version
+    echo "this MolProbity configure script requires Python 2.7 or newer";
+    exit
+  fi
 fi
 
 echo ++++++++++ getting MolProbity base ...
