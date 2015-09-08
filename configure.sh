@@ -94,7 +94,8 @@ echo ++++++++++ setting paths ...
 source ../build/setpaths.sh
 
 echo ++++++++++ pickling rotarama ...
-#this configures all the rotamer and ramachandran contour files so rotalyze and ramalyze work.  They are downloaded as hiant text files, this line of code creates them as python pickles
+#this configures all the rotamer and ramachandran contour files so rotalyze and ramalyze work. 
+#They are downloaded as giant text files, this line of code creates them as python pickles
 mmtbx.rebuild_rotarama_cache
 
 echo ++++++++++ creating directories ...
