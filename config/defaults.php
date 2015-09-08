@@ -125,7 +125,8 @@ if(!defined("MP_DIR_CHARTS"))
 //  of the MolProbity source code. Please DO NOT modify this
 //  entry; this is how we get feedback about bugs, etc.
 //  Change MP_EMAIL_WEBMASTER instead.
-    define("MP_EMAIL_AUTHOR", "arendall@duke.edu");
+//    define("MP_EMAIL_AUTHOR", "arendall@duke.edu");
+    define("MP_EMAIL_AUTHOR", "rlabduke@gmail.com");
 
 // Don't change this! It will break user bookmarks.
     define("MP_SESSION_NAME", "MolProbSID");
