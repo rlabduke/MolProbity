@@ -2,6 +2,8 @@
 <HTML>
 <HEAD> <TITLE>MolProbity Monitor</title> </HEAD>
 <!-- Background white, links blue (unvisited), navy (visited), red (active) -->
+<!-- This page runs a server monitor script at molprobityurl/monitor.php.  Optional argument ?refresh=X for a refresh rate. The served data help us maintain the main public server but are irrelevant for most users.  This page should have no interaction with the rest of the MolProbity install. -->
+
 <BODY BGCOLOR="#FFFFFF">
 
 <?php
