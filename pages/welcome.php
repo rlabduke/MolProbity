@@ -59,7 +59,7 @@ function display($context)
     echo "</div>\n<br>\n<div class='pagecontent'>\n";
 ?>
 <table border='0' width='100%'><tr valign='top'><td width='45%'>
-<h3>Walkthroughs &amp; tutorials:</h3>
+<h3>Walkthroughs, tutorials, and usage FAQs:</h3>
 <p><b><?php echo "<a href='".makeEventURL("onGoto", "helper_xray.php")."'>Evaluate X-ray structure</a>"; ?>:</b>
 Typical steps for a published X-ray crystal structure
 or one still undergoing refinement.</p>
@@ -98,7 +98,7 @@ Choose validations appropriate to a structure.</p>
       </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>");
 ?>
 
-<h3>Common questions:</h3>
+<h3>Citations, science, and technical FAQs:</h3>
 <p><b><a href='help/about.html' target='_blank'>Cite MolProbity</a></b>:
     <small>Chen et al. (2010)
     <a href="http://kinemage.biochem.duke.edu/lab/papers.php" target="_blank">MolProbity:
