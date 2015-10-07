@@ -17,6 +17,8 @@ function display($context)
     echo $this->pageHeader("Feedback &amp; bugs", "feedback");
     echo makeEventForm("onFeedbackSend");
 ?>
+
+<div class=alert>Please scroll to the last few lines of the error log below: it will often tell you what to fix. If not, we welcome your bug reports and feedback.  </div>
 <table border='0' cellspacing='0'>
 <tr>
     <td align='right'>My name is</td>
