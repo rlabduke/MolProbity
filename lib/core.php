@@ -831,6 +831,28 @@ function is_elementerror($errfile)
 }
 #}}}########################################################################
 
+#{{{ is_modelerror - parses the error to see if it is a MODEL/ENDMDL mismatch
+SML 14 oct 15
+############################################################################
+/**
+* parses the error to see if it is a MODEL/ENDMDL mismatch issue
+* $errfile should be MP_DIR_SYSTEM."/errors"
+*/
+function is_modelerror($errfile)
+{
+    $s1 = "ENDMDL record missing at end of input";
+    $a = file($errfile);
+    if(!file_exists($errfile)) return false;
+    foreach($a as $s)
+        {
+            error_log("$s");
+	    if(strpos($s,$s1) !== false) return true; 
+         }
+    return false;
+}
+#}}}########################################################################
+
+
 #{{{ a_function_definition - sumary_statement_goes_here
 ############################################################################
 /**
