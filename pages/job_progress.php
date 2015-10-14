@@ -77,6 +77,25 @@ function display($context)
             echo "<br><small>If needed, you can <a href='$url&abort={$_SESSION[bgjob][processID]}'>abort this job</a>.\n";
         echo $this->pageFooter();
     }
+    elseif($_SESSION['bgjob']['modelError'])
+      {
+        $url        = makeEventURL("onGoto", "welcome.php");
+        $pdburlMODEL = "http://deposit.rcsb.org/adit/docs/pdb_atom_format.html#MODEL";
+	$pdburlENDMDL = "http://deposit.rcsb.org/adit/docs/pdb_atom_format.html#ENDMDL";
+        $refresh    = "10; URL=$url";
+        echo $this->pageHeader("CCTBX job failed");//, "none", $refresh);
+        echo "<p>It appears that the PDB you provided has a formatting error.\n";
+        echo "<br>MolProbity believes the formatting error has to do with mismatched MODEL and ENDMDL cards.\n\n";
+	echo "<p>Each MODEL card must be uniquely numbered and have a matching ENDMDL card.\n";
+	echo "<p>The most common error is 'MODEL 1' existing with no ENDMDL card.\n";
+        echo "<br>For further info please see the <a href='$pdburlMODEL' target=\"_blank\">PDB's MODEL</a> and <a href='$pdburlENDMDL' target=\"_blank\">PDB's ENDMDL</a>.\n";
+        echo "<p><strong>To fix:</strong> please check your fomatting conforms to proper PDB";
+        echo "<br>conventions and try again. If you continue experiencing problems please";
+        echo "<br>contact us using the feedback page which you can access on the left-hand";
+        echo "<br>navigation bar from the main page.\n";
+        echo "<p><a href='$url'>Click here</a> to continue.\n";
+        echo $this->pageFooter();
+      }
     elseif($_SESSION['bgjob']['elementError'])
     {
         $url        = makeEventURL("onGoto", "welcome.php");
