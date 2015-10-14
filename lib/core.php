@@ -831,8 +831,7 @@ function is_elementerror($errfile)
 }
 #}}}########################################################################
 
-#{{{ is_modelerror - parses the error to see if it is a MODEL/ENDMDL mismatch
-SML 14 oct 15
+#{{{ is_modelerror - parses the error to see if it is a MODEL/ENDMDL mismatch; SML 14 oct 15
 ############################################################################
 /**
 * parses the error to see if it is a MODEL/ENDMDL mismatch issue
