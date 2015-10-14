@@ -853,7 +853,7 @@ function is_modelerror($errfile)
 #}}}########################################################################
 
 
-#{{{ a_function_definition - sumary_statement_goes_here
+#{{{ a_function_definition - summary_statement_goes_here
 ############################################################################
 /**
 * Documentation for this function.
