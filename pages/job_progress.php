@@ -122,6 +122,7 @@ function display($context)
         echo "ATOM     43  CG BARG A  -3      12.866  85.172  92.651  0.50 37.31           C\n";
         echo "ATOM     44  CD AARG A  -3      11.698  84.678  90.815  0.50 38.51           C\n";
         echo "ATOM     45  CD BARG A  -3      13.374  85.886  91.406  0.50 37.66           C\n";
+	echo "HETATM   46 MG   MG  B 101      44.444  55.555  66.666  1.00 42.42          MG\n";
         echo "</pre><p>Chemical names must be in columns 77-78 of the PDB file, right justified (e.g. \" C\"). ";
         echo "<br>For further info please see the <a href='$pdburl' target=\"_blank\">PDB formatting</a> guide.\n";
         echo "<p><strong>To fix:</strong> please check your fomatting conforms to proper PDB";
