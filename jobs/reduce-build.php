@@ -140,6 +140,8 @@ if($did_flip && $_SESSION['bgjob']['nqh_regularize'])
     $errfile = $_SESSION['dataDir']."/".MP_DIR_SYSTEM."/errors";
     $elementerror = is_elementerror($errfile);
     if($elementerror) $_SESSION['bgjob']['elementError'] = true;
+    $modelerror = is_modelerror($errfile);
+    if($modelerror) $_SESSION['bgjob']['modelError'] = true;
     else $_SESSION['bgjob']['cctbxError'] = true;
     die();
   }
