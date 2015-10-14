@@ -93,7 +93,7 @@ function display($context)
         echo "<br>conventions and try again. If you continue experiencing problems please";
         echo "<br>contact us using the feedback page which you can access on the left-hand";
         echo "<br>navigation bar from the main page.\n";
-        echo "<p><a href='$url'>Click here</a> to continue.\n";
+        echo "<p><a href='$url'>Click here</a> to return to the main page. \n";
         echo $this->pageFooter();
       }
     elseif($_SESSION['bgjob']['elementError'])
@@ -128,7 +128,7 @@ function display($context)
         echo "<br>conventions and try again. If you continue experiencing problems please";
         echo "<br>contact us using the feedback page which you can access on the left-hand";
         echo "<br>navigation bar from the main page.\n";
-        echo "<p><a href='$url'>Click here</a> to continue.\n";
+        echo "<p><a href='$url'>Click here</a> to return to the main page.\n";
         echo $this->pageFooter();
     }
     elseif($_SESSION['bgjob']['cctbxError'])
