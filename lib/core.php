@@ -807,14 +807,16 @@ function microtimeSubtract($a, $b)
 #{{{ is_elementerror - parses the error to see if it is an element format issue
 ############################################################################
 /**
-* parses the error to see if it is an element format isuse
+* parses the error to see if it is an element format issue
 * $errfile should be MP_DIR_SYSTEM."/errors"
 */
 function is_elementerror($errfile)
 {
+  //these error messages come from cctbx, mostly from cctbx_project/iotbx/pdb/xray_structure.h
     $s1 = "Conflicting scattering type symbols";
     $s2 = "Unknown scattering type";
     $s3 = "Unknown chemical element type";
+    $s4 = "Unknown charge";
     $a = file($errfile);
     if(!file_exists($errfile)) return false;
     foreach($a as $s)
@@ -823,6 +825,7 @@ function is_elementerror($errfile)
 	    if(strpos($s,$s1) !== false) return true; 
             if(strpos($s,$s2) !== false) return true;
             if(strpos($s,$s3) !== false) return true;
+	    if(strpos($s,$s4) !== false) return true;
          }
     return false;
 }
