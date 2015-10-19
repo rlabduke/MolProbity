@@ -38,7 +38,7 @@ then
     svn -r 22859 --quiet --non-interactive --trust-server-cert co https://$sf_user@svn.code.sf.net/p/cctbx/code/trunk cctbx_project
     svn --quiet --non-interactive --trust-server-cert co https://$sf_user@svn.code.sf.net/p/cbflib/code-0/trunk/CBFlib_bleeding_edge cbflib
 else
-    svn --quiet --non-interactive --trust-server-cert co https://svn.code.sf.net/p/cctbx/code/trunk cctbx_project
+    svn -r 22859 --quiet --non-interactive --trust-server-cert co https://svn.code.sf.net/p/cctbx/code/trunk cctbx_project
     svn --quiet --non-interactive --trust-server-cert co https://svn.code.sf.net/p/cbflib/code-0/trunk/CBFlib_bleeding_edge cbflib
 fi
 
