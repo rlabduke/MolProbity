@@ -24,7 +24,8 @@ $uptime_cmd = `uptime|cut -c 10-`;
 //$df_cmd = `df -h /home / /dev /run /run/lock /run/shm /run/user`;
 $df_cmd = `df -h /home / /run /run/user`;
 $df0_cmd = `df -h /home |grep /home`;
-$ps_cmd = `ps -Huwww-data -o pid,ppid,c,%cpu,%mem,stime,time,cmd|egrep -v apache\|ps`;
+$ps_cmd = `ps -Huwww-data -o pid,ppid,c,%cpu,%mem,stime,time,cmd|egrep -v apache\|Huwww`;
+//the tail egrep is meant to remove unwanted lines from the ps.  Huwww may occasionally match real data (if a user submits Huwww.pdb, for instance), resulting in incorrect reporting (but still correct server behavior.)
 
 date_default_timezone_set('America/New_York');
 $flastmod = date("D, d-M-Y H:i:s T",filemtime("monitor.php") );
