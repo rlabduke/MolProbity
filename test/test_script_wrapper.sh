@@ -24,15 +24,20 @@
 
 home=$(pwd)
 
+rm -r $home/new
 mkdir $home/new
 
+pdbs= 1A2P 1EHZ #1UBQ.pdb 1VC7.pdb 2V8O.pdb 3KAT.pdb 4HUM.pdb 4NPD.pdb 4PRF.pdb
+
 #may need to unloop for simple_molprobity's flags, and function-ize some of the loop
-for each in 1A2P 1EHZ #1UBQ.pdb 1VC7.pdb 2V8O.pdb 3KAT.pdb 4HUM.pdb 4NPD.pdb 4PRF.pdb
+for each in $pdbs
 do
     echo "Processing $each"
     cd $home/new
     $home/simple_molprobity.sh $home/pdbtestfiles/$each.pdb &> log.$each # redirect version that captures all output
     mv log.$each $home/new/test_$each
+done
+
 
 #maybe should re-loop to do work-then-compare-later?
 #if ref directory exists:
@@ -40,6 +45,6 @@ do
 
 #else:
 #mv new ref
-done
+
 
 ) #Trailing parenthesis to limit scope of script vars
