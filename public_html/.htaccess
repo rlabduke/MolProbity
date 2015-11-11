@@ -1,0 +1,13 @@
+#The purpose of this file, .htaccess, is to substitute for systemwide configuration for the MolProbity server.
+
+#This commented out stuff allows for primitive per directory authentication
+#AuthUserFile /home/rlab/public_html/.htpasswd
+#AuthName "Authorization Required"
+#AuthType Basic
+#require valid-user
+
+
+#These settings change the PHP default limits for using the server, allowing users to submit large jobs
+php_value memory_limit 300M
+php_value post_max_size 500M
+php_value upload_max_filesize 300M
