@@ -44,7 +44,7 @@ if [ ! -d "ref" ]; then
 else
     for each in $home/ref
     do
-	if [ -d $home/new/$each ]
+	if [ -d $home/new/$each ]; then
 	    diff --brief $home/ref/$each $home/new/$each
 	else
 	    echo "ERROR: directory $home/ref/$each exists but not $home/new/$each"
