@@ -27,7 +27,8 @@ home=$(pwd)
 rm -r $home/new
 mkdir $home/new
 
-pdbs= 1A2P 1EHZ #1UBQ.pdb 1VC7.pdb 2V8O.pdb 3KAT.pdb 4HUM.pdb 4NPD.pdb 4PRF.pdb
+pdbs="1A2P
+1EHZ" #1UBQ.pdb 1VC7.pdb 2V8O.pdb 3KAT.pdb 4HUM.pdb 4NPD.pdb 4PRF.pdb
 
 #may need to unloop for simple_molprobity's flags, and function-ize some of the loop
 for each in $pdbs
