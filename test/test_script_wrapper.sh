@@ -27,11 +27,11 @@ home=$(pwd)
 mkdir $home/new
 
 #may need to unloop for simple_molprobity's flags, and function-ize some of the loop
-for each in 1A2P.pdb 1EHZ.pdb 1UBQ.pdb 1VC7.pdb 2V8O.pdb 3KAT.pdb 4HUM.pdb 4NPD.pdb 4PRF.pdb
+for each in 1A2P.pdb 1EHZ.pdb #1UBQ.pdb 1VC7.pdb 2V8O.pdb 3KAT.pdb 4HUM.pdb 4NPD.pdb 4PRF.pdb
 do
     echo "Procesing $each"
     cd $home/new
-    $home/simple_molprobity.sh $home/pdbtestfiles/$each > log.$each # redirect version that captures all output
+    $home/simple_molprobity.sh $home/pdbtestfiles/$each &> log.$each # redirect version that captures all output
     mv log.$each $home/new/test_$each
 
 #maybe should re-loop to do work-then-compare-later?
