@@ -110,20 +110,20 @@ fi
 trimmedfile="$pdbcode.trim.pdb"
 #This is using reduce to strip H's
 echo "running reduce -trim"
-phenix.reduce -quiet -trim -allalt "$pdbfilepath" | awk '$0 !~ /^USER  MOD/' > "$tempdir/$trimmedfile"
+time phenix.reduce -quiet -trim -allalt "$pdbfilepath" | awk '$0 !~ /^USER  MOD/' > "$tempdir/$trimmedfile"
 # this reduce commandline from lib/model.php in reduceNoBuild()
 
 #This makes the thumbnail kinemage
-$mptop_dir/$osbin/prekin -cass -colornc "$tempdir/$trimmedfile" > "$tempdir/thumbnail.kin"
+time $mptop_dir/$osbin/prekin -cass -colornc "$tempdir/$trimmedfile" > "$tempdir/thumbnail.kin"
 
 #reduce proper
 #-build should = -flip
 reducedfile="$pdbcode.FH.pdb"
 echo "running reduce -build (add Hs and do flips)"
 if [[ $hydrogen_position == "nuclear" ]]; then
-  phenix.reduce -quiet -build -nuclear "$tempdir/$trimmedfile" > "$tempdir/$reducedfile"
+  time phenix.reduce -quiet -build -nuclear "$tempdir/$trimmedfile" > "$tempdir/$reducedfile"
 else
-  phenix.reduce -quiet -build "$tempdir/$trimmedfile" > "$tempdir/$reducedfile"
+  time phenix.reduce -quiet -build "$tempdir/$trimmedfile" > "$tempdir/$reducedfile"
 fi
 # this from lib/model.php in reduceBuild()
 
@@ -140,7 +140,7 @@ then
   #mmtbx.nqh_minimize requires 3 arguments, the third is just a tempdir for it to work in
   #arguments are: inpath, outpath, temppath
   echo "running nqh_minimize"
-  mmtbx.nqh_minimize "$tempdir/$reducedfile" "$tempdir/$minimizedfile" "$nqhtempdir"
+  time mmtbx.nqh_minimize "$tempdir/$reducedfile" "$tempdir/$minimizedfile" "$nqhtempdir"
   #this commandline from lib/model.php in regularizeNQH()
 else
   #nqh_minimize breaks on files without flips
@@ -160,59 +160,59 @@ fi
 ##Start aacgeom.php functionality##
 #runAnalysis() in lib/analyze.php actually handles most of this
 echo "running ramalyze"
-phenix.ramalyze $tempdir/$minimizedfile > $tempdir/$pdbcode.rama
+time phenix.ramalyze $tempdir/$minimizedfile > $tempdir/$pdbcode.rama
 #this from runRamachandran() in lib/analyze.php
 #not running loadRamachandran because not making multichart
 echo "making ramachandran kin"
-java -Xmx512m -cp $mptop_dir/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -kinplot $tempdir/$minimizedfile > $tempdir/$pdbcode.rama.kin
+time java -Xmx512m -cp $mptop_dir/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -kinplot $tempdir/$minimizedfile > $tempdir/$pdbcode.rama.kin
 #this from makeRamachandranKin($infile, $outfile) in lib/visualize.php
 echo "making ramachandran pdf"
-java -Xmx512m -cp $mptop_dir/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -pdf $tempdir/$minimizedfile $tempdir/$pdbcode.rama.pdf
+time java -Xmx512m -cp $mptop_dir/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -pdf $tempdir/$minimizedfile $tempdir/$pdbcode.rama.pdf
 #this from function makeRamachandranPDF($infile, $outfile) in lib/visualize.php
 
 echo "running rotalyze"
-phenix.rotalyze data_version=8000 $tempdir/$minimizedfile > $tempdir/$pdbcode.rota
+time phenix.rotalyze data_version=8000 $tempdir/$minimizedfile > $tempdir/$pdbcode.rota
 #this from runRotamer($infile, $outfile) in lib/analyze.php
 
 echo "running CBdev"
-phenix.cbetadev $tempdir/$minimizedfile > $tempdir/$pdbcode.cbdev
+time phenix.cbetadev $tempdir/$minimizedfile > $tempdir/$pdbcode.cbdev
 #this from runCbetaDev($infile, $outfile) in lib/analyze.php
 echo "making CBdev kinemage"
-$mptop_dir/$osbin/prekin -cbdevdump $tempdir/$minimizedfile | java -cp $mptop_dir/lib/hless.jar hless.CBScatter > $tempdir/$pdbcode.cbdev.kin
+time $mptop_dir/$osbin/prekin -cbdevdump $tempdir/$minimizedfile | java -cp $mptop_dir/lib/hless.jar hless.CBScatter > $tempdir/$pdbcode.cbdev.kin
 #this from makeCbetaDevPlot($infile, $outfile) in lib/visualize.php
 
 echo "running omegalyze"
-phenix.omegalyze nontrans_only=False $tempdir/$minimizedfile > $tempdir/$pdbcode.omega
+time phenix.omegalyze nontrans_only=False $tempdir/$minimizedfile > $tempdir/$pdbcode.omega
 #this from runOmegalyze($infile, $outfile) in lib/analyze.php
 
 echo "running CaBLAM"
-phenix.cablam_validate output=text $tempdir/$minimizedfile > $tempdir/$pdbcode.cablam
+time phenix.cablam_validate output=text $tempdir/$minimizedfile > $tempdir/$pdbcode.cablam
 #this from runCablam($infile, $outfile) in lib/analyze.php
 
 echo "running prekin pucker analysis"
-$mptop_dir/$osbin/prekin -pperptoline -pperpdump $tempdir/$minimizedfile > $tempdir/$pdbcode.pucker
+time $mptop_dir/$osbin/prekin -pperptoline -pperpdump $tempdir/$minimizedfile > $tempdir/$pdbcode.pucker
 #this from runBasePhosPerp($infile, $outfile) in lib/analyze.php
 
 echo "running suitename prep"
 #This step is not authentic to MolProbity.
 #Running mmtbx.mp_geo rna_backbone=True once here allows us to speed up the test
 #  and allows us to capture the otherwise invisible intermediate output from mp_geo
-mmtbx.mp_geo rna_backbone=True pdb=$tempdir/$minimizedfile > $tempdir/$pdbcode.suitename_midpoint
+time mmtbx.mp_geo rna_backbone=True pdb=$tempdir/$minimizedfile > $tempdir/$pdbcode.suitename_midpoint
 echo "running suitename"
-phenix.suitename -report -pointIDfields 7 -altIDfield 6 < $tempdir/$pdbcode.suitename_midpoint > $tempdir/$pdbcode.suitename
+time phenix.suitename -report -pointIDfields 7 -altIDfield 6 < $tempdir/$pdbcode.suitename_midpoint > $tempdir/$pdbcode.suitename
 #Original: mmtbx.mp_geo rna_backbone=True pdb=$tempdir/$minimizedfile | phenix.suitename -report -pointIDfields 7 -altIDfield 6 > $tempdir/$pdbcode.suitename
 #this from runSuitenameReport($infile, $outfile) in lib/analyze.php
 echo "running suitestring"
-phenix.suitename -string -oneline -pointIDfields 7 -altIDfield 6 < $tempdir/$pdbcode.suitename_midpoint | fold -w 60 > $tempdir/$pdbcode.suitestring
+time phenix.suitename -string -oneline -pointIDfields 7 -altIDfield 6 < $tempdir/$pdbcode.suitename_midpoint | fold -w 60 > $tempdir/$pdbcode.suitestring
 #Original: mmtbx.mp_geo rna_backbone=True pdb=$tempdir/$minimizedfile | phenix.suitename -string -oneline -pointIDfields 7 -altIDfield 6 | fold -w 60 > $tempdir/$pdbcode.suitestring
 #this from runSuitenameString($infile, $outfile) in lib/analyze.php
 echo "making suitename kin"
-phenix.suitename -kinemage -pointIDfields 7 -altIDfield 6 < $tempdir/$pdbcode.suitename_midpoint > $tempdir/$pdbcode.suitename.kin
+time phenix.suitename -kinemage -pointIDfields 7 -altIDfield 6 < $tempdir/$pdbcode.suitename_midpoint > $tempdir/$pdbcode.suitename.kin
 #Original: mmtbx.mp_geo rna_backbone=True pdb=$tempdir/$minimizedfile | phenix.suitename -kinemage -pointIDfields 7 -altIDfield 6 > $tempdir/$pdbcode.suitename.kin
 #this from makeSuitenameKin($infile, $outfile) in lib/visualize.php
 
 echo "running mp_geo bond geometry"
-mmtbx.mp_geo pdb=$tempdir/$minimizedfile out_file=$tempdir/$pdbcode.geom cdl=$usecdl outliers_only=False bonds_and_angles=True
+time mmtbx.mp_geo pdb=$tempdir/$minimizedfile out_file=$tempdir/$pdbcode.geom cdl=$usecdl outliers_only=False bonds_and_angles=True
 #this from runValidationReport($infile, $outfile, $use_cdl) in lib/analyze.php
 sort $tempdir/$pdbcode.geom > $tempdir/$pdbcode.geom.sorted
 #by default, mp_geo produces unsorted output, this should render print order consistent
@@ -220,10 +220,10 @@ sort $tempdir/$pdbcode.geom > $tempdir/$pdbcode.geom.sorted
 echo "running clashscore"
 if [[ $hydrogen_position == 'nuclear' ]]; then
   echo "...in nuclear mode"
-  phenix.clashscore b_factor_cutoff=40 clash_cutoff=-0.4 nuclear=True $tempdir/$minimizedfile > $tempdir/$pdbcode.clash
+  time phenix.clashscore b_factor_cutoff=40 clash_cutoff=-0.4 nuclear=True $tempdir/$minimizedfile > $tempdir/$pdbcode.clash
 else
   echo "...in ecloud mode"
-  phenix.clashscore b_factor_cutoff=40 clash_cutoff=-0.4 $tempdir/$minimizedfile > $tempdir/$pdbcode.clash
+  time phenix.clashscore b_factor_cutoff=40 clash_cutoff=-0.4 $tempdir/$minimizedfile > $tempdir/$pdbcode.clash
 fi
 #this from runClashscore($infile, $outfile, $blength="ecloud", $clash_cutoff=-0.4) in lib/analyze.php
 
