@@ -22,7 +22,7 @@
 (#parens scopes variables
 
 
-$home = pwd
+home=$(pwd)
 
 mkdir $home/new
 
