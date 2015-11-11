@@ -22,10 +22,12 @@
 (#parens scopes variables
 
 
-home=$(pwd)
+mp_test=$(pwd)
 
-rm -r $home/new
-mkdir $home/new
+if [ -d $mp_test/new ]; then
+    rm -r $mp_test/new
+    mkdir $mp_test/new
+fi
 
 pdbs="1A2P
 1EHZ" #1UBQ.pdb 1VC7.pdb 2V8O.pdb 3KAT.pdb 4HUM.pdb 4NPD.pdb 4PRF.pdb
@@ -34,20 +36,20 @@ pdbs="1A2P
 for each in $pdbs
 do
     echo "Processing $each"
-    cd $home/new
-    $home/simple_molprobity.sh $home/pdbtestfiles/$each.pdb &> log.$each # redirect version that captures all output
-    mv log.$each $home/new/test_$each
+    cd $mp_test/new
+    $mp_test/simple_molprobity.sh $mp_test/pdbtestfiles/$each.pdb &> log.$each # redirect version that captures all output
+    mv log.$each $mp_test/new/test_$each
 done
 
-if [ ! -d "ref" ]; then
-  mv $home/new $home/ref
+if [ ! -d $mp_test/ref ]; then
+  mv $mp_test/new $mp_test/ref
 else
-    for each in $home/ref
+    for each in $mp_test/ref
     do
-	if [ -d $home/new/$each ]; then
-	    diff --brief $home/ref/$each $home/new/$each
+	if [ -d $mp_test/new/$each ]; then
+	    diff --brief $mp_test/ref/$each $mp_test/new/$each
 	else
-	    echo "ERROR: directory $home/ref/$each exists but not $home/new/$each"
+	    echo "ERROR: directory $mp_test/ref/$each exists but not $mp_test/new/$each"
 	fi
     done
 fi
