@@ -238,24 +238,33 @@ echo "running suitename prep"
 #Running mmtbx.mp_geo rna_backbone=True once here allows us to speed up the test
 #  and allows us to capture the otherwise invisible intermediate output from mp_geo
 time mmtbx.mp_geo rna_backbone=True pdb=$tempdir/$minimizedfile > $tempdir/$pdbcode.suitename_midpoint
+echo "^time for suitename midpoint\n"
 echo "running suitename"
 time phenix.suitename -report -pointIDfields 7 -altIDfield 6 < $tempdir/$pdbcode.suitename_midpoint > $tempdir/$pdbcode.suitename
 #Original: mmtbx.mp_geo rna_backbone=True pdb=$tempdir/$minimizedfile | phenix.suitename -report -pointIDfields 7 -altIDfield 6 > $tempdir/$pdbcode.suitename
 #this from runSuitenameReport($infile, $outfile) in lib/analyze.php
+echo "^time for suitename\n\n"
+
 echo "running suitestring"
 time phenix.suitename -string -oneline -pointIDfields 7 -altIDfield 6 < $tempdir/$pdbcode.suitename_midpoint | fold -w 60 > $tempdir/$pdbcode.suitestring
 #Original: mmtbx.mp_geo rna_backbone=True pdb=$tempdir/$minimizedfile | phenix.suitename -string -oneline -pointIDfields 7 -altIDfield 6 | fold -w 60 > $tempdir/$pdbcode.suitestring
 #this from runSuitenameString($infile, $outfile) in lib/analyze.php
+echo "^time for suitestring (alternate invocation of suitename)\n\n"
+
 echo "making suitename kin"
 time phenix.suitename -kinemage -pointIDfields 7 -altIDfield 6 < $tempdir/$pdbcode.suitename_midpoint > $tempdir/$pdbcode.suitename.kin
 #Original: mmtbx.mp_geo rna_backbone=True pdb=$tempdir/$minimizedfile | phenix.suitename -kinemage -pointIDfields 7 -altIDfield 6 > $tempdir/$pdbcode.suitename.kin
 #this from makeSuitenameKin($infile, $outfile) in lib/visualize.php
+echo "^time to make suitename kin\n\n"
+
 
 echo "running mp_geo bond geometry"
 time mmtbx.mp_geo pdb=$tempdir/$minimizedfile out_file=$tempdir/$pdbcode.geom cdl=$usecdl outliers_only=False bonds_and_angles=True
 #this from runValidationReport($infile, $outfile, $use_cdl) in lib/analyze.php
+echo "^time to run mp_geo for bond geometry\n\n"
 sort $tempdir/$pdbcode.geom > $tempdir/$pdbcode.geom.sorted
 #by default, mp_geo produces unsorted output, this should render print order consistent
+
 
 echo "running clashscore"
 if [[ $hydrogen_position == 'nuclear' ]]; then
@@ -266,6 +275,8 @@ else
   time phenix.clashscore b_factor_cutoff=40 clash_cutoff=-0.4 $tempdir/$minimizedfile > $tempdir/$pdbcode.clash
 fi
 #this from runClashscore($infile, $outfile, $blength="ecloud", $clash_cutoff=-0.4) in lib/analyze.php
+echo "^time for clashscore\n\n"
+
 
 #This should cover all of the datafile generation done by MolProbity
 #This also covers the "extra" outputs MolProbity makes available, such as the rama pdf and the CBdev kin
