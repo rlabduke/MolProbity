@@ -27,7 +27,7 @@ $home = pwd
 mkdir $home/new
 
 #may need to unloop for simple_molprobity's flags, and function-ize some of the loop
-for each in ("1A2P.pdb", "1EHZ.pdb", "1UBQ.pdb", "1VC7.pdb", "2V8O.pdb", "3KAT.pdb", "4HUM.pdb", "4NPD.pdb", "4PRF.pdb")
+for each in 1A2P.pdb 1EHZ.pdb 1UBQ.pdb 1VC7.pdb 2V8O.pdb 3KAT.pdb 4HUM.pdb 4NPD.pdb 4PRF.pdb
 do
     echo "Procesing $each"
     cd $home/new
