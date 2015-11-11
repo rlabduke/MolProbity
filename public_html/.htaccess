@@ -1,4 +1,4 @@
-#The purpose of this file, .htaccess, is to substitute for systemwide configuration for the MolProbity server.
+#The purpose of this file, .htaccess, is to substitute for systemwide configuration for the MolProbity server when using Apache as the server.
 
 #This commented out stuff allows for primitive per directory authentication
 #AuthUserFile /home/rlab/public_html/.htpasswd

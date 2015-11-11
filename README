@@ -78,8 +78,14 @@ you will have a functioning local MolProbity site.
 
 3. Tweak Apache settings as needed
 
-You may need to edit Apache settings for proper MolProbity
-performance.  The settings file is often called php.ini,
+We have provided two files in public_html/, .user.ini and .htaccess,
+which attempt to preclude the need for users to do system-wide server
+reconfigurations.  In particular, .htaccess should override the global
+php.ini for an Apache MolProbity server, and .user.ini should do the
+same for a local PHP-CLI server.
+
+If that doesn't work, you may need to edit Apache settings for proper
+MolProbity performance.  The settings file is often called php.ini,
 e.g. /etc/php5/???/php.ini, but it will vary on different computers.
 Two such defaults are:
 
