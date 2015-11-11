@@ -39,13 +39,19 @@ do
     mv log.$each $home/new/test_$each
 done
 
+if [ ! -d "ref" ]; then
+  mv $home/new $home/ref
+else
+    for each in $home/ref
+    do
+	if [ -d $home/new/$each ]
+	    diff --brief $home/ref/$each $home/new/$each
+	else
+	    echo "ERROR: directory $home/ref/$each exists but not $home/new/$each"
+	fi
+    done
+fi
 
-#maybe should re-loop to do work-then-compare-later?
-#if ref directory exists:
-#diff --brief $home/ref/test_$each $home/new/test_$each
-
-#else:
-#mv new ref
-
+echo "If there are differences, examine manually?"
 
 ) #Trailing parenthesis to limit scope of script vars
