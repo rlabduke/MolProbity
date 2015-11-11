@@ -117,12 +117,12 @@ trimmedfile="$pdbcode.trim.pdb"
 echo "running reduce -trim"
 time phenix.reduce -quiet -trim -allalt "$pdbfilepath" | awk '$0 !~ /^USER  MOD/' > "$tempdir/$trimmedfile"
 # this reduce commandline from lib/model.php in reduceNoBuild()
-echo "^time for reduce -trim\n\n"
+echo -e "^time for reduce -trim\n\n"
 
 echo "making a thumbnail kinemage"
 #This makes the thumbnail kinemage
 time $mptop_dir/$osbin/prekin -cass -colornc "$tempdir/$trimmedfile" > "$tempdir/thumbnail.kin"
-echo "^time for making a thumbnail kinemage\n\n"
+echo -e "^time for making a thumbnail kinemage\n\n"
 
 echo "###########################################"
 echo "######MolProbity Step 2: Reduce+flips######"
@@ -139,7 +139,7 @@ else
   time phenix.reduce -quiet -build "$tempdir/$trimmedfile" > "$tempdir/$reducedfile"
 fi
 # this from lib/model.php in reduceBuild()
-echo "^time for reduce -build\n\n"
+echo -e "^time for reduce -build\n\n"
 
 
 #determine if reduce did any flips, run nqh_minimize if so:
@@ -157,11 +157,11 @@ then
   echo "running nqh_minimize"
   time mmtbx.nqh_minimize "$tempdir/$reducedfile" "$tempdir/$minimizedfile" "$nqhtempdir"
   #this commandline from lib/model.php in regularizeNQH()
-  echo "^time for nqh_minimize\n\n"
+  echo -e "^time for nqh_minimize\n\n"
 else
   #nqh_minimize breaks on files without flips
   #set filename for next steps and pass
-  echo "No flips, skipping nqh_minimize\n\n"
+  echo -e "No flips, skipping nqh_minimize\n\n"
   minimizedfile="$reducedfile"
 fi
 
@@ -185,52 +185,52 @@ echo "running ramalyze"
 time phenix.ramalyze $tempdir/$minimizedfile > $tempdir/$pdbcode.rama
 #this from runRamachandran() in lib/analyze.php
 #not running loadRamachandran because not making multichart
-echo "^time for ramalyze\n\n"
+echo -e "^time for ramalyze\n\n"
 
 echo "making ramachandran kin"
 time java -Xmx512m -cp $mptop_dir/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -kinplot $tempdir/$minimizedfile > $tempdir/$pdbcode.rama.kin
 #this from makeRamachandranKin($infile, $outfile) in lib/visualize.php
-echo "^time to make ramachandran kinemage\n\n"
+echo -e "^time to make ramachandran kinemage\n\n"
 
 echo "making ramachandran pdf"
 time java -Xmx512m -cp $mptop_dir/lib/chiropraxis.jar chiropraxis.rotarama.Ramalyze -pdf $tempdir/$minimizedfile $tempdir/$pdbcode.rama.pdf
 #this from function makeRamachandranPDF($infile, $outfile) in lib/visualize.php
-echo "^time to make ramachandran pdf\n\n"
+echo -e "^time to make ramachandran pdf\n\n"
 
 
 echo "running rotalyze"
 time phenix.rotalyze data_version=8000 $tempdir/$minimizedfile > $tempdir/$pdbcode.rota
 #this from runRotamer($infile, $outfile) in lib/analyze.php
-echo "^time to run rotalyze\n\n"
+echo -e "^time to run rotalyze\n\n"
 
 
 echo "running CBdev"
 time phenix.cbetadev $tempdir/$minimizedfile > $tempdir/$pdbcode.cbdev
 #this from runCbetaDev($infile, $outfile) in lib/analyze.php
-echo "^time for CBdev C-beta deviation\n\n"
+echo -e "^time for CBdev C-beta deviation\n\n"
 
 echo "making CBdev kinemage"
 time $mptop_dir/$osbin/prekin -cbdevdump $tempdir/$minimizedfile | java -cp $mptop_dir/lib/hless.jar hless.CBScatter > $tempdir/$pdbcode.cbdev.kin
 #this from makeCbetaDevPlot($infile, $outfile) in lib/visualize.php
-echo "^time for CBdev C-beta deviation kinemage\n\n"
+echo -e "^time for CBdev C-beta deviation kinemage\n\n"
 
 
 echo "running omegalyze"
 time phenix.omegalyze nontrans_only=False $tempdir/$minimizedfile > $tempdir/$pdbcode.omega
 #this from runOmegalyze($infile, $outfile) in lib/analyze.php
-echo "^time to run omegalyze\n\n"
+echo -e "^time to run omegalyze\n\n"
 
 
 echo "running CaBLAM"
 time phenix.cablam_validate output=text $tempdir/$minimizedfile > $tempdir/$pdbcode.cablam
 #this from runCablam($infile, $outfile) in lib/analyze.php
-echo "^time to run CaBLAM\n\n"
+echo -e "^time to run CaBLAM\n\n"
 
 
 echo "running prekin pucker analysis"
 time $mptop_dir/$osbin/prekin -pperptoline -pperpdump $tempdir/$minimizedfile > $tempdir/$pdbcode.pucker
 #this from runBasePhosPerp($infile, $outfile) in lib/analyze.php
-echo "^time for prekin pucker analysis\n\n"
+echo -e "^time for prekin pucker analysis\n\n"
 
 
 echo "running suitename prep"
@@ -238,30 +238,30 @@ echo "running suitename prep"
 #Running mmtbx.mp_geo rna_backbone=True once here allows us to speed up the test
 #  and allows us to capture the otherwise invisible intermediate output from mp_geo
 time mmtbx.mp_geo rna_backbone=True pdb=$tempdir/$minimizedfile > $tempdir/$pdbcode.suitename_midpoint
-echo "^time for suitename midpoint\n"
+echo -e "^time for suitename midpoint\n\n"
 echo "running suitename"
 time phenix.suitename -report -pointIDfields 7 -altIDfield 6 < $tempdir/$pdbcode.suitename_midpoint > $tempdir/$pdbcode.suitename
 #Original: mmtbx.mp_geo rna_backbone=True pdb=$tempdir/$minimizedfile | phenix.suitename -report -pointIDfields 7 -altIDfield 6 > $tempdir/$pdbcode.suitename
 #this from runSuitenameReport($infile, $outfile) in lib/analyze.php
-echo "^time for suitename\n\n"
+echo -e "^time for suitename\n\n"
 
 echo "running suitestring"
 time phenix.suitename -string -oneline -pointIDfields 7 -altIDfield 6 < $tempdir/$pdbcode.suitename_midpoint | fold -w 60 > $tempdir/$pdbcode.suitestring
 #Original: mmtbx.mp_geo rna_backbone=True pdb=$tempdir/$minimizedfile | phenix.suitename -string -oneline -pointIDfields 7 -altIDfield 6 | fold -w 60 > $tempdir/$pdbcode.suitestring
 #this from runSuitenameString($infile, $outfile) in lib/analyze.php
-echo "^time for suitestring (alternate invocation of suitename)\n\n"
+echo -e "^time for suitestring (alternate invocation of suitename)\n\n"
 
 echo "making suitename kin"
 time phenix.suitename -kinemage -pointIDfields 7 -altIDfield 6 < $tempdir/$pdbcode.suitename_midpoint > $tempdir/$pdbcode.suitename.kin
 #Original: mmtbx.mp_geo rna_backbone=True pdb=$tempdir/$minimizedfile | phenix.suitename -kinemage -pointIDfields 7 -altIDfield 6 > $tempdir/$pdbcode.suitename.kin
 #this from makeSuitenameKin($infile, $outfile) in lib/visualize.php
-echo "^time to make suitename kin\n\n"
+echo -e "^time to make suitename kin\n\n"
 
 
 echo "running mp_geo bond geometry"
 time mmtbx.mp_geo pdb=$tempdir/$minimizedfile out_file=$tempdir/$pdbcode.geom cdl=$usecdl outliers_only=False bonds_and_angles=True
 #this from runValidationReport($infile, $outfile, $use_cdl) in lib/analyze.php
-echo "^time to run mp_geo for bond geometry\n\n"
+echo -e "^time to run mp_geo for bond geometry\n\n"
 sort $tempdir/$pdbcode.geom > $tempdir/$pdbcode.geom.sorted
 #by default, mp_geo produces unsorted output, this should render print order consistent
 
@@ -275,7 +275,7 @@ else
   time phenix.clashscore b_factor_cutoff=40 clash_cutoff=-0.4 $tempdir/$minimizedfile > $tempdir/$pdbcode.clash
 fi
 #this from runClashscore($infile, $outfile, $blength="ecloud", $clash_cutoff=-0.4) in lib/analyze.php
-echo "^time for clashscore\n\n"
+echo -e "^time for clashscore\n\n"
 
 
 #This should cover all of the datafile generation done by MolProbity
