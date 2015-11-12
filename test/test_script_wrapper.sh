@@ -45,8 +45,9 @@ pdbs="1A2P
 if [ ! -d $mp_test/ref ]; then
   mv $mp_test/new $mp_test/ref
 else
-    for each in $mp_test/ref
+    for each in $(ls $mp_test/ref/)
     do
+	echo $each
 	if [ -d $mp_test/new/$each ]; then
 	    diff --brief $mp_test/ref/$each $mp_test/new/$each
 	else
