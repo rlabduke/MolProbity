@@ -55,14 +55,14 @@ if [ ! -d $mp_test/ref ]; then
 else
     for each in $(ls $mp_test/ref/)
     do
-	echo $each
+	echo -e "\n\n######################\nprocessing $each\n#####################\n"
 	if [ -d $mp_test/new/$each ]; then
-	    diff --brief $mp_test/ref/$each $mp_test/new/$each
+	    diff -r --brief $mp_test/ref/$each $mp_test/new/$each
 	else
 	    echo "ERROR: directory $mp_test/ref/$each exists but not $mp_test/new/$each"
 	fi
     done
-    echo "If there are differences, examine manually?"
+    echo -e "\nIf there are differences, examine manually?  *.rama.pdf diffs are expected, and log.* or nqh.log diffs are also expected due to timestamps."
 fi
 
 
