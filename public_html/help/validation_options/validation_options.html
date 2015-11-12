@@ -219,18 +219,20 @@ Lovell, S. C., Davis, I. W., Arendall, W. B., de Bakker, P. I., Word, J. M., Pri
 <h3><a name="cispeptides">Cis-peptide evaluation</a></h3>
 <h5 class="nospaceafter">Overview</h5>
 The peptide bond that joins adjacent amino acids has partial double bond character. As a result this bond assumes either a planar trans or a planar cis conformation.
-Trans is the default conformation. The cis conformation is most common preceding proline, and roughly 5% of PRO residues assume a cis conformation. Only about 0.05% of non-proline residues assume a cis conformation.
+Trans is the default conformation. The cis conformation is most common preceding proline, and roughly 5% of PRO residues assume a cis conformation. Only about 0.03% of non-proline residues assume a cis conformation.
 This validation identifies cis-peptides and reports whether the cis-peptide content of a structure exceeds the above statistical expectations.
 <p>An additional validation category identifies residues with peptide bond dihedrals far (&gt;30&deg;) from the expected planar trans or planar cis conformations.
 These residues are identified as having <b>Twisted peptides</b>.
 <h5 class="nospaceafter">Chart report</h5>
 In the multicrit chart, non-proline cis-peptides and all twisted peptides are identified as probable outliers.
 Non-proline cis-peptides <b>do</b> occur, but require strong support from the data, like other unusual conformations.
-Cis-prolines are identified for user convenience, but are not marked as probable outliers due to their higher expected occurence.
+Cis-prolines are identified for user convenience, but are not marked as probable outliers due to their higher expected occurrence.
 <h5 class="nospaceafter">Kinemage report</h5>
-In the multicrit kinemage, cis-peptides are marked with a sea green shape that fills the space between the mainchain trace and the C&alpha; trace at the cis-peptide location.
-Twisted peptides are marked with a similar shape in lime green. The angle between this shape's component triangles serves as a visual indicator of the severity of the twist.
-<div class="indent"><img src="eg_peptidebonds_text.jpg" alt="Example nontrans peptides" height="300" width="605"></div>
+In the multicrit kinemage, all non-trans peptides are marked for ease of identification, with brighter colors indicating a greater level of concern.
+<div class="indent"><b>Proline cis-peptides</b> are marked with a sea green shape that fills the space between the mainchain trace and the C&alpha; trace at the cis-peptide location.
+<br><b>Non-proline cis-peptides</b> are marked with same shape in lime green.
+<br><b>Twisted peptides</b> are marked with a similar shape in yellow. The angle between this shape's component triangles serves as a visual indicator of the severity of the twist.
+<div class="indent"><img src="eg_peptidebonds_text.jpg" alt="Example nontrans peptides" height="300" width="910"></div></div>
 <h5 class="nospaceafter">Usage notes</h5>
 Cis-peptide validation is always relevant, but is especially important in low-resolution structures and in structures with regions of uncertainty.
 Some methods can introduce extraneous cis-peptides in regions of ambiguous electron density.
