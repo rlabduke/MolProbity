@@ -62,8 +62,8 @@ else
 	    echo "ERROR: directory $mp_test/ref/$each exists but not $mp_test/new/$each"
 	fi
     done
+    echo "If there are differences, examine manually?"
 fi
 
-echo "If there are differences, examine manually?"
 
 ) #Trailing parenthesis to limit scope of script vars
