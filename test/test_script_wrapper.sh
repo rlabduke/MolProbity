@@ -34,13 +34,13 @@ pdbs="1A2P
 1EHZ" #1UBQ.pdb 1VC7.pdb 2V8O.pdb 3KAT.pdb 4HUM.pdb 4NPD.pdb 4PRF.pdb
 
 #may need to unloop for simple_molprobity's flags, and function-ize some of the loop
-for each in $pdbs
-do
-    echo "Processing $each"
-    cd $mp_test/new
-    $mp_test/simple_molprobity.sh $mp_test/pdbtestfiles/$each.pdb &> log.$each # redirect version that captures all output
-    mv log.$each $mp_test/new/test_$each
-done
+# for each in $pdbs
+# do
+#     echo "Processing $each"
+#     cd $mp_test/new
+#     $mp_test/simple_molprobity.sh $mp_test/pdbtestfiles/$each.pdb &> log.$each # redirect version that captures all output
+#     mv log.$each $mp_test/new/test_$each
+# done
 
 if [ ! -d $mp_test/ref ]; then
   mv $mp_test/new $mp_test/ref
