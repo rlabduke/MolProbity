@@ -24,11 +24,11 @@
 
 mp_test=$(pwd)
 
-if [ -d $mp_test/new ]; then
-    rm -r $mp_test/new
-fi
+# if [ -d $mp_test/new ]; then
+#     rm -r $mp_test/new
+# fi
 
-mkdir $mp_test/new
+# mkdir $mp_test/new
 
 pdbs="1A2P
 1EHZ" #1UBQ.pdb 1VC7.pdb 2V8O.pdb 3KAT.pdb 4HUM.pdb 4NPD.pdb 4PRF.pdb
