@@ -50,12 +50,12 @@ if [[ $pdbfilepath == '' ]]
 then
   printf "$helptext"
   echo "No .pdb file provided."
-  return 1
+  exit 1
 elif [[ ! -e "$pdbfilepath" ]];
 then
   printf "$helptext"
   echo "Could not find specified PDB file."
-  return 1
+  exit 1
 fi
 
 echo "sourcing MolProbity Phenix environment"
