@@ -426,6 +426,7 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
 
     // Test for proper use of MODEL/ENDMDL
     // for now, die() to see what happens
+    $_SESSION['bgjob']['modelError'] = true;	
     die();
 
 
