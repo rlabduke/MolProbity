@@ -426,6 +426,10 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
 
     // Test for proper use of MODEL/ENDMDL
     // for now, die() to see what happens
+    //code randomly copied from reduce-build to try to force error messages to appear
+    unset($_SESSION['bgjob']['processID']);
+    $_SESSION['bgjob']['endTime']   = time();
+    $_SESSION['bgjob']['isRunning'] = false;
     $_SESSION['bgjob']['modelError'] = true;	
     die();
 
