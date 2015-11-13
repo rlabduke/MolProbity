@@ -410,6 +410,7 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
 
     // List of tasks for running as a background job
     $tasks['scrublines'] = "Convert linefeeds to UNIX standard (\\n)";
+    $tasks['checkMODEL'] = "Checking for improper MODEL/ENDMDL cards";
     $tasks['stripusermod'] = "Strip out old USER MOD records from <code>reduce</code>";
     $tasks['pdbstat'] = "Analyze contents of PDB file";
     //$tasks['segmap'] = "Convert segment IDs to chain IDs (if needed)";
@@ -418,9 +419,17 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
     //$tasks['remediate'] = "Convert PDB to version 3 format (if needed)";
 
     // Process file - this is the part that matters
+
     // Convert linefeeds to UNIX standard (\n):
     setProgress($tasks, 'scrublines'); // updates the progress display if running as a background job
     exec("scrublines < $inpath > $tmp1");
+
+    // Test for proper use of MODEL/ENDMDL
+    // for now, die() to see what happens
+    die();
+
+
+
     // Remove stale USER MOD records that will confuse us later
     // We won't know which flips are old and which are new!
     setProgress($tasks, 'stripusermod'); // updates the progress display if running as a background job
