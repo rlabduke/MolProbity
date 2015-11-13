@@ -8,6 +8,6 @@
 
 
 #These settings change the PHP default limits for using the server, allowing users to submit large jobs
-php_value memory_limit 300M
-php_value post_max_size 500M
-php_value upload_max_filesize 300M
+#php_value memory_limit 300M
+#php_value post_max_size 500M
+#php_value upload_max_filesize 300M
