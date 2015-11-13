@@ -424,16 +424,16 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
     setProgress($tasks, 'scrublines'); // updates the progress display if running as a background job
     exec("scrublines < $inpath > $tmp1");
 
+
+    //SML WORKING HERE (find note in text editor)
     // Test for proper use of MODEL/ENDMDL
+    setProgress($tasks, 'checkMODEL'); // updates the progress display if running as a background job
+
     // for now, die() to see what happens
-    //code randomly copied from reduce-build to try to force error messages to appear
-    unset($_SESSION['bgjob']['processID']);
-    $_SESSION['bgjob']['endTime']   = time();
-    $_SESSION['bgjob']['isRunning'] = false;
+    //next step: actually check for errors
+    //will also need to write catch code for whatever modelError currently triggers
     $_SESSION['bgjob']['modelError'] = true;	
-    die();
-
-
+    die_in_upload();
 
     // Remove stale USER MOD records that will confuse us later
     // We won't know which flips are old and which are new!
@@ -1538,6 +1538,30 @@ function replacePdbRemark($inpath, $remarkText, $remarkNumber)
     unlink($inpath);
 }
 #}}}########################################################################
+
+#{{{ checkMODEL - checks status of MODEL/ENDMDL cards
+############################################################################
+/**
+* This function detects if the input PDB has misused MODEL / ENDMDL cards
+* (Need a duplicate for MODEL 1 but no ENDMDL?)
+*/
+function checkMODEL() {}
+#}}}########################################################################
+
+#{{{ die_in_upload - sets flags to tell server job is dead
+############################################################################
+/**
+* This function deduplicates a few lines of code used wherever a job needs to die because of bad user input
+*/
+function die_in_upload() {
+    unset($_SESSION['bgjob']['processID']);
+    $_SESSION['bgjob']['endTime']   = time();
+    $_SESSION['bgjob']['isRunning'] = false;
+    die();
+}
+#}}}########################################################################
+
+
 
 #{{{ a_function_definition - sumary_statement_goes_here
 ############################################################################
