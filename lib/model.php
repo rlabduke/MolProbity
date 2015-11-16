@@ -435,7 +435,7 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
     if(false)
     {
         $_SESSION['bgjob']['modelError'] = true;
-        die_in_upload();
+        dieInUpload();
 	}
 
     // Remove stale USER MOD records that will confuse us later
@@ -1545,18 +1545,43 @@ function replacePdbRemark($inpath, $remarkText, $remarkNumber)
 #{{{ checkMODEL - checks status of MODEL/ENDMDL cards
 ############################################################################
 /**
-* This function detects if the input PDB has misused MODEL / ENDMDL cards
-* (Need a duplicate for MODEL 1 but no ENDMDL?)
+* This function groups several subfunctions looking for misused MODEL / ENDMDL cards
 */
 function checkMODEL() {}
 #}}}########################################################################
 
-#{{{ die_in_upload - sets flags to tell server job is dead
+#{{{ checkAnyMODEL - check if any MODEL/ENDMDL exist
+############################################################################
+/**
+* This function just looks if MODEL/ENDMDL are used at all
+* Probably duplicated somewhere else in this codebase
+*/
+function checkAnyMODEL() {}
+#}}}########################################################################
+
+#{{{ checkNoENDMDL - checks for a missing ENDMDL card
+############################################################################
+/**
+* This function checks if there is a MODEL card with no ENDMDL (a common problem)
+* It does not check for subtler errors - just, if MODEL, also ENDMDL?
+*/
+function checkNoENDMDL() {}
+#}}}########################################################################
+
+#{{{ checkMODELPairs - checks for MODEL/ENDMODEL pairs
+############################################################################
+/**
+* This function detects proper pairing of MODEL and ENDMDL cards
+*/
+function checkMODELPairs() {}
+#}}}########################################################################
+
+#{{{ dieInUpload - sets flags to tell server job is dead
 ############################################################################
 /**
 * This function deduplicates a few lines of code used wherever a job needs to die because of bad user input
 */
-function die_in_upload() {
+function dieInUpload() {
     unset($_SESSION['bgjob']['processID']);
     $_SESSION['bgjob']['endTime']   = time();
     $_SESSION['bgjob']['isRunning'] = false;
