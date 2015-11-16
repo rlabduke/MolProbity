@@ -432,8 +432,11 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
     // for now, die() to see what happens
     //next step: actually check for errors
     //will also need to write catch code for whatever modelError currently triggers
-    $_SESSION['bgjob']['modelError'] = true;	
-    die_in_upload();
+    if(false)
+    {   
+    	$_SESSION['bgjob']['modelError'] = true;	
+    	die_in_upload();
+	}
 
     // Remove stale USER MOD records that will confuse us later
     // We won't know which flips are old and which are new!
