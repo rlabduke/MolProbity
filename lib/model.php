@@ -433,9 +433,9 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
     //next step: actually check for errors
     //will also need to write catch code for whatever modelError currently triggers
     if(false)
-    {   
-    	$_SESSION['bgjob']['modelError'] = true;	
-    	die_in_upload();
+    {
+        $_SESSION['bgjob']['modelError'] = true;
+        die_in_upload();
 	}
 
     // Remove stale USER MOD records that will confuse us later
