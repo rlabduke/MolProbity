@@ -1546,8 +1546,24 @@ function replacePdbRemark($inpath, $remarkText, $remarkNumber)
 ############################################################################
 /**
 * This function groups several subfunctions looking for misused MODEL / ENDMDL cards
+* $inpath is the PDB file to be checked (some tmp file somewhere)
 */
-function checkMODEL() {}
+function checkMODEL($inpath)
+{
+    if(checkAnyMODEL($inpath)) //these checks only run if a MODEL card is detected
+    {
+        if(checkNoENDMDL($inpath))
+        {
+            //set some error status
+            dieInUpload();
+            //return early
+        } elseif (checkMODELPairs($inpath)) {
+            //set some error status
+            dieInUpload();
+            //return early
+        }//at this point, neither error type exists
+    }//if any MODELs exist
+}
 #}}}########################################################################
 
 #{{{ checkAnyMODEL - check if any MODEL/ENDMDL exist
@@ -1555,8 +1571,9 @@ function checkMODEL() {}
 /**
 * This function just looks if MODEL/ENDMDL are used at all
 * Probably duplicated somewhere else in this codebase
+* $inpath is the PDB file to be checked (some tmp file somewhere)
 */
-function checkAnyMODEL() {}
+function checkAnyMODEL($inpath) {}
 #}}}########################################################################
 
 #{{{ checkNoENDMDL - checks for a missing ENDMDL card
@@ -1564,16 +1581,18 @@ function checkAnyMODEL() {}
 /**
 * This function checks if there is a MODEL card with no ENDMDL (a common problem)
 * It does not check for subtler errors - just, if MODEL, also ENDMDL?
+* $inpath is the PDB file to be checked (some tmp file somewhere)
 */
-function checkNoENDMDL() {}
+function checkNoENDMDL($inpath) {}
 #}}}########################################################################
 
 #{{{ checkMODELPairs - checks for MODEL/ENDMODEL pairs
 ############################################################################
 /**
 * This function detects proper pairing of MODEL and ENDMDL cards
+* $inpath is the PDB file to be checked (some tmp file somewhere)
 */
-function checkMODELPairs() {}
+function checkMODELPairs($inpath) {}
 #}}}########################################################################
 
 #{{{ dieInUpload - sets flags to tell server job is dead
