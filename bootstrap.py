@@ -91,6 +91,7 @@ class ShellCommand(object):
     command = self.get_command()
     description = self.get_description()
     workdir = self.get_workdir()
+    print command
     if not self.kwargs.get("quiet", False):
       if description:
         print "===== Running in %s:"%workdir, description
@@ -1217,7 +1218,71 @@ class CCIBuilder(Builder):
   ]
   LIBTBX_EXTRA = []
 
+class MPBuilder(Builder):
+  # Base packages
+  BASE_PACKAGES = 'all'
+  # Checkout these codebases
+  CODEBASES = [
+    'cbflib',
+    'cctbx_project',
+    'ccp4io_adaptbx',
+    'annlib_adaptbx',
+    'tntbx',
+  ]
+  CODEBASES_EXTRA = []
+  # Copy these sources from cci.lbl.gov
+  HOT = [
+    'annlib',
+    'boost',
+    'scons',
+    'ccp4io',
+    #"libsvm",
+  ]
+  HOT_EXTRA = []
+  # Configure for these cctbx packages
+  LIBTBX = [
+    'cctbx',
+    'cbflib',
+    'scitbx',
+    'libtbx',
+    'iotbx',
+    'mmtbx',
+    'smtbx',
+    'dxtbx',
+    'gltbx',
+    'wxtbx',
+  ]
+  LIBTBX_EXTRA = []
+
 ##### CCTBX-derived packages #####
+
+class MOLPROBITYBuilder(MPBuilder):
+  BASE_PACKAGES = 'cctbx'
+  CODEBASES_EXTRA = [
+    'chem_data',
+    'reduce',
+    'probe',
+    'suitename'
+  ]
+  LIBTBX_EXTRA = [
+    'chem_data',
+    'reduce',
+    'probe',
+  ]
+
+  def add_tests(self):
+    pass
+
+  def add_base(self, extra_opts=[]):
+    super(MOLPROBITYBuilder, self).add_base(
+      extra_opts=['--cctbx',
+                 ] + extra_opts)
+
+  def add_dispatchers(self):
+    pass
+
+  def rebuild_docs(self):
+    pass
 
 class CCTBXBuilder(CCIBuilder):
   BASE_PACKAGES = 'cctbx'
@@ -1416,7 +1481,7 @@ def run(root=None):
   """
   parser = optparse.OptionParser(usage=usage)
   # parser.add_option("--root", help="Root directory; this will contain base, modules, build, etc.")
-  parser.add_option("--builder", help="Builder: cctbx, phenix, xfel, dials, labelit", default="cctbx")
+  parser.add_option("--builder", help="Builder: cctbx, phenix, xfel, dials, labelit, molprobity", default="cctbx")
   parser.add_option("--cciuser", help="CCI SVN username.")
   parser.add_option("--sfuser", help="SourceForge SVN username.")
   parser.add_option("--sfmethod", help="SourceForge SVN checkout method.", default="svn+ssh")
@@ -1456,7 +1521,8 @@ def run(root=None):
     'phenix': PhenixBuilder,
     'xfel': XFELBuilder,
     'labelit': LABELITBuilder,
-    'dials': DIALSBuilder
+    'dials': DIALSBuilder,
+    'molprobity':MOLPROBITYBuilder
   }
   if options.builder not in builders:
     raise ValueError("Unknown builder: %s"%options.builder)
@@ -1468,6 +1534,7 @@ def run(root=None):
     auth['sfuser'] = options.sfuser
   if options.sfmethod:
     auth['sfmethod'] = options.sfmethod
+# sys.exit()
 
   # Build
   builder = builders[options.builder]
