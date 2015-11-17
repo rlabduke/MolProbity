@@ -1553,6 +1553,7 @@ function checkMODEL($inpath)
 {
     if(checkAnyMODEL($inpath)) //these checks only run if a MODEL card is detected
     {
+        SML_cout("STEVEN it returned TRUE!!!");
         if(checkNoENDMDL($inpath))
         {
             //set some error status
@@ -1564,6 +1565,8 @@ function checkMODEL($inpath)
             //return early
         }//at this point, neither error type exists
     }//if any MODELs exist
+    else SML_cout ("STEVEN it returned FALSE");
+    
 }
 #}}}########################################################################
 
@@ -1576,12 +1579,15 @@ function checkMODEL($inpath)
 */
 function checkAnyMODEL($inpath)
 {
-    $grepcommand = "grep \"^MODEL \" ".$inpath;
-    SML_cout($grepcommand);
-    exec($grepcommand, $tossresult, $grepreturnstatus);
-    SML_cout($grepreturnstatus);
-    if(false) return true;
-    else return false;
+    $grep_command = "grep -q \"^MODEL \" ".$inpath;
+    SML_cout($grep_command);
+    exec($grep_command, $toss_result, $grep_return_status);
+    SML_cout($grep_return_status);
+    //$grep_return_status is 0 if MODEL found, 1 if not
+    //this is just return not $grep_return_status
+    return(!$grep_return_status);
+    //    if($grep_return_status) return true;
+    //else return false;
 }
 #}}}########################################################################
 
