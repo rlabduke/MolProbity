@@ -1576,8 +1576,9 @@ function checkMODEL($inpath)
 */
 function checkAnyMODEL($inpath)
 {
-    $grepcommand = "grep MODEL".$inpath;
+    $grepcommand = "grep MODEL ".$inpath;
     SML_cout($grepcommand);
+    SML_cout(exec($grepcommand));
     if(false) return true;
     else return false;
 }
