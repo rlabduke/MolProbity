@@ -1624,7 +1624,10 @@ function checkNoENDMDL($inpath) {}
 * This function detects proper pairing of MODEL and ENDMDL cards
 * $inpath is the PDB file to be checked (some tmp file somewhere)
 */
-function checkMODELPairs($inpath) {}
+function checkMODELPairs($inpath) {
+
+    //my script is filter_improper_MODEL_cards.py
+}
 #}}}########################################################################
 
 #{{{ dieInUpload - sets flags to tell server job is dead
