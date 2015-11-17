@@ -1553,19 +1553,23 @@ function checkMODEL($inpath)
 {
     if(checkAnyMODEL($inpath)) //these checks only run if a MODEL card is detected
     {
-        SML_cout("STEVEN it returned TRUE!!!");
+        //SML_cout("STEVEN it returned TRUE!!!");
         if(checkNoENDMDL($inpath))
         {
             //set some error status
-            dieInUpload();
+            $_SESSION['bgjob']['missingENDMDLError'] = true;
             //return early
+            dieInUpload();
+            return;
         } elseif (checkMODELPairs($inpath)) {
             //set some error status
-            dieInUpload();
+            $_SESSION['bgjob']['badMODELPairsError'] = true;
             //return early
+            dieInUpload();
+            return;
         }//at this point, neither error type exists
     }//if any MODELs exist
-    else SML_cout ("STEVEN it returned FALSE");
+    //else SML_cout ("STEVEN it returned FALSE");
     
 }
 #}}}########################################################################
@@ -1635,8 +1639,6 @@ function dieInUpload() {
     die();
 }
 #}}}########################################################################
-
-
 
 #{{{ a_function_definition - sumary_statement_goes_here
 ############################################################################
