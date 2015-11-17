@@ -1630,6 +1630,11 @@ function checkNoENDMDL($inpath) {
 function checkMODELPairs($inpath) {
 
     //my script is filter_improper_MODEL_cards.py
+    $script_path = MP_BASE_DIR."/lib/filter_improper_MODEL_cards.py";
+    $script_command = $script_path." ".$inpath;
+    exec($script_command, $resulttext, $errorfound);
+    SML_cout($resulttext);
+    return($errorfound);
 }
 #}}}########################################################################
 
