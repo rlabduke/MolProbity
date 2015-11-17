@@ -1592,7 +1592,7 @@ function checkAnyMODEL($inpath)
 */
 function SML_cout($message) {
 
-    $errfile = fopen($_SESSION['dataDir']."/".MP_DIR_SYSTEM."/errors", "w");
+    $errfile = fopen($_SESSION['dataDir']."/".MP_DIR_SYSTEM."/errors", "a");
     fwrite($errfile, $message);
     fclose($errfile);
 
