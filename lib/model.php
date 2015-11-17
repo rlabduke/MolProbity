@@ -1633,7 +1633,7 @@ function checkMODELPairs($inpath) {
     $script_path = MP_BASE_DIR."/lib/filter_improper_MODEL_cards.py";
     $script_command = $script_path." ".$inpath;
     exec($script_command, $resulttext, $errorfound);
-    SML_cout($resulttext);
+    SML_cout(serialize($resulttext)); //serialize turns array into string
     return($errorfound);
 }
 #}}}########################################################################
