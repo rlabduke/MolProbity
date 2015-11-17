@@ -1,1 +1,0 @@
-The purpose of this branch is to add code to MolProbity to detect PDBs with broken use of MODEL cards and prevent them from reaching reduce.  (Reduce gets stuck in an infinite loop on these PDBs).

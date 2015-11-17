@@ -196,7 +196,6 @@ function pdbstat($pdbfilename)
         $id = $chain.$resno.$icode.$restype; # 10-character residue ID
 
         # Switch on record type
-	// SML seems like we should be tracking MODELs vs ENDMDLs and make sure the counts align!
         if(startsWith($s, "ENDMDL")) { $models++; }
         # Prefer TITLE records over COMPND records
         elseif(startsWith($s, "TITLE")) { $compnd  .= " " . trim(substr($s,10,60)); $hadtitle = TRUE; }
