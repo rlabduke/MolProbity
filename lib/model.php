@@ -424,20 +424,11 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
     setProgress($tasks, 'scrublines'); // updates the progress display if running as a background job
     exec("scrublines < $inpath > $tmp1");
 
-
-    //SML WORKING HERE (find note in text editor)
     // Test for proper use of MODEL/ENDMDL
     setProgress($tasks, 'checkMODEL'); // updates the progress display if running as a background job
-
-    // for now, die() to see what happens
-    //next step: actually check for errors
-    //will also need to write catch code for whatever modelError currently triggers
     checkMODEL($tmp1);
-    if(false)
-    {
-        $_SESSION['bgjob']['modelError'] = true;
-        dieInUpload();
-	}
+
+    //SML WORKING HERE (find note in text editor)
 
     // Remove stale USER MOD records that will confuse us later
     // We won't know which flips are old and which are new!
