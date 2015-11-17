@@ -1573,7 +1573,11 @@ function checkMODEL($inpath)
 * Probably duplicated somewhere else in this codebase
 * $inpath is the PDB file to be checked (some tmp file somewhere)
 */
-function checkAnyMODEL($inpath) {}
+function checkAnyMODEL($inpath)
+{
+    if(true) return true;
+    else return false;
+}
 #}}}########################################################################
 
 #{{{ checkNoENDMDL - checks for a missing ENDMDL card
