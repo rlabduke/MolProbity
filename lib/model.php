@@ -1554,16 +1554,10 @@ function checkMODEL($inpath)
     if(checkAnyMODEL($inpath)) //these checks only run if a MODEL card is detected
     {
         //SML_cout("STEVEN it returned TRUE!!!");
-        if(checkNoENDMDL($inpath))
+        if(checkNoENDMDL($inpath) or checkMODELPairs($inpath))
         {
             //set some error status
-            $_SESSION['bgjob']['missingENDMDLError'] = true;
-            //return early
-            dieInUpload();
-            return;
-        } elseif (checkMODELPairs($inpath)) {
-            //set some error status
-            $_SESSION['bgjob']['badMODELPairsError'] = true;
+            $_SESSION['bgjob']['modelError'] = true;
             //return early
             dieInUpload();
             return;

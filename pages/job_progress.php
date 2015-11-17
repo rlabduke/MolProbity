@@ -86,7 +86,7 @@ function display($context)
         $pdburlMODEL = "http://deposit.rcsb.org/adit/docs/pdb_atom_format.html#MODEL";
         $pdburlENDMDL = "http://deposit.rcsb.org/adit/docs/pdb_atom_format.html#ENDMDL";
         $refresh    = "10; URL=$url";
-        echo $this->pageHeader("CCTBX job failed");//, "none", $refresh);
+        echo $this->pageHeader("ERROR: MODEL/ENDMDL card mismatches");//, "none", $refresh);
         echo "<p>It appears that the PDB you provided has a formatting error.\n";
         echo "<br>MolProbity believes the formatting error has to do with mismatched MODEL and ENDMDL cards.\n\n";
         echo "<p>Each MODEL card must be uniquely numbered and have a matching ENDMDL card.\n";
