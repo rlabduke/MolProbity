@@ -1578,7 +1578,8 @@ function checkAnyMODEL($inpath)
 {
     $grepcommand = "grep \"^MODEL \" ".$inpath;
     SML_cout($grepcommand);
-    SML_cout(exec($grepcommand));
+    exec($grepcommand, $tossresult, $grepreturnstatus);
+    SML_cout($grepreturnstatus);
     if(false) return true;
     else return false;
 }
