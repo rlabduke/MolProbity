@@ -417,6 +417,7 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
     $tasks['cnsnames'] = "Convert CNS atom names to PDB standard (if needed)";
     $tasks['pdbstat2'] = "Re-analyze contents of final PDB file";
     //$tasks['remediate'] = "Convert PDB to version 3 format (if needed)";
+    $tasks['MODEL_consistency'] = "Checking MODEL/ENDMDL card consistency (if needed)";
 
     // Process file - this is the part that matters
 
@@ -511,6 +512,18 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
     // Clean up temp files
     unlink($tmp1);
     unlink($tmp2);
+
+    //Check MODEL card validity
+    setProgress($tasks, 'MODEL_consistency'); // updates the progress display if running as a background job
+    //Pseudocode
+    //if MODELs exist
+    //call python script lib/filter_improper_MODEL_cards.py
+    //emit error message and stop if input was bad
+    //otherwise do nothing
+
+    if($stats['models'] != 0) {
+
+    }
 
     setProgress($tasks, 'pdbstat2'); // updates the progress display if running as a background job
     $stats = pdbstat($outpath);
