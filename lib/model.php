@@ -1615,7 +1615,16 @@ function SML_cout($message) {
 * It does not check for subtler errors - just, if MODEL, also ENDMDL?
 * $inpath is the PDB file to be checked (some tmp file somewhere)
 */
-function checkNoENDMDL($inpath) {}
+function checkNoENDMDL($inpath) {
+
+    $grep_command = "grep -q \"^ENDMDL \" ".$inpath;
+    //SML_cout($grep_command);
+    exec($grep_command, $toss_result, $grep_return_status);
+    //SML_cout($grep_return_status);
+    //$grep_return_status is 0 if ENDMDL found, 1 if not
+    return($grep_return_status);
+
+}
 #}}}########################################################################
 
 #{{{ checkMODELPairs - checks for MODEL/ENDMODEL pairs
