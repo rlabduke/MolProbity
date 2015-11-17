@@ -432,6 +432,7 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
     // for now, die() to see what happens
     //next step: actually check for errors
     //will also need to write catch code for whatever modelError currently triggers
+    checkMODEL($tmp1);
     if(false)
     {
         $_SESSION['bgjob']['modelError'] = true;
@@ -1576,11 +1577,27 @@ function checkMODEL($inpath)
 function checkAnyMODEL($inpath)
 {
     $grepcommand = "grep MODEL".$inpath;
-    echo $grepcommand;
+    SML_cout($grepcommand);
     if(false) return true;
     else return false;
 }
 #}}}########################################################################
+
+
+#{{{ SML_cout - stupid replacement to actually get output
+############################################################################
+/**
+* I don't know where PHP puts "echo" or "print", so this is desperation
+*/
+function SML_cout($message) {
+
+    $errfile = fopen($_SESSION['dataDir']."/".MP_DIR_SYSTEM."/errors", "w");
+    fwrite($errfile, $message);
+    fclose($errfile);
+
+}
+#}}}########################################################################
+
 
 #{{{ checkNoENDMDL - checks for a missing ENDMDL card
 ############################################################################
