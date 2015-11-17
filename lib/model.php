@@ -1576,7 +1576,7 @@ function checkMODEL($inpath)
 function checkAnyMODEL($inpath)
 {
     $grepcommand = "grep MODEL".$inpath;
-    echo $grepcommand       
+    echo $grepcommand;
     if(false) return true;
     else return false;
 }
