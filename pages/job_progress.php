@@ -77,17 +77,20 @@ function display($context)
             echo "<br><small>If needed, you can <a href='$url&abort={$_SESSION[bgjob][processID]}'>abort this job</a>.\n";
         echo $this->pageFooter();
     }
+    ////////////////////////if job is not running
+    ////////////////////////there was an ERROR
+    ////////////////////////these if blocks create error explanation pages
     elseif($_SESSION['bgjob']['modelError'])
-      {
+    {
         $url        = makeEventURL("onGoto", "welcome.php");
         $pdburlMODEL = "http://deposit.rcsb.org/adit/docs/pdb_atom_format.html#MODEL";
-	$pdburlENDMDL = "http://deposit.rcsb.org/adit/docs/pdb_atom_format.html#ENDMDL";
+        $pdburlENDMDL = "http://deposit.rcsb.org/adit/docs/pdb_atom_format.html#ENDMDL";
         $refresh    = "10; URL=$url";
         echo $this->pageHeader("CCTBX job failed");//, "none", $refresh);
         echo "<p>It appears that the PDB you provided has a formatting error.\n";
         echo "<br>MolProbity believes the formatting error has to do with mismatched MODEL and ENDMDL cards.\n\n";
-	echo "<p>Each MODEL card must be uniquely numbered and have a matching ENDMDL card.\n";
-	echo "<p>The most common error is 'MODEL 1' existing with no ENDMDL card.\n";
+        echo "<p>Each MODEL card must be uniquely numbered and have a matching ENDMDL card.\n";
+        echo "<p>The most common error is 'MODEL 1' existing with no ENDMDL card.\n";
         echo "<br>For further info please see the <a href='$pdburlMODEL' target=\"_blank\">PDB's MODEL</a> and <a href='$pdburlENDMDL' target=\"_blank\">ENDMDL</a> documentation.\n";
         echo "<p><strong>To fix:</strong> please check your fomatting conforms to proper PDB";
         echo "<br>conventions and try again. If you continue experiencing problems please";
@@ -95,7 +98,7 @@ function display($context)
         echo "<br>navigation bar from the main page.\n";
         echo "<p><a href='$url'>Click here</a> to return to the main page. \n";
         echo $this->pageFooter();
-      }
+    }
     elseif($_SESSION['bgjob']['elementError'])
     {
         $url        = makeEventURL("onGoto", "welcome.php");
@@ -122,7 +125,7 @@ function display($context)
         echo "ATOM     43  CG BARG A  -3      12.866  85.172  92.651  0.50 37.31           C\n";
         echo "ATOM     44  CD AARG A  -3      11.698  84.678  90.815  0.50 38.51           C\n";
         echo "ATOM     45  CD BARG A  -3      13.374  85.886  91.406  0.50 37.66           C\n";
-	echo "HETATM   46 MG   MG  B 101      44.444  55.555  66.666  1.00 42.42          MG\n";
+        echo "HETATM   46 MG   MG  B 101      44.444  55.555  66.666  1.00 42.42          MG\n";
         echo "</pre><p>Chemical names must be in columns 77-78 of the PDB file, right justified (e.g. \" C\"). ";
         echo "<br>For further info please see the <a href='$pdburl' target=\"_blank\">PDB formatting</a> guide.\n";
         echo "<p><strong>To fix:</strong> please check your fomatting conforms to proper PDB";
@@ -143,6 +146,9 @@ function display($context)
         echo "<p><a href='$url'>Click here</a> to continue.\n";
         echo $this->pageFooter();
     }
+    //////////////////////////////////////////////
+    ///////////////Assuming nothing else went wrong, job is finished
+    //////////////////////////////////////////////
     else
     {
         $url        = makeEventURL("onGoto", $_SESSION['bgjob']['whereNext'], $_SESSION['bgjob']);
