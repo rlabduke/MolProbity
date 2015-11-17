@@ -1580,14 +1580,11 @@ function checkMODEL($inpath)
 function checkAnyMODEL($inpath)
 {
     $grep_command = "grep -q \"^MODEL \" ".$inpath;
-    SML_cout($grep_command);
+    //SML_cout($grep_command);
     exec($grep_command, $toss_result, $grep_return_status);
-    SML_cout($grep_return_status);
+    //SML_cout($grep_return_status);
     //$grep_return_status is 0 if MODEL found, 1 if not
-    //this is just return not $grep_return_status
     return(!$grep_return_status);
-    //    if($grep_return_status) return true;
-    //else return false;
 }
 #}}}########################################################################
 
