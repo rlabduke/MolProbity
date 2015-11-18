@@ -1241,16 +1241,7 @@ class MPBuilder(Builder):
   HOT_EXTRA = []
   # Configure for these cctbx packages
   LIBTBX = [
-    'cctbx',
-    'cbflib',
-    'scitbx',
-    'libtbx',
-    'iotbx',
     'mmtbx',
-    'smtbx',
-    'dxtbx',
-    'gltbx',
-    'wxtbx',
   ]
   LIBTBX_EXTRA = []
 
