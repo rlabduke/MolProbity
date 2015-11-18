@@ -1220,7 +1220,7 @@ class CCIBuilder(Builder):
 
 class MPBuilder(Builder):
   # Base packages
-  BASE_PACKAGES = 'all'
+  BASE_PACKAGES = 'cctbx'
   # Checkout these codebases
   CODEBASES = [
     'cbflib',
