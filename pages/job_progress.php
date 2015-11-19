@@ -89,12 +89,12 @@ function display($context)
         echo $this->pageHeader("ERROR: MODEL/ENDMDL card mismatches");//, "none", $refresh);
         echo "<p>It appears that the PDB you provided has a formatting error.\n";
         echo "<br>MolProbity believes the formatting error has to do with mismatched MODEL and ENDMDL cards.\n\n";
+        echo "<p>If you have a single-model structure, the <b>easiest solution is to remove the MODEL card</b>.\n\n";
         echo "<p>Each MODEL card must be uniquely numbered and have a matching ENDMDL card.\n";
         echo "<p>The most common error is 'MODEL 1' existing with no ENDMDL card.\n";
-        echo "<br>For further info please see the <a href='$pdburlMODEL' target=\"_blank\">PDB's MODEL</a> and <a href='$pdburlENDMDL' target=\"_blank\">ENDMDL</a> documentation.\n";
-        echo "<p><strong>To fix:</strong> please check your fomatting conforms to proper PDB";
-        echo "<br>conventions and try again. If you continue experiencing problems please";
-        echo "<br>contact us using the feedback page which you can access on the left-hand";
+        echo "<br>For further info please see the <a href='$pdburlMODEL' target=\"_blank\">PDB's MODEL</a> and <a href='$pdburlENDMDL' target=\"_blank\">ENDMDL</a> documentation.\n\n";
+        echo "<p>If you continue experiencing problems please contact us";
+        echo "<br>using the feedback page which you can access on the left-hand";
         echo "<br>navigation bar from the main page.\n";
         echo "<p><a href='$url'>Click here</a> to return to the main page. \n";
         echo $this->pageFooter();
