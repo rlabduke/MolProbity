@@ -35,6 +35,12 @@ else
 fi
 
 # Set world-writable permisions on data/ and tmp/
+echo ++++++++++ creating directories ...
+mkdir -p public_html/data
+mkdir -p public_html/data/tmp
+mkdir -p feedback
+mkdir -p tmp
+echo ++++++++++ setting permisions ...
 chmod 777 public_html/data
 chmod 777 public_html/data/tmp
 chmod 777 tmp/

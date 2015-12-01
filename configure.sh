@@ -98,12 +98,12 @@ echo ++++++++++ pickling rotarama ...
 #They are downloaded as giant text files, this line of code creates them as python pickles
 mmtbx.rebuild_rotarama_cache
 
-echo ++++++++++ creating directories ...
+#echo ++++++++++ creating directories ...
 # git doesn't store empty directories so we're adding the the required empty directory here.
 cd ..
-mkdir -p public_html/data
-mkdir -p public_html/data/tmp
-mkdir -p feedback
-mkdir -p tmp
+#mkdir -p public_html/data
+#mkdir -p public_html/data/tmp
+#mkdir -p feedback
+#mkdir -p tmp
 
 echo ++++++++++ MolProbity configure.sh finished.

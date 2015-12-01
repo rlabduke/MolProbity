@@ -542,7 +542,7 @@ class king_module(SourceModule):
   module = 'king'
   anonymous = ['svn', 'https://github.com/rlabduke/phenix_king_binaries.git/trunk']
 
-class suitename_module(SourceModule):
+class molprobity_moodule(SourceModule):
   module = 'molprobity'
   anonymous = ['svn', 'https://github.com/rlabduke/MolProbity.git/trunk']
 
@@ -924,48 +924,48 @@ class Builder(object):
 
 
   def _add_svn(self, module, url):
+    thisworkdir = 'modules'
+    if module == 'molprobity' : thisworkdir = '.'
     svnflags = []
     if self.isPlatformWindows():
       # avoid stalling bootstrap on Windows with the occasional prompt
       # whenever server certificates have been forgotten
       svnflags = ['--non-interactive', '--trust-server-cert']
-    if os.path.exists(self.opjoin(*['modules', module, '.svn'])):
+    if os.path.exists(self.opjoin(*[thisworkdir, module, '.svn'])):
       # print "using update..."
       self.add_step(self.shell(
           command=['svn', 'update', module] + svnflags,
-          workdir=['modules']
+          workdir=[thisworkdir]
       ))
       self.add_step(self.shell(
           command=['svn', 'status', module] + svnflags,
-          workdir=['modules'],
+          workdir=[thisworkdir],
           quiet=True,
       ))
-    elif os.path.exists(self.opjoin(*['modules', module])):
+    elif os.path.exists(self.opjoin(*[thisworkdir, module])):
       print "Existing non-svn directory -- don't know what to do. skipping: %s"%module
     else:
       # print "fresh checkout..."
       self.add_step(self.shell(
           command=['svn', 'co', url, module] + svnflags,
-          workdir=['modules']
+          workdir=[thisworkdir]
       ))
 
   def _add_git(self, module, parameters):
-   thisworkdir = 'modules'
-   if module == 'molprobity' : thisworkdir = '.'
     git_available = True
     try:
       subprocess.call(['git', '--version'], stdout=open(os.devnull, 'wb'), stderr=open(os.devnull, 'wb'))
     except OSError:
       git_available = False
 
-    if git_available and os.path.exists(self.opjoin(*[thisworkdir, module, '.git'])):
+    if git_available and os.path.exists(self.opjoin(*['modules', module, '.git'])):
       self.add_step(self.shell(
         command=['git', 'pull', '--ff-only'],
-        workdir=[os.path.join(thisworkdir, module)]
+        workdir=[os.path.join('modules', module)]
       ))
       return
 
-    if os.path.exists(self.opjoin(*[thisworkdir, module])):
+    if os.path.exists(self.opjoin(*['modules', module])):
       print "Existing non-git directory -- don't know what to do. skipping: %s"%module
       return
 
@@ -977,13 +977,13 @@ class Builder(object):
           continue
         self.add_step(self.shell(
           command=['git', 'clone', source_candidate, module],
-          workdir=[thisworkdir]
+          workdir=['modules']
         ))
         return
       filename = "%s-%s" % (module, urlparse.urlparse(source_candidate).path.split('/')[-1])
-      filename = os.path.join(thisworkdir, filename)
+      filename = os.path.join('modules', filename)
       self._add_download(source_candidate, filename)
-      self._add_unzip(filename, os.path.join(thisworkdir, module), trim_directory=1)
+      self._add_unzip(filename, os.path.join('modules', module), trim_directory=1)
       return
 
     error = "Cannot satisfy git dependency for module %s: None of the sources are available." % module
@@ -1224,8 +1224,9 @@ class CCIBuilder(Builder):
   ]
   LIBTBX_EXTRA = []
 
-class MPBuilder(Builder):
-  # Base packages
+##### CCTBX-derived packages #####
+
+class MOLPROBITYBuilder(Builder):
   BASE_PACKAGES = 'molprobity'
   # Checkout these codebases
   CODEBASES = [
@@ -1235,7 +1236,13 @@ class MPBuilder(Builder):
     'annlib_adaptbx',
     'tntbx',
   ]
-  CODEBASES_EXTRA = []
+  CODEBASES_EXTRA = [
+    'molprobity',
+    'chem_data',
+    'reduce',
+    'probe',
+    'suitename'
+  ]
   # Copy these sources from cci.lbl.gov
   HOT = [
     'annlib',
@@ -1249,23 +1256,7 @@ class MPBuilder(Builder):
   LIBTBX = [
     'mmtbx',
   ]
-  LIBTBX_EXTRA = []
-
-##### CCTBX-derived packages #####
-
-class MOLPROBITYBuilder(MPBuilder):
-  BASE_PACKAGES = 'molprobity'
-  CODEBASES_EXTRA = [
-    'chem_data',
-    'reduce',
-    'probe',
-    'suitename'
-    'molprobity'
-  ]
   LIBTBX_EXTRA = [
-    'chem_data',
-    'reduce',
-    'probe',
   ]
 
   def add_tests(self):
