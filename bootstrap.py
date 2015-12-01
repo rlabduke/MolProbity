@@ -542,6 +542,10 @@ class king_module(SourceModule):
   module = 'king'
   anonymous = ['svn', 'https://github.com/rlabduke/phenix_king_binaries.git/trunk']
 
+class suitename_module(SourceModule):
+  module = 'molprobity'
+  anonymous = ['svn', 'https://github.com/rlabduke/MolProbity.git/trunk']
+
 MODULES = SourceModule()
 
 ###################################
@@ -884,7 +888,7 @@ class Builder(object):
        "python","-c","import sys; sys.path.append('..'); import bootstrap; \
        bootstrap.tar_extract('','%s')" %filename],
       workdir=['modules'],
-      description="extracting files from %s" %filename,
+       description="extracting files from %s" %filename,
     ))
 
   def _add_unzip(self, archive, directory, trim_directory=0):
@@ -946,20 +950,22 @@ class Builder(object):
       ))
 
   def _add_git(self, module, parameters):
+   thisworkdir = 'modules'
+   if module == 'molprobity' : thisworkdir = '.'
     git_available = True
     try:
       subprocess.call(['git', '--version'], stdout=open(os.devnull, 'wb'), stderr=open(os.devnull, 'wb'))
     except OSError:
       git_available = False
 
-    if git_available and os.path.exists(self.opjoin(*['modules', module, '.git'])):
+    if git_available and os.path.exists(self.opjoin(*[thisworkdir, module, '.git'])):
       self.add_step(self.shell(
         command=['git', 'pull', '--ff-only'],
-        workdir=[os.path.join('modules', module)]
+        workdir=[os.path.join(thisworkdir, module)]
       ))
       return
 
-    if os.path.exists(self.opjoin(*['modules', module])):
+    if os.path.exists(self.opjoin(*[thisworkdir, module])):
       print "Existing non-git directory -- don't know what to do. skipping: %s"%module
       return
 
@@ -971,13 +977,13 @@ class Builder(object):
           continue
         self.add_step(self.shell(
           command=['git', 'clone', source_candidate, module],
-          workdir=['modules']
+          workdir=[thisworkdir]
         ))
         return
       filename = "%s-%s" % (module, urlparse.urlparse(source_candidate).path.split('/')[-1])
-      filename = os.path.join('modules', filename)
+      filename = os.path.join(thisworkdir, filename)
       self._add_download(source_candidate, filename)
-      self._add_unzip(filename, os.path.join('modules', module), trim_directory=1)
+      self._add_unzip(filename, os.path.join(thisworkdir, module), trim_directory=1)
       return
 
     error = "Cannot satisfy git dependency for module %s: None of the sources are available." % module
@@ -1220,7 +1226,7 @@ class CCIBuilder(Builder):
 
 class MPBuilder(Builder):
   # Base packages
-  BASE_PACKAGES = 'cctbx'
+  BASE_PACKAGES = 'molprobity'
   # Checkout these codebases
   CODEBASES = [
     'cbflib',
@@ -1248,12 +1254,13 @@ class MPBuilder(Builder):
 ##### CCTBX-derived packages #####
 
 class MOLPROBITYBuilder(MPBuilder):
-  BASE_PACKAGES = 'cctbx'
+  BASE_PACKAGES = 'molprobity'
   CODEBASES_EXTRA = [
     'chem_data',
     'reduce',
     'probe',
     'suitename'
+    'molprobity'
   ]
   LIBTBX_EXTRA = [
     'chem_data',
@@ -1264,10 +1271,10 @@ class MOLPROBITYBuilder(MPBuilder):
   def add_tests(self):
     pass
 
-  def add_base(self, extra_opts=[]):
-    super(MOLPROBITYBuilder, self).add_base(
-      extra_opts=['--cctbx',
-                 ] + extra_opts)
+# def add_base(self, extra_opts=[]):
+#   super(MOLPROBITYBuilder, self).add_base(
+#     extra_opts=['--molprobity',
+#                ] + extra_opts)
 
   def add_dispatchers(self):
     pass
