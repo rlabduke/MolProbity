@@ -424,20 +424,11 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
     setProgress($tasks, 'scrublines'); // updates the progress display if running as a background job
     exec("scrublines < $inpath > $tmp1");
 
-
-    //SML WORKING HERE (find note in text editor)
     // Test for proper use of MODEL/ENDMDL
     setProgress($tasks, 'checkMODEL'); // updates the progress display if running as a background job
-
-    // for now, die() to see what happens
-    //next step: actually check for errors
-    //will also need to write catch code for whatever modelError currently triggers
     checkMODEL($tmp1);
-    if(false)
-    {
-        $_SESSION['bgjob']['modelError'] = true;
-        dieInUpload();
-	}
+
+    //SML WORKING HERE (find note in text editor)
 
     // Remove stale USER MOD records that will confuse us later
     // We won't know which flips are old and which are new!
@@ -1554,16 +1545,10 @@ function checkMODEL($inpath)
     if(checkAnyMODEL($inpath)) //these checks only run if a MODEL card is detected
     {
         //SML_cout("STEVEN it returned TRUE!!!");
-        if(checkNoENDMDL($inpath))
+        if(checkNoENDMDL($inpath) or checkMODELPairs($inpath))
         {
             //set some error status
-            $_SESSION['bgjob']['missingENDMDLError'] = true;
-            //return early
-            dieInUpload();
-            return;
-        } elseif (checkMODELPairs($inpath)) {
-            //set some error status
-            $_SESSION['bgjob']['badMODELPairsError'] = true;
+            $_SESSION['bgjob']['modelError'] = true;
             //return early
             dieInUpload();
             return;
@@ -1615,7 +1600,16 @@ function SML_cout($message) {
 * It does not check for subtler errors - just, if MODEL, also ENDMDL?
 * $inpath is the PDB file to be checked (some tmp file somewhere)
 */
-function checkNoENDMDL($inpath) {}
+function checkNoENDMDL($inpath) {
+
+    $grep_command = "grep -q \"^ENDMDL \" ".$inpath;
+    //SML_cout($grep_command);
+    exec($grep_command, $toss_result, $grep_return_status);
+    //SML_cout($grep_return_status);
+    //$grep_return_status is 0 if ENDMDL found, 1 if not
+    return($grep_return_status);
+
+}
 #}}}########################################################################
 
 #{{{ checkMODELPairs - checks for MODEL/ENDMODEL pairs
@@ -1624,7 +1618,15 @@ function checkNoENDMDL($inpath) {}
 * This function detects proper pairing of MODEL and ENDMDL cards
 * $inpath is the PDB file to be checked (some tmp file somewhere)
 */
-function checkMODELPairs($inpath) {}
+function checkMODELPairs($inpath) {
+
+    //my script is filter_improper_MODEL_cards.py
+    $script_path = MP_BASE_DIR."/lib/filter_improper_MODEL_cards.py";
+    $script_command = $script_path." ".$inpath;
+    exec($script_command, $resulttext, $errorfound);
+    SML_cout(serialize($resulttext)); //serialize turns array into string
+    return($errorfound);
+}
 #}}}########################################################################
 
 #{{{ dieInUpload - sets flags to tell server job is dead
