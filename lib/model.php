@@ -410,6 +410,7 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
 
     // List of tasks for running as a background job
     $tasks['scrublines'] = "Convert linefeeds to UNIX standard (\\n)";
+    $tasks['checkMODEL'] = "Checking for improper MODEL/ENDMDL cards";
     $tasks['stripusermod'] = "Strip out old USER MOD records from <code>reduce</code>";
     $tasks['pdbstat'] = "Analyze contents of PDB file";
     //$tasks['segmap'] = "Convert segment IDs to chain IDs (if needed)";
@@ -418,9 +419,17 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
     //$tasks['remediate'] = "Convert PDB to version 3 format (if needed)";
 
     // Process file - this is the part that matters
+
     // Convert linefeeds to UNIX standard (\n):
     setProgress($tasks, 'scrublines'); // updates the progress display if running as a background job
     exec("scrublines < $inpath > $tmp1");
+
+    // Test for proper use of MODEL/ENDMDL
+    setProgress($tasks, 'checkMODEL'); // updates the progress display if running as a background job
+    checkMODEL($tmp1);
+
+    //SML WORKING HERE (find note in text editor)
+
     // Remove stale USER MOD records that will confuse us later
     // We won't know which flips are old and which are new!
     setProgress($tasks, 'stripusermod'); // updates the progress display if running as a background job
@@ -1522,6 +1531,114 @@ function replacePdbRemark($inpath, $remarkText, $remarkNumber)
     fclose($in);
     // Remove duplicate of original file
     unlink($inpath);
+}
+#}}}########################################################################
+
+#{{{ checkMODEL - checks status of MODEL/ENDMDL cards
+############################################################################
+/**
+* This function groups several subfunctions looking for misused MODEL / ENDMDL cards
+* $inpath is the PDB file to be checked (some tmp file somewhere)
+*/
+function checkMODEL($inpath)
+{
+    if(checkAnyMODEL($inpath)) //these checks only run if a MODEL card is detected
+    {
+        //SML_cout("STEVEN it returned TRUE!!!");
+        if(checkNoENDMDL($inpath) or checkMODELPairs($inpath))
+        {
+            //set some error status
+            $_SESSION['bgjob']['modelError'] = true;
+            //return early
+            dieInUpload();
+            return;
+        }//at this point, neither error type exists
+    }//if any MODELs exist
+    //else SML_cout ("STEVEN it returned FALSE");
+    
+}
+#}}}########################################################################
+
+#{{{ checkAnyMODEL - check if any MODEL/ENDMDL exist
+############################################################################
+/**
+* This function just looks if MODEL/ENDMDL are used at all
+* Probably duplicated somewhere else in this codebase
+* $inpath is the PDB file to be checked (some tmp file somewhere)
+*/
+function checkAnyMODEL($inpath)
+{
+    $grep_command = "grep -q \"^MODEL \" ".$inpath;
+    //SML_cout($grep_command);
+    exec($grep_command, $toss_result, $grep_return_status);
+    //SML_cout($grep_return_status);
+    //$grep_return_status is 0 if MODEL found, 1 if not
+    return(!$grep_return_status);
+}
+#}}}########################################################################
+
+
+#{{{ SML_cout - stupid replacement to actually get output
+############################################################################
+/**
+* I don't know where PHP puts "echo" or "print", so this is desperation
+*/
+function SML_cout($message) {
+
+    $errfile = fopen($_SESSION['dataDir']."/".MP_DIR_SYSTEM."/errors", "a");
+    fwrite($errfile, $message);
+    fclose($errfile);
+
+}
+#}}}########################################################################
+
+
+#{{{ checkNoENDMDL - checks for a missing ENDMDL card
+############################################################################
+/**
+* This function checks if there is a MODEL card with no ENDMDL (a common problem)
+* It does not check for subtler errors - just, if MODEL, also ENDMDL?
+* $inpath is the PDB file to be checked (some tmp file somewhere)
+*/
+function checkNoENDMDL($inpath) {
+
+    $grep_command = "grep -q \"^ENDMDL \" ".$inpath;
+    //SML_cout($grep_command);
+    exec($grep_command, $toss_result, $grep_return_status);
+    //SML_cout($grep_return_status);
+    //$grep_return_status is 0 if ENDMDL found, 1 if not
+    return($grep_return_status);
+
+}
+#}}}########################################################################
+
+#{{{ checkMODELPairs - checks for MODEL/ENDMODEL pairs
+############################################################################
+/**
+* This function detects proper pairing of MODEL and ENDMDL cards
+* $inpath is the PDB file to be checked (some tmp file somewhere)
+*/
+function checkMODELPairs($inpath) {
+
+    //my script is filter_improper_MODEL_cards.py
+    $script_path = MP_BASE_DIR."/lib/filter_improper_MODEL_cards.py";
+    $script_command = $script_path." ".$inpath;
+    exec($script_command, $resulttext, $errorfound);
+    SML_cout(serialize($resulttext)); //serialize turns array into string
+    return($errorfound);
+}
+#}}}########################################################################
+
+#{{{ dieInUpload - sets flags to tell server job is dead
+############################################################################
+/**
+* This function deduplicates a few lines of code used wherever a job needs to die because of bad user input
+*/
+function dieInUpload() {
+    unset($_SESSION['bgjob']['processID']);
+    $_SESSION['bgjob']['endTime']   = time();
+    $_SESSION['bgjob']['isRunning'] = false;
+    die();
 }
 #}}}########################################################################
 
