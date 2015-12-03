@@ -89,7 +89,7 @@ function mpGetPath()
 #{{{ cctbxGetPath - gets path for cctbx executables
 function cctbxGetPath()
 {
-    $cctbxPath = MP_BASE_DIR."/build/bin";
+    $cctbxPath = MP_BASE_DIR."/../build/bin";
 
     if(MP_BIN_PATH != "")
       $cctbxPath = MP_BIN_PATH.":$cctbxPath";
