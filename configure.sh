@@ -25,7 +25,8 @@ echo ++++++++++ getting MolProbity base ...
 if [ ! -f base.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/base.tar.gz -o base.tar.gz; echo got.;
 else echo already got.; fi
 echo unpacking ...
-tar zxf base.tar.gz
+if [ ! -d base]; then tar zxf base.tar.gz; echo unpacked.;
+else echo already unpacked.; fi
 
 echo ++++++++++ creating build directories ...
 if [ ! -d sources ]; then mkdir sources; fi
@@ -35,39 +36,60 @@ cd sources
 echo ++++++++++ getting sources ...
 if [ -n "$sf_user" ]
 then
-    svn --quiet --non-interactive --trust-server-cert co https://$sf_user@svn.code.sf.net/p/cctbx/code/trunk cctbx_project
-    svn --quiet --non-interactive --trust-server-cert co https://$sf_user@svn.code.sf.net/p/cbflib/code-0/trunk/CBFlib_bleeding_edge cbflib
+    if [ ! -d cctbx_project]
+    then
+        svn --quiet --non-interactive --trust-server-cert co https://$sf_user@svn.code.sf.net/p/cctbx/code/trunk cctbx_project
+    fi
+    if [ ! -d cbflib]
+    then
+        svn --quiet --non-interactive --trust-server-cert co https://$sf_user@svn.code.sf.net/p/cbflib/code-0/trunk/CBFlib_bleeding_edge cbflib
+    fi
 else
-    svn --quiet --non-interactive --trust-server-cert co https://svn.code.sf.net/p/cctbx/code/trunk cctbx_project
-    svn --quiet --non-interactive --trust-server-cert co https://svn.code.sf.net/p/cbflib/code-0/trunk/CBFlib_bleeding_edge cbflib
+    if [ ! -d cctbx_project]
+    then
+        svn --quiet --non-interactive --trust-server-cert co https://svn.code.sf.net/p/cctbx/code/trunk cctbx_project
+    fi
+    if [ ! -d cbflib]
+    then
+        svn --quiet --non-interactive --trust-server-cert co https://svn.code.sf.net/p/cbflib/code-0/trunk/CBFlib_bleeding_edge cbflib
+    fi
 fi
 
 #svn --non-interactive --trust-server-cert co https://quiddity.biochem.duke.edu/svn/reduce/trunk reduce
 #svn --non-interactive --trust-server-cert co https://quiddity.biochem.duke.edu/svn/probe/trunk probe
 #svn --non-interactive --trust-server-cert co https://quiddity.biochem.duke.edu/svn/suitename
 
-svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/probe.git/trunk probe
-svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reduce.git/trunk reduce
-svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/suitename.git/trunk suitename
+if [ ! -d probe ]; 
+then 
+    svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/probe.git/trunk probe
+fi
+if [ ! -d reduce ]; 
+then 
+    svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reduce.git/trunk reduce
+fi
+if [ ! -d reduce ];
+then 
+   svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/suitename.git/trunk suitename
+fi
 
-if [ ! -f boost.tar.gz ]; then curl http://cci.lbl.gov/repositories/boost.gz -o boost.tar.gz; fi
-if [ ! -f scons.tar.gz ]; then curl http://cci.lbl.gov/repositories/scons.gz -o scons.tar.gz; fi
-if [ ! -f annlib.tar.gz ]; then curl http://cci.lbl.gov/repositories/annlib.tar.gz -o annlib.tar.gz; fi
-if [ ! -f annlib_adaptbx.tar.gz ]; then curl http://cci.lbl.gov/repositories/annlib_adaptbx.tar.gz -o annlib_adaptbx.tar.gz; fi
-if [ ! -f ccp4io.tar.gz ]; then curl http://cci.lbl.gov/repositories/ccp4io.tar.gz -o ccp4io.tar.gz; fi
-if [ ! -f ccp4io_adaptbx.tar.gz ]; then curl http://cci.lbl.gov/repositories/ccp4io_adaptbx.tar.gz -o ccp4io_adaptbx.tar.gz; fi
+if [ ! -f boost.gz ]; then curl http://cci.lbl.gov/repositories/boost.gz -o boost.gz; fi
+if [ ! -f scons.gz ]; then curl http://cci.lbl.gov/repositories/scons.gz -o scons.gz; fi
+if [ ! -f annlib.gz ]; then curl http://cci.lbl.gov/repositories/annlib.gz -o annlib.gz; fi
+if [ ! -f annlib_adaptbx.gz ]; then curl http://cci.lbl.gov/repositories/annlib_adaptbx.gz -o annlib_adaptbx.gz; fi
+if [ ! -f ccp4io.gz ]; then curl http://cci.lbl.gov/repositories/ccp4io.gz -o ccp4io.gz; fi
+if [ ! -f ccp4io_adaptbx.gz ]; then curl http://cci.lbl.gov/repositories/ccp4io_adaptbx.gz -o ccp4io_adaptbx.gz; fi
 if [ ! -f chem_data.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/chem_data.tar.gz -o chem_data.tar.gz; fi
-if [ ! -f tntbx.tar.gz ]; then curl http://cci.lbl.gov/repositories/tntbx.tar.gz -o tntbx.tar.gz; fi
+if [ ! -f tntbx.gz ]; then curl http://cci.lbl.gov/repositories/tntbx.gz -o tntbx.gz; fi
 
 echo ++++++++++ unpacking sources ...
-tar zxf boost.tar.gz
-tar zxf scons.tar.gz
-tar zxf annlib.tar.gz
-tar zxf annlib_adaptbx.tar.gz
-tar zxf ccp4io.tar.gz
-tar zxf ccp4io_adaptbx.tar.gz
+tar zxf boost.gz
+tar zxf scons.gz
+tar zxf annlib.gz
+tar zxf annlib_adaptbx.gz
+tar zxf ccp4io.gz
+tar zxf ccp4io_adaptbx.gz
 tar zxf chem_data.tar.gz
-tar zxf tntbx.tar.gz
+tar zxf tntbx.gz
 
 echo ++++++++++ creating Makefile ...
 cd ../build
