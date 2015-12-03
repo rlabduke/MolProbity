@@ -50,15 +50,14 @@ svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke
 svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reduce.git/trunk reduce
 svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/suitename.git/trunk suitename
 
-if [ ! -f boost.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/boost.tar.gz -o boost.tar.gz; fi
-if [ ! -f scons.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/scons.tar.gz -o scons.tar.gz; fi
-if [ ! -f annlib.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/annlib.tar.gz -o annlib.tar.gz; fi
-if [ ! -f annlib_adaptbx.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/annlib_adaptbx.tar.gz -o annlib_adaptbx.tar.gz; fi
-if [ ! -f ccp4io.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/ccp4io.tar.gz -o ccp4io.tar.gz; fi
-if [ ! -f ccp4io_adaptbx.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/ccp4io_adaptbx.tar.gz -o ccp4io_adaptbx.tar.gz; fi
+if [ ! -f boost.tar.gz ]; then curl http://cci.lbl.gov/repositories/boost.gz -o boost.tar.gz; fi
+if [ ! -f scons.tar.gz ]; then curl http://cci.lbl.gov/repositories/scons.gz -o scons.tar.gz; fi
+if [ ! -f annlib.tar.gz ]; then curl http://cci.lbl.gov/repositories/annlib.tar.gz -o annlib.tar.gz; fi
+if [ ! -f annlib_adaptbx.tar.gz ]; then curl http://cci.lbl.gov/repositories/annlib_adaptbx.tar.gz -o annlib_adaptbx.tar.gz; fi
+if [ ! -f ccp4io.tar.gz ]; then curl http://cci.lbl.gov/repositories/ccp4io.tar.gz -o ccp4io.tar.gz; fi
+if [ ! -f ccp4io_adaptbx.tar.gz ]; then curl http://cci.lbl.gov/repositories/ccp4io_adaptbx.tar.gz -o ccp4io_adaptbx.tar.gz; fi
 if [ ! -f chem_data.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/chem_data.tar.gz -o chem_data.tar.gz; fi
-if [ ! -f lapack_fem.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/lapack_fem.tar.gz -o lapack_fem.tar.gz; fi
-if [ ! -f tntbx.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/tntbx.tar.gz -o tntbx.tar.gz; fi
+if [ ! -f tntbx.tar.gz ]; then curl http://cci.lbl.gov/repositories/tntbx.tar.gz -o tntbx.tar.gz; fi
 
 echo ++++++++++ unpacking sources ...
 tar zxf boost.tar.gz
@@ -68,7 +67,6 @@ tar zxf annlib_adaptbx.tar.gz
 tar zxf ccp4io.tar.gz
 tar zxf ccp4io_adaptbx.tar.gz
 tar zxf chem_data.tar.gz
-tar zxf lapack_fem.tar.gz
 tar zxf tntbx.tar.gz
 
 echo ++++++++++ creating Makefile ...
