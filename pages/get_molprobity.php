@@ -32,30 +32,10 @@ Acta Crystallographica <u>D66</u>: 12-21.</div>
 A complete list of appropriate citations can be
 found <a href='help/about.html' target='_blank'>here</a>.</p>
 
-<p>Installation <b>instructions</b> for MolProbity are provided, in the file named
-<code>README</code>.</p>
-
-<?php
-/**$file = "moltbx-".MP_VERSION.".tgz";
-* if(file_exists($file) && filesize($file) > 0)
-* {
-*     echo "<p><b>Download now: <a href='$file'>".basename($file)."</a></b>";
-*     echo ", ".formatFilesize(filesize($file));
-*     echo ", last updated ".date('j M Y', filemtime($file))."\n";
-* }
-* else
-* {
-*     echo "<p><b>General MolProbity downloads have been temporary disabled.</b>  Please";
-*     echo "<a href='".makeEventURL("onGoto", "feedback_setup.php")."'>contact </a>";
-*     echo "us for an up-to-date copy of the source code.";
-* 
-* }*/
-?>
-
 <p><b>MolProbity is now on GitHub!</b>
-Please use the following url to clone or get a zipped distribution on the web :
+The GitHub site is <a href='https://github.com/rlabduke/MolProbity' target="_blank">https://github.com/rlabduke/MolProbity</a>. You can look at the README there, or if you're already using git you can get a copy of MolProbity with:
 <div align="center" style="font-size:20px">
-<a href='https://github.com/rlabduke/MolProbity.git' target="_blank">https://git-hub.com/rlabduke/MolProbity.git</a>
+git clone https://github.com/rlabduke/MolProbity.git --branch molprobity_4.2 --single-branch --depth 1
 </dir>
 <p>
 
