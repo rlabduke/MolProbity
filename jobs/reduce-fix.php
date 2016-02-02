@@ -43,18 +43,18 @@ OUTPUTS (via $_SESSION['bgjob']):
 # MAIN - the beginning of execution for this page
 ############################################################################
 $doflip = $_SESSION['bgjob']['doflip'];
-$nqh_regularize = $_SESSION['nqh_regularize'];
-if(!$nqh_regularize)
-{
-  $modelID = $_SESSION['bgjob']['modelID'];
-  $model = $_SESSION['models'][$modelID];
-}
-else
-{
-  $minModelID = $_SESSION['bgjob']['modelID'];
-  $modelID = $_SESSION['models'][$minModelID]['modelID_pre_min'];
-  $model = $_SESSION['models'][$modelID];
-}
+//$nqh_regularize = $_SESSION['nqh_regularize'];
+//if(!$nqh_regularize)
+//{
+$modelID = $_SESSION['bgjob']['modelID'];
+$model = $_SESSION['models'][$modelID];
+//}
+//else
+//{
+//  $minModelID = $_SESSION['bgjob']['modelID'];
+//  $modelID = $_SESSION['models'][$minModelID]['modelID_pre_min'];
+//  $model = $_SESSION['models'][$modelID];
+//}
 $pdb = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$model['pdb'];
 
 $changes = decodeReduceUsermods($pdb);
@@ -100,42 +100,42 @@ else
         reduceFix($parentPDB, $outpath, $flipfile);
     }
 
-    if($nqh_regularize)
-    {
-       #can we just overwrite the previous minimized version?
-       setProgress($tasks, 'regularize');
-       $flipInpath = $outpath;
-       #$minModel = createModel($modelID."FH_reg");
-       $minModelID = $_SESSION['bgjob']['modelID'];
-       $minModel = $_SESSION['models'][$minModelID];
-       $outname2 = $minModel['pdb'];
-       $outpath2 = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
-       $outpath2 .= '/'.$outname2;
-       $temp = $_SESSION['dataDir'].'/tmp';
-       if(file_exists($flipInpath))
-       {
-         regularizeNQH($flipInpath, $outpath2, $temp);
-       }
-       if(!file_exists($outpath2))
-       {
-         # We are deleting the reduced file because we'd rather not have users
-         # play with the unregularized, nqh-flipped pdb. 
-         unlink($flipInpath);
-         unset($_SESSION['models'][$_SESSION['lastUsedModelID']]);
-         $_SESSION['lastUsedModelID'] = $parentID;
-         unset($_SESSION['bgjob']['processID']);
-         $_SESSION['bgjob']['endTime']   = time();
-         $_SESSION['bgjob']['isRunning'] = false;
-         # there was an error. Let's see if it is an element type issue.
-         $errfile = $_SESSION['dataDir']."/".MP_DIR_SYSTEM."/errors";
-         $elementerror = is_elementerror($errfile);
-         if($elementerror) $_SESSION['bgjob']['elementError'] = true;
-         $modelerror = is_modelerror($errfile);
-         if($modelerror) $_SESSION['bgjob']['modelError'] = true;
-         else $_SESSION['bgjob']['cctbxError'] = true;
-         die();
-       }
-    }
+//    if($nqh_regularize)
+//    {
+//       #can we just overwrite the previous minimized version?
+//       setProgress($tasks, 'regularize');
+//       $flipInpath = $outpath;
+//       #$minModel = createModel($modelID."FH_reg");
+//       $minModelID = $_SESSION['bgjob']['modelID'];
+//       $minModel = $_SESSION['models'][$minModelID];
+//       $outname2 = $minModel['pdb'];
+//       $outpath2 = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
+//       $outpath2 .= '/'.$outname2;
+//       $temp = $_SESSION['dataDir'].'/tmp';
+//       if(file_exists($flipInpath))
+//       {
+//         regularizeNQH($flipInpath, $outpath2, $temp);
+//       }
+//       if(!file_exists($outpath2))
+//       {
+//         # We are deleting the reduced file because we'd rather not have users
+//         # play with the unregularized, nqh-flipped pdb. 
+//         unlink($flipInpath);
+//         unset($_SESSION['models'][$_SESSION['lastUsedModelID']]);
+//         $_SESSION['lastUsedModelID'] = $parentID;
+//         unset($_SESSION['bgjob']['processID']);
+//         $_SESSION['bgjob']['endTime']   = time();
+//         $_SESSION['bgjob']['isRunning'] = false;
+//         # there was an error. Let's see if it is an element type issue.
+//         $errfile = $_SESSION['dataDir']."/".MP_DIR_SYSTEM."/errors";
+//         $elementerror = is_elementerror($errfile);
+//         if($elementerror) $_SESSION['bgjob']['elementError'] = true;
+//         $modelerror = is_modelerror($errfile);
+//         if($modelerror) $_SESSION['bgjob']['modelError'] = true;
+//         else $_SESSION['bgjob']['cctbxError'] = true;
+//         die();
+//       }
+//    }
     setProgress($tasks, null); // all done
 }
 
