@@ -819,21 +819,28 @@ function downgradePDB($inpath, $outpath)
 }
 #}}}########################################################################
 
-#{{{ regularizeNQH - regularize NQH geometry following flip
+#{{{ regularizeNQH [DEPRACATED] - regularize NQH geometry following flip
 ############################################################################
-/**
-* regularize geometry - powered by CCTBX
-*
-* $inpath       the full filename for the PDB file to be processed
-* $outpath      the full filename for the destination PDB. Will be overwritten.
-* $temp         temp directory location
-*/
-function regularizeNQH($inpath, $outpath, $temp)
-{
-  #echo "libtbx.python ".MP_BASE_DIR."/bin/nqh_minimize.py $inpath $outpath $temp";
-  #exec("libtbx.python ".MP_BASE_DIR."/bin/nqh_minimize.py $inpath $outpath $temp");
-  exec("mmtbx.nqh_minimize $inpath $outpath $temp");
-}
+//#The nqh_minimize program suffered from long run-times and a tendency to move
+//#  atoms out from their density (because it can't see the density)
+//#It has therefore been "replaced" by a new version of reduce which performs
+//#  a more involved flipping motion to approximate what we wanted
+//#This function is retained for reference; calls to this function have been
+//#  removed.
+//#  nqh_minimize to do.
+///**
+//* regularize geometry - powered by CCTBX
+//*
+//* $inpath       the full filename for the PDB file to be processed
+//* $outpath      the full filename for the destination PDB. Will be overwritten.
+//* $temp         temp directory location
+//*/
+//function regularizeNQH($inpath, $outpath, $temp)
+//{
+//  #echo "libtbx.python ".MP_BASE_DIR."/bin/nqh_minimize.py $inpath $outpath $temp";
+//  #exec("libtbx.python ".MP_BASE_DIR."/bin/nqh_minimize.py $inpath $outpath $temp");
+//  exec("mmtbx.nqh_minimize $inpath $outpath $temp");
+//}
 #}}}#########################################################################
 
 #{{{ reduceTrim - removes H from a PDB file
