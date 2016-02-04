@@ -207,6 +207,7 @@ function runAnalysis($modelID, $opts)
         setProgress($tasks, 'geomValidation'); // updates the progress display if running as a background job
         $geomfile = "$rawDir/$model[prefix]geomvalidation.data";
         runValidationReport($infile, $geomfile, $model['stats']['use_cdl']);
+        mpgeo_error_catch($geomfile);
         //$protfile = "$rawDir/$model[prefix]protvalidation.data";
         //runValidationReport($infile, $protfile, "protein");
         //$rnafile = "$rawDir/$model[prefix]rnavalidation.data";
