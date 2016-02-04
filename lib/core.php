@@ -851,6 +851,22 @@ function is_modelerror($errfile)
 }
 #}}}########################################################################
 
+function mpgeo_error_catch($expectedfile)
+{
+    if(!file_exists($expectedfile) or filesize($expectedfile)==0)
+    {
+        unset($_SESSION['bgjob']['processID']);
+        $_SESSION['bgjob']['endTime']   = time();
+        $_SESSION['bgjob']['isRunning'] = false;
+        $errfile = $_SESSION['dataDir']."/".MP_DIR_SYSTEM."/errors";
+        $elementerror = is_elementerror($errfile);
+        if($elementerror) $_SESSION['bgjob']['elementError'] = true;
+        $modelerror = is_modelerror($errfile);
+        if($modelerror) $_SESSION['bgjob']['modelError'] = true;
+        else $_SESSION['bgjob']['cctbxError'] = true;
+        die();
+    }
+}
 
 #{{{ a_function_definition - summary_statement_goes_here
 ############################################################################
