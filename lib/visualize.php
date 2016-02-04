@@ -1145,7 +1145,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
                 if($item['conf'] == 'Cis') $cisprocount += 1;
                 elseif($item['conf'] == 'Twisted') $twistcount += 1;
             }
-            elseif($item['type'] == 'General'){
+            elseif($item['type'] == 'non-Pro'){
                 $nonprototal += 1;
                 if($item['conf'] == 'Cis') $cisnonprocount += 1;
                 elseif($item['conf'] == 'Twisted') $twistcount += 1;

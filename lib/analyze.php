@@ -1239,6 +1239,9 @@ function runOmegalyze($infile, $outfile)
 *   omega           the omega (peptide) dihedral
 *   conf            "Trans", "Cis", or "Twisted"
 */
+#' C 439  GLY to  C 440  ARG: non-Pro : -15.03:Cis     :107.4 '
+#' C 534  GLY to  C 535  ASP: non-Pro : 139.87:Twisted :173.67'
+#' B 277  PHE to  B 278  PRO: Pro     : -21.73:Cis     :126.98'
 function loadOmegalyze($datafile)
 {
     $data = array_slice(file($datafile), 1); // drop first line
@@ -1259,7 +1262,7 @@ function loadOmegalyze($datafile)
         elseif (preg_match("/^residue/",$line[0])){
           continue;
         }
-        $cnit = $line[0];
+        $cnit = substr($line[0], 0, 11);
         /*if(strlen($cnit)==10)
         {
           $cnit = ' '.$cnit;
@@ -1274,9 +1277,9 @@ function loadOmegalyze($datafile)
             'resNum'    => $decomp['resNum'],
             'insCode'   => $decomp['insCode'],
             'altID'     => $decomp['altID'],
-            'type'      => $line[1],
-            'omega'     => $line[2] + 0,
-            'conf'      => $line[3]
+            'type'      => trim($line[1]),
+            'omega'     => ltrim($line[2]) + 0,
+            'conf'      => rtrim($line[3])
         );
     }
     return $ret;
