@@ -558,19 +558,21 @@ function makeZipForFiles($basepath, $filelist)
     //SML hack: zip into better-named directory
 
     //first, modify $filelist by prepending some good name
-    $nicename = "gobbledegook/"; //ultimately replace with a function call
+    $nicename = "gobbledegook"; //ultimately replace with a function call
     foreach ($filelist as &$value)
-        $value = $nicename.$value;
+        $value = $nicename."/".$value;
     SML_cout(implode(' ', $filelist));
 
     //next, make a symlink through that good name
     chdir("..");
     $lncommand = "ln -s ".$basepath." ".$nicename;
-    //exec($lncommand);
+    exec($lncommand);
     SML_cout($lncommand);
 
     // must compress to stdout b/c otherwise zip wants a .zip ending
-    exec("zip -qr - ".implode(' ', $filelist)." > $outpath");
+    $zipcommand = "zip -qr - ".implode(' ', $filelist)." > $outpath";
+    SML_cout("\n\n".$zipcommand."\n\n");
+    exec($zipcommand);
     chdir($cwd); // go back to our original working dir
     return $outpath;
 }
