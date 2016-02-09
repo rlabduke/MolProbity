@@ -549,9 +549,21 @@ function makeZipForFolder($inpath)
 */
 function makeZipForFiles($basepath, $filelist)
 {
+    SML_cout("HELLO IS THIS THING ON");
+
     $outpath = mpTempfile("tmp_zip_");
     $cwd = getcwd();
     chdir($basepath);
+
+    //SML hack: zip into better-named directory
+    $nicename = "gobbledegook/"; //ultimately replace with a function call
+    foreach ($filelist as &$value)
+        $value = $nicename.$value;
+    SML_cout(implode(' ', $filelist));
+
+    //chdir("..");
+    //exec("ln -s ".$basepath." gobbledegook");
+
     // must compress to stdout b/c otherwise zip wants a .zip ending
     exec("zip -qr - ".implode(' ', $filelist)." > $outpath");
     chdir($cwd); // go back to our original working dir
