@@ -208,8 +208,10 @@ function runAnalysis($modelID, $opts)
     if($opts['chartSuite'])
     {
         setProgress($tasks, 'suitename'); // updates the progress display if running as a background job
+        $midfile = "$chartDir/$model[prefix]suitedata.txt";
         $outfile = "$chartDir/$model[prefix]suitename.txt";
-        runSuitenameReport($infile, $outfile);
+        $mpgeo_return_code = runSuitenameReport($infile, $midfile, $outfile);
+        mpgeo_error_catch($mpgeo_return_code);
         $suites = loadSuitenameReport($outfile);
         $tasks['suitename'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=plain' target='_blank'>preview</a>\n";
         setProgress($tasks, 'suitename'); // so the preview link is visible
@@ -1317,10 +1319,14 @@ function findOmegaOutliers($omega)
 
 #{{{ runSuitenameReport - finds conformer and suiteness for every RNA suite
 ############################################################################
-function runSuitenameReport($infile, $outfile)
+function runSuitenameReport($infile, $midfile, $outfile)
 {
     //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle rnabb $infile | suitename -report > $outfile");
-    exec("mmtbx.mp_geo rna_backbone=True pdb=$infile | phenix.suitename -report -pointIDfields 7 -altIDfield 6 > $outfile");
+    //formerly a single exec with a pipe, this has been broken into two execs to facilitate mp_geo error catching
+    exec("mmtbx.mp_geo rna_backbone=True pdb=$infile > $midfile",$arg_list_filler,$mpgeo_return_code);
+    if($mp_geo_return_code != 0) return $mpgeo_return_code; //skip suitename step if bad input
+    exec("phenix.suitename -report -pointIDfields 7 -altIDfield 6 < $midfile > $outfile");
+    return $mpgeo_return_code;
 }
 #}}}########################################################################
 
