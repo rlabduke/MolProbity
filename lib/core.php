@@ -851,9 +851,10 @@ function is_modelerror($errfile)
 }
 #}}}########################################################################
 
-function mpgeo_error_catch($expectedfile)
+#{{{ mpgeo_error_catch - looks at return code from an mp_geo run and checks for error types if nonzero
+function mpgeo_error_catch($mpgeo_return_code)
 {
-    if(!file_exists($expectedfile) or filesize($expectedfile)==0)
+    if($mpgeo_return_code != 0)
     {
         unset($_SESSION['bgjob']['processID']);
         $_SESSION['bgjob']['endTime']   = time();
@@ -867,6 +868,7 @@ function mpgeo_error_catch($expectedfile)
         die();
     }
 }
+#}}}
 
 #{{{ a_function_definition - summary_statement_goes_here
 ############################################################################

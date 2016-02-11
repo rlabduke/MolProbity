@@ -115,8 +115,8 @@ function runAnalysis($modelID, $opts)
     {
         setProgress($tasks, 'geomValidation'); // updates the progress display if running as a background job
         $geomfile = "$rawDir/$model[prefix]geomvalidation.data";
-        runValidationReport($infile, $geomfile, $model['stats']['use_cdl']);
-        mpgeo_error_catch($geomfile);
+        $mpgeo_return_code = runValidationReport($infile, $geomfile, $model['stats']['use_cdl']);
+        mpgeo_error_catch($mpgeo_return_code);
         //$protfile = "$rawDir/$model[prefix]protvalidation.data";
         //runValidationReport($infile, $protfile, "protein");
         //$rnafile = "$rawDir/$model[prefix]rnavalidation.data";
@@ -1527,7 +1527,8 @@ function runValidationReport($infile, $outfile, $use_cdl)
     //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -$moltype -validate -outliers -sigma=0.0 $infile > $outfile");
     if($use_cdl) {$uc = "True";}
     else {$uc = "False"; }
-    exec("mmtbx.mp_geo pdb=$infile out_file=$outfile cdl=$uc outliers_only=False bonds_and_angles=True");
+    exec("mmtbx.mp_geo pdb=$infile out_file=$outfile cdl=$uc outliers_only=False bonds_and_angles=True",$arg_list_filler,$mpgeo_return_code);
+    return $mpgeo_return_code;
 }
 #}}}########################################################################
 
