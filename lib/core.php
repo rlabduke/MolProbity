@@ -617,14 +617,12 @@ function makeZipForSession()
 */
 function zipSymlinkName()
 {
-    SML_cout("zipSymlinkName");
-
-    SML_cout("\n\n\n");
+    //SML_cout("\n\nzipSymlinkName\n\n\n");
 
     $datestring = date("Ymd_Hi");
     $symlink_name = $datestring."_molprobity_".session_id();
 
-    SML_cout($symlink_name);
+    //SML_cout($symlink_name);
 
     return $symlink_name;
 }
