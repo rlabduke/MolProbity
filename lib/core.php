@@ -626,7 +626,7 @@ function zipSymlinkName()
 
     SML_cout($symlink_name);
 
-    return "gobbledegook2";
+    return $symlink_name;
 }
 #}}}########################################################################
 
