@@ -557,7 +557,7 @@ function makeZipForFiles($basepath, $filelist)
     //SML hack: zip into better-named directory
 
     //first, modify $filelist by prepending some good name
-    $nicename = "gobbledegook"; //ultimately replace with a function call
+    $nicename = zipSymlinkName();
     foreach ($filelist as &$value)
         $value = $nicename."/".$value;
     SML_cout(implode(' ', $filelist));
@@ -602,6 +602,22 @@ function makeZipForSession()
 
     $_SESSION['archives'][] = $outname;
     return $outname;
+}
+#}}}########################################################################
+
+#{{{ zipSymlinkName - generates a uniquely named symlink for zip archives
+############################################################################
+/**
+* Returns a string formatted YYYYMMDD_HHMM_molprobity_JOBHASH,
+* year-month-day_24hr-minute_molprobity_job-hash-string.  This
+* mangling of the molprobity job ID provides a usefully named faux
+* folder to zip files through, so that when unzipping archives the
+* files will land in a useful place instead of "tarbombing" into the
+* current directory.
+*/
+function zipSymlinkName()
+{
+    return "gobbledegook2";
 }
 #}}}########################################################################
 
