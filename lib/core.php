@@ -549,8 +549,7 @@ function makeZipForFolder($inpath)
 */
 function makeZipForFiles($basepath, $filelist)
 {
-    SML_cout("HELLO IS THIS THING ON");
-
+    SML_cout("\n\n makeZipForFiles \n\n");
     $outpath = mpTempfile("tmp_zip_");
     $cwd = getcwd();
     chdir($basepath);
@@ -562,12 +561,14 @@ function makeZipForFiles($basepath, $filelist)
     foreach ($filelist as &$value)
         $value = $nicename."/".$value;
     SML_cout(implode(' ', $filelist));
+    SML_cout("\n\n\n");
 
     //next, make a symlink through that good name
     chdir("..");
     $lncommand = "ln -s ".$basepath." ".$nicename;
     exec($lncommand);
     SML_cout($lncommand);
+    SML_cout("\n\n\n");
 
     // must compress to stdout b/c otherwise zip wants a .zip ending
     $zipcommand = "zip -qr - ".implode(' ', $filelist)." > $outpath";
