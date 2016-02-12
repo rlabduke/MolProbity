@@ -514,29 +514,6 @@ function linkAnyFile($fname, $name = null, $image = null)
 }
 #}}}########################################################################
 
-#{{{ makeZipForFolder - packages all files as a ZIP archive
-############################################################################
-/**
-* Creates a ZIP archive file containing all the files in the given folder.
-* The archive is created as a temporary file and should be unlinked afterwards.
-* The name of the temporary file is returned.
-*/
-function makeZipForFolder($inpath)
-{
-    $outpath = mpTempfile("tmp_zip_");
-    // Do the song and dance to get just the last dir of $inpath in the ZIP
-    // instead of all the dirs, starting from the filesystem root (/).
-    $inbase = basename($inpath);
-    $indir = dirname($inpath);
-    $cwd = getcwd();
-    chdir($indir);
-    // must compress to stdout b/c otherwise zip wants a .zip ending
-    exec("zip -qr - $inbase > $outpath");
-    chdir($cwd); // go back to our original working dir
-    return $outpath;
-}
-#}}}########################################################################
-
 #{{{ makeZipForFiles - packages selected files as a ZIP archive
 ############################################################################
 /**
@@ -604,6 +581,29 @@ function makeZipForSession()
 
     $_SESSION['archives'][] = $outname;
     return $outname;
+}
+#}}}########################################################################
+
+#{{{ makeZipForFolder - packages all files as a ZIP archive
+############################################################################
+/**
+* Creates a ZIP archive file containing all the files in the given folder.
+* The archive is created as a temporary file and should be unlinked afterwards.
+* The name of the temporary file is returned.
+*/
+function makeZipForFolder($inpath)
+{
+    $outpath = mpTempfile("tmp_zip_");
+    // Do the song and dance to get just the last dir of $inpath in the ZIP
+    // instead of all the dirs, starting from the filesystem root (/).
+    $inbase = basename($inpath);
+    $indir = dirname($inpath);
+    $cwd = getcwd();
+    chdir($indir);
+    // must compress to stdout b/c otherwise zip wants a .zip ending
+    exec("zip -qr - $inbase > $outpath");
+    chdir($cwd); // go back to our original working dir
+    return $outpath;
 }
 #}}}########################################################################
 
