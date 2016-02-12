@@ -413,7 +413,8 @@ function makeMulticritKin2($infiles, $outfile, $opt, $viewRes = array(), $nmrCon
         if($opt['geom'])
         {
             #"making Geom...\n";
-            makeBadGeomKin($infile, $outfile);
+            $mpgeo_return_code = makeBadGeomKin($infile, $outfile);
+            mpgeo_error_catch($mpgeo_return_code);
             #"Geom OK\n";
         }
         if($opt['cbdev'])
@@ -673,7 +674,8 @@ function makeBadRotamerKin($infile, $outfile, $rota = null, $color = 'gold', $cu
 ############################################################################
 function makeBadGeomKin($infile, $outfile) {
     //$out = fopen($outfile, 'a');
-    exec("mmtbx.mp_geo pdb=$infile out_file=$outfile outliers_only=True kinemage=True");
+    exec("mmtbx.mp_geo pdb=$infile out_file=$outfile outliers_only=True kinemage=True",$arg_list_filler,$mpgeo_return_code);
+    return $mpgeo_return_code;
     //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -kin -sub -validate -protein $infile >> $outfile");
     //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -kin -sub -validate -rna $infile >> $outfile");
     //exec("java -Xmx256m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.dangle.Dangle -kin -validate -dna $infile >> $outfile");
