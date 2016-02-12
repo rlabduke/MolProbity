@@ -617,6 +617,8 @@ function makeZipForSession()
 */
 function zipSymlinkName()
 {
+    $datestring = date("Ymd_Hi");
+    SML_cout($datestring);
     return "gobbledegook2";
 }
 #}}}########################################################################
