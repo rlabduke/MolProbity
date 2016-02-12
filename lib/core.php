@@ -626,10 +626,10 @@ function zipSymlinkName()
     SML_cout($_SESSION['sessTag']);
     SML_cout("\n\n\n");
 
-    SML_cout($_SESSION['dataDir']);
+    SML_cout(session_id());
     SML_cout("\n\n\n");
 
-    SML_cout($_SESSION['dataUrl']);
+    SML_cout(session_id());
     return "gobbledegook2";
 }
 #}}}########################################################################
