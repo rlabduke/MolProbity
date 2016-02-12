@@ -622,14 +622,10 @@ function zipSymlinkName()
     SML_cout("\n\n\n");
 
     $datestring = date("Ymd_Hi");
-    $symlink_name = $datestring."_molprobity_"; //not finished
-    SML_cout($_SESSION['sessTag']);
-    SML_cout("\n\n\n");
+    $symlink_name = $datestring."_molprobity_".session_id();
 
-    SML_cout(session_id());
-    SML_cout("\n\n\n");
+    SML_cout($symlink_name);
 
-    SML_cout(session_id());
     return "gobbledegook2";
 }
 #}}}########################################################################
