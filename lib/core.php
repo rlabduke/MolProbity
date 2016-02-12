@@ -617,8 +617,19 @@ function makeZipForSession()
 */
 function zipSymlinkName()
 {
+    SML_cout("zipSymlinkName");
+
+    SML_cout("\n\n\n");
+
     $datestring = date("Ymd_Hi");
-    SML_cout($datestring);
+    $symlink_name = $datestring."_molprobity_"; //not finished
+    SML_cout($_SESSION['sessTag']);
+    SML_cout("\n\n\n");
+
+    SML_cout($_SESSION['dataDir']);
+    SML_cout("\n\n\n");
+
+    SML_cout($_SESSION['dataUrl']);
     return "gobbledegook2";
 }
 #}}}########################################################################
