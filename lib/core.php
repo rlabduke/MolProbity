@@ -514,29 +514,6 @@ function linkAnyFile($fname, $name = null, $image = null)
 }
 #}}}########################################################################
 
-#{{{ makeZipForFolder - packages all files as a ZIP archive
-############################################################################
-/**
-* Creates a ZIP archive file containing all the files in the given folder.
-* The archive is created as a temporary file and should be unlinked afterwards.
-* The name of the temporary file is returned.
-*/
-function makeZipForFolder($inpath)
-{
-    $outpath = mpTempfile("tmp_zip_");
-    // Do the song and dance to get just the last dir of $inpath in the ZIP
-    // instead of all the dirs, starting from the filesystem root (/).
-    $inbase = basename($inpath);
-    $indir = dirname($inpath);
-    $cwd = getcwd();
-    chdir($indir);
-    // must compress to stdout b/c otherwise zip wants a .zip ending
-    exec("zip -qr - $inbase > $outpath");
-    chdir($cwd); // go back to our original working dir
-    return $outpath;
-}
-#}}}########################################################################
-
 #{{{ makeZipForFiles - packages selected files as a ZIP archive
 ############################################################################
 /**
@@ -549,11 +526,33 @@ function makeZipForFolder($inpath)
 */
 function makeZipForFiles($basepath, $filelist)
 {
+    //SML_cout("\n\n makeZipForFiles \n\n");
     $outpath = mpTempfile("tmp_zip_");
     $cwd = getcwd();
     chdir($basepath);
+
+    //SML hack: zip into better-named directory
+
+    //first, modify $filelist by prepending some good name
+    $nicename = zipSymlinkName();
+    foreach ($filelist as &$value)
+        $value = $nicename."/".$value;
+    //SML_cout(implode(' ', $filelist)."\n\n\n");
+
+    //next, make a symlink through that good name
+    chdir("..");
+    $lncommand = "ln -s ".$basepath." ".$nicename;
+    exec($lncommand);
+    //SML_cout($lncommand."\n\n\n");
+
     // must compress to stdout b/c otherwise zip wants a .zip ending
-    exec("zip -qr - ".implode(' ', $filelist)." > $outpath");
+    $zipcommand = "zip -qr - ".implode(' ', $filelist)." > $outpath";
+    //SML_cout("\n\n".$zipcommand."\n\n");
+    exec($zipcommand);
+
+    //clean up the symlink
+    exec("rm ".$nicename);
+
     chdir($cwd); // go back to our original working dir
     return $outpath;
 }
@@ -582,6 +581,52 @@ function makeZipForSession()
 
     $_SESSION['archives'][] = $outname;
     return $outname;
+}
+#}}}########################################################################
+
+#{{{ makeZipForFolder - packages all files as a ZIP archive
+############################################################################
+/**
+* Creates a ZIP archive file containing all the files in the given folder.
+* The archive is created as a temporary file and should be unlinked afterwards.
+* The name of the temporary file is returned.
+*/
+function makeZipForFolder($inpath)
+{
+    $outpath = mpTempfile("tmp_zip_");
+    // Do the song and dance to get just the last dir of $inpath in the ZIP
+    // instead of all the dirs, starting from the filesystem root (/).
+    $inbase = basename($inpath);
+    $indir = dirname($inpath);
+    $cwd = getcwd();
+    chdir($indir);
+    // must compress to stdout b/c otherwise zip wants a .zip ending
+    exec("zip -qr - $inbase > $outpath");
+    chdir($cwd); // go back to our original working dir
+    return $outpath;
+}
+#}}}########################################################################
+
+#{{{ zipSymlinkName - generates a uniquely named symlink for zip archives
+############################################################################
+/**
+* Returns a string formatted YYYYMMDD_HHMM_molprobity_JOBHASH,
+* year-month-day_24hr-minute_molprobity_job-hash-string.  This
+* mangling of the molprobity job ID provides a usefully named faux
+* folder to zip files through, so that when unzipping archives the
+* files will land in a useful place instead of "tarbombing" into the
+* current directory.
+*/
+function zipSymlinkName()
+{
+    //SML_cout("\n\nzipSymlinkName\n\n\n");
+
+    $datestring = date("Ymd_Hi");
+    $symlink_name = "MolProbity_".$datestring."_".session_id();
+
+    //SML_cout($symlink_name);
+
+    return $symlink_name;
 }
 #}}}########################################################################
 
@@ -851,6 +896,24 @@ function is_modelerror($errfile)
 }
 #}}}########################################################################
 
+#{{{ mpgeo_error_catch - looks at return code from an mp_geo run and checks for error types if nonzero
+function mpgeo_error_catch($mpgeo_return_code)
+{
+    if($mpgeo_return_code != 0)
+    {
+        unset($_SESSION['bgjob']['processID']);
+        $_SESSION['bgjob']['endTime']   = time();
+        $_SESSION['bgjob']['isRunning'] = false;
+        $errfile = $_SESSION['dataDir']."/".MP_DIR_SYSTEM."/errors";
+        $elementerror = is_elementerror($errfile);
+        if($elementerror) $_SESSION['bgjob']['elementError'] = true;
+        $modelerror = is_modelerror($errfile);
+        if($modelerror) $_SESSION['bgjob']['modelError'] = true;
+        else $_SESSION['bgjob']['cctbxError'] = true;
+        die();
+    }
+}
+#}}}
 
 #{{{ a_function_definition - summary_statement_goes_here
 ############################################################################

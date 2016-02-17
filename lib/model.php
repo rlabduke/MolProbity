@@ -1549,6 +1549,8 @@ function replacePdbRemark($inpath, $remarkText, $remarkNumber)
 */
 function checkMODEL($inpath)
 {
+    //Comment this return back in if you need to remove MODEL/ENDMDL filtering on upload
+    //return;
     if(checkAnyMODEL($inpath)) //these checks only run if a MODEL card is detected
     {
         //SML_cout("STEVEN it returned TRUE!!!");
