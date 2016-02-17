@@ -25,7 +25,7 @@ echo ++++++++++ getting MolProbity base ...
 if [ ! -f base.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/base.tar.gz -o base.tar.gz; echo got.;
 else echo already got.; fi
 echo unpacking ...
-if [ ! -d base]; then tar zxf base.tar.gz; echo unpacked.;
+if [ ! -d base ]; then tar zxf base.tar.gz; echo unpacked.;
 else echo already unpacked.; fi
 
 echo ++++++++++ creating build directories ...
@@ -36,20 +36,20 @@ cd sources
 echo ++++++++++ getting sources ...
 if [ -n "$sf_user" ]
 then
-    if [ ! -d cctbx_project]
+    if [ ! -d cctbx_project ]
     then
         svn --quiet --non-interactive --trust-server-cert co https://$sf_user@svn.code.sf.net/p/cctbx/code/trunk cctbx_project
     fi
-    if [ ! -d cbflib]
+    if [ ! -d cbflib ]
     then
         svn --quiet --non-interactive --trust-server-cert co https://$sf_user@svn.code.sf.net/p/cbflib/code-0/trunk/CBFlib_bleeding_edge cbflib
     fi
 else
-    if [ ! -d cctbx_project]
+    if [ ! -d cctbx_project ]
     then
         svn --quiet --non-interactive --trust-server-cert co https://svn.code.sf.net/p/cctbx/code/trunk cctbx_project
     fi
-    if [ ! -d cbflib]
+    if [ ! -d cbflib ]
     then
         svn --quiet --non-interactive --trust-server-cert co https://svn.code.sf.net/p/cbflib/code-0/trunk/CBFlib_bleeding_edge cbflib
     fi

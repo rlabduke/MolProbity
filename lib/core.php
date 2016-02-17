@@ -622,7 +622,7 @@ function zipSymlinkName()
     //SML_cout("\n\nzipSymlinkName\n\n\n");
 
     $datestring = date("Ymd_Hi");
-    $symlink_name = $datestring."_molprobity_".session_id();
+    $symlink_name = "MolProbity_".$datestring."_".session_id();
 
     //SML_cout($symlink_name);
 
