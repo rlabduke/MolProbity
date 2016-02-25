@@ -927,12 +927,19 @@ function reduceBuild($inpath, $outpath, $blength='ecloud')
 * $flippath     the file listing residues to fix and their orientations, in
 *               the appropriate format for Reduce's -fix option
 */
-function reduceFix($inpath, $outpath, $flippath)
+function reduceFix($inpath, $outpath, $flippath, $blength='ecloud')
 {
     // $_SESSION[hetdict] is used to set REDUCE_HET_DICT environment variable,
     // so it doesn't need to appear on the command line here.
     //exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -build -fix $flippath -allalt $inpath > $outpath");
-    exec("phenix.reduce -quiet -build -fix $flippath -allalt $inpath > $outpath");
+    if ($blength == 'ecloud')
+    {
+      exec("phenix.reduce -quiet -build -fix $flippath -allalt $inpath > $outpath");
+    }
+    elseif ($blength == 'nuclear')
+    {
+      exec("phenix.reduce -quiet -build -fix -nuclear $flippath -allalt $inpath > $outpath");
+    }
 }
 #}}}########################################################################
 

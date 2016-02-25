@@ -85,9 +85,10 @@ else
     $parentID = $model['parent'];
     $parent = $_SESSION['models'][$parentID];
     $parentPDB = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$parent['pdb'];
+    $blength = $reduce_blength = $_SESSION['bgjob']['reduce_blength'];
     if(file_exists($parentPDB))
     {
-        reduceFix($parentPDB, $outpath, $flipfile);
+        reduceFix($parentPDB, $outpath, $flipfile, $blength);
     }
 
     setProgress($tasks, null); // all done
