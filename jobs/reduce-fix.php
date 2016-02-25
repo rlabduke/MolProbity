@@ -47,6 +47,8 @@ $modelID = $_SESSION['bgjob']['modelID'];
 $model = $_SESSION['models'][$modelID];
 $pdb = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$model['pdb'];
 
+$reduce_blength = $_SESSION['reduce_blength'];
+//$_SESSION['reduce_blength'] this was set during reduce-build
 $changes = decodeReduceUsermods($pdb);
 
 // If all changes were accepted, we will not need to re-run Reduce.
@@ -73,7 +75,7 @@ if(! $rerun)
 else
 {
     $tasks['reduce'] = "Add H with user-selected Asn/Gln/His flips using <code>reduce -fix</code>";
-    $tasks['regularize'] = "Regularize flipped N/Q/H geometry with <code>CCTBX</code> (if necessary)";
+    //$tasks['regularize'] = "Regularize flipped N/Q/H geometry with <code>CCTBX</code> (if necessary)";
     setProgress($tasks, 'reduce');
 
     $outname    = $model['pdb']; // Just overwrite the default Reduce -build one
@@ -85,10 +87,9 @@ else
     $parentID = $model['parent'];
     $parent = $_SESSION['models'][$parentID];
     $parentPDB = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$parent['pdb'];
-    $blength = $reduce_blength = $_SESSION['bgjob']['reduce_blength'];
     if(file_exists($parentPDB))
     {
-        reduceFix($parentPDB, $outpath, $flipfile, $blength);
+        reduceFix($parentPDB, $outpath, $flipfile, $reduce_blength);
     }
 
     setProgress($tasks, null); // all done

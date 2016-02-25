@@ -938,7 +938,7 @@ function reduceFix($inpath, $outpath, $flippath, $blength='ecloud')
     }
     elseif ($blength == 'nuclear')
     {
-      exec("phenix.reduce -quiet -build -fix -nuclear $flippath -allalt $inpath > $outpath");
+      exec("phenix.reduce -quiet -build -nuclear -fix $flippath -allalt $inpath > $outpath");
     }
 }
 #}}}########################################################################
