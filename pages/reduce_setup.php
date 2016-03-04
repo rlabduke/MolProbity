@@ -69,6 +69,8 @@ function display($context)
         echo "<div class='inline_options'><b>Advanced options:</b><br>\n";
         echo "<label><input type='checkbox' name='makeFlipkin' id='makeFlipkin' value='1' checked>\n";
         echo "Make Flipkin kinemages illustrating any Asn, Gln, or His flips</label>\n";
+        echo "<br><label><input type='checkbox' name='use_rename' id='use_rename' value='1'>\n";
+        echo "Use atom-renaming version of Reduce (not recommended)</div>\n";
         echo "</small></td></tr>\n";
         echo "<tr><td colspan='2'>&nbsp;</td></tr>\n"; // vertical spacer
         echo "<tr valign='top'><td width='300'><input type='radio' name='method' value='nobuild' $check2> <b>No flips</b><td>";
@@ -97,6 +99,8 @@ function setFlipkins(hasProtein)
 {
     flipkin = document.getElementById("makeFlipkin");
     flipkin.checked = hasProtein;
+    use_rename = document.getElementById("use_rename");
+    use_rename.checked = false;
 }
 
 // This nifty function means we won't override other ONLOAD handlers
@@ -155,6 +159,7 @@ function onAddH()
         $_SESSION['bgjob']['modelID']        = $req['modelID'];
         $_SESSION['bgjob']['makeFlipkin']    = $req['makeFlipkin'];
         $_SESSION['bgjob']['reduce_blength'] = $req['blength'];
+        $_SESSION['bgjob']['use_rename']     = $req['use_rename'];
 
         $_SESSION['reduce_blength'] = $_SESSION['bgjob']['reduce_blength'];
 
@@ -185,6 +190,7 @@ function onAddH()
         if(isset($req['modelID']))  $context['modelID'] = $req['modelID'];
         if(isset($req['method']))   $context['method'] = $req['method'];
         if(isset($req['blength']))   $context['blength'] = $req['blength'];
+        if(isset($req['use_rename'])) $context['use_rename'] = $req['use_rename'];
         setContext($context);
     }
 }

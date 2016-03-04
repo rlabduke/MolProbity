@@ -899,18 +899,20 @@ function reduceNoBuild($inpath, $outpath, $blength='ecloud')
 * $outpath      the full filename for the destination PDB. Will be overwritten.
 * $blength      either 'ecloud' or 'nuclear' to select desired x-H distances
 */
-function reduceBuild($inpath, $outpath, $blength='ecloud')
+function reduceBuild($inpath, $outpath, $blength='ecloud', $use_rename=false)
 {
     // $_SESSION[hetdict] is used to set REDUCE_HET_DICT environment variable,
     // so it doesn't need to appear on the command line here.
     //exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -build -allalt $inpath > $outpath");
+    if ($use_rename) $rename_flag = "-renameflip";
+    else $rename_flag = "";
     if ($blength == 'ecloud')
     {
-      exec("phenix.reduce -quiet -build $inpath > $outpath");
+      exec("phenix.reduce -quiet -build $rename_flag $inpath > $outpath");
     }
     elseif ($blength == 'nuclear')
     {
-      exec("phenix.reduce -quiet -build -nuclear $inpath > $outpath");
+      exec("phenix.reduce -quiet -build -nuclear $rename_flag $inpath > $outpath");
     }
 }
 #}}}########################################################################

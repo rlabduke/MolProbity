@@ -49,6 +49,8 @@ $pdb = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$model['pdb'];
 
 $reduce_blength = $_SESSION['bgjob']['reduce_blength'];
 $_SESSION['reduce_blength'] = $reduce_blength;
+$reduce_use_rename = $_SESSION['bgjob']['use_rename'];
+$SESSION['use_rename'] = $reduce_use_rename;
 
 // Set up progress message
 if ($reduce_blength == 'ecloud')
@@ -59,11 +61,16 @@ elseif($reduce_blength == 'nuclear')
 {
   $tasks['reduce'] = "Add H with <code>reduce -build -nuclear</code>";
 }
+if ($_SESSION['bgjob']['use_rename'])
+{
+  $tasks['reduce'] .= " -rename";
+}
 
 if($_SESSION['bgjob']['makeFlipkin'])
 {
   $tasks['flipkin'] = "Create Asn/Gln and His <code>flipkin</code> kinemages";
 }
+
 
 setProgress($tasks, 'reduce');
 $prereduceid = $_SESSION['lastUsedModelID'];
@@ -72,7 +79,7 @@ $outname = $newModel['pdb'];
 $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
 if(!file_exists($outpath)) mkdir($outpath, 0777); // shouldn't ever happen, but might...
 $outpath .= '/'.$outname;
-reduceBuild($pdb, $outpath, $reduce_blength);
+reduceBuild($pdb, $outpath, $reduce_blength, $reduce_use_rename);
 $newModel['stats']          = pdbstat($outpath);
 $newModel['parent']         = $modelID;
 
