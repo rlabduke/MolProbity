@@ -70,7 +70,7 @@ function display($context)
         echo "<label><input type='checkbox' name='makeFlipkin' id='makeFlipkin' value='1' checked>\n";
         echo "Make Flipkin kinemages illustrating any Asn, Gln, or His flips</label>\n";
         echo "<br><label><input type='checkbox' name='use_rename' id='use_rename' value='1'>\n";
-        echo "Use atom-renaming version of Reduce (not recommended)</div>\n";
+        echo "Use atom-renaming version of Reduce for output (<b>must</b> be refined before deposition)</div>\n";
         echo "</small></td></tr>\n";
         echo "<tr><td colspan='2'>&nbsp;</td></tr>\n"; // vertical spacer
         echo "<tr valign='top'><td width='300'><input type='radio' name='method' value='nobuild' $check2> <b>No flips</b><td>";
