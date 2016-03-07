@@ -622,7 +622,7 @@ function zipSymlinkName()
     //SML_cout("\n\nzipSymlinkName\n\n\n");
 
     $datestring = date("Ymd_Hi");
-    $symlink_name = $datestring."_molprobity_".session_id();
+    $symlink_name = "MolProbity_".$datestring."_".session_id();
 
     //SML_cout($symlink_name);
 
@@ -896,6 +896,24 @@ function is_modelerror($errfile)
 }
 #}}}########################################################################
 
+#{{{ mpgeo_error_catch - looks at return code from an mp_geo run and checks for error types if nonzero
+function mpgeo_error_catch($mpgeo_return_code)
+{
+    if($mpgeo_return_code != 0)
+    {
+        unset($_SESSION['bgjob']['processID']);
+        $_SESSION['bgjob']['endTime']   = time();
+        $_SESSION['bgjob']['isRunning'] = false;
+        $errfile = $_SESSION['dataDir']."/".MP_DIR_SYSTEM."/errors";
+        $elementerror = is_elementerror($errfile);
+        if($elementerror) $_SESSION['bgjob']['elementError'] = true;
+        $modelerror = is_modelerror($errfile);
+        if($modelerror) $_SESSION['bgjob']['modelError'] = true;
+        else $_SESSION['bgjob']['cctbxError'] = true;
+        die();
+    }
+}
+#}}}
 
 #{{{ a_function_definition - summary_statement_goes_here
 ############################################################################

@@ -819,21 +819,28 @@ function downgradePDB($inpath, $outpath)
 }
 #}}}########################################################################
 
-#{{{ regularizeNQH - regularize NQH geometry following flip
+#{{{ regularizeNQH [DEPRACATED] - regularize NQH geometry following flip
 ############################################################################
-/**
-* regularize geometry - powered by CCTBX
-*
-* $inpath       the full filename for the PDB file to be processed
-* $outpath      the full filename for the destination PDB. Will be overwritten.
-* $temp         temp directory location
-*/
-function regularizeNQH($inpath, $outpath, $temp)
-{
-  #echo "libtbx.python ".MP_BASE_DIR."/bin/nqh_minimize.py $inpath $outpath $temp";
-  #exec("libtbx.python ".MP_BASE_DIR."/bin/nqh_minimize.py $inpath $outpath $temp");
-  exec("mmtbx.nqh_minimize $inpath $outpath $temp");
-}
+//#The nqh_minimize program suffered from long run-times and a tendency to move
+//#  atoms out from their density (because it can't see the density)
+//#It has therefore been "replaced" by a new version of reduce which performs
+//#  a more involved flipping motion to approximate what we wanted
+//#This function is retained for reference; calls to this function have been
+//#  removed.
+//#  nqh_minimize to do.
+///**
+//* regularize geometry - powered by CCTBX
+//*
+//* $inpath       the full filename for the PDB file to be processed
+//* $outpath      the full filename for the destination PDB. Will be overwritten.
+//* $temp         temp directory location
+//*/
+//function regularizeNQH($inpath, $outpath, $temp)
+//{
+//  #echo "libtbx.python ".MP_BASE_DIR."/bin/nqh_minimize.py $inpath $outpath $temp";
+//  #exec("libtbx.python ".MP_BASE_DIR."/bin/nqh_minimize.py $inpath $outpath $temp");
+//  exec("mmtbx.nqh_minimize $inpath $outpath $temp");
+//}
 #}}}#########################################################################
 
 #{{{ reduceTrim - removes H from a PDB file
@@ -892,18 +899,20 @@ function reduceNoBuild($inpath, $outpath, $blength='ecloud')
 * $outpath      the full filename for the destination PDB. Will be overwritten.
 * $blength      either 'ecloud' or 'nuclear' to select desired x-H distances
 */
-function reduceBuild($inpath, $outpath, $blength='ecloud')
+function reduceBuild($inpath, $outpath, $blength='ecloud', $use_rename=false)
 {
     // $_SESSION[hetdict] is used to set REDUCE_HET_DICT environment variable,
     // so it doesn't need to appear on the command line here.
     //exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -build -allalt $inpath > $outpath");
+    if ($use_rename) $rename_flag = "-renameflip";
+    else $rename_flag = "";
     if ($blength == 'ecloud')
     {
-      exec("phenix.reduce -quiet -build $inpath > $outpath");
+      exec("phenix.reduce -quiet -build $rename_flag $inpath > $outpath");
     }
     elseif ($blength == 'nuclear')
     {
-      exec("phenix.reduce -quiet -build -nuclear $inpath > $outpath");
+      exec("phenix.reduce -quiet -build -nuclear $rename_flag $inpath > $outpath");
     }
 }
 #}}}########################################################################
@@ -920,12 +929,19 @@ function reduceBuild($inpath, $outpath, $blength='ecloud')
 * $flippath     the file listing residues to fix and their orientations, in
 *               the appropriate format for Reduce's -fix option
 */
-function reduceFix($inpath, $outpath, $flippath)
+function reduceFix($inpath, $outpath, $flippath, $blength='ecloud')
 {
     // $_SESSION[hetdict] is used to set REDUCE_HET_DICT environment variable,
     // so it doesn't need to appear on the command line here.
     //exec("reduce -quiet -limit".MP_REDUCE_LIMIT." -build -fix $flippath -allalt $inpath > $outpath");
-    exec("phenix.reduce -quiet -build -fix $flippath -allalt $inpath > $outpath");
+    if ($blength == 'ecloud')
+    {
+      exec("phenix.reduce -quiet -build -fix $flippath -allalt $inpath > $outpath");
+    }
+    elseif ($blength == 'nuclear')
+    {
+      exec("phenix.reduce -quiet -build -nuclear -fix $flippath -allalt $inpath > $outpath");
+    }
 }
 #}}}########################################################################
 
@@ -1542,6 +1558,8 @@ function replacePdbRemark($inpath, $remarkText, $remarkNumber)
 */
 function checkMODEL($inpath)
 {
+    //Comment this return back in if you need to remove MODEL/ENDMDL filtering on upload
+    //return;
     if(checkAnyMODEL($inpath)) //these checks only run if a MODEL card is detected
     {
         //SML_cout("STEVEN it returned TRUE!!!");

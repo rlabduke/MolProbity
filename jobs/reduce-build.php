@@ -49,8 +49,8 @@ $pdb = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$model['pdb'];
 
 $reduce_blength = $_SESSION['bgjob']['reduce_blength'];
 $_SESSION['reduce_blength'] = $reduce_blength;
-
-$_SESSION['nqh_regularize'] = false;
+$reduce_use_rename = $_SESSION['bgjob']['use_rename'];
+$SESSION['use_rename'] = $reduce_use_rename;
 
 // Set up progress message
 if ($reduce_blength == 'ecloud')
@@ -61,14 +61,16 @@ elseif($reduce_blength == 'nuclear')
 {
   $tasks['reduce'] = "Add H with <code>reduce -build -nuclear</code>";
 }
-if($_SESSION['bgjob']['nqh_regularize'])
+if ($_SESSION['bgjob']['use_rename'])
 {
-  $tasks['regularize'] = "Regularize flipped N/Q/H geometry with <code>CCTBX</code> (if necessary)";
+  $tasks['reduce'] .= " -rename";
 }
+
 if($_SESSION['bgjob']['makeFlipkin'])
 {
   $tasks['flipkin'] = "Create Asn/Gln and His <code>flipkin</code> kinemages";
 }
+
 
 setProgress($tasks, 'reduce');
 $prereduceid = $_SESSION['lastUsedModelID'];
@@ -77,7 +79,7 @@ $outname = $newModel['pdb'];
 $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
 if(!file_exists($outpath)) mkdir($outpath, 0777); // shouldn't ever happen, but might...
 $outpath .= '/'.$outname;
-reduceBuild($pdb, $outpath, $reduce_blength);
+reduceBuild($pdb, $outpath, $reduce_blength, $reduce_use_rename);
 $newModel['stats']          = pdbstat($outpath);
 $newModel['parent']         = $modelID;
 
@@ -112,64 +114,6 @@ $newModel['isBuilt']        = true;
 $_SESSION['models'][ $newModel['id'] ] = $newModel;
 $_SESSION['bgjob']['modelID'] = $newModel['id'];
 $_SESSION['lastUsedModelID'] = $newModel['id']; // this is now the current model
-
-if($did_flip && $_SESSION['bgjob']['nqh_regularize'])
-{
-  setProgress($tasks, 'regularize');
-  $flipInpath = $outpath;
-  $minModel = createModel($modelID."FH_reg");
-  $outname2 = $minModel['pdb'];
-  $outpath2 = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
-  $outpath2 .= '/'.$outname2;
-  $temp = $_SESSION['dataDir'].'/tmp';
-  if(file_exists($flipInpath))
-  {
-    regularizeNQH($flipInpath, $outpath2, $temp);
-  }
-  unset($_SESSION['models'][$_SESSION['lastUsedModelID']]);
-  if(!file_exists($outpath2))
-  {
-    # We are deleting the reduced file because we'd rather not have users
-    # play with the unregularized, nqh-flipped pdb. 
-    unlink($flipInpath);
-    $_SESSION['lastUsedModelID'] = $prereduceid;
-    unset($_SESSION['bgjob']['processID']);
-    $_SESSION['bgjob']['endTime']   = time();
-    $_SESSION['bgjob']['isRunning'] = false;
-    # there was an error. Let's see if it is an element type issue.
-    $errfile = $_SESSION['dataDir']."/".MP_DIR_SYSTEM."/errors";
-    $elementerror = is_elementerror($errfile);
-    if($elementerror) $_SESSION['bgjob']['elementError'] = true;
-    $modelerror = is_modelerror($errfile);
-    if($modelerror) $_SESSION['bgjob']['modelError'] = true;
-    else $_SESSION['bgjob']['cctbxError'] = true;
-    die();
-  }
-  $minModel['stats']           = pdbstat($outpath2);
-  $minModel['parent']          = $modelID;
-  $minModel['modelID_pre_min'] = $newModel['id']; // for reduce-fix
-
-  // transfer mtz to reduced model
-  if(isset($_SESSION['models'][$modelID]['mtz_file']))
-    $minModel['mtz_file'] = $_SESSION['models'][$modelID]['mtz_file'];
-
-  if($reduce_blength == 'ecloud')
-  {
-    $minModel['history']        = "Derived from $model[pdb] by Reduce -build w/ CCTBX side-chain regularization";
-  }
-  elseif($reduce_blength == 'nuclear')
-  {
-    $minModel['history']        = "Derived from $model[pdb] by Reduce -build -nuclear w/ CCTBX side-chain regularization";
-  }
-  $minModel['isUserSupplied'] = $model['isUserSupplied'];
-  $minModel['isReduced']      = true;
-  $minModel['isBuilt']        = true;
-  $minModel['isRegularized']  = true;
-  $_SESSION['models'][ $minModel['id'] ] = $minModel;
-  $_SESSION['bgjob']['modelID'] = $minModel['id'];
-  $_SESSION['lastUsedModelID'] = $minModel['id']; // this is now the current model
-  $_SESSION['nqh_regularize'] = $_SESSION['bgjob']['nqh_regularize'];
-}
 
 if($_SESSION['bgjob']['makeFlipkin'])
 {

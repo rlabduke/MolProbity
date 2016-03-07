@@ -80,6 +80,9 @@ function runAnalysis($modelID, $opts)
         $mtz_file = $model['mtz_file'];
     else $mtz_file = $_SESSION['models'][$model['parent']]['mtz_file'];
 
+    if($model['stats']['use_cdl'])  $geomsg = "Using CDL";
+    else $geomsg = "";
+    if($opts['chartGeom'])      $tasks['geomValidation'] = "Do bond length and angle geometry analysis (<code>mp_geo</code>) $geomsg";
     if($opts['chartRama'])      $tasks['rama'] = "Do Ramachandran analysis and make plots (<code>ramalyze</code>)";
     if($opts['chartRota'])      $tasks['rota'] = "Do rotamer analysis (<code>rotalyze</code>)";
     if($opts['chartCBdev'])     $tasks['cbeta'] = "Do C&beta; deviation analysis and make kins (<code>cbetadev</code>)";
@@ -87,9 +90,6 @@ function runAnalysis($modelID, $opts)
     if($opts['chartCablamLow']) $tasks['cablam'] = "Do CaBLAM analysis (<code>cablam_validate</code>)";
     if($opts['chartBaseP'])     $tasks['base-phos'] = "Do RNA sugar pucker analysis";
     if($opts['chartSuite'])     $tasks['suitename'] = "Do RNA backbone conformations analysis";
-    if($model['stats']['use_cdl'])  $geomsg = "Using CDL";
-    else $geomsg = "";
-    if($opts['chartGeom'])      $tasks['geomValidation'] = "Do bond length and angle geometry analysis (<code>mp_geo</code>) $geomsg";
 
     if($opts['chartClashlist']) $tasks['clashlist'] = "Run <code>clashscore</code> to find bad clashes and clashscore";
     if($opts['chartImprove'])   $tasks['improve'] = "Suggest / report on fixes";
@@ -109,6 +109,26 @@ function runAnalysis($modelID, $opts)
     //}}} Set up file/directory vars and the task list
 
     //{{{ Run geometry programs and offer kins to user
+
+    //{{{ Bonds and Angles
+    if($opts['chartGeom'])
+    {
+        setProgress($tasks, 'geomValidation'); // updates the progress display if running as a background job
+        $geomfile = "$rawDir/$model[prefix]geomvalidation.data";
+        $mpgeo_return_code = runValidationReport($infile, $geomfile, $model['stats']['use_cdl']);
+        mpgeo_error_catch($mpgeo_return_code);
+        //$protfile = "$rawDir/$model[prefix]protvalidation.data";
+        //runValidationReport($infile, $protfile, "protein");
+        //$rnafile = "$rawDir/$model[prefix]rnavalidation.data";
+        //runValidationReport($infile, $rnafile, "rna");
+        //$validate_bond  = loadValidationBondReport($protfile,"protein");
+        //if (is_array($validate_bond))
+        $validate_bond  = array_merge(loadValidationBondReport($geomfile,"protein"), loadValidationBondReport($geomfile, "rna"));
+        if (count($validate_bond) == 0) $validate_bond = null;
+        $validate_angle = array_merge(loadValidationAngleReport($geomfile, "protein"), loadValidationAngleReport($geomfile, "rna"));
+        if (count($validate_angle) == 0) $validate_angle = null;
+    }//}}}
+
     //{{{ Ramachandran
     if($opts['chartRama'])
     {
@@ -188,8 +208,10 @@ function runAnalysis($modelID, $opts)
     if($opts['chartSuite'])
     {
         setProgress($tasks, 'suitename'); // updates the progress display if running as a background job
+        $midfile = "$chartDir/$model[prefix]suitedata.txt";
         $outfile = "$chartDir/$model[prefix]suitename.txt";
-        runSuitenameReport($infile, $outfile);
+        $mpgeo_return_code = runSuitenameReport($infile, $midfile, $outfile);
+        mpgeo_error_catch($mpgeo_return_code);
         $suites = loadSuitenameReport($outfile);
         $tasks['suitename'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=plain' target='_blank'>preview</a>\n";
         setProgress($tasks, 'suitename'); // so the preview link is visible
@@ -200,24 +222,6 @@ function runAnalysis($modelID, $opts)
         makeSuitenameKin($infile, "$kinDir/$model[prefix]suitename.kin");
     }//}}}
     //}}} Run nucleic acid geometry programs and offer kins to user
-
-    //{{{ Bonds and Angles
-    if($opts['chartGeom'])
-    {
-        setProgress($tasks, 'geomValidation'); // updates the progress display if running as a background job
-        $geomfile = "$rawDir/$model[prefix]geomvalidation.data";
-        runValidationReport($infile, $geomfile, $model['stats']['use_cdl']);
-        //$protfile = "$rawDir/$model[prefix]protvalidation.data";
-        //runValidationReport($infile, $protfile, "protein");
-        //$rnafile = "$rawDir/$model[prefix]rnavalidation.data";
-        //runValidationReport($infile, $rnafile, "rna");
-        //$validate_bond  = loadValidationBondReport($protfile,"protein");
-        //if (is_array($validate_bond))
-        $validate_bond  = array_merge(loadValidationBondReport($geomfile,"protein"), loadValidationBondReport($geomfile, "rna"));
-        if (count($validate_bond) == 0) $validate_bond = null;
-        $validate_angle = array_merge(loadValidationAngleReport($geomfile, "protein"), loadValidationAngleReport($geomfile, "rna"));
-        if (count($validate_angle) == 0) $validate_angle = null;
-    }//}}}
 
     //}}} Run programs and offer kins to user
 
@@ -1319,10 +1323,14 @@ function findOmegaOutliers($omega)
 
 #{{{ runSuitenameReport - finds conformer and suiteness for every RNA suite
 ############################################################################
-function runSuitenameReport($infile, $outfile)
+function runSuitenameReport($infile, $midfile, $outfile)
 {
     //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle rnabb $infile | suitename -report > $outfile");
-    exec("mmtbx.mp_geo rna_backbone=True pdb=$infile | phenix.suitename -report -pointIDfields 7 -altIDfield 6 > $outfile");
+    //formerly a single exec with a pipe, this has been broken into two execs to facilitate mp_geo error catching
+    exec("mmtbx.mp_geo rna_backbone=True pdb=$infile > $midfile",$arg_list_filler,$mpgeo_return_code);
+    if($mp_geo_return_code != 0) return $mpgeo_return_code; //skip suitename step if bad input
+    exec("phenix.suitename -report -pointIDfields 7 -altIDfield 6 < $midfile > $outfile");
+    return $mpgeo_return_code;
 }
 #}}}########################################################################
 
@@ -1529,7 +1537,8 @@ function runValidationReport($infile, $outfile, $use_cdl)
     //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -$moltype -validate -outliers -sigma=0.0 $infile > $outfile");
     if($use_cdl) {$uc = "True";}
     else {$uc = "False"; }
-    exec("mmtbx.mp_geo pdb=$infile out_file=$outfile cdl=$uc outliers_only=False bonds_and_angles=True");
+    exec("mmtbx.mp_geo pdb=$infile out_file=$outfile cdl=$uc outliers_only=False bonds_and_angles=True",$arg_list_filler,$mpgeo_return_code);
+    return $mpgeo_return_code;
 }
 #}}}########################################################################
 
