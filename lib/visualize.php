@@ -1525,7 +1525,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
         {
             if($item['conf'] == 'Cis'){
                 $res[$item['resName']]['any_isbad'] = true;
-                if($item['type'] == 'General'){
+                if($item['type'] == 'non-Pro'){
                     $res[$item['resName']]['omega'] = "$item[conf] nonPRO<br><small>omega= $item[omega]</small>";
                     $res[$item['resName']]['omega_val'] = "1"; //for column sort
                     $res[$item['resName']]['omega_isbad'] = true;}
@@ -1537,7 +1537,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
             elseif($item['conf'] == 'Twisted'){
                 $res[$item['resName']]['any_isbad'] = true;
                 $res[$item['resName']]['omega_isbad'] = true;
-                if($item['type'] == 'General'){
+                if($item['type'] == 'non-Pro'){
                     $res[$item['resName']]['omega'] = "$item[conf] nonPRO<br><small>omega= $item[omega]</small>";
                     $res[$item['resName']]['omega_val'] = "1";} //for column sort
                 elseif($item['type'] == 'Pro'){
