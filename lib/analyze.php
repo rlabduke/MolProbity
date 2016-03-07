@@ -1262,7 +1262,8 @@ function loadOmegalyze($datafile)
         elseif (preg_match("/^residue/",$line[0])){
           continue;
         }
-        $cnit = substr($line[0], 0, 11);
+        #$cnit = substr($line[0], 0, 11);
+        $cnit = substr($line[0], 15, 26);
         /*if(strlen($cnit)==10)
         {
           $cnit = ' '.$cnit;
