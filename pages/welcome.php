@@ -83,7 +83,12 @@ Choose validations appropriate to a structure.</p>
 //      <li>Allows use of both electron cloud and nuclear x-H bond-lengths. Read more about this change <a href='".makeEventURL("onGoto", "helper_hydrogens.php")."'>here</a>.</li>
 //      <li>Full support for 2-character CHAINIDs added. 4-character SEGIDs also supported in place of CHAINIDs.</li>
 //      </ul>
-    echo("<h3>What's new in 4.2:</h3><ul>
+    echo("<h3>What's new in 4.3:</h3><ul>
+        <li>New NQH coordinate regularization method after flips in Reduce: a three-step process attempting to match existing coordinates replaces cctbx-based optimization</li>
+        <li>Updates to Omegalyze kinemage output - markup defaults to 'off', separate colors for cis-pro (sea), cis-nonpro (lime), and all twisted (yellow).</li>
+        <li>Improved error catching, with 'how to fix it' notes for common formatting errors</li>
+	</ul>
+    <h3>What's new in 4.2:</h3><ul>
       <li>Cis-peptide identification, markup and statistics now available.</li>
       <li>CaBLAM C&alpha;-based validation of protein backbone and secondary structure now available.</li>
       <li>Rotamer validation now uses <a href='http://kinemage.biochem.duke.edu/databases/top8000.php' target='_blank'>Top8000</a> rotamer distributions. Favored vs Allowed distinction introduced for rotamers.</li>
@@ -699,7 +704,7 @@ function toggleUploadOptions()
 //      <a style=\"color: #66FFFF\" href='http://kinemage.biochem.duke.edu/databases/top8000.php' target='_blank'>Top8000</a> dataset of high quality PDB files.
 //        <br><br>Please don't hesitate to report any <a style=\"color: #66FFFF\" href='".makeEventURL("onGoto", "feedback_setup.php")."'>bugs</a> you may encounter.
 //        <br><br>If for some reason you need to use MolProbity4 version 4.02, which is now a retired legacy version, please go to <a style=\"color: #66FFFF\" href='http://rutile.biochem.duke.edu/' target='_blank'>http://rutile.biochem.duke.edu</a>.</strong></div>");
-    echo("<div class=feature>CCTBX, which powers this version of MolProbity (4.2), requires stricter adherence to PDB format. If you are having trouble with version 4.2 try using MolProbity4 legacy version 4.02 at <a href='http://rutile.biochem.duke.edu/' target='_blank'>http://rutile.biochem.duke.edu</a>.  Note that not all features are supported on legacy 4.02 and we suggest repairing your PDB format instead.</div>");
+    echo("<div class=feature>CCTBX, which powers this version of MolProbity (4.3), requires stricter adherence to PDB format. If you are having trouble with version 4.3 try using MolProbity4 legacy version 4.02 at <a href='http://rutile.biochem.duke.edu/' target='_blank'>http://rutile.biochem.duke.edu</a>.  Note that not all features are supported on legacy 4.02 and we suggest repairing your PDB format instead.</div>");
 }
 
 #}}}########################################################################
