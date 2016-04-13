@@ -625,7 +625,7 @@ function displayUpload($context)
         echo("<div class=alert><strong>Our MolProbity server was recently rebooted. We apologize for the loss of any jobs you might have had running. Reboots are sometimes necessary if the server is overloaded. If you were running large jobs (more than 10,000 atoms) or more than 2 jobs, please consider resubmitting them over a longer period to spread out the load. Thanks for helping us keep our MolProbity downtimes rare.</strong></div>");
     }
 
-    echo("<div class=feature>Again, a huge thanks to the users who sent emails or letters to support our MolProbity grant renewal resubmission!  With your help, it did very well and has now been funded early, at NIH fiscal-year-end.  So -- MolProbity will still be here for you.</div>");
+    echo("<div class=feature>We are getting ready for MolProbity 4.3!  If you'd like to try our beta site, go to <a href='http://altmolprobity.biochem.duke.edu/'>http://altmolprobity.biochem.duke.edu</a>.</div>");
 
     echo makeEventForm("onUploadOrFetch") . "\n";
     //echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onCall", "upload_setup.php")."'>more options</a>)</h5>";
