@@ -35,14 +35,53 @@ Where appropriate, it calculates atomic contact networks, and attempts to place 
 <!--NQH FLIPS - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 <h3><a name="nqh_flips">NQH Flips</a></h3>
 NQH "flips" are automatic repositioning of certain sidechains by Reduce to improve the all-atom contacts in a model.
-<br><br>
+<br>
+<br>
 The protein sidechains Asparagine (N), Glutamine (Q), and Histidine (H) have asymmetric head groups, but are easily modeled in the wrong orientation in ambiguous density.
 However, when Reduce calculates atomic contact networks, it can detect the correct orientations of NQH residues.
 This detections is based on which orientation promotes hydrogen bonds and avoids steric clashes.
-<br><br>
+<br>
+<br>
+<div class="indent"><img src="asn_flip.jpg" alt="Asn sidechain before and after flip" height="300" width="605"></div>
+<br>
 By default, adding hydrogens in MolProbity will perform flips for which there is convincing evidence.
 In stand-alone Reduce, use the <i>-flip</i> flag to access this functionality.
 Records of flipped residue choices and the scoring behind them are printed to the resulting PDB file as USER MOD records.
+<br>
+<br>
+<div class="indent"><img src="his_flip.jpg" alt="His sidechain before and after flip" height="300" width="605"></div>
+<hr>
+<!--SECTION NQH FLIP DETAILS - - - - - - - - - - - - - - - - - - - - - - - - -->
+<h2><a name="flip_details">How NQH Flips are performed</a></h2>
+The current "flip" method is a three step process - an intuitive move, followed by two corrections.
+<hr>
+<!--180 ROTATION - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<h3><a name="180_rotation">180&deg; rotation</a></h3>
+First, the head group of the residue is rotated 180&deg;.
+The stem atoms of the head group define the axis of this rotation (C&beta;-C&gamma; for ASN and HIS, C&gamma;-C&delta; for GLN). 
+<!--HEAD GROUP HINGE - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<h3><a name="hinge_correction">Head group hinge</a></h3>
+The atoms of the head group are not always modeled in plane with the stem.
+If the head group atoms are not in plane with the stem, the rotation moves those atoms away from their original positions.
+To correct for this move, the head group is hinged back into the same plane as its original position.
+<br>
+<br>
+<div class="indent"><img src="hinge_motion.jpg" alt="Hinge motion to correct nonplanar head groups" height="300" width="300"></div>
+<!--THREE POINT DOCK - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<h3><a name="dock_correction"></a>Three point dock</h3>
+The atoms of the head group are asymmetric.
+Therefore, the 180&deg; rotation moves the head group atoms away from the original atom positions, affecting the atomic contacts.
+A three-point dock corrects for this move.
+<br>
+<br>
+<div class="indent"><img src="asn_superpose_compare.jpg" alt="Asn sidechain before and after flip" height="300" width="605"></div>
+<br>
+The sidechain is three-point docked as a rigid body.
+The first point is the C&alpha; position, which is held constant.
+The terminal atoms (O&delta;1 and N&delta;2 for ASN, O&epsilon;1 and N&epsilon;2 for GLN, C&epsilon;1 and N&epsilon;2 for HIS)
+<br>
+<br>
+<div class="indent"><img src="his_superpose_compare.jpg" alt="His sidechain before and after flip" height="300" width="605"></div>
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 </div></td></tr>
 
