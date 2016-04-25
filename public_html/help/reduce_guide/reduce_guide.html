@@ -51,8 +51,25 @@ Records of flipped residue choices and the scoring behind them are printed to th
 <br>
 <div class="indent"><img src="his_flip.jpg" alt="His sidechain before and after flip" height="300" width="605"></div>
 <hr>
-<!--SECTION NQH FLIP DETAILS - - - - - - - - - - - - - - - - - - - - - - - - -->
-<h2><a name="flip_details">How NQH Flips are performed</a></h2>
+<!--SECTION NQH FLIP choices - - - - - - - - - - - - - - - - - - - - - - - - -->
+<h2><a name="flip_choices">How NQH Flips are chosen</a></h2>
+Each Asn, Gln, and His residue is tested to determine whether it should be flipped.
+To do this, a "flipped" position is generated for each residue by a simple renaming of the modeled atom positions, and added hydrogens based on those new positions.
+The original and flipped positions are then scored based on their favorable (hydrogen bond) and unfavorable (steric clash) all-atom contacts.
+Flipped positions that score significantly better than the original positions (without introducing severe clashes) are accepted.
+(Renaming, rather than moving, the sidechain atoms keeps these contacts optimized for the decision-making step.)
+<br>
+<br>
+<div class="indent"><img src="flipkin_compare.jpg" alt="Flipkins show sidechains before and after flipping." height="300" width="605"></div>
+<br>
+MolProbity makes FlipKins available during the Reduce process.
+These kinemages allow users to make informed decisions about which flips to accept for their model.
+<br>
+<b>WARNING:</b> Due to a known bug, using a custom selection of flips will prevent the improved flip output method descibed below from being used.
+This will dratically increase the necessity of rerefining the model after flips.
+<hr>
+<!--SECTION NQH FLIP METHOD - - - - - - - - - - - - - - - - - - - - - - - - -->
+<h2><a name="flip_method">How NQH Flips are performed</a></h2>
 The current "flip" method is a three step process - an intuitive move, followed by two corrections.
 <hr>
 <!--180 ROTATION - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
@@ -74,14 +91,20 @@ Therefore, the 180&deg; rotation moves the head group atoms away from the origin
 A three-point dock corrects for this move.
 <br>
 <br>
-<div class="indent"><img src="asn_superpose_compare.jpg" alt="Asn sidechain before and after flip" height="300" width="605"></div>
+<div class="indent"><img src="asn_superpose_compare.jpg" alt="Asn sidechain before and after docking" height="300" width="605"></div>
 <br>
 The sidechain is three-point docked as a rigid body.
 The first point is the C&alpha; position, which is held constant.
 The terminal atoms (O&delta;1 and N&delta;2 for ASN, O&epsilon;1 and N&epsilon;2 for GLN, C&epsilon;1 and N&epsilon;2 for HIS)
 <br>
 <br>
-<div class="indent"><img src="his_superpose_compare.jpg" alt="His sidechain before and after flip" height="300" width="605"></div>
+<div class="indent"><img src="his_superpose_compare.jpg" alt="His sidechain before and after docking" height="300" width="605"></div>
+<hr>
+<!--SECTION NOTES ON USAGE - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<h2><a name="usage_notes">Caveats and usage notes</a></h2>
+If depositing a structure, <b>always</b> rerefine after performing NQH flips.
+Reduce's flips perform a large-scale movement that is difficulat to achieve in refinement, but cannot correctly set the detailed level of the structure.
+
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 </div></td></tr>
 
