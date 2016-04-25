@@ -67,7 +67,7 @@ if [ ! -d reduce ];
 then 
     svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reduce.git/trunk reduce
 fi
-if [ ! -d reduce ];
+if [ ! -d suitename ];
 then 
    svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/suitename.git/trunk suitename
 fi
