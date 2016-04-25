@@ -72,6 +72,8 @@ as part of the refinement cycle.</p>
 <p><b><?php echo "<a href='".makeEventURL("onGoto", "helper_kinemage.php")."'>Work with kinemages</a>"; ?>:</b>
 Create and view interactive 3-D graphics
 from your web browser.</p>
+<p><b><a target="_blank" href="help/reduce_guide/reduce_guide.html">Guide to Reduce options</a>:</b>
+Learn about adding hydrogens to a structure for all-atom contact analysis.</p>
 <p><b><a target="_blank" href="help/validation_options/validation_options.html">Guide to validation options</a>:</b>
 Choose validations appropriate to a structure.</p>
 

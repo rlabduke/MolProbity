@@ -63,7 +63,7 @@ function display($context)
         // Selects -BUILD by default unless the user changes it.
         if($context['method'] == 'nobuild') { $check1 = ""; $check2 = "checked"; }
         else                                { $check1 = "checked"; $check2 = ""; }
-        echo "<tr valign='top'><td width='300'><input type='radio' name='method' value='build' $check1> <b>Asn/Gln/His flips</b><td>";
+        echo "<tr valign='top'><td width='300'><input type='radio' name='method' value='build' $check1> <b>Asn/Gln/His flips</b><a target='_blank' href='help/reduce_guide/reduce_guide.html'> <img src='img/helplink.jpg' alt='' title='Reduce guide'></a><td>";
         echo "<td><small>Add missing H, optimize H-bond networks, check for flipped Asn, Gln, His";
         echo " (<code>Reduce -build</code>)\n";
         echo "<div class='inline_options'><b>Advanced options:</b><br>\n";
