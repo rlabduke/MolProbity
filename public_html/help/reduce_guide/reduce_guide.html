@@ -24,9 +24,10 @@
 <!--ADDING HYDROGENS - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 <h3><a name="adding_hydrogens">Adding hydrogens</a></h3>
 <b>Reduce</b> is a program developed by the Richardson Lab for adding hydrogen atoms to models of biological macromolecules.
+The program is described in <a href="http://www.ncbi.nlm.nih.gov/pubmed/9917408">Word, et al.(1999) "Asparagine and glutamine: using hydrogen atom contacts in the choice of sidechain amide orientation" J. Mol. Biol. 285, 1735-1747</a> <a href="http://kinemage.biochem.duke.edu/php/downlode.php?filename=/downloads/PDFs/1999WordJMB285b.pdf">PDF</a>.
 <br><br>
 Hydrogen atoms make up roughly half the atoms in a biological macromolecule, and interactions involving one or more hydrogen atoms dominate the interatomic contacts in models of these macromolecules.
-Correct placement of hydrogen atoms is therefore essential to an accurate contact analysis of a macromeolecular model.
+Correct placement of hydrogen atoms is therefore essential to an accurate contact analysis of a macromolecular model.
 However, hydrogen atom positions are not usually resolved by x-ray crystallography experimental data, and so hydrogens are often left out of models.
 Reduce provides a computational method to calculate expected hydrogen positions.
 <br><br>
@@ -66,7 +67,7 @@ MolProbity makes FlipKins available during the Reduce process.
 These kinemages allow users to make informed decisions about which flips to accept for their model.
 <br>
 <b>WARNING:</b> Due to a known bug, using a custom selection of flips will prevent the improved flip output method descibed below from being used.
-This will dratically increase the necessity of rerefining the model after flips.
+It is already imperative that you <b>re-refine</b> your models after accepting reduce flips; this bug makes that situation even more true.
 <hr>
 <!--SECTION NQH FLIP METHOD - - - - - - - - - - - - - - - - - - - - - - - - -->
 <h2><a name="flip_method">How NQH Flips are performed</a></h2>
@@ -103,7 +104,8 @@ The terminal atoms (O&delta;1 and N&delta;2 for ASN, O&epsilon;1 and N&epsilon;2
 <!--SECTION NOTES ON USAGE - - - - - - - - - - - - - - - - - - - - - - - - - -->
 <h2><a name="usage_notes">Caveats and usage notes</a></h2>
 If depositing a structure, <b>always</b> rerefine after performing NQH flips.
-Reduce's flips perform a large-scale movement that is difficulat to achieve in refinement, but cannot correctly set the detailed level of the structure.
+Reduce's flips perform a large-scale movement that is difficult to achieve in refinement due to the ruggedness of the energy landscape.
+However, Reduce does not have access to your experimental data, and thus cannot correctly determine finer details of the structure.
 
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 </div></td></tr>
