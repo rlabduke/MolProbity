@@ -1563,7 +1563,7 @@ function checkMODEL($inpath)
     if(checkAnyMODEL($inpath)) //these checks only run if a MODEL card is detected
     {
         //SML_cout("STEVEN it returned TRUE!!!");
-        if(checkNoENDMDL($inpath) or checkMODELPairs($inpath))
+        if(checkNoMODEL($inpath) or checkNoENDMDL($inpath) or checkMODELPairs($inpath))
         {
             //set some error status
             $_SESSION['bgjob']['modelError'] = true;
@@ -1586,7 +1586,7 @@ function checkMODEL($inpath)
 */
 function checkAnyMODEL($inpath)
 {
-    $grep_command = "grep -q \"^MODEL \" ".$inpath;
+    $grep_command = "grep -q -e \"^MODEL \" -e \"^ENDMDL\" ".$inpath;
     //SML_cout($grep_command);
     exec($grep_command, $toss_result, $grep_return_status);
     //SML_cout($grep_return_status);
@@ -1611,6 +1611,22 @@ function SML_cout($message) {
 #}}}########################################################################
 
 
+#{{{ checkNoMODEL - checks for a missing MODEL card
+############################################################################
+/**
+* This function checks if there is a ENDMDL card with no MODEL (uncommon problem)
+* $inpath is the PDB file to be checked (some tmp file somewhere)
+*/
+function checkNoMODEL($inpath) {
+
+    $grep_command = "grep -q \"^MODEL \" ".$inpath;
+    exec($grep_command, $toss_result, $grep_return_status);
+    //$grep_return_status is 0 if MODEL found, 1 if not
+    return($grep_return_status);
+
+}
+#}}}########################################################################
+
 #{{{ checkNoENDMDL - checks for a missing ENDMDL card
 ############################################################################
 /**
@@ -1620,7 +1636,7 @@ function SML_cout($message) {
 */
 function checkNoENDMDL($inpath) {
 
-    $grep_command = "grep -q \"^ENDMDL \" ".$inpath;
+    $grep_command = "grep -q \"^ENDMDL\" ".$inpath;
     //SML_cout($grep_command);
     exec($grep_command, $toss_result, $grep_return_status);
     //SML_cout($grep_return_status);
