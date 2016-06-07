@@ -690,39 +690,40 @@ function makeBadCbetaBalls($infile, $outfile)
     fwrite($h, "@subgroup {CB dev} dominant\n");
     fclose($h);
 
-    // C-beta deviation balls >= 0.25A
-    if(!$_SESSION['useSEGID'])
-    {
-      $cbeta_dev_script =
-'BEGIN { doprint = 0; bigbeta = 0; }
-$0 ~ /^@/ { doprint = 0; }
-$0 ~ /^@(point)?master/ { print $0 }
-$0 ~ /^@balllist/ { doprint = 1; print $0 " master= {Cbeta dev}"; }
-{ bigbeta = 0 }
-match($0, /^\{ cb .+ r=([0-9]\.[0-9]+) /, frag) { gsub(/gold|pink/, "magenta"); bigbeta = (frag[1]+0 >= 0.25); }
-doprint && bigbeta';
-    }
-    else
-    {
-      $cbeta_dev_script =
-'BEGIN { doprint = 0; bigbeta = 0; }
-$0 ~ /^@/ { doprint = 0; }
-$0 ~ /^@(point)?master/ { print $0 }
-$0 ~ /^@balllist/ { doprint = 1; print $0 " master= {Cbeta dev}"; }
-{ bigbeta = 0 }
-match($0, /^\{ cb .+ r=([0-9]\.[0-9]+) /, frag) { gsub(/gold|pink/, "magenta"); bigbeta = (frag[1]+0 >= 0.25); }
-doprint && bigbeta';
-    }
-
-    if(!$_SESSION['useSEGID'])
-    {
-      $opt = "-quiet";
-    }
-    else
-    {
-      $opt = "-quiet -segid";
-    }
-    exec("prekin -append $opt -cbetadev $infile | gawk '$cbeta_dev_script' >> $outfile");
+    exec("phenix.cbetadev output=kin $infile >> $outfile");
+//    // C-beta deviation balls >= 0.25A
+//    if(!$_SESSION['useSEGID'])
+//    {
+//      $cbeta_dev_script =
+//'BEGIN { doprint = 0; bigbeta = 0; }
+//$0 ~ /^@/ { doprint = 0; }
+//$0 ~ /^@(point)?master/ { print $0 }
+//$0 ~ /^@balllist/ { doprint = 1; print $0 " master= {Cbeta dev}"; }
+//{ bigbeta = 0 }
+//match($0, /^\{ cb .+ r=([0-9]\.[0-9]+) /, frag) { gsub(/gold|pink/, "magenta"); bigbeta = (frag[1]+0 >= 0.25); }
+//doprint && bigbeta';
+//    }
+//    else
+//    {
+//      $cbeta_dev_script =
+//'BEGIN { doprint = 0; bigbeta = 0; }
+//$0 ~ /^@/ { doprint = 0; }
+//$0 ~ /^@(point)?master/ { print $0 }
+//$0 ~ /^@balllist/ { doprint = 1; print $0 " master= {Cbeta dev}"; }
+//{ bigbeta = 0 }
+//match($0, /^\{ cb .+ r=([0-9]\.[0-9]+) /, frag) { gsub(/gold|pink/, "magenta"); bigbeta = (frag[1]+0 >= 0.25); }
+//doprint && bigbeta';
+//    }
+//
+//    if(!$_SESSION['useSEGID'])
+//    {
+//      $opt = "-quiet";
+//    }
+//    else
+//    {
+//      $opt = "-quiet -segid";
+//    }
+//    exec("prekin -append $opt -cbetadev $infile | gawk '$cbeta_dev_script' >> $outfile");
 }
 #}}}########################################################################
 
