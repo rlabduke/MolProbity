@@ -1,0 +1,200 @@
+Notes on Reduce as used in MolProbity
+
+This document attempts to record all of the (interesting) instances in which "reduce" appears in the MolProbity code base.
+
+Most reduce invocations in the main MolProbity code are actually calls to one of a series of functions in lib/model.php
+These functions contain commandline invocations of phenix.reduce using php's exec function
+Centralizing the commandlines and routing through these functions to access them reduces code duplication and simplifies maintenance . . . if you know to look in lib/model.php, of course
+
+Due to its importance, lib/model.php is covered first, then the other locations are covered in alphabetical order.
+
+lib/model.php
+----------
+This is where most of the actual phenix.reduce invocations live
+phenix.reduce invocations are accessed from other code via functions with explanatory names
+I'll put the commandline calls for each of these function here, with parens around optional -nuclear flags:
+
+reduceTrim()
+  phenix.reduce -quiet -trim -allalt $inpath | awk '\$0 !~ /^USER  MOD/' > $outpath
+
+reduceNoBuild()
+  phenix.reduce -quiet -nobuild9999 (-nuclear) $inpath > $outpath
+
+reduceBuild()
+  phenix.reduce -quiet -nobuild9999 (-nuclear) $inpath > $outpath
+
+reduceFix()
+  phenix.reduce -quiet -build (-nuclear) -fix $flippath -allalt $inpath > $outpath
+
+reduceEnsemble()
+  calls either reduceBuild(), reduceNoBuild(), or reduceTrim()
+
+
+
+bin/flipkin
+----------
+uses the -fix flag to force reduce to flip all possible sidechains, the results are used as input to flipkin kinemages.
+contains direct phenix.reduce invocations
+phenix.reduce -trim is piped to phenix.reduce -fix
+Invocation exist in xray and -nuclear varieties
+
+cmd/make_condor_file.py
+----------
+seems to set up for something else to run reduce, does not invoke reduce itself
+
+cmdline/multichart
+----------
+calls runClashscore()
+
+
+cmdline/multichart-cluster-coot
+----------
+calls runClashlist()*
+
+
+cmdline/multichart-coot
+----------
+calls runClashlist()*
+
+
+cmdline/multichart-directory
+----------
+calls runClashlist()*
+
+cmdline/multikin
+----------
+checks $_SESSION['reduce_blength']
+calls makeMulticritKin2()
+
+cmdline/oneline-analysis
+----------
+checks $_SESSION['reduce_blength']
+calls runClashscore()
+
+cmdline/reduce-build
+----------
+calls reduceBuild(), which is in lib/model.php
+
+cmdline/reduce-condor.py
+----------
+seems to set up for something else to run reduce, does not invoke reduce itself
+
+cmdline/reduce-nobuild
+----------
+calls reduceNoBuild(), which is in lib/model.php
+
+cmdline/reduce-trim
+----------
+calls reduceTrim(), which is in lib/model.php
+
+cmdline/residue-analysis
+----------
+checks $_SESSION['reduce_blength']
+calls runClashscore()
+
+cmdline/view-pdb
+----------
+sets $_SESSION['reduce_blength']
+calls reduceBuild(), which is in lib/model.php
+
+config/defaults.php
+----------
+sets location of MP_REDUCE_HET_DICT for the molprobity environment
+sets locations to the het dict in lib/ rather than the one in the reduce distribution
+
+configure.sh
+----------
+does the svn checkout of reduce from github
+
+jobs/ens_reduce.php
+----------
+calls reduceEnsemble()
+
+jobs/fillfragments.php
+----------
+commented-out call to reduceNoBuild() after jiffiloop
+
+jobs/reduce-build.php
+----------
+selects flags for reduce run
+calls reduceBuild(), which is in lib/model.php for the actual reduce run
+
+jobs/reduce-fix.php
+----------
+calls reduceFix()
+
+jobs/reduce-nobuild.php
+----------
+calls reduceNoBuild()
+
+lib/analyze.php
+----------
+checks $_SESSION['reduce_blength']
+calls runClashscore()
+analyze handles the comparison of flipped to unflipped models and runs reduce as part of this:
+can call reduceNoBuild() on the original input file
+can call reduceBuild() 
+
+
+lib/core.php
+----------
+links to the reduce_setup page via the navbar
+checks $_SESSION['reduce_blength']
+prints message at bottom of page that announces which bond length is in use
+
+
+lib/pdbstat.php
+----------
+sets! $_SESSION['reduce_blength']
+  runs dangle to determine the fraction of Hs with non-electon H-bond lengths
+  if that fraction is non-zero, 'reduce_blength' is set to nuclear
+
+lib/reduce_het_dict.txt
+----------
+from config/defaults.php: define("MP_REDUCE_OLD_HET_DICT", MP_BASE_DIR."/lib/reduce_het_dict.txt")
+
+lib/sessions.php
+----------
+sets $_SESSION['reduce_blength'] = "ecloud";
+This is probably a default initialization that will be updated later is nuclear is selected
+
+lib/visualize.php
+----------
+checks $_SESSION['reduce_blength']
+invokes phenix.reduce -help to print reduce help text to the multicrit kinemage's @text field
+
+pages/editpdb_setup2.php
+----------
+calls reduceTrim()
+
+pages/ens_reduce_setup.php
+----------
+launchBackground(MP_BASE_DIR."/jobs/ens_reduce.php", "generic_done.php", 5);
+
+pages/reduce_choose.php
+----------
+checks $_SESSION['reduce_blength']
+launchBackground(MP_BASE_DIR."/jobs/reduce-fix.php", "reduce_done.php", 5);
+
+pages/reduce_setup.php
+----------
+checks $_SESSION['reduce_blength']
+launchBackground(MP_BASE_DIR."/jobs/reduce-build.php", "reduce_choose.php", 5);
+launchBackground(MP_BASE_DIR."/jobs/reduce-nobuild.php", "generic_done.php", 5);
+
+pages/sitemap.php
+----------
+menu link to reduce_setup.php
+
+pages/welcome.php
+----------
+links to reduce_setup.php
+
+public_html/download_trimmed.php
+----------
+calls reduceTrim()
+
+test/simple_molprobity.sh
+----------
+several phenix.reduce invocations meant to reproduce the reduce usage during a typical MolProbity session
+

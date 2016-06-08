@@ -1,0 +1,143 @@
+Notes on Prekin calls in Molprobity
+
+The changeover to basing MolProbity calculations on cctbx has removed or obsoleted a number of calls to Prekin.  However, a number of Prekin calls remain.  This document attempts to record the current Prekin calls so that they may be assessed for their necessity and so that Prekin may be further developed.
+
+Instances of prekin use are ordered (loosely) by importance.
+
+
+lib/analyze.php
+----------
+This is the main validation script in MolProbity.
+There is one active prekin call, in runBasePhosPerp(), which does the pperp outlier analysis.
+There is a deprecated prekin call in runCbetaDev(), which has been replaced with a phenix.cbetadev call.
+
+
+lib/visualize.php
+----------
+This is the main visualization (kinemage-printing) script in MolProbity.
+As such, this script contains many calls to prekin.
+
+One prekin call in makeCbetaDevPlot() to make the concentric circles cbdev scatterplot.
+
+Two kinemage-printing prekin calls in the deprecated makeMulticritKin() (replaced by makeMulticritKin2())
+
+Two prekin calls in makeMulticritKin2() itself (rather than functions called by it):
+-one to print the prekin version number
+-one to print the structure to kinemage (has two versions depending on whether "-segid" is used)
+
+Two prekin calls in makeAltConfKin()
+-one adds mainchain alternates to the multicrit kin
+-one adds sidechain alternates
+
+One commented-out prekin call in makeBadRamachandranKin()
+-Ramachandran outliers are currently printed by a java chiropraxis.jar call
+-This could probably be updated to a phenix.ramalyze call
+
+One prekin call in makeBadRotamerKin()
+-prints gold sidechain rotamer outliers to the multicrit kin
+
+One prekin call in makeBadCbetaBalls()
+-along with a pipe to gawk, prints cbeta outlier balls to the multicrit kin
+-this gawk call introduces an additional dependency to MP. Can it be eliminated?
+
+One prekin all in makeBadPPerpKin()
+-calculates pperp outlier crosses and prints them to the multicrit kin
+
+One prekin call in each of makeRainbowRibbons(), makeBfactorRibbons(), and makeRibbons()
+-print the appropriately-colored ribbons to the multicrit kinemage
+
+One prekin call in each of makeBfactorScale() and makeOccupancyScale()
+-these provide for coloring the kinemage by b-factor or occupancy
+
+
+bin/flipkin
+----------
+Contains multiple calls to prekin.
+These calls seem to be used to generate the animations in the flipkin.
+Each call has two versions, one with a -segid flag and one without.
+
+
+test/simple_molprobity.sh
+----------
+Reproduces several MolProbity calls for testing purposes:
+prekin call for thumbnail/preview kinemage
+prekin call for cbdev visualization kinemage
+prekin call for pucker analysis
+
+
+jobs/addmodels.php
+----------
+This script is involved in importing a model to a MolProbity session.
+There is a single prekin call that generates the kinemage shown in the thumbnail preview on the upload page.
+
+
+jobs/interface-vis.php
+----------
+This is MolProbity's interface contacts analysis/visualization.
+There is a single prekin call to generate the output kinemage for this analysis.
+
+
+jobs/makekin.php
+----------
+makekin.php is called in pages/makekin_setup.php
+makekin_setup.php is used in the "Make simple kinemages" option accessible on the MolProbity main page.
+The prekin call is used in kinemage generation.
+
+
+cmdline/view-pdb
+----------
+This is a commandline tool to, in the words of its own documentation: "Given a PDB code, download it, get the map (if possible), add H, and make a multikin."
+Most of the kinemage production is handled by makeMulticritKin2 from lib/visualize.php.
+However, there is one separate prekin call for disulfides.
+This script does not appear to be used or called in MolProbity proper.
+
+
+--------------------------
+prekin instances below this line may not be active code
+--------------------------
+
+
+cmdline/make_condor_files.py
+----------
+This script writes other scripts that can perform molprobity analysis.
+The resulting scripts will contain prekin calls for RNA pperp and c-beta deviation analyses
+
+
+cmdline/NMR_PACK.php
+cmdline/NMRviolkin.php
+----------
+These scripts appear to be unfinished/pseudo-code for NMR analyses.
+If finished, they would contain prekin calls for kinemage generation.
+
+
+
+lib/visualize_nmr.php
+----------
+visualize_nmr.php may be deprecated.
+prekin calls for structure visualization
+prekin call for -listmaster 'Rota Outliers'
+prekin call for -listmaster 'Rama Outliers'
+
+
+public_html/admin/checkconfig.php
+----------
+Simple -version call to prekin to check version.
+Is prekin versioning currently meaningful?
+
+
+setup.sh
+----------
+No prekin calls, but sets the prekin location so that MolProbity can find it.
+
+
+bin/sswing
+bin/sswingpdb2rotscr
+lib/sswing.php
+----------
+sswing is a deprecated system for sidechain modification.
+sswing is not currently used, and neither are the prekin calls it contains
+
+
+
+
+

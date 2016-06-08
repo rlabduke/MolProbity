@@ -1,0 +1,76 @@
+Notes on Probe as used in MolProbity
+
+In MolProbity, Probe is generally called as phenix.probe  The phenix.probe command seems to direct to a compiled version of the probe code stored in build/probe/exe  All probe calls in non-deprecated code use phenix.probe
+
+Probe is acquired from GitHub using an svn checkout.
+During standard MolProbity install, this occurs during configure.sh, using the commandline:
+svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/probe.git/trunk probe
+During a Phenix update, Probe is likewise obtained from GitHub via svn checkout, though the bootstrap script makes the specific command used less evident.
+(If Probe is updated during a Phenix update, it must, of course be recompiled.  bootstrap build will take care of this, and nightly builds will come precompiled)
+This checkout will get the latest version of the master branch of probe development.
+
+---------------
+In MolProbity
+
+phenix.probe is invoked directly by MolProbity code in the following locations.
+1. In bin/flipkin, it is called to generate dots for the flipkin visualization
+2. In lib/visualize, it is called to generate dots for the multicrit kinemage
+3. In lib/visualize_nmr, it is called to generate dots for a multicrit kinemage (it is not clear that this call is actually used)
+4. In lib/analyze_nmr, it is called to generate a oneline output that is further parsed by MolProbity code (it is not clear that this call is actually used)
+5. In lib/sswing, it is called to generate dots for a kinemage.  sswing appears in lib, jobs, and bin, but appears to be totally deprecated.  It seems that it assessed and altered sidechain rotamers in some way.
+
+A Non-Phenix version of probe is invoked in two locations in deprecated code:
+1. In bin/clashlist and bin/clashlist.sh, probe generated results used for clash evaluation
+2. In bin/sswingmkrotscrByPerl, probe does something related to whatever sswing did
+
+A Non-Phenix version of probe is also invoked in jobs/interface-vis.php
+This is the interface visualization tool available in MolProbity.
+The function still works, so what Probe is being used?
+
+---------------
+In Phenix
+
+phenix.probe is invoked directly by Phenix code in the following locations:
+1. In cctbx_project/mmtbx/cablam/cablam_training.py, probe generates condensed output to facilitate motif identification if pregenerated probe data is not supplied.
+phenix.cablam_training is not currently used by MolProbity
+2. In cctbx_project/mmtbx/kinemage/validation.py, probe generates contact dots for the phenix version of the multicrit kinemage (phenix.kinemage uses this)
+phenix.kinemage is not currently used by MolProbity; instead, lib/visualize.php assembles the multicrit kinemage through multiple calls - see makeMilticritKin2()
+To my knowledge, MolProbity does not use this script, rather this script stitches together MolProbity-type outputs for Phenix use.
+3. In cctbx_project/mmtbx/validation/clashscore.py, generates output used in the clashscore analysis.  phenix.clashscore has replaced clashlist.sh and will be discussed later in this document.
+phenix.clashscore IS invoked by MolProbity in lib/analyze.php, and it handles MolProbity's clash analysis.
+
+Other
+There is a script named ctbx_project/crys3d/probe_dots.py, though it does not seem to invoke a probe call within that script.
+There exists a script named probe.py at: cctbx_project/xfel/cxi/postrefine/probe.py  It "reads in mtz file and build the reciprocal lattices" and is unrelated to our Probe, but we should be careful about naming conflicts.
+
+To my knowledge, there are no invocations of Probe from inside Phenix that do not use a phenix.probe commandline call.
+
+---------------
+In phenix.clashscore
+
+phenix.clashscore is the main (only) location outside MolProbity code containing a probe call used by MolProbity
+phenix.clashscore contains 3 probe calls (each of these calls has a -nuclear version as well):
+1. phenix.probe -u -q -mc -het -once "ogt10 not water" "ogt10"
+This call contains the -u flag that produces "unformatted" (that is, line-by-line text rather than kinemage dots) output.
+The unformatted output is extensively parsed by phenix.clashscore to produce a list of clashes and a clashscore.
+The list of clashes is used by MolProbity to populate the multicrit chart.
+
+2. phenix.probe -q -mc -het -dumpatominfo "ogt10 not water"
+This call is used to get the number of atoms in the model, for use in the clashscore calculation
+This returns a single line of text in the following format:
+atoms selected: 602
+
+3. phenix.probe -q -mc -het -dumpatominfo "blt40 ogt10 not water"
+This call is used to get the number of atoms in the model with b-factor less than 40, for use in an alternate clashscore calculation.
+
+ogt is "occupancy greater than", so ogt10 requires occupancy greater than 10% (this is set in phenix.clashscore)
+blt is "b-factor less than", so blt40 requires b-factor less than 40 (this is set in the commandline call)
+
+---------------
+Notable absences:
+There is not call to Probe as such inside Reduce, so Reduce 
+
+
+
+
+
