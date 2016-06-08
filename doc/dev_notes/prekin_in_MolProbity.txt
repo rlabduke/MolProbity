@@ -39,6 +39,7 @@ One prekin call in makeBadRotamerKin()
 One prekin call in makeBadCbetaBalls()
 -along with a pipe to gawk, prints cbeta outlier balls to the multicrit kin
 -this gawk call introduces an additional dependency to MP. Can it be eliminated?
+***This call has been obsoleted with a phenix.cbetadev call***
 
 One prekin all in makeBadPPerpKin()
 -calculates pperp outlier crosses and prints them to the multicrit kin
