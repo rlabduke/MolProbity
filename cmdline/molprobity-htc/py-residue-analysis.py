@@ -5,8 +5,6 @@ import sys, os, getopt, re, pprint, collections
 import datetime
 from optparse import OptionParser
 import molparser
-#sys.path.append('/home/vbc3/programs/sans/python')
-#import bmrb
 
 #{{{ parse_cmdline
 #parse the command line--------------------------------------------------------------------------
@@ -14,12 +12,13 @@ def parse_cmdline():
   parser = OptionParser()
   parser.add_option("-q", "--quiet", action="store_true", dest="quiet",
     help="quiet mode")
-  parser.add_option("-s", "--sans", action="store", dest="sans_location", 
-    type="string", default="none",
+  parser.add_option("-s", "--sans", action="store", dest="sans_location",
+    type="string", default=None,
     help="sans parser location, needed for nmrstar output")
   opts, args = parser.parse_args()
-  if not opts.sans_location is "none" and not os.path.isdir(opts.sans_location):
-    sys.stderr.write("\n**ERROR: sans location must be a directory!\n")
+  if opts.sans_location is not None and not os.path.isfile(opts.sans_location):
+    sys.stderr.write("sans_location entered is: "+opts.sans_location+"\n")
+    sys.stderr.write("\n**ERROR: sans location must exist!\n")
     sys.exit(help())
   if len(args) < 11:
     sys.stderr.write("\n**ERROR: Must have 11 arguments!\n")
@@ -54,11 +53,11 @@ def parse_cmdline():
 def help():
   print """
 This script parses the output files from the various programs in MP to duplicate
-a set of the oneline analysis.  This script reimplements a significant portion 
-of analysis.php.  
+a set of the oneline analysis.  This script reimplements a significant portion
+of analysis.php.
 
 USAGE:   python molparser.py [MP output files]
-  
+
   [MP output files] In order: pdbname (string)
                               model number
                               clashlist output file
@@ -99,7 +98,7 @@ def residue_analysis_old(files, quiet):
   list_res = list_residues(files[0])
   #print list_res
   out = ""
-  
+
   clash = molparser.loadClashlist(files[2])
   cbdev = molparser.loadCbetaDev(files[3])
   badCbeta = molparser.findCbetaOutliers(cbdev)
@@ -134,7 +133,7 @@ def residue_analysis_old(files, quiet):
   badPperp = molparser.findBasePhosPerpOutliers(pperp)
   suites = molparser.loadSuitenameReport(files[10])
   badSuites = molparser.findSuitenameOutliers(suites)
-  
+
   for res in list_res:
     outCount = 0
     outCountSep = 0
@@ -142,7 +141,7 @@ def residue_analysis_old(files, quiet):
     #if res in clash['clashes']:
     #  outCount += 1
     #  outCountSep += 1
-    
+
     out = out+os.path.basename(files[0])+":"+(os.path.basename(files[0])[:-4])[:4]+":"+files[1]+":"+res
     if res in clash['clashes']:
       outCount += 1
@@ -150,13 +149,13 @@ def residue_analysis_old(files, quiet):
       out = out+":"+repr(clash['clashes'][res])+":"+clash['clashes-with'][res]['srcatom']+":"+clash['clashes-with'][res]['dstatom']+":"+clash['clashes-with'][res]['dstcnit']
     else:
       out += "::::"
-  
+
     if res in badCbeta:
       outCountSep += 1
       out = out+":" + repr(badCbeta[res])
     else:
       out += ":"
-    
+
     if res in rota:
       out = out+":" + repr(rota[res]['scorePct'])
       if (rota[res]['scorePct'] <= 1.0):
@@ -167,15 +166,15 @@ def residue_analysis_old(files, quiet):
         out += ":" + repr(rota[res]['rotamer'])
     else:
       out += "::"
-      
+
     if res in rama:
       outCount += 1
       outCountSep += 1
       out += ":"+repr(rama[res]['scorePct'])+":"+rama[res]['eval']+":"+rama[res]['type']
     else:
       out += ":::"
-      
-    if (totalRes > 0 and totalBonds > 0 and totalAngles > 0): # catches a bug with PNA residues      
+
+    if (totalRes > 0 and totalBonds > 0 and totalAngles > 0): # catches a bug with PNA residues
       if res in bondOut:
         outCountSep += 1
         out += ":"+repr(geom[res]['bondoutCount'])+":"+geom[res]['worstbondmeasure']+":"+repr(geom[res]['worstbondvalue'])+":"+repr(geom[res]['worstbondsigma'])
@@ -188,10 +187,10 @@ def residue_analysis_old(files, quiet):
         out += "::::"
     else:
       out += ":-1:-1:-1:-1:-1:-1:-1:-1"
-      
+
     if (res in badCbeta) or (res in bondOut and geom[res]['bondoutCount'] > 0) or (res in angleOut and geom[res]['angleoutCount'] > 0):
       outCount += 1
-    
+
     #pprint.pprint(pperp)
     pperpval = ""
     if res in badPperp:
@@ -216,12 +215,11 @@ def residue_analysis_old(files, quiet):
     out += repr(outCountSep)+":"+repr(outCount)
     out += "\n"
   print out
-    
+
 #}}}
 
 #{{{ setup_nmrstar
 def setup_nmrstar(header, output_str, filename, sans_loc):
-  sys.path.append(sans_loc)
   import bmrb
   #if os.path.isfile(output_str):
   #  saver = bmrb.saveframe.fromFile(output_str)
@@ -248,7 +246,7 @@ def setup_nmrstar(header, output_str, filename, sans_loc):
     software_saver2.addTag("Details", ".")
     entrier.addSaveframe(software_saver)
     entrier.addSaveframe(software_saver2)
-    
+
     saver = bmrb.saveframe.fromScratch("Structure_validation_residue", "Structure_validation_residue")
     saver.addTag("Sf_category", "structure_validation")
     saver.addTag("Sf_framecode", "Structure_validation_residue")
@@ -260,14 +258,14 @@ def setup_nmrstar(header, output_str, filename, sans_loc):
     saver.addTag("PDB_accession_code", (os.path.basename(filename)[:-4])[:4])
     saver.addTag("Date_analyzed", datetime.date.today().isoformat())
     entrier.addSaveframe(saver)
-    
+
     software_loop = bmrb.loop.fromScratch(category="Residue_analysis_software")
     loop_tags = ["Software_ID", "Software_label", "Method_ID", "Method_label", "Entry_ID", "Structure_validation_oneline_list_ID"]
     software_loop.addColumn(loop_tags)
     software_loop.addData(["1", "MolProbity", ".", ".", "?", "1"])
     software_loop.addData(["2", "CYRANGE", ".", ".", "?", "1"])
     saver.addLoop(software_loop)
-    
+
     with open(output_str[:-4]+".header", "a+") as str_write:
       str_write.write(str(entrier))
   loop = bmrb.loop.fromScratch(category="Residue_analysis")
@@ -294,7 +292,7 @@ def residue_analysis(files, quiet, sans_location):
   list_res = list_residues(files[0])
   #print list_res
   #out = []
-  #need h position, flip info, 
+  #need h position, flip info,
   header = ["Filename",                                    #0
             "PDB_accession_code",                          #1
             "PDB_model_num",                               #2
@@ -354,12 +352,12 @@ def residue_analysis(files, quiet, sans_location):
             "Entry_ID",                                    #56
             "Structure_validation_residue_list_ID"         #57
   ]
-  
+
   output_dir = os.path.realpath(files[14])
-  if sans_location is not "none":
+  if sans_location:
     output_str = (os.path.basename(files[0])[:-4])[:4]+"-"+files[16]+"-residue-str.csv"
     loop = setup_nmrstar(header[2:], output_str, files[0], sans_location)
-  
+
   clash = molparser.loadClashlist(files[2])
   cbdev = molparser.loadCbetaDev(files[3])
   badCbeta = molparser.findCbetaOutliers(cbdev)
@@ -397,11 +395,11 @@ def residue_analysis(files, quiet, sans_location):
   badPperp = molparser.findBasePhosPerpOutliers(pperp)
   suites = molparser.loadSuitenameReport(files[10])
   badSuites = molparser.findSuitenameOutliers(suites)
-  
+
   csv_out = []
   if not quiet:
     csv_out.append("#"+(":".join(header)))
-    
+
   for res in list_res:
     out = []
     outCount = 0
@@ -410,7 +408,7 @@ def residue_analysis(files, quiet, sans_location):
     #if res in clash['clashes']:
     #  outCount += 1
     #  outCountSep += 1
-    
+
     out.append(os.path.basename(files[0])) # filename
     out.append((os.path.basename(files[0])[:-4])[:4]) # pdbID
     out.append(files[1]) # model num
@@ -432,13 +430,13 @@ def residue_analysis(files, quiet, sans_location):
     out.append(res[2:6]) # PDB_residue_no
     out.append(res[6:7]) # PDB_ins_code
     out.append(res[7:10]) # PDB_residue_name
-    
+
     out.append("") # "Assembly_ID",       bmrb specific, to be filled in later
     out.append("") # "Entity_assembly_ID",bmrb specific, to be filled in later
     out.append("") # "Entity_ID",         bmrb specific, to be filled in later
     out.append("") # "Comp_ID",           bmrb specific, to be filled in later
     out.append("") # "Comp_index_ID",     bmrb specific, to be filled in later
-    
+
     if res in clash['clashes']:
       outCount += 1
       outCountSep += 1
@@ -450,16 +448,16 @@ def residue_analysis(files, quiet, sans_location):
       out.append(dest_cnit[0:2])
       out.append(dest_cnit[2:6])
       out.append(dest_cnit[6:7])
-      out.append(dest_cnit[7:10])   
+      out.append(dest_cnit[7:10])
     else:
       out.extend(["","","","","","",""])
-  
+
     if res in badCbeta:
       outCountSep += 1
       out.append(badCbeta[res])
     else:
       out.append("")
-    
+
     if res in rota:
       out.append(rota[res]['scorePct'])
       if (rota[res]['scorePct'] <= 1.0):
@@ -470,7 +468,7 @@ def residue_analysis(files, quiet, sans_location):
         out.append(rota[res]['rotamer'])
     else:
       out.extend(["",""])
-      
+
     if res in rama:
       outCount += 1
       outCountSep += 1
@@ -481,8 +479,8 @@ def residue_analysis(files, quiet, sans_location):
       out.append(rama[res]['type'])
     else:
       out.extend(["","","","",""])
-      
-    if (totalRes > 0 and totalBonds > 0 and totalAngles > 0): # catches a bug with PNA residues      
+
+    if (totalRes > 0 and totalBonds > 0 and totalAngles > 0): # catches a bug with PNA residues
       if res in bondOut:
         outCountSep += 1
       if res in geom and 'bondoutCount' in geom[res]:
@@ -503,10 +501,10 @@ def residue_analysis(files, quiet, sans_location):
         out.extend(['','','',''])
     else:
       out.extend([-1,-1,-1,-1,-1,-1,-1,-1])
-      
+
     if (res in badCbeta) or (res in bondOut and geom[res]['bondoutCount'] > 0) or (res in angleOut and geom[res]['angleoutCount'] > 0):
       outCount += 1
-    
+
     #pprint.pprint(pperp)
     pperpval = ""
     if res in badPperp:
@@ -530,30 +528,30 @@ def residue_analysis(files, quiet, sans_location):
         out.append("")
     else:
       out.extend(["","",""])
-    
+
     if res in bfactor:
       out.append(repr(bfactor[res]['maxB']))
     else:
       out.append("")
-      
+
     if res in tauomega:
       out.extend([tauomega[res]['tau'], tauomega[res]['omega']])
     else:
       out.extend(["",""])
-      
+
     if res in disulf:
       out.extend([disulf[res]['chi1'],disulf[res]['chi2'],disulf[res]['chi3'],disulf[res]['cb-s-s'],disulf[res]['s-s'],disulf[res]['s-s-cbprime'],disulf[res]['chi2prime'],disulf[res]['chi1prime']])
     else:
       out.extend(["","","","","","","",""])
-    
+
     out.extend([outCountSep,outCount])
 
     # This is for the entry_ID and list_ID
     out.extend(["","1"])
     #print out
     csv_out.append(":".join(str(e) for e in out))
-    if sans_location is not "none":
-      #add an extra column on front for the "Residue_analysis.ID" for possible use as a primary key 
+    if sans_location:
+      #add an extra column on front for the "Residue_analysis.ID" for possible use as a primary key
       loop.addData(["."]+(["." if x=="" else x for x in out][2:]))
 
   output_file = (os.path.basename(files[0])[:-4])[:4]+"-"+files[16]+"-residue.csv"
@@ -563,12 +561,12 @@ def residue_analysis(files, quiet, sans_location):
   with open(output_file, "a+") as out_write:
     out_write.write("\n".join(csv_out))
     out_write.write('\n')
-    
+
   #sys.stderr.write(" ".join(os.listdir(os.path.dirname(output_str))))
-  if sans_location is not "none":
+  if sans_location:
     write_nmrstar(output_str, loop)
 
-    
+
 #}}}
 
 # for testing

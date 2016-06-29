@@ -4,8 +4,6 @@ from math import log
 import sys, os, getopt, re, pprint
 import datetime
 from optparse import OptionParser
-#sys.path.append('/home/vbc3/programs/sans/python')
-#import bmrb
 
 #{{{ parse_cmdline
 #parse the command line--------------------------------------------------------------------------
@@ -13,12 +11,13 @@ def parse_cmdline():
   parser = OptionParser()
   parser.add_option("-q", "--quiet", action="store_true", dest="quiet",
     help="quiet mode")
-  parser.add_option("-s", "--sans", action="store", dest="sans_location", 
-    type="string", default="none",
+  parser.add_option("-s", "--sans", action="store", dest="sans_location",
+    type="string", default=None,
     help="sans parser location, needed for nmrstar output")
   opts, args = parser.parse_args()
-  if not opts.sans_location is "none" and not os.path.isdir(opts.sans_location):
-    sys.stderr.write("\n**ERROR: sans location must be a directory!\n")
+  if opts.sans_location is not None and not os.path.isfile(opts.sans_location):
+    sys.stderr.write("sans_location entered is: "+opts.sans_location+"\n")
+    sys.stderr.write("\n**ERROR: sans location must be a python file!\n")
     sys.exit(help())
   if len(args) < 11:
     sys.stderr.write("\n**ERROR: Must have 11 arguments!\n")
@@ -53,11 +52,11 @@ def parse_cmdline():
 def help():
   print """
 This script parses the output files from the various programs in MP to duplicate
-a set of the oneline analysis.  This script reimplements a significant portion 
-of analysis.php.  
+a set of the oneline analysis.  This script reimplements a significant portion
+of analysis.php.
 
 USAGE:   python molparser.py [MP output files]
-  
+
   [MP output files] In order: pdbname (string)
                               model number
                               clashlist output file
@@ -80,7 +79,7 @@ FLAGS:
   -h     Print this help message
 """
 #}}}
-   
+
 #{{{ debug
 def debug(arg):
   print os.path.dirname(os.path.realpath(arg))
@@ -104,7 +103,7 @@ def debug(arg):
   #pprint.pprint(loadBondGeometryReport(arg[5], "rna"))
   #pprint.pprint(findBondGeomOutliers(loadBondGeometryReport(arg[5], "rna")))
   #pprint.pprint(findAngleGeomOutliers(loadBondGeometryReport(arg[5], "rna")))
-  
+
   #out.close()
 #}}}
 
@@ -121,7 +120,7 @@ def debug(arg):
 #                       'srcatom' => atom from this residue making bigest clash
 #                       'dstatom' => atom it clashes with
 #                       'dstcnit' => chain/residue it clashes with
-# 
+#
 def loadClashlist(datafile):
   datafile = open(datafile).readlines()
   sumArray = datafile[-2:]
@@ -130,7 +129,7 @@ def loadClashlist(datafile):
   if (sumArray[0].startswith("#sum2")):
     ret["scoreAll"] = float(scores[2].split()[0]);
     ret["scoreBlt40"] = float(scores[3].split()[0]);
-  
+
   clashes = {}
   clasheswith = {}
   for datam in datafile:
@@ -143,7 +142,7 @@ def loadClashlist(datafile):
       dist = abs(float(line[4].strip()))
       if(res1 not in clashes) or (clashes[res1] < dist):
         clashes[res1] = dist
-        clasheswith[res1] = {'srcatom': atm1, 'dstatom': atm2, 'dstcnit': res2}    
+        clasheswith[res1] = {'srcatom': atm1, 'dstatom': atm2, 'dstcnit': res2}
       if(res2 not in clashes) or (clashes[res2] < dist):
         clashes[res2] = dist
         clasheswith[res2] = {'srcatom': atm2, 'dstatom': atm1, 'dstcnit': res1}
@@ -243,7 +242,7 @@ def loadRotamer(datafile):
     if(ret[cnit]['chi2'] != ''): float(ret[cnit]['chi2']);
     if(ret[cnit]['chi3'] != ''): float(ret[cnit]['chi3']);
     if(ret[cnit]['chi4'] != ''): float(ret[cnit]['chi4']);
-    
+
   return ret;
 
 #}}}########################################################################
@@ -272,7 +271,7 @@ def loadRamachandran(datafile):
   data = file(datafile).readlines()[1:] # drop first line
   ret = {}
   for line in data:
-    splitline = line.split(":") 
+    splitline = line.split(":")
     cnit = splitline[0]
     #print cnit
     decomp = decomposeResName(cnit)
@@ -373,7 +372,7 @@ def loadSuitenameReport(datafile):
   #$ret = array(); # needs to return null if no data!
   ret = {}
   for line in data:
-    if(line.startswith(" all general case widths")): 
+    if(line.startswith(" all general case widths")):
       break
     splitline = line.rstrip().split(':')
     if (len(splitline)==5): # missing colon due to name length issue in suitename
@@ -462,11 +461,11 @@ def loadBondGeometryReport(datafile, moltype):
           ret[cnit]['worstbondmeasure'] = measure
           ret[cnit]['worstbondvalue'] = value
           ret[cnit]['worstbondsigma'] = sigma
-        
+
         if (abs(sigma) > 4):
           ret[cnit]['bondoutCount'] = ret[cnit]['bondoutCount'] + 1
           ret[cnit]['isbondOutlier'] = True
-          
+
         ret[cnit]['bondCount'] = ret[cnit]['bondCount'] + 1
     elif re.search("-.+-", measure):
       if not "angleCount" in ret[cnit]:
@@ -486,11 +485,11 @@ def loadBondGeometryReport(datafile, moltype):
           ret[cnit]['worstanglemeasure'] = measure
           ret[cnit]['worstanglevalue'] = value
           ret[cnit]['worstanglesigma'] = sigma
-        
+
         if (abs(sigma) > 4):
           ret[cnit]['angleoutCount'] = ret[cnit]['angleoutCount'] + 1
           ret[cnit]['isangleOutlier'] = True
-          
+
         ret[cnit]['angleCount'] = ret[cnit]['angleCount'] + 1
   return ret
 #}}}########################################################################
@@ -583,7 +582,7 @@ def findClashOutliers(clash):
   worst = {}
   if(len(clash) > 0):
     for res, dist in clash['clashes'].iteritems():
-      if(dist >= 0.4): 
+      if(dist >= 0.4):
         worst[res] = dist
   #ksort($worst); // Put the residues into a sensible order
   return worst;
@@ -672,7 +671,7 @@ def findBasePhosPerpOutliers(pperps):
         worst[data['resName']] = delta_or_epsilon(data)
   #ksort($worst); // Put the residues into a sensible order
   return worst
-  
+
 def delta_or_epsilon(data):
   if data['deltaOut'] and data['epsilonOut']: return 'both'
   if data['epsilonOut']: return 'epsilon'
@@ -698,13 +697,13 @@ def findGeomOutliers(geom, b_or_angle):
             worst[data['resName']] = data[b_or_angle+'outCount']
         else:
           sys.stderr.write("Odd geometry data detected; possibly het residues or missing residues\n")
-          
+
   #ksort($worst); // Put the residues into a sensible order
   return worst
-  
+
 def findBondGeomOutliers(geom):
   return findGeomOutliers(geom, 'bond')
-  
+
 def findAngleGeomOutliers(geom):
   return findGeomOutliers(geom, 'angle')
 #}}}########################################################################
@@ -809,8 +808,7 @@ def recomposeResName(chain, resnum, inscode, restype):
 #}}}
 
 #{{{ write_nmrstar
-def write_nmrstar(header, output_str, out, filename, sans_loc):
-  sys.path.append(sans_loc)
+def write_nmrstar(header, output_str, out, filename):
   import bmrb
   #print len(header)
   #print str(header)
@@ -840,7 +838,7 @@ def write_nmrstar(header, output_str, out, filename, sans_loc):
     software_saver2.addTag("Details", ".")
     entrier.addSaveframe(software_saver)
     entrier.addSaveframe(software_saver2)
-    
+
     saver = bmrb.saveframe.fromScratch("Structure_validation_oneline", "Structure_validation_oneline")
     saver.addTag("Sf_category", "structure_validation")
     saver.addTag("Sf_framecode", "Structure_validation_oneline")
@@ -911,41 +909,41 @@ def oneline_analysis(files, quiet, sans_location):
   ]
   if (not quiet):
     print "#"+(":".join(header))
-  
+
   out = []
   out.append(os.path.basename(files[0]))
   out.append((os.path.basename(files[0])[:-4])[:4])
   out.append(files[1])
   macromolecule_type = []
-  
+
   flips_used = files[16]
   if flips_used == "na":
     out.append("original")
   else:
     out.append(files[15]) # Hydrogen_positions
   out.append(files[16]) # MolProbity_flips
-  
+
   if "-cyranged" in os.path.basename(files[0]):
     out.append("core")
   else:
     out.append("full") # Cyrange_core_flag (tells whether this structure is core or full
-  
+
   out.append("") # "Assembly_ID",       bmrb specific, to be filled in later
-  
+
   clash = loadClashlist(files[2])
   out.append(("%.2f" % (clash['scoreAll'])))
   out.append(("%.2f" % (clash['scoreBlt40'])))
-  
+
   cbdev = loadCbetaDev(files[3])
   badCbeta = findCbetaOutliers(cbdev)
   out.append(repr(len(badCbeta)))
   out.append(repr(len(cbdev)))
-  
+
   rota = loadRotamer(files[4])
   badRota = findRotaOutliers(rota)
   out.append(repr(len(badRota)))
   out.append(repr(len(rota)))
-  
+
   rama = loadRamachandran(files[5])
   #pprint.pprint(rama)
   ramaScore = {}
@@ -965,7 +963,7 @@ def oneline_analysis(files, quiet, sans_location):
     out.append((repr(ramaScore['Allowed'])))
     out.append((repr(ramaScore['Favored'])))
     out.append(repr(len(rama)))
-  
+
   geom = loadBondGeometryReport(files[6], "protein")
   geom.update(loadBondGeometryReport(files[7], "rna"))
   dna_geom = loadBondGeometryReport(files[8], "dna")
@@ -1003,13 +1001,13 @@ def oneline_analysis(files, quiet, sans_location):
   else:
     out.extend([-1,-1,-1,-1,-1,-1,-1,-1])
     sys.stderr.write("No standard residues detected!\n")
-    
+
   if ((len(rota) != 0) and (len(rama) != 0)):
     mps = calcMPscore(clash, rota, rama)
     out.append(("%.2f" % mps))
   else:
     out.append("")
-     
+
   pperp = loadBasePhosPerp(files[9])
   badPperp = findBasePhosPerpOutliers(pperp)
   out.append(repr(len(badPperp)))
@@ -1021,17 +1019,17 @@ def oneline_analysis(files, quiet, sans_location):
   out.append(repr(len(suites)))
   if (len(pperp)> 1 and len(suites)>1):
     macromolecule_type.append("rna")
-  
+
   out.append("") # "Entry_ID",          bmrb specific
   out.append("1") # "List_ID",           bmrb specific
-  
+
   if (len(macromolecule_type) > 0):
     out.append(",".join(macromolecule_type))
   else:
     out.append("unknown")
 
   print ":".join(str(e) for e in out)
-  
+
   if sans_location is not "none":
     output_str = (os.path.basename(files[0])[:-4])[:4]+"-"+files[16]+"oneline.str"
     # I re-sort the header and results for star file to adhere to NMRSTAR conventions
@@ -1039,7 +1037,7 @@ def oneline_analysis(files, quiet, sans_location):
     resort_header = header[2:7]+[header[32]]+header[7:32]
     #print resort_header
     resort_out = out[2:7]+[out[32]]+out[7:32]
-    write_nmrstar(resort_header, output_str, resort_out, files[0], sans_location)
+    write_nmrstar(resort_header, output_str, resort_out, files[0])
   #print len(out)
 
 #}}}

@@ -16,7 +16,7 @@ import make_condor_files2
 def parse_cmdline():
   parser = OptionParser()
   parser.add_option("-l", "--limit", action="store", type="int",
-    dest="total_file_size_limit", default=10000000,
+    dest="total_file_size_limit", default=26214400,
     help="change total file size in each separate job")
   parser.add_option("-t", "--type", action="store", type="string",
     dest="bond_type", default="none",
@@ -24,16 +24,16 @@ def parse_cmdline():
   parser.add_option("-u", "--updatescripts", action="store_true",
     dest="update_scripts", default=False,
     help="update scripts in a prexisting folder with new versions")
-  parser.add_option("-s", "--sans", action="store", dest="sans_location", 
-    type="string", default="none",
+  parser.add_option("-s", "--sans", action="store", dest="sans_location",
+    type="string", default=None,
     help="sans parser location, needed for nmrstar output")
   parser.add_option("-r", "--requirement", action="store", dest="requirement",
     type="string", default="none",
     help="requirements for limiting where condor jobs get submitted (none or bmrb)")
-  parser.add_option("-w", "--web", action="store", dest="update_bmrb_website", 
+  parser.add_option("-w", "--web", action="store", dest="update_bmrb_website",
     type="string", default="none",
     help="use this option to auto update results on BMRB website afterwards")
-  parser.add_option("-c", "--core", action="store", dest="cyrange_location", 
+  parser.add_option("-c", "--core", action="store", dest="cyrange_location",
     type="string", default="none",
     help="cyrange core calculation software location")
   #parser.add_option("-r", "--reduce", action="store", type="boolean",
@@ -43,11 +43,9 @@ def parse_cmdline():
   #  dest="build_type", default="default",
   #  help="specify whether to use -build or -nobuild for running reduce")
   opts, args = parser.parse_args()
-  if not opts.sans_location is "none" and not os.path.isfile(opts.sans_location) and not opts.sans_location.endswith("tgz"):
-    sys.stderr.write("\n**ERROR: sans location must be a gz file!\n")
+  if opts.sans_location is not None and not os.path.isfile(opts.sans_location):
+    sys.stderr.write("\n**ERROR: sans must exist!\n")
     sys.exit(help())
-  elif not opts.sans_location is "none" and os.path.isdir(opts.sans_location):
-    opts.sans_location = os.path.realpath(opts.sans_location)
   if opts.total_file_size_limit < 5000000:
     sys.stderr.write("\n**ERROR: -limit cannot be less than 5000000 (5M)\n")
     sys.exit(parser.print_help())
@@ -181,14 +179,14 @@ def trim_pdb(range_dict, pdb_file, do_gzip = False):
         res = line[22:26]
         #fixes bug where cyrange doesn't indicate nucleic acid residues by chain so they don't get removed
         #since cyrange is currently only protein only
-        if not resname in nucacid_residues: 
+        if not resname in nucacid_residues:
           if chain in range_dict.keys() and int(res) in range_dict[chain]:
             outfile.write(line)
           elif "" in range_dict.keys() and int(res) in range_dict[""]:
             outfile.write(line)
     outfile.close()
 
-            
+
 def process_file(f):
   from_zip = False
   if f.endswith(".gz"):
@@ -223,17 +221,22 @@ Notify_user  = vbchen@bmrb.wisc.edu
 notification = Error
 
 {req}
++AccountingGroup = "bmrb"
++WantGlidein = True
 
 Executable     = cyranger.py
-should_transfer_files = YES
-transfer_input_files = {cy_loc}
+
+should_transfer_files   = YES
+transfer_input_files    = {cy_loc},$(PDBPATHS)
+when_to_transfer_output = ON_EXIT
 
 copy_to_spool   = False
 priority        = 0
 
-Arguments       = $(ARGS)
+Arguments       = $(PDBNAMES)
 log         = cylogs/cyranger$(NUMBER).log
-error      = cylogs/cyranger$(NUMBER).err
+error       = cylogs/cyranger$(NUMBER).err
+out         = cylogs/cyranger$(NUMBER).out
 queue
 """
 #}}}
@@ -244,19 +247,30 @@ mpprep_sub = """universe = vanilla
 Notify_user  = vbchen@bmrb.wisc.edu
 notification = Error
 
-{req}
+#{req}
+# Temporary requirements to run at BMRB
+Requirements = (Machine == "exocet.bmrb.wisc.edu")
++RosettaJob = True
 
 Executable     = {mp_loc}/cmdline/molprobity-htc/make_condor_files2.py
 #should_transfer_files = YES
-#transfer_input_files = 
+#transfer_input_files =
 
 copy_to_spool   = False
 priority        = 0
 
 Arguments       = $(ARGS)
 log         = mppreplogs/mpprep.log
-error      = mppreplogs/mpprep.err
+error       = mppreplogs/mpprep.err
+out         = mppreplogs/mpprep.out
 queue
+"""
+#}}}
+
+#{{{ post_cyrange_script
+cyrange_post = """#!/bin/sh
+mv *cyranged.pdb* ..
+exit 0
 """
 #}}}
 
@@ -275,18 +289,24 @@ def write_dag(indir, outdir, list_of_pdblists, rebuilt_args, mp_outdir):
     out.write("CONFIG "+ config_file+"\n\n")
     out.write("NODE_STATUS_FILE supermpdag.status 3600\n")
     out.write("\n")
-    
+
     for indx, pdbs in enumerate(list_of_pdblists):
       num = '{0:0>4}'.format(indx)
+
+      # Get basename of pdbs
+      pdb_names = [os.path.basename(x) for x in pdbs]
+
       out.write("Job cyranger"+num+" cyranger.sub\n")
-      out.write("VARS cyranger"+num+" ARGS=\""+" ".join(pdbs)+"\"\n")
-      out.write("VARS cyranger"+num+" NUMBER=\""+num+"\"\n\n")
+      out.write("VARS cyranger"+num+" PDBPATHS=\""+",".join(pdbs)+"\"\n")
+      out.write("VARS cyranger"+num+" PDBNAMES=\""+" ".join(pdb_names)+"\"\n")
+      out.write("VARS cyranger"+num+" NUMBER=\""+num+"\"\n")
+      out.write("SCRIPT POST cyranger"+num+" post_cyrange.sh\n\n")
       parent_childs.append("cyranger"+num)
-    
+
     out.write("Job mpprep mpprep.sub\n")
     out.write("VARS mpprep ARGS=\""+indir+" "+rebuilt_args+"\"\n")
     out.write("PARENT "+" ".join(parent_childs)+" CHILD mpprep\n\n")
-    
+
     out.write("SUBDAG EXTERNAL mpanalysis mpanalysisdag.dag DIR "+mp_outdir+"\n")
     out.write("PARENT mpprep CHILD mpanalysis\n\n")
 #}}}
@@ -315,16 +335,17 @@ def make_files(indir, rebuilt_args, file_size_limit, cyrange_loc, do_requirement
     outdir = prep_dirs(indir)
     mp_outdir = os.path.join(indir, "condor_sub_files_"+indir_base)
     #make_condor_files2.prep_dirs(indir, update_scripts)
-    #if do_requirement == "bmrb":
-    condor_req = "requirements = ((TARGET.FileSystemDomain == \"bmrb.wisc.edu\") || (TARGET.FileSystemDomain == \".bmrb.wisc.edu\"))"
-    #else:
-    #  condor_req = ""
+    if do_requirement == "bmrb":
+        condor_req = "requirements = ((TARGET.FileSystemDomain == \"bmrb.wisc.edu\") || (TARGET.FileSystemDomain == \".bmrb.wisc.edu\"))\n+RosettaJob=True"
+    else:
+      condor_req = ""
     list_of_lists = make_condor_files2.divide_pdbs(indir, outdir, file_size_limit)
     if not cyrange_loc == "none":
       # write cyrange files
       cyrange_loc = os.path.realpath(cyrange_loc)
       make_condor_files2.write_file(outdir, "cyranger.sub", cyranger_sub.format(req=condor_req, cy_loc=cyrange_loc))
       make_condor_files2.write_file(outdir, "cyranger.py", cyranger_py, 0755)
+      make_condor_files2.write_file(outdir, "post_cyrange.sh", cyrange_post, 0755)
     make_condor_files2.write_file(outdir, "mpprep.sub", mpprep_sub.format(req=condor_req, mp_loc=molprobity_home))
     write_dag(indir, outdir, list_of_lists, rebuilt_args, mp_outdir)
 #}}}
@@ -335,10 +356,10 @@ if __name__ == "__main__":
     sys.stderr.write("\n**ERROR: User must specify bond type (nuclear or ecloud)\n")
     sys.exit(parser.print_help())
   make_files(indir, rebuilt_args, opts.total_file_size_limit, opts.cyrange_location, opts.requirement)
-  #make_condor_files2.make_files(indir, 
+  #make_condor_files2.make_files(indir,
   #                             opts.total_file_size_limit,
   #                             opts.bond_type,
-  #                             opts.sans_location, 
+  #                             opts.sans_location,
   #                             opts.cyrange_location,
   #                             opts.requirement,
   #                             opts.update_scripts,
