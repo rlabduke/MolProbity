@@ -1,0 +1,17 @@
+MolProbity now supports additional banner images at the top of each page to display host site affiliation and/or version information.  These images are not necessary, but may be used to communicate useful site information.
+
+To use this feature, create an appropriately-named symlink in public_html/img that points to the image you wish to use.
+
+On Mac/Linux, navigate to public_html/img and use the following commandlines:
+ln -s path_to_your_image site-logo
+and/or
+ln -s path_to_your_image site-version
+
+site-logo is intended to show branding for the institution hosting a MolProbity server, such as Duke or Manchester.
+
+site-version is intended to show which code variant a server is running on, most notably beta-test servers.  The site-version image will appear to the right of the site-logo image if both are present.
+
+The ideal height for these images is 75 pixels, the same height as the MolProbity logo at the upper left of each page. Significantly taller images will affect the page layout.  Image width affects page title centering.  Widths over about 400 pixels are not recommended.
+
+A site-version image for beta-test sites is provided at public_html/img/mplogo_beta_clear.png  img_work contains resources for creating additional images.
+

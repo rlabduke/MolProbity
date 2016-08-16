@@ -81,12 +81,14 @@ window.alert("You cannot use your browser\'s back button in MolProbity,"
     <td valign="bottom"><div class="pageheader">
         <h1>'.$title.'</h1>
     </div></td>
+    <td width="150"><img src="img/site-logo" alt=""></td>
+    <td width="150"><img src="img/site-version" alt=""></td>
 </tr>
 ';
 
     if($active == "none")
     {
-        $s .= '<tr><td valign="top" colspan="2">
+        $s .= '<tr><td valign="top" colspan="4">
     <div class="pagecontent_alone">
 ';
     }
@@ -97,7 +99,7 @@ window.alert("You cannot use your browser\'s back button in MolProbity,"
 ' . mpNavigationBar($active) . '
     </div>
 </td>
-<td valign="top">
+<td valign="top" colspan="3">
     <div class="pagecontent">
 ';
     }
@@ -198,7 +200,7 @@ function mpPageFooter()
     return '
     </div>
 </td></tr>
-<tr><td colspan="2">
+<tr><td colspan="3">
     <div class="pagefooter">
 About <a href="help/about.html" target="_blank">MolProbity</a>
 | Website for <a href="http://kinemage.biochem.duke.edu" target="_blank">the Richardson Lab</a> '.
