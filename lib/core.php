@@ -81,8 +81,8 @@ window.alert("You cannot use your browser\'s back button in MolProbity,"
     <td valign="bottom"><div class="pageheader">
         <h1>'.$title.'</h1>
     </div></td>
-    <td width="150"><img src="img/site-logo" alt=""></td>
-    <td width="150"><img src="img/site-version" alt=""></td>
+    <td width="150"><img src="img/host-banner" alt=""></td>
+    <td width="150"><img src="img/version-banner" alt=""></td>
 </tr>
 ';
 
