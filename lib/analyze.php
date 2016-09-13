@@ -110,6 +110,12 @@ function runAnalysis($modelID, $opts)
 
     //{{{ Run geometry programs and offer kins to user
 
+    $summaries = array();
+    //This will be used to hold summary counts and statistics as summaries
+    //  become more complex than MolProbity can calculate on the fly.
+    //$summaries should be loaded with data in loadValidationSummary() functions
+    //  should be keyed with the same short strings used elsewhere 'rama', 'rota', etc
+
     //{{{ Bonds and Angles
     if($opts['chartGeom'])
     {
@@ -137,6 +143,7 @@ function runAnalysis($modelID, $opts)
         $outfile = "$rawDir/$model[prefix]rama.data";
         runRamachandran($infile, $outfile);
         $rama = loadRamachandran($outfile);
+        $summaries['rama'] = loadRamachandranSummary($outfile);
 
         makeRamachandranKin($infile, "$kinDir/$model[prefix]rama.kin");
         $tasks['rama'] .= " - preview <a href='viewking.php?$_SESSION[sessTag]&url=$kinURL/$model[prefix]rama.kin' target='_blank'>kinemage</a>";
@@ -358,7 +365,7 @@ function runAnalysis($modelID, $opts)
         $outfile = "$rawDir/$model[prefix]multi.table";
         $snapfile = "$chartDir/$model[prefix]multi.html";
         $resout = "$rawDir/$model[prefix]multi_res.table";
-        writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, $cablam, $omega, !$opts['chartNotJustOut'], $opts['chartMulti'], $opts['chartAltloc']);
+        writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, $cablam, $omega, $summaries, !$opts['chartNotJustOut'], $opts['chartMulti'], $opts['chartAltloc']);
         if($opts['chartMulti']) {
           $tasks['multichart'] .= " - <a href='viewtable.php?$_SESSION[sessTag]&file=$outfile' target='_blank'>preview</a>\n";
           setProgress($tasks, 'multichart'); // so the preview link is visible
@@ -461,7 +468,7 @@ function runAnalysis($modelID, $opts)
     if(is_array($clash) || is_array($rama) || is_array($rota) || is_array($cbdev) || is_array($pperp) || is_array($suites))
     {
         $entry .= "<h3>Summary statistics</h3>\n";
-        $entry .= makeSummaryStatsTable($model['stats']['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, $cablam, $omega);
+        $entry .= makeSummaryStatsTable($model['stats']['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, $cablam, $omega, $summaries);
     }
     $entry .= $improveText;
     if($opts['doKinemage'] || $opts['doCharts'])
@@ -1196,6 +1203,30 @@ function loadRamachandran($datafile)
     return $ret;
 }
 #}}}########################################################################
+
+function loadRamachandranSummary($datafile)
+{
+  $data = array_slice(file($datafile), -3); //look at last 3 lines, where summaries are
+  foreach($data as $line)
+  {
+    if (preg_match("/^SUMMARY/",$line)){
+            echo "match found";
+          //SUMMARY: 504 Favored, 12 Allowed, 2 Outlier out of 518 residues (altloc A where applicable)
+          if (preg_match("/altloc/",$line)){
+            $linebits = explode(' ',$line);
+            $ret = array(
+              'favored' => $linebits[1],
+              'allowed' => $linebits[3],
+              'outlier' => $linebits[5],
+              'residues'=> $linebits[9]);
+          }
+          else{
+            continue;
+          }
+    }
+  }
+  return $ret;
+}
 
 #{{{ findRamaOutliers - evaluates residues for bad score
 ############################################################################

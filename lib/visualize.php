@@ -926,7 +926,7 @@ function makeBadOmegaKin($infile, $outfile)
 /**
 * Documentation for this function.
 */
-function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $cablam, $omega)
+function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $cablam, $omega, $summaries)
 {
     $entry = "";
     $bgPoor = '#ff9999';
@@ -1013,9 +1013,18 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
         }
         if(is_array($rama))
         {
-            $ramaOut = count(findRamaOutliers($rama));
-            foreach($rama as $r) { if($r['eval'] == "Favored") $ramaFav++; }
-            $ramaTot = count($rama);
+            if(is_array($summaries['rama']))
+            {
+              $ramaTot = $summaries['rama']['residues'];
+              $ramaOut = $summaries['rama']['outlier'];
+              $ramaFav = $summaries['rama']['favored'];
+            }
+            else
+            {
+              $ramaOut = count(findRamaOutliers($rama));
+              foreach($rama as $r) { if($r['eval'] == "Favored") $ramaFav++; }
+              $ramaTot = count($rama);
+            }
             $ramaOutPct = sprintf("%.2f", 100.0 * $ramaOut / $ramaTot);
             $ramaFavPct = sprintf("%.2f", 100.0 * $ramaFav / $ramaTot);
 
@@ -1369,7 +1378,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
 * $suites   is the data structure from loadSuitenameReport()
 * Any of them can be set to null if the data is unavailable.
 */
-function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $cablam, $omega, $outliersOnly = false, $doHtmlTable = true, $cleanupAltloc = true)
+function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $cablam, $omega, $summaries, $outliersOnly = false, $doHtmlTable = true, $cleanupAltloc = true)
 {
     $startTime = time();
     //{{{ Process validation data
@@ -1792,7 +1801,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
     //{{{ Table prequel and headers
     // Do summary chart
     $pdbstats = pdbstat($infile);
-    $table['prequel'] = makeSummaryStatsTable($pdbstats['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $cablam, $omega);
+    $table['prequel'] = makeSummaryStatsTable($pdbstats['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $cablam, $omega, $summaries);
 
     if ($doHtmlTable) {
       $header1 = array();
