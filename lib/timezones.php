@@ -97,6 +97,14 @@ $TIME_ZONES = array(
 ############################################################################
 function guessDefaultTimezone()
 {
+    //Check if the php.ini has a timezone. If not, use UTC.
+    if(!ini_get('date.timezone'))
+      {
+        define("MP_DEFAULT_TIMEZONE", 'UTC');
+        date_default_timezone_set('UTC');
+        return;
+      }
+    //If php.ini does have a timezone, attempt to parse that timezone
     global $TIME_ZONES;
     $seconds = date('Z')+0;
     $abbrev = date('T');
