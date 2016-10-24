@@ -350,5 +350,5 @@ foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
 
 ############################################################################
 // Clean up and go home
-mpDestroySession(); // only call this if we created one
+//mpDestroySession(); // session creation/destriction now handled inside loops
 ?>
