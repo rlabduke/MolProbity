@@ -85,10 +85,17 @@ Choose validations appropriate to a structure.</p>
 //      <li>Allows use of both electron cloud and nuclear x-H bond-lengths. Read more about this change <a href='".makeEventURL("onGoto", "helper_hydrogens.php")."'>here</a>.</li>
 //      <li>Full support for 2-character CHAINIDs added. 4-character SEGIDs also supported in place of CHAINIDs.</li>
 //      </ul>
-    echo("<h3>What's new in 4.3:</h3><ul>
-        <li>New NQH coordinate regularization method after flips in Reduce: a three-step process attempting to match existing coordinates replaces cctbx-based optimization</li>
-        <li>Updates to Omegalyze kinemage output - markup defaults to 'off', separate colors for cis-pro (sea), cis-nonpro (lime), and all twisted (yellow).</li>
-        <li>Improved error catching, with 'how to fix it' notes for common formatting errors</li>
+    echo("<h3>What's coming in 4.3.1:</h3><ul>
+      <li>This versioned release is timed to correspond with the Phenix 1.11 official release, and is expected to work with the corresponding version of the cctbx project.</li>
+      <li>Update to Omegalyze kinemage output - markup now offset from backbone to reduce overlap with other markups.</li>
+      <li>Ramachandran analysis reports alternate conformations more comprehensively at the residue level. Ramachandran summary statistics are given for alternate A only where applicable.</li>
+      <li>Reduce het dictionary updated - hydrogens now available for more ligands.</li>
+      <li>Reduce no longer rotates methionine sidechain methyls.</li>
+  </ul>
+    <h3>What's new in 4.3:</h3><ul>
+      <li>New NQH coordinate regularization method after flips in Reduce: a three-step process attempting to match existing coordinates replaces cctbx-based optimization</li>
+      <li>Updates to Omegalyze kinemage output - markup defaults to 'off', separate colors for cis-pro (sea), cis-nonpro (lime), and all twisted (yellow).</li>
+      <li>Improved error catching, with 'how to fix it' notes for common formatting errors</li>
 	</ul>
     <h3>What's new in 4.2:</h3><ul>
       <li>Cis-peptide identification, markup and statistics now available.</li>
