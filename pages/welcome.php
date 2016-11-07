@@ -714,12 +714,18 @@ function toggleUploadOptions()
 //        <br><br>Please don't hesitate to report any <a style=\"color: #66FFFF\" href='".makeEventURL("onGoto", "feedback_setup.php")."'>bugs</a> you may encounter.
 //        <br><br>If for some reason you need to use MolProbity4 version 4.02, which is now a retired legacy version, please go to <a style=\"color: #66FFFF\" href='http://rutile.biochem.duke.edu/' target='_blank'>http://rutile.biochem.duke.edu</a>.</strong></div>");
     echo("<div class=feature><b>Molprobity sites:</b>
-      <br>Duke mirror: <a href='http://molprobity.biochem.duke.edu/' target='_blank'>http://molprobity.biochem.duke.edu/index.php</a>
-      <br>Manchester mirror: <a href='http://molprobity.manchester.ac.uk/' target='_blank'>http://molprobity.manchester.ac.uk</a>
-      <br>Public beta: <a href='http://magma.research.duhs.duke.edu/~molprobity_beta/' target='_blank'>http://magma.research.duhs.duke.edu/~molprobity_beta</a>
-      <br>Legacy pre-CCTBX version: <a href='http://rutile.biochem.duke.edu/' target='_blank'>http://rutile.biochem.duke.edu</a>
-      (CCTBX, which powers this version of MolProbity (4.3), requires stricter adherence to PDB format. If you are having trouble with version 4.3 try using this MolProbity4 legacy version 4.02). Note that not all features are supported on legacy 4.02 and we suggest repairing your PDB format instead.
-      <br></div>");
+      <br><a href='http://molprobity.biochem.duke.edu/' target='_blank'>Duke (US)</a> | <a href='http://molprobity.manchester.ac.uk/' target='_blank'>Manchester (UK)</a> | <a href='http://magma.research.duhs.duke.edu/~molprobity_beta/' target='_blank'>Beta (Recent developments; Unstable)</a>
+      <br><a href='http://rutile.biochem.duke.edu/' target='_blank'>Legacy version 4.02</a> (Current Molprobity requires strict PDB format. 4.02 is more forgiving, but lacks recent features. Format repair is preferable.)
+      <br>
+      <br><b>Usage Guidelines:</b>
+      <br>These web services are provided for analysis of individual structures, not batch runs.</div>");
+      //("<div class=feature><b>Molprobity sites:</b>
+      //<br>Duke mirror: <a href='http://molprobity.biochem.duke.edu/' target='_blank'>http://molprobity.biochem.duke.edu/index.php</a>
+      //<br>Manchester mirror: <a href='http://molprobity.manchester.ac.uk/' target='_blank'>http://molprobity.manchester.ac.uk</a>
+      //<br>Public beta: <a href='http://magma.research.duhs.duke.edu/~molprobity_beta/' target='_blank'>http://magma.research.duhs.duke.edu/~molprobity_beta</a>
+      //<br>Legacy pre-CCTBX version: <a href='http://rutile.biochem.duke.edu/' target='_blank'>http://rutile.biochem.duke.edu</a>
+      //(CCTBX, which powers this version of MolProbity (4.3), requires stricter adherence to PDB format. If you are having trouble with version 4.3 try using this MolProbity4 legacy version 4.02). Note that not all features are supported on legacy 4.02 and we suggest repairing your PDB format instead.
+      //<br></div>");
 }
 
 #}}}########################################################################
