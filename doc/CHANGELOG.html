@@ -96,6 +96,23 @@
 ===  CHANGE LOG  =============================================================
 ==============================================================================
 
+### 4.3.1 new features ###
+- Reduce changes
+-- methyl groups on methionine sidechains no longer free to rotate by default
+-- Reduce het dictionary updated
+- Omegalyze kinemage printing updated again, this time to incorporate an offset
+  of this markup from the backbone to avoid overlap with other markup.
+- Ramalyze now handles alternate conformations in a more complete way, allowing
+  alternate assessments for residues adjacent to modeled alternates. Ramalyze
+  summary statistics report only alternate A where there is a choice of
+  alternates. This is a transitional state of affairs.
+- cbdev markup printing is now handled by cctbx rather than prekin. This
+  addresses a rare prekin bug and yields greater internal consistency, but
+  should be a largely invisible change.
+- Welcome page code now supports banners for site branding and identification.
+  See doc/adding_site_and_version_banners.txt for instructions on how to change
+  these.
+
 ### 4.3 release ###
 - 4.3 branched at 7bee7cfdf5309f636c1dc4023d6739919ca2620d, Monday, April 25 2016 at 1230 PM (1461601827 POSIX), and went live at molprobity.biochem.duke.edu at approximately this time
 
@@ -108,7 +125,7 @@
   colors for cis-pro (sea), cis-nonpro (lime), and all twisted (yellow).
 - New method for outputting flips in Reduce, NQH_minimize removed
 
-### 4.2+ patches and notes ### 
+### 4.2+ patches and notes ###
 - A bugfix to decolorize proline-associated cis-omegas in the
   stoplight (because they are not right/wrong by percentage, and red
   sends the wrong message) was patched into 4.2
@@ -144,11 +161,11 @@
 - Changes to CCTBX dependencies, particularly the addition of the 'base'
   directory which holds python and other dependencies. This has been tested
   successfully on OSX and linux 64-bit
-- For bond angles and lengths, the conformation-dependent library (CDL) from 
+- For bond angles and lengths, the conformation-dependent library (CDL) from
   Dunbrack and Karplus will be used rather than Engh and Huber if the PDB header
   has a REMARK3 with string "CDL v1.2"
 - A new version of Probe that separates the 'bad' overlaps into 'bad' and 'worse'.
-  0.4 <= bad < 0.5 and 0.5 >= worse.  This is not a MolProbity change but is 
+  0.4 <= bad < 0.5 and 0.5 >= worse.  This is not a MolProbity change but is
   concurrent with the server version change, but kinemages produced by MolProbity
   have new categories based on this change.
 - Due to CCTBX integration, PDBs MUST have their element column. We have an
