@@ -26,7 +26,7 @@ you about this if it fails for this reason.
 
 Currently the only way to get MolProbity is from GitHub. For users, we suggest:
 
-git clone https://github.com/rlabduke/MolProbity.git --branch molprobity_4.2 --single-branch --depth 1
+git clone https://github.com/rlabduke/MolProbity.git --branch molprobity_4.3.1 --single-branch --depth 1
 
 This will check out just the most recent release of the code. If you
 did a whole-repository checkout instead, let us suggest you swap to a

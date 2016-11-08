@@ -85,7 +85,7 @@ Choose validations appropriate to a structure.</p>
 //      <li>Allows use of both electron cloud and nuclear x-H bond-lengths. Read more about this change <a href='".makeEventURL("onGoto", "helper_hydrogens.php")."'>here</a>.</li>
 //      <li>Full support for 2-character CHAINIDs added. 4-character SEGIDs also supported in place of CHAINIDs.</li>
 //      </ul>
-    echo("<h3>What's coming in 4.3.1:</h3><ul>
+    echo("<h3>What's new in 4.3.1:</h3><ul>
       <li>This versioned release is timed to correspond with the Phenix 1.11 official release, and is expected to work with the corresponding version of the cctbx project.</li>
       <li>Update to Omegalyze kinemage output - markup now offset from backbone to reduce overlap with other markups.</li>
       <li>Ramachandran analysis reports alternate conformations more comprehensively at the residue level. Ramachandran summary statistics are given for alternate A only where applicable.</li>

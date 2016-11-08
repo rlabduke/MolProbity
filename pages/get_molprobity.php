@@ -35,7 +35,7 @@ found <a href='help/about.html' target='_blank'>here</a>.</p>
 <p><b>MolProbity is now on GitHub!</b>
 The GitHub site is <a href='https://github.com/rlabduke/MolProbity' target="_blank">https://github.com/rlabduke/MolProbity</a>. You can look at the README there, or if you're already using git you can get a copy of MolProbity with:
 <div align="center" style="font-size:20px">
-git clone https://github.com/rlabduke/MolProbity.git --branch molprobity_4.2 --single-branch --depth 1
+git clone https://github.com/rlabduke/MolProbity.git --branch molprobity_4.3.1 --single-branch --depth 1
 </dir>
 <p>
 
