@@ -38,7 +38,8 @@ if [ -n "$sf_user" ]
 then
     if [ ! -d cctbx_project ]
     then
-        svn --quiet --non-interactive --trust-server-cert co https://$sf_user@svn.code.sf.net/p/cctbx/code/trunk cctbx_project
+        svn --quiet --non-interactive --trust-server-cert co https://github.com/cctbx/cctbx_project.git/trunk cctbx_project
+        #svn --quiet --non-interactive --trust-server-cert co https://$sf_user@svn.code.sf.net/p/cctbx/code/trunk cctbx_project
     fi
     if [ ! -d cbflib ]
     then
@@ -47,7 +48,8 @@ then
 else
     if [ ! -d cctbx_project ]
     then
-        svn --quiet --non-interactive --trust-server-cert co https://svn.code.sf.net/p/cctbx/code/trunk cctbx_project
+        svn --quiet --non-interactive --trust-server-cert co https://github.com/cctbx/cctbx_project.git/trunk cctbx_project
+        #svn --quiet --non-interactive --trust-server-cert co https://svn.code.sf.net/p/cctbx/code/trunk cctbx_project
     fi
     if [ ! -d cbflib ]
     then
