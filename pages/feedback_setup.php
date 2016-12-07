@@ -39,7 +39,7 @@ function display($context)
     </select></td>
 </tr><tr>
     <td align='left' colspan='2'>
-        <textarea name='feedbackText' rows='15' cols='76'><?php echo $this->makeTemplateText(); ?></textarea>
+        <textarea name='feedbackText' rows='30' cols='76'><?php echo $this->makeTemplateText(); ?></textarea>
     </td>
 </tr><tr>
     <td align='left'><input type='submit' name='cmd' value='Send email &gt;'></td>
