@@ -108,6 +108,10 @@ function runAnalysis($modelID, $opts)
     //if($doRem40)                $tasks['remark40'] = "Create REMARK  40 record for the PDB file";
     //}}} Set up file/directory vars and the task list
 
+    //Curate presentation of validation feedback
+    $curation = array(
+    	'showAllOmegaStats' => $opts['chartOmegaForceStats']);
+
     //{{{ Run geometry programs and offer kins to user
 
     $summaries = array();
@@ -365,7 +369,7 @@ function runAnalysis($modelID, $opts)
         $outfile = "$rawDir/$model[prefix]multi.table";
         $snapfile = "$chartDir/$model[prefix]multi.html";
         $resout = "$rawDir/$model[prefix]multi_res.table";
-        writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, $cablam, $omega, $summaries, !$opts['chartNotJustOut'], $opts['chartMulti'], $opts['chartAltloc']);
+        writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, $cablam, $omega, $summaries, $curation, !$opts['chartNotJustOut'], $opts['chartMulti'], $opts['chartAltloc']);
         if($opts['chartMulti']) {
           $tasks['multichart'] .= " - <a href='viewtable.php?$_SESSION[sessTag]&file=$outfile' target='_blank'>preview</a>\n";
           setProgress($tasks, 'multichart'); // so the preview link is visible
@@ -468,7 +472,7 @@ function runAnalysis($modelID, $opts)
     if(is_array($clash) || is_array($rama) || is_array($rota) || is_array($cbdev) || is_array($pperp) || is_array($suites))
     {
         $entry .= "<h3>Summary statistics</h3>\n";
-        $entry .= makeSummaryStatsTable($model['stats']['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, $cablam, $omega, $summaries);
+        $entry .= makeSummaryStatsTable($model['stats']['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, $cablam, $omega, $summaries, $curation);
     }
     $entry .= $improveText;
     if($opts['doKinemage'] || $opts['doCharts'])

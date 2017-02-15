@@ -926,7 +926,7 @@ function makeBadOmegaKin($infile, $outfile)
 /**
 * Documentation for this function.
 */
-function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $cablam, $omega, $summaries)
+function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $cablam, $omega, $summaries, $curation)
 {
     $entry = "";
     $bgPoor = '#ff9999';
@@ -1181,7 +1181,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
         //elseif($cispropct <= 10.0) $bg = $bgFair; //set at 2x statistical expectations
         //else                       $bg = $bgPoor;
         $cisentry .= "<td>Cis Prolines:</td><td> $cisprocount / $prototal</td><td> $cispropct% </td>\n<td>Expected: &le;1 per chain, or &le;5%</td></tr>\n";
-        if($cisnonprocount > 0)
+        if($cisnonprocount > 0 or $curation['showAllOmegaStats'])
         {
             $cispepRows += 1;
             if($cisnonpropct <= 0.05)    $bg = $bgGood; // 0.05% is statistical expectation for cis-nonPro
@@ -1189,7 +1189,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             else                         $bg = $bgPoor;
             $cisentry .= "<td>Cis nonProlines:</td><td bgcolor='$bg'> $cisnonprocount / $nonprototal</td><td bgcolor='$bg'> $cisnonpropct% </td>\n<td>Goal: &lt;0.05%</td></tr>\n";
         }
-        if($twistcount > 0)
+        if($twistcount > 0 or $curation['showAllOmegaStats'])
         {
             $cispepRows += 1;
             if($twistpct  == 0)       $bg = $bgGood; //insufficient statistics, but highly suspicious
@@ -1378,7 +1378,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
 * $suites   is the data structure from loadSuitenameReport()
 * Any of them can be set to null if the data is unavailable.
 */
-function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $cablam, $omega, $summaries, $outliersOnly = false, $doHtmlTable = true, $cleanupAltloc = true)
+function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $cablam, $omega, $summaries, $curation, $outliersOnly = false, $doHtmlTable = true, $cleanupAltloc = true)
 {
     $startTime = time();
     //{{{ Process validation data
@@ -1801,7 +1801,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
     //{{{ Table prequel and headers
     // Do summary chart
     $pdbstats = pdbstat($infile);
-    $table['prequel'] = makeSummaryStatsTable($pdbstats['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $cablam, $omega, $summaries);
+    $table['prequel'] = makeSummaryStatsTable($pdbstats['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $cablam, $omega, $summaries, $curation);
 
     if ($doHtmlTable) {
       $header1 = array();

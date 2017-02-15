@@ -42,6 +42,13 @@ function hideMultiOpts()
   else block.style.display = 'none'
 }
 
+function hideOmegaOpts()
+{
+  var block = document.getElementById('omega_opts')
+  if(document.forms[0].chartOmega.checked) block.style.display = 'block'
+  else block.style.display = 'none'
+}
+
 //function hideLowResOpts()
 //{
 //  var block = document.getElementById('lowres_opts')
@@ -185,8 +192,9 @@ Default options have been selected based on the content of the submitted file.
     <br><label><input type='checkbox' name='chartRama' value='1'> Ramachandran plots</label> <a target="_blank" href="help/validation_options/validation_options.html#ramachandran"> <img src="img/helplink.jpg" alt="" title="Ramachandran help"></a>
     <br><label><input type='checkbox' name='chartRota' value='1'> Rotamer evaluation</label> <a target="_blank" href="help/validation_options/validation_options.html#rotamers"> <img src="img/helplink.jpg" alt="" title="Rotamer help"></a>
     <br><label><input type='checkbox' name='chartCBdev' value='1'> C&beta; deviations</label> <a target="_blank" href="help/validation_options/validation_options.html#cbdev"> <img src="img/helplink.jpg" alt="" title="CB deviation help"></a>
-    <br><label><input type='checkbox' name='chartOmega' value='1'> Cis-Peptide evaluation</label> <a target="_blank" href="help/validation_options/validation_options.html#cispeptides"> <img src="img/helplink.jpg" alt="" title="Cis-peptide help"></a>
-    <br><label><input type='checkbox' name='chartCablamLow' value='1'> CaBLAM backbone evaluation</label> <a target="_blank" href="help/validation_options/validation_options.html#cablam"> <img src="img/helplink.jpg" alt="" title="CaBLAM help"></a>
+    <br><label><input type='checkbox' name='chartOmega' value='1' checked onclick='hideOmegaOpts()'> Cis-Peptide evaluation</label> <a target="_blank" href="help/validation_options/validation_options.html#cispeptides"> <img src="img/helplink.jpg" alt="" title="Cis-peptide help"></a>
+    <div class='closeindent' id='omega_opts'><label><input type='checkbox' name='chartOmegaForceStats' value='1'> Force display of stats</label></div>
+    <label><input type='checkbox' name='chartCablamLow' value='1'> CaBLAM backbone evaluation</label> <a target="_blank" href="help/validation_options/validation_options.html#cablam"> <img src="img/helplink.jpg" alt="" title="CaBLAM help"></a>
     <p><label><b>RNA</b></label>
     <br><label><input type='checkbox' name='chartBaseP' value='1'> RNA sugar pucker analysis</label> <a target="_blank" href="help/validation_options/validation_options.html#sugarpuckers"> <img src="img/helplink.jpg" alt="" title="Sugar pucker help"></a>
     <br><label><input type='checkbox' name='chartSuite' value='1'> RNA backbone conformations</label> <a target="_blank" href="help/validation_options/validation_options.html#suites"> <img src="img/helplink.jpg" alt="" title="Suite help"></a>
@@ -195,7 +203,7 @@ Default options have been selected based on the content of the submitted file.
     <br><label><input type='checkbox' name='chartCoot' value='1'> Chart for use with Coot (may take a long time, but should take less than 1 hour) </label>
     <br><label><input type='checkbox' name='chartImprove' value='1'> Suggest / report on automatic structure fix-ups</label>
     <br><label><input type='checkbox' name='chartMulti' value='1' onclick='hideMultiOpts()'> Create html version of multi-chart</label>
-    <div class='indent' id='multi_opts'>
+    <div class='closeindent' id='multi_opts'>
     <label><input type='checkbox' name='chartNotJustOut' value='1'> List all residues in multi-chart, not just outliers</label>
     <br><label><input type='checkbox' name='chartAltloc' value='1'> Remove residue rows with ' ' altloc when other alternate(s) present</label>
     </div>
