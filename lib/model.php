@@ -1275,11 +1275,18 @@ function getPdbModel($pdbcode, $biolunit = false)
 
     // Copy in the newly uploaded file:
     if($biolunit)
+    {
         //$src = "ftp://ftp.rcsb.org/pub/pdb/data/biounit/coordinates/all/".strtolower($pdbcode).".pdb1.gz";
         $src = "http://www.pdb.org/pdb/files/".strtolower($pdbcode).".pdb1.gz";
+        $cifsrc = "http://www.pdb.org/pdb/files/".strtolower($pdbcode)."-assembly1.cif.gz";
+        #biological assembly may not be relevant for cif-only structures?
+    }
     else
+    {
         //$src = "http://www.rcsb.org/pdb/cgi/export.cgi/$pdbcode.pdb?format=PDB&pdbId=$pdbcode&compression=gz";
         $src = "http://www.pdb.org/pdb/files/".strtolower($pdbcode).".pdb.gz";
+        $cifsrc = "http://www.pdb.org/pdb/files/".strtolower($pdbcode).".cif.gz";
+    }
 
     $outpath = mpTempfile("tmp_pdb_");
     if(copy($src, $outpath) && filesize($outpath) > 1000)
@@ -1295,6 +1302,24 @@ function getPdbModel($pdbcode, $biolunit = false)
             return $outpath;
         }
         else return $outpath2;
+    }
+    elseif(copy($cifsrc, $outpath) && filesize($outpath) > 1000)
+    {
+        $outpath2 = mpTempfile("tmp_pdb_");
+        exec("gunzip -c < $outpath > $outpath2"); // can't just gunzip without a .gz ending
+        unlink($outpath);
+
+        $outpath3 = mpTempfile("tmp_pdb_");
+        exec("python ".MP_BASE_DIR."/cmdline/convert_cif_to_pdb.py $outpath2 $outpath3");
+        unlink($outpath2);
+        // Convert MODELs to chain IDs
+        if($biolunit)
+        {
+            $outpath = convertModelsToChains($outpath3);
+            unlink($outpath3);
+            return $outpath;
+        }
+        else return $outpath3;
     }
     else
     {
