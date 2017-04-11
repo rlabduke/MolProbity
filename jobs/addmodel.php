@@ -159,7 +159,7 @@ if(isset($_SESSION['bgjob']['pdbCode']))
 else
 {
     // Remove illegal chars from the upload file name
-    $origName = censorFileName($_SESSION['bgjob']['origName'], array("pdb", "ent", "xyz", "mtz"));
+    $origName = censorFileName($_SESSION['bgjob']['origName'], array("pdb", "ent", "xyz", "mtz", "cif"));
     $fileSource = "local disk";
 
     if(isset($_SESSION['bgjob']['tmpPdb'])) 

@@ -164,6 +164,8 @@ function addModelOrEnsemble(
     // Try stripping file extension
     if(preg_match('/^(.+)\.(pdb|xyz|ent)$/i', $origName, $m))
         $origID = $m[1];
+    elseif(preg_match('/^(.+)\.(cif)$/i', $origName, $m))
+        $origID = $m[1].'_hybrid36';
     else
         $origID = $origName;
 
@@ -174,7 +176,7 @@ function addModelOrEnsemble(
     $tmp2 = mpTempfile("tmp_pdb_");
     $tmp3 = mpTempfile("tmp_pdb_");
     $tmp4 = mpTempFile("tmp_pdb_");
-    list($stats, $segmap) = preparePDB($tmpPdb, $tmp2, $isCnsFormat, $ignoreSegID);
+    list($stats, $segmap) = preparePDB($filename, $tmp2, $isCnsFormat, $ignoreSegID);
     $stats = convertToPDBv3($tmp2, $tmp3);
     /* this section is for trimming Hs by default */
     ////if ($stats['has_most_H'] && $trim_input_H) {
@@ -410,6 +412,8 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
 
     // List of tasks for running as a background job
     $tasks['scrublines'] = "Convert linefeeds to UNIX standard (\\n)";
+    if(preg_match('/^(.+)\.(cif)$/i', $inpath, $m))
+      $tasks['cifconvert'] = "Converting input cif to hybrid36 pdb format";
     $tasks['checkMODEL'] = "Checking for improper MODEL/ENDMDL cards";
     $tasks['stripusermod'] = "Strip out old USER MOD records from <code>reduce</code>";
     $tasks['pdbstat'] = "Analyze contents of PDB file";
@@ -423,6 +427,15 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
     // Convert linefeeds to UNIX standard (\n):
     setProgress($tasks, 'scrublines'); // updates the progress display if running as a background job
     exec("scrublines < $inpath > $tmp1");
+
+    // Convert an input .cif file to .pdb if necessary
+    if(preg_match('/^(.+)\.(cif)$/i', $inpath, $m))
+    {
+      setProgress($tasks, 'cifconvert');
+      $converted_file_path = $m[1]."_hybrid36.pdb";
+      exec("python ".MP_BASE_DIR."/cmdline/convert_cif_to_pdb.py $tmp1 $converted_file_path");
+      $tmp1 = $converted_file_path;
+    }
 
     // Test for proper use of MODEL/ENDMDL
     setProgress($tasks, 'checkMODEL'); // updates the progress display if running as a background job
