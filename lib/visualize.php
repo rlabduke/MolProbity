@@ -1549,6 +1549,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
             elseif($item['conf'] == 'Twisted'){
                 $res[$item['resName']]['any_isbad'] = true;
                 $res[$item['resName']]['omega_isbad'] = true;
+                if($item['omega'] >= 45 or $item['omega'] <= -45) $res[$item['resName']]['omega_color'] = $cell_color_severe;
                 if($item['type'] == 'non-Pro'){
                     $res[$item['resName']]['omega'] = "$item[conf] nonPRO<br><small>omega= $item[omega]</small>";
                     $res[$item['resName']]['omega_val'] = "1";} //for column sort
