@@ -477,7 +477,11 @@ function runAnalysis($modelID, $opts)
     $entry = "";
     if(is_array($clash) || is_array($rama) || is_array($rota) || is_array($cbdev) || is_array($pperp) || is_array($suites))
     {
-        $entry .= "<h3>Summary statistics</h3>\n";
+        if($opts['doEnsemble']) {
+          $entry .= "<h3>Summary statistics for $model[pdb]</h3>\n";
+        } else {
+          $entry .= "<h3>Summary statistics</h3>\n";
+        }
         $entry .= makeSummaryStatsTable($model['stats']['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, $cablam, $omega, $summaries, $curation);
     }
     $entry .= $improveText;

@@ -29,33 +29,66 @@ function hideKinOpts()
     else block.style.display = 'none'
 }
 
-/*function hideChartOpts()
+function hideChartOpts()
 {
     var block = document.getElementById('chart_opts')
     if(document.forms[0].doCharts.checked) block.style.display = 'block'
     else block.style.display = 'none'
-}*/
+}
 
-function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig)
+function hideMultiOpts()
+{
+  var block = document.getElementById('multi_opts')
+  if(document.forms[0].chartMulti.checked) block.style.display = 'block'
+  else block.style.display = 'none'
+}
+
+function hideOmegaOpts()
+{
+  var block = document.getElementById('omega_opts')
+  if(document.forms[0].chartOmega.checked) block.style.display = 'block'
+  else block.style.display = 'none'
+}
+
+function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig, isLowRes)
 {
     selectionHasH = doAAC
 
     document.forms[0].kinClashes.checked        = doAAC
     document.forms[0].kinHbonds.checked         = doAAC
-    if(!doAAC) // turn these off only
-    {
-        document.forms[0].kinContacts.checked       = doAAC && !isBig
-    }
+    document.forms[0].kinContacts.checked       = doAAC && !isBig
+    document.forms[0].chartClashlist.checked    = doAAC
+
+    //if(!doAAC) // turn these off only
+    //{
+    //    document.forms[0].kinContacts.checked       = doAAC && !isBig
+    //}
     //document.forms[0].chartClashlist.checked    = doAAC
 
     document.forms[0].kinRama.checked           = hasProtein
     document.forms[0].kinRota.checked           = hasProtein
     document.forms[0].kinCBdev.checked          = hasProtein
-    //document.forms[0].chartRama.checked         = hasProtein
-    //document.forms[0].chartRota.checked         = hasProtein
-    //document.forms[0].chartCBdev.checked        = hasProtein
+    document.forms[0].kinGeom.checked           = (hasProtein || hasNucAcid)
+    document.forms[0].kinOmega.checked          = hasProtein
+    document.forms[0].kinCablamLow.checked      = (hasProtein && isLowRes)
 
+    document.forms[0].chartRama.checked         = hasProtein
+    document.forms[0].chartRota.checked         = hasProtein
+    document.forms[0].chartCBdev.checked        = hasProtein
+    document.forms[0].chartGeom.checked         = (hasProtein || hasNucAcid)
+    document.forms[0].chartOmega.checked        = hasProtein
+    document.forms[0].chartCablamLow.checked    = (hasProtein && isLowRes)
+  
     document.forms[0].kinBaseP.checked          = hasNucAcid
+    document.forms[0].kinSuite.checked          = hasNucAcid
+    document.forms[0].chartBaseP.checked        = hasNucAcid
+    document.forms[0].chartSuite.checked        = hasNucAcid
+
+    //document.forms[0].chartCoot.checked         = !isBig
+    //document.forms[0].chartImprove.checked      = (hasProtein && doAAC)
+    document.forms[0].chartMulti.checked        = (hasProtein || hasNucAcid)
+    document.forms[0].chartNotJustOut.checked   = !isBig
+    document.forms[0].chartAltloc.checked       = (hasProtein || hasNucAcid)
     //document.forms[0].chartBaseP.checked        = hasNucAcid
 }
 
@@ -65,7 +98,7 @@ function checkSettingsBeforeSubmit()
     var doAAC = (document.forms[0].kinClashes.checked
         || document.forms[0].kinHbonds.checked
         || document.forms[0].kinContacts.checked
-        //|| document.forms[0].chartClashlist.checked
+        || document.forms[0].chartClashlist.checked
         );
 
     if(!selectionHasH && doAAC)
@@ -106,22 +139,25 @@ function checkSettingsBeforeSubmit()
             $isBig = ($pdbSize > 1<<21 ? "true" : "false");
             //isBig is set with some over-clever math
             //  increased from 1<<20 during the CaBLAM/low-res update due to expanded computing power
-            $isLowRes = ($stats['resolution'] > 2.5 ? "true" : "false");
+            // added empty check for lowRes since NMR structures don't have resolution
+            $isLowRes = ($stats['resolution'] > 2.5 || empty($stats['resolution']) ? "true" : "false");
 
             // Alternate row colors:
             $c == MP_TABLE_ALT1 ? $c = MP_TABLE_ALT2 : $c = MP_TABLE_ALT1;
             echo " <tr bgcolor='$c'>\n";
             $checked = ($lastUsedID == $id ? "checked" : "");
-            echo "  <td><input type='radio' name='ensID' value='$id' onclick='setAnalyses($doAAC, $hasProtein, $hasNucAcid, $isBig)' $checked></td>\n";
+            echo "  <td><input type='radio' name='ensID' value='$id' onclick='setAnalyses($doAAC, $hasProtein, $hasNucAcid, $isBig, $isLowRes)' $checked></td>\n";
             echo "  <td><b>$ensemble[pdb]</b></td>\n";
             echo "  <td><small>$ensemble[history]</small></td>\n";
             echo " </tr>\n";
-            if($checked) $jsOnLoad = "setAnalyses($doAAC, $hasProtein, $hasNucAcid, $isBig)";
+            if($checked) $jsOnLoad = "setAnalyses($doAAC, $hasProtein, $hasNucAcid, $isBig, $isLowRes)";
         }
         echo "</table></p>\n";
 ?>
 <hr>
 <h3>Choose which analyses to run:</h3>
+Default options have been selected based on the content of the submitted file.
+<br>Follow the <a target="_blank" href="help/validation_options/validation_options.html"> <img src="img/helplink.jpg" alt="" title="General help"></a> symbols for more information on the validation options.
 <div class='indent'>
 <h5 class='nospaceafter'><label><input type='checkbox' name='doKinemage' value='1' checked onclick='hideKinOpts()'> 3-D kinemage graphics</label></h5>
     <div class='indent' id='kin_opts'>
