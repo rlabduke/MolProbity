@@ -65,11 +65,20 @@ foreach($ensemble['models'] as $modelID)
     $infiles[] = $modelDir.'/'.$_SESSION['models'][$modelID]['pdb'];
     
 $tasks = array();
+if($opts['doCharts'])            $tasks['charts'] = "Create ensemble multi-criterion charts";
 if($opts['doKinemage'])         $tasks['multikin'] = "Create multi-criterion kinemage";
 if($opts['doRamaPDF'])          $tasks['ramapdf'] = "Create multi-model Ramachandran plot (PDF)";
 if($opts['doMultiGraph'])       $tasks['multigraph'] = "Create multi-criterion graph";
 if($opts['doMultiModelChart'])  $tasks['multichart'] = "Create multi-criterion chart";
+$opts['doEnsemble'] = True;
     
+if($opts['doCharts']) {
+  setProgress($tasks, 'charts');
+  $labbookEntry .= runEnsembleAnalysis($ensemble, $opts);
+  
+  
+}
+
 if($opts['doKinemage'])
 {
     setProgress($tasks, 'multikin'); // updates the progress display if running as a background job

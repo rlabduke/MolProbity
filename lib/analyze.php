@@ -79,6 +79,12 @@ function runAnalysis($modelID, $opts)
     if(isset($model['mtz_file']))
         $mtz_file = $model['mtz_file'];
     else $mtz_file = $_SESSION['models'][$model['parent']]['mtz_file'];
+    
+    if($opts['doEnsemble']) {
+      echo "Ensemble mode set for runAnalysis for ".$model[pdb]."\n";
+      $tasks['currentModel'] = "Analyzing $model[pdb]";
+      setProgress($tasks, 'currentModel');
+    }
 
     if($model['stats']['use_cdl'])  $geomsg = "Using CDL";
     else $geomsg = "";
@@ -1214,7 +1220,7 @@ function loadRamachandranSummary($datafile)
   foreach($data as $line)
   {
     if (preg_match("/^SUMMARY/",$line)){
-            echo "match found";
+            echo "match found\n";
           //SUMMARY: 504 Favored, 12 Allowed, 2 Outlier out of 518 residues (altloc A where applicable)
           if (preg_match("/altloc/",$line)){
             $linebits = explode(' ',$line);

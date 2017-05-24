@@ -16,6 +16,30 @@ require_once(MP_BASE_DIR.'/lib/visualize.php'); // for making kinemages
 require_once(MP_BASE_DIR.'/lib/labbook.php');
 require_once(MP_BASE_DIR.'/lib/pdbstat.php');  //for getting number of atoms
 
+//{{{ runEnsembleAnalysis
+function runEnsembleAnalysis($ensemble, $opts) {
+  $doAAC = ($opts['doKinemage'] && ($opts['kinClashes'] || $opts['kinHbonds'] || $opts['kinContacts']))
+    || ($opts['doCharts'] && ($opts['chartClashlist']));
+  //echo "infiles:".$infiles."\n";
+  foreach ($ensemble['models'] as $modelID) {
+    $model = $_SESSION['models'][$modelID];
+    //echo "This is an model test:".$modelID."\n";
+    $modelResults = runAnalysis($modelID, $opts);
+    $labbookEntry .= $modelResults;
+    
+    $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
+    "Analysis output: ".($doAAC ? "all-atom contacts and " : "")."geometry for $model[pdb]",
+    $modelResults,
+    $modelID,
+    "auto",
+    ($doAAC ? "clash_rama.png" : "ramaplot.png")
+);
+  }
+  return $labbookEntry;
+}
+//}}}
+
+
 #{{{ packingStats - reads in probe -ONELINE and calculates other values
 
 function packingStats($pdboneline, $onelinemod)

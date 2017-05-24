@@ -15,7 +15,7 @@ class ens_aacgeom_setup_delegate extends BasicDelegate {
 */
 function display($context)
 {
-    echo $this->pageHeader("Analyze all-atom contacts and geometry");
+    echo $this->pageHeader("Analyze all-atom contacts and geometry (ensemble)");
 
     //{{{ Script to set default choices based on model properties.
 ?><script language='JavaScript'>
@@ -123,19 +123,53 @@ function checkSettingsBeforeSubmit()
 <hr>
 <h3>Choose which analyses to run:</h3>
 <div class='indent'>
-<h5 class='nospaceafter'><label><input type='checkbox' name='doKinemage' value='1' checked onclick='hideKinOpts()'> Multi-criterion kinemage</label></h5>
+<h5 class='nospaceafter'><label><input type='checkbox' name='doKinemage' value='1' checked onclick='hideKinOpts()'> 3-D kinemage graphics</label></h5>
     <div class='indent' id='kin_opts'>
-    <label><input type='checkbox' name='kinClashes' value='1'> Clashes</label>
-    <br><label><input type='checkbox' name='kinHbonds' value='1'> Hydrogen bonds</label>
-    <br><label><input type='checkbox' name='kinContacts' value='1'> van der Waals contacts</label>
-    <p><label><input type='checkbox' name='kinRama' value='1'> Ramachandran plots</label>
-    <br><label><input type='checkbox' name='kinRota' value='1'> Rotamer evaluation</label>
-    <br><label><input type='checkbox' name='kinCBdev' value='1'> C&beta; deviations</label>
-    <br><label><input type='checkbox' name='kinBaseP' value='1'> RNA sugar pucker analysis</label>
-    <p><label><input type='checkbox' name='kinAltConfs' value='1'> Alternate conformations</label>
-    <br><label><input type='checkbox' name='kinBfactor' value='1'> Models colored by B-factors</label>
-    <br><label><input type='checkbox' name='kinOccupancy' value='1'> Models colored by occupancy</label>
+    <label><b>Universal</b></label>
+    <br><label><input type='checkbox' name='kinClashes' value='1'> Clashes</label> <a target="_blank" href="help/validation_options/validation_options.html#clashes"> <img src="img/helplink.jpg" alt="" title="Clash help"></a>
+    <br><label><input type='checkbox' name='kinHbonds' value='1'> Hydrogen bonds</label> <a target="_blank" href="help/validation_options/validation_options.html#hbonds"><img src="img/helplink.jpg" alt="" title="H-bond help"></a>
+    <br><label><input type='checkbox' name='kinContacts' value='1'> van der Waals contacts</label> <a target="_blank" href="help/validation_options/validation_options.html#vdwcontacts"><img src="img/helplink.jpg" alt="" title="vdw contact help"></a>
+    <br><label><input type='checkbox' name='kinGeom' value='1'> Geometry evaluation</label> <a target="_blank" href="help/validation_options/validation_options.html#bondgeometry"><img src="img/helplink.jpg" alt="" title="Geometry help"></a>
+    <p><label><b>Protein</b></label>
+    <br><label><input type='checkbox' name='kinRama' value='1'> Ramachandran plots</label> <a target="_blank" href="help/validation_options/validation_options.html#ramachandran"><img src="img/helplink.jpg" alt="" title="Ramachandran help"></a>
+    <br><label><input type='checkbox' name='kinRota' value='1'> Rotamer evaluation</label> <a target="_blank" href="help/validation_options/validation_options.html#rotamers"><img src="img/helplink.jpg" alt="" title="Rotamer help"></a>
+    <br><label><input type='checkbox' name='kinCBdev' value='1'> C&beta; deviations</label> <a target="_blank" href="help/validation_options/validation_options.html#cbdev"><img src="img/helplink.jpg" alt="" title="CB deviation help"></a>
+    <br><label><input type='checkbox' name='kinOmega' value='1'> Cis-Peptide evaluation</label> <a target="_blank" href="help/validation_options/validation_options.html#cispeptides"><img src="img/helplink.jpg" alt="" title="Cis-peptide help"></a>
+    <br><label><input type='checkbox' name='kinCablamLow' value='1'> CaBLAM backbone markup</label> <a target="_blank" href="help/validation_options/validation_options.html#cablam"><img src="img/helplink.jpg" alt="" title="CaBLAM help"></a>
+    <p><label><b>RNA</b></label>
+    <br><label><input type='checkbox' name='kinBaseP' value='1'> RNA sugar pucker analysis</label> <a target="_blank" href="help/validation_options/validation_options.html#sugarpuckers"><img src="img/helplink.jpg" alt="" title="Sugar pucker help"></a>
+    <br><label><input type='checkbox' name='kinSuite' value='1'> RNA backbone conformations</label> <a target="_blank" href="help/validation_options/validation_options.html#suites"><img src="img/helplink.jpg" alt="" title="Suite help"></a>
+    <p><label><b>Other options</b></label>
+    <br><label><input type='checkbox' name='kinForceViews' value='1'> Make views of trouble spots even if it takes longer</label>
+    <br><label><input type='checkbox' name='kinAltConfs' value='1'> Alternate conformations</label>
+    <br><label><input type='checkbox' name='kinBfactor' value='1'> Model colored by B-factors</label>
+    <br><label><input type='checkbox' name='kinOccupancy' value='1'> Model colored by occupancy</label>
     <br><label><input type='checkbox' name='kinRibbons' value='1'> Ribbons</label>
+    </div>
+<h5 class='nospaceafter'><label><input type='checkbox' name='doCharts' value='1' checked onclick='hideChartOpts()'> Charts, plots, and tables</label></h5>
+    <div class='indent' id='chart_opts'>
+    <label><b>Universal</b></label>
+    <br><label><input type='checkbox' name='chartClashlist' value='1'> Clashes &amp; clashscore</label> <a target="_blank" href="help/validation_options/validation_options.html#clashes"> <img src="img/helplink.jpg" alt="" title="Clash help"></a>
+    <br><label><input type='checkbox' name='chartGeom' value='1'> Geometry evaluation</label> <a target="_blank" href="help/validation_options/validation_options.html#bondgeometry"> <img src="img/helplink.jpg" alt="" title="Geometry help"></a>
+    <p><label><b>Protein</b></label>
+    <br><label><input type='checkbox' name='chartRama' value='1'> Ramachandran plots</label> <a target="_blank" href="help/validation_options/validation_options.html#ramachandran"> <img src="img/helplink.jpg" alt="" title="Ramachandran help"></a>
+    <br><label><input type='checkbox' name='chartRota' value='1'> Rotamer evaluation</label> <a target="_blank" href="help/validation_options/validation_options.html#rotamers"> <img src="img/helplink.jpg" alt="" title="Rotamer help"></a>
+    <br><label><input type='checkbox' name='chartCBdev' value='1'> C&beta; deviations</label> <a target="_blank" href="help/validation_options/validation_options.html#cbdev"> <img src="img/helplink.jpg" alt="" title="CB deviation help"></a>
+    <br><label><input type='checkbox' name='chartOmega' value='1' checked onclick='hideOmegaOpts()'> Cis-Peptide evaluation</label> <a target="_blank" href="help/validation_options/validation_options.html#cispeptides"> <img src="img/helplink.jpg" alt="" title="Cis-peptide help"></a>
+    <div class='closeindent' id='omega_opts'><label><input type='checkbox' name='chartOmegaForceStats' value='1'> Show cis-nonPro and twisted peptide statistics even if the model has none</label></div>
+    <label><input type='checkbox' name='chartCablamLow' value='1'> CaBLAM backbone evaluation</label> <a target="_blank" href="help/validation_options/validation_options.html#cablam"> <img src="img/helplink.jpg" alt="" title="CaBLAM help"></a>
+    <p><label><b>RNA</b></label>
+    <br><label><input type='checkbox' name='chartBaseP' value='1'> RNA sugar pucker analysis</label> <a target="_blank" href="help/validation_options/validation_options.html#sugarpuckers"> <img src="img/helplink.jpg" alt="" title="Sugar pucker help"></a>
+    <br><label><input type='checkbox' name='chartSuite' value='1'> RNA backbone conformations</label> <a target="_blank" href="help/validation_options/validation_options.html#suites"> <img src="img/helplink.jpg" alt="" title="Suite help"></a>
+    <p><label><b>Other options</b></label>
+    <!--<br><label><input type='checkbox' name='chartHoriz' value='1'> Horizontal chart with real-space correlation data</label>
+    <br><label><input type='checkbox' name='chartCoot' value='1'> Chart for use with Coot (may take a long time, but should take less than 1 hour) </label>-->
+    <br><label><input type='checkbox' name='chartImprove' value='1'> Suggest / report on automatic structure fix-ups</label>
+    <br><label><input type='checkbox' name='chartMulti' value='1' onclick='hideMultiOpts()'> Create html version of multi-chart</label>
+    <div class='closeindent' id='multi_opts'>
+    <label><input type='checkbox' name='chartNotJustOut' value='1'> List all residues in multi-chart, not just outliers</label>
+    <br><label><input type='checkbox' name='chartAltloc' value='1'> Remove residue rows with ' ' altloc when other alternate(s) present</label>
+    </div>
     </div>
 <h5 class='nospaceafter'><label><input type='checkbox' name='doRamaPDF' value='1' checked> Multi-model Ramachandran plot (PDF)</label></h5>
 <!--
