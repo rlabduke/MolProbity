@@ -66,7 +66,7 @@ foreach($ensemble['models'] as $modelID)
     
 $tasks = array();
 if($opts['doCharts'])            $tasks['charts'] = "Create ensemble multi-criterion charts";
-if($opts['doKinemage'])         $tasks['multikin'] = "Create multi-criterion kinemage";
+if($opts['doEnsembleKinemage'])  $tasks['multikin'] = "Create ensemble multi-criterion kinemage";
 if($opts['doRamaPDF'])          $tasks['ramapdf'] = "Create multi-model Ramachandran plot (PDF)";
 if($opts['doMultiGraph'])       $tasks['multigraph'] = "Create multi-criterion graph";
 if($opts['doMultiModelChart'])  $tasks['multichart'] = "Create multi-criterion chart";
@@ -80,7 +80,7 @@ if($opts['doCharts']) {
   
 }
 
-if($opts['doKinemage'])
+if($opts['doEnsembleKinemage'])
 {
     setProgress($tasks, 'multikin'); // updates the progress display if running as a background job
     $mcKinOpts = array(
@@ -90,8 +90,10 @@ if($opts['doKinemage'])
         'altconf'   =>  $opts['kinAltConfs'],
         'rama'      =>  $opts['kinRama'],
         'rota'      =>  $opts['kinRota'],
-        //'geom'      =>  $opts['kinGeom'],
+        'geom'      =>  $opts['kinGeom'],
         'cbdev'     =>  $opts['kinCBdev'],
+        'omega'     =>  $opts['kinOmega'],
+        'cablam'    =>  $opts['kinCablamLow'],
         'pperp'     =>  $opts['kinBaseP'],
         'clashdots' =>  $opts['kinClashes'],
         'hbdots'    =>  $opts['kinHbonds'],

@@ -159,7 +159,7 @@ function checkSettingsBeforeSubmit()
 Default options have been selected based on the content of the submitted file.
 <br>Follow the <a target="_blank" href="help/validation_options/validation_options.html"> <img src="img/helplink.jpg" alt="" title="General help"></a> symbols for more information on the validation options.
 <div class='indent'>
-<h5 class='nospaceafter'><label><input type='checkbox' name='doKinemage' value='1' checked onclick='hideKinOpts()'> 3-D kinemage graphics</label></h5>
+<h5 class='nospaceafter'><label><input type='checkbox' name='doEnsembleKinemage' value='1' checked onclick='hideKinOpts()'> 3-D kinemage graphics</label></h5>
     <div class='indent' id='kin_opts'>
     <label><b>Universal</b></label>
     <br><label><input type='checkbox' name='kinClashes' value='1'> Clashes</label> <a target="_blank" href="help/validation_options/validation_options.html#clashes"> <img src="img/helplink.jpg" alt="" title="Clash help"></a>
