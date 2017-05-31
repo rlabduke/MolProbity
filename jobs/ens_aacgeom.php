@@ -73,9 +73,10 @@ if($opts['doMultiModelChart'])  $tasks['multichart'] = "Create multi-criterion c
 $opts['doEnsemble'] = True;
     
 if($opts['doCharts']) {
+
   setProgress($tasks, 'charts');
-  $labbookEntry .= runEnsembleAnalysis($ensemble, $opts);
   
+  $labbookEntry .= runEnsembleAnalysis($ensemble, $opts);
   
 }
 

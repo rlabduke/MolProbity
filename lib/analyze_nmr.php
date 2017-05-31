@@ -18,6 +18,14 @@ require_once(MP_BASE_DIR.'/lib/pdbstat.php');  //for getting number of atoms
 
 //{{{ runEnsembleAnalysis
 function runEnsembleAnalysis($ensemble, $opts) {
+  $labbookEntry .= "<script type='text/javascript'>\n";
+  $labbookEntry .= file_get_contents(MP_BASE_DIR.'/public_html/js/mptabs.js');
+  $labbookEntry .= "\n</script>\n";
+  $labbookEntry .= "<div class=\"tab\">\n";
+  foreach ($ensemble['models'] as $modelID) {
+    $labbookEntry .= "  <button class=\"tablinks\" onclick=\"openTab(event, '$modelID')\">$modelID</button>\n";
+  }
+  $labbookEntry .= "</div>\n";
   $doAAC = ($opts['doKinemage'] && ($opts['kinClashes'] || $opts['kinHbonds'] || $opts['kinContacts']))
     || ($opts['doCharts'] && ($opts['chartClashlist']));
   //echo "infiles:".$infiles."\n";
@@ -25,7 +33,9 @@ function runEnsembleAnalysis($ensemble, $opts) {
     $model = $_SESSION['models'][$modelID];
     //echo "This is an model test:".$modelID."\n";
     $modelResults = runAnalysis($modelID, $opts);
+    $labbookEntry .= "<div id=\"$modelID\" class=\"tabcontent\">\n";
     $labbookEntry .= $modelResults;
+    $labbookEntry .= "</div>\n";
     
     $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
     "Analysis output: ".($doAAC ? "all-atom contacts and " : "")."geometry for $model[pdb]",
