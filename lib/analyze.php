@@ -80,9 +80,11 @@ function runAnalysis($modelID, $opts)
         $mtz_file = $model['mtz_file'];
     else $mtz_file = $_SESSION['models'][$model['parent']]['mtz_file'];
     
-    if($opts['doEnsemble']) {
+    if(is_array($opts['doEnsemble'])) {
+      $ensemble = $opts['doEnsemble'];
       echo "Ensemble mode set for runAnalysis for ".$model[pdb]."\n";
-      $tasks['currentModel'] = "Analyzing $model[pdb]";
+      //var_dump($ensemble);
+      $tasks['currentModel'] = "Analyzing $model[pdb] out of ".count($ensemble["models"]);
       setProgress($tasks, 'currentModel');
     }
 

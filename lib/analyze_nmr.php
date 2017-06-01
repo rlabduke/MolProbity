@@ -22,14 +22,17 @@ function runEnsembleAnalysis($ensemble, $opts) {
   $labbookEntry .= file_get_contents(MP_BASE_DIR.'/public_html/js/mptabs.js');
   $labbookEntry .= "\n</script>\n";
   $labbookEntry .= "<div class=\"tab\">\n";
-  foreach ($ensemble['models'] as $modelID) {
-    $labbookEntry .= "  <button class=\"tablinks\" onclick=\"openTab(event, '$modelID')\">$modelID</button>\n";
+  //var_dump($ensemble);
+  //use only a portion of the ensemble to limit the number of models analyzed to 50 first models
+  $ensembleModelsToAnalyze = array_slice($ensemble['models'], 0, 50);
+  foreach ($ensembleModelsToAnalyze as $modelID) {
+    $labbookEntry .= "  <button class=\"tablinks\" onclick=\"openTab(event, '$modelID')\">Model ".extractModelNumber($modelID)."</button>\n";
   }
   $labbookEntry .= "</div>\n";
   $doAAC = ($opts['doKinemage'] && ($opts['kinClashes'] || $opts['kinHbonds'] || $opts['kinContacts']))
     || ($opts['doCharts'] && ($opts['chartClashlist']));
   //echo "infiles:".$infiles."\n";
-  foreach ($ensemble['models'] as $modelID) {
+  foreach ($ensembleModelsToAnalyze as $modelID) {
     $model = $_SESSION['models'][$modelID];
     //echo "This is an model test:".$modelID."\n";
     $modelResults = runAnalysis($modelID, $opts);
@@ -46,6 +49,14 @@ function runEnsembleAnalysis($ensemble, $opts) {
 );
   }
   return $labbookEntry;
+}
+//}}}
+
+//{{{ extractModelNumber
+function extractModelNumber($modelID) {
+  $exploded = explode("_", $modelID);
+  $modelNumber = ltrim($exploded[0], "m0");
+  return $modelNumber;
 }
 //}}}
 

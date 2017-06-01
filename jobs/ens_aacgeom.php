@@ -70,12 +70,14 @@ if($opts['doEnsembleKinemage'])  $tasks['multikin'] = "Create ensemble multi-cri
 if($opts['doRamaPDF'])          $tasks['ramapdf'] = "Create multi-model Ramachandran plot (PDF)";
 if($opts['doMultiGraph'])       $tasks['multigraph'] = "Create multi-criterion graph";
 if($opts['doMultiModelChart'])  $tasks['multichart'] = "Create multi-criterion chart";
-$opts['doEnsemble'] = True;
+$opts['doEnsemble'] = $ensemble;
+echo $ensemble;
     
 if($opts['doCharts']) {
 
   setProgress($tasks, 'charts');
-  
+  $labbookEntry .= "<h3>Model-by-model validation results</h3>\n";
+  $labbookEntry .= "<p>\n";
   $labbookEntry .= runEnsembleAnalysis($ensemble, $opts);
   
 }
@@ -108,7 +110,7 @@ if($opts['doEnsembleKinemage'])
         destructiveGZipFile($outfile);
     }
 
-    $labbookEntry .= "<h3>Multi-criterion kinemage</h3>\n";
+    $labbookEntry .= "<h3>Multi-model multi-criterion kinemage</h3>\n";
     $labbookEntry .= "<p>\n";
     $labbookEntry .= "<i>Note: these kins are often too big to view in the browser. You may need to download it and view it off line.</i>\n";
     $labbookEntry .= "<br>".linkKinemage("$ensemble[prefix]multi.kin", "Multi-criterion kinemage");
