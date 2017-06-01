@@ -25,7 +25,7 @@ var selectionHasH = true
 function hideKinOpts()
 {
     var block = document.getElementById('kin_opts')
-    if(document.forms[0].doKinemage.checked) block.style.display = 'block'
+    if(document.forms[0].doEnsembleKinemage.checked) block.style.display = 'block'
     else block.style.display = 'none'
 }
 
