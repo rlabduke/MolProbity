@@ -182,8 +182,8 @@ div.tab {
 div.tab button {
     background-color: inherit;
     float: left;
-    border: none;
-    outline: none;
+    border: 1px solid #ddd;
+    outline: 1px solid #ccc;
     cursor: pointer;
     padding: 14px 16px;
     transition: 0.3s;
