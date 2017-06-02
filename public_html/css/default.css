@@ -185,7 +185,9 @@ div.tab button {
     border: 1px solid #ddd;
     outline: 1px solid #ccc;
     cursor: pointer;
-    padding: 14px 16px;
+    /*padding: 14px 16px;*/
+    height: 40px;
+    width: 80px;
     transition: 0.3s;
 }
 /* Change background color of buttons on hover */
