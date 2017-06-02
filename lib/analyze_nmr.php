@@ -26,7 +26,7 @@ function runEnsembleAnalysis($ensemble, $opts) {
   //use only a portion of the ensemble to limit the number of models analyzed to 50 first models
   $ensembleModelsToAnalyze = array_slice($ensemble['models'], 0, 50);
   foreach ($ensembleModelsToAnalyze as $modelID) {
-    $labbookEntry .= "  <button class=\"tablinks\" onclick=\"openTab(event, '$modelID')\">Model ".extractModelNumber($modelID)."</button>\n";
+    $labbookEntry .= "  <button class=\"tablinks\" onclick=\"openTab(event, '$modelID')\"><b>Model ".extractModelNumber($modelID)."</b></button>\n";
   }
   $labbookEntry .= "</div>\n";
   $doAAC = ($opts['doKinemage'] && ($opts['kinClashes'] || $opts['kinHbonds'] || $opts['kinContacts']))
