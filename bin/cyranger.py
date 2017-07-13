@@ -1,9 +1,5 @@
 #!/usr/bin/python
 import sys, os, re, pprint, subprocess, gzip, platform
-
-class cyranged_pdb:
-  def __init__(self, original_pdb_file):
-    self.original_pdb = original_pdb_file
     
 class cyrange_results:
   def __init__(self, cyrange_output_text):
@@ -87,24 +83,15 @@ def run_cyrange(pdb):
   pdb_cyrange_results = cyrange_results(cy_out)
   return pdb_cyrange_results
 
-def trim_pdb(pdb_cyrange_results, pdb_file, do_gzip = False):
-  file_path, name = os.path.split(pdb_file)
-  core_path = os.path.join(file_path, os.path.splitext(name)[0]+"-core.pdb")
-  notcore_path = os.path.join(file_path, os.path.splitext(name)[0]+"-illdefined.pdb")
+def split_pdb(pdb_cyrange_results, pdb_file):
+  core_lines_list = []
+  notcore_lines_list = []
   with open(pdb_file) as f:
-    if do_gzip:
-      corefile = gzip.open(core_path+".gz", "wr")
-      notcorefile = gzip.open(notcore_path+".gz", "wr")
-    else:
-      corefile = open(core_path, 'wr')
-      notcorefile = open(notcore_path, "wr")
     for line in f:
       if line.startswith("MODEL") or line.startswith("END") or line.startswith("END"):
-        corefile.write(line)
-        notcorefile.write(line)
+        core_lines_list.append(line)
+        notcore_lines_list.append(line)
       if line.startswith("ATOM"):
-        #print ":"+line[21]+":"
-        #print ":"+line[22:26]+":"
         nucacid_residues = ["  G", "  A", "  C", "  U", " DG", " DA", " DC", " DT"]
         resname = line[17:20]
         chain = line[21]
@@ -113,13 +100,12 @@ def trim_pdb(pdb_cyrange_results, pdb_file, do_gzip = False):
         #since cyrange is currently only protein only
         if not resname in nucacid_residues:
           if pdb_cyrange_results.is_core(chain, res):
-            corefile.write(line)
+            core_lines_list.append(line)
           else:
-            notcorefile.write(line)
+            notcore_lines_list.append(line)
         else:
-          notcorefile.write(line)
-    corefile.close()
-    notcorefile.close()
+          notcore_lines_list.append(line)
+  return core_lines_list, notcore_lines_list
 
 def process_file(f):
   from_zip = False
@@ -128,12 +114,25 @@ def process_file(f):
     f = unzip_to_temp(f)
   pdb_cyrange_results = run_cyrange(f)
   if not pdb_cyrange_results.is_empty():
-    if from_zip:
-      trim_pdb(pdb_cyrange_results,f,True)
-    else:
-      trim_pdb(pdb_cyrange_results,f)
+    core_lines, notcore_lines = split_pdb(pdb_cyrange_results,f)
+    
+    file_path, name = os.path.split(f)    
+    core_path = os.path.join(file_path, os.path.splitext(name)[0]+"-core.pdb")
+    write_pdb_file(core_lines, core_path, from_zip)
+    notcore_path = os.path.join(file_path, os.path.splitext(name)[0]+"-illdefined.pdb")
+    write_pdb_file(notcore_lines, notcore_path, from_zip)
   if from_zip:
     os.unlink(f)
+    
+def write_pdb_file(pdb_lines_list, path, do_gzip = False):
+  if do_gzip:
+    pdb_file = gzip.open(path+".gz", "wr")
+  else:
+    pdb_file = open(path, 'wr')
+  for line in pdb_lines_list:
+    pdb_file.write(line)
+  pdb_file.close()
+
     
 if __name__ == '__main__' :
   for arg in sys.argv[1:]:
