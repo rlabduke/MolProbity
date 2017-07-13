@@ -67,10 +67,12 @@ def tst_cyrange_results():
   assert not pdb5mpg_results.is_core("", 10)
   assert not pdb5mpg_results.is_core("", 47)
   assert not pdb5mpg_results.is_core("", 499)
-
   
   pdb5x29_results = cyrange_results(cyrange_txt_5x29)
   assert pdb5x29_results.is_core("A", 8)
+  assert pdb5x29_results.is_core("B", 65)
+  assert pdb5x29_results.is_core("C", 48)
+  assert pdb5x29_results.is_core("D", 12)
 
   print("all tests passed")    
     
