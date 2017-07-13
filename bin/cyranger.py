@@ -84,45 +84,24 @@ def unzip_to_temp(pdb):
 def run_cyrange(pdb):
   cyrange_path = os.path.join(".",determine_os(), "cyrange")
   cy_out = long_reap(syscmd(subprocess.PIPE, cyrange_path,pdb), pdb)
-  chain_range_dict = {}
-  for line in cy_out.split("\\n"):
-    #print line
-    if "Optimal" in line:
-      for element in line.split(" "):
-        if ".." in element:
-          lower,upper = element.strip(",:").split("..")
-          chain = ""
-          low_match = re.match("[A-Za-z]", lower)
-          upp_match = re.match("[A-Za-z]", upper)
-          if low_match and upp_match:
-            #use chain ID
-            chain = lower[0:1]
-            lower = lower[1:]
-            upper = upper[1:]
-          #print chain, lower, upper
-          if chain in chain_range_dict.keys():
-            old_range = chain_range_dict[chain]
-            old_range.extend(range(int(lower), int(upper)+1))
-            chain_range_dict[chain] = old_range
-          else:
-            chain_range_dict[chain] = range(int(lower), int(upper)+1)
-  #print chain_range_dict.keys()
-  if len(chain_range_dict.keys()) == 0:
-    sys.stderr.write(pdb+" failed to generate cyrange results\\n")
-  return chain_range_dict
+  pdb_cyrange_results = cyrange_results(cy_out)
+  return pdb_cyrange_results
 
-def trim_pdb(range_dict, pdb_file, do_gzip = False):
+def trim_pdb(pdb_cyrange_results, pdb_file, do_gzip = False):
   file_path, name = os.path.split(pdb_file)
-  out_path = os.path.join(file_path, os.path.splitext(name)[0]+"-core.pdb")
-  ill_defined_pdb = os.path.join(file_path, os.path.splitext(name)[0]+"-illdefined.pdb")
+  core_path = os.path.join(file_path, os.path.splitext(name)[0]+"-core.pdb")
+  notcore_path = os.path.join(file_path, os.path.splitext(name)[0]+"-illdefined.pdb")
   with open(pdb_file) as f:
     if do_gzip:
-      outfile = gzip.open(out_path+".gz", "wr")
+      corefile = gzip.open(core_path+".gz", "wr")
+      notcorefile = gzip.open(notcore_path+".gz", "wr")
     else:
-      outfile = open(out_path, 'wr')
+      corefile = open(core_path, 'wr')
+      notcorefile = open(notcore_path, "wr")
     for line in f:
       if line.startswith("MODEL") or line.startswith("END") or line.startswith("END"):
-        outfile.write(line)
+        corefile.write(line)
+        notcorefile.write(line)
       if line.startswith("ATOM"):
         #print ":"+line[21]+":"
         #print ":"+line[22:26]+":"
@@ -133,23 +112,26 @@ def trim_pdb(range_dict, pdb_file, do_gzip = False):
         #fixes bug where cyrange doesn't indicate nucleic acid residues by chain so they don't get removed
         #since cyrange is currently only protein only
         if not resname in nucacid_residues:
-          if chain in range_dict.keys() and int(res) in range_dict[chain]:
-            outfile.write(line)
-          elif "" in range_dict.keys() and int(res) in range_dict[""]:
-            outfile.write(line)
-    outfile.close()
+          if pdb_cyrange_results.is_core(chain, res):
+            corefile.write(line)
+          else:
+            notcorefile.write(line)
+        else:
+          notcorefile.write(line)
+    corefile.close()
+    notcorefile.close()
 
 def process_file(f):
   from_zip = False
   if f.endswith(".gz"):
     from_zip = True
     f = unzip_to_temp(f)
-  range_dict = run_cyrange(f)
-  if len(range_dict.keys()) > 0:
+  pdb_cyrange_results = run_cyrange(f)
+  if not pdb_cyrange_results.is_empty():
     if from_zip:
-      trim_pdb(range_dict,f,True)
+      trim_pdb(pdb_cyrange_results,f,True)
     else:
-      trim_pdb(range_dict,f)
+      trim_pdb(pdb_cyrange_results,f)
   if from_zip:
     os.unlink(f)
     
