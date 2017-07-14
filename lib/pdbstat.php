@@ -26,8 +26,11 @@ function describePdbStats($pdbstats, $useHTML = true)
         $details[] = "This compound is identified as $b$compnd$unb";
 
     // # of models, if any
-    if($pdbstats['models'] > 1) $details[] = "This is an multi-model structure, probably from NMR, with $b".$pdbstats['models']." distinct models$unb present.";
-    if(isset($pdbstats['resolution'])) $details[] = "This is a crystal structure at ".$pdbstats['resolution']." A resolution.";
+    if(isset($pdbstats['methodstring'])) $details[] = "This structure was solved by ".$pdbstats['methodstring'].".";
+    if(isset($pdbstats['resolution'])) $details[] = "This structure was solved at ".$pdbstats['resolution']." &Aring; resolution.";
+    if($pdbstats['models'] > 1) $details[] = "This is an multi-model structure, with $b".$pdbstats['models']." distinct models$unb present.";
+    //if($pdbstats['models'] > 1) $details[] = "This is an multi-model structure, probably from NMR, with $b".$pdbstats['models']." distinct models$unb present.";
+    //if(isset($pdbstats['resolution'])) $details[] = "This is a crystal structure at ".$pdbstats['resolution']." A resolution.";
 
     // # of chains and residues
     if($_SESSION['useSEGID'])
@@ -200,6 +203,7 @@ function pdbstat($pdbfilename)
         # Prefer TITLE records over COMPND records
         elseif(startsWith($s, "TITLE")) { $compnd  .= " " . trim(substr($s,10,60)); $hadtitle = TRUE; }
         elseif(startsWith($s, "COMPND") && !$hadtitle) { $compnd  .= " " . trim(substr($s,10,60)); }
+        elseif(startswith($s, "EXPDTA")) { $methodstring = trim(substr($s,10,60)); }
         elseif(startsWith($s, "REMARK"))
         {
             if(startsWith($s, 'REMARK   3   PROGRAM')) { $refiProg = trim(substr($s, 26, 44)); }
@@ -450,6 +454,7 @@ function pdbstat($pdbfilename)
     $ret['use_cdl']         = $use_cdl;
 
     if(isset($resolution))  $ret['resolution']  = $resolution;
+    if(isset($methodstring)) $ret['methodstring'] = $methodstring;
     if(isset($refiProg))    $ret['refiprog']    = $refiProg;
     if(isset($refiTemp))    $ret['refitemp']    = $refiTemp;
 
