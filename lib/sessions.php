@@ -89,7 +89,14 @@ function mpGetPath()
 #{{{ cctbxGetPath - gets path for cctbx executables
 function cctbxGetPath()
 {
-    $cctbxPath = MP_BASE_DIR."/build/bin";
+    #standard and "bootstrap" installs of MolProbity have different directory structures.
+    #This should account for both possibilities
+    if(is_dir(MP_BASE_DIR."/build/bin"))
+      $cctbxPath = MP_BASE_DIR."/build/bin";
+    elseif(is_dir(MP_BASE_DIR."/../build/bin"))
+      $cctbxPath = MP_BASE_DIR."/../build/bin";
+    else 
+      die("viable cctbxPath not found, see lib/sessions.php");
 
     if(MP_BIN_PATH != "")
       $cctbxPath = MP_BIN_PATH.":$cctbxPath";
