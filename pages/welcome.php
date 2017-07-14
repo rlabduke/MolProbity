@@ -303,6 +303,7 @@ function displayEnsembleTools($context)
     // "rel" (relevance) is 2 for major, 1 for minor, 0 for not shown.
     $tools = array(
         'reduce'    => array('desc' => 'Add hydrogens', 'page' => 'ens_reduce_setup.php', 'rel' => 1, 'img' => 'add_h.png'),
+        'coregen'  => array('desc' => 'Generate core ensemble', 'page' => 'ens_core_gen_setup.php', 'rel' => 2, 'img' => 'scissors.png'),
         'aacgeom'   => array('desc' => 'Analyze all-atom contacts and geometry (ensemble)', 'page' => 'ens_aacgeom_setup.php', 'rel' => 2, 'img' => 'clash_rama.png'),
         'biolunit'  => array('desc' => 'Biol. unit, not NMR', 'handler' => 'onConvertToBiolUnit', 'rel' => 1, 'img' => 'scissors.png'),
         'downgrade' => array('desc' => 'Downgrade file to PDBv2.3 format (for download only)', 'page' => 'pdb_convert_setup.php', 'rel' => 1, 'img' => 'downgrade.gif'),
