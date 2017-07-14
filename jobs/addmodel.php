@@ -158,6 +158,14 @@ if(isset($_SESSION['bgjob']['pdbCode']))
 }
 else
 {
+    //Check for illegal files
+    $file_passes = shell_exec('bash '.MP_BASE_DIR.'/cmdline/sanitize_input.sh '.$_SESSION['bgjob']['tmpPdb']);
+    if($file_passes != 1)
+    {
+      unlink($_SESSION['bgjob']['tmpPdb']);
+      mpLog("pdb-upload:uploaded file failed sanitation");
+      mpgeo_error_catch(1);
+    }
     // Remove illegal chars from the upload file name
     $origName = censorFileName($_SESSION['bgjob']['origName'], array("pdb", "ent", "xyz", "mtz", "cif"));
     $fileSource = "local disk";
