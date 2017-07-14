@@ -141,8 +141,9 @@ function display($context)
         $refresh    = "10; URL=$url";
         echo $this->pageHeader("CCTBX job failed");//, "none", $refresh);
         echo "<p>It appears that your CCTBX-powered job failed.\n";
-        echo "<br>This is probably due to a syntax error in one of the CCTBX scripts!\n";
-        echo "<br>See the session error log for hints, and please report the bug using the Feedback tool.\n";
+        echo "<br>This may be due to an error in the PDB-formatting of a submitted file.\n";
+        echo "<br>Or it may be due to a syntax error in one of the CCTBX scripts.\n";
+        echo "<br>See the session error log for hints, and please report the bug or seek assistance using the Feedback tool.\n";
         echo "<p><a href='$url'>Click here</a> to continue.\n";
         echo $this->pageFooter();
     }
