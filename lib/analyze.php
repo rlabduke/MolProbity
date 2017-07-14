@@ -79,6 +79,14 @@ function runAnalysis($modelID, $opts)
     if(isset($model['mtz_file']))
         $mtz_file = $model['mtz_file'];
     else $mtz_file = $_SESSION['models'][$model['parent']]['mtz_file'];
+    
+    if(is_array($opts['doEnsemble'])) {
+      $ensemble = $opts['doEnsemble'];
+      echo "Ensemble mode set for runAnalysis for ".$model[pdb]."\n";
+      //var_dump($ensemble);
+      $tasks['currentModel'] = "Analyzing $model[pdb] out of ".count($ensemble["models"]);
+      setProgress($tasks, 'currentModel');
+    }
 
     if($model['stats']['use_cdl'])  $geomsg = "Using CDL";
     else $geomsg = "";
@@ -471,7 +479,11 @@ function runAnalysis($modelID, $opts)
     $entry = "";
     if(is_array($clash) || is_array($rama) || is_array($rota) || is_array($cbdev) || is_array($pperp) || is_array($suites))
     {
-        $entry .= "<h3>Summary statistics</h3>\n";
+        if($opts['doEnsemble']) {
+          $entry .= "<h3>Summary statistics for $model[pdb]</h3>\n";
+        } else {
+          $entry .= "<h3>Summary statistics</h3>\n";
+        }
         $entry .= makeSummaryStatsTable($model['stats']['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, $cablam, $omega, $summaries, $curation);
     }
     $entry .= $improveText;
@@ -1214,7 +1226,7 @@ function loadRamachandranSummary($datafile)
   foreach($data as $line)
   {
     if (preg_match("/^SUMMARY/",$line)){
-            echo "match found";
+            echo "match found\n";
           //SUMMARY: 504 Favored, 12 Allowed, 2 Outlier out of 518 residues (altloc A where applicable)
           if (preg_match("/altloc/",$line)){
             $linebits = explode(' ',$line);

@@ -65,12 +65,24 @@ foreach($ensemble['models'] as $modelID)
     $infiles[] = $modelDir.'/'.$_SESSION['models'][$modelID]['pdb'];
     
 $tasks = array();
-if($opts['doKinemage'])         $tasks['multikin'] = "Create multi-criterion kinemage";
+if($opts['doCharts'])            $tasks['charts'] = "Create ensemble multi-criterion charts";
+if($opts['doEnsembleKinemage'])  $tasks['multikin'] = "Create ensemble multi-criterion kinemage";
 if($opts['doRamaPDF'])          $tasks['ramapdf'] = "Create multi-model Ramachandran plot (PDF)";
 if($opts['doMultiGraph'])       $tasks['multigraph'] = "Create multi-criterion graph";
 if($opts['doMultiModelChart'])  $tasks['multichart'] = "Create multi-criterion chart";
+$opts['doEnsemble'] = $ensemble;
+echo $ensemble;
     
-if($opts['doKinemage'])
+if($opts['doCharts']) {
+
+  setProgress($tasks, 'charts');
+  $labbookEntry .= "<h3>Model-by-model validation results</h3>\n";
+  $labbookEntry .= "<p>\n";
+  $labbookEntry .= runEnsembleAnalysis($ensemble, $opts);
+  
+}
+
+if($opts['doEnsembleKinemage'])
 {
     setProgress($tasks, 'multikin'); // updates the progress display if running as a background job
     $mcKinOpts = array(
@@ -80,8 +92,10 @@ if($opts['doKinemage'])
         'altconf'   =>  $opts['kinAltConfs'],
         'rama'      =>  $opts['kinRama'],
         'rota'      =>  $opts['kinRota'],
-        //'geom'      =>  $opts['kinGeom'],
+        'geom'      =>  $opts['kinGeom'],
         'cbdev'     =>  $opts['kinCBdev'],
+        'omega'     =>  $opts['kinOmega'],
+        'cablam'    =>  $opts['kinCablamLow'],
         'pperp'     =>  $opts['kinBaseP'],
         'clashdots' =>  $opts['kinClashes'],
         'hbdots'    =>  $opts['kinHbonds'],
@@ -96,7 +110,7 @@ if($opts['doKinemage'])
         destructiveGZipFile($outfile);
     }
 
-    $labbookEntry .= "<h3>Multi-criterion kinemage</h3>\n";
+    $labbookEntry .= "<h3>Multi-model multi-criterion kinemage</h3>\n";
     $labbookEntry .= "<p>\n";
     $labbookEntry .= "<i>Note: these kins are often too big to view in the browser. You may need to download it and view it off line.</i>\n";
     $labbookEntry .= "<br>".linkKinemage("$ensemble[prefix]multi.kin", "Multi-criterion kinemage");
