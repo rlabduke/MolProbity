@@ -85,7 +85,10 @@ Choose validations appropriate to a structure.</p>
 //      <li>Allows use of both electron cloud and nuclear x-H bond-lengths. Read more about this change <a href='".makeEventURL("onGoto", "helper_hydrogens.php")."'>here</a>.</li>
 //      <li>Full support for 2-character CHAINIDs added. 4-character SEGIDs also supported in place of CHAINIDs.</li>
 //      </ul>
-    echo("<h3>What's new in 4.3.1:</h3><ul>
+    echo("<h3>What's new in 4.4/h3<><ul>
+      <li>
+  </ul>
+    <h3>What's new in 4.3.1:</h3><ul>
       <li>This versioned release is timed to correspond with the Phenix 1.11 official release, and is expected to work with the corresponding version of the cctbx project.</li>
       <li>Update to Omegalyze kinemage output - markup now offset from backbone to reduce overlap with other markups.</li>
       <li>Ramachandran analysis reports alternate conformations more comprehensively at the residue level. Ramachandran summary statistics are given for alternate A only where applicable.</li>
@@ -715,7 +718,7 @@ function toggleUploadOptions()
 //        <br><br>If for some reason you need to use MolProbity4 version 4.02, which is now a retired legacy version, please go to <a style=\"color: #66FFFF\" href='http://rutile.biochem.duke.edu/' target='_blank'>http://rutile.biochem.duke.edu</a>.</strong></div>");
     echo("<div class=feature><b>Molprobity sites:</b>
       <br><a href='http://molprobity.biochem.duke.edu/' target='_blank'>Duke (US)</a> | <a href='http://molprobity.manchester.ac.uk/' target='_blank'>Manchester (UK)</a> | <a href='http://magma.research.duhs.duke.edu/~molprobity_beta/' target='_blank'>Beta (Recent developments; Unstable)</a>
-      <br><a href='http://rutile.biochem.duke.edu/' target='_blank'>Legacy version 4.02</a> (Current Molprobity requires strict PDB format. 4.02 is more forgiving, but lacks recent features. Format repair is preferable.)
+      <br>Legacy version 4.02 has been retired. Please contact us through the 'Feedback & bugs' link if this affects your MolProbity use.
       <br>
       <br><b>Usage Guidelines:</b>
       <br>These web services are provided for analysis of individual structures, not batch runs.</div>");
