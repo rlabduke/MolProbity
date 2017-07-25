@@ -79,14 +79,30 @@ Choose validations appropriate to a structure.</p>
 
 
 <?php
+//    <h3>What's new in 4.2:</h3><ul>
+//      <li>Cis-peptide identification, markup and statistics now available.</li>
+//      <li>CaBLAM C&alpha;-based validation of protein backbone and secondary structure now available.</li>
+//      <li>Rotamer validation now uses <a href='http://kinemage.biochem.duke.edu/databases/top8000.php' target='_blank'>Top8000</a> rotamer distributions. Favored vs Allowed distinction introduced for rotamers.</li>
+//      <li>New coloring scheme in multicriterion chart encodes outlier severity at a glance.</li>
+//      <li><a target='_blank' href='help/validation_options/validation_options.html'>Online tutorial</a> explaining markup and methods</li>
+//      <li>We now use a conformation-dependent library (CDL) from Dunbrack and Karplus for geometry analysis if requested.
+//      </ul>
+//      <h3>What's new in 4.1:</h3><ul>
+//      <li>Validation analysis now powered by CCTBX. Also adds geometry regularization for N/Q/H flip corrections. Read more about this change <a href='".makeEventURL("onGoto", "helper_cctbx.php")."'>here</a>.</li>
+//      <li>Alternate conformations now handled for validation analysis.</li>
+//      </ul>
 //      <h3>What's new in 4.0:</h3><ul>
 //      <li>Updated Reduce-added hydrogen lengths to be more consistent with other crystallography software.</li>
 //      <li>New <a href='http://kinemage.biochem.duke.edu/databases/top8000.php' target='_blank'>Top8000</a> Ramachandran validation information.</li>
 //      <li>Allows use of both electron cloud and nuclear x-H bond-lengths. Read more about this change <a href='".makeEventURL("onGoto", "helper_hydrogens.php")."'>here</a>.</li>
 //      <li>Full support for 2-character CHAINIDs added. 4-character SEGIDs also supported in place of CHAINIDs.</li>
 //      </ul>
-    echo("<h3>What's new in 4.4/h3<><ul>
-      <li>
+    echo("<h3>What's new in 4.4</h3><ul>
+      <li>This versioned release is timed to correspond with the Phenix 1.12 official release, and is expected to work with the corresponding version of the cctbx project.</li>
+      <li>MolProbity now provides simultaneous validation for ensemble structures of up to 50 models. After validation is complete, use the tabs to switch between models.</li>
+      <li>MolProbity now accepts mmCIF file uploads and can fetch structures only available as mmCif. These files will be automatically converted to PDB hybrid36 format for validation.</li>
+      <li>Severely twisted peptides (more than 45&deg; from planar) are now colored red in the multicriterion chart, like other especially severe outliers.</li>
+      <li>More user control of feedback for non-trans peptides is available in the validation selection menu.</li>
   </ul>
     <h3>What's new in 4.3.1:</h3><ul>
       <li>This versioned release is timed to correspond with the Phenix 1.11 official release, and is expected to work with the corresponding version of the cctbx project.</li>
@@ -100,18 +116,6 @@ Choose validations appropriate to a structure.</p>
       <li>Updates to Omegalyze kinemage output - markup defaults to 'off', separate colors for cis-pro (sea), cis-nonpro (lime), and all twisted (yellow).</li>
       <li>Improved error catching, with 'how to fix it' notes for common formatting errors</li>
 	</ul>
-    <h3>What's new in 4.2:</h3><ul>
-      <li>Cis-peptide identification, markup and statistics now available.</li>
-      <li>CaBLAM C&alpha;-based validation of protein backbone and secondary structure now available.</li>
-      <li>Rotamer validation now uses <a href='http://kinemage.biochem.duke.edu/databases/top8000.php' target='_blank'>Top8000</a> rotamer distributions. Favored vs Allowed distinction introduced for rotamers.</li>
-      <li>New coloring scheme in multicriterion chart encodes outlier severity at a glance.</li>
-      <li><a target='_blank' href='help/validation_options/validation_options.html'>Online tutorial</a> explaining markup and methods</li>
-      <li>We now use a conformation-dependent library (CDL) from Dunbrack and Karplus for geometry analysis if requested.
-      </ul>
-      <h3>What's new in 4.1:</h3><ul>
-      <li>Validation analysis now powered by CCTBX. Also adds geometry regularization for N/Q/H flip corrections. Read more about this change <a href='".makeEventURL("onGoto", "helper_cctbx.php")."'>here</a>.</li>
-      <li>Alternate conformations now handled for validation analysis.</li>
-      </ul>
       </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>");
 ?>
 
