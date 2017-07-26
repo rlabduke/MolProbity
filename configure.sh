@@ -21,17 +21,10 @@ then
   fi
 fi
 
-echo ++++++++++ getting MolProbity base ...
-if [ ! -f base.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/base.tar.gz -o base.tar.gz; echo got.;
-else echo already got.; fi
-echo unpacking ...
-if [ ! -d base ]; then tar zxf base.tar.gz; echo unpacked.;
-else echo already unpacked.; fi
-
 echo ++++++++++ creating build directories ...
-if [ ! -d sources ]; then mkdir sources; fi
+if [ ! -d modules ]; then mkdir modules; fi
 if [ ! -d build ]; then mkdir build; fi
-cd sources
+cd modules
 
 echo ++++++++++ getting sources ...
 if [ -n "$sf_user" ]
@@ -56,6 +49,14 @@ else
         svn --quiet --non-interactive --trust-server-cert co https://svn.code.sf.net/p/cbflib/code-0/trunk/CBFlib_bleeding_edge cbflib
     fi
 fi
+
+#echo ++++++++++ getting MolProbity base ...
+#MolProbity base was previously obtained at this point, prior to switching to bootstrap
+#if [ ! -f base.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/base.tar.gz -o base.tar.gz; echo got.;
+#else echo already got.; fi
+#echo unpacking ...
+#if [ ! -d base ]; then tar zxf base.tar.gz; echo unpacked.;
+#else echo already unpacked.; fi
 
 #svn --non-interactive --trust-server-cert co https://quiddity.biochem.duke.edu/svn/reduce/trunk reduce
 #svn --non-interactive --trust-server-cert co https://quiddity.biochem.duke.edu/svn/probe/trunk probe
@@ -93,11 +94,19 @@ tar zxf ccp4io_adaptbx.gz
 tar zxf chem_data.tar.gz
 tar zxf tntbx.gz
 
+cd ..
+echo ++++++++++ getting MolProbity base ...
+if [ ! -d base ]; then python modules/cctbx_project/libtbx/auto_build/bootstrap.py --builder=molprobity base
+else echo base already exists.; fi
+#'base' dependencies were previously served as a tarball on the kinemage server
+#This version obtains the base through the bootstrap builder used by cctbx
+#This change should help keep dependencies up to date
+
 echo ++++++++++ creating Makefile ...
-cd ../build
+cd build
 
 #this script, at minimum, creates the Makefile for the make operation that follows
-python ../sources/cctbx_project/libtbx/configure.py mmtbx
+python ../modules/cctbx_project/libtbx/configure.py mmtbx
 
 echo ++++++++++ making ...
 #As of this writing, the default make command below evaluates to:
