@@ -102,11 +102,14 @@ else echo base already exists.; fi
 #This version obtains the base through the bootstrap builder used by cctbx
 #This change should help keep dependencies up to date
 
+#Alternate build process:
+#python modules/cctbx_project/libtbx/auto_build/bootstrap.py --builder=molprobity build
+
 echo ++++++++++ creating Makefile ...
 cd build
 
 #this script, at minimum, creates the Makefile for the make operation that follows
-python ../modules/cctbx_project/libtbx/configure.py mmtbx
+../base/bin/python ../modules/cctbx_project/libtbx/configure.py mmtbx
 
 echo ++++++++++ making ...
 #As of this writing, the default make command below evaluates to:
