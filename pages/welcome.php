@@ -102,6 +102,7 @@ Choose validations appropriate to a structure.</p>
       <li>MolProbity now provides simultaneous validation for ensemble structures of up to 50 models. After validation is complete, use the tabs to switch between models.</li>
       <li>MolProbity now accepts mmCIF file uploads and can fetch structures only available as mmCif. These files will be automatically converted to PDB hybrid36 format for validation.</li>
       <li>Severely twisted peptides (more than 45&deg; from planar) are now colored red in the multicriterion chart, like other especially severe outliers.</li>
+      <li>Limited CaBLAM validation now available for CA-only models.</li>
       <li>More user control of feedback for non-trans peptides is available in the validation selection menu.</li>
   </ul>
     <h3>What's new in 4.3.1:</h3><ul>
