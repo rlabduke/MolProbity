@@ -22,16 +22,19 @@ Linux users: python-dev is a dependency of one of MolProbity's cctbx
 dependencies, and may need to be installed. The build script will warn
 you about this if it fails for this reason.
 
+Mac users: The Xcode app and xcode commandline tools may be needed to install
+MolProbity.
+
 0. Acquiring MolProbity
 
 Currently the only way to get MolProbity is from GitHub. For users, we suggest:
 
-git clone https://github.com/rlabduke/MolProbity.git --branch molprobity_4.3.1 --single-branch --depth 1
+git clone https://github.com/rlabduke/MolProbity.git --branch molprobity_4.4 --single-branch --depth 1
 
 This will check out just the most recent release of the code. If you
 did a whole-repository checkout instead, let us suggest you swap to a
-stable release branch (currently molprobity_4.2) over the master
-development branch.  Just "git checkout molprobity_4.2" from the
+stable release branch (currently molprobity_4.4) over the master
+development branch.  Just "git checkout molprobity_4.4" from the
 directory containing this readme.
 
 1. Run configure.sh. 
