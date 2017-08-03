@@ -42,59 +42,50 @@ OUTPUTS (via $_SESSION['bgjob']):
 
 # MAIN - the beginning of execution for this page
 ############################################################################
-$oldEnsID = $_SESSION['bgjob']['ensID'];
+$oldEnsid = $_SESSION['bgjob']['ensID'];
 $oldEns = $_SESSION['ensembles'][$oldEnsID];
 $method = $_SESSION['bgjob']['method'];
 
-$reduce_blength = $_SESSION['bgjob']['reduce_blength'];
-$_SESSION['reduce_blength'] = $reduce_blength;
-
-$flags = '';
-
-$reduce_method = $method;
-
-// Set up progress message
-if($reduce_blength == 'nuclear')
-{
-  $reduce_method = "$method -nuclear";
-}
-$tasks['reduce'] = "Add H with <code>reduce -$reduce_method</code>";
+$tasks['cyrange'] = "Create core and noncore PDB files with <code>CYRANGE</code>";
 $tasks['notebook'] = "Add entry to lab notebook";
 
-setProgress($tasks, 'reduce'); // updates the progress display if running as a background job
-if($method == 'build')
-    $newEnsID = reduceEnsemble($oldEnsID, 'reduceBuild');
-elseif($method == 'nobuild')
-    $newEnsID = reduceEnsemble($oldEnsID, 'reduceNoBuild');
-else
-    $newEnsID = reduceEnsemble($oldEnsID /*, default mode */);
-$newEns = $_SESSION['ensembles'][$newEnsID];
-$_SESSION['lastUsedModelID'] = $newEnsID; // this is now the current model
+setProgress($tasks, 'cyrange'); // updates the progress display if running as a background job
+//if($method == 'build')
+//    $newEnsID = reduceEnsemble($oldEnsID, 'reduceBuild');
+//elseif($method == 'nobuild')
+//    $newEnsID = reduceEnsemble($oldEnsID, 'reduceNoBuild');
+//else
+//    $newEnsID = reduceEnsemble($oldEnsID /*, default mode */);
+$newEnsembles = runCyrangerEnsemble($oldEnsid);
+$coreEnsid = $newEnsembles[0];
+$noncoreEnsid = $newEnsembles[1];
+print "coreEnsID: ".$coreEnsid."\n";
+print "noncoreEnsID: ".$noncoreEnsid."\n";
+
+$coreEns = $_SESSION['ensembles'][$coreEnsid];
+$noncoreEns = $_SESSION['ensembles'][$noncoreEnsid];
+$_SESSION['lastUsedModelID'] = $coreEnsid; // this is now the current model
 
 setProgress($tasks, 'notebook');
-$pdb = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$newEns['pdb'];
-$url = $_SESSION['dataURL'].'/'.MP_DIR_MODELS.'/'.$newEns['pdb'];
-// This should find the line for the first model, at least.
-// Some USER MOD records may be munged by the model-joining process.
-$hcount = countReduceChanges($pdb);
+$pdb = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$coreEns['pdb'];
+$url = $_SESSION['dataURL'].'/'.MP_DIR_MODELS.'/'.$coreEns['pdb'];
+$noncorepdb = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$noncoreEns['pdb'];
+$noncoreurl = $_SESSION['dataURL'].'/'.MP_DIR_MODELS.'/'.$noncoreEns['pdb'];
 
-$entry = "Reduce was run on all models of $oldEns[pdb] to add and optimize missing hydrogens, resulting in $newEns[pdb].\n";
-if($hcount)
+$cyrange_count = countCyrangeChanges($pdb);
+
+$entry = "Cyrange was run on all models of $oldEns[pdb] to determine the well-ordered residues. Two new ensembles have been created: $coreEns[pdb] and $noncoreEns[pdb].\n";
+if($cyrange_count)
 {
-    $entry .= "$hcount[found] hydrogens were found in the original model, and $hcount[add] hydrogens were added.\n";
-    if($hcount['std']) $entry .= "$hcount[std] H were repositioned to standardize bond lengths.\n";
-    if($hcount['adj']) $entry .= "The positions of $hcount[adj] hydrogens were adjusted to optimize H-bonding.\n";
+    $entry .= "$cyrange_count[core] core residues and $cyrange_count[noncore] non-core residues were found per model.\n";
 }
-$entry .= "Asn/Gln/His flips were ".($method == 'build' ? "" : "not")." optimized.\n";
-if($reduce_blength == 'ecloud') $flags = 'electron-cloud';
-else $flags = 'nuclear';
-$entry .= "<p>Reduce placed hydrogens at $flags positions.\n";
-$entry .= "<p>You can now <a href='$url'>download the annotated PDB file</a> (".formatFilesize(filesize($pdb)).").</p>\n";
+
+$entry .= "<p>You can now download the <a href='$url'>core PDB file</a> (".formatFilesize(filesize($pdb)).") or the <a href='$noncoreurl'>non-core PDB file</a> (".formatFilesize(filesize($noncorepdb)).").</p>\n";
 $_SESSION['bgjob']['labbookEntry'] = addLabbookEntry(
-    "Added H with -$method to get $newEns[pdb]",
+    "Ran CYRANGE to get $coreEns[pdb] and $noncoreEns[pdb]",
     $entry,
-    "$oldEnsID|$newEnsID", // applies to both old and new ensemble
-    "auto",
+    "$oldEnsid|$coreEnsid|$noncoreEnsid", // applies to old and new ensembles
+    "cyrange",
     "add_h.png"
 );
 

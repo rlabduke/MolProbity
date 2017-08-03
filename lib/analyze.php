@@ -1826,6 +1826,13 @@ function hasMoltype($geom, $moltype) {
 }
 #}}}########################################################################
 
+//{{{ runCyranger - runs cyrange program on an ensemble to determine core/non-core parts
+function runCyranger($infile, $outcorefile, $outnoncorefile)
+{
+  echo "python ".MP_BASE_DIR."/bin/cyranger.py -pdb_file $infile -core_output $outcorefile -noncore_output $outnoncorefile\n";
+  exec("python ".MP_BASE_DIR."/bin/cyranger.py -pdb_file $infile -core_output $outcorefile -noncore_output $outnoncorefile");
+}
+//}}}
 
 #{{{ runJiffiloop - fills gaps in protein structures with fragments
 ############################################################################

@@ -319,7 +319,10 @@ function displayEnsembleTools($context)
         $tools['reduce']['rel'] = 2;
         //$tools['aacgeom']['rel'] = 1;
     }
-
+    
+    // core/non-core split
+    if($ensemble['isCored'])
+      $tools['coregen']['rel'] = 0;
 
     $this->formatTools($tools);
 }

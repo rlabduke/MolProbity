@@ -238,6 +238,7 @@ function addModelOrEnsemble(
         $ensemble['models'] = $idList;
         $ensemble['history'] = "Ensemble of ".count($idList)." models uploaded by user";
         $ensemble['isUserSupplied'] = $isUserSupplied;
+        if($segmap) $ensemble['segmap']  = $segmap;
 
         $pdbList = array();
         foreach($idList as $modelNum => $id) $pdbList[$modelNum] = $outpath.'/'.$_SESSION['models'][$id]['pdb'];
@@ -257,6 +258,7 @@ function addModelOrEnsemble(
             // Jane prefers the model number in front. This is good for kins,
             // so mdl can be ID'd, but bad for sorting multiple structures...
             $model = createModel(sprintf("m%02d_{$origID}_trimmed", $modelNum));
+            var_dump($model);
             $id = $model['id'];
             // Better to keep the original model numbers hanging around:
             //$idList[] = $id;
@@ -286,6 +288,7 @@ function addModelOrEnsemble(
           $ensemble['models'] = $idList;
           $ensemble['history'] = "Ensemble of ".count($idList)." models uploaded by user (trimmed)";
           $ensemble['isUserSupplied'] = $isUserSupplied;
+          if($segmap) $ensemble['segmap'] = $segmap;
 
           $pdbList = array();
           foreach($idList as $modelNum => $id) $pdbList[$modelNum] = $outpath.'/'.$_SESSION['models'][$id]['pdb'];
@@ -1633,6 +1636,165 @@ function checkAnyMODEL($inpath)
 }
 #}}}########################################################################
 
+#{{{ runCyrangerEnsemble
+############################################################################
+/**
+* Calling this function runs cyranger.py on an ensemble to generate split PDB files.
+*
+* Returns the ID of the newly minted ensemble.
+*
+* $ensID        the ensemble ID for the ensemble to reduce
+*/
+function runCyrangerEnsemble($ensid)
+{
+    $origEns        = $_SESSION['ensembles'][$ensid];
+    echo "segmap".$origEns['segmap'];
+    $idList     = array();
+    //$pdbList    = array();
+    
+    $coreEns = createEnsemble($ensid."-core");
+    $noncoreEns = createEnsemble($ensid."-noncore");
+
+    $origenspath     = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$origEns['pdb'];
+    $coreoutpath = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$coreEns['pdb'];
+    $noncoreoutpath = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$noncoreEns['pdb'];
+    
+    echo "ens path: ".$origenspath."\n";
+    echo "core out path: ".$coreoutpath."\n";
+    echo "noncore out path: ".$noncoreoutpath."\n";
+    runCyranger($origenspath, $coreoutpath, $noncoreoutpath);
+    
+    $coreidList = splitPdbAndAddModelInfo($coreoutpath, $coreEns['id'], $origEns['isUserSupplied'], $origEns['segmap']);
+    $noncoreidList = splitPdbAndAddModelInfo($noncoreoutpath, $noncoreEns['id'], $origEns['isUserSupplied'], $origEns['segmap']);
+    
+    //foreach($ens['models'] as $modelNum => $modelID)
+    //{
+    //    $oldModel   = $_SESSION['models'][$modelID];
+    //    $newcoreModel   = createModel($modelID."-core");
+    //    $newnoncoreModel = createModel($modelID."-noncore");
+    //    $outcorename    = $newcoreModel['pdb'];
+    //    $outnoncorename = $newnoncoreModel['pdb'];
+    //    $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
+    //    if(!file_exists($outpath)) mkdir($outpath, 0777); // shouldn't ever happen, but might...
+    //    $outcorepath    = $outpath.'/'.$outcorename;
+    //    $outnoncorepath = $outpath.'/'.$outnoncorename;
+    //    //$inpath     = $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$oldModel['pdb'];
+    //    // FUNKY: calls the function whose name is stored in the variable $reduceFunc
+    //    //runCyranger($inpath, $outpath, $reduce_blength);
+    //
+    //    $newModel['stats']          = pdbstat($outpath);
+    //    $newModel['parent']         = $modelID;
+    //    $newModel['history']        = "Derived from $oldModel[pdb] by $reduceFunc";
+    //    $newModel['isUserSupplied'] = $oldModel['isUserSupplied'];
+    //    //$newModel['isReduced']      = ($reduceFunc != 'reduceTrim');
+    //    //$newModel['isBuilt']        = ($reduceFunc == 'reduceBuild');
+    //    $_SESSION['models'][ $newModel['id'] ] = $newModel;
+    //
+    //    $idList[$modelNum]  = $newModel['id'];
+    //    //$pdbList[$modelNum] = $outpath;
+    //}
+
+    $coreEns['models']     = $coreidList;
+    $coreEns['history']        = "Core ensemble of ".count($origEns['models'])." models derived from $origEns[pdb] by CYRANGE";
+    $coreEns['isReduced']      = $origEns['isReduced'];
+    $coreEns['isBuilt']        = $origEns['isBuilt'];
+    $coreEns['isUserSupplied'] = $origEns['isUserSupplied'];
+    $coreEns['isCored']        = true;
+    
+    $noncoreEns['models']   = $noncoreidList;
+    $noncoreEns['history']        = "Noncore ensemble of ".count($origEns['models'])." models derived from $origEns[pdb] by CYRANGE";
+    $noncoreEns['isReduced']      = $origEns['isReduced'];
+    $noncoreEns['isBuilt']        = $origEns['isBuilt'];
+    $noncoreEns['isUserSupplied'] = $origEns['isUserSupplied'];
+    $noncoreEns['isCored']        = true;
+    //$ensemble = createEnsemble($ensID."-noncore");
+    
+
+    //$joinedModel = joinPdbModels($pdbList);
+    //copy($joinedModel, $_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$ensemble['pdb']);
+    //unlink($joinedModel);
+
+    // Create the ensemble entry
+    $coreid = $coreEns['id'];
+    $_SESSION['ensembles'][$coreid] = $coreEns;
+    $noncoreid = $noncoreEns['id'];
+    $_SESSION['ensembles'][$noncoreid] = $noncoreEns;
+    print $coreid."\n";
+    print ":".$noncoreid.":"."\n";
+    return array($coreid, $noncoreid);
+}
+#}}}
+
+//{{{ 
+function splitPdbAndAddModelInfo($inputPdb, $origId, $isUserSupplied, $segmap) {
+  // Original task list set during preparePDB()
+  $idList     = array();
+  $tasks = getProgressTasks();
+  $tasks['splitNMR'] = "Split NMR models into separate PDB files";
+  setProgress($tasks, "splitNMR");
+  
+  $outpath    = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
+  if(!file_exists($outpath)) mkdir($outpath, 0777);
+  
+  $splitModels = splitPdbModels($inputPdb);
+  $idList = array();
+  foreach($splitModels as $modelNum => $tmpModel)
+  {
+    // Jane prefers the model number in front. This is good for kins,
+    // so mdl can be ID'd, but bad for sorting multiple structures...
+    $model = createModel(sprintf("m%02d_{$origId}", $modelNum));
+    var_dump($model);
+    $id = $model['id'];
+    // Better to keep the original model numbers hanging around:
+    //$idList[] = $id;
+    $idList[$modelNum] = $id;
+    
+    $file = $outpath.'/'.$model['pdb'];
+    copy($tmpModel, $file);
+    unlink($tmpModel);
+    
+    $model['stats']                 = pdbstat($file);
+    if ($model['stats']['originalInputH']) $inputHasH = true;
+    if ($model['stats']['non_ecloud_H']) $hasNuclearH = true;
+    if ($inputHasH && $hasNuclearH) $_SESSION['reduce_blength'] = 'nuclear';
+    $model['history']               = "Model $modelNum from file uploaded by user";
+    $model['isUserSupplied']        = $isUserSupplied;
+    if($segmap) $model['segmap']    = $segmap;
+    
+    // Create the model entry
+    $_SESSION['models'][$id] = $model;
+    $idList[$modelNum]  = $model['id'];
+  }
+  return $idList;
+}
+//}}}
+
+#{{{ countCyrangeChanges - report number of residues split by Cyrange
+############################################################################
+/**
+* Returns an array with the following keys, or null if no USER MOD found.
+*   core          number of core residues in each model
+*   noncore       number of noncore residues in each model
+*/
+function countCyrangeChanges($pdbfile)
+{
+    $in = fopen($pdbfile, 'rb');
+    if($in) while(!feof($in))
+    {
+        $s = fgets($in, 1024);
+        if(preg_match('/^USER  MOD +cyranger.+?core=(\d+).+?noncore=(\d+)/', $s, $fields))
+        {
+            $ret = array(
+                'core'      => $fields[1],
+                'noncore'   => $fields[2]
+            );
+            break;
+        }
+    }
+    fclose($in);
+    return $ret;
+}
+#}}}########################################################################
 
 #{{{ SML_cout - stupid replacement to actually get output
 ############################################################################
