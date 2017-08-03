@@ -155,7 +155,7 @@ function checkSettingsBeforeSubmit()
         echo "</table></p>\n";
 ?>
 <hr>
-<div class='alert'>This analysis may take a long time if the ensemble is large! Only the first 50 models (if present) will be analyzed.</div>
+<div class='alert'>This analysis may take a long time if the ensemble is large! Only the first 80 models (if present) will be analyzed.</div>
 <h3>Choose which analyses to run:</h3>
 Default options have been selected based on the content of the submitted file.
 <br>Follow the <a target="_blank" href="help/validation_options/validation_options.html"> <img src="img/helplink.jpg" alt="" title="General help"></a> symbols for more information on the validation options.

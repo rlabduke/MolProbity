@@ -99,7 +99,7 @@ Choose validations appropriate to a structure.</p>
 //      </ul>
     echo("<h3>What's new in 4.4</h3><ul>
       <li>This versioned release is timed to correspond with the Phenix 1.12 official release, and is expected to work with the corresponding version of the cctbx project.</li>
-      <li>MolProbity now provides simultaneous validation for ensemble structures of up to 50 models. After validation is complete, use the tabs to switch between models.</li>
+      <li>MolProbity now provides simultaneous validation for ensemble structures up to 80 models. After validation is complete, use the tabs to switch between the results for the models.</li>
       <li>MolProbity now accepts mmCIF file uploads and can fetch structures only available as mmCif. These files will be automatically converted to PDB hybrid36 format for validation.</li>
       <li>Severely twisted peptides (more than 45&deg; from planar) are now colored red in the multicriterion chart, like other especially severe outliers.</li>
       <li>Limited CaBLAM validation now available for CA-only models.</li>
