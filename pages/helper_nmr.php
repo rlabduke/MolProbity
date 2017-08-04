@@ -48,7 +48,7 @@ and the errors could impact the biological conclusion you wish to draw.
     Running all the various analyses may take a few minutes, so please be patient.
     <p>The <b>all-atom contact</b> analysis is concerned with steric interactions inside the model.
     Non-(H)bonded atoms with substantial (e.g. &gt;0.4&Aring;) van der Waals overlap
-    are errors in the model; the energetic cost is enormous relative the stability of a macromolecule.
+    are errors in the model; the energetic cost is enormous relative to the stability of a macromolecule.
     The clashscore is the number of these overlaps per 1000 atoms; smaller numbers are better.
     You can see the individual clashes in the multi-criterion kinemage as hot pink spikes,
     which is useful for seeing if the errors affect your region(s) of interest.
