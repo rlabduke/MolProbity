@@ -32,13 +32,17 @@ and the errors could impact the biological conclusion you wish to draw.
     <a href='http://www.pdb.org/' target='blank'>Protein Data Bank</a> or the
     <a href='http://ndbserver.rutgers.edu/' target='blank'>Nucleic Acid Data Bank</a>.
 </li>
-<li><b><?php echo "<a href='".makeEventURL("onCall", "reduce_setup.php")."'>Add hydrogens (usually unnecessary)</a>"; ?>:</b>
+<li><b><?php echo "<a href='".makeEventURL("onCall", "ens_reduce_setup.php")."'>Add hydrogens (usually unnecessary)</a>"; ?>:</b>
     Explicit hydrogens are needed for many of MolProbity's analyses to function correctly, but
     structures determined by NMR almost always include them. By default hydrogens are trimmed from 
     structures on upload, but your original file can be selected using the "Currently working on:" drop-down menu.
     Alternatively, you can use the "Add hydrogens" option to use our Reduce program to add hydrogens to the trimmed version.
 </li>
-<li><b><?php echo "<a href='".makeEventURL("onCall", "aacgeom_setup.php")."'>Analyze sterics &amp; geometry for single models</a>"; ?>:</b>
+<li><b><?php echo "<a href='".makeEventURL("onCall", "ens_core_gen_setup.php")."'>Calculate core and non-core residues of an ensemble</a>"; ?>:</b>
+    MolProbity includes an option to use the <a href='http://www.bpc.uni-frankfurt.de/cyrange.html'>CYRANGE</a> program to calculate the well-defined core residues
+    of an ensemble and create new ensembles containing either core or non-core residues so you can obtain the quality statistics of just those residues.
+</li>
+<li><b><?php echo "<a href='".makeEventURL("onCall", "ens_aacgeom_setup.php")."'>Analyze sterics &amp; geometry for single models</a>"; ?>:</b>
     Most NMR structures are reported as ensembles of models. MolProbity splits ensemble PDB files into separate model PDB files.
     Each of these model files can be analyzed one at a time. Alternatively, MolProbity is now able to analyze models in an
     ensemble file all at once (see below).
