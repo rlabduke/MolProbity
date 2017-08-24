@@ -45,7 +45,7 @@ function display($context)
         echo "<p><table width='100%' border='0'>\n";
 
         $check1 = ""; $check2 = "checked";
-        echo "<tr valign='top'><td width='400'><input type='radio' name='method' value='cyrange' $check1> <b>Use <code>CYRANGE</code> to calculate core residues</b></td>";
+        echo "<tr valign='top'><td width='400'><input type='radio' name='method' value='cyrange' $check2> <b>Use <code>CYRANGE</code> to calculate core residues</b></td>";
         echo "<td><small>Calculate core residues using <code>CYRANGE</code> and split PDB into core/non-core residues\n</td>";
         echo "<tr><td colspan='2'>&nbsp;</td></tr>\n"; // vertical spacer
         echo "</table></p>\n";
