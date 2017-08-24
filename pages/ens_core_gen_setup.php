@@ -83,7 +83,7 @@ windowOnload(function() {
 <hr>
 <div class='help_info'>
 <h4>Generating core/non-core PDB files</h4>
-<i>TODO: Help text about CYRANGE goes here</i>
+This option runs the CYRANGE program, developed by D.K. Kirchner and P. Güntert at Goethe University Frankfurt. Please cite D.K. Kirchner and P. Güntert, BMC Bioinformatics 2011, 12:170 if you make use of this feature.
 </div>
 <?php
     }
