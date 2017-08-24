@@ -23,8 +23,8 @@ function runEnsembleAnalysis($ensemble, $opts) {
   $labbookEntry .= "\n</script>\n";
   $labbookEntry .= "<div class=\"tab\">\n";
   //var_dump($ensemble);
-  //use only a portion of the ensemble to limit the number of models analyzed to 50 first models
-  $ensembleModelsToAnalyze = array_slice($ensemble['models'], 0, 50);
+  //use only a portion of the ensemble to limit the number of models analyzed to 80 first models
+  $ensembleModelsToAnalyze = array_slice($ensemble['models'], 0, 80);
   foreach ($ensembleModelsToAnalyze as $modelID) {
     $labbookEntry .= "  <button class=\"tablinks\" onclick=\"openTab(event, '$modelID')\"><b>Model ".extractModelNumber($modelID)."</b></button>\n";
   }

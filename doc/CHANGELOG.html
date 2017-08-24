@@ -96,6 +96,38 @@
 ===  CHANGE LOG  =============================================================
 ==============================================================================
 
+### 4.4 new features ###
+- CCTBX changes
+-- fixed a bug where cis peptides were not being identified correctly in ramalyze
+-- clashscore should run faster now
+- Installation changes
+-- The configure script now uses bootstrap for the base and build phases
+---- This is slower than before, but should ensure good future compatability
+-- CaBLAM, ramalyze, and rotalyze contours are all available in
+   https://github.com/rlabduke/reference_data
+---- Future versions of the installation should be arranged to pull these
+     contours from github
+- MolProbity changes
+-- Legacy 4.02 site has been retired due to problems with its host machine.
+   Nearly all aspects of 4.02 validation were out of date, so its return is
+   unlikely.
+-- Can now fetch and upload mmcif files. These are converted to hybrid36 format
+   (which reduce and probe can read) by phenix.cif_as_pdb
+-- A light sanitization check of uploaded files is now in place.
+-- Now supports full validation for multi-model files. Results are organized by
+   tabs on Summary Statistics page. Cap on number of models to accept still in
+   flux.
+-- "Twisted" peptides that are also 45 degrees or more from planar are now
+   considered severe outliers and colored red in the multicrit chart
+-- Switched CaBLAM validation to use newer code that better handles alternate
+   conformations and allows limited assessment of CA-only models
+---- Note: an actual workflow for CA-only models should be developed
+-- By default, the summary statistics table hides cis-nonPro and twisted peptide
+   statistics if none are present in the structure. A button has been added to
+   the validation selection page to force these statistics to be displayed.
+---- Curation of output by default, with optional user override should be a
+     guiding principle
+
 ### 4.3.1 new features ###
 - Reduce changes
 -- methyl groups on methionine sidechains no longer free to rotate by default

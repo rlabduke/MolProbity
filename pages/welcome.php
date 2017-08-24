@@ -79,13 +79,33 @@ Choose validations appropriate to a structure.</p>
 
 
 <?php
+//    <h3>What's new in 4.2:</h3><ul>
+//      <li>Cis-peptide identification, markup and statistics now available.</li>
+//      <li>CaBLAM C&alpha;-based validation of protein backbone and secondary structure now available.</li>
+//      <li>Rotamer validation now uses <a href='http://kinemage.biochem.duke.edu/databases/top8000.php' target='_blank'>Top8000</a> rotamer distributions. Favored vs Allowed distinction introduced for rotamers.</li>
+//      <li>New coloring scheme in multicriterion chart encodes outlier severity at a glance.</li>
+//      <li><a target='_blank' href='help/validation_options/validation_options.html'>Online tutorial</a> explaining markup and methods</li>
+//      <li>We now use a conformation-dependent library (CDL) from Dunbrack and Karplus for geometry analysis if requested.
+//      </ul>
+//      <h3>What's new in 4.1:</h3><ul>
+//      <li>Validation analysis now powered by CCTBX. Also adds geometry regularization for N/Q/H flip corrections. Read more about this change <a href='".makeEventURL("onGoto", "helper_cctbx.php")."'>here</a>.</li>
+//      <li>Alternate conformations now handled for validation analysis.</li>
+//      </ul>
 //      <h3>What's new in 4.0:</h3><ul>
 //      <li>Updated Reduce-added hydrogen lengths to be more consistent with other crystallography software.</li>
 //      <li>New <a href='http://kinemage.biochem.duke.edu/databases/top8000.php' target='_blank'>Top8000</a> Ramachandran validation information.</li>
 //      <li>Allows use of both electron cloud and nuclear x-H bond-lengths. Read more about this change <a href='".makeEventURL("onGoto", "helper_hydrogens.php")."'>here</a>.</li>
 //      <li>Full support for 2-character CHAINIDs added. 4-character SEGIDs also supported in place of CHAINIDs.</li>
 //      </ul>
-    echo("<h3>What's new in 4.3.1:</h3><ul>
+    echo("<h3>What's new in 4.4</h3><ul>
+      <li>This versioned release is timed to correspond with the Phenix 1.12 official release, and is expected to work with the corresponding version of the cctbx project.</li>
+      <li>MolProbity now provides simultaneous validation for ensemble structures up to 80 models. After validation is complete, use the tabs to switch between the results for the models.</li>
+      <li>MolProbity now accepts mmCIF file uploads and can fetch structures only available as mmCif. These files will be automatically converted to PDB hybrid36 format for validation.</li>
+      <li>Severely twisted peptides (more than 45&deg; from planar) are now colored red in the multicriterion chart, like other especially severe outliers.</li>
+      <li>Limited CaBLAM validation now available for CA-only models.</li>
+      <li>More user control of feedback for non-trans peptides is available in the validation selection menu.</li>
+  </ul>
+    <h3>What's new in 4.3.1:</h3><ul>
       <li>This versioned release is timed to correspond with the Phenix 1.11 official release, and is expected to work with the corresponding version of the cctbx project.</li>
       <li>Update to Omegalyze kinemage output - markup now offset from backbone to reduce overlap with other markups.</li>
       <li>Ramachandran analysis reports alternate conformations more comprehensively at the residue level. Ramachandran summary statistics are given for alternate A only where applicable.</li>
@@ -97,18 +117,6 @@ Choose validations appropriate to a structure.</p>
       <li>Updates to Omegalyze kinemage output - markup defaults to 'off', separate colors for cis-pro (sea), cis-nonpro (lime), and all twisted (yellow).</li>
       <li>Improved error catching, with 'how to fix it' notes for common formatting errors</li>
 	</ul>
-    <h3>What's new in 4.2:</h3><ul>
-      <li>Cis-peptide identification, markup and statistics now available.</li>
-      <li>CaBLAM C&alpha;-based validation of protein backbone and secondary structure now available.</li>
-      <li>Rotamer validation now uses <a href='http://kinemage.biochem.duke.edu/databases/top8000.php' target='_blank'>Top8000</a> rotamer distributions. Favored vs Allowed distinction introduced for rotamers.</li>
-      <li>New coloring scheme in multicriterion chart encodes outlier severity at a glance.</li>
-      <li><a target='_blank' href='help/validation_options/validation_options.html'>Online tutorial</a> explaining markup and methods</li>
-      <li>We now use a conformation-dependent library (CDL) from Dunbrack and Karplus for geometry analysis if requested.
-      </ul>
-      <h3>What's new in 4.1:</h3><ul>
-      <li>Validation analysis now powered by CCTBX. Also adds geometry regularization for N/Q/H flip corrections. Read more about this change <a href='".makeEventURL("onGoto", "helper_cctbx.php")."'>here</a>.</li>
-      <li>Alternate conformations now handled for validation analysis.</li>
-      </ul>
       </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>");
 ?>
 
@@ -719,7 +727,7 @@ function toggleUploadOptions()
 //        <br><br>If for some reason you need to use MolProbity4 version 4.02, which is now a retired legacy version, please go to <a style=\"color: #66FFFF\" href='http://rutile.biochem.duke.edu/' target='_blank'>http://rutile.biochem.duke.edu</a>.</strong></div>");
     echo("<div class=feature><b>Molprobity sites:</b>
       <br><a href='http://molprobity.biochem.duke.edu/' target='_blank'>Duke (US)</a> | <a href='http://molprobity.manchester.ac.uk/' target='_blank'>Manchester (UK)</a> | <a href='http://magma.research.duhs.duke.edu/~molprobity_beta/' target='_blank'>Beta (Recent developments; Unstable)</a>
-      <br><a href='http://rutile.biochem.duke.edu/' target='_blank'>Legacy version 4.02</a> (Current Molprobity requires strict PDB format. 4.02 is more forgiving, but lacks recent features. Format repair is preferable.)
+      <br>Legacy version 4.02 has been retired. Please contact us through the 'Feedback & bugs' link if this affects your MolProbity use.
       <br>
       <br><b>Usage Guidelines:</b>
       <br>These web services are provided for analysis of individual structures, not batch runs.</div>");

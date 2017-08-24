@@ -12,7 +12,7 @@ class helper_nmr_delegate extends BasicDelegate {
 */
 function display($context)
 {
-    echo $this->pageHeader("Evaluate NMR structure", "helper_nmr");
+    echo $this->pageHeader("Evaluate NMR structures", "helper_nmr");
 ?>
 <div class='feature'>
     We currently have no tutorials for NMR structures, but many of the principles of analyzing crystal structures still apply.
@@ -34,19 +34,21 @@ and the errors could impact the biological conclusion you wish to draw.
 </li>
 <li><b><?php echo "<a href='".makeEventURL("onCall", "reduce_setup.php")."'>Add hydrogens (usually unnecessary)</a>"; ?>:</b>
     Explicit hydrogens are needed for many of MolProbity's analyses to function correctly, but
-    structures determined by NMR almost always include them.
+    structures determined by NMR almost always include them. By default hydrogens are trimmed from 
+    structures on upload, but your original file can be selected using the "Currently working on:" drop-down menu.
+    Alternatively, you can use the "Add hydrogens" option to use our Reduce program to add hydrogens to the trimmed version.
 </li>
 <li><b><?php echo "<a href='".makeEventURL("onCall", "aacgeom_setup.php")."'>Analyze sterics &amp; geometry for single models</a>"; ?>:</b>
-    Most NMR structures are reported as ensembles of models.
-    At the moment, MolProbity has limited tools for analyzing ensembles,
-    but it can easily analyze each model individually.
+    Most NMR structures are reported as ensembles of models. MolProbity splits ensemble PDB files into separate model PDB files.
+    Each of these model files can be analyzed one at a time. Alternatively, MolProbity is now able to analyze models in an
+    ensemble file all at once (see below).
     <p>Don't be daunted by the array of <b>options</b> here --
     MolProbity automatically selects appropriate settings for your structure,
     so it's not necessary for you to change them unless you want to.
     Running all the various analyses may take a few minutes, so please be patient.
     <p>The <b>all-atom contact</b> analysis is concerned with steric interactions inside the model.
     Non-(H)bonded atoms with substantial (e.g. &gt;0.4&Aring;) van der Waals overlap
-    are errors in the model; the energetic cost is enormous relative the stability of a macromolecule.
+    are errors in the model; the energetic cost is enormous relative to the stability of a macromolecule.
     The clashscore is the number of these overlaps per 1000 atoms; smaller numbers are better.
     You can see the individual clashes in the multi-criterion kinemage as hot pink spikes,
     which is useful for seeing if the errors affect your region(s) of interest.
@@ -62,9 +64,10 @@ and the errors could impact the biological conclusion you wish to draw.
     and can help other scientists know whether a particular model offers a believable view of a specific area.
 </li>
 <li><b><?php echo "<a href='".makeEventURL("onCall", "ens_aacgeom_setup.php")."'>Analyze sterics &amp; geometry for the ensemble</a>"; ?>:</b>
-    At the moment, MolProbity has limited tools for analyzing ensembles.
-    It can produce multi-model multi-criterion kinemages, but not much else (yet).
-    Feature requests to Jeremy Block (jeremy.block@duke.edu).
+    MolProbity can analyze up to the first 80 models of an ensemble all at once. Select the appropriate ensemble file from the
+    "Currently working on:" drop-down menu, and choose "Analyze all-atom contacts & geometry (ensemble)" to select your desired analysis options. 
+    Note that because each model is analyzed one after the other in this mode, this option can take a long time. 
+    On the results page, the statistics are presented using tabs, one for each model.
 </li>
 <li><b><?php echo "<a href='".makeEventURL("onGoto", "file_browser.php")."'>Download files</a>"; ?>:</b>
     Before you leave, you may want to download some of the files you've created,

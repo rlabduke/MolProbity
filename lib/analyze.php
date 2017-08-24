@@ -1500,7 +1500,7 @@ function runSuitenameString($infile, $outfile)
 ############################################################################
 function runCablam($infile, $outfile)
 {
-    exec("phenix.cablam_validate output=text $infile > $outfile");
+    exec("phenix.cablam output=text $infile > $outfile");
 }
 #}}}########################################################################
 
