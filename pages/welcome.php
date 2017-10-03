@@ -689,10 +689,7 @@ function toggleUploadOptions()
     <td>type:
         <select name='uploadType'>
             <option value='pdb'>PDB coords</option>
-            <option value='xray'>xray data (mtz format)</option>
-            <option value='kin'>kinemage</option>
-            <option value='map'>ED map</option>
-            <option value='hetdict'>het dict</option>
+            
         </select>
     </td>
     <td><input type="submit" name="cmd" value="Upload &gt;"></td>
@@ -705,6 +702,12 @@ function toggleUploadOptions()
 </div></form>
 <?php
 
+//--These options have been removed from the uploads menu for security reasons--
+//<option value='xray'>xray data (mtz format)</option>
+//<option value='kin'>kinemage</option>
+//<option value='map'>ED map</option>
+//<option value='hetdict'>het dict</option>
+//--------------------------------------------------------------
     //echo("<div class=alert><strong>The PDB has changed its file format from PDB v2.3 to v3 (see <a href='http://remediation.wwpdb.org/index.html' target='_blank'>here</a> for more info).
     //    We have upgraded our software to be compatible with the new format.
     //    Any uploaded files will be converted to PDB v3 if necessary; you will have an option to convert modified files back to PDB v2.3 if desired.
