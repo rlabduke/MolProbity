@@ -128,6 +128,12 @@ div.side_options {
     float : right ;
 }
 
+div.right_ngl {
+    background-color: #f0f0dd ;
+    float : right ;
+    margin: 1em;
+}
+
 div.inline_options {
     background-color: #f0f0dd ;
     border : 1px dotted #999966 ;

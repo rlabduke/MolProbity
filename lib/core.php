@@ -468,6 +468,7 @@ function linkAnyFile($fname, $name = null, $image = null)
     if(endsWith($fname, ".kin") || endsWith($fname, ".kin.gz"))
         $links = array(
             array('url' => "viewking.php?$_SESSION[sessTag]&url=$link", 'label' => "View in KiNG", 'blank' => true),
+            array('url' => "viewngl.php?$_SESSION[sessTag]&url=$link", 'label' => "View in NGL", 'blank' => true),
             array('url' => "$link", 'label' => "Download", 'blank' => false),
         );
     elseif(endsWith($fname, "multi.table"))

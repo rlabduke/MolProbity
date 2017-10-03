@@ -214,20 +214,71 @@ if(isset($id))
 
     // Make a thumbnail kin for the lab notebook
     $modelDir = $_SESSION['dataDir'].'/'.MP_DIR_MODELS;
+    $modelURL = $_SESSION['dataURL'].'/'.MP_DIR_MODELS;
     $kinDir = $_SESSION['dataDir'].'/'.MP_DIR_KINS;
     $kinURL = $_SESSION['dataURL'].'/'.MP_DIR_KINS;
     if(!file_exists($kinDir)) mkdir($kinDir, 0777);
     exec("prekin -cass -colornc $modelDir/$model[pdb] > $kinDir/$model[prefix]thumbnail.kin");
 
     $s = "";
-    $s .= "<div class='side_options'>\n";
-    $s .= "<center><small><i>drag to rotate</i></small></center>\n";
-    $s .= "<applet code='Magelet.class' archive='magejava.jar' width='150' height='150'>\n";
-    $s .= "  <param name='kinemage' value='$kinURL/$model[prefix]thumbnail.kin'>\n";
-    $s .= "  <param name='buttonpanel' value='no'>\n";
-    $s .= "</applet>\n";
-    $s .= "<center><small><a href='help/java.html' target='_blank'>Don't see anything?</a></i></small></center>\n";
+    $s .= "<div class=\"right_ngl\" id=\"viewport\" style=\"width:350px; height:250px;\">\n";
+    $s .= "<script src=\"../public_html/js/ngl.dev.js\"></script>\n";
+    $s .= "<script>\n";
+    $s .= "        document.addEventListener( \"DOMContentLoaded\", function() {\n";
+    $s .= "                var stage = new NGL.Stage( \"viewport\" );\n";
+    $s .= "                stage.loadFile( \"$modelURL/$model[pdb]\", { defaultRepresentation: true, smoothSheet: true } );\n";
+    //$s .= "                stage.loadFile( \"$kinURL/$model[prefix]thumbnail.kin\", { ext: \"kin\" }  );\n";
+    
+$s .= "NGL.autoLoad(\"$kinURL/$model[prefix]thumbnail.kin\").then(function (kinemage) {
+  for (let master in kinemage.masterDict) {
+    var shape = new NGL.Shape(master)
+
+    kinemage.dotLists.forEach(function (dotList) {
+      if (!dotList.master.includes(master)) return
+      var pointBuffer = new NGL.PointBuffer({
+        position: new Float32Array(dotList.position),
+        color: new Float32Array(dotList.color)
+      }, {
+        pointSize: 2,
+        sizeAttenuation: false,
+        useTexture: true
+      })
+      shape.addBuffer(pointBuffer)
+    })
+
+    kinemage.vectorLists.forEach(function (vectorList) {
+      if (!vectorList.master.includes(master)) return
+      var lineBuffer = new NGL.LineBuffer({
+        position1: new Float32Array(vectorList.position1),
+        position2: new Float32Array(vectorList.position2),
+        color: new Float32Array(vectorList.color1),
+        color2: new Float32Array(vectorList.color2)
+      }, {
+        lineWidth: 2
+      })
+      shape.addBuffer(lineBuffer)
+    })
+
+    var visible = kinemage.masterDict[ master ].visible
+    var shapeComp = stage.addComponentFromObject(shape, { visible: visible })
+    shapeComp.addRepresentation('buffer')
+  }
+
+  stage.autoView()
+})";
+
+    $s .= "        } );\n";
+    $s .= "</script>\n";
     $s .= "</div>\n";
+
+    //$s .= "<div class='side_options'>\n";
+    //$s .= "<center><small><i>drag to rotate</i></small></center>\n";
+    //$s .= "<applet code='Magelet.class' archive='magejava.jar' width='150' height='150'>\n";
+    //$s .= "  <param name='kinemage' value='$kinURL/$model[prefix]thumbnail.kin'>\n";
+    //$s .= "  <param name='buttonpanel' value='no'>\n";
+    //$s .= "</applet>\n";
+    //$s .= "<center><small><a href='help/java.html' target='_blank'>Don't see anything?</a></i></small></center>\n";
+    //$s .= "</div>\n";
 
     if(count($idList) > 1) // NMR/multiple models
     {
