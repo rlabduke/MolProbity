@@ -226,7 +226,8 @@ if(isset($id))
     $s .= "<script>\n";
     $s .= "        document.addEventListener( \"DOMContentLoaded\", function() {\n";
     $s .= "                var stage = new NGL.Stage( \"viewport\" );\n";
-    $s .= "                stage.loadFile( \"$modelURL/$model[pdb]\", { defaultRepresentation: true, smoothSheet: true } );\n";
+    $s .= "                stage.setParameters( {ribbon.smoothSheet: true} );\n";
+    $s .= "                stage.loadFile( \"$modelURL/$model[pdb]\", { defaultRepresentation: true } );\n";
     //$s .= "                stage.loadFile( \"$kinURL/$model[prefix]thumbnail.kin\", { ext: \"kin\" }  );\n";
     
 $s .= "NGL.autoLoad(\"$kinURL/$model[prefix]thumbnail.kin\").then(function (kinemage) {
