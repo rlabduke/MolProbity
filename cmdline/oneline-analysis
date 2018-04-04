@@ -102,7 +102,7 @@ function summaryAnalysis($modelID)
     {
       //echo "running val report\n";
       runValidationReport($pdbfile, "$rawDir/$model[prefix]geom.data", $model['stats']['use_cdl']);
-      runValidationReport($pdbfile, "$rawDir/$model[prefix]rnageom.data", "$model['stats']['use_cdl']);
+      runValidationReport($pdbfile, "$rawDir/$model[prefix]rnageom.data", $model['stats']['use_cdl']);
       //echo "finished running val report\n";
       $bonds = array_merge(loadValidationBondReport("$rawDir/$model[prefix]geom.data", "protein"), loadValidationBondReport("$rawDir/$model[prefix]rnageom.data", "rna"));
       $angles = array_merge(loadValidationAngleReport("$rawDir/$model[prefix]geom.data", "protein"), loadValidationAngleReport("$rawDir/$model[prefix]rnageom.data", "rna"));
