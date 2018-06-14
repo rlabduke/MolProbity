@@ -1,0 +1,62 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+    <title>NGL - placeholder title - MolProbity</title>
+    <link rel="StyleSheet" href="css/default.css" TYPE="text/css">
+    <link rel="shortcut icon" href="favicon.ico">
+    <meta name="ROBOTS" content="INDEX, NOFOLLOW">
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+    <td width="150"><img src="img/small-logo5.gif" alt="MolProbity logo"></td>
+    <td valign="bottom"><div class="pageheader">
+        <h1>NGL - 1ubqFH-multi.kin.gz</h1>
+    </div></td>
+    <td width="1"><img src="img/placeholder.png" alt=""></td>
+    <td width="1"><img src="img/placeholder.png" alt=""></td>
+</tr>
+<tr><td valign="top" colspan="4">
+    <div class="pagecontent_alone">
+
+<center>
+<div class="right_ngl" id="viewport" style="width:350px; height:250px;">
+<script src="../js/ngl.dev.js"></script>
+
+<script>
+NGL.cssDirectory = "../js/nglcss/"
+document.addEventListener( "DOMContentLoaded", function() {
+            var stage = new NGL.Stage( "viewport" )
+stage.loadFile('http://files.rcsb.org/download/3SN6.cif').then(function (o) {
+  o.addRepresentation('cartoon', { color: 'chainname' })
+
+  var chainData = {
+    'A': { text: 'alpha subunit', color: 'firebrick' },
+    'B': { text: 'beta subunit', color: 'orange' },
+    'G': { text: 'gamma subunit', color: 'khaki' },
+    'R': { text: 'beta 2 adrenergic receptor', color: 'skyblue' },
+    'N': { text: 'nanobody', color: 'royalblue' }
+  }
+
+  var ap = o.structure.getAtomProxy()
+  o.structure.eachChain(function (cp) {
+    ap.index = cp.atomOffset + Math.floor(cp.atomCount / 2)
+    var elm = document.createElement('div')
+    elm.innerText = chainData[ cp.chainname ].text
+    elm.style.color = 'black'
+    elm.style.backgroundColor = chainData[ cp.chainname ].color
+    elm.style.padding = '8px'
+    o.addAnnotation(ap.positionToVector3(), elm)
+  }, new NGL.Selection('polymer'))
+
+  o.autoView()
+
+  var pa = o.structure.getPrincipalAxes()
+  var q = pa.getRotationQuaternion()
+  q.multiply(o.quaternion.clone().inverse())
+  stage.animationControls.rotate(q, 0)
+  stage.animationControls.move(o.getCenter(), 0)
+})
+});
+</script>
+</body>

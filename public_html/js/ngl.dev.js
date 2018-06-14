@@ -72924,7 +72924,23 @@ Shape$1.prototype.addMesh = function addMesh (position, color, index, normal, na
     if (normal) {
         normal = ensureFloat32Array(normal);
     }
-    var data = { position: position, color: color, index: index, normal: normal };
+    var data;
+    if (index.length == 0) {
+        if (normal.length == 0) {
+            data = { position: position, color: color };
+        }
+        else {
+            data = { position: position, color: color, normal: normal };
+        }
+    }
+    else {
+        if (normal.length == 0) {
+            data = { position: position, color: color, index: index };
+        }
+        else {
+            data = { position: position, color: color, index: index, normal: normal };
+        }
+    }
     var picking = new MeshPicker(this, Object.assign({ serial: this.meshCount, name: name }, data));
     var meshBuffer = new MeshBuffer(Object.assign({ picking: picking }, data));
     this.bufferList.push(meshBuffer);
@@ -73097,6 +73113,37 @@ Shape$1.prototype.addText = function addText (position, color, size, text) {
     return this;
 };
 /**
+* Add a triangle
+* @example
+* shape.addTriangle([ 0, 2, 7 ], [ 0, 0, 9 ], [ 1, 0, 9 ], [ 1, 1, 0 ]);
+*
+* @param {Vector3|Array} position1 - from position vector or array
+* @param {Vector3|Array} position2 - to position vector or array
+* @param {Vector3|Array} position3 - to position vector or array
+* @param {Color|Array} color - color object or array
+* @param {String} [name] - text
+* @return {Shape} this object
+*/
+Shape$1.prototype.addTriangle = function addTriangle (position1, position2, position3, color, normal, name) {
+    var position = [];
+    addElement(position1, position);
+    addElement(position2, position);
+    addElement(position3, position);
+    var colorArray = [];
+    addElement(color, colorArray);
+    addElement(color, colorArray);
+    addElement(color, colorArray);
+    var normalArray = [];
+    addElement(normal, normalArray);
+    addElement(normal, normalArray);
+    addElement(normal, normalArray);
+    var indexArray = [];
+    return this.addMesh(position, colorArray, indexArray, normalArray, name);
+    // TrianglePrimitive.objectToShape(
+    //   this, { position1, position2, position3, color, name }
+    // )
+};
+/**
  * Add point
  * @example
  * shape.addPoint([ 10, -2, 4 ], [ 0.2, 0.5, 0.8 ]);
@@ -73121,7 +73168,8 @@ Shape$1.prototype.addPoint = function addPoint (position, color, name) {
  * @param {String} [name] - text
  * @return {Shape} this object
  */
-Shape$1.prototype.addWideline = function addWideline (position1, position2, color, name) {
+Shape$1.prototype.addWideline = function addWideline (position1, position2, color, linewidth, name) {
+    this.parameters.lineWidth = linewidth;
     WidelinePrimitive.objectToShape(this, { position1: position1, position2: position2, color: color, name: name });
     return this;
 };
@@ -94051,6 +94099,7 @@ function parseFlag(line) {
 function parseGroup(line) {
     var name;
     var flags = {};
+    var master = [];
     line = line.replace(reCollapseEqual, '=');
     var lm = line.match(reCurlyWhitespace);
     for (var j = 1; j < lm.length; ++j) {
@@ -94061,14 +94110,19 @@ function parseGroup(line) {
         else {
             var es = e.split('=');
             if (es.length === 2) {
-                flags[es[0]] = es[1].replace(reTrimCurly, '');
+                if (es[0] === 'master') {
+                    master.push(es[1].replace(reTrimCurly, ''));
+                }
+                else {
+                    flags[es[0]] = es[1].replace(reTrimCurly, '');
+                }
             }
             else {
                 flags[es[0]] = true;
             }
         }
     }
-    return [name, flags];
+    return [name, flags, master];
 }
 function convertKinTriangleArrays(ribbonObject) {
     // have to convert ribbons/triangle lists from stripdrawmode to normal drawmode
@@ -94092,11 +94146,23 @@ function convertKinTriangleArrays(ribbonObject) {
     for (var i$2 = 0; i$2 < (colorArray.length / 3 - 2) * 9; ++i$2) {
         convertedColors[i$2] = colorArray[i$2 - Math.floor(i$2 / 9) * 6];
     }
+    var vector3Positions = [];
+    for (var i$3 = 0; i$3 < (convertedPositions.length) / 3; ++i$3) {
+        vector3Positions.push(new Vector3(convertedPositions[i$3 * 3], convertedPositions[i$3 * 3] + 1, convertedPositions[i$3 * 3] + 2));
+    }
+    var normals = [];
+    for (var i$4 = 0; i$4 < vector3Positions.length - 1; ++i$4) {
+        var normalVec3 = vector3Positions[i$4].cross(vector3Positions[i$4 + 1]);
+        normals.push(normalVec3.x);
+        normals.push(normalVec3.y);
+        normals.push(normalVec3.z);
+    }
     return {
         name: ribbonObject.name,
         masterArray: ribbonObject.masterArray,
         labelArray: convertedLabels,
         positionArray: convertedPositions,
+        normalArray: normals,
         colorArray: convertedColors
     };
 }
@@ -94134,6 +94200,7 @@ var KinParser = (function (Parser$$1) {
             ribbonLists: []
         };
         this.kinemage = kinemage;
+        var groupMasters, subgroupMasters;
         var isDotList = false;
         var prevDotLabel = '';
         var dotDefaultColor;
@@ -94452,11 +94519,24 @@ var KinParser = (function (Parser$$1) {
                     var ref$9 = parseGroup(line);
                     var name = ref$9[0];
                     var flags = ref$9[1];
+                    var masters = ref$9[2];
                     if (!kinemage.groupDict[name]) {
                         kinemage.groupDict[name] = {
                             dominant: false,
-                            animate: false
+                            animate: false,
+                            master: masters
                         };
+                        groupMasters = masters;
+                    }
+                    if (groupMasters) {
+                        groupMasters.forEach(function (name) {
+                            if (!kinemage.masterDict[name]) {
+                                kinemage.masterDict[name] = {
+                                    indent: false,
+                                    visible: false
+                                };
+                            }
+                        });
                     }
                     for (var key in flags) {
                         kinemage.groupDict[name][key] = flags[key];
@@ -94466,12 +94546,24 @@ var KinParser = (function (Parser$$1) {
                     var ref$10 = parseGroup(line);
                     var name$1 = ref$10[0];
                     var flags$1 = ref$10[1];
+                    var masters$1 = ref$10[2];
                     if (!kinemage.subgroupDict[name$1]) {
                         kinemage.subgroupDict[name$1] = {
                             dominant: false,
                             animate: false,
-                            master: undefined
+                            master: masters$1
                         };
+                        subgroupMasters = masters$1;
+                    }
+                    if (subgroupMasters) {
+                        subgroupMasters.forEach(function (name) {
+                            if (!kinemage.masterDict[name]) {
+                                kinemage.masterDict[name] = {
+                                    indent: false,
+                                    visible: false
+                                };
+                            }
+                        });
                     }
                     for (var key$1 in flags$1) {
                         kinemage.subgroupDict[name$1][key$1] = flags$1[key$1];
