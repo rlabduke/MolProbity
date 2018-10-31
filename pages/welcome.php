@@ -122,16 +122,10 @@ Choose validations appropriate to a structure.</p>
 
 <h3>Citations, science, and technical FAQs:</h3>
 <p><b><a href='help/about.html' target='_blank'>Cite MolProbity</a></b>:
-    <small>Chen et al. (2010)
+    <small>Williams et al. (2018)
     <a href="http://kinemage.biochem.duke.edu/lab/papers.php" target="_blank">MolProbity:
-    all-atom structure validation for macromolecular crystallography.</a>
-    Acta Crystallographica D66:12-21.
-    </p>
-    <center>and/or</center>
-<p>Davis et al. (2007)
-    <a href="http://kinemage.biochem.duke.edu/lab/papers.php" target="_blank">MolProbity:
-    all-atom contacts and structure validation for proteins and nucleic acids.</a>
-    Nucleic Acids Research 35:W375-W383.
+    More and better reference data for improved all-atom structure validation.</a>
+    Protein Science 27: 293-315.
     </small></p>
 <p><b><a href='help/about.html' target='_blank'>Cite KiNG</a></b>:
     <small>Chen et al. (2009)
