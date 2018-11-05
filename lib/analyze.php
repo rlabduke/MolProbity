@@ -806,11 +806,11 @@ function runClashscore($infile, $outfile, $blength="ecloud", $clash_cutoff=-0.4)
     #exec("clashlist $infile $bcutval $ocutval $blength > $outfile");
     if($blength == "ecloud")
     {
-      exec("phenix.clashscore b_factor_cutoff=40 clash_cutoff=$clash_cutoff $infile > $outfile");
+      exec("phenix.clashscore b_factor_cutoff=40 keep_hydrogens=True clash_cutoff=$clash_cutoff $infile > $outfile");
     }
     elseif($blength == "nuclear")
     {
-      exec("phenix.clashscore b_factor_cutoff=40 clash_cutoff=$clash_cutoff nuclear=True $infile > $outfile");
+      exec("phenix.clashscore b_factor_cutoff=40 keep_hydrogens=True clash_cutoff=$clash_cutoff nuclear=True $infile > $outfile");
     }
 }
 #}}}########################################################################
