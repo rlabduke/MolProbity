@@ -110,9 +110,9 @@ function checkSettingsBeforeSubmit()
 
     if(!selectionHasH && doAAC)
     {
-        return window.confirm("The file you choose may not have all its H atoms added."
-        +" All-atom contacts requires all H atoms to function properly."
-        +" Do you want to proceed anyway?")
+        return window.confirm("The chosen file may be missing significant numbers of H atoms.\n"
+        +"All-atom contacts may add missing H atoms to allow complete validation.\n"
+        +"Cancel and add H atoms, or OK to proceed?")
     }
     else return true; // OK to submit
 }
