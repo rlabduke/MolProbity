@@ -1,0 +1,170 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+  <title>Validation Options - MolProbity Help</title>
+  <link rel="StyleSheet" href="default.css" TYPE="text/css">
+  <link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+<table border="0" cellpadding="0" cellspacing="0" width="100%">
+<tr>
+  <td width="150"><img src="small-logo5.gif" alt="MolProbity logo"></td>
+  <td align="center" valign="bottom"><div class="pageheader">
+    <h1>Summary Table Cutoffs</h1>
+  </div></td>
+</tr>
+<tr><td valign="top" colspan="2">
+  <div class="pagecontent_alone">
+
+  <p><table border='1' width='100%'>
+  <tr>
+  <td align='center'>Category</td>
+  <td>Validation</td>
+  <td align='center' bgcolor='#99ff99'>Good</td>
+  <td align='center' bgcolor='#ffff99'>Caution</td>
+  <td align='center' bgcolor='#ff9999'>Warning</td>
+  </tr>
+  <tr>
+  <td align='center'>All-Atom<br>Contacts</td>
+  <td>Clashscore, all atoms:</td>
+  <td align='center' bgcolor='#99ff99'>Percentile &ge; 66</td>
+  <td align='center' bgcolor='#ffff99'>66 &gt; Percentile &ge; 33</td>
+  <td align='center' bgcolor='#ff9999'>Percentile &lt; 33</td>
+  </tr>
+  
+  <tr>
+  <td rowspan='8' align='center'>Protein<br>Geometry</td>
+  <td>Poor rotamers:</td>
+  <td align='center' bgcolor='#99ff99'>Outliers &le; 0.3%</td>
+  <td align='center' bgcolor='#ffff99'>0.3% &lt; Outliers &le; 1.5%</td>
+  <td align='center' bgcolor='#ff9999'>Outliers &gt; 1.5%</td>
+  </tr>
+  <tr>
+  <td>Favored rotamers:</td>
+  <td align='center' bgcolor='#99ff99'>Favored &ge; 98%</td>
+  <td align='center' bgcolor='#ffff99'>98% &gt; Favored &ge; 95%</td>
+  <td align='center' bgcolor='#ff9999'>Favored &lt; 95%</td>
+  </tr>
+  <tr>
+  <td>Ramachandran outliers:</td>
+  <td align='center' bgcolor='#99ff99'>Outliers &le; 0.05%</td>
+  <td align='center' bgcolor='#ffff99'>0.05% &lt; Outliers &le; 0.5%<br>or<br>Outliers &gt; 0.5% and Outlier count &equals; 1</td>
+  <td align='center' bgcolor='#ff9999'>Outliers &gt; 0.5%<br>and<br>Outlier count &ge; 2</td>
+  </tr>
+  <tr>
+  <td>Ramachandran favored:</td>
+  <td align='center' bgcolor='#99ff99'>Favored &ge; 98%</td>
+  <td align='center' bgcolor='#ffff99'>98% &gt; Favored &ge; 95%</td>
+  <td align='center' bgcolor='#ff9999'>Favored &lt; 95%</td>
+  </tr>
+  <tr>
+  <td>MolProbity score:</td>
+  <td align='center' bgcolor='#99ff99'>Percentile &ge; 66</td>
+  <td align='center' bgcolor='#ffff99'>66 &gt; Percentile &ge; 33</td>
+  <td align='center' bgcolor='#ff9999'>Percentile &lt; 33</td>
+  </tr>
+  <tr>
+  <td>Cβ deviations &gt;0.25&Aring;:</td>
+  <td align='center' bgcolor='#99ff99'>Outlier count &equals; 0</td>
+  <td align='center' bgcolor='#ffff99'>0 &lt; Outliers &lt; 5%</td>
+  <td align='center' bgcolor='#ff9999'>Outliers &ge; 5%</td>
+  </tr>
+  <tr>
+  <td>Bad bonds:</td>
+  <td align='center' bgcolor='#99ff99'>Outlier bonds &lt; 0.01%</td>
+  <td align='center' bgcolor='#ffff99'>0.01% &le; Outlier bonds &lt; 0.2%</td>
+  <td align='center' bgcolor='#ff9999'>Outlier bonds &ge; 0.2%</td>
+  </tr>
+  <tr>
+  <td>Bad angles:</td>
+  <td align='center' bgcolor='#99ff99'>Outlier angles &lt; 0.1%</td>
+  <td align='center' bgcolor='#ffff99'>0.1% &le; Outlier angles &lt; 0.5%</td>
+  <td align='center' bgcolor='#ff9999'>Outlier angles &ge; 0.5%</td>
+  </tr>
+
+  <tr>
+  <td rowspan='3' align='center'>Peptide Omegas</td>
+  <td>Cis Prolines:</td>
+  <td align='center'>No suitable</td>
+  <td align='center'>universal cutoffs</td>
+  <td align='center'>for cisProline</td>
+  </tr>
+  <tr>
+  <td>Cis nonProlines:</td>
+  <td align='center' bgcolor='#99ff99'>Peptides &le; 0.05% Cis</td>
+  <td align='center' bgcolor='#ffff99'>0.05% &lt; Cis Peptides &le; 0.1%</td>
+  <td align='center' bgcolor='#ff9999'>Peptides &gt; 0.1% Cis</td>
+  </tr>
+  <tr>
+  <td>Twisted Peptides:</td>
+  <td align='center' bgcolor='#99ff99'>Twisted peptide count = 0</td>
+  <td align='center' bgcolor='#ffff99'>0 &lt; Twisted peptides &le; 0.1%</td>
+  <td align='center' bgcolor='#ff9999'>Peptides &gt; 0.1% twisted</td>
+  </tr>
+  
+  <tr>
+  <td rowspan='4' align='center'>Nucleic Acid<br>Geometry</td>
+  <td>Probably wrong sugar puckers:</td>
+  <td align='center' bgcolor='#99ff99'>Outlier count = 0</td>
+  <td align='center' bgcolor='#ffff99'>0 &lt; Outliers &le; 5%</td>
+  <td align='center' bgcolor='#ff9999'>Outliers &gt; 5%</td>
+  </tr>
+  <tr>
+  <td>Bad backbone conformations:</td>
+  <td align='center' bgcolor='#99ff99'>Outliers &le; 5%</td>
+  <td align='center' bgcolor='#ffff99'>5% &lt; Outliers &le; 15%</td>
+  <td align='center' bgcolor='#ff9999'>Outliers &gt; 15%</td>
+  </tr>
+  <tr>
+  <td>Bad bonds:</td>
+  <td align='center' bgcolor='#99ff99'>Outlier bonds &lt; 0.01%</td>
+  <td align='center' bgcolor='#ffff99'>0.01% &le; Outlier bonds &lt; 0.2%</td>
+  <td align='center' bgcolor='#ff9999'>Outlier bonds &ge; 0.2%</td>
+  </tr>
+  <tr>
+  <td>Bad angles:</td>
+  <td align='center' bgcolor='#99ff99'>Outlier angles &lt; 0.1%</td>
+  <td align='center' bgcolor='#ffff99'>0.1% &le; Outlier angles &lt; 0.5%</td>
+  <td align='center' bgcolor='#ff9999'>Outlier angles &ge; 0.5%</td>
+  </tr>
+  
+  <tr>
+  <td rowspan='2' align='center'>Low-resolution Criteria</td>
+  <td>CaBLAM outliers:</td>
+  <td align='center' bgcolor='#99ff99'>Outliers &le; 1%</td>
+  <td align='center' bgcolor='#ffff99'>1% &lt; Outliers &le; 5%</td>
+  <td align='center' bgcolor='#ff9999'>Outliers &gt; 5%</td>
+  </tr>
+  <tr>
+  <td>CA Geometry outliers:</td>
+  <td align='center' bgcolor='#99ff99'>Outliers &le; 0.5%</td>
+  <td align='center' bgcolor='#ffff99'>0.5% &lt; Outliers &lt; 1%</td>
+  <td align='center' bgcolor='#ff9999'>Outliers &gt; 1%</td>
+  </tr>
+  </table></p>
+  <br>
+  The green-to-yellow cutoffs are set from statistics or from properties of the validation methods.
+  <br>E.g. the Ramachandran "Favored" category is defined by the contour containing the top 98% of residues, therefore the green-to-yellow cutoff is set at 98%.
+  <br>
+  <br>The yellow-to-red cutoffs are not derived from properties of the validations, but are set from our intuition and experience to serve as guildlines for when structures become seriously troubled.
+  <br>E.g the Ramachandran "Favored" line becomes colored red when fewer than 95% of residues fall within the 98% contour.
+  <br>
+  <br>Ramachandran validation allows a structure with a single outlier to be colored yellow to avoid seeming to disproportionalte punish small structures.
+  <br>
+  <br>We determined that the expected cisProline content of strutures varies to widely for a simple cutoffs to avoid either passing or penalizing a significant number of structures incorrectly.
+  Therefore, a structure's cisProline count is reported, but the row in the table is left uncolored.
+  <br>A similar enrichment of cis nonPro is expected in certain proteins, but real cis nonPro is sufficiently rare and erroneous cis nonPro sufficiently common that we color the row to ensure that modelers are alerted to the presense of even justified cis NonPro.
+  <br>
+  <br>As always with structure validations, "perfect" is not the correct goal.  "Justified" is the goal, and outliers are not necessarily mistakes.
+  <br>Especially in small structures, embrace yellow validation rows if you can explain and justify the outliers.
+  
+</div></td></tr>
+
+<tr><td colspan="2">
+  <div class="pagefooter">
+About <a href="http://kinemage.biochem.duke.edu" target="_blank">the Richardson Lab</a>
+  </div>
+</td></tr>
+</table>
+</body>
+</html>
