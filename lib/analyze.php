@@ -211,6 +211,7 @@ function runAnalysis($modelID, $opts)
         $outfile = "$rawDir/$model[prefix]cablam.data";
         runCablam($infile, $outfile);
         $cablam = loadCablam($outfile);
+        $summaries['cablam'] = loadCablamSummary($outfile);
     }//}}}
 
     //{{{ Run nucleic acid geometry programs and offer kins to user
@@ -1220,13 +1221,14 @@ function loadRamachandran($datafile)
 }
 #}}}########################################################################
 
+#{{{ loadRamachandranSummary - extract SUMMARY lines from ramalyze output
 function loadRamachandranSummary($datafile)
 {
   $data = array_slice(file($datafile), -3); //look at last 3 lines, where summaries are
   foreach($data as $line)
   {
     if (preg_match("/^SUMMARY/",$line)){
-            echo "match found\n";
+            //echo "match found\n";
           //SUMMARY: 504 Favored, 12 Allowed, 2 Outlier out of 518 residues (altloc A where applicable)
           if (preg_match("/altloc/",$line)){
             $linebits = explode(' ',$line);
@@ -1243,6 +1245,7 @@ function loadRamachandranSummary($datafile)
   }
   return $ret;
 }
+#}}}########################################################################
 
 #{{{ findRamaOutliers - evaluates residues for bad score
 ############################################################################
@@ -1533,6 +1536,12 @@ function loadCablam($datafile)
     foreach($data as $line)
     {
         $line = explode(':', rtrim($line));
+        if (preg_match("/^SUMMARY/",$line[0])){
+          continue;
+        }
+        #elseif (preg_match("/^residue/",$line[0])){
+        #  continue;
+        #}
         $cnit = $line[0];
         $decomp = decomposeResName($cnit);
         $ret[$cnit] = array(
@@ -1555,6 +1564,56 @@ function loadCablam($datafile)
 }
 #}}}########################################################################
 
+#{{{ loadCablamSummary - extract SUMMARY lines from cablam output
+############################################################################
+function loadCablamSummary($datafile)
+{
+    $data = array_slice(file($datafile), -7); //look at last 7 lines, where summaries are
+    foreach($data as $line)
+    {
+        if (preg_match("/^SUMMARY/",$line)){
+//SUMMARY: Note: Regardless of number of alternates, each residue is counted as having at most one outlier.
+//SUMMARY: CaBLAM found 225 full protein residues and 0 CA-only residues
+//SUMMARY: 15 residues (6.7%) have disfavored conformations. (<=5% expected).
+//SUMMARY: 5 residues (2.2%) have outlier conformations. (<=1% expected)
+//SUMMARY: 2 residues (0.89%) have severe CA geometry outliers. (<=0.5% expected)
+//SUMMARY: 63 residues (28.00%) are helix-like, 41 residues (18.22%) are beta-like
+//SUMMARY: 0 residues (0.00%) are correctable to helix, 0 residues (0.00%) are correctable to beta
+            if (preg_match("/full/",$line)){
+                $linebits = explode(' ',$line);
+                $residues = $linebits[3] + $linebits[8];
+            }
+            elseif (preg_match("/have outlier/",$line)){
+                $linebits = explode(' ',$line);
+                $cablam_outlier_count = $linebits[1];
+                $cablam_outlier_percent = $linebits[3];//(2.2%)
+                $cablam_outlier_percent = explode('%',ltrim($cablam_outlier_percent,"("))[0];
+            }
+            elseif (preg_match("/have severe/",$line)){
+                $linebits = explode(' ',$line);
+                $cageom_outlier_count = $linebits[1];
+                $cageom_outlier_percent = $linebits[3];
+                $cageom_outlier_percent = explode('%',ltrim($cageom_outlier_percent,"("))[0];
+            }
+            else{
+                continue;
+            }
+        }
+        else{
+            continue;
+        }
+    }
+    $ret = array(
+        'residues'               => $residues,
+        'cablam_outlier_count'   => $cablam_outlier_count,
+        'cablam_outlier_percent' => $cablam_outlier_percent,
+        'cageom_outlier_count'   => $cageom_outlier_count,
+        'cageom_outlier_percent' => $cageom_outlier_percent);
+
+    return $ret;
+}
+#}}}########################################################################
+
 #{{{ findCablamOutliers - evaluates residues for bad score
 /**
 * Returns array of cnit residue names from loadCablam function above
@@ -1568,8 +1627,10 @@ function findCablamOutliers($cablam)
     $worst = array();
     if(is_array($cablam)) foreach($cablam as $res)
     {
-        //This is only used to get a count of outliers
-        if($res['outlierType'] != '                    ')
+        ////This is only used to get a count of outliers
+        //if($res['outlierType'] != '                    ')
+        //    $worst[$res['resName']] = $res['cablamScore'];
+        if(preg_match("/Outlier/",$res['outlierType']))
             $worst[$res['resName']] = $res['cablamScore'];
     }
     ksort($worst);

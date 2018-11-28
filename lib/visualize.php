@@ -1296,21 +1296,30 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
       $firstRow = true;
       if(is_array($cablam))
       {
-        $cablamOut = 0;
-        $caGeomOut = 0;
-        //$cablamFav = 0;
-        foreach($cablam as $c)
-        {
-          if($c['outlierType'] ==     " CaBLAM Outlier     ") $cablamOut++;
-          elseif($c['outlierType'] == " CA Geom Outlier    ") $caGeomOut++;
-          //elseif($c['outlierType'] != " CaBLAM Disfavored  ") $cablamFav++;
-          //The disfavored category was deemed more info than necessary for the moment in this chart
-        }
-        $cablamTot = count($cablam);
-        $cablamOutPct = sprintf("%.2f", 100.0 * $cablamOut/$cablamTot);
-        //$cablamFavPct = sprintf("%.2f", 100.0 * $cablamFav/$cablamTot);
-        $caGeomPct = sprintf("%.2f", 100.0 * $caGeomOut/$cablamTot);
-
+          if(is_array($summaries['cablam']))
+          {
+              $cablamOut = $summaries['cablam']['cablam_outlier_count'];
+              $caGeomOut = $summaries['cablam']['cageom_outlier_count'];
+              $cablamOutPct = $summaries['cablam']['cablam_outlier_percent'];
+              $caGeomPct = $summaries['cablam']['cageom_outlier_percent'];
+          }
+          else
+          {
+              $cablamOut = 0;
+              $caGeomOut = 0;
+              //$cablamFav = 0;
+              foreach($cablam as $c)
+              {
+                  if($c['outlierType'] ==     " CaBLAM Outlier     ") $cablamOut++;
+                  elseif($c['outlierType'] == " CA Geom Outlier    ") $caGeomOut++;
+                  //elseif($c['outlierType'] != " CaBLAM Disfavored  ") $cablamFav++;
+                  //The disfavored category was deemed more info than necessary for the moment in this chart
+              }
+              $cablamTot = count($cablam);
+              $cablamOutPct = sprintf("%.2f", 100.0 * $cablamOut/$cablamTot);
+              //$cablamFavPct = sprintf("%.2f", 100.0 * $cablamFav/$cablamTot);
+              $caGeomPct = sprintf("%.2f", 100.0 * $caGeomOut/$cablamTot);
+          }
         if($firstRow) $firstRow = false;
         else $entry .= "<tr>";
 
