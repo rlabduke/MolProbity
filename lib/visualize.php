@@ -1365,6 +1365,10 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
       //$entry .= "<small><sup>^</sup> MolProbity score is defined as the following: 0.42574*log(1+clashscore) + 0.32996*log(1+max(0,pctRotOut-1)) + 0.24979*log(1+max(0,100-pctRamaFavored-2)) + 0.5</small>\n";
       $entry .= "<small><sup>^</sup> MolProbity score combines the clashscore, rotamer, and Ramachandran evaluations into a single score, normalized to be on the same scale as X-ray resolution.</small>\n";
     }
+    if($firstRow) $firstRow = false;
+    else $entry .= "<br>";
+    $entry .= "<small>Key to table colors and cutoffs here: <a target='_blank' href='help/validation_options/summary_table_guide.html'><img src='img/helplink.jpg' alt='' title='Guide to summary table'></a></small>";
+
     $entry .= "</p>\n"; // end of summary stats table
     return $entry;
 }
