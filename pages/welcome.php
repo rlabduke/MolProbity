@@ -74,9 +74,10 @@ Create and view interactive 3-D graphics
 from your web browser.</p>
 <p><b><a target="_blank" href="help/reduce_guide/reduce_guide.html">Guide to Reduce options</a>:</b>
 Learn about adding hydrogens to a structure for all-atom contact analysis.</p>
+<p><b><a target="_blank" href="help/validation_options/summary_table_guide.html">Guide to summary statistics</a>:</b>
+Interpret structure-level validation statistics.</p>
 <p><b><a target="_blank" href="help/validation_options/validation_options.html">Guide to validation options</a>:</b>
 Choose validations appropriate to a structure.</p>
-
 
 <?php
 //    <h3>What's new in 4.2:</h3><ul>
