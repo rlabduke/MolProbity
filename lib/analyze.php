@@ -937,6 +937,12 @@ function loadClashscore($datafile)
     elseif (preg_match("/^Using /",$line[0])){
       continue;
     }
+    elseif (preg_match("/^Adding /",$line[0])){
+      continue;
+    }
+    elseif (preg_match("/^No H/",$line[0])){
+      continue;
+    }
     elseif (preg_match("/^Bad Clashes/",$line[0])){
       continue;
     }
