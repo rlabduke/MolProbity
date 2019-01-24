@@ -21,6 +21,21 @@ then
   fi
 fi
 
+#check for bzip2 dependency
+#attempt to import relevant module
+python -c "import bz2"
+#access return code via $?, will be 0 if the import was successful
+if [ $? -eq 1 ]
+then
+  echo """
+  MolProbity and the cctbx_project now require the bzip2 developer libraries.
+  Please obtain this dependency before running this configure.sh again.
+  On Centos, the required package should be bzip2-devel
+  On Ubuntu, the required package should be libbz2-dev
+  """
+  exit
+fi
+
 echo ++++++++++ creating build directories ...
 if [ ! -d modules ]; then mkdir modules; fi
 if [ ! -d build ]; then mkdir build; fi
@@ -81,7 +96,7 @@ if [ ! -f annlib.gz ]; then curl http://cci.lbl.gov/repositories/annlib.gz -o an
 if [ ! -f annlib_adaptbx.gz ]; then curl http://cci.lbl.gov/repositories/annlib_adaptbx.gz -o annlib_adaptbx.gz; fi
 if [ ! -f ccp4io.gz ]; then curl http://cci.lbl.gov/repositories/ccp4io.gz -o ccp4io.gz; fi
 if [ ! -f ccp4io_adaptbx.gz ]; then curl http://cci.lbl.gov/repositories/ccp4io_adaptbx.gz -o ccp4io_adaptbx.gz; fi
-if [ ! -f chem_data.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/chem_data.tar.gz -o chem_data.tar.gz; fi
+#if [ ! -f chem_data.tar.gz ]; then curl http://kinemage.biochem.duke.edu/molprobity/chem_data.tar.gz -o chem_data.tar.gz; fi
 if [ ! -f tntbx.gz ]; then curl http://cci.lbl.gov/repositories/tntbx.gz -o tntbx.gz; fi
 
 echo ++++++++++ unpacking sources ...
@@ -91,8 +106,19 @@ tar zxf annlib.gz
 tar zxf annlib_adaptbx.gz
 tar zxf ccp4io.gz
 tar zxf ccp4io_adaptbx.gz
-tar zxf chem_data.tar.gz
+#tar zxf chem_data.tar.gz
 tar zxf tntbx.gz
+
+#assemble chem_data piecemeal
+mkdir chem_data
+cd chem_data
+svn --quiet --non-interactive --trust-server-cert co svn://svn.code.sf.net/p/geostd/code/trunk geostd
+svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/mon_lib.git/trunk mon_lib
+svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_rotamer_pct_contour_grids rotarama_data
+rm -rf rotarama_data/.svn
+svn --quiet --non-interactive --trust-server-cert --force co https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_ramachandran_pct_contour_grids rotarama_data
+svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_cablam_pct_contour_grids cablam_data
+cd ..
 
 cd ..
 echo ++++++++++ getting MolProbity base ...
@@ -107,6 +133,8 @@ echo ++++++++++ building ...
 #  guarantee function on most platforms
 #rebuild_rotarama_cache is run as part of this build
 python modules/cctbx_project/libtbx/auto_build/bootstrap.py --builder=molprobity build
+source build/setpaths.sh
+python modules/chem_data/cablam_data/rebuild_cablam_cache.py
 
 #echo ++++++++++ creating Makefile ...
 #cd build
