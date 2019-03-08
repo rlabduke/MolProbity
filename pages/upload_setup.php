@@ -49,7 +49,7 @@ function display($context)
 <td align='right'><input type="submit" name="cmd" value="Cancel"></td>
 </tr></table>
 </form>
-</div><br><div class='pagecontent_alone'>
+<!--</div><br><div class='pagecontent_alone'>
 <?php
     echo makeEventForm("onUploadKinemage") . "\n";
 ?>
@@ -84,7 +84,7 @@ function display($context)
 <td><input type="submit" name="cmd" value="Upload this file &gt;"></td>
 <td align='right'><input type="submit" name="cmd" value="Cancel"></td>
 </tr></table>
-</form>
+</form>-->
 </div><br><div class='pagecontent_alone'>
 <div class='help_info'>
 <h4>Upload model from local disk</h4>
@@ -110,7 +110,7 @@ function display($context)
     <a href="http://ndbserver.rutgers.edu/" target="_blank">Nucleic Acid Data Bank</a>.</li>
 </ul>
 
-<h4>Upload kinemage</h4>
+<!--<h4>Upload kinemage</h4>
 <ul>
 <li>This function allows you to upload kinemages from your computer's hard drive,
 and then view them on-line using KiNG.</li>
@@ -138,7 +138,7 @@ version 1.3 or newer. See the user manual for more details.</li>
 <li>Your uploaded dictionary will be merged with this default dictionary of common hets.</li>
 <li>Uploading a new dictionary will replace the previous one.</li>
 <li>Dictionaries must be in <a href='http://deposit.pdb.org/het_dictionary.txt' target='_blank'>PDB format</a>.</li>
-</ul>
+</ul>-->
 </div>
 <?php
     echo $this->pageFooter();

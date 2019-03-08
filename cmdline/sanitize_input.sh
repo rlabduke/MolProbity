@@ -33,7 +33,15 @@ else
   noscriptflags=true
 fi
 
-if ( $hasatoms && $noshbangs && $noscriptflags )
+phptags=$(grep -i "<?php" $inputfile)
+if [[ ${#phptags} > 0 ]]
+then
+  nophpflags=false
+else
+  nophpflags=true
+fi
+
+if ( $hasatoms && $noshbangs && $noscriptflags && $nophpflags)
 then
   echo 1
 else

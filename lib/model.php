@@ -744,9 +744,11 @@ function convertModelsToChains($infile)
 {
     // Generate a set of all possible usable IDs.
     // These will be removed as they're used.
-    $possibleIDs = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890abcdefghijklmnopqrstuvwxyz ";
+    //$possibleIDs = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890abcdefghijklmnopqrstuvwxyz ";
+    exec("python ".MP_BASE_DIR."/bin/cctbx_utils.py all_chain_ids",$possibleIDs);
+    //$possibleIDs = array_slice($possibleIDs, 0, 36); // subset of chains for testing
     $unusedIDs = array();
-    for($i = 0; $i < strlen($possibleIDs); $i++)
+    for($i = 0; $i <= count($possibleIDs); $i++)
         $unusedIDs[ $possibleIDs{$i} ] = $possibleIDs{$i};
 
     // Maps old chain IDs to new chain IDs. Mappings are pulled from $unusedIDs.
@@ -760,15 +762,18 @@ function convertModelsToChains($infile)
         $line = fgets($in);
         if(preg_match('/^(ATOM|HETATM|TER|ANISOU)/', $line) && strlen($line) >= 22)
         {
-            $cid = $line{21};
+            $cid = $line{20}.$line{21};
             if(!isset($idmap[$cid]))
             {
                 if(isset($ununsedIDs[$cid]))    $idmap[$cid] = $unusedIDs[$cid];
                 else                            $idmap[$cid] = reset($unusedIDs);
                 unset($unusedIDs[ $idmap[$cid] ]);
             }
-            $line{21} = $idmap[$cid];
-            fwrite($out, $line);
+            $line{20} = $idmap[$cid]{0};
+            $line{21} = $idmap[$cid]{1};
+            if (count($unusedIDs)>0) {
+              fwrite($out, $line);
+            }
         }
         elseif(preg_match('/^(MODEL|ENDMDL)/', $line))
         {
@@ -777,6 +782,9 @@ function convertModelsToChains($infile)
         }
         else fwrite($out, $line);
     }
+    if (count($unusedIDs)==0) {
+      echo "ran out of chain IDs when converting a multi-model biological unit PDB file to chains, your resulting file is likely truncated\n";
+    }    
     fclose($in);
     fclose($out);
 
