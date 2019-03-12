@@ -81,4 +81,5 @@ This would lend itself nicely to a tabular format...
 unset($_SESSION['bgjob']['processID']);
 $_SESSION['bgjob']['endTime']   = time();
 $_SESSION['bgjob']['isRunning'] = false;
+mpSaveSession();
 ?>
