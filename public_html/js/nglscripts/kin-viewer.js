@@ -440,8 +440,7 @@ NGL.KinGroupWidget = function (component, stage) {
     .setColor('#444')
     .setOptions((function () {
       var reprOptions = {
-        '': '[ add ]',
-        'buffer': 'buffer'
+        '': '[ add ]'
       }
       return reprOptions
     })())

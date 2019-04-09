@@ -183,11 +183,17 @@ echo "NGL.autoLoad(\"$url\").then(function (kinemage) {
         var r3 = ribbonList.colorArray[ i9 + 6 ]
         var g3 = ribbonList.colorArray[ i9 + 7 ]
         var b3 = ribbonList.colorArray[ i9 + 8 ]
-        var nx = ribbonList.normalArray[ i3 ]
-        var ny = ribbonList.normalArray[ i3 + 1 ]
-        var nz = ribbonList.normalArray[ i3 + 2 ]
-        shape.addTriangle([ x1, y1, z1 ], [ x2, y2, z2 ], [ x3, y3, z3 ], [ r1, g1, b1 ], [], ribbonList.labelArray[ i3 ])
-        //shape.addMesh([ x1, y1, z1, x2, y2, z2, x3, y3, z3 ], [ r1, g1, b1, r2, g2, b2, r3, g3, b3 ], [ 0, 0, 0 ], [ 1, 1, 1, 1, 1, 1, 1, 1, 1 ], ribbonList.labelArray[ i3 ])
+        var nx1 = ribbonList.normalArray[ i9 ]
+        var ny1 = ribbonList.normalArray[ i9 + 1 ]
+        var nz1 = ribbonList.normalArray[ i9 + 2 ]
+        var nx2 = ribbonList.normalArray[ i9 + 3]
+        var ny2 = ribbonList.normalArray[ i9 + 4 ]
+        var nz2 = ribbonList.normalArray[ i9 + 5 ]
+        var nx3 = ribbonList.normalArray[ i9 + 6 ]
+        var ny3 = ribbonList.normalArray[ i9 + 7 ]
+        var nz3 = ribbonList.normalArray[ i9 + 8 ]
+        //shape.addTriangle([ x1, y1, z1 ], [ x2, y2, z2 ], [ x3, y3, z3 ], [ r1, g1, b1 ], [ ], ribbonList.labelArray[ i3 ])
+        shape.addMesh([ x1, y1, z1, x2, y2, z2, x3, y3, z3 ], [ r1, g1, b1, r2, g2, b2, r3, g3, b3 ], undefined ,[ nx1, ny1, nz1, nx2, ny2, nz2, nx3, ny3, nz3 ], ribbonList.labelArray[ i3 ])
       }
     })
     
@@ -213,23 +219,60 @@ echo "NGL.autoLoad(\"$url\").then(function (kinemage) {
     //      
     //      27.540, 29.681, 5.820,
     //      25.537, 29.360, 5.683,
-    //      27.532, 30.283, 6.297
+    //      27.532, 30.283, 6.297,
     //     
+    //      25.537, 29.360, 5.683,
+    //      27.532, 30.283, 6.297,
+    //      25.536, 29.882, 6.467,
+    //      
+    //      27.532, 30.283, 6.297,
+    //      25.536, 29.882, 6.467,
+    //      25.536, 29.882, 6.467
     //      ]
     //  ),
     //  color: new Float32Array(
-    //    [ 0.3, 0.3, 1, 
-    //      0.3, 0.3, 1, 
-    //      0.3, 0.3, 1, 
+    //    [ 0, 0.8, 0.8, 
+    //      0, 0.8, 0.8,
+    //      0, 0.8, 0.8,
     //      
-    //      0.3, 0.3, 1, 
-    //      0.3, 0.3, 1, 
-    //      0.3, 0.3, 1, 
+    //      0, 0.8, 0.8,
+    //      0, 0.8, 0.8, 
+    //      0, 0.8, 0.8,
     //      
-    //      0.3, 0.3, 1, 
-    //      0.3, 0.3, 1, 
-    //      0.3, 0.3, 1
+    //      0, 0.8, 0.8,
+    //      0, 0.8, 0.8, 
+    //      0, 0.8, 0.8,
+    //      
+    //      0, 0.8, 0.8,
+    //      0, 0.8, 0.8, 
+    //      0, 0.8, 0.8,
+    //      
+    //      0, 0.8, 0.8,
+    //      0, 0.8, 0.8, 
+    //      0, 0.8, 0.8
     //     ]
+    //  ),
+    //  normal: new Float32Array(
+    //    [ 0.125255691, 0.577254096, -0.806900688,
+    //      0.125255691, 0.577254096, -0.806900688,
+    //      0.125255691, 0.577254096, -0.806900688,
+    //    
+    //      0.095844536, -0.831558053, 0.54710605,
+    //      0.095844536, -0.831558053, 0.54710605,
+    //      0.095844536, -0.831558053, 0.54710605,
+    //      
+    //      -0.045790074, 0.62001107, -0.783255733,
+    //      -0.045790074, 0.62001107, -0.783255733,
+    //      -0.045790074, 0.62001107, -0.783255733,
+    //      
+    //      0.20965374, -0.813754449, 0.542078413,
+    //      0.20965374, -0.813754449, 0.542078413,
+    //      0.20965374, -0.813754449, 0.542078413,
+    //      
+    //      0.20965374, -0.813754449, 0.542078413,
+    //      0.20965374, -0.813754449, 0.542078413,
+    //      0.20965374, -0.813754449, 0.542078413,
+    //    ]
     //  )
     //}, {
     //});
