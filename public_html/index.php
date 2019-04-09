@@ -18,6 +18,7 @@
     require_once(MP_BASE_DIR.'/lib/core.php');
 // 3. Restore session data. If you don't want to access the session
 // data for some reason, you must call mpInitEnvirons() instead.
+//ini_set('display_errors','1'); error_reporting(E_ERROR | E_WARNING | E_PARSE);
     $isNewSess = mpStartSession(true);
 // New sessions must define where they start!
 // Default is welcome page unless URL is like index.php?start=____
@@ -32,8 +33,6 @@
             //default:            pageGoto("april_fools.php"); break;
         }
     }
-    
-
 
 // Process submitted event /////////////////////////////////////////////////////
 $page = end($_SESSION['pages']); // not a ref; read only

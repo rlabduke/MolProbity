@@ -287,6 +287,7 @@ function mpSessWrite($id, $sessData)
     {
         $r = fwrite($fp, $sessData);
         @fclose($fp);
+        if($r !== false) return true;
         return $r;
     }
     else return false;

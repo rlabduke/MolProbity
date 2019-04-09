@@ -923,6 +923,7 @@ function mpgeo_error_catch($mpgeo_return_code)
         $modelerror = is_modelerror($errfile);
         if($modelerror) $_SESSION['bgjob']['modelError'] = true;
         else $_SESSION['bgjob']['cctbxError'] = true;
+        mpSaveSession();
         die();
     }
 }

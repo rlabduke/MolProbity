@@ -304,7 +304,13 @@ if(isset($id))
 
 ############################################################################
 // Clean up and go home
+//$errlog = $_SESSION['dataDir']."/".MP_DIR_SYSTEM."/errors";
+//file_put_contents($errlog,"pre unset addmodel\n", FILE_APPEND);
+
 unset($_SESSION['bgjob']['processID']);
 $_SESSION['bgjob']['endTime']   = time();
 $_SESSION['bgjob']['isRunning'] = false;
+mpSaveSession();
+//file_put_contents($errlog,var_export($_SESSION['bgjob'], true), FILE_APPEND);
+//file_put_contents($errlog,"end of addmodel", FILE_APPEND);
 ?>

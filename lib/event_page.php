@@ -263,7 +263,7 @@ function mpControllerDie($msg = "")
 class BasicDelegate {
 
     /** All page classes must implement display() to render a web page. */
-    function display()
+    function display($context)
     { die("All page classes must override display()"); }
     
     function pageHeader($title, $active = "none", $refresh = "")
