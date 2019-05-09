@@ -79,7 +79,7 @@ function runAnalysis($modelID, $opts)
     if(isset($model['mtz_file']))
         $mtz_file = $model['mtz_file'];
     else $mtz_file = $_SESSION['models'][$model['parent']]['mtz_file'];
-    
+
     if(is_array($opts['doEnsemble'])) {
       $ensemble = $opts['doEnsemble'];
       echo "Ensemble mode set for runAnalysis for ".$model[pdb]."\n";
@@ -118,7 +118,7 @@ function runAnalysis($modelID, $opts)
 
     //Curate presentation of validation feedback
     $curation = array(
-    	'showAllOmegaStats' => $opts['chartOmegaForceStats']);
+      'showAllOmegaStats' => $opts['chartOmegaForceStats']);
 
     //{{{ Run geometry programs and offer kins to user
 
@@ -427,7 +427,7 @@ function runAnalysis($modelID, $opts)
             //echo "Ran calcLocalBadness\n";
             $viewRes = array_keys(calcLocalBadness($infile, 10, $clash, $rama, $rota, $cbdev, $pperp));
         }
-        makeMulticritKin2(array($infile), $outfile, $mcKinOpts,
+        makeMulticritKin2(array($infile), $outfile, $mcKinOpts, $model['stats']['use_cdl'],
         #    array_keys(findAllOutliers($clash, $rama, $rota, $cbdev, $pperp)));
             $viewRes);
 
@@ -601,7 +601,7 @@ function loadBasePhosPerp($datafile)
             $deltaOut = (trim($line[8]) ? true : false);
             $epsilonOut = (trim($line[10]) ? true : false);
             $perpdist = $line[6] + 0;
-            if($perpdist < 2.9) //2.9A is dist cutoff for C2' vs C3' endo pucker  
+            if($perpdist < 2.9) //2.9A is dist cutoff for C2' vs C3' endo pucker
               $probpucker = "C2'-endo";
             else
               $probpucker = "C3'-endo";
