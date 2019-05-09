@@ -63,7 +63,8 @@ $infile     = "$modelDir/$ensemble[pdb]";
 $infiles    = array();
 foreach($ensemble['models'] as $modelID)
     $infiles[] = $modelDir.'/'.$_SESSION['models'][$modelID]['pdb'];
-    
+    $use_cdl = $_SESSION['models'][$modelID]['stats']['use_cdl'];
+
 $tasks = array();
 if($opts['doCharts'])            $tasks['charts'] = "Create ensemble multi-criterion charts";
 if($opts['doEnsembleKinemage'])  $tasks['multikin'] = "Create ensemble multi-criterion kinemage";
@@ -72,14 +73,14 @@ if($opts['doMultiGraph'])       $tasks['multigraph'] = "Create multi-criterion g
 if($opts['doMultiModelChart'])  $tasks['multichart'] = "Create multi-criterion chart";
 $opts['doEnsemble'] = $ensemble;
 echo $ensemble;
-    
+
 if($opts['doCharts']) {
 
   setProgress($tasks, 'charts');
   $labbookEntry .= "<h3>Model-by-model validation results</h3>\n";
   $labbookEntry .= "<p>\n";
   $labbookEntry .= runEnsembleAnalysis($ensemble, $opts);
-  
+
 }
 
 if($opts['doEnsembleKinemage'])
@@ -102,7 +103,7 @@ if($opts['doEnsembleKinemage'])
         'vdwdots'   =>  $opts['kinContacts']
     );
     $outfile = "$kinDir/$ensemble[prefix]multi.kin";
-    makeMulticritKin2($infiles, $outfile, $mcKinOpts);
+    makeMulticritKin2($infiles, $outfile, $mcKinOpts, $use_cdl);
 
     // EXPERIMENTAL: gzip compress large multikins
     if(filesize($outfile) > MP_KIN_GZIP_THRESHOLD)
@@ -121,7 +122,7 @@ if($opts['doRamaPDF'])
     setProgress($tasks, 'ramapdf'); // updates the progress display if running as a background job
     $outfile = "$chartDir/$ensemble[prefix]rama.pdf";
     makeRamachandranPDF($infile, $outfile);
-    
+
     $labbookEntry .= "<h3>Multi-model Ramachandran plot</h3>\n";
     $labbookEntry .= "<p>".linkAnyFile("$ensemble[prefix]rama.pdf", "Ramachandran plot PDF")."</p>\n";
 }
