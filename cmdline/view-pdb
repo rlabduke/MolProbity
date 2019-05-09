@@ -162,7 +162,8 @@ foreach($pdbCodeList as $pdbCode)
       makeMulticritKin2(
           array($infileH),
           $kinfile,
-          $optMultikin);
+          $optMultikin,
+          $model['stats']['use_cdl']);
       // Needed to get separate disulfides, which I want for the SS study.
       exec("prekin -cass -append -nogroup $infileH >> $kinfile");
       if($optGzipKin) destructiveGZipFile($kinfile);
