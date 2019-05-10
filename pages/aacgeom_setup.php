@@ -141,7 +141,8 @@ function checkSettingsBeforeSubmit()
             $hasNucAcid = ($stats['nucacids'] > 0 ? "true" : "false");
             $pdbSize = filesize($_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$model['pdb']);
             $isBig = ($pdbSize > 1<<21 ? "true" : "false"); // 1<<20 = 2^20
-            $isLowRes = ($stats['resolution'] > 2.5 ? "true" : "false");
+            //$isLowRes = ($stats['resolution'] > 2.5 ? "true" : "false");
+            $isLowRes = ($stats['resolution'] ? ($stats['resolution'] > 2.5 ? "true" : "false") : "true");
 
             // Alternate row colors:
             $c == MP_TABLE_ALT1 ? $c = MP_TABLE_ALT2 : $c = MP_TABLE_ALT1;
