@@ -69,7 +69,7 @@ $file = basename($url);
 <center>
 <div id="viewport" content="width=device-width">
 
-<script src="../public_html/js/ngl.dev.js"></script>
+<script src="../public_html/js/ngl.js"></script>
 <script src="../public_html/js/nglscripts/ui/signals.min.js"></script>
 <script src="../public_html/js/nglscripts/ui/colorpicker.min.js"></script>
 
@@ -183,17 +183,18 @@ echo "NGL.autoLoad(\"$url\").then(function (kinemage) {
         var r3 = ribbonList.colorArray[ i9 + 6 ]
         var g3 = ribbonList.colorArray[ i9 + 7 ]
         var b3 = ribbonList.colorArray[ i9 + 8 ]
-        var nx1 = ribbonList.normalArray[ i9 ]
-        var ny1 = ribbonList.normalArray[ i9 + 1 ]
-        var nz1 = ribbonList.normalArray[ i9 + 2 ]
-        var nx2 = ribbonList.normalArray[ i9 + 3]
-        var ny2 = ribbonList.normalArray[ i9 + 4 ]
-        var nz2 = ribbonList.normalArray[ i9 + 5 ]
-        var nx3 = ribbonList.normalArray[ i9 + 6 ]
-        var ny3 = ribbonList.normalArray[ i9 + 7 ]
-        var nz3 = ribbonList.normalArray[ i9 + 8 ]
+        //var nx1 = ribbonList.normalArray[ i9 ]
+        //var ny1 = ribbonList.normalArray[ i9 + 1 ]
+        //var nz1 = ribbonList.normalArray[ i9 + 2 ]
+        //var nx2 = ribbonList.normalArray[ i9 + 3]
+        //var ny2 = ribbonList.normalArray[ i9 + 4 ]
+        //var nz2 = ribbonList.normalArray[ i9 + 5 ]
+        //var nx3 = ribbonList.normalArray[ i9 + 6 ]
+        //var ny3 = ribbonList.normalArray[ i9 + 7 ]
+        //var nz3 = ribbonList.normalArray[ i9 + 8 ]
         //shape.addTriangle([ x1, y1, z1 ], [ x2, y2, z2 ], [ x3, y3, z3 ], [ r1, g1, b1 ], [ ], ribbonList.labelArray[ i3 ])
-        shape.addMesh([ x1, y1, z1, x2, y2, z2, x3, y3, z3 ], [ r1, g1, b1, r2, g2, b2, r3, g3, b3 ], undefined ,[ nx1, ny1, nz1, nx2, ny2, nz2, nx3, ny3, nz3 ], ribbonList.labelArray[ i3 ])
+        //shape.addMesh([ x1, y1, z1, x2, y2, z2, x3, y3, z3 ], [ r1, g1, b1, r2, g2, b2, r3, g3, b3 ], undefined ,[ nx1, ny1, nz1, nx2, ny2, nz2, nx3, ny3, nz3 ], ribbonList.labelArray[ i3 ])
+        shape.addMesh([ x1, y1, z1, x2, y2, z2, x3, y3, z3 ], [ r1, g1, b1, r2, g2, b2, r3, g3, b3 ], undefined ,[  ], ribbonList.labelArray[ i3 ])
       }
     })
     

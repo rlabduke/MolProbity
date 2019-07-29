@@ -5,3 +5,15 @@ Gawk
 Curl
 Tar
 Make
+git
+php
+bzip2-devel
+openssl
+bzip2-devel
+zlib-devel
+gcc
+pango
+pango-devel
+gtk2-devel
+gcc-c++
+php-process
