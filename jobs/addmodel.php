@@ -222,7 +222,7 @@ if(isset($id))
 
     $s = "";
     $s .= "<div class=\"right_ngl\" id=\"viewport\" style=\"width:350px; height:250px;\">\n";
-    $s .= "<script src=\"../public_html/js/ngl.dev.js\"></script>\n";
+    $s .= "<script src=\"../public_html/js/ngl.js\"></script>\n";
     $s .= "<script>\n";
     $s .= "        document.addEventListener( \"DOMContentLoaded\", function() {\n";
     $s .= "                var stage = new NGL.Stage( \"viewport\" );\n";
