@@ -15,6 +15,7 @@ class reduce_setup_delegate extends BasicDelegate {
 *   modelID     the model ID to add H to
 *   method      the means of adding H: nobuild or build
 *   blength     desired x-H length: ecloud or nuclear
+* CONTEXT IS NOT CURRENTLY PASSED
 */
 function display($context)
 {
@@ -79,7 +80,8 @@ function display($context)
 
         echo "<h3>Select x-H bond-length:</h3>";
         echo "<p><table width='100%' border='0'>\n";
-        if($context['method'] == 'nuclear') { $check1 = ""; $check2 = "checked"; }
+        //if($model['stats']['non_ecloud_H']) { $check1 = ""; $check2 = "checked"; }
+        if($_SESSION['reduce_blength'] == 'nuclear') { $check1 = ""; $check2 = "checked"; }
         else                                { $check1 = "checked"; $check2 = ""; }
         echo "<tr valign='top'><td width='300'><input type='radio' name='blength' value='ecloud' $check1> <b>Electron-cloud x-H</b><td>";
         echo "<td><small>Use electron-cloud x-H bond lengths and vdW radii.\nIdeal for most cases, especially X-ray crystal structures.";

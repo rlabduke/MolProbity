@@ -311,6 +311,4 @@ unset($_SESSION['bgjob']['processID']);
 $_SESSION['bgjob']['endTime']   = time();
 $_SESSION['bgjob']['isRunning'] = false;
 mpSaveSession();
-//file_put_contents($errlog,var_export($_SESSION['bgjob'], true), FILE_APPEND);
-//file_put_contents($errlog,"end of addmodel", FILE_APPEND);
 ?>

@@ -70,4 +70,5 @@ OUTPUTS (via $_SESSION['bgjob']):
 unset($_SESSION['bgjob']['processID']);
 $_SESSION['bgjob']['endTime']   = time();
 $_SESSION['bgjob']['isRunning'] = false;
+mpSaveSession(); //Seems to be necessary on some machines
 ?>

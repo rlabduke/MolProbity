@@ -122,4 +122,5 @@ setProgress($tasks, null);
 unset($_SESSION['bgjob']['processID']);
 $_SESSION['bgjob']['endTime']   = time();
 $_SESSION['bgjob']['isRunning'] = false;
+mpSaveSession();
 ?>

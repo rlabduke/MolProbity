@@ -3,6 +3,7 @@ from __future__ import division
 import os
 import iotbx.pdb
 import iotbx.pdb.mmcif
+import mmtbx.model
 
 #This code is derived from cctbx_project/iotbx/command_line/cif_as_pdb.py
 #  (aka phenix.cif_as_pdb), with modifications for use in MolProbity
@@ -10,7 +11,7 @@ import iotbx.pdb.mmcif
 def run(args):
   if len(args) != 2:
     sys.stdout.write("""
-Error in cif cenversion commandline
+Error in cif conversion commandline
 Format is:
 convert_cif_to_pdb.py input_file_path.cif output_file_path.pdb
 """)
@@ -21,18 +22,11 @@ convert_cif_to_pdb.py input_file_path.cif output_file_path.pdb
     assert os.path.exists(file_name)
     #print "Converting %s to PDB format." %file_name
     cif_input = iotbx.pdb.mmcif.cif_input(file_name=file_name)
-    hierarchy = cif_input.construct_hierarchy()
+    m = mmtbx.model.manager(model_input=cif_input)
     basename = os.path.splitext(os.path.basename(file_name))[0]
-    iotbx.pdb.write_whole_pdb_file(
-        file_name=output_name,
-        output_file=None,
-        processed_pdb_file=None,
-        pdb_hierarchy=hierarchy,
-        crystal_symmetry=cif_input.crystal_symmetry(),
-        ss_annotation=cif_input.extract_secondary_structure(),
-        append_end=True,
-        atoms_reset_serial_first_value=None,
-        link_records=None)
+    pdb_text = m.model_as_pdb()
+    with open(output_name, 'w') as f:
+        f.write(pdb_text)
   except Exception, e:
     print "Error converting %s to PDB format:" %file_name
     print " ", str(e)

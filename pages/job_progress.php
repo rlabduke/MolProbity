@@ -143,7 +143,8 @@ function display($context)
         echo "<p>It appears that your CCTBX-powered job failed.\n";
         echo "<br>This may be due to an error in the PDB-formatting of a submitted file.\n";
         echo "<br>Or it may be due to a syntax error in one of the CCTBX scripts.\n";
-        echo "<br>See the session error log for hints, and please report the bug or seek assistance using the Feedback tool.\n";
+        echo "<br>See the session error log for hints, and check your file against the <a target='_blank' href='http://www.wwpdb.org/documentation/file-format-content/format33/v3.3.html'>official PDB format</a>.\n";
+        echo "<br><br>You can report bugs or seek formatting assistance through the Feedback page.\n";
         echo "<p><a href='$url'>Click here</a> to continue.\n";
         echo $this->pageFooter();
     }

@@ -322,7 +322,7 @@ function makeMulticritKin($infiles, $outfile, $opt, $nmrConstraints = null)
 * $nmrConstraints is optional, and if present will generate lines for violated NOEs
 * $clashLimit is an option for probe, to set the clash cutoff to something different than -0.4
 */
-function makeMulticritKin2($infiles, $outfile, $opt, $viewRes = array(), $nmrConstraints = null, $clashLimit = null)
+function makeMulticritKin2($infiles, $outfile, $opt, $use_cdl, $viewRes = array(), $nmrConstraints = null, $clashLimit = null)
 {
     if(file_exists($outfile)){
         if(!unlink($outfile)){
@@ -413,7 +413,8 @@ function makeMulticritKin2($infiles, $outfile, $opt, $viewRes = array(), $nmrCon
         if($opt['geom'])
         {
             #"making Geom...\n";
-            $mpgeo_return_code = makeBadGeomKin($infile, $outfile);
+            #$mpgeo_return_code = makeBadGeomKin($infile, $outfile, $model['stats']['use_cdl']);
+            $mpgeo_return_code = makeBadGeomKin($infile, $outfile, $use_cdl);
             mpgeo_error_catch($mpgeo_return_code);
             #"Geom OK\n";
         }
@@ -672,9 +673,11 @@ function makeBadRotamerKin($infile, $outfile, $rota = null, $color = 'gold', $cu
 
 #{{{ makeBadGeomKin - appends bond and angle outliers
 ############################################################################
-function makeBadGeomKin($infile, $outfile) {
+function makeBadGeomKin($infile, $outfile, $use_cdl) {
     //$out = fopen($outfile, 'a');
-    exec("mmtbx.mp_geo pdb=$infile out_file=$outfile outliers_only=True kinemage=True",$arg_list_filler,$mpgeo_return_code);
+    if($use_cdl) {$uc = "True";}
+    else {$uc = "False"; }
+    exec("mmtbx.mp_geo pdb=$infile out_file=$outfile cdl=$uc outliers_only=True kinemage=True",$arg_list_filler,$mpgeo_return_code);
     return $mpgeo_return_code;
     //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -kin -sub -validate -protein $infile >> $outfile");
     //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle -kin -sub -validate -rna $infile >> $outfile");
@@ -1296,21 +1299,30 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
       $firstRow = true;
       if(is_array($cablam))
       {
-        $cablamOut = 0;
-        $caGeomOut = 0;
-        //$cablamFav = 0;
-        foreach($cablam as $c)
-        {
-          if($c['outlierType'] ==     " CaBLAM Outlier     ") $cablamOut++;
-          elseif($c['outlierType'] == " CA Geom Outlier    ") $caGeomOut++;
-          //elseif($c['outlierType'] != " CaBLAM Disfavored  ") $cablamFav++;
-          //The disfavored category was deemed more info than necessary for the moment in this chart
-        }
-        $cablamTot = count($cablam);
-        $cablamOutPct = sprintf("%.2f", 100.0 * $cablamOut/$cablamTot);
-        //$cablamFavPct = sprintf("%.2f", 100.0 * $cablamFav/$cablamTot);
-        $caGeomPct = sprintf("%.2f", 100.0 * $caGeomOut/$cablamTot);
-
+          if(is_array($summaries['cablam']))
+          {
+              $cablamOut = $summaries['cablam']['cablam_outlier_count'];
+              $caGeomOut = $summaries['cablam']['cageom_outlier_count'];
+              $cablamOutPct = $summaries['cablam']['cablam_outlier_percent'];
+              $caGeomPct = $summaries['cablam']['cageom_outlier_percent'];
+          }
+          else
+          {
+              $cablamOut = 0;
+              $caGeomOut = 0;
+              //$cablamFav = 0;
+              foreach($cablam as $c)
+              {
+                  if($c['outlierType'] ==     " CaBLAM Outlier     ") $cablamOut++;
+                  elseif($c['outlierType'] == " CA Geom Outlier    ") $caGeomOut++;
+                  //elseif($c['outlierType'] != " CaBLAM Disfavored  ") $cablamFav++;
+                  //The disfavored category was deemed more info than necessary for the moment in this chart
+              }
+              $cablamTot = count($cablam);
+              $cablamOutPct = sprintf("%.2f", 100.0 * $cablamOut/$cablamTot);
+              //$cablamFavPct = sprintf("%.2f", 100.0 * $cablamFav/$cablamTot);
+              $caGeomPct = sprintf("%.2f", 100.0 * $caGeomOut/$cablamTot);
+          }
         if($firstRow) $firstRow = false;
         else $entry .= "<tr>";
 
@@ -1356,6 +1368,10 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
       //$entry .= "<small><sup>^</sup> MolProbity score is defined as the following: 0.42574*log(1+clashscore) + 0.32996*log(1+max(0,pctRotOut-1)) + 0.24979*log(1+max(0,100-pctRamaFavored-2)) + 0.5</small>\n";
       $entry .= "<small><sup>^</sup> MolProbity score combines the clashscore, rotamer, and Ramachandran evaluations into a single score, normalized to be on the same scale as X-ray resolution.</small>\n";
     }
+    if($firstRow) $firstRow = false;
+    else $entry .= "<br>";
+    $entry .= "<small>Key to table colors and cutoffs here: <a target='_blank' href='help/validation_options/summary_table_guide.html'><img src='img/helplink.jpg' alt='' title='Guide to summary table'></a></small>";
+
     $entry .= "</p>\n"; // end of summary stats table
     return $entry;
 }

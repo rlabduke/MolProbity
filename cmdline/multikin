@@ -118,7 +118,8 @@ foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
     makeMulticritKin2(
       $pdbfile,
       $outDir.'/'.$outFile,
-      $optMultikin);
+      $optMultikin,
+      $model['stats']['use_cdl']);
     if($optGzipKin) destructiveGZipFile($outDir.'/'.$outFile);
 
     mpDestroySession();
