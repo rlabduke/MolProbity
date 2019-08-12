@@ -802,16 +802,19 @@ function runClashlist($infile, $outfile, $blength="ecloud")
 ############################################################################
 function runClashscore($infile, $outfile, $blength="ecloud", $clash_cutoff=-0.4)
 {
+    #clash_cutoff flag not currently in use in phenix.clashscore, commandlines preserved for posterity
     #$bcutval = 40;
     #$ocutval = 10;
     #exec("clashlist $infile $bcutval $ocutval $blength > $outfile");
     if($blength == "ecloud")
     {
-      exec("phenix.clashscore b_factor_cutoff=40 keep_hydrogens=True clash_cutoff=$clash_cutoff $infile > $outfile");
+      #exec("phenix.clashscore b_factor_cutoff=40 keep_hydrogens=True clash_cutoff=$clash_cutoff $infile > $outfile");
+      exec("phenix.clashscore b_factor_cutoff=40 keep_hydrogens=True $infile > $outfile");
     }
     elseif($blength == "nuclear")
     {
-      exec("phenix.clashscore b_factor_cutoff=40 keep_hydrogens=True clash_cutoff=$clash_cutoff nuclear=True $infile > $outfile");
+      #exec("phenix.clashscore b_factor_cutoff=40 keep_hydrogens=True clash_cutoff=$clash_cutoff nuclear=True $infile > $outfile");
+      exec("phenix.clashscore b_factor_cutoff=40 keep_hydrogens=True nuclear=True $infile > $outfile");
     }
 }
 #}}}########################################################################
@@ -1042,7 +1045,8 @@ function runRotamer($infile, $outfile)
     //java-based
     //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/chiropraxis.jar chiropraxis.rotarama.Rotalyze $infile > $outfile");
     //cctbx-based
-    exec("phenix.rotalyze data_version=8000 $infile > $outfile");
+    //exec("phenix.rotalyze data_version=8000 $infile > $outfile");
+    exec("phenix.rotalyze $infile > $outfile"); #data_version flag not currently in use
 }
 #}}}########################################################################
 
@@ -1509,7 +1513,7 @@ function runSuitenameString($infile, $outfile)
 ############################################################################
 function runCablam($infile, $outfile)
 {
-    exec("phenix.cablam output=text $infile > $outfile");
+    exec("phenix.cablam output_type=text $infile > $outfile");
 }
 #}}}########################################################################
 
