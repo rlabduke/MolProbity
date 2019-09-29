@@ -6,8 +6,8 @@ do
 done
 
 #grep for lines starting with ATOM or HETATM
-atomchars=$(grep "^ATOM" $inputfile)
-hetatomchars=$(grep "^HETATM" $inputfile)
+atomchars=$(grep "^[[:blank:]]*ATOM" $inputfile)
+hetatomchars=$(grep "^[[:blank:]]*HETATM" $inputfile)
 
 #check if length of either grep output is > 0
 if ([[ ${#atomchars} > 0 ]] || [[ ${#hetatomchars} > 0 ]])

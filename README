@@ -27,25 +27,23 @@ MolProbity.
 
 0. Acquiring MolProbity
 
-Currently the only way to get MolProbity is from GitHub. For users, we suggest:
+The MolProbity installation process is currently in flux.
+Currently we recommend obtaining the installation script on its own:
 
-git clone https://github.com/rlabduke/MolProbity.git --branch molprobity_4.4 --single-branch --depth 1
+svn --quiet --non-interactive --trust-server-cert export https://github.com/rlabduke/MolProbity.git/trunk/install_via_bootstrap.sh
 
-This will check out just the most recent release of the code. If you
-did a whole-repository checkout instead, let us suggest you swap to a
-stable release branch (currently molprobity_4.4) over the master
-development branch.  Just "git checkout molprobity_4.4" from the
-directory containing this readme.
+Place this script at the top level of the directory where MolProbity is to be
+installed.
 
-1. Run configure.sh. 
 
-If your machine has less than 2 GB memory per processor, you may wish
-to edit configure.sh by commenting out "make" and commenting in the
-nearby line "./bin/libtbx.scons -j 1".  This causes the underlying
-cctbx code to compile on only one processor instead of all processors
-- it's slower (an hour?) but less likely to bog down your computer.
+1. Run install_via_bootstrap.sh. 
 
->>> ./configure.sh
+>>> ./install_via_bootstrap.sh
+
+The script can accept a single integer argument to set the number of processors
+to use.  We recommend 4 if possible.
+
+>>> ./install_via_bootstrap.sh 4
 
 This will install cctbx_project and needed components in MolProbity/sources:
 
@@ -68,6 +66,7 @@ and then will compile and configure in MolProbity/build.
 
 2. Run setup.sh to configure the webserver.
 
+>>> cd/molprobity
 >>> ./setup.sh
 
 If setting up a webserver, make sure that the machine's Apache

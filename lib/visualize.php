@@ -913,7 +913,7 @@ function makeOccupancyScale($infile, $outfile)
 #{{{ makeBadCablamKin - CaBLAM outlier markup
 function makeBadCablamKin($infile, $outfile)
 {
-    exec("phenix.cablam_validate output=markup_no_ribbons $infile >> $outfile");
+    exec("phenix.cablam output_type=kin $infile >> $outfile");
 }
 #}}}
 
