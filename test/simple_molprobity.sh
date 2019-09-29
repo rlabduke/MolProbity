@@ -200,7 +200,7 @@ echo -e "^time to run omegalyze\n\n"
 
 
 echo "running CaBLAM"
-time phenix.cablam_validate output=text $tempdir/$reducedfile > $tempdir/$pdbcode.cablam
+time phenix.cablam output_type=text $tempdir/$reducedfile > $tempdir/$pdbcode.cablam
 #this from runCablam($infile, $outfile) in lib/analyze.php
 echo -e "^time to run CaBLAM\n\n"
 
