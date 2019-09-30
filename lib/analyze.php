@@ -145,6 +145,11 @@ function runAnalysis($modelID, $opts)
         if (count($validate_bond) == 0) $validate_bond = null;
         $validate_angle = array_merge(loadValidationAngleReport($geomfile, "protein"), loadValidationAngleReport($geomfile, "rna"));
         if (count($validate_angle) == 0) $validate_angle = null;
+        $chiral_outfile = "$chartDir/$model[prefix]chirals.txt";
+        makeChiralOutlierTable($geomfile,$chiral_outfile);
+        $chiral_summary = load_chiral_summary($chiral_outfile);
+
+        
     }//}}}
 
     //{{{ Ramachandran
@@ -378,7 +383,7 @@ function runAnalysis($modelID, $opts)
         $outfile = "$rawDir/$model[prefix]multi.table";
         $snapfile = "$chartDir/$model[prefix]multi.html";
         $resout = "$rawDir/$model[prefix]multi_res.table";
-        writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, $cablam, $omega, $summaries, $curation, !$opts['chartNotJustOut'], $opts['chartMulti'], $opts['chartAltloc']);
+        writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, $chiral_summary, $cablam, $omega, $summaries, $curation, !$opts['chartNotJustOut'], $opts['chartMulti'], $opts['chartAltloc']);
         if($opts['chartMulti']) {
           $tasks['multichart'] .= " - <a href='viewtable.php?$_SESSION[sessTag]&file=$outfile' target='_blank'>preview</a>\n";
           setProgress($tasks, 'multichart'); // so the preview link is visible
@@ -485,7 +490,7 @@ function runAnalysis($modelID, $opts)
         } else {
           $entry .= "<h3>Summary statistics</h3>\n";
         }
-        $entry .= makeSummaryStatsTable($model['stats']['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, $cablam, $omega, $summaries, $curation);
+        $entry .= makeSummaryStatsTable($model['stats']['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, $chiral_summary, $cablam, $omega, $summaries, $curation);
     }
     $entry .= $improveText;
     if($opts['doKinemage'] || $opts['doCharts'])
@@ -526,6 +531,8 @@ function runAnalysis($modelID, $opts)
             $entry .= "<li>".linkAnyFile("$model[prefix]rama.kin", "Ramachandran plot kinemage")."</li>\n";
             $entry .= "<li>".linkAnyFile("$model[prefix]rama.pdf", "Ramachandran plot PDF")."</li>\n";
         }
+        if($opts['chartGeom'])
+            $entry .= "<li>".linkAnyFile("$model[prefix]chirals.txt", "Chiral volume report")."</li>\n";
         if($opts['chartCBdev'])
             $entry .= "<li>".linkAnyFile("$model[prefix]cbetadev.kin", "C&beta; deviation scatter plot")."</li>\n";
         if($opts['chartSuite'])
@@ -1837,6 +1844,45 @@ function loadValidationAngleReport($datafile, $moltype)
 }
 
 #}}}########################################################################
+
+#{{{ load_chiral_summary
+############################################################################
+function load_chiral_summary($chiral_result_file)
+{
+    #SUMMARY: 3 outliers out of 98 CA chiral centers (3.06%)
+    #SUMMARY: 0 outliers out of 47 other chiral centers (0.00%)
+    $outliers = 0;
+    $centers = 0;
+    $data = file($chiral_result_file);
+    foreach($data as $line) 
+    {
+      #$line = explode(' ', rtrim($line));
+      #if ($line[1] == 'outliers' and $line[5] == 'CA')
+      if (preg_match("/^SUMMARY/",$line))
+      {
+        $line = explode(' ', rtrim($line));
+        $outliers += ($line[1]+0);
+        $centers += ($line[5]+0);
+      }
+     ###if ($line[1] == 'outliers' and $line[5] == 'CA')
+#    ### if (preg_match("/CA chiral/",$line))
+     ###{
+     ###  ##$line = explode(' ', rtrim($line));
+     ###  $other_outliers += $line[0]+0;
+     ###  $other_centers += $line[4]+0;
+      #}
+    }
+    #$outliers = $ca_outliers+$other_outliers;
+    #$centers = $ca_centers+$other_centers;
+    if ($centers == 0) $percent_outliers = 0;
+    else $percent_outliers = $outliers*100/$centers;
+    $hash = array(
+      'outliers' => $outliers,
+      'centers' => $centers,
+      'percent_outliers' => $percent_outliers);
+    return $hash;
+}
+#}}}############################################################################
 
 #{{{ findGeomOutliers - evaluates residues for bad score
 ############################################################################

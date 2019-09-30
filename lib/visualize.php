@@ -57,6 +57,14 @@ function makeCbetaDevPlot($infile, $outfile)
 }
 #}}}########################################################################
 
+#{{{ makeChiralOutlierTable
+############################################################################
+function makeChiralOutlierTable($geomfile, $outfile)
+{
+  exec("python ".MP_BASE_DIR."/cmdline/parse_chiral_report.py $geomfile > $outfile");
+}
+#}}}########################################################################
+
 #{{{ makeSuitenameKin - creates a high-D plot of suite conformations
 ############################################################################
 function makeSuitenameKin($infile, $outfile)
@@ -158,8 +166,6 @@ function resGroupsForPrekin($data)
     return $out;
 }
 #}}}########################################################################
-
-
 
 #{{{ [deprecated] makeMulticritKin - display all quality metrics at once in 3-D
 ############################################################################
@@ -929,7 +935,7 @@ function makeBadOmegaKin($infile, $outfile)
 /**
 * Documentation for this function.
 */
-function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $cablam, $omega, $summaries, $curation)
+function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $chiral_summary, $cablam, $omega, $summaries, $curation)
 {
     $entry = "";
     $bgPoor = '#ff9999';
@@ -1344,6 +1350,25 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
         $entry .= "<td>Goal: &lt;0.5%</td></tr>\n";
       }
     }
+    //New measures
+    $addedRows = 0;
+    if(is_array($chiral_summary)) $addedRows +=1;
+    if($addedRows > 0)
+    {
+      $entry .= "<tr><td rowspan='$addedRows' align='center'>Additional validations</td>\n";
+      $firstRow = true;
+      if(is_array($chiral_summary))
+      {
+        $chiral_outliers = $chiral_summary['outliers'];
+        $chiral_centers = $chiral_summary['centers'];
+        $chiralPct =  number_format ( $chiral_summary['percent_outliers'], $decimals = 2);
+        #if($chiral_centers == 0) $chiralPct = 0;
+        #else $chiralPct = $chiral_summary['percent_outliers'];
+        $entry .= "<td>Chiral volume outliers</td><td>$chiral_outliers/$chiral_centers</td><td>$chiralPct%</td><td>See Chiral volume report for details</td></tr>\n";
+      }
+    }
+        
+    
     $entry .= "</table>\n";
     //Table ended
     $firstRow = true;
@@ -1394,7 +1419,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
 * $suites   is the data structure from loadSuitenameReport()
 * Any of them can be set to null if the data is unavailable.
 */
-function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $cablam, $omega, $summaries, $curation, $outliersOnly = false, $doHtmlTable = true, $cleanupAltloc = true)
+function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $chiral_summary, $cablam, $omega, $summaries, $curation, $outliersOnly = false, $doHtmlTable = true, $cleanupAltloc = true)
 {
     $startTime = time();
     //{{{ Process validation data
@@ -1819,7 +1844,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
     //{{{ Table prequel and headers
     // Do summary chart
     $pdbstats = pdbstat($infile);
-    $table['prequel'] = makeSummaryStatsTable($pdbstats['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $cablam, $omega, $summaries, $curation);
+    $table['prequel'] = makeSummaryStatsTable($pdbstats['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $chiral_summary, $cablam, $omega, $summaries, $curation);
 
     if ($doHtmlTable) {
       $header1 = array();
