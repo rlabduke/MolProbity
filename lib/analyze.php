@@ -265,6 +265,9 @@ function runAnalysis($modelID, $opts)
         $tasks['clashlist'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=plain' target='_blank'>preview</a>\n";
         setProgress($tasks, 'clashlist'); // so the preview link is visible
         echo "chartClashlist ran for ".(time() - $startTime)." seconds\n";
+
+        $outfile = "$chartDir/$model[prefix]undowser.html";
+        runUnDowerser($infile, $outfile);
     }
     //}}} Run all-atom contact programs and offer kins to user
 
@@ -502,6 +505,7 @@ function runAnalysis($modelID, $opts)
             $entry .= "<td>".linkAnyFile("$model[prefix]multi.kin", "Kinemage", "img/multikin.jpg")."</td>\n";
         if($opts['doCharts'])
         {
+            $entry .= "<td>".linkAnyFile("$model[prefix]undowser.html", "Chart", "img/undowserchart.png")."</td>\n";
             $entry .= "<td>".linkAnyFile("$model[prefix]multi.table", "Chart", "img/multichart.jpg")."</td>\n";
             if($opts['chartCoot']) {
               $entry .= "<td>".linkAnyFile("$model[prefix]multi-coot.scm", "To-do list for Coot", "img/multichart-coot.jpg")."<br><small><i>Open this in Coot 0.1.2 or later using Calculate | Run Script...</i></small></td>\n";
@@ -1042,6 +1046,14 @@ function runClashStats($resol, $clashscore, $clashscoreBlt40)
     );
 }
 #}}}########################################################################
+
+#{{{ runUnDowser
+############################################################################
+function runUnDowerser($infile, $outfile)
+{
+  exec("python ".MP_BASE_DIR."/cmdline/undowser.py $infile > $outfile");
+}
+#}}}############################################################################
 
 #{{{ runRotamer - generates rotamer analysis data
 ############################################################################
