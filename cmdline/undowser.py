@@ -149,6 +149,14 @@ class water_contact():
   def write_b_cell(self, b):
     return "<td>%.2f</td>" % b
 
+def cumulative_severity(contact_key, water_contacts):
+  cumulative_severity = 0
+  water = water_contacts[contact_key]
+  for clash in water:
+    weighted_severity = float(clash.mingap) - 0.2
+    cumulative_severity += weighted_severity
+  return cumulative_severity
+
 def color_cell(clash_check):
   if clash_check: return 'bgcolor=#ff76a9'
   else: return ''
@@ -207,11 +215,14 @@ These categories are general suggestions. Check your electron density and trust 
 """)
 
   contact_keys = water_contacts.keys()
-  contact_keys.sort()
+  contact_keys.sort(key=lambda c: (-1*cumulative_severity(c, water_contacts)))
+  #simple reverse sorting may put waters with the same cumulative severity in reverse sequence order
+
   row_number = 0
   row_color = ['#eaeaea','#ffffff']
   for contact_key in contact_keys:
     water = water_contacts[contact_key]
+    water.sort(key=lambda w: (-1*float(w.mingap)))
     bgcolor = row_color[row_number%2]
     out.write("<tr bgcolor=%s><td rowspan='%i' ><pre><code>%s</code></pre></td>\n" % (bgcolor,len(water),water[0].format_src_id_str()))
     row_number+=1
