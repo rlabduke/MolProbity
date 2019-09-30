@@ -147,7 +147,7 @@ $resout = null; //see lib/visualize.php, has something to do with horiz?
 if($mode == 'coot')
     makeCootClusteredChart($pdbfile, "php://stdout", $clash, $rama, $rota, $cbdev, $pperp);
 else
-    writeMulticritChart($pdbfile, "/dev/null", "php://stdout", $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $cablam, $omega);
+    writeMulticritChart($pdbfile, "/dev/null", "php://stdout", $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $chiral_summary, $cablam, $omega);
 
 mpDestroySession();
 

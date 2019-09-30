@@ -153,7 +153,7 @@ foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
   else
   {
     $resout = null;
-    writeMulticritChart($pdbfile, "/dev/null", $outFile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles);
+    writeMulticritChart($pdbfile, "/dev/null", $outFile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $chiral_summary, $cablam, $omega);
   }
   
   mpDestroySession();
