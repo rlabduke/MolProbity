@@ -24,18 +24,27 @@ and (3) groups that need automated or scripted MolProbity runs.</p>
 
 <p>If you use MolProbity in the course of your research, please cite:
 <br>
-<div class='indent'>Vincent B. Chen, W. Bryan Arendall III, Jeffrey J. Headd, Daniel A. Keedy,
-Robert M. Immormino, Gary J. Kapral, Laura W. Murray, Jane S. Richardson and David C. Richardson (2010)
-MolProbity: all-atom structure validation for macromolecular crystallography.
-Acta Crystallographica <u>D66</u>: 12-21.</div>
+<div class='indent'>Christopher J. Williams, Jeffrey J. Headd, Nigel W. Moriarty,
+Michael G. Prisant, Lizbeth L. Videau, Lindsay N. Deis, Vishal Verma, Daniel A. Keedy,
+Bradley J. Hintze, Vincent B. Chen, Swati Jain, Steven M. Lewis, Bryan W. Arendall 3rd,
+Jack Snoeyink, Paul D. Adams, Simon C. Lovell, Jane S. Richardson, and David C. Richardson (2018) 
+MolProbity: More and better reference data for improved all-atom structure validation. 
+Protein Science <u>27</u>: 293-315.</div>
 <br>
 A complete list of appropriate citations can be
 found <a href='help/about.html' target='_blank'>here</a>.</p>
 
 <p><b>MolProbity is now on GitHub!</b>
-The GitHub site is <a href='https://github.com/rlabduke/MolProbity' target="_blank">https://github.com/rlabduke/MolProbity</a>. You can look at the README there, or if you're already using git you can get a copy of MolProbity with:
+The GitHub site is <a href='https://github.com/rlabduke/MolProbity' target="_blank">https://github.com/rlabduke/MolProbity</a>. You can look at the README there, or follow these instructions:
 <div align="center" style="font-size:20px">
-git clone https://github.com/rlabduke/MolProbity.git --branch molprobity_4.4 --single-branch --depth 1
+To build MolProbity from the latest version, first acquire the builder script:
+<br>
+svn --quiet --non-interactive --trust-server-cert export https://github.com/rlabduke/MolProbity.git/trunk/install_via_bootstrap.sh
+<br><br>
+Run install_via_bootstrap.sh X inside the directory you want to serve as the top level for MolProbity,
+<br>where X is the number of processors to use during compiling. 4 is recommended.
+<br><br>
+Run molprobity/setup.sh
 </dir>
 <p>
 
