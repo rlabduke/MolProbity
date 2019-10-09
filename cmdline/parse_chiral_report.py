@@ -24,7 +24,7 @@ class chiral_volume():
     self.resid = ":".join([self.chain, self.resseq+self.icode, self.altloc, self.resname, self.atom])
 
   def make_recommendation(self):
-    if float(self.sigma) > 15:
+    if float(self.sigma) > 10:
       self.recommendation = "Probable handedness swap"
     else:
       self.recommendation = ""
