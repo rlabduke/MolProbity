@@ -69,15 +69,15 @@ $file = basename($url);
 <center>
 <div id="viewport" content="width=device-width">
 
-<script src="../public_html/js/ngl.js"></script>
-<script src="../public_html/js/nglscripts/ui/signals.min.js"></script>
-<script src="../public_html/js/nglscripts/ui/colorpicker.min.js"></script>
+<script src="js/ngl.js"></script>
+<script src="js/nglscripts/ui/signals.min.js"></script>
+<script src="js/nglscripts/ui/colorpicker.min.js"></script>
 
-<script src="../public_html/js/nglscripts/ui/ui.js"></script>
-<script src="../public_html/js/nglscripts/ui/ui.extra.js"></script>
-<script src="../public_html/js/nglscripts/ui/ui.ngl.js"></script>
-<script src="../public_html/js/nglscripts/kin-viewer.js"></script>
-<script src="../public_html/js/nglscripts/gui.js"></script>
+<script src="js/nglscripts/ui/ui.js"></script>
+<script src="js/nglscripts/ui/ui.extra.js"></script>
+<script src="js/nglscripts/ui/ui.ngl.js"></script>
+<script src="js/nglscripts/kin-viewer.js"></script>
+<script src="js/nglscripts/gui.js"></script>
 
 <script>
 NGL.cssDirectory = "js/nglcss/"
