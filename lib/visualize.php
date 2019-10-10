@@ -1355,16 +1355,34 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
     if(is_array($chiral_summary)) $addedRows +=1;
     if($addedRows > 0)
     {
-      $entry .= "<tr><td rowspan='$addedRows' align='center'>Additional validations</td>\n";
+      #$entry .= "<tr><td rowspan='$addedRows' align='center'>Additional validations</td>\n";
       $firstRow = true;
       if(is_array($chiral_summary))
       {
-        $chiral_outliers = $chiral_summary['outliers'];
-        $chiral_centers = $chiral_summary['centers'];
-        $chiralPct =  number_format ( $chiral_summary['percent_outliers'], $decimals = 2);
+        $chiral_outliers = $chiral_summary['chiral_outliers'];
+        $chiral_centers = $chiral_summary['chiral_centers'];
+        $chiralPct =  number_format ( $chiral_summary['percent_chiral_outliers'], $decimals = 2);
+        $tetra_outliers = $chiral_summary['tetra_outliers'];
+        $tetra_centers = $chiral_summary['tetra_centers'];
+        $total_outliers = $chiral_summary['total_outliers'];
+        $pseudo_outliers = $chiral_summary['pseudo_outliers'];
+        if ($total_outliers == 0)
+        {
+          $entry .= "<tr><td rowspan='$addedRows' align='center'>Additional validations</td>\n";
+          $entry .= "<td>Chiral volume outliers</td><td colspan=2>$total_outliers/$tetra_centers</td><td></td></tr>";
+        }
+        else
+        {
+          $addedRows +=2;
+          $entry .= "<tr><td rowspan='$addedRows' align='center'>Additional validations</td>\n";
+          $entry .= "<td>Chiral handedness swaps</td><td>$chiral_outliers/$chiral_centers</td><td>$chiralPct%</td><td>See Chiral volume report for details</td></tr>";
+          $entry .= "<td>Tetrahedral geometry outliers</td><td colspan=2>$tetra_outliers</td><td></td></tr>";
+          $entry .= "<td>Pseudochiral naming errors</td><td colspan=2>$pseudo_outliers</td><td></td></tr>";
+        }
         #if($chiral_centers == 0) $chiralPct = 0;
         #else $chiralPct = $chiral_summary['percent_outliers'];
-        $entry .= "<td>Chiral volume outliers</td><td>$chiral_outliers/$chiral_centers</td><td>$chiralPct%</td><td>See Chiral volume report for details</td></tr>\n";
+        #$entry .= "<td>Chiral handedness outliers</td><td>$chiral_outliers/$chiral_centers</td><td>$chiralPct%</td><td></td></tr>\n";
+        #$entry .= "<tr><td>Total chiral volume outliers</td><td>$tetra_outliers/$tetra_centers</td><td>$tetraPct%</td><td>See Chiral volume report for details</td></tr>\n";
       }
     }
         
