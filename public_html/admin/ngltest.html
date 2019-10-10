@@ -21,14 +21,14 @@
 
 <center>
 <div class="right_ngl" id="viewport" style="width:350px; height:250px;">
-<script src="../js/ngl.dev.js"></script>
+<script src="../js/ngl.js"></script>
 
 <script>
 NGL.cssDirectory = "../js/nglcss/"
 document.addEventListener( "DOMContentLoaded", function() {
             var stage = new NGL.Stage( "viewport" )
 stage.loadFile('http://files.rcsb.org/download/3SN6.cif').then(function (o) {
-  o.addRepresentation('cartoon', { color: 'chainname' })
+  o.addRepresentation('cartoon', { color: 'chainname', smoothSheet: true })
 
   var chainData = {
     'A': { text: 'alpha subunit', color: 'firebrick' },
@@ -57,6 +57,7 @@ stage.loadFile('http://files.rcsb.org/download/3SN6.cif').then(function (o) {
   stage.animationControls.rotate(q, 0)
   stage.animationControls.move(o.getCenter(), 0)
 })
+stage.setParameters({camera: 'orthographic'})
 });
 </script>
 </body>

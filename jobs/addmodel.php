@@ -226,8 +226,12 @@ if(isset($id))
     $s .= "<script>\n";
     $s .= "        document.addEventListener( \"DOMContentLoaded\", function() {\n";
     $s .= "                var stage = new NGL.Stage( \"viewport\" );\n";
-    $s .= "                //stage.setParameters( {ribbon.smoothSheet: true} );\n";
-    $s .= "                stage.loadFile( \"$modelURL/$model[pdb]\", { defaultRepresentation: true } );\n";
+    $s .= "                stage.loadFile( \"$modelURL/$model[pdb]\" ).then(function(o) {;\n";
+    $s .= "                  o.addRepresentation('cartoon', { colorScale: 'spectral', colorScheme: 'residueindex', colorReverse: true, smoothSheet: true })\n";
+    $s .= "                  o.autoView()\n";
+    $s .= "                  stage.animationControls.move(o.getCenter(), 0)\n";
+    $s .= "                });\n";
+    $s .= "                stage.setParameters( { cameraType: 'orthographic' } );\n";
     //$s .= "                stage.loadFile( \"$kinURL/$model[prefix]thumbnail.kin\", { ext: \"kin\" }  );\n";
 
     $s .= "        } );\n";
