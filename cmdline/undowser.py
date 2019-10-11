@@ -181,13 +181,14 @@ def as_html_table(water_contacts, water_count, out=sys.stdout):
 
 <hr>
 This table lists all the waters in the structure that have steric clashes. Waters are classified into common categories based on the atom - or parent heavy atom of a hydrogen - they clash with.
-<br>
-<br>
+<br><br>
+Waters with minimal support in the map should be removed from the model. This table does not report map data directly, but a high B factor is a likely warning sign that a water is a poor fit to the map.
+<br><br>
 Clash with polar - Waters that clash with polar groups may actually be coordinated ions.
 <br>
 Clash with nonpolar - Waters that clash with nonpolar groups may indicate place where covalently-bonded atoms should be, such as an unmodeled alternate conformation or a ligand.
 <br>
-Clashes with water - Water-water clashes may indicate a place where covalently-bonded atoms (most often a ligand) should be built, or they may be caused by unnecessary waters.
+Clash with water - Water-water clashes may be resolved by changing the involved waters into alternates of compatible occupancy. Or they may indicate a place where covalently-bonded atoms like a ligand or sidechain should be built.
 <br>
 Clash with altloc - Water clashes involving one or more alternate conformations may be resolved by renaming some of the alternates.
 <br>
@@ -197,7 +198,7 @@ These categories are general suggestions. Check your electron density and trust 
 <hr>
 <br>
 """)
-  out.write("%i waters out of %i have clashes (%.2f%%)" % (len(water_contacts), water_count, len(water_contacts)/water_count*100))
+  out.write("SUMMARY: %i waters out of %i have clashes (%.2f%%)" % (len(water_contacts), water_count, len(water_contacts)/water_count*100))
   out.write("""
 <br><br>
 <hr>
