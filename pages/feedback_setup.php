@@ -15,38 +15,38 @@ class feedback_setup_delegate extends BasicDelegate {
 function display($context)
 {
     echo $this->pageHeader("Feedback &amp; bugs", "feedback");
-    echo makeEventForm("onFeedbackSend");
+    //echo makeEventForm("onFeedbackSend");
 ?>
 
 <div class=alert>Please scroll to the last few lines of the error log below: it will often tell you what to fix. If not, we welcome your bug reports and feedback.  </div>
 <table border='0' cellspacing='0'>
+<p>
+Please send bug reports or feedback to the gmail address molprobity.bugreports. Copy and paste the text below, along with as many details/PDB files that you can provide, into your email client.
+<p>
 <tr>
-    <td align='right'>My name is</td>
-    <td align='left'><input type='text' name='senderName' value='' size='25' maxlength='100'></td>
-</tr><tr>
-    <td align='right'>My email address is</td>
-    <td align='left'><input type='text' name='senderEmail' value='' size='25' maxlength='100'></td>
-</tr><tr>
-    <td align='right'>My comment regards</td>
-    <td align='left'><select name='inRegardTo'>
-        <option selected value="Bug report">a bug or error in MolProbity</option>
-        <option value="Suggestion">a suggestion on how to improve MolProbity</option>
-        <option value="KiNG">the KiNG graphics applet</option>
-        <option value="Tutorial">the online tutorial</option>
-        <option value="Documentation">the other online documentation</option>
-        <option value="Local server setup">installing or configuring a local copy of MolProbity</option>
-        <option value="General feedback">(none of the above)</option>
-    </select></td>
-</tr><tr>
     <td align='left' colspan='2'>
-        <textarea name='feedbackText' rows='30' cols='76'><?php echo $this->makeTemplateText(); ?></textarea>
+        <textarea name='feedbackText' rows='20' cols='76' id='feedback'><?php echo $this->makeTemplateText(); ?></textarea>
     </td>
-</tr><tr>
-    <td align='left'><input type='submit' name='cmd' value='Send email &gt;'></td>
-    <td align='right'><input type='reset' name='cmd' value='Reset'></td>
+    <td align='left'><button onclick="copyToClipboard()">Copy to clipboard</button></td>
 </tr>
 </table>
 </form>
+<script>
+function copyToClipboard() {
+  /* Get the text field */
+  var copyText = document.getElementById("feedback");
+
+  /* Select the text field */
+  copyText.select();
+  copyText.setSelectionRange(0, 99999); /*For mobile devices*/
+
+  /* Copy the text inside the text field */
+  document.execCommand("copy");
+
+  /* Alert the copied text */
+  //alert("Copied the text: " + copyText.value);
+}
+</script>
 <?php
     echo $this->pageFooter();
 }
@@ -115,7 +115,7 @@ function onFeedbackSend()
     fwrite($h, $msg_text);
     fclose($h);
     
-    $ok = mpSendEmail($req['senderName'], $req['senderEmail'], $subject, $msg_text);
+    //$ok = mpSendEmail($req['senderName'], $req['senderEmail'], $subject, $msg_text);
     mpLog("feedback:Sent with subject $req[inRegardTo]; success=$ok");
     
     pageGoto("feedback_done.php", $msg_text);
