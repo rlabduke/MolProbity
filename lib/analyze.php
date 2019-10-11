@@ -1863,18 +1863,42 @@ function load_chiral_summary($chiral_result_file)
 {
     #SUMMARY: 3 outliers out of 98 CA chiral centers (3.06%)
     #SUMMARY: 0 outliers out of 47 other chiral centers (0.00%)
-    $outliers = 0;
-    $centers = 0;
+    $chiral_outliers = 0;
+    $chiral_centers = 0;
+    $total_outliers = 0;
+    $tetra_centers = 0;
+    $tetra_outliers = 0;
+    $pseudochiral_outliers = 0;
     $data = file($chiral_result_file);
     foreach($data as $line) 
     {
+      #SUMMARY: 22 total outliers at 67 tetrahedral centers (32.84%)
+      #SUMMARY: 8 handedness outliers at 65 chiral centers (12.31%)
+      #SUMMARY: 13 tetrahedral geometry outliers
+      #SUMMARY: 1 pseudochiral naming errors
       #$line = explode(' ', rtrim($line));
       #if ($line[1] == 'outliers' and $line[5] == 'CA')
       if (preg_match("/^SUMMARY/",$line))
       {
         $line = explode(' ', rtrim($line));
-        $outliers += ($line[1]+0);
-        $centers += ($line[5]+0);
+        if ($line[2] == "handedness")
+        {
+          $chiral_outliers += $line[1]+0;
+          $chiral_centers  += $line[5]+0;
+        }
+        elseif ($line[2] == "total")
+        {
+          $total_outliers += $line[1]+0;
+          $tetra_centers  += $line[5]+0;
+        }
+        elseif ($line[2] == "tetrahedral")
+        {
+          $tetra_outliers += $line[1]+0;
+        }
+        elseif ($line[2] == "pseudochiral")
+        {
+          $pseudochiral_outliers += $line[1]+0;
+        }
       }
      ###if ($line[1] == 'outliers' and $line[5] == 'CA')
 #    ### if (preg_match("/CA chiral/",$line))
@@ -1886,12 +1910,18 @@ function load_chiral_summary($chiral_result_file)
     }
     #$outliers = $ca_outliers+$other_outliers;
     #$centers = $ca_centers+$other_centers;
-    if ($centers == 0) $percent_outliers = 0;
-    else $percent_outliers = $outliers*100/$centers;
+    if ($chiral_centers == 0) $percent_chiral_outliers = 0;
+    else $percent_chiral_outliers = $chiral_outliers*100/$chiral_centers;
+    #if ($tetra_centers == 0) $percent_tetra_outliers = 0;
+    #else $percent_tetra_outliers = $tetra_outliers*100/$tetra_centers;
     $hash = array(
-      'outliers' => $outliers,
-      'centers' => $centers,
-      'percent_outliers' => $percent_outliers);
+      'chiral_outliers' => $chiral_outliers,
+      'chiral_centers' => $chiral_centers,
+      'percent_chiral_outliers' => $percent_chiral_outliers,
+      'tetra_outliers' => $tetra_outliers,
+      'tetra_centers' => $tetra_centers,
+      'total_outliers' => $total_outliers,
+      'pseudo_outliers' => $pseudochiral_outliers);
     return $hash;
 }
 #}}}############################################################################
