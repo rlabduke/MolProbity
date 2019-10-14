@@ -268,6 +268,7 @@ function runAnalysis($modelID, $opts)
 
         $outfile = "$chartDir/$model[prefix]undowser.html";
         runUnDowerser($infile, $outfile);
+        $undowser = loadUndowserSummary($outfile);
     }
     //}}} Run all-atom contact programs and offer kins to user
 
@@ -1870,7 +1871,7 @@ function load_chiral_summary($chiral_result_file)
     $tetra_outliers = 0;
     $pseudochiral_outliers = 0;
     $data = file($chiral_result_file);
-    foreach($data as $line) 
+    foreach($data as $line)
     {
       #SUMMARY: 22 total outliers at 67 tetrahedral centers (32.84%)
       #SUMMARY: 8 handedness outliers at 65 chiral centers (12.31%)
@@ -1923,6 +1924,30 @@ function load_chiral_summary($chiral_result_file)
       'total_outliers' => $total_outliers,
       'pseudo_outliers' => $pseudochiral_outliers);
     return $hash;
+}
+#}}}############################################################################
+
+#{{{ loadUndowserSummary
+function loadUndowserSummary($undowser_result_file)
+{
+  $data = file($chiral_result_file);
+  foreach($data as $line)
+  {
+    #SUMMARY: 6 waters out of 86 have clashes (6.98%) 
+    if (preg_match("/^SUMMARY/",$line))
+    {
+      $line = explode(' ', rtrim($line));
+      $clashes = $line[1];
+      $waters = $line[5];
+      $clashpct = $line[8];
+      $clashpct = substr($clashpct,1,-2); #remove '(' and '%)'
+    }
+  }
+  $hash = array(
+    'water_clashes' => $clashes,
+    'water_count' => $waters,
+    'water_clash_pct' => $clashpct);
+  return $hash;
 }
 #}}}############################################################################
 
