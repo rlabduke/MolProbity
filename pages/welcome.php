@@ -80,6 +80,18 @@ Interpret structure-level validation statistics.</p>
 Choose validations appropriate to a structure.</p>
 
 <?php
+//    <h3>What's new in 4.3.1:</h3><ul>
+//      <li>This versioned release is timed to correspond with the Phenix 1.11 official release, and is expected to work with the corresponding version of the cctbx project.</li>
+//      <li>Update to Omegalyze kinemage output - markup now offset from backbone to reduce overlap with other markups.</li>
+//      <li>Ramachandran analysis reports alternate conformations more comprehensively at the residue level. Ramachandran summary statistics are given for alternate A only where applicable.</li>
+//      <li>Reduce het dictionary updated - hydrogens now available for more ligands.</li>
+//      <li>Reduce no longer rotates methionine sidechain methyls.</li>
+//  </ul>
+//    <h3>What's new in 4.3:</h3><ul>
+//      <li>New NQH coordinate regularization method after flips in Reduce: a three-step process attempting to match existing coordinates replaces cctbx-based optimization</li>
+//      <li>Updates to Omegalyze kinemage output - markup defaults to 'off', separate colors for cis-pro (sea), cis-nonpro (lime), and all twisted (yellow).</li>
+//      <li>Improved error catching, with 'how to fix it' notes for common formatting errors</li>
+//	</ul>
 //    <h3>What's new in 4.2:</h3><ul>
 //      <li>Cis-peptide identification, markup and statistics now available.</li>
 //      <li>CaBLAM C&alpha;-based validation of protein backbone and secondary structure now available.</li>
@@ -98,7 +110,11 @@ Choose validations appropriate to a structure.</p>
 //      <li>Allows use of both electron cloud and nuclear x-H bond-lengths. Read more about this change <a href='".makeEventURL("onGoto", "helper_hydrogens.php")."'>here</a>.</li>
 //      <li>Full support for 2-character CHAINIDs added. 4-character SEGIDs also supported in place of CHAINIDs.</li>
 //      </ul>
-    echo("<h3>What's new in 4.4</h3><ul>
+    echo("<h3>What's new in 4.5</h3><ul>
+      <li>Added an option to visualize 3D validation markup online using the Javascript NGL viewer software.</li>
+      <li>Changes to the bug reporting/email system.</li>
+  </ul>
+  <h3>What's new in 4.4</h3><ul>
       <li>This versioned release is timed to correspond with the Phenix 1.12 official release, and is expected to work with the corresponding version of the cctbx project.</li>
       <li>MolProbity now provides simultaneous validation for ensemble structures up to 80 models. After validation is complete, use the tabs to switch between the results for the models.</li>
       <li>MolProbity now accepts mmCIF file uploads and can fetch structures only available as mmCif. These files will be automatically converted to PDB hybrid36 format for validation.</li>
@@ -106,18 +122,7 @@ Choose validations appropriate to a structure.</p>
       <li>Limited CaBLAM validation now available for CA-only models.</li>
       <li>More user control of feedback for non-trans peptides is available in the validation selection menu.</li>
   </ul>
-    <h3>What's new in 4.3.1:</h3><ul>
-      <li>This versioned release is timed to correspond with the Phenix 1.11 official release, and is expected to work with the corresponding version of the cctbx project.</li>
-      <li>Update to Omegalyze kinemage output - markup now offset from backbone to reduce overlap with other markups.</li>
-      <li>Ramachandran analysis reports alternate conformations more comprehensively at the residue level. Ramachandran summary statistics are given for alternate A only where applicable.</li>
-      <li>Reduce het dictionary updated - hydrogens now available for more ligands.</li>
-      <li>Reduce no longer rotates methionine sidechain methyls.</li>
-  </ul>
-    <h3>What's new in 4.3:</h3><ul>
-      <li>New NQH coordinate regularization method after flips in Reduce: a three-step process attempting to match existing coordinates replaces cctbx-based optimization</li>
-      <li>Updates to Omegalyze kinemage output - markup defaults to 'off', separate colors for cis-pro (sea), cis-nonpro (lime), and all twisted (yellow).</li>
-      <li>Improved error catching, with 'how to fix it' notes for common formatting errors</li>
-	</ul>
+
       </td><td width='10%'><!-- horizontal spacer --></td><td width=='45%'>");
 ?>
 
@@ -139,6 +144,11 @@ Choose validations appropriate to a structure.</p>
     <a href="http://scripts.iucr.org/cgi-bin/paper?ks0118" target="_blank">The Computational Crystallography Toolbox:
     crystallographic algorithms in a reusable software framework.</a>
     J. Appl. Cryst. 35:126-136.
+    </small></p>
+<p><b><a href='help/about.html' target='_blank'>Cite NGL</a></b>:
+    <small>Rose et al. (2018)
+    <a href="https://doi.org/10.1093/bioinformatics/bty419" target="_blank">NGL viewer: web-based molecular graphics for large complexes.</a>
+    Bioinformatics. 34:3755–3758.
     </small></p>
 <p><b><?php echo "<a href='".makeEventURL("onGoto", "helper_hydrogens.php")."'>About hydrogens</a>"; ?>:</b>
 Why have the hydrogen bondlengths changed?</p>

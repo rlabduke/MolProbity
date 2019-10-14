@@ -12,7 +12,7 @@
     in order to obtain all the usual resources that every page expects.
 *****************************************************************************/
 // Current "internal reference" version number. Please DO NOT change.
-define("MP_VERSION", "4.4"); // initialize MP version number (w/ svn revision # if exported from svn)
+define("MP_VERSION", "4.5"); // initialize MP version number (w/ svn revision # if exported from svn)
 
 // Someone else MUST have defined this before including us!
 if(!defined('MP_BASE_DIR')) die("MP_BASE_DIR is not defined.");
