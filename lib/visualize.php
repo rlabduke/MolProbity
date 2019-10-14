@@ -1363,6 +1363,8 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
       if($tetra_outliers) $addedRows += 1;
       if($pseudo_outliers) $addedRows += 1;
     }
+    if(is_array($undowser))
+      $addedRows+=1;
     if($addedRows > 0)
     {
       #$entry .= "<tr><td rowspan='$addedRows' align='center'>Additional validations</td>\n";
@@ -1395,6 +1397,14 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
         #$entry .= "<td>Chiral handedness outliers</td><td>$chiral_outliers/$chiral_centers</td><td>$chiralPct%</td><td></td></tr>\n";
         #$entry .= "<tr><td>Total chiral volume outliers</td><td>$tetra_outliers/$tetra_centers</td><td>$tetraPct%</td><td>See Chiral volume report for details</td></tr>\n";
       }
+      if(is_array($undowser))
+      {
+        $water_clashes = $undowser['water_clashes'];
+        $water_count = $undowser['water_count'];
+        $water_clash_pct = $undowser['water_clash_pct'];
+        $entry .= "<td>Waters with clashes</td><td>$water_clashes/$water_count</td><td>$water_clash_pct%</td><td>See UnDowser table for details</td></tr>";
+      }
+      #$entry .= "</tr>";
     }
         
     

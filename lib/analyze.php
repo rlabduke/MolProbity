@@ -387,7 +387,7 @@ function runAnalysis($modelID, $opts)
         $outfile = "$rawDir/$model[prefix]multi.table";
         $snapfile = "$chartDir/$model[prefix]multi.html";
         $resout = "$rawDir/$model[prefix]multi_res.table";
-        writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, $chiral_summary, $cablam, $omega, $summaries, $curation, !$opts['chartNotJustOut'], $opts['chartMulti'], $opts['chartAltloc']);
+        writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, $chiral_summary, $undowser, $cablam, $omega, $summaries, $curation, !$opts['chartNotJustOut'], $opts['chartMulti'], $opts['chartAltloc']);
         if($opts['chartMulti']) {
           $tasks['multichart'] .= " - <a href='viewtable.php?$_SESSION[sessTag]&file=$outfile' target='_blank'>preview</a>\n";
           setProgress($tasks, 'multichart'); // so the preview link is visible
@@ -494,7 +494,7 @@ function runAnalysis($modelID, $opts)
         } else {
           $entry .= "<h3>Summary statistics</h3>\n";
         }
-        $entry .= makeSummaryStatsTable($model['stats']['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, $chiral_summary, $cablam, $omega, $summaries, $curation);
+        $entry .= makeSummaryStatsTable($model['stats']['resolution'], $clash, $rama, $rota, $cbdev, $pperp, $suites, $validate_bond, $validate_angle, $chiral_summary, $undowser, $cablam, $omega, $summaries, $curation);
     }
     $entry .= $improveText;
     if($opts['doKinemage'] || $opts['doCharts'])
@@ -1930,7 +1930,7 @@ function load_chiral_summary($chiral_result_file)
 #{{{ loadUndowserSummary
 function loadUndowserSummary($undowser_result_file)
 {
-  $data = file($chiral_result_file);
+  $data = file($undowser_result_file);
   foreach($data as $line)
   {
     #SUMMARY: 6 waters out of 86 have clashes (6.98%) 
