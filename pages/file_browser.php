@@ -188,14 +188,14 @@ function makeFileCommands($path, $url)
         $s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=plain' target='_blank'>plain text</a></small></td>";
         $s .= "<td></td>";
         //$s .= "<td><small><a href='viewtext.php?$_SESSION[sessTag]&file=$path&mode=kin' target='_blank'>highlighted</a></small></td>";
-        $s .= "<td><small><a href='viewking.php?$_SESSION[sessTag]&url=$url' target='_blank'>in KiNG</a></small></td>";
+        $s .= "<td><small><a href='viewking.php?$_SESSION[sessTag]&url=$url' target='_blank'>in KiNG</a> | <a href='viewngl.php?$_SESSION[sessTag]&url=$url' target='_blank'>in NGL</a></small></td>";
     }
     // Compressed kinemages
     elseif(endsWith($lcPath, ".kin.gz"))
     {
         $s .= "<td></td>";
-        $s .= "<td><small><a href='viewking.php?$_SESSION[sessTag]&url=$url' target='_blank'>in KiNG</a></small></td>";
         $s .= "<td></td>";
+        $s .= "<td><small><a href='viewking.php?$_SESSION[sessTag]&url=$url' target='_blank'>in KiNG</a> | <a href='viewngl.php?$_SESSION[sessTag]&url=$url' target='_blank'>in NGL</a></small></small></td>";
     }
     // PDB files with H
     elseif(endsWith($path, "H.pdb")) // have to use $path b/c the capital letter matters!
