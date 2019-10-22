@@ -115,21 +115,31 @@ sys.stdout.write("SUMMARY: %i handedness outliers at %i chiral centers (%.2f%%)\
 sys.stdout.write("SUMMARY: %i tetrahedral geometry outliers\n" % (len(tetrahedral_outliers)))
 sys.stdout.write("SUMMARY: %i pseudochiral naming errors\n" % (len(pseudochiral_naming_errors)))
 
-sys.stdout.write("\nHandedness swaps\n")
+sys.stdout.write("\n\n\n")
+
+sys.stdout.write("Handedness swaps\n")
 sys.stdout.write("----------------------------------------------------------------------\n")
 for chiral in handedness_outliers:
   sys.stdout.write(chiral.make_output_line()+'\n')
-sys.stdout.write("----------------------------------------------------------------------\n\n")
+if not handedness_outliers:
+  sys.stdout.write("None\n")
+sys.stdout.write("----------------------------------------------------------------------\n")
+sys.stdout.write("\n\n")
 sys.stdout.write("Tetrahedral geometry outliers\n")
 sys.stdout.write("----------------------------------------------------------------------\n")
 for chiral in tetrahedral_outliers:
   sys.stdout.write(chiral.make_output_line()+'\n')
-sys.stdout.write("----------------------------------------------------------------------\n\n")
+if not tetrahedral_outliers:
+  sys.stdout.write("None\n")
+sys.stdout.write("----------------------------------------------------------------------\n")
+sys.stdout.write("\n\n")
 sys.stdout.write("Probable atom naming errors around pseudochiral centers\n")
 sys.stdout.write("  e.g. CG1 and CG2 around Valine CB\n")
 sys.stdout.write("----------------------------------------------------------------------\n")
 for chiral in pseudochiral_naming_errors:
   sys.stdout.write(chiral.make_output_line()+'\n')
+if not pseudochiral_naming_errors:
+  sys.stdout.write("None\n")
 sys.stdout.write("----------------------------------------------------------------------\n")
 
 #sys.stdout.write("Probable handedness swaps\n")
