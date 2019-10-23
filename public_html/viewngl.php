@@ -281,6 +281,9 @@ echo "NGL.autoLoad(\"$url\").then(function (kinemage) {
     //shape.addBuffer(meshBuff)
     
     var visible = kinemage.masterDict[ master ].visible
+    if (master.startsWith('chain')||master.startsWith('dots')) {
+      visible = false
+    }
     var shapeComp = stage.addComponentFromObject(shape, { visible: visible })
     shapeComp.addRepresentation('buffer')
   }
