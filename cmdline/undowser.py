@@ -197,7 +197,10 @@ These categories are general suggestions. Check your electron density and trust 
 <hr>
 <br>
 """)
-  out.write("SUMMARY: %i waters out of %i have clashes (%.2f%%)" % (len(water_contacts), water_count, len(water_contacts)/water_count*100))
+  if water_count == 0:
+    out.write("SUMMARY: %i waters out of %i have clashes (%.2f%%)" % (0, 0, 0))
+  else:
+    out.write("SUMMARY: %i waters out of %i have clashes (%.2f%%)" % (len(water_contacts), water_count, len(water_contacts)/water_count*100))
   out.write("""
 <br><br>
 <hr>
