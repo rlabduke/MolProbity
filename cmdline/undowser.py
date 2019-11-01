@@ -98,13 +98,15 @@ class water_contact():
     #Start with simple check for non-polars
     if self.trg_heavy_atom in ['C']:
       return True
+    elif self.trg_is_H():
+      if self.trg_heavy_atom in ['O','N','S']:
+        return ''
+      else:
+        return True
     elif self.trg_heavy_atom in ['N']:
       if not self.trg_is_charged_N():
         return True
-      else:
-        return ''
-    else:
-      return ''
+    return ''
 
   def write_polar_cell(self):
     if self.does_it_clash_with_polar():
