@@ -112,7 +112,11 @@ Choose validations appropriate to a structure.</p>
 //      </ul>
     echo("<h3>What's new in 4.5</h3><ul>
       <li>Added an option to visualize 3D validation markup online using the Javascript NGL viewer software.</li>
+      <li>New 'UnDowser' validation for waters with clashes.</li>
+      <li>New validation for chiral volume outliers and D/L misnamings.</li>
       <li>Changes to the bug reporting/email system.</li>
+      <li>New installation script for home users.</li>
+      <li>Added <a target='_blank' href='help/validation_options/summary_table_guide.html'>guide to summary statistics</a> table.</li>
   </ul>
   <h3>What's new in 4.4</h3><ul>
       <li>This versioned release is timed to correspond with the Phenix 1.12 official release, and is expected to work with the corresponding version of the cctbx project.</li>
