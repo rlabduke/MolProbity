@@ -730,11 +730,11 @@ function toggleUploadOptions()
 //        <br><br>Please don't hesitate to report any <a style=\"color: #66FFFF\" href='".makeEventURL("onGoto", "feedback_setup.php")."'>bugs</a> you may encounter.
 //        <br><br>If for some reason you need to use MolProbity4 version 4.02, which is now a retired legacy version, please go to <a style=\"color: #66FFFF\" href='http://rutile.biochem.duke.edu/' target='_blank'>http://rutile.biochem.duke.edu</a>.</strong></div>");
     echo("<div class=feature><b>Molprobity sites:</b>
-      <br><a href='http://molprobity.biochem.duke.edu/' target='_blank'>Duke (US)</a> | <a href='http://molprobity.manchester.ac.uk/' target='_blank'>Manchester (UK)</a> | <a href='http://magma.research.duhs.duke.edu/~molprobity_beta/' target='_blank'>Beta (Recent developments; Unstable)</a>
-      <br>Legacy version 4.02 has been retired. Please contact us through the 'Feedback & bugs' link if this affects your MolProbity use.
+      <br><a href='http://molprobity.biochem.duke.edu/' target='_blank'>Duke (US)</a> | <a href='http://molprobity.manchester.ac.uk/' target='_blank'>Manchester (UK)</a>
       <br>
       <br><b>Usage Guidelines:</b>
-      <br>These web services are provided for analysis of individual structures, not batch runs.</div>");
+      <br>These web services are provided for analysis of individual structures.
+      <br>For batch runs, please <a href='".makeEventURL("onGoto", "get_molprobity.php")."'>download and install</a> your own copy of MolProbity.</div>");
       //("<div class=feature><b>Molprobity sites:</b>
       //<br>Duke mirror: <a href='http://molprobity.biochem.duke.edu/' target='_blank'>http://molprobity.biochem.duke.edu/index.php</a>
       //<br>Manchester mirror: <a href='http://molprobity.manchester.ac.uk/' target='_blank'>http://molprobity.manchester.ac.uk</a>
