@@ -24,10 +24,12 @@ class chiral_volume():
       self.is_outlier = True
     else:
       self.is_outlier = False
-    if self.sigma > 10:
+    self.is_handedness_swap = False
+    if self.resname in ['PRO','DPR']: #proline has slightly different geometry
+      if self.sigma > 22:
+        self.is_handedness_swap = True
+    elif self.sigma > 20:
       self.is_handedness_swap = True
-    else:
-      self.is_handedness_swap = False
     self.moltype = x[9].rstrip()
     self.resid = ":".join([self.chain, self.resseq+self.icode, self.altloc, self.resname, self.atom])
 
@@ -141,26 +143,4 @@ for chiral in pseudochiral_naming_errors:
 if not pseudochiral_naming_errors:
   sys.stdout.write("None\n")
 sys.stdout.write("----------------------------------------------------------------------\n")
-
-#sys.stdout.write("Probable handedness swaps\n")
-#sys.stdout.write("SUMMARY: %i outliers out of %i CA chiral centers (%.2f%%)\n" % (len(backbone_ca_outliers), backbone_chiral_center_count, percent_backbone_outliers))
-#sys.stdout.write("----------------------------------------------------------------------\n")
-#for chiral in backbone_ca_outliers:
-#  sys.stdout.write(chiral.make_output_line()+'\n')
-#sys.stdout.write("----------------------------------------------------------------------\n")
-#sys.stdout.write("\n")
-#sys.stdout.write("Probable tetrahedral geometry outliers\n")
-#sys.stdout.write("SUMMARY: %i outliers out of %i other chiral centers (%.2f%%)\n" % (len(other_outliers), other_chiral_center_count, percent_other_outliers))
-#sys.stdout.write("----------------------------------------------------------------------\n")
-#for chiral in other_outliers:
-#  sys.stdout.write(chiral.make_output_line()+'\n')
-#sys.stdout.write("----------------------------------------------------------------------\n")
-#sys.stdout.write("\n")
-#sys.stdout.write("Probable atom naming errors around pseudochiral centers\n")
-#sys.stdout.write("SUMMARY: %i outliers out of %i other chiral centers (%.2f%%)\n" % (len(other_outliers), other_chiral_center_count, percent_other_outliers))
-#sys.stdout.write("----------------------------------------------------------------------\n")
-#for chiral in other_outliers:
-#  sys.stdout.write(chiral.make_output_line()+'\n')
-#sys.stdout.write("----------------------------------------------------------------------\n")
-
   
