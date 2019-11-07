@@ -250,7 +250,7 @@ water_contacts = {}
 
 pdbfile = sys.argv[1]
 
-probe_command = "phenix.probe -u -q -mc -het -con -once -wat2wat -onlybadout 'water' 'all' %s" % pdbfile
+probe_command = "phenix.probe -u -q -mc -het -con -once -wat2wat -stdbonds -onlybadout 'water' 'all' %s" % pdbfile
 
 probe_out = easy_run.fully_buffered(probe_command)
 if (probe_out.return_code != 0):
