@@ -160,6 +160,9 @@ echo "NGL.autoLoad(\"$url\").then(function (kinemage) {
     
     var positionArray = []
     var colorArray = []
+    var masterRibbonPositionArray = []
+    var masterRibbonColorArray = []
+    var masterRibbonLabelArray = []
     kinemage.ribbonLists.forEach(function (ribbonList) {
       if (!ribbonList.masterArray.includes(master)) return
       for (var i = 0, il = ribbonList.positionArray.length / 9; i < il; ++i) {
@@ -194,10 +197,17 @@ echo "NGL.autoLoad(\"$url\").then(function (kinemage) {
         //var nz3 = ribbonList.normalArray[ i9 + 8 ]
         //shape.addTriangle([ x1, y1, z1 ], [ x2, y2, z2 ], [ x3, y3, z3 ], [ r1, g1, b1 ], [ ], ribbonList.labelArray[ i3 ])
         //shape.addMesh([ x1, y1, z1, x2, y2, z2, x3, y3, z3 ], [ r1, g1, b1, r2, g2, b2, r3, g3, b3 ], undefined ,[ nx1, ny1, nz1, nx2, ny2, nz2, nx3, ny3, nz3 ], ribbonList.labelArray[ i3 ])
-        shape.addMesh([ x1, y1, z1, x2, y2, z2, x3, y3, z3 ], [ r1, g1, b1, r2, g2, b2, r3, g3, b3 ], undefined ,[  ], ribbonList.labelArray[ i3 ])
+        //shape.addMesh([ x1, y1, z1, x2, y2, z2, x3, y3, z3 ], [ r1, g1, b1, r2, g2, b2, r3, g3, b3 ], undefined ,[  ], ribbonList.labelArray[ i3 ])
       }
+      masterRibbonPositionArray.push(...ribbonList.positionArray)
+      masterRibbonColorArray.push(...ribbonList.colorArray)
+      masterRibbonLabelArray.push(...ribbonList.labelArray)
     })
-    
+    if (masterRibbonPositionArray.length > 0) {
+      //shape.addMesh(masterRibbonPositionArray, masterRibbonColorArray, undefined, [ ], masterRibbonLabelArray)
+      shape.addMesh(masterRibbonPositionArray, masterRibbonColorArray, undefined, [ ], [ ])
+    }
+
     //var testwidelineBuffer = new NGL.WideLineBuffer({
     //  position1: new Float32Array([ 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 1 ]),
     //  position2: new Float32Array([1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0 ]),
