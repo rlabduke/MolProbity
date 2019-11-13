@@ -182,19 +182,29 @@ def as_html_table(water_contacts, water_count, out=sys.stdout):
 <body>
 
 <hr>
-This table lists all the waters in the structure that have steric clashes. Waters are classified into common categories based on the atom - or parent heavy atom of a hydrogen - they clash with.
+This table lists all HOH "waters" in the structure that have steric clashes. HOH are classified into common categories based on the atom they clash with.
 <br><br>
-Clash with polar - Waters that clash with polar groups may actually be coordinated ions.
-<br>
-Clash with nonpolar - Waters that clash with nonpolar groups may indicate place where covalently-bonded atoms should be, such as an unmodeled alternate conformation or a ligand.
-<br>
-Clash with water - Water-water clashes may be resolved by changing the involved waters into alternates of compatible occupancy. Or they may indicate a place where covalently-bonded atoms like a ligand or sidechain should be built.
-<br>
-Clash with altloc - Water clashes involving one or more alternate conformations may be resolved by renaming some of the alternates.
+A clashing HOH is very unlikely be be a real water, unless the clashing atom position is incorrect. The following categories provide guidance for correcting false HOH.
 <br><br>
-High B-factor - Waters with clashes and minimal support in the map should be removed from the model. This table does not report map data directly, but a high B-factor is a likely warning sign that a water is a poor fit to the map.
+<b>Clash with polar</b> - HOH that clashes with polar groups may actually be a coordinated ion.
+<br>
+<b>Clash with nonpolar</b> - HOH that clashes with nonpolar groups may be a missing or displaced atom&ast;.
+<br>
+<b>Clash with both polar and nonpolar</b> - HOH that clashes with both polar and non-polar groups is unlikely to be an ion. If clashes are severe, a displaced atom is likely. If clashes and map are weak, the HOH may be entirely removable.
+<br>
+<b>Clash with water</b> - HOH-HOH clashes may be real waters that need to be modeled as alternates of compatible occupancy. Or they may indicate missing or displaced atoms.
+<br>
+<b>Clash with altloc</b> - HOH clashes involving one or more alternate conformations may be resolved by renaming some of the alternates.
 <br><br>
-These categories are general suggestions. Check your electron density and trust your intuition and experience.
+<b>High B-factor</b> - HOH with clashes and minimal support in the map should be removed from the model. This table does not report map data directly, but a high B-factor is a likely warning sign that an HOH is a poor fit to the map.
+<br>
+<b>Severe clash</b> - HOH with severe clash overlap but good map support is likely to be a position where an atom is displaced.
+<br><br>
+&ast;<i>Displaced atom</i> indicates that a structural atom has been moved from its proper place in the model and replaced by HOH. Displaced sidechains are common. Moved atoms may be restored by local rebuilding.
+<br>
+<i>Missing atoms</i> have been entirely replaced by HOH. Removed atoms may be restored by modeling alternate conformations (especially sidechains), modeling ligands, or continuing a macromolecular mainchain. 
+<br><br>
+These categories are general suggestions. Check your electron density; trust your intuition and experience.
 <br>
 <hr>
 <br>
