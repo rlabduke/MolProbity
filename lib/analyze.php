@@ -506,7 +506,7 @@ function runAnalysis($modelID, $opts)
             $entry .= "<td>".linkAnyFile("$model[prefix]multi.kin", "Kinemage", "img/multikin.jpg")."</td>\n";
         if($opts['doCharts'])
         {
-            $entry .= "<td>".linkAnyFile("$model[prefix]undowser.html", "Chart", "img/undowserchart.png")."</td>\n";
+            $entry .= "<td>".linkAnyFile("$model[prefix]undowser.html", "Chart", "img/UnDowser_icon_120h.jpg")."</td>\n";
             $entry .= "<td>".linkAnyFile("$model[prefix]multi.table", "Chart", "img/multichart.jpg")."</td>\n";
             if($opts['chartCoot']) {
               $entry .= "<td>".linkAnyFile("$model[prefix]multi-coot.scm", "To-do list for Coot", "img/multichart-coot.jpg")."<br><small><i>Open this in Coot 0.1.2 or later using Calculate | Run Script...</i></small></td>\n";
