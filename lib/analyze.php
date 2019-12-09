@@ -620,7 +620,8 @@ function loadBasePhosPerp($datafile)
             //echo strtoupper(substr($line[3],0,-1))."\n";
             $entry = array(
                 'resType'   => strtoupper(substr($line[2],1,-1)),
-                'chainID'   => strtoupper(substr($line[3],1,-1)),
+                //'chainID'   => strtoupper(substr($line[3],1,-1)),
+                'chainID'   => substr($line[3],1,-1),
                 'resNum'    => trim(substr($line[4], 0, -2)) + 0,
                 'insCode'   => strtoupper(substr($line[4], -2, 1)),
                 'altloc'    => ' ', //limitation - doesn't currently handle altloc
@@ -726,7 +727,8 @@ function loadCbetaDev($datafile)
             $entry = array(
                 'altConf'   => strtoupper($line[1]),
                 'resType'   => strtoupper($line[2]),
-                'chainID'   => strtoupper($line[3]),
+                //'chainID'   => strtoupper($line[3]),
+                'chainID'   => $line[3],
                 'resNum'    => trim(substr($line[4], 0, -1)) + 0,
                 'insCode'   => substr($line[4], -1),
                 'dev'       => $line[5] + 0,
