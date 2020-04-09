@@ -267,7 +267,7 @@ function runAnalysis($modelID, $opts)
         echo "chartClashlist ran for ".(time() - $startTime)." seconds\n";
 
         $outfile = "$chartDir/$model[prefix]undowser.html";
-        runUnDowerser($infile, $outfile);
+        runUnDowser($infile, $outfile);
         $undowser = loadUndowserSummary($outfile);
     }
     //}}} Run all-atom contact programs and offer kins to user
@@ -1052,7 +1052,7 @@ function runClashStats($resol, $clashscore, $clashscoreBlt40)
 
 #{{{ runUnDowser
 ############################################################################
-function runUnDowerser($infile, $outfile)
+function runUnDowser($infile, $outfile)
 {
   exec("python ".MP_BASE_DIR."/cmdline/undowser.py $infile > $outfile");
 }
