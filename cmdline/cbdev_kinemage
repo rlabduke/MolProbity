@@ -42,6 +42,9 @@ if(is_array($_SERVER['argv']))
     }
 else die("Something went profoundly wrong with the commandline.\n");
 
+if(!endsWith($inFile, ".pdb")) die("'$inFile' is not a .pdb file.\n");
+if(!is_file($inFile)) die("'$inFile' is not a file that could be found.\n");
+
 mpStartSession(true); // create a new session
 
 $inpath = $inFile;
