@@ -41,8 +41,8 @@ $optVerbose = true;
 $optGzipKin = true;
 $optMultikin = array(
     'ribbons'   => false,
-    'Bscale'    => true,
-    'Qscale'    => true,
+    'Bscale'    => false,
+    'Qscale'    => false,
     'altconf'   => true,
     'rama'      => true,
     'geom'      => true,
@@ -66,9 +66,29 @@ if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
     else                        die("Too many or unrecognized arguments: '$arg'\n");
 }
 
-if(!isset($inDir))          die("No input directory specified.\n");
-elseif(!is_dir($inDir))     die("Input directory '$inDir' does not exist.\n");
-elseif(!isset($outDir))     die("No output directory specified.\n");
+if(!isset($inDir))          die("No input file or directory specified.\n");
+elseif(is_file($inDir))
+{
+    if(endsWith($inDir, ".pdb")) $fileList = [$inDir];
+    else die("'$inDir' is not a .pdb file.\n");
+}
+elseif(is_dir($inDir))
+{
+    $fileList = [];
+    foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
+    {
+        $inpath = $inDir.'/'.$inFile;
+        array_push($fileList, $inpath);
+    }
+    if (count($fileList) == 0) die("No .pdb files foundin'$inDir'.\n");
+}
+else                        die("Input file or directory '$inDir' does not exist.\n");
+
+if(!isset($outDir))
+{
+    $outDir = ".";
+    echo("No output directory specified, printing to working directory.\n");
+}
 elseif(!is_dir($outDir))    die("Output directory '$outDir' does not exist.\n");
 
 if($optVerbose)
@@ -77,13 +97,14 @@ if($optVerbose)
     echo "OUTPUT  : ".realpath($outDir)."\n";
 }
 
-foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
+foreach($fileList as $inFile) if(endsWith($inFile, ".pdb"))
 {
     #echo $inFile."\n";
     $outFile = basename($inFile, ".pdb") . ".kin";
 
     mpStartSession(true); // create a new session
-    $inpath = $inDir.'/'.$inFile;
+    //$inpath = $inDir.'/'.$inFile;
+    $inpath = $inFile;
     $modelID = addModelOrEnsemble(
                  $inpath,
                  basename($inpath),
