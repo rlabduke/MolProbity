@@ -162,6 +162,10 @@ function runAnalysis($modelID, $opts)
         $rama = loadRamachandran($outfile);
         $summaries['rama'] = loadRamachandranSummary($outfile);
 
+        #$ramaZfile = "$chartDir/$model[prefix]ramaZ.txt";
+        #runRamaZ($infile, $ramaZfile);
+        #$summaries['ramaZ'] = loadRamaZ($ramaZfile);
+
         makeRamachandranKin($infile, "$kinDir/$model[prefix]rama.kin");
         $tasks['rama'] .= " - preview <a href='viewking.php?$_SESSION[sessTag]&url=$kinURL/$model[prefix]rama.kin' target='_blank'>kinemage</a>";
         setProgress($tasks, 'rama'); // so the preview link is visible
@@ -1298,6 +1302,65 @@ function findRamaOutliers($rama)
     return $worst;
 }
 #}}}########################################################################
+
+#{{{ runRamaZ - generate analysis of Ramachandran distribution
+############################################################################
+/**
+* Creates a text file that will be available for direct inspection
+* Text file will also be parsed by loadRamaZ() to feed into summary table
+*/
+function runRamaZ($infile, $outfile)
+{
+    #can also run as phenix.rama_z
+    exec("mmtbx.rama_z $infile > $outfile");
+}
+############################################################################
+#}}}
+
+#{{{ loadRamaZ - load Ramachandran distribution for summary table
+############################################################################
+/**
+* Creates a text file that will be available for direct inspection
+* Text file will also be parsed by loadRamaZ() to feed into summary table
+*/
+function loadRamaZ($datafile)
+{
+#END OF FILE looks like this:
+#Rama-Z (Ramachandran plot Z-score):
+#Interpretation: bad |Rama-Z| > 3; suspicious 2 < |Rama-Z| < 3; good |Rama-Z| < 2.
+#Scores for whole/helix/sheet/loop are scaled independently;
+#therefore, the values are not related in a simple manner.
+#  whole: -8.32 (0.16), residues: 546
+#  helix: -5.23 (0.11), residues: 223
+#  sheet: -3.80 (0.64), residues: 36
+#  loop : -6.27 (0.18), residues: 287
+#
+#===============================================================================
+#Job complete
+#usr+sys time: 2.12 seconds
+#wall clock time: 2.12 seconds
+  $data = array_slice(file($datafile), -13); //look at last 13 lines, where summaries are
+  foreach($data as $line)
+  {
+    if (preg_match("/^  whole/",$line))
+    {
+      //echo "match found\n";
+      //  whole: -8.32 (0.16), residues: 546
+      $linebits = explode(' ',$line);
+      #$z = $linebits[1];
+      #$stddev = $linebits[2][1:-1];
+    
+      $ret = array(
+        'z' => $linebits[1],
+        'stddev' => substr($linebits[2],1,-1),
+        'residues'=> $linebits[4]);
+    }
+    else continue;
+  }
+  return $ret;
+}
+############################################################################
+#}}}
 
 #{{{ runOmegalyze - generates rotamer analysis data
 ############################################################################
