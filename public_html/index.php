@@ -24,7 +24,7 @@
 // Default is welcome page unless URL is like index.php?start=____
     if($isNewSess)
     {
-        if(date('F j') == 'April 1') pageGoto("april_fools.php");
+        if(date('F j') == 'April 500') pageGoto("april_fools.php"); //made april fools inaccessible, fix better later
         else switch($_REQUEST['start'])
         {
             case "sitemap":     pageGoto("sitemap.php"); break;
