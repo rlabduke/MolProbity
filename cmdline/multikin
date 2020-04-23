@@ -39,7 +39,7 @@ OUTPUTS / RESULTS:
 // Default options
 $optVerbose = true;
 $optGzipKin = true;
-$optMultikin = array(
+/*$optMultikin = array(
     'ribbons'   => false,
     'Bscale'    => false,
     'Qscale'    => false,
@@ -55,7 +55,7 @@ $optMultikin = array(
     'vdwdots'   => true,
     'omega'     => true,
     'cablam'    => true
-);
+);*/
 
 // First argument is the name of this script...
 if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
@@ -117,6 +117,28 @@ foreach($fileList as $inFile) if(endsWith($inFile, ".pdb"))
     $model =& $_SESSION['models'][$modelID];
     $ensemble =& $_SESSION['ensembles'][$modelID];
     $reduce_blength = $_SESSION['reduce_blength'];
+    $pdbSize = filesize($_SESSION['dataDir'].'/'.MP_DIR_MODELS.'/'.$model['pdb']);
+    $isSmall = ($pdbSize < 1<<21 ? true : false); // 1<<20 = 2^20
+    $stats = $model['stats'];
+    $hasNucAcid = ($stats['nucacids'] > 0 ? true : false);
+    $hasProtein = ($stats['sidechains'] > 0 ? true : false);
+    $optMultikin = array(
+      'ribbons'   => false,
+      'Bscale'    => false,
+      'Qscale'    => false,
+      'altconf'   => true,
+      'rama'      => $hasProtein,
+      'geom'      => true,
+      'rota'      => $hasProtein,
+      'geom'      => true,
+      'cbdev'     => $hasProtein,
+      'pperp'     => $hasNucAcid,
+      'clashdots' => true,
+      'hbdots'    => true,
+      'vdwdots'   => $isSmall,
+      'omega'     => $hasProtein,
+      'cablam'    => $hasProtein
+    );
     #echo "model: ".isset($model)."\n";
     #echo "ensemble: \n";
     #print_r($ensemble);
