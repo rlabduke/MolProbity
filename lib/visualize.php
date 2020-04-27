@@ -983,7 +983,8 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
         //$entry .= "<td>$clashPct[pct_rank40]<sup>".ordinalSuffix($clashPct['pct_rank40'])."</sup> percentile<sup>*</sup> (N=$clashPct[n_samples], $clashPct[minresol]&Aring; - $clashPct[maxresol]&Aring;)</td></tr>\n";
     }
     $proteinRows = 0;
-    if(is_array($rama))    $proteinRows += 3;
+    if(is_array($rama))    $proteinRows += 2;
+    if(is_array($summaries['ramaZ'])) $proteinRows += 1;
     if(is_array($rota))    $proteinRows += 2;
     if(is_array($cbdev))   $proteinRows += 1;
     if(is_array($clash) && is_array($rota) && is_array($rama)) $proteinRows += 1;
