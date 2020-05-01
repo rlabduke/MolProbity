@@ -110,7 +110,13 @@ Choose validations appropriate to a structure.</p>
 //      <li>Allows use of both electron cloud and nuclear x-H bond-lengths. Read more about this change <a href='".makeEventURL("onGoto", "helper_hydrogens.php")."'>here</a>.</li>
 //      <li>Full support for 2-character CHAINIDs added. 4-character SEGIDs also supported in place of CHAINIDs.</li>
 //      </ul>
-    echo("<h3>What's new in 4.5</h3><ul>
+    echo("<h3>What's new in 4.5.1</h3><ul>
+      <li>New validation: Ramachandran Z-score assesses whether total Rama distribution is realistic.</li>
+      <li>Improved bullseye kinemage for CBdev distribution.</li>
+      <li>Updated cmdline tools for multichart and multikin, added one for cbetadev_kinemage.</li>
+      <li>Added chiral volume outliers to the Guide to validation options.</li>
+  </ul>
+  <h3>What's new in 4.5</h3><ul>
       <li>Added an option to visualize 3D validation markup online using the Javascript NGL viewer software.</li>
       <li>New 'UnDowser' validation for waters with clashes.</li>
       <li>New validation for chiral volume outliers and D/L misnamings.</li>
