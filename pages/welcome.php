@@ -662,6 +662,11 @@ function displayUpload($context)
         echo("<div class=alert><strong>Our MolProbity server was recently rebooted. We apologize for the loss of any jobs you might have had running. Reboots are sometimes necessary if the server is overloaded. If you were running large jobs (more than 10,000 atoms) or more than 2 jobs, please consider resubmitting them over a longer period to spread out the load. Thanks for helping us keep our MolProbity downtimes rare.</strong></div>");
     }
 
+    echo("<div class=feature><strong>Looking at deposited SARS-CoV-2 related structures?  Check PDB for updated versions as well as new structures.
+      <br>(Our Fetch &gt; always returns the latest version.)
+<br>Solving or improving them? Look at MolProbity's CaBLAM outliers, and at sparse H-bonds.</strong></div>");
+
+
     echo makeEventForm("onUploadOrFetch") . "\n";
     //echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onCall", "upload_setup.php")."'>more options</a>)</h5>";
     echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onCall", "upload_setup.php")."' onclick='toggleUploadOptions(); return false' id='upload_options_link'>more options</a>)</h5>";
