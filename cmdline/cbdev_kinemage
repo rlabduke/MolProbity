@@ -45,34 +45,14 @@ else die("Something went profoundly wrong with the commandline.\n");
 if(!endsWith($inFile, ".pdb")) die("'$inFile' is not a .pdb file.\n");
 if(!is_file($inFile)) die("'$inFile' is not a file that could be found.\n");
 
-mpStartSession(true); // create a new session
-
 $inpath = $inFile;
-$modelID = addModelOrEnsemble(
-             $inpath,
-             basename($inpath),
-             false,
-             true,
-             true,
-             false);
-
-$model =& $_SESSION['models'][$modelID];
-
 $outfile = basename($inFile,".pdb")."-cbetadev.kin";
 
 #From lib/visualize.makeCbetaDevPlot()
-if(!$_SESSION['useSEGID'])
-    {
-      $opt = "-cbdevdump";
-    }
-    else
-    {
-      $opt = "-cbdevdump -segid";
-    }
-    exec("prekin $opt $inFile | java -cp ".MP_BASE_DIR."/lib/hless.jar hless.CBScatter > $outfile");
+    exec("molprobity.cbetadev output=bullseye $inpath > $outfile");
 
 echo("Created kinemage file: $outfile\n");
 ############################################################################
 // Clean up and go home
-mpDestroySession(); // only call this if we created one
+#mpDestroySession(); // only call this if we created one
 ?>
