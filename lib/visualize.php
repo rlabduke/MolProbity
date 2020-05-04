@@ -45,15 +45,16 @@ function convertKinToPostscript($infile)
 ############################################################################
 function makeCbetaDevPlot($infile, $outfile)
 {
-    if(!$_SESSION['useSEGID'])
-    {
-      $opt = "-cbdevdump";
-    }
-    else
-    {
-      $opt = "-cbdevdump -segid";
-    }
-    exec("prekin $opt $infile | java -cp ".MP_BASE_DIR."/lib/hless.jar hless.CBScatter > $outfile");
+    exec("molprobity.cbetadev output=bullseye $infile > $outfile");
+    #if(!$_SESSION['useSEGID'])
+    #{
+    #  $opt = "-cbdevdump";
+    #}
+    #else
+    #{
+    #  $opt = "-cbdevdump -segid";
+    #}
+    #exec("prekin $opt $infile | java -cp ".MP_BASE_DIR."/lib/hless.jar hless.CBScatter > $outfile");
 }
 #}}}########################################################################
 
