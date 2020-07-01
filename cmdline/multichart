@@ -86,6 +86,8 @@ if($hasProtein)
   runRamachandran($pdbfile, "$rawDir/$model[prefix]rama.data");
   $rama = loadRamachandran("$rawDir/$model[prefix]rama.data");
   $summaries['rama'] = loadRamachandranSummary("$rawDir/$model[prefix]rama.data");
+  runRamaZ($pdbfile, "$rawDir/$model[prefix]ramaZ.txt");
+  $summaries['ramaZ'] = loadRamaZ("$rawDir/$model[prefix]ramaZ.txt");
 
   runCbetaDev($pdbfile, "$rawDir/$model[prefix]cbdev.data");
   $cbdev = loadCbetaDev("$rawDir/$model[prefix]cbdev.data");

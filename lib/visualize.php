@@ -45,15 +45,16 @@ function convertKinToPostscript($infile)
 ############################################################################
 function makeCbetaDevPlot($infile, $outfile)
 {
-    if(!$_SESSION['useSEGID'])
-    {
-      $opt = "-cbdevdump";
-    }
-    else
-    {
-      $opt = "-cbdevdump -segid";
-    }
-    exec("prekin $opt $infile | java -cp ".MP_BASE_DIR."/lib/hless.jar hless.CBScatter > $outfile");
+    exec("molprobity.cbetadev output=bullseye $infile > $outfile");
+    #if(!$_SESSION['useSEGID'])
+    #{
+    #  $opt = "-cbdevdump";
+    #}
+    #else
+    #{
+    #  $opt = "-cbdevdump -segid";
+    #}
+    #exec("prekin $opt $infile | java -cp ".MP_BASE_DIR."/lib/hless.jar hless.CBScatter > $outfile");
 }
 #}}}########################################################################
 
@@ -984,6 +985,7 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
     }
     $proteinRows = 0;
     if(is_array($rama))    $proteinRows += 2;
+    if(is_array($summaries['ramaZ'])) $proteinRows += 1;
     if(is_array($rota))    $proteinRows += 2;
     if(is_array($cbdev))   $proteinRows += 1;
     if(is_array($clash) && is_array($rota) && is_array($rama)) $proteinRows += 1;
@@ -1050,6 +1052,18 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             else                        $bg = $bgPoor;
             $entry .= "<tr><td>Ramachandran favored</td><td bgcolor='$bg'>$ramaFav</td><td bgcolor='$bg'>$ramaFavPct%</td>\n";
             $entry .= "<td>Goal: &gt;98%</td></tr>\n";
+
+            if(is_array($summaries['ramaZ']))
+            {
+              $ramaZ_score = $summaries['ramaZ']['z'];
+              $ramaZ_stddev = $summaries['ramaZ']['stddev'];
+              //$ramaZ_rescount = $summaries['ramaZ']['residues'];
+              if(abs($ramaZ_score) <= 2) $bg = $bgGood;
+              elseif(abs($ramaZ_score) > 3) $bg = $bgPoor;
+              else $bg = $bgFair;
+              $entry .= "<td>Rama distribution Z-score</td><td colspan=2 bgcolor='$bg'>$ramaZ_score &plusmn; $ramaZ_stddev</td>\n";
+              $entry .= "<td>Goal: abs(Z score) &lt; 2</td></tr>\n";
+            }
         }
         if(is_array($clash) && is_array($rota) && is_array($rama))
         {

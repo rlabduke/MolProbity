@@ -162,9 +162,9 @@ function runAnalysis($modelID, $opts)
         $rama = loadRamachandran($outfile);
         $summaries['rama'] = loadRamachandranSummary($outfile);
 
-        #$ramaZfile = "$chartDir/$model[prefix]ramaZ.txt";
-        #runRamaZ($infile, $ramaZfile);
-        #$summaries['ramaZ'] = loadRamaZ($ramaZfile);
+        $ramaZfile = "$chartDir/$model[prefix]ramaZ.txt";
+        runRamaZ($infile, $ramaZfile);
+        $summaries['ramaZ'] = loadRamaZ($ramaZfile);
 
         makeRamachandranKin($infile, "$kinDir/$model[prefix]rama.kin");
         $tasks['rama'] .= " - preview <a href='viewking.php?$_SESSION[sessTag]&url=$kinURL/$model[prefix]rama.kin' target='_blank'>kinemage</a>";
@@ -539,6 +539,7 @@ function runAnalysis($modelID, $opts)
         {
             $entry .= "<li>".linkAnyFile("$model[prefix]rama.kin", "Ramachandran plot kinemage")."</li>\n";
             $entry .= "<li>".linkAnyFile("$model[prefix]rama.pdf", "Ramachandran plot PDF")."</li>\n";
+            $entry .= "<li>".linkAnyFile("$model[prefix]ramaZ.txt", "Ramachandran distribution Z-score analysis")."</li>\n";
         }
         if($opts['chartGeom'])
             $entry .= "<li>".linkAnyFile("$model[prefix]chirals.txt", "Chiral volume report")."</li>\n";
@@ -1346,14 +1347,17 @@ function loadRamaZ($datafile)
     {
       //echo "match found\n";
       //  whole: -8.32 (0.16), residues: 546
-      $linebits = explode(' ',$line);
+      //  whole:  0.25 (0.89), residues: 74
+      //may have different # of spaces, makes explode behave differently
+      $linebits = explode(':',$line);
+      $smallerbits = explode('(',$linebits[1]);
       #$z = $linebits[1];
       #$stddev = $linebits[2][1:-1];
     
       $ret = array(
-        'z' => $linebits[1],
-        'stddev' => substr($linebits[2],1,-1),
-        'residues'=> $linebits[4]);
+        'z' => trim($smallerbits[0]),
+        'stddev' => explode(')',$smallerbits[1])[0],
+        'residues'=> trim($linebits[2]));
     }
     else continue;
   }

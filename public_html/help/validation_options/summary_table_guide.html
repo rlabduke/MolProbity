@@ -33,7 +33,7 @@
   </tr>
   
   <tr>
-  <td rowspan='8' align='center'>Protein<br>Geometry</td>
+  <td rowspan='9' align='center'>Protein<br>Geometry</td>
   <td>Poor rotamers:</td>
   <td align='center' bgcolor='#99ff99'>Outliers &le; 0.3%</td>
   <td align='center' bgcolor='#ffff99'>0.3% &lt; Outliers &le; 1.5%</td>
@@ -56,6 +56,12 @@
   <td align='center' bgcolor='#99ff99'>Favored &ge; 98%</td>
   <td align='center' bgcolor='#ffff99'>98% &gt; Favored &ge; 95%</td>
   <td align='center' bgcolor='#ff9999'>Favored &lt; 95%</td>
+  </tr>
+  <tr>
+  <td>Ramachandran Z-score:</td>
+  <td align='center' bgcolor='#99ff99'>abs(Z-score) &le; 2</td>
+  <td align='center' bgcolor='#ffff99'>2 &lt; abs(Z-score) &le; 3</td>
+  <td align='center' bgcolor='#ff9999'>abs(Z-score) &gt; 3%</td>
   </tr>
   <tr>
   <td>MolProbity score:</td>
@@ -150,6 +156,8 @@
   <br>E.g the Ramachandran "Favored" line becomes colored red when fewer than 95% of residues fall within the 98% contour.
   <br>
   <br>Ramachandran validation allows a structure with a single outlier to be colored yellow to avoid seeming to disproportionalte punish small structures.
+  <br>
+  <br>Ramachandran Z-score validation checks the total Ramachandran <i>distribution</i> against the expected distribution. This can reveal overfitting. For more information on Ramachandran Z-score, see: <a href="https://www.biorxiv.org/content/10.1101/2020.03.26.010587v1" target="_blank">https://www.biorxiv.org/content/10.1101/2020.03.26.010587v1</a>
   <br>
   <br>We determined that the expected cisProline content of strutures varies to widely for a simple cutoffs to avoid either passing or penalizing a significant number of structures incorrectly.
   Therefore, a structure's cisProline count is reported, but the row in the table is left uncolored.

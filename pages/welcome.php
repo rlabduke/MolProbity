@@ -110,7 +110,13 @@ Choose validations appropriate to a structure.</p>
 //      <li>Allows use of both electron cloud and nuclear x-H bond-lengths. Read more about this change <a href='".makeEventURL("onGoto", "helper_hydrogens.php")."'>here</a>.</li>
 //      <li>Full support for 2-character CHAINIDs added. 4-character SEGIDs also supported in place of CHAINIDs.</li>
 //      </ul>
-    echo("<h3>What's new in 4.5</h3><ul>
+    echo("<h3>What's new in 4.5.1</h3><ul>
+      <li>New validation: Ramachandran Z-score assesses whether total Rama distribution is realistic.</li>
+      <li>Improved bullseye kinemage for CBdev distribution.</li>
+      <li>Updated cmdline tools for multichart and multikin, added one for cbetadev_kinemage.</li>
+      <li>Added chiral volume outliers to the Guide to validation options.</li>
+  </ul>
+  <h3>What's new in 4.5</h3><ul>
       <li>Added an option to visualize 3D validation markup online using the Javascript NGL viewer software.</li>
       <li>New 'UnDowser' validation for waters with clashes.</li>
       <li>New validation for chiral volume outliers and D/L misnamings.</li>
@@ -655,6 +661,11 @@ function displayUpload($context)
     {
         echo("<div class=alert><strong>Our MolProbity server was recently rebooted. We apologize for the loss of any jobs you might have had running. Reboots are sometimes necessary if the server is overloaded. If you were running large jobs (more than 10,000 atoms) or more than 2 jobs, please consider resubmitting them over a longer period to spread out the load. Thanks for helping us keep our MolProbity downtimes rare.</strong></div>");
     }
+
+    echo("<div class=feature><strong>Looking at deposited SARS-CoV-2 related structures?  Check PDB for updated versions as well as new structures.
+      <br>(Our Fetch &gt; always returns the latest version.)
+<br>Solving or improving them? Look at MolProbity's CaBLAM outliers, and at sparse H-bonds.</strong></div>");
+
 
     echo makeEventForm("onUploadOrFetch") . "\n";
     //echo "<h5 class='welcome'>File Upload/Retrieval (<a href='".makeEventURL("onCall", "upload_setup.php")."'>more options</a>)</h5>";
