@@ -209,6 +209,7 @@ Default options have been selected based on the content of the submitted file.
     </div>
     </div>
 <h5 class='nospaceafter'><label><input type='checkbox' name='doRamaPDF' value='1' checked> Multi-model Ramachandran plot (PDF)</label></h5>
+<h5 class='nospaceafter'><label><input type='checkbox' name='doRamaKin' value='1' checked> Multi-model Ramachandran plot (kinemage)</label></h5>
 <!--
 <h5 class='nospaceafter'><label><input type='checkbox' name='doMultiGraph' value='1'> Multi-criterion graph [ALPHA TEST]</label></h5>
 -->

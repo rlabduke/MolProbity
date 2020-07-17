@@ -69,6 +69,7 @@ $tasks = array();
 if($opts['doCharts'])            $tasks['charts'] = "Create ensemble multi-criterion charts";
 if($opts['doEnsembleKinemage'])  $tasks['multikin'] = "Create ensemble multi-criterion kinemage";
 if($opts['doRamaPDF'])          $tasks['ramapdf'] = "Create multi-model Ramachandran plot (PDF)";
+if($opts['doRamaKin'])          $tasks['ramakin'] = "Create multi-model Ramachandran plot (kinemage)";
 if($opts['doMultiGraph'])       $tasks['multigraph'] = "Create multi-criterion graph";
 if($opts['doMultiModelChart'])  $tasks['multichart'] = "Create multi-criterion chart";
 $opts['doEnsemble'] = $ensemble;
@@ -125,6 +126,16 @@ if($opts['doRamaPDF'])
 
     $labbookEntry .= "<h3>Multi-model Ramachandran plot</h3>\n";
     $labbookEntry .= "<p>".linkAnyFile("$ensemble[prefix]rama.pdf", "Ramachandran plot PDF")."</p>\n";
+}
+if($opts['doRamaKin'])
+{
+    setProgress($tasks, 'ramakin'); // updates the progress display if running as a background job
+    $outfile = "$chartDir/$ensemble[prefix]rama.kin";
+    makeRamachandranKin($infile, $outfile);
+
+    $labbookEntry .= "<h3>Multi-model Ramachandran plot kinemage</h3>\n";
+    $labbookEntry .= "<p>".linkAnyFile("$ensemble[prefix]rama.kin", "Ramachandran plot kinemage")."</p>\n";
+
 }
 if($opts['doMultiGraph'])
 {
