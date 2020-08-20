@@ -51,6 +51,11 @@
 Clash analysis is one of the signature validations offered by MolProbity.
 "Clashes" are steric overlaps of 0.4&Aring; or greater between non-bonded atoms.
 Such interactions carry a severe energy penalty and should be avoided.
+<br><br>
+All-atom contact validation of ligands in MolProbity is not comprehensive
+Reduce adds hydrogens to ligands based on the PDB hetdict library.
+We update this library periodically, and it may not contain recent additions to the PDB and will not contain novel ligands.
+Ligands without complete hydrogens cannot be fully assessed.
 <h5 class="nospaceafter">Chart report</h5>
 <div class="nospaceafter">In the multicrit chart MolProbity identifies individual clashes and provides an overall "clashscore" for the structure.
 Clashscore is an approximation of the overall severity of the clashes in a structure.
@@ -115,6 +120,10 @@ Word, J. M., Lovell, S. C., LaBean, T. H., Taylor, H. C., Zalis, M. E., Presley,
 Geometry evaluation checks covalent bond lengths and covalent bond angles against the bond geometry expectations established by Engh and Huber for protein structures.
 For RNA structures, bond lengths and bond angles depend on the <a href="#sugarpuckers">pucker of the ribose sugar</a>, and are checked against the pucker-specific values implemented in PHENIX.
 Bond lengths and bond angles that differ from the expected values by more than 4&sigma; are considered outliers.
+<br><br>
+Covalent geometry validation of ligands in MolProbity is not comprehensive.
+It is based on the Phenix geostd and mon_lib libraries that contains many significant ligands such as HEM, rather than on dynamic calculations.
+These libraries may not contain recent additions to the PDB and will not contain novel ligands.  
 <h5 class="nospaceafter">Chart report</h5>
 In the multicrit chart, the worst geometry outlier for each residue is reported.
 Most outliers (4&sigma; to 10&sigma;) are colored outlier pink.
