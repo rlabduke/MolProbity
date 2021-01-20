@@ -27,8 +27,8 @@ and (3) groups that need automated or scripted MolProbity runs.</p>
 <div class='indent'>Christopher J. Williams, Jeffrey J. Headd, Nigel W. Moriarty,
 Michael G. Prisant, Lizbeth L. Videau, Lindsay N. Deis, Vishal Verma, Daniel A. Keedy,
 Bradley J. Hintze, Vincent B. Chen, Swati Jain, Steven M. Lewis, Bryan W. Arendall 3rd,
-Jack Snoeyink, Paul D. Adams, Simon C. Lovell, Jane S. Richardson, and David C. Richardson (2018) 
-MolProbity: More and better reference data for improved all-atom structure validation. 
+Jack Snoeyink, Paul D. Adams, Simon C. Lovell, Jane S. Richardson, and David C. Richardson (2018)
+MolProbity: More and better reference data for improved all-atom structure validation.
 Protein Science <u>27</u>: 293-315.</div>
 <br>
 A complete list of appropriate citations can be
@@ -45,8 +45,11 @@ Run install_via_bootstrap.sh X inside the directory you want to serve as the top
 <br>where X is the number of processors to use during compiling. 4 is recommended.
 <br><br>
 Run molprobity/setup.sh
-</dir>
-<p>
+</div>
+<p><b>Further Notes:</b>
+MolProbity requires the installation of the Java Runtime Environment (JRE) as well as the PHP 5 (CLI and HTTP server).  We strongly advise against exposing your local installation to whole internet traffic. Research your own platform target documentation for specific instructions regarding these additional requirements.
+<p><b>Other Questions?</b>
+Contact us at molprobity.bugreports@gmail.com
 
 <?php
 $file = "jiffiloop.tgz";
