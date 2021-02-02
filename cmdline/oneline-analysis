@@ -64,6 +64,8 @@ function summaryAnalysis($modelID)
     $rawDir  = $_SESSION['dataDir'].'/'.MP_DIR_RAWDATA;
         if(!file_exists($rawDir)) mkdir($rawDir, 0777);
 
+    $summaries = array();
+
     if($optClash)
     {
         //runClashlist($pdbfile, "$rawDir/$model[prefix]clash.data", $reduce_blength);
@@ -94,9 +96,14 @@ function summaryAnalysis($modelID)
     {
         runRamachandran($pdbfile, "$rawDir/$model[prefix]rama.data");
         $rama = loadRamachandran("$rawDir/$model[prefix]rama.data");
-        foreach($rama as $r)
-            $ramaScore[ $r['eval'] ] += 1;
-        $out .= ":" . ($ramaScore['OUTLIER']+0) . ":" . ($ramaScore['Allowed']+0) . ":" . ($ramaScore['Favored']+0) . ":" . count($rama);
+        $summaries['rama'] = loadRamachandranSummary("$rawDir/$model[prefix]rama.data");
+        #$ramaStat = loadRamachandranSummary("$rawDir/$model[prefix]rama.data");
+        #echo $ramaStat['favored']+0 . "\n";
+        #echo $summaries['rama']['favored'] . "\n";
+        #exit();
+        #echo ":" . $summaries['rama']['outlier'] . ":" . $summaries['rama']['allowed'] . ":" . $summaries['rama']['favored'] . ":" . $summaries['rama']['residues'];
+        #exit();
+        $out .= ":" . ($summaries['rama']['outlier']+0) . ":" . ($summaries['rama']['allowed']+0) . ":" . ($summaries['rama']['favored']+0) . ":" . ($summaries['rama']['residues']+0);
     }
     if($optGeom)
     {
@@ -152,7 +159,7 @@ function summaryAnalysis($modelID)
     {
       $axr = $pdbstats['resolution'];                                     // Actual Xtalographic Resolution
       if ((count($rota) != 0) && (count($rama) != 0)) {
-        $mer = getEffectiveResolution($clash, $rota, $rama);    // MolProbity Effective Resolution
+        $mer = getEffectiveResolution($clash, $rota, $rama, $summaries);    // MolProbity Effective Resolution
         $mer_pct = getEffectiveResolutionPercentile($mer, $axr);
         $out .= sprintf(':%.3f', $mer);
         $out .= sprintf(':%s', $mer_pct[pct_rank]);
