@@ -319,7 +319,7 @@ if($optVerbose)
 }
 #}}}
 
-foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
+foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb") or endsWith($inFile, ".ent"))
 {
     mpStartSession(true); // create a new session
     $inpath = $inDir.'/'.$inFile;
