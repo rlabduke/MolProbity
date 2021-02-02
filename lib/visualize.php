@@ -1065,13 +1065,13 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
               $entry .= "<td>Goal: abs(Z score) &lt; 2</td></tr>\n";
             }
         }
-        if(is_array($clash) && is_array($rota) && is_array($rama))
+        if(is_array($clash) && is_array($rota) && is_array($rama) && is_array($summaries))
         {
             if($firstRow) $firstRow = false;
             else $entry .= "<tr>";
 
             $axr = $resolution;                                     // Actual Xtalographic Resolution
-            $mer = getEffectiveResolution($clash, $rota, $rama);    // MolProbity Effective Resolution
+            $mer = getEffectiveResolution($clash, $rota, $rama, $summaries);    // MolProbity Effective Resolution
             $mer_pct = getEffectiveResolutionPercentile($mer, $axr);
 
             /*if(!$axr)*/                             $bg = $bgFair;  // unknown AXR

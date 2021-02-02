@@ -45,7 +45,7 @@
 /**
 * clash, rota, rama are from the corresponding loadXXX() functions
 */
-function getEffectiveResolution($clash, $rota, $rama)
+function getEffectiveResolution($clash, $rota, $rama, $summaries)
 {
     // Use of count(...) may occasionally lead to divide-by-zero if you have
     // non-protein PDB files.  I don't try to trap it b/c the PHP error msg
@@ -53,10 +53,13 @@ function getEffectiveResolution($clash, $rota, $rama)
     // and so acts as zero in arithmetic expressions, FWIW.)
     $cs = $clash['scoreAll'];
     $ro = 100.0 * count(findRotaOutliers($rota)) / count($rota);
-    $ramaScore = array();
-    foreach($rama as $r)
-        $ramaScore[ $r['eval'] ] += 1;
-    $ra = 100.0 - (100.0 * $ramaScore['Favored'] / count($rama));
+    //The $rama array is no longer required; the necessary data is in summaries
+    //  $rama is preserved as an argument bc it existing means $summaries should have the right data
+    //$ramaScore = array();
+    //foreach($rama as $r)
+    //    $ramaScore[ $r['eval'] ] += 1;
+    //$ra = 100.0 - (100.0 * $ramaScore['Favored'] / count($rama));
+    $ra = 100.0 - (100.0 * $summaries['rama']['favored'] / $summaries['rama']['residues']);
 
     //echo " cs=$cs, ro=$ro, ra=$ra ";
     //return 0.4548*log(1+$cs) + 0.4205*log(1+$ro) + 0.3186*log(1+$ra) - 0.5001;
