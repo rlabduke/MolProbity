@@ -88,6 +88,8 @@ foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
   $hasProtein = ($stats['sidechains'] > 0 ? True : False);
   $hasNucAcid = ($stats['nucacids'] > 0 ? True : False);
 
+  $summaries = array();
+
   if($hasProtein)
   {
     runRotamer($pdbfile, "$rawDir/$model[prefix]rota.data");
@@ -95,65 +97,80 @@ foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb"))
 
     runRamachandran($pdbfile, "$rawDir/$model[prefix]rama.data");
     $rama = loadRamachandran("$rawDir/$model[prefix]rama.data");
+    $summaries['rama'] = loadRamachandranSummary("$rawDir/$model[prefix]rama.data");
+    runRamaZ($pdbfile, "$rawDir/$model[prefix]ramaZ.txt");
+    $summaries['ramaZ'] = loadRamaZ("$rawDir/$model[prefix]ramaZ.txt");
 
     runCbetaDev($pdbfile, "$rawDir/$model[prefix]cbdev.data");
     $cbdev = loadCbetaDev("$rawDir/$model[prefix]cbdev.data");
 
-    runValidationReport($pdbfile, "$rawDir/$model[prefix]geom.data", "protein");
+    runOmegalyze($pdbfile, "$rawDir/$model[prefix]omega.data");
+    $omega = loadOmegalyze("$rawDir/$model[prefix]omega.data");
+
+    runCaBLAM($pdbfile, "$rawDir/$model[prefix]cablam.data");
+    $cablam = loadCablam("$rawDir/$model[prefix]cablam.data");
+    $summaries['cablam'] = loadCablamSummary("$rawDir/$model[prefix]cablam.data");
   }
   else
   {
     $rota = null;
     $rama = null;
     $cbdev = null;
+    $omega = null;
+    $cablam = null;
   }
 
-  runClashlist($pdbfile, "$rawDir/$model[prefix]clash.data", $reduce_blength);
-  $clash = loadClashlist("$rawDir/$model[prefix]clash.data");
+  runClashscore($pdbfile, "$rawDir/$model[prefix]clashlist.txt", $reduce_blength);
+  $clash = loadClashscore("$rawDir/$model[prefix]clashlist.txt");
+
+  runValidationReport($pdbfile, "$rawDir/$model[prefix]geom.data", $model['stats']['use_cdl']);
 
   if($hasNucAcid)
   {
     runBasePhosPerp($pdbfile, "$rawDir/$model[prefix]pperp.data");
     $pperp = loadBasePhosPerp("$rawDir/$model[prefix]pperp.data");
 
-    runSuitenameReport($pdbfile, "$rawDir/$model[prefix]suite.data");
+    $midfile = "$rawDir/$model[prefix]suitedata.txt";
+    runSuitenameReport($pdbfile, $midfile, "$rawDir/$model[prefix]suite.data");
     $suites = loadSuitenameReport("$rawDir/$model[prefix]suite.data");
-
-    runValidationReport($pdbfile, "$rawDir/$model[prefix]rna.data", "rna");
   }
+  else
   {
     $pperp = null;
     $suites = null;
   }
 
-  if($hasProtein && $hasNucAcid)
+  $bbonds = [];
+  $bangles = [];
+  if($hasProtein)
   {
-    $bbonds = array_merge(loadValidationBondReport("$rawDir/$model[prefix]geom.data","protein"), loadValidationBondReport("$rawDir/$model[prefix]rna.data", "rna"));
-    if (count($bbonds) == 0) $bbonds = null;
-    $bangles = array_merge(loadValidationAngleReport("$rawDir/$model[prefix]geom.data", "protein"), loadValidationAngleReport("$rawDir/$model[prefix]rna.data", "rna"));
-    if (count($bangles) == 0) $bangles = null;
+    $bbonds  = array_merge($bbonds,  loadValidationBondReport("$rawDir/$model[prefix]geom.data","protein"));
+    $bangles = array_merge($bangles, loadValidationAngleReport("$rawDir/$model[prefix]geom.data","protein"));
   }
-  elseif($hasProtein)
+  if($hasNucAcid)
   {
-    $bbonds = loadValidationBondReport("$rawDir/$model[prefix]geom.data", "protein");
-    if (count($bbonds) == 0) $bbonds = null;
-    $bangles = loadValidationAngleReport("$rawDir/$model[prefix]geom.data", "protein");
-    if (count($bangles) == 0) $bangles = null;
+    $bbonds  = array_merge($bbonds,  loadValidationBondReport("$rawDir/$model[prefix]geom.data","rna"));
+    $bangles = array_merge($bangles, loadValidationAngleReport("$rawDir/$model[prefix]geom.data","rna"));
   }
-  elseif($hasNucAcid)
-  {
-    $bbonds = loadValidationBondReport("$rawDir/$model[prefix]rna.data", "rna");
-    if (count($bbonds) == 0) $bbonds = null;
-    $bangles = loadValidationAngleReport("$rawDir/$model[prefix]rna.data", "rna");
-    if (count($bangles) == 0) $bangles = null;
-  }
+  if (count($bbonds) == 0) $bbonds = null;
+  if (count($bangles) == 0) $bangles = null;
+
+  makeChiralOutlierTable("$rawDir/$model[prefix]geom.data","$rawDir/$model[prefix]chirals.txt");
+  $chiral_summary = load_chiral_summary("$rawDir/$model[prefix]chirals.txt");
+
+  $undowserfile = "$rawDir/$model[prefix]undowser.html";
+  runUndowser($pdbfile,$undowserfile);
+  $undowser = loadUndowserSummary($undowserfile);
+
+  $curation = array(
+      'showAllOmegaStats' => false);
 
   if($mode == 'coot')
     makeCootClusteredChart($pdbfile, $outFile, $clash, $rama, $rota, $cbdev, $pperp);
   else
   {
     $resout = null;
-    writeMulticritChart($pdbfile, "/dev/null", $outFile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $chiral_summary, $undowser, $cablam, $omega);
+    writeMulticritChart($pdbfile, "/dev/null", $outFile, $resout, $clash, $rama, $rota, $cbdev, $pperp, $suites, $bbonds, $bangles, $chiral_summary, $undowser, $cablam, $omega, $summaries, $curation, $outliersOnly=false, $doHtmlTable=true, $cleanupAltloc=true);
   }
   
   mpDestroySession();
