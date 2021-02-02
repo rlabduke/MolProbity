@@ -79,7 +79,7 @@ function summaryAnalysis($modelID)
         runCbetaDev($pdbfile, "$rawDir/$model[prefix]cbdev.data");
         $cbdev = loadCbetaDev("$rawDir/$model[prefix]cbdev.data");
         $badCbeta = findCbetaOutliers($cbdev);
-        $cbStats = calcCbetaStats($cbdev);
+        //$cbStats = calcCbetaStats($cbdev);
         $out .= ":" . count($badCbeta) . ":" . count($cbdev);
         //$out .= ":$cbStats[max]:$cbStats[median]:".round($cbStats['mean'], 3);
     }
