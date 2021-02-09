@@ -87,10 +87,13 @@ function summaryAnalysis($modelID)
     }
     if($optRota)
     {
+        //This should also switch to summaries
         runRotamer($pdbfile, "$rawDir/$model[prefix]rota.data");
         $rota = loadRotamer("$rawDir/$model[prefix]rota.data");
         $badRota = findRotaOutliers($rota);
-        $out .= ":" . count($badRota) . ":" . count($rota);
+        $rotaFav = 0;
+        foreach($rota as $r) { if($r['eval'] == "Favored") $rotaFav++; }
+        $out .= ":" . count($badRota) . ":" . $rotaFav . ":" . count($rota);
     }
     if($optRama)
     {
@@ -315,7 +318,7 @@ if($optVerbose)
     if($optStats)   echo ":chains:residues:nucacids:resolution:rvalue:rfree";
     if($optClash)   echo ":clashscore:clashscoreB<40:minresol:maxresol:n_samples:pct_rank:pct_rank40";
     if($optCbeta)   echo ":cbeta>0.25:numCbeta";//:maxCbeta:medianCbeta:meanCbeta"; removed by jjh
-    if($optRota)    echo ":rota<1%:numRota";
+    if($optRota)    echo ":rotaOutlier:rotaFavored:numRota";
     if($optRama)    echo ":ramaOutlier:ramaAllowed:ramaFavored:numRama";
     if($optGeom)    echo ":numbadbonds:numbonds:pct_badbonds:pct_resbadbonds:numbadangles:numangles:pct_badangles:pct_resbadangles";
     if($optClash && $optRota && $optRama) echo ":MolProbityScore:Mol_pct_rank";
