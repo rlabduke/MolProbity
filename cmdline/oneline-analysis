@@ -36,6 +36,40 @@ OUTPUTS / RESULTS:
 // 6. Unlimited memory for processing large files:
     ini_set('memory_limit', -1);
 
+#{{{ oneSession - setup, execution, and cleanup for one validation
+############################################################################
+/**
+* Uses one session per file processed to avoid overflowing space requirements.
+*/
+function oneSession($inpath)
+{
+    mpStartSession(true); // create a new session
+    // Need to ignore segIDs for stupid Top500 with seg new_ for all H
+    $id = addModelOrEnsemble(
+            $inpath,
+            basename($inpath),
+            false,
+            true,
+            true,
+            false);
+    if(isset($_SESSION['ensembles'][$id]))
+    {
+        foreach($_SESSION['ensembles'][$id]['models'] as $modelID)
+        {
+            echo basename($_SESSION['models'][$modelID]['pdb']);
+            echo summaryAnalysis($modelID);
+        }
+    }
+    else
+    {
+        echo basename($inpath);
+        echo summaryAnalysis($id);
+    }
+    // Clean up and go home
+    mpDestroySession();
+}
+#}}}########################################################################
+
 #{{{ summaryAnalysis - run all analysis for one file
 ############################################################################
 /**
@@ -305,8 +339,8 @@ if($optMode == 'filter')
     die(); // remaining code is for "batch" mode
 }
 
-if(!isset($inDir))       die($helptext."No input directory specified.\n");
-elseif(!is_dir($inDir))  die($helptext."Input directory '$inDir' does not exist.\n");
+if(!isset($inDir))       die($helptext."No input file or directory specified.\n");
+elseif(!is_dir($inDir) && !is_file($inDir))  die($helptext."Input file or directory '$inDir' does not exist.\n");
 
 #{{{ column headers
 if($optVerbose)
@@ -328,34 +362,25 @@ if($optVerbose)
 }
 #}}}
 
-foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb") or endsWith($inFile, ".ent"))
+if(is_file($inDir))
 {
-    mpStartSession(true); // create a new session
-    $inpath = $inDir.'/'.$inFile;
-    // Need to ignore segIDs for stupid Top500 with seg new_ for all H
-    $id = addModelOrEnsemble(
-            $inpath,
-            basename($inpath),
-            false,
-            true,
-            true,
-            false);
-    if(isset($_SESSION['ensembles'][$id]))
+    if(endsWith($inDir, ".pdb") or endsWith($inDir, ".ent"))
     {
-        foreach($_SESSION['ensembles'][$id]['models'] as $modelID)
-        {
-            echo basename($_SESSION['models'][$modelID]['pdb']);
-            echo summaryAnalysis($modelID);
-        }
+        $inpath = $inDir;
+        oneSession($inpath);
     }
     else
     {
-        echo basename($inFile);
-        echo summaryAnalysis($id);
+        die($helptext."File is not a supported format. Supported structure file types are .pdb and .ent\n");
     }
-    // Clean up and go home
-    mpDestroySession();
 }
+
+elseif(is_dir($inDir))
+    foreach(listDir($inDir) as $inFile) if(endsWith($inFile, ".pdb") or endsWith($inFile, ".ent"))
+    {
+        $inpath = $inDir.'/'.$inFile;
+        oneSession($inpath);
+    }
 
 ############################################################################
 // Clean up and go home
