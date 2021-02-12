@@ -1165,31 +1165,17 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             $entry .= "<td>Bad angles:</td><td bgcolor='$bg'>$outCount / $total</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: &lt;0.1%</td></tr>\n";
         }
     }// end of protein-specific stats
-    if(is_array($omega))
+    if(is_array($omega) && is_array($summaries))
     {
-        $totalres = 0;
-        $prototal = 0;
-        $nonprototal = 0;
-        $cisprocount = 0;
-        $cisnonprocount = 0;
-        $twistcount = 0;
-        foreach($omega as $cnit => $item){
-            //$totalres += 1;
-            if($item['type'] == 'Pro'){
-                $prototal += 1;
-                if($item['conf'] == 'Cis') $cisprocount += 1;
-                elseif($item['conf'] == 'Twisted') $twistcount += 1;
-            }
-            elseif($item['type'] == 'non-Pro'){
-                $nonprototal += 1;
-                if($item['conf'] == 'Cis') $cisnonprocount += 1;
-                elseif($item['conf'] == 'Twisted') $twistcount += 1;
-            }
-        }
-        $totalres = $prototal + $nonprototal;
-        $cispropct = sprintf("%.2f", 100.0 * $cisprocount / $prototal);
-        $cisnonpropct = sprintf("%.2f", 100.0 * $cisnonprocount / $nonprototal);
-        $twistpct = sprintf("%.2f", 100.0 * $twistcount / $totalres);
+        $totalres =       $summaries['omega']['totalres'];
+        $prototal =       $summaries['omega']['prototal'];
+        $nonprototal =    $summaries['omega']['nonprototal'];
+        $cisprocount =    $summaries['omega']['cisprocount'];
+        $cisnonprocount = $summaries['omega']['cisnonprocount'];
+        $twistcount =     $summaries['omega']['twistcount'];
+        $cispropct =      $summaries['omega']['cispropct'];
+        $cisnonpropct =   $summaries['omega']['cisnonpropct'];
+        $twistpct =       $summaries['omega']['twistpct'];
 
         //stoplights:
         //cis pro yellow is 5 to 10%

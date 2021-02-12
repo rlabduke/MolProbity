@@ -210,6 +210,7 @@ function runAnalysis($modelID, $opts)
         //$outfile = "$rawDir/$model[prefix]omega-clashlist.txt";
         runOmegalyze($infile, $outfile);
         $omega = loadOmegalyze($outfile);
+        $summaries['omega'] = loadOmegaSummary($omega);
         echo "Omegalyze ran for ".(time() - $startTime)." seconds\n";
     }//}}}
 
@@ -1469,6 +1470,55 @@ function findOmegaOutliers($omega)
     return $worst;
 }
 #}}}########################################################################
+
+#{{{ loadOmegaSummary - percentage calculations for omegalyze stats
+#}}}########################################################################
+/**
+*Accepts the $omega array from loadOmegalyze
+*Returns array of omegalyze statistics
+*replace this with SUMMARY lines parsing if/when omegalyze becomes alt-sensitive
+**/
+function loadOmegaSummary($omega)
+{
+    $totalres = 0;
+    $prototal = 0;
+    $nonprototal = 0;
+    $cisprocount = 0;
+    $cisnonprocount = 0;
+    $twistcount = 0;
+    foreach($omega as $cnit => $item){
+        //$totalres += 1;
+        if($item['type'] == 'Pro'){
+            $prototal += 1;
+            if($item['conf'] == 'Cis') $cisprocount += 1;
+            elseif($item['conf'] == 'Twisted') $twistcount += 1;
+        }
+        elseif($item['type'] == 'non-Pro'){
+            $nonprototal += 1;
+            if($item['conf'] == 'Cis') $cisnonprocount += 1;
+            elseif($item['conf'] == 'Twisted') $twistcount += 1;
+        }
+    }
+    $totalres = $prototal + $nonprototal;
+    if($prototal==0) $cispropct = 0;
+    else $cispropct = sprintf("%.2f", 100.0 * $cisprocount / $prototal);
+    if($nonprototal==0) $cisnonpropct = 0;
+    else $cisnonpropct = sprintf("%.2f", 100.0 * $cisnonprocount / $nonprototal);
+    if($totalres==0) $twistpct = 0;
+    else $twistpct = sprintf("%.2f", 100.0 * $twistcount / $totalres);
+
+    $ret = array(
+              'totalres' => $totalres,
+              'prototal' => $prototal,
+              'nonprototal' => $nonprototal,
+              'cisprocount' => $cisprocount,
+              'cisnonprocount'=> $cisnonprocount,
+              'twistcount'=> $twistcount,
+              'cispropct' => $cispropct,
+              'cisnonpropct' => $cisnonpropct,
+              'twistpct' => $twistpct);
+    return $ret;
+}
 
 #{{{ runSuitenameReport - finds conformer and suiteness for every RNA suite
 ############################################################################
