@@ -77,7 +77,7 @@ function oneSession($inpath)
 */
 function summaryAnalysis($modelID)
 {
-    global $optStats, $optClash, $optCbeta, $optRota, $optRama, $optGeom, $optPuck, $optSuite;
+    global $optStats, $optClash, $optCbeta, $optRota, $optRama, $optOmega, $optGeom, $optPuck, $optSuite;
     $out = "";
 
     $model =& $_SESSION['models'][$modelID];
@@ -142,14 +142,24 @@ function summaryAnalysis($modelID)
         #exit();
         $out .= ":" . ($summaries['rama']['outlier']+0) . ":" . ($summaries['rama']['allowed']+0) . ":" . ($summaries['rama']['favored']+0) . ":" . ($summaries['rama']['residues']+0);
     }
+    if($optOmega)
+    {
+        runOmegalyze($pdbfile, "$rawDir/$model[prefix]omega.data");
+        $omega = loadOmegalyze("$rawDir/$model[prefix]omega.data");
+        $summaries['omega'] = loadOmegaSummary($omega);
+        $out .= ":" . ($summaries['omega']['cisprocount']+0) . ":" . ($summaries['omega']['prototal']+0);
+        $out .= ":" . ($summaries['omega']['cisnonprocount']+0) . ":" . ($summaries['omega']['nonprototal']+0);
+        $out .= ":" . ($summaries['omega']['twistcount']+0) . ":" . ($summaries['omega']['totalres']+0);
+    }
     if($optGeom)
     {
-      //echo "running val report\n";
+      // run validation, load results
       runValidationReport($pdbfile, "$rawDir/$model[prefix]geom.data", $model['stats']['use_cdl']);
-      //echo "finished running val report\n";
       $bonds = array_merge(loadValidationBondReport("$rawDir/$model[prefix]geom.data", "protein"), loadValidationBondReport("$rawDir/$model[prefix]geom.data", "rna"));
       $angles = array_merge(loadValidationAngleReport("$rawDir/$model[prefix]geom.data", "protein"), loadValidationAngleReport("$rawDir/$model[prefix]geom.data", "rna"));
-      //echo "finished loading val report\n";
+      makeChiralOutlierTable("$rawDir/$model[prefix]geom.data","$rawDir/$model[prefix]chirals.txt");
+      $chiral_summary = load_chiral_summary("$rawDir/$model[prefix]chirals.txt");
+      // BONDS
       $total = 0; // total residues
       $totalBonds = 0;
       $outCount = 0; // residues with at least one bond outlier
@@ -170,6 +180,7 @@ function summaryAnalysis($modelID)
       }
       else            $out .= ":-1:-1:-1:-1";
       //echo "outliers:$outCount total:$total";
+      // ANGLES
       $total = 0; // total residues
       $totalAng = 0;
       $outCount = 0; // residues with at least one angle outlier
@@ -190,6 +201,13 @@ function summaryAnalysis($modelID)
       }
       else            $out .= ":-1:-1:-1:-1";
       //echo "\noutliers:$outCount total:$total\n";
+      // CHIRALS
+      $total_cv_outliers = $chiral_summary['total_outliers'];
+      $chiral_outliers = $chiral_summary['chiral_outliers'];
+      $tetra_outliers = $chiral_summary['tetra_outliers'];
+      $pseudo_outliers = $chiral_summary['pseudo_outliers'];
+      //chiralSwaps:tetraOutliers:pseudochiralErrors
+      $out .= ":".($chiral_outliers+0).":".($tetra_outliers+0).":".($pseudo_outliers+0);
     }
     if($optClash && $optRota && $optRama)
     {
@@ -274,6 +292,7 @@ $optCbeta   = true;
 $optRota    = true;
 $optRama    = true;
 $optGeom    = true;
+$optOmega   = true;
 $optPuck    = false;
 $optSuite   = false;
 
@@ -288,6 +307,7 @@ if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
     elseif($arg == '-norota')   $optRota = false;
     elseif($arg == '-norama')   $optRama = false;
     elseif($arg == '-nogeom')   $optGeom = false;
+    elseif($arg == '-noomega')  $optOmega = false;
     elseif($arg == '-dopucker') $optPuck = true;
     elseif($arg == '-dosuite')  $optSuite = true;
     elseif($arg == '-noprotein')
@@ -295,6 +315,7 @@ if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
       $optCbeta = false;
       $optRota = false;
       $optRama = false;
+      $optOmega = false;
     }
     elseif($arg == '-dorna')
     {
@@ -354,7 +375,9 @@ if($optVerbose)
     if($optCbeta)   echo ":cbeta>0.25:numCbeta";//:maxCbeta:medianCbeta:meanCbeta"; removed by jjh
     if($optRota)    echo ":rotaOutlier:rotaFavored:numRota";
     if($optRama)    echo ":ramaOutlier:ramaAllowed:ramaFavored:numRama";
-    if($optGeom)    echo ":numbadbonds:numbonds:pct_badbonds:pct_resbadbonds:numbadangles:numangles:pct_badangles:pct_resbadangles";
+    if($optOmega)   echo ":cisPro:totalPro:cisNonPro:totalNonPro:twistedPeptides:totalPeptides";
+    if($optGeom)    echo ":numbadbonds:numbonds:pct_badbonds:pct_resbadbonds:numbadangles:numangles:pct_badangles:pct_resbadangles"; #bonds/angles
+    if($optGeom)    echo ":chiralSwaps:tetraOutliers:pseudochiralErrors"; #chirals
     if($optClash && $optRota && $optRama) echo ":MolProbityScore:Mol_pct_rank";
     if($optPuck)    echo ":numPperpOutliers:numPperp";
     if($optSuite)   echo ":numSuiteOutliers:numSuites";
