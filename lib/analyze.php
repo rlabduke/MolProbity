@@ -1472,7 +1472,7 @@ function findOmegaOutliers($omega)
 #}}}########################################################################
 
 #{{{ loadOmegaSummary - percentage calculations for omegalyze stats
-#}}}########################################################################
+############################################################################
 /**
 *Accepts the $omega array from loadOmegalyze
 *Returns array of omegalyze statistics
@@ -1519,6 +1519,7 @@ function loadOmegaSummary($omega)
               'twistpct' => $twistpct);
     return $ret;
 }
+#}}}########################################################################
 
 #{{{ runSuitenameReport - finds conformer and suiteness for every RNA suite
 ############################################################################
