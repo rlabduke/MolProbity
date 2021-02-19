@@ -77,7 +77,7 @@ function oneSession($inpath)
 */
 function summaryAnalysis($modelID)
 {
-    global $optStats, $optClash, $optCbeta, $optRota, $optRama, $optOmega, $optGeom, $optPuck, $optSuite;
+    global $optStats, $optClash, $optCbeta, $optRota, $optRama, $optOmega, $optCablam, $optGeom, $optUndowser, $optPuck, $optSuite;
     $out = "";
 
     $model =& $_SESSION['models'][$modelID];
@@ -209,6 +209,29 @@ function summaryAnalysis($modelID)
       //chiralSwaps:tetraOutliers:pseudochiralErrors
       $out .= ":".($chiral_outliers+0).":".($tetra_outliers+0).":".($pseudo_outliers+0);
     }
+    if($optCablam)
+    {
+      runCablam($pdbfile, "$rawDir/$model[prefix]cablam.data");
+      //$cablam = loadCablam("$rawDir/$model[prefix]cablam.data");
+      $summaries['cablam'] = loadCablamSummary("$rawDir/$model[prefix]cablam.data");
+      //:cablamOutlierPct:caGeomOutlierPct
+      //$cablamOut = $summaries['cablam']['cablam_outlier_count'];
+      //$caGeomOut = $summaries['cablam']['cageom_outlier_count'];
+      $cablamOutPct = $summaries['cablam']['cablam_outlier_percent'];
+      $caGeomPct = $summaries['cablam']['cageom_outlier_percent'];
+      $out .= sprintf(':%.2f', $cablamOutPct);
+      $out .= sprintf(':%.2f', $caGeomPct);
+    }
+    if($optUndowser)
+    {
+      runUnDowser($pdbfile, "$rawDir/$model[prefix]undowser.html");
+      $undowser = loadUndowserSummary("$rawDir/$model[prefix]undowser.html");
+      //":waterClashes:totalWaters"
+      //'water_clashes' => $clashes,
+      //'water_count' => $waters,
+      //'water_clash_pct' => $clashpct);
+      $out .= ":".($undowser['water_clashes']+0).":".($undowser['water_count']+0);
+    }
     if($optClash && $optRota && $optRama)
     {
       $axr = $pdbstats['resolution'];                                     // Actual Xtalographic Resolution
@@ -288,11 +311,13 @@ $optVerbose = true;
 $optMode    = 'batch';
 $optStats   = true;
 $optClash   = true;
+$optUndowser = true;
 $optCbeta   = true;
 $optRota    = true;
 $optRama    = true;
 $optGeom    = true;
 $optOmega   = true;
+$optCablam  = true;
 $optPuck    = false;
 $optSuite   = false;
 
@@ -303,11 +328,13 @@ if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
     elseif($arg == '-filter')   $optMode = 'filter'; //function not clear
     elseif($arg == '-nostats')  $optStats = false;
     elseif($arg == '-noclash')  $optClash = false;
+    elseif($arg == '-noundowser') $optUndowser = false;
     elseif($arg == '-nocbeta')  $optCbeta = false;
     elseif($arg == '-norota')   $optRota = false;
     elseif($arg == '-norama')   $optRama = false;
     elseif($arg == '-nogeom')   $optGeom = false;
     elseif($arg == '-noomega')  $optOmega = false;
+    elseif($arg == '-nocablam') $optCablam = false;
     elseif($arg == '-dopucker') $optPuck = true;
     elseif($arg == '-dosuite')  $optSuite = true;
     elseif($arg == '-noprotein')
@@ -316,6 +343,7 @@ if(is_array($_SERVER['argv'])) foreach(array_slice($_SERVER['argv'], 1) as $arg)
       $optRota = false;
       $optRama = false;
       $optOmega = false;
+      $optCablam = false;
     }
     elseif($arg == '-dorna')
     {
@@ -378,6 +406,8 @@ if($optVerbose)
     if($optOmega)   echo ":cisPro:totalPro:cisNonPro:totalNonPro:twistedPeptides:totalPeptides";
     if($optGeom)    echo ":numbadbonds:numbonds:pct_badbonds:pct_resbadbonds:numbadangles:numangles:pct_badangles:pct_resbadangles"; #bonds/angles
     if($optGeom)    echo ":chiralSwaps:tetraOutliers:pseudochiralErrors"; #chirals
+    if($optCablam)  echo ":cablamOutlierPct:caGeomOutlierPct";
+    if($optUndowser) echo ":waterClashes:totalWaters";
     if($optClash && $optRota && $optRama) echo ":MolProbityScore:Mol_pct_rank";
     if($optPuck)    echo ":numPperpOutliers:numPperp";
     if($optSuite)   echo ":numSuiteOutliers:numSuites";
