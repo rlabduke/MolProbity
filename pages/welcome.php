@@ -113,7 +113,7 @@ Choose validations appropriate to a structure.</p>
     echo("<h3>What's new in 4.5.2</h3><ul>
       <li><b>MolProbity score calculation has changed slightly</b> for structures with alternate conformations.
       The Ramachandran component now uses only residues from the 'A' conformer of multiple conformers are present.
-      This matches the values reported in the Summary Statistics table, which are also for the 'A' conformer.</li>
+      This matches the Ramachandran values reported in the Summary Statistics table, which are also for the 'A' conformer.</li>
       <li>Further commandline tools have been updated.  No effect on the website, but those with home builds will find oneline-analysis to be fully up to date now.</li>
   </ul>
    <h3>What's new in 4.5.1</h3><ul>
