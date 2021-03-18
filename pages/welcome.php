@@ -110,7 +110,13 @@ Choose validations appropriate to a structure.</p>
 //      <li>Allows use of both electron cloud and nuclear x-H bond-lengths. Read more about this change <a href='".makeEventURL("onGoto", "helper_hydrogens.php")."'>here</a>.</li>
 //      <li>Full support for 2-character CHAINIDs added. 4-character SEGIDs also supported in place of CHAINIDs.</li>
 //      </ul>
-    echo("<h3>What's new in 4.5.1</h3><ul>
+    echo("<h3>What's new in 4.5.2</h3><ul>
+      <li><b>MolProbity score calculation has changed slightly</b> for structures with alternate conformations.
+      The Ramachandran component now uses only residues from the 'A' conformer of multiple conformers are present.
+      This matches the values reported in the Summary Statistics table, which are also for the 'A' conformer.</li>
+      <li>Further commandline tools have been updated.  No effect on the website, but those with home builds will find oneline-analysis to be fully up to date now.</li>
+  </ul>
+   <h3>What's new in 4.5.1</h3><ul>
       <li>New validation: Ramachandran Z-score assesses whether total Rama distribution is realistic.</li>
       <li>Improved bullseye kinemage for CBdev distribution.</li>
       <li>Updated cmdline tools for multichart and multikin, added one for cbetadev_kinemage.</li>
