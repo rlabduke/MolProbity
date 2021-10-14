@@ -13,11 +13,26 @@ This checkout will get the latest version of the master branch of probe developm
 In MolProbity
 
 phenix.probe is invoked directly by MolProbity code in the following locations.
-1. In bin/flipkin, it is called to generate dots for the flipkin visualization
+1. In bin/flipkin, it is called to generate dots for the flipkin visualization.  -nuclear is optional depending on if nuclear H bond lengths are used.  ${prbSC} is "H" or "N,Q" depending on the residue name.
+    phenix.probe -dens12 -lens -nogroup -3 -q -wat -het -both -nuclear "${prbSC} sc alta ogt1 not (beta,atom1HG_,atom2HG_,atom3HG_)" "not water alta ogt1 | water alta blt40 ogt66" $redpdb >> $kintmp
+
 2. In lib/visualize, it is called to generate dots for the multicrit kinemage
+    phenix.probe $options -sepworse -4H -quiet -noticks -nogroup -dotmaster -mc -het -self 'ogt$ocutval' $infile >> $outfile
+    phenix.probe $options -sepworse -DIVlow$clashLimit -4H -quiet -noticks -nogroup -dotmaster -mc -het -self 'ogt$ocutval' $infile >> $outfile
+
 3. In lib/visualize_nmr, it is called to generate dots for a multicrit kinemage (it is not clear that this call is actually used)
+    phenix.probe -mc -NOGroup -NOVDWOUT -quiet -noticks -self 'All' $pdb > $kinName
+    phenix.probe -mc -NOGroup -NOVDWOUT -quiet -noticks -self 'All' $pdb >> $kinName
+
 4. In lib/analyze_nmr, it is called to generate a oneline output that is further parsed by MolProbity code (it is not clear that this call is actually used)
+    phenix.probe -mc -self 'ALL' -ONELINE $pdb 
+
 5. In lib/sswing, it is called to generate dots for a kinemage.  sswing appears in lib, jobs, and bin, but appears to be totally deprecated.  It seems that it assessed and altered sidechain rotamers in some way.
+    phenix.probe -quiet -noticks -nogroup -self 'alta' $pdb1 >> $outfile
+    phenix.probe -quiet -noticks -nogroup -self 'alta' $pdb2 >> $outfile
+
+6. In cmdline/undowser.py, phenix.probe is called to analyze water contacts.
+    phenix.probe -u -q -mc -het -con -once -wat2wat -stdbonds -onlybadout 'water' 'all' %s" % pdbfile
 
 A Non-Phenix version of probe is invoked in two locations in deprecated code:
 1. In bin/clashlist and bin/clashlist.sh, probe generated results used for clash evaluation
@@ -25,7 +40,7 @@ A Non-Phenix version of probe is invoked in two locations in deprecated code:
 
 A Non-Phenix version of probe is also invoked in jobs/interface-vis.php
 This is the interface visualization tool available in MolProbity.
-The function still works, so what Probe is being used?
+The function still works, and appears to still use the standalone "probe" as opposed to the phenix.probe.  It also seems to provide access to a huge range of probe flags, including: "-4H", "-3", "-2", "-1", "-gap", -atom", "-colorbase", "-outcolor gray", "-noclashout", "-nohbout", "-novdwout", "-mc", "-nohets", "-nowaters", "-wat2wat", "-drop", "-elem", "-both", "-once", "-self", "-out", "alta", "blt40", "ogt33". It also interacts with chain selection and selection of molecule type (protein,rna,dna,het,water) in various combinations.
 
 ---------------
 In Phenix
