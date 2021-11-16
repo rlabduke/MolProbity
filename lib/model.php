@@ -426,7 +426,7 @@ function preparePDB($inpath, $outpath, $isCNS = false, $ignoreSegID = false)
 
     // Convert linefeeds to UNIX standard (\n):
     setProgress($tasks, 'scrublines'); // updates the progress display if running as a background job
-    exec("scrublines < $inpath > $tmp1");
+    exec("awk '{sub(/\r$/,\"\")}1' $inpath > $tmp1");
 
     // Convert an input .cif file to .pdb if necessary
     if(preg_match('/^(.+)\.(cif)$/i', $inpath, $m))
@@ -901,7 +901,8 @@ function reduceNoBuild($inpath, $outpath, $blength='ecloud')
     if ($blength == 'ecloud')
     {
       //exec("reduce -quiet -oh -his -flip -norotmet -pen9999 -keep -allalt $inpath > $outpath");
-      exec("phenix.reduce -quiet -nobuild9999 $inpath > $outpath");
+      //exec("phenix.reduce -quiet -nobuild9999 $inpath > $outpath");
+      exec("mmtbx.reduce2 $inpath approach=add preference_magnitude=9999 output.description_file_name=$outpath");
     }
     elseif ($blength == 'nuclear')
     {
