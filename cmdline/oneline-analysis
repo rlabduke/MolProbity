@@ -240,7 +240,7 @@ function summaryAnalysis($modelID)
         $mer = getEffectiveResolution($clash, $rota, $rama, $summaries);    // MolProbity Effective Resolution
         $mer_pct = getEffectiveResolutionPercentile($mer, $axr);
         $out .= sprintf(':%.3f', $mer);
-        $out .= sprintf(':%s', $mer_pct[pct_rank]);
+        $out .= sprintf(':%s', $mer_pct['pct_rank']);
       } else {
         $out .= '::';
       }
