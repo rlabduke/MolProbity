@@ -89,4 +89,3 @@ define("MP_BIN_PATH", "/usr/local/php5/bin:/opt/j2/bin:/usr/java/jdk/bin");
 //define("MP_BANNER", "The system will go down for maintenance in ".(int)((strtotime("1200")-time())/60)." minutes.  Please download your data and log off before that time.");
 
 ?>
-
