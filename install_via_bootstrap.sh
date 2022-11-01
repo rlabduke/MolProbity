@@ -30,7 +30,7 @@ cd modules
 if [ ! -d chem_data ]; then mkdir chem_data; fi
 
 cd chem_data
-svn --quiet --non-interactive --trust-server-cert co https://svn.code.sf.net/p/geostd/code/trunk geostd
+svn --quiet --non-interactive --trust-server-cert co https://github.com/phenix-project/geostd/trunk geostd # https://svn.code.sf.net/p/geostd/code/trunk
 svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/mon_lib.git/trunk mon_lib
 svn --quiet --non-interactive --trust-server-cert export https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_rotamer_pct_contour_grids rotarama_data
 svn --quiet --non-interactive --trust-server-cert --force export https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_ramachandran_pct_contour_grids rotarama_data
