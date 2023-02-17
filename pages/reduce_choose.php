@@ -121,6 +121,7 @@ function display($context)
         echo "</table>\n";
         echo "<p><input type='submit' name='cmd' value='Regenerate H, applying only selected flips &gt;'>\n";
         echo "<br><small>(If you didn't make any changes, we won't recalculate.)</small>\n";
+        echo "<div class='alert'><small>If you do make changes, some geometry errors will result in the flipped residues. Re-refine before depositing!</small></div>\n";
     }
 
     echo "</form>\n";
@@ -206,7 +207,7 @@ function onRerunReduce()
     if(file_exists($nqkin) && file_exists($hiskin))
     {
         $entry .= "<p>These Flipkin kinemages illustrate both flip states for all Asn/Gln/His.\n";
-        $entry .= "Residues that Reduce <i>suggested</i> flipping are marked with stars (*) in the Views menu.\n";
+        $entry .= "Residues that Reduce suggests flipping are marked with stars (*) in the Views menu.\n";
         $entry .= "<ul>\n";
         $entry .= "<li>" . linkKinemage("$model[prefix]flipnq.kin") . "</li>\n";
         $entry .= "<li>" . linkKinemage("$model[prefix]fliphis.kin") . "</li>\n";
