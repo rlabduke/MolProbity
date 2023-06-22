@@ -750,10 +750,10 @@ function toggleUploadOptions()
 //      <a style=\"color: #66FFFF\" href='http://kinemage.biochem.duke.edu/databases/top8000.php' target='_blank'>Top8000</a> dataset of high quality PDB files.
 //        <br><br>Please don't hesitate to report any <a style=\"color: #66FFFF\" href='".makeEventURL("onGoto", "feedback_setup.php")."'>bugs</a> you may encounter.
 //        <br><br>If for some reason you need to use MolProbity4 version 4.02, which is now a retired legacy version, please go to <a style=\"color: #66FFFF\" href='http://rutile.biochem.duke.edu/' target='_blank'>http://rutile.biochem.duke.edu</a>.</strong></div>");
-    echo("<div class=feature><b>Molprobity sites:</b>
-      <br><a href='http://molprobity.biochem.duke.edu/' target='_blank'>Duke (US)</a> | <a href='http://molprobity.manchester.ac.uk/' target='_blank'>Manchester (UK)</a>
-      <br>
-      <br><b>Usage Guidelines:</b>
+    //echo("<div class=feature><b>Molprobity sites:</b>
+    //  <br><a href='http://molprobity.biochem.duke.edu/' target='_blank'>Duke (US)</a> | <a href='http://molprobity.manchester.ac.uk/' target='_blank'>Manchester (UK)</a>
+    //  <br>
+    echo("<div class=feature><b>Usage Guidelines:</b>
       <br>These web services are provided for analysis of individual structures.
       <br>For batch runs, please <a href='".makeEventURL("onGoto", "get_molprobity.php")."'>download and install</a> your own copy of MolProbity.</div>");
       //("<div class=feature><b>Molprobity sites:</b>
