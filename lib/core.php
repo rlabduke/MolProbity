@@ -467,9 +467,9 @@ function linkAnyFile($fname, $name = null, $image = null)
     // Choose the right action(s) -- see pages/file_browser.php for origin
     if(endsWith($fname, ".kin") || endsWith($fname, ".kin.gz"))
         $links = array(
-            array('url' => "viewking.php?$_SESSION[sessTag]&url=$link", 'label' => "View in KiNG", 'blank' => true),
+            //array('url' => "viewking.php?$_SESSION[sessTag]&url=$link", 'label' => "View in KiNG", 'blank' => true), //KiNG viewer no longer available online due to web Java reasons
             array('url' => "viewngl.php?$_SESSION[sessTag]&url=$link", 'label' => "View in NGL", 'blank' => true),
-            array('url' => "$link", 'label' => "Download", 'blank' => false),
+            array('url' => "$link", 'label' => "Download for KiNG", 'blank' => false),
         );
     elseif(endsWith($fname, "multi.table"))
         $links = array(array('url' => "viewtable.php?$_SESSION[sessTag]&file=$path", 'label' => "View", 'blank' => true));
