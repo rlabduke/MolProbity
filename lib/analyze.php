@@ -238,10 +238,11 @@ function runAnalysis($modelID, $opts)
     if($opts['chartSuite'])
     {
         setProgress($tasks, 'suitename'); // updates the progress display if running as a background job
-        $midfile = "$chartDir/$model[prefix]suitedata.txt";
+        //$midfile = "$chartDir/$model[prefix]suitedata.txt"; //obsoleted by direct reading of structure files by suitename
         $outfile = "$chartDir/$model[prefix]suitename.txt";
-        $mpgeo_return_code = runSuitenameReport($infile, $midfile, $outfile);
-        mpgeo_error_catch($mpgeo_return_code);
+        //$mpgeo_return_code = runSuitenameReport($infile, $midfile, $outfile);
+        runSuitenameReport($infile, $outfile);
+        //mpgeo_error_catch($mpgeo_return_code);
         $suites = loadSuitenameReport($outfile);
         $tasks['suitename'] .= " - <a href='viewtext.php?$_SESSION[sessTag]&file=$outfile&mode=plain' target='_blank'>preview</a>\n";
         setProgress($tasks, 'suitename'); // so the preview link is visible
@@ -1523,14 +1524,16 @@ function loadOmegaSummary($omega)
 
 #{{{ runSuitenameReport - finds conformer and suiteness for every RNA suite
 ############################################################################
-function runSuitenameReport($infile, $midfile, $outfile)
+function runSuitenameReport($infile, $outfile)
 {
     //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle rnabb $infile | suitename -report > $outfile");
     //formerly a single exec with a pipe, this has been broken into two execs to facilitate mp_geo error catching
-    exec("mmtbx.mp_geo rna_backbone=True pdb=$infile > $midfile",$arg_list_filler,$mpgeo_return_code);
-    if($mp_geo_return_code != 0) return $mpgeo_return_code; //skip suitename step if bad input
-    exec("phenix.suitename -report -pointIDfields 7 -altIDfield 6 < $midfile > $outfile");
-    return $mpgeo_return_code;
+    //exec("mmtbx.mp_geo rna_backbone=True pdb=$infile > $midfile",$arg_list_filler,$mpgeo_return_code);
+    //if($mp_geo_return_code != 0) return $mpgeo_return_code; //skip suitename step if bad input
+    //exec("phenix.suitename -report -pointIDfields 7 -altIDfield 6 < $midfile > $outfile");
+    //Now a straight call to suitename, which can read structure files directly
+    exec("molprobity.suitename -report $infile > $outfile");
+    //return $mpgeo_return_code;
 }
 #}}}########################################################################
 
@@ -1644,7 +1647,8 @@ function runSuitenameString($infile, $outfile)
     // so they display OK in the <PRE> region of the HTML page.
     // 60 was selected because it makes counting to specific positions easier (20 suites/line)
     //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle rnabb $infile | suitename -string -oneline | fold -w 60 > $outfile");
-    exec("mmtbx.mp_geo rna_backbone=True pdb=$infile | phenix.suitename -string -oneline -pointIDfields 7 -altIDfield 6 | fold -w 60 > $outfile");
+    //exec("mmtbx.mp_geo rna_backbone=True pdb=$infile | phenix.suitename -string -oneline -pointIDfields 7 -altIDfield 6 | fold -w 60 > $outfile");
+    exec("molprobity.suitename -string -oneline $infile > $outfile");
 
 }
 #}}}########################################################################
