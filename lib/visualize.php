@@ -71,7 +71,7 @@ function makeChiralOutlierTable($geomfile, $outfile)
 function makeSuitenameKin($infile, $outfile)
 {
     //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle rnabb $infile | suitename -kinemage > $outfile");
-    exec("mmtbx.mp_geo rna_backbone=True pdb=$infile | phenix.suitename -kinemage -pointIDfields 7 -altIDfield 6 > $outfile");
+    exec("mmtbx.mp_geo rna_backbone=True pdb=$infile | phenix.suitename_old -kinemage -pointIDfields 7 -altIDfield 6 > $outfile");
 }
 #}}}########################################################################
 

@@ -1532,7 +1532,7 @@ function runSuitenameReport($infile, $outfile)
     //if($mp_geo_return_code != 0) return $mpgeo_return_code; //skip suitename step if bad input
     //exec("phenix.suitename -report -pointIDfields 7 -altIDfield 6 < $midfile > $outfile");
     //Now a straight call to suitename, which can read structure files directly
-    exec("molprobity.suitename -report $infile > $outfile");
+    exec("molprobity.suitename report=True $infile > $outfile");
     //return $mpgeo_return_code;
 }
 #}}}########################################################################
@@ -1648,7 +1648,7 @@ function runSuitenameString($infile, $outfile)
     // 60 was selected because it makes counting to specific positions easier (20 suites/line)
     //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle rnabb $infile | suitename -string -oneline | fold -w 60 > $outfile");
     //exec("mmtbx.mp_geo rna_backbone=True pdb=$infile | phenix.suitename -string -oneline -pointIDfields 7 -altIDfield 6 | fold -w 60 > $outfile");
-    exec("molprobity.suitename -string -oneline $infile > $outfile");
+    exec("molprobity.suitename string=True oneline=True $infile > $outfile");
 
 }
 #}}}########################################################################
