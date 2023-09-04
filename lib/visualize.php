@@ -1689,14 +1689,14 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
             elseif($item['bin'] == 'inc ')
                 $res[$cnit]['suites'] = "conformer: $item[conformer]<br><small>$bin</small>";
             else
-                $res[$cnit]['suites'] = "conformer: $item[conformer]<br><small>$bin, suiteness = ".sprintf("%.2f",$item[suiteness])."</small>";
+                $res[$cnit]['suites'] = "conformer: $item[conformer]<br><small>$bin, suiteness = ".sprintf("%.2f",$item['suiteness'])."</small>";
         }
     }//}}}
     if(is_array($bbonds)) {//{{{
         foreach($bbonds as $cnit => $item) {
             if ($item['isOutlier']) {
                 $res[$cnit]['bbonds_val'] = abs($item['sigma']);
-                $res[$cnit]['bbonds'] = "$item[count] OUTLIER(S)<br><small>worst is $item[measure]: ".sprintf("%.1f",$item[sigma])." &sigma;</small>";
+                $res[$cnit]['bbonds'] = "$item[count] OUTLIER(S)<br><small>worst is $item[measure]: ".sprintf("%.1f",$item['sigma'])." &sigma;</small>";
                 $res[$cnit]['bbonds_isbad'] = true;
                 $res[$cnit]['any_isbad'] = true;
                 if($res[$cnit]['bbonds_val'] >=10 ) $res[$cnit]['bbonds_color'] = $cell_color_severe;
@@ -1707,7 +1707,7 @@ function writeMulticritChart($infile, $outfile, $snapfile, $resout, $clash, $ram
         foreach($bangles as $cnit => $item) {
             if ($item['isOutlier']) {
                 $res[$cnit]['bangles_val'] = abs($item['sigma']);
-                $res[$cnit]['bangles'] = "$item[count] OUTLIER(S)<br><small>worst is $item[measure]: ".sprintf("%.1f",$item[sigma])." &sigma;</small>";
+                $res[$cnit]['bangles'] = "$item[count] OUTLIER(S)<br><small>worst is $item[measure]: ".sprintf("%.1f",$item['sigma'])." &sigma;</small>";
                 $res[$cnit]['bangles_isbad'] = true;
                 $res[$cnit]['any_isbad'] = true;
                 if($res[$cnit]['bangles_val'] >=10 ) $res[$cnit]['bangles_color'] = $cell_color_severe;
