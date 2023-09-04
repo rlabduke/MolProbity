@@ -134,6 +134,7 @@ foreach($fileList as $inFile) if(endsWith($inFile, ".pdb"))
       'geom'      => true,
       'cbdev'     => $hasProtein,
       'pperp'     => $hasNucAcid,
+      'suites'    => $hasNucAcid,
       'clashdots' => true,
       'hbdots'    => true,
       'vdwdots'   => $isSmall,
