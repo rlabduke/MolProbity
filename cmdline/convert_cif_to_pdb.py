@@ -1,4 +1,4 @@
-from __future__ import division
+from __future__ import division, print_function
 # LIBTBX_SET_DISPATCHER_NAME phenix.cif_as_pdb
 import os
 import iotbx.pdb
@@ -20,7 +20,7 @@ convert_cif_to_pdb.py input_file_path.cif output_file_path.pdb
   output_name = args[1]
   try:
     assert os.path.exists(file_name)
-    #print "Converting %s to PDB format." %file_name
+    #print("Converting %s to PDB format." %file_name)
     cif_input = iotbx.pdb.mmcif.cif_input(file_name=file_name)
     m = mmtbx.model.manager(model_input=cif_input)
     basename = os.path.splitext(os.path.basename(file_name))[0]
@@ -28,8 +28,8 @@ convert_cif_to_pdb.py input_file_path.cif output_file_path.pdb
     with open(output_name, 'w') as f:
         f.write(pdb_text)
   except Exception, e:
-    print "Error converting %s to PDB format:" %file_name
-    print " ", str(e)
+    print("Error converting %s to PDB format:" %file_name)
+    print(" ", str(e))
 
 if __name__ == '__main__':
   import sys
