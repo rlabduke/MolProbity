@@ -66,9 +66,9 @@ function makeChiralOutlierTable($geomfile, $outfile)
 }
 #}}}########################################################################
 
-#{{{ makeSuitenameKin - creates a high-D plot of suite conformations
+#{{{ makeSuitenameKinHighD - creates a high-D plot of suite conformations
 ############################################################################
-function makeSuitenameKin($infile, $outfile)
+function makeSuitenameKinHighD($infile, $outfile)
 {
     //exec("java -Xmx512m -cp ".MP_BASE_DIR."/lib/dangle.jar dangle.Dangle rnabb $infile | suitename -kinemage > $outfile");
     exec("mmtbx.mp_geo rna_backbone=True pdb=$infile | phenix.suitename_old -kinemage -pointIDfields 7 -altIDfield 6 > $outfile");
@@ -443,6 +443,12 @@ function makeMulticritKin2($infiles, $outfile, $opt, $use_cdl, $viewRes = array(
             makeBadPPerpKin($infile, $outfile);
             #"BadPPerp OK\n";
         }
+        if ($opt['suites'])
+        {
+            #"making Suite markup...\n";
+            makeBadSuiteKin($infile, $outfile);
+            #"Suite markup OK\n":
+        }
         if($opt['Bscale'])
         {
             #"making Bfactor...\n";
@@ -754,6 +760,14 @@ function makeBadPPerpKin($infile, $outfile)
       $opt = "-quiet -segid";
     }
     exec("prekin $opt -append -nogroup -pperptoline -pperpoutliers $infile >> $outfile");
+}
+#}}}########################################################################
+
+#{{{ makeBadSuiteKin - plots RNA suite information on kin
+############################################################################
+function makeBadSuiteKin($infile, $outfile)
+{
+    exec("molprobity.suitename markup=True $infile >> $outfile");
 }
 #}}}########################################################################
 

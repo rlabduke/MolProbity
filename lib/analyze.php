@@ -250,7 +250,10 @@ function runAnalysis($modelID, $opts)
         $outfile = "$chartDir/$model[prefix]suitestring.txt";
         runSuitenameString($infile, $outfile);
 
-        makeSuitenameKin($infile, "$kinDir/$model[prefix]suitename.kin");
+        if($opts['kinSuiteHighD'])
+        {
+            makeSuitenameKinHighD($infile, "$kinDir/$model[prefix]suitename.kin");
+        }
     }//}}}
     //}}} Run nucleic acid geometry programs and offer kins to user
 
@@ -431,6 +434,7 @@ function runAnalysis($modelID, $opts)
             'omega'     =>  $opts['kinOmega'],
             'cablam'    =>  $opts['kinCablamLow'],
             'pperp'     =>  $opts['kinBaseP'],
+            'suites'    =>  $opts['kinSuite'],
             'clashdots' =>  $opts['kinClashes'],
             'hbdots'    =>  $opts['kinHbonds'],
             'vdwdots'   =>  $opts['kinContacts']
