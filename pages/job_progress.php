@@ -83,8 +83,8 @@ function display($context)
     elseif($_SESSION['bgjob']['modelError'])
     {
         $url        = makeEventURL("onGoto", "welcome.php");
-        $pdburlMODEL = "http://deposit.rcsb.org/adit/docs/pdb_atom_format.html#MODEL";
-        $pdburlENDMDL = "http://deposit.rcsb.org/adit/docs/pdb_atom_format.html#ENDMDL";
+        $pdburlMODEL = "https://www.wwpdb.org/documentation/file-format-content/format33/sect9.html#MODEL";
+        $pdburlENDMDL = "https://www.wwpdb.org/documentation/file-format-content/format33/sect9.html#ENDMDL";
         $refresh    = "10; URL=$url";
         echo $this->pageHeader("ERROR: MODEL/ENDMDL card mismatches");//, "none", $refresh);
         echo "<p>It appears that the PDB you provided has a formatting error.\n";
