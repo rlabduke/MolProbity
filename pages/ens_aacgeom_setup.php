@@ -80,7 +80,8 @@ function setAnalyses(doAAC, hasProtein, hasNucAcid, isBig, isLowRes)
     document.forms[0].chartCablamLow.checked    = (hasProtein && isLowRes)
   
     document.forms[0].kinBaseP.checked          = hasNucAcid
-    document.forms[0].kinSuite.checked          = hasNucAcid
+    document.forms[0].kinSuite.checked          = hasNucAcid //This is now kinemage markup
+    document.forms[0].kinSuiteHighD.checked     = false //This is a specialist visualization
     document.forms[0].chartBaseP.checked        = hasNucAcid
     document.forms[0].chartSuite.checked        = hasNucAcid
 
@@ -176,6 +177,7 @@ Default options have been selected based on the content of the submitted file.
     <p><label><b>RNA</b></label>
     <br><label><input type='checkbox' name='kinBaseP' value='1'> RNA sugar pucker analysis</label> <a target="_blank" href="help/validation_options/validation_options.html#sugarpuckers"><img src="img/helplink.jpg" alt="" title="Sugar pucker help"></a>
     <br><label><input type='checkbox' name='kinSuite' value='1'> RNA backbone conformations</label> <a target="_blank" href="help/validation_options/validation_options.html#suites"><img src="img/helplink.jpg" alt="" title="Suite help"></a>
+    <br><label><input type='checkbox' name='kinSuiteHighD' value='1'> RNA backbone conformations high dimension kinemage</label> <a target="_blank" href="help/validation_options/validation_options.html#suites"><img src="img/helplink.jpg" alt="" title="Suite help"></a>
     <p><label><b>Other options</b></label>
     <br><label><input type='checkbox' name='kinForceViews' value='1'> Make views of trouble spots even if it takes longer</label>
     <br><label><input type='checkbox' name='kinAltConfs' value='1'> Alternate conformations</label>
@@ -273,6 +275,7 @@ function onRunAnalysis()
         if($req['kinRota'] || $req['chartRota'])    mpLog("aacgeom-rota:Doing rotamer analysis");
         if($req['kinCBdev'] || $req['chartCBdev'])  mpLog("aacgeom-cbdev:Doing C-beta deviation analysis");
         if($req['kinBaseP'] || $req['chartBaseP'])  mpLog("aacgeom-basep:Validating base-phosphate distances vs sugar puckers");
+        if($req['kinSuite'] || $req['kinSuiteHighD'] || $req['chartSuite'])  mpLog("aacgeom-suite:Validating RNA backbone conformations");
 
         // doMultiGraph hasn't been renamed to doCharts yet...
         if($req['doKinemage'])      mpLog("aacgeom-mkin:Multi-criterion validation kinemage");

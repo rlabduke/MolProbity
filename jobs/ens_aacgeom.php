@@ -99,6 +99,7 @@ if($opts['doEnsembleKinemage'])
         'omega'     =>  $opts['kinOmega'],
         'cablam'    =>  $opts['kinCablamLow'],
         'pperp'     =>  $opts['kinBaseP'],
+        'suites'    =>  $opts['kinSuite'],
         'clashdots' =>  $opts['kinClashes'],
         'hbdots'    =>  $opts['kinHbonds'],
         'vdwdots'   =>  $opts['kinContacts']
