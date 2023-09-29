@@ -27,7 +27,7 @@ convert_cif_to_pdb.py input_file_path.cif output_file_path.pdb
     pdb_text = m.model_as_pdb()
     with open(output_name, 'w') as f:
         f.write(pdb_text)
-  except Exception, e:
+  except Exception as e:
     print("Error converting %s to PDB format:" %file_name)
     print(" ", str(e))
 
