@@ -34,9 +34,7 @@ MolProbity.
 The MolProbity installation process is currently in flux.
 Currently we recommend obtaining the installation script on its own:
 
-svn --quiet --non-interactive --trust-server-cert export https://github.com/rlabduke/MolProbity.git/trunk/install_via_bootstrap.sh
-or
-wget https://github.com/rlabduke/MolProbity/blob/master/install_via_bootstrap.sh
+wget -O install_via_bootstrap.sh https://github.com/rlabduke/MolProbity/raw/master/install_via_bootstrap.sh
 
 Place this script at the top level of the directory where MolProbity is to be
 installed.
