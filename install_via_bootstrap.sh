@@ -30,22 +30,22 @@ cd modules
 if [ ! -d chem_data ]; then mkdir chem_data; fi
 
 cd chem_data
-svn --quiet --non-interactive --trust-server-cert co https://github.com/phenix-project/geostd/trunk geostd
-svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/mon_lib.git/trunk mon_lib
-svn --quiet --non-interactive --trust-server-cert export https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_rotamer_pct_contour_grids rotarama_data
-svn --quiet --non-interactive --trust-server-cert --force export https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_ramachandran_pct_contour_grids rotarama_data
-svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reference_data.git/trunk/Top8000/Top8000_cablam_pct_contour_grids cablam_data
-svn --quiet --non-interactive --trust-server-cert co https://github.com/rlabduke/reference_data.git/trunk/Top8000/rama_z rama_z
+git clone --depth 1 https://github.com/phenix-project/geostd.git
+git clone --depth 1 https://github.com/rlabduke/mon_lib.git
+git clone --depth 1 https://github.com/rlabduke/rotarama_data.git
+git clone --depth 1 https://github.com/rlabduke/cablam_data.git
+
+if [ ! -d rama_z ]; then mkdir rama_z; fi
+wget -O rama_z/top8000_rama_z_dict.pkl https://github.com/rlabduke/reference_data/raw/master/Top8000/rama_z/top8000_rama_z_dict.pkl
 
 #back to top
 cd ../..
 
-svn --quiet --non-interactive --trust-server-cert export https://github.com/cctbx/cctbx_project.git/trunk/libtbx/auto_build/bootstrap.py
+wget -O bootstrap.py https://github.com/cctbx/cctbx_project/raw/master/libtbx/auto_build/bootstrap.py
 
 python bootstrap.py --builder=molprobity --use-conda $nproc
 
 source build/setpaths.sh
-python modules/chem_data/cablam_data/rebuild_cablam_cache.py
 
 echo ++++++++++ MolProbity configure.sh finished.
 echo ++++++++++ Run molprobity/setup.sh to complete installation.
