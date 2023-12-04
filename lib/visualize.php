@@ -973,12 +973,12 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
           $entry .= "<tr><td colspan='3'>An error has occurred; clashscore should not be negative! Please report this bug.</td></tr>\n";
         } else {
           //$entry .= "<td>$clashPct[pct_rank]<sup>".ordinalSuffix($clashPct['pct_rank'])."</sup> percentile<sup>*</sup> (N=$clashPct[n_samples], $clashPct[minresol]&Aring; - $clashPct[maxresol]&Aring;)</td></tr>\n";
-          if (($clashPct[minresol] == 0) && ($clashPct[maxresol] == 9999)) {
+          if (($clashPct['minresol'] == 0) && ($clashPct['maxresol'] == 9999)) {
             $percentileOut = "all resolutions";
           } else {
-            $diff = $resolution - $clashPct[minresol];
+            $diff = $resolution - $clashPct['minresol'];
             //echo $diff." ".gettype($diff)." ";
-            $diff2 = -($resolution - $clashPct[maxresol]);
+            $diff2 = -($resolution - $clashPct['maxresol']);
             //echo $diff2." ".gettype($diff2)." ";
             //$test = ($diff2 > 0.245 && $diff2 < 0.255);
             //echo "diff2 = 0.25:".$test;
@@ -1105,11 +1105,11 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
             if ($mer == -1) {
               $entry .= "</td><td>unknown percentile<sup>*</sup> (N=$mer_pct[n_samples], $mer_pct[minresol]&Aring; - $mer_pct[maxresol]&Aring;)</td></tr>\n";
             } else {
-              if (($mer_pct[minresol] == 0) && ($mer_pct[maxresol] == 9999)) {
+              if (($mer_pct['minresol'] == 0) && ($mer_pct['maxresol'] == 9999)) {
                 $percentileOut = "all resolutions";
               } else {
-                $diff = $resolution - $mer_pct[minresol];
-                $diff2 = -($resolution - $mer_pct[maxresol]);
+                $diff = $resolution - $mer_pct['minresol'];
+                $diff2 = -($resolution - $mer_pct['maxresol']);
                 if (($diff > 0.245)&&($diff2 > 0.245)&&($diff < 0.255)&&($diff2 < 0.255)) {
                   $percentileOut = "$resolution&Aring; &plusmn; $diff&Aring;";
                 } else {
