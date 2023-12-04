@@ -230,7 +230,8 @@ These categories are general suggestions. Check your electron density; trust you
 """)
 
   contact_keys = water_contacts.keys()
-  contact_keys.sort(key=lambda c: (-1*cumulative_severity(c, water_contacts)))
+  contact_keys = sorted(contact_keys, key=lambda c: (-1*cumulative_severity(c, water_contacts)))
+  ##contact_keys.sort(key=lambda c: (-1*cumulative_severity(c, water_contacts)))
   #simple reverse sorting may put waters with the same cumulative severity in reverse sequence order
 
   row_number = 0
