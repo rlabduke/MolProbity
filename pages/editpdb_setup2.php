@@ -33,6 +33,17 @@ function display($context)
     
     echo "<h5 class='nospaceafter'>Remove unwanted chains:</h5>";
     echo "<div class='indent'>\n";
+
+    echo "<script language='Javascript'>";
+    echo "function toggle(source) {";
+    echo "  checkboxes = document.getElementsByName('removechain[]');";
+    echo "  for(var i=0, n=checkboxes.length;i<n;i++) {";
+    echo "    checkboxes[i].checked = source.checked;";
+    echo "  }";
+    echo "}";
+    echo "</script>";
+    echo "<input type='checkbox' onClick='toggle(this)' />Toggle all chains<br/><br/>";
+
     foreach($_SESSION['models'][$modelID]['stats']['chainids'] as $chainID)
     {
         echo "<input type='checkbox' name='removechain[]' value='$chainID'> Remove chain $chainID<br>\n";
