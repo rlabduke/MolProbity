@@ -799,12 +799,6 @@ function convertModelsToChains($infile)
 */
 function removeChains($inpath, $outpath, $idsToRemove)
 {
-    #$ids = "";
-    #foreach($idsToRemove as $id)
-    #{
-    #    if($id == '_') $id = ' ';
-    #    $ids .= $id;
-    #}
     $removeThis = "(";
     $additionalChains = false;
     foreach($idsToRemove as $id)
@@ -818,26 +812,7 @@ function removeChains($inpath, $outpath, $idsToRemove)
     }
     $removeThis .= ")";
 
-    #if(strlen($ids) == 0)
-    #{
-    #    copy($inpath, $outpath);
-    #    return;
-    #}
-
-    #$in = fopen($inpath, 'rb');
-    #$out = fopen($outpath, 'wb');
-    #exec("phenix.cbetadev $infile > $outfile");
     exec("phenix.pdbtools remove='$removeThis' $inpath output.filename=$outpath");
-    
-    #$regex = "/^(ATOM  |HETATM|TER   |ANISOU|SIGATM|SIGUIJ).{15}[$ids]/";
-    #while(!feof($in))
-    #{
-    #    $s = fgets($in, 4096);
-    #    if(! preg_match($regex, $s))
-    #        fwrite($out, $s);
-    #}
-    #fclose($out);
-    #fclose($in);
 }
 #}}}########################################################################
 
