@@ -39,10 +39,10 @@ The GitHub site is <a href='https://github.com/rlabduke/MolProbity' target="_bla
 <div align="center" style="font-size:20px">
 To build MolProbity from the latest version, first acquire the builder script:
 <br>
-svn --quiet --non-interactive --trust-server-cert export https://github.com/rlabduke/MolProbity.git/trunk/install_via_bootstrap.sh
+wget -O install_via_bootstrap.sh https://github.com/rlabduke/MolProbity/raw/master/install_via_bootstrap.sh
 <br><br>
-Run install_via_bootstrap.sh X inside the directory you want to serve as the top level for MolProbity,
-<br>where X is the number of processors to use during compiling. 4 is recommended.
+Run 'install_via_bootstrap.sh 4' inside the directory you want to serve as the top level for MolProbity,
+<br>'4' is the number of processors to use during compiling. You may change this value.
 <br><br>
 Run molprobity/setup.sh
 </div>
