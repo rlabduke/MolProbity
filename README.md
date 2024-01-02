@@ -2,6 +2,25 @@ Updated Jan 02 2024
 
 # Welcome to MolProbity!!
 
+##### Table of Contents
+- [Introduction](#introduction)
+- [1. System Preparation](#prepare)
+    - [a. Preliminaries](#preliminaries)
+    - [b. Installing PHP 5.6](#php5)
+    - [c. PHP Version Check](#phpcheck)
+    - [d. Configure Apache](#configureapache)
+- [2. MolProbity Installation](#install)
+    - [a. Acquiring MolProbity](#acquiremolprobity)
+    - [b. Run install_via_bootstrap.sh](#runbootstrap)
+    - [c. Run setup.sh to configure the webserver](#runsetup)
+- [3. Providing System or Local Webservice](#service)
+    - [a. Webservices](#webservice)
+    - [b. Webserver/PHP configuration](#phpconfig)
+
+
+<a name="introduction"></a>
+## Introduction
+
 MolProbity website source and installation instructions are provided with the
 cautionary restriction and explicit understanding that user deployment occur
 only on individual machines and restricted access private networks.
@@ -28,8 +47,9 @@ installation; and C. Providing system and local webservices. These notes
 are mostly specific to Linux Ubuntu/Debian systems but can be adapted to
 other platforms.
 
+<a name="prepare"></a>
 ## 1. System Preparation:
-
+<a name="preliminaries"></a>
 ### a. Preliminaries:
 
 Linux users should ensure that gawk is on a path that the
@@ -40,7 +60,7 @@ The build script will warn you about this if it fails for this reason.
 
 Mac users should know that the Xcode app and xcode commandline tools may be
 needed to install MolProbity.
-
+<a name="php5"></a>
 ### b. Installing PHP 5.6
 
 MolProbity requires the older 5.6 version of PHP to work.
@@ -60,12 +80,13 @@ php5.6-xmlrpc php5.6-xsl php5.6-zip php5.6-mbstring php5.6-soap
 php5.6-opcache libicu65 php5.6-common php5.6-json php5.6-readline
 php5.6-xml libapache2-mod-php5.6 php5.6-cli 
 ```
+<a name="phpcheck"></a>
+### c. PHP Version Check:
 
-### c. Check:
-
-php -v
+```
 php --version
-
+```
+<a name="configureapache"></a>
 ### d. Configure Apache
 ```
 sudo update-alternatives --config php
@@ -79,6 +100,7 @@ See
 
 https://vitux.com/how-to-install-php5-php8-on-ubuntu/
 
+<a name="install"></a>
 ## 2. MolProbity Installation:
 
 The MolProbity installation process is currently in flux. This is our
@@ -86,6 +108,7 @@ recommended protocol which starts with downloading our standalone
 installation script into an empty MolProbity directory specifically
 created for the installation.
 
+<a name="acquiremolprobity"></a>
 ### a. Acquiring MolProbity 
 
 First create the empty MolProbity directory (the directory that this
@@ -102,7 +125,7 @@ wget -O install_via_bootstrap.sh https://github.com/rlabduke/MolProbity/raw/mast
 Make sure that this script is at the top level of the directory where
 MolProbity is to be installed.
 
-
+<a name="runbootstrap"></a>
 ### b. Run install_via_bootstrap.sh. 
 ```
 ./install_via_bootstrap.sh
@@ -115,27 +138,39 @@ to use.  We recommend 4 if possible.
 This will install cctbx_project and the following needed buildlist components
 in MolProbity/modules:
 
-     annlib
-     annlib_adaptbx
-     cbflib
-     ccp4io
-     ccp4io_adaptbx
-     cctbx_project
-     chem_data
-     probe
-     reduce
-     tntbx
+> annlib
+> 
+> annlib_adaptbx
+> 
+> cbflib
+> 
+> ccp4io
+> 
+> ccp4io_adaptbx
+> 
+> cctbx_project
+> 
+> chem_data
+> 
+> probe
+> 
+> reduce
+> 
+> tntbx
 
 and then will compile and configure in MolProbity/build.
 
+<a name="runsetup"></a>
 ### c. Run setup.sh to configure the webserver.
 ```
 cd/molprobity
 ./setup.sh
 ```
 
+<a name="service"></a>
 ## 3. Providing System or Local Webservice
 
+<a name="webservice"></a>
 ### a. Webservices
 
 If setting up a webserver, make sure that the machine's Apache
@@ -164,6 +199,8 @@ MolProbity work and closing the browser, you can shut down the local userspace
 webservice by using a Ctl-C command to kill the process in the terminal
 where the command was invoked. 
 
+<a name="phpconfig"></a>
+
 ### b. Webserver/PHP configuration
 
 Finally it is very important to tweak webserver and PHP settings
@@ -181,6 +218,7 @@ e.g. /etc/php5/???/php.ini, but it will vary on different computers.
 Two such defaults are:
 
 `upload_max_filesize = 2M`
+
 `post_max_size = 8M`
 
 Something like 50M (for both) may be more appropriate.
