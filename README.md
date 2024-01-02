@@ -40,12 +40,12 @@ MolProbity installation is accomplished with a downloadable script which
 fetches required sources and data into a specifically created empty directory
 as opposed to cloning this repository. 
 
-We describe our installation recipe in three parts: A. System preparation
-(mostly installing php 5.6); B. Molprobity installation using our standalone
-script placed at the top of an empty directory created specifically for the
-installation; and C. Providing system and local webservices. These notes
-are mostly specific to Linux Ubuntu/Debian systems but can be adapted to
-other platforms.
+We describe our installation recipe in three parts:
+1. System preparation (mostly installing php 5.6)
+2. Molprobity installation using our standalone script placed at the top of
+an empty directory created specifically for the installation
+3. Providing system and local webservices. These notes are mostly specific
+to Linux Ubuntu/Debian systems but can be adapted to other platforms.
 
 <a name="prepare"></a>
 ## 1. System Preparation:
