@@ -1,6 +1,6 @@
 Updated Jan 02 2024
 
-Welcome to MolProbity!!
+# Welcome to MolProbity!!
 
 MolProbity website source and installation instructions are provided with the
 cautionary restriction and explicit understanding that user deployment occur
@@ -13,7 +13,6 @@ as a local app using a lightweight user based web server (such as
 php -S localhost:8000 provided with the php-cli package) as opposed to the
 systemwide web server (eg apache.)
 
-Installation
 Installation is fairly straightforward but will probably require some system
 administration background.  The most notable wrinkle is the need to install
 an older version of PHP (PHP5.6) as the default PHP interpreter.
@@ -29,9 +28,9 @@ installation; and C. Providing system and local webservices. These notes
 are mostly specific to Linux Ubuntu/Debian systems but can be adapted to
 other platforms.
 
-A. System Preparation:
+## 1. System Preparation:
 
-0. Preliminaries:
+### a. Preliminaries:
 
 Linux users should ensure that gawk is on a path that the
 server can read (gawk may need to be installed). Also, python-dev is a
@@ -42,48 +41,52 @@ The build script will warn you about this if it fails for this reason.
 Mac users should know that the Xcode app and xcode commandline tools may be
 needed to install MolProbity.
 
-a. Installing PHP 5.6
+### b. Installing PHP 5.6
 
 MolProbity requires the older 5.6 version of PHP to work.
 
+```
 apt-get install -y software-properties-common
 sudo add-apt-repository ppa:ondrej/php
 sudo apt update
 sudo apt upgrade
 sudo apt install -y php5.6
+```
 
+```
 apt-get install php5.6-gd php5.6-mysql php5.6-imap php5.6-curl
 php5.6-intl php5.6-pspell php5.6-recode php5.6-sqlite3 php5.6-tidy
 php5.6-xmlrpc php5.6-xsl php5.6-zip php5.6-mbstring php5.6-soap
 php5.6-opcache libicu65 php5.6-common php5.6-json php5.6-readline
 php5.6-xml libapache2-mod-php5.6 php5.6-cli 
+```
 
-b. Check:
+### c. Check:
 
 php -v
 php --version
 
-c. Configure Apache
-
+### d. Configure Apache
+```
 sudo update-alternatives --config php
-
+```
 or
-
+```
 sudo a2enmod php5.6
 sudo service apache2 restart
-
+```
 See
 
 https://vitux.com/how-to-install-php5-php8-on-ubuntu/
 
-B. MolProbity Installation:
+## 2. MolProbity Installation:
 
 The MolProbity installation process is currently in flux. This is our
 recommended protocol which starts with downloading our standalone
 installation script into an empty MolProbity directory specifically
 created for the installation.
 
-0. Acquiring MolProbity 
+### a. Acquiring MolProbity 
 
 First create the empty MolProbity directory (the directory that this
 README file will be in) to a location where you want it to reside.
@@ -93,22 +96,22 @@ interested in setting up a web service.
 Second, open a terminal and change into the empty MolProbity directory which you
 have just created. Download our installation script into your MolProbity
 directory with:
-
+```
 wget -O install_via_bootstrap.sh https://github.com/rlabduke/MolProbity/raw/master/install_via_bootstrap.sh
-
+```
 Make sure that this script is at the top level of the directory where
 MolProbity is to be installed.
 
 
-1. Run install_via_bootstrap.sh. 
-
->>> ./install_via_bootstrap.sh
-
+### b. Run install_via_bootstrap.sh. 
+```
+./install_via_bootstrap.sh
+```
 The script can accept a single integer argument to set the number of processors
 to use.  We recommend 4 if possible.
-
->>> ./install_via_bootstrap.sh 4
-
+```
+./install_via_bootstrap.sh 4
+```
 This will install cctbx_project and the following needed buildlist components
 in MolProbity/modules:
 
@@ -125,14 +128,15 @@ in MolProbity/modules:
 
 and then will compile and configure in MolProbity/build.
 
-2. Run setup.sh to configure the webserver.
+### c. Run setup.sh to configure the webserver.
+```
+cd/molprobity
+./setup.sh
+```
 
->>> cd/molprobity
->>> ./setup.sh
+## 3. Providing System or Local Webservice
 
-C. Providing System or Local Webservice
-
-0. Webservices
+### a. Webservices
 
 If setting up a webserver, make sure that the machine's Apache
 configuration can point to the MolProbity/public_html directory.
@@ -145,9 +149,9 @@ webserver like Apache to get MolProbity served as a website available
 only on your computer (via localhost). You will need to install
 php-cli or a similar package, then open a terminal in the MolProbity directory
 and run:
-
+```
 php -S localhost:8000
-
+```
 This starts up a local userspace webserver which will continue to run until
 its process is killed.
 
@@ -160,7 +164,7 @@ MolProbity work and closing the browser, you can shut down the local userspace
 webservice by using a Ctl-C command to kill the process in the terminal
 where the command was invoked. 
 
-1. Webserver/PHP configuration
+### b. Webserver/PHP configuration
 
 Finally it is very important to tweak webserver and PHP settings
 for proper operation. 
@@ -176,8 +180,8 @@ MolProbity performance.  The settings file is often called php.ini,
 e.g. /etc/php5/???/php.ini, but it will vary on different computers.
 Two such defaults are:
 
-upload_max_filesize = 2M
-post_max_size = 8M
+`upload_max_filesize = 2M`
+`post_max_size = 8M`
 
 Something like 50M (for both) may be more appropriate.
 
@@ -186,7 +190,7 @@ http://stackoverflow.com/questions/24377403/maximum-upload-size-in-php-and-apach
 http://stackoverflow.com/questions/2184513/php-change-the-maximum-upload-file-size
 
 It may also be appropriate to set the script memory limit, thus:
-memory_limit = 1280M
+`memory_limit = 1280M`
 
 We invite feedback on your experience with these instructions (and notes
 for different platforms) so they may be improved. Thank you for using
