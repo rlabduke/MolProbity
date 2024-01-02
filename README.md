@@ -215,13 +215,13 @@ same for a local PHP-CLI server.
 If that doesn't work, you may need to edit Apache settings for proper
 MolProbity performance.  The settings file is often called php.ini,
 e.g. /etc/php5/???/php.ini, but it will vary on different computers.
-Two such defaults are:
+We recommend setting at least:
 
-`upload_max_filesize = 2M`
+`upload_max_filesize = 50M`
 
-`post_max_size = 8M`
+`post_max_size = 50M`
 
-Something like 50M (for both) may be more appropriate.
+Values higher than 50M may be needed for unusually large files.
 
 An external explanation:
 http://stackoverflow.com/questions/24377403/maximum-upload-size-in-php-and-apache
