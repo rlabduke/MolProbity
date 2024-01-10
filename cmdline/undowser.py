@@ -192,7 +192,7 @@ A clashing HOH is very unlikely be be a real water, unless the clashing atom pos
 <br>
 <b>Clash with both polar and nonpolar</b> - HOH that clashes with both polar and non-polar groups is unlikely to be an ion. If clashes are severe, a displaced atom is likely. If clashes and map are weak, the HOH may be entirely removable.
 <br>
-<b>Clash with water</b> - HOH-HOH clashes may be real waters that need to be modeled as alternates of compatible occupancy. Or they may in the density of a sidechain alternate or a larger ligand.
+<b>Clash with water</b> - HOH-HOH clashes may be real waters that need to be modeled as alternates of compatible occupancy. Or they may be in the density of a sidechain alternate or a larger ligand.
 <br>
 <b>Clash with altloc</b> - HOH clashes involving one or more alternate conformations may be resolved by renaming some of the alternates.
 <br><br>
