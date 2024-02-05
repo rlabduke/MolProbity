@@ -27,6 +27,13 @@ else
     echo "config.php already exists; no changes made"
 fi
 
+# Create custom php.ini file
+if [ -f config/php.ini ]; then
+    cp config/php.ini /etc/php.ini
+    chown root:root /etc/php.ini
+    chmod 644 /etc/php.ini
+fi
+
 # Create ssh_grid_workers file
 if [ ! -f config/ssh_grid_workers.php ]; then
     cp config/ssh_grid_workers.php.sample config/ssh_grid_workers.php
@@ -34,23 +41,28 @@ else
     echo "ssh_grid_workers.php already exists; no changes made"
 fi
 
-# Set world-writable permisions on data/ and tmp/
+# Set permisions on data/ and tmp/
 echo ++++++++++ creating directories ...
 mkdir -p public_html/data
 mkdir -p public_html/data/tmp
 mkdir -p feedback
 mkdir -p tmp
 echo ++++++++++ setting permisions ...
-chmod 777 public_html/data
-chmod 777 public_html/data/tmp
-chmod 777 tmp/
+chown apache:apache public_html/data
+chmod 770 public_html/data
+chown apache:apache public_html/data/tmp
+chmod 770 public_html/data/tmp
+chmod 755 tmp/
 
-# Set world-writable permisions on feedback/
-chmod 777 feedback/
+# Set permisions on feedback/
+chown apache:apache feedback/
+chmod 770 feedback/
 touch feedback/molprobity.log
-chmod 666 feedback/molprobity.log
+chown apache:apache feedback/molprobity.log
+chmod 664 feedback/molprobity.log
 touch feedback/user_paths.log
-chmod 666 feedback/user_paths.log
+chown apache:apache feedback/user_paths.log
+chmod 664 feedback/user_paths.log
 
 # Create symlinks for executables
 cd bin
