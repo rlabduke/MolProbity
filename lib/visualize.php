@@ -1151,8 +1151,8 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
                 }
             }
             $geomOutPct = sprintf("%.2f", 100.0 * $outCount / $total);
-            if ($outCount/$total < 0.002)   $bg = $bgFair;
-            if ($outCount/$total < 0.0001)  $bg = $bgGood; //set based on 4sigma ~= 1 in 10000
+	    if ($outCount/$total < 0.0001)  $bg = $bgGood; //set based on 4sigma ~= 1 in 10000
+	    elseif ($outCount/$total < 0.002)   $bg = $bgFair;
             //if ($outCount/$total == 0.0)    $bg = $bgGood; //old bgGood cutoff, became problematic when we started counting every bond
             else                            $bg = $bgPoor;
             $entry .= "<td>Bad bonds:</td><td bgcolor='$bg'>$outCount / $total</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: 0%</td></tr>\n";
@@ -1173,8 +1173,8 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
                 }
             }
             $geomOutPct = sprintf("%.2f", 100.0 * $outCount / $total);
-            if ($outCount/$total < 0.005)    $bg = $bgFair;
             if ($outCount/$total < 0.001)    $bg = $bgGood;
+	    elseif ($outCount/$total < 0.005)    $bg = $bgFair;
             else                            $bg = $bgPoor;
             $entry .= "<td>Bad angles:</td><td bgcolor='$bg'>$outCount / $total</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: &lt;0.1%</td></tr>\n";
         }
@@ -1280,8 +1280,8 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
                 }
             }
             $geomOutPct = sprintf("%.2f", 100.0 * $outCount / $total);
-            if ($outCount/$total < 0.002)    $bg = $bgFair;
             if ($outCount/$total < 0.0001)   $bg = $bgGood; //set based on 4sigma inclusion
+	    elseif ($outCount/$total < 0.002)    $bg = $bgFair;
             //if ($outCount/$total < 0.000001)    $bg = $bgGood; //4sigma= 1 in 10,000=0.01%
             else                            $bg = $bgPoor;
             $entry .= "<td>Bad bonds:</td><td bgcolor='$bg'>$outCount / $total</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: 0%</td></tr>\n";
@@ -1302,8 +1302,8 @@ function makeSummaryStatsTable($resolution, $clash, $rama, $rota, $cbdev, $pperp
                 }
             }
             $geomOutPct = sprintf("%.2f", 100.0 * $outCount / $total);
-            if ($outCount/$total < 0.005)    $bg = $bgFair;
             if ($outCount/$total < 0.001)    $bg = $bgGood;
+            elseif ($outCount/$total < 0.005)    $bg = $bgFair;
             else                            $bg = $bgPoor;
             $entry .= "<td>Bad angles:</td><td bgcolor='$bg'>$outCount / $total</td><td bgcolor='$bg'>$geomOutPct%</td>\n<td>Goal: <0.1%</td></tr>\n";
         }
