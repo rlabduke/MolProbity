@@ -1,0 +1,11 @@
+MolProbity
+Copyright (c) 2001-2013 Ian W. Davis
+Copyright (c) 2001-2026 David C. Richardson, Jane S. Richardson, Vincent B. Chen, Christopher J. Williams, and contributors
+
+This product includes software developed in the Richardson Lab at
+Duke University (http://kinemage.biochem.duke.edu).
+
+Licensed under the Apache License, Version 2.0; see the LICENSE file.
+The lib/ directory bundles third-party libraries (for example PHPMailer,
+PDFBox, MySQL Connector/J) that carry their own licenses; see the notices
+in those files.

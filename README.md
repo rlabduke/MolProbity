@@ -233,3 +233,9 @@ It may also be appropriate to set the script memory limit, thus:
 We invite feedback on your experience with these instructions (and notes
 for different platforms) so they may be improved. Thank you for using
 MolProbity!
+
+## License
+
+Apache License 2.0; see [LICENSE](LICENSE) and [NOTICE](NOTICE). The lib/ directory bundles third-party libraries (for example PHPMailer, PDFBox, MySQL Connector/J) that carry their own licenses; see the notices in those files.
+
+MolProbity is the name of the Richardson Lab's structure validation service. Its authorized successor is MolProbity Next, maintained by Vincent Chen and hosted by Phenix, which carries the name forward. The Apache License does not grant permission to use that name (section 6), so please give other forks and derived tools a different name.
