@@ -34,7 +34,9 @@
 #   7/31/2007 - J Headd and R Immormino -    - fixed hydrogens on hets
 #  11/29/2007 - RMI            - updated for two character chains
 #  01/11/2014 - JJH            - changed to phenix.reduce and phenix.probe
+#  01/08/2017 - Jared Sampson  - added binary detection for reduce, probe and prekin
    use strict;
+   use File::Which;
 
    my $probe_chain_length = 1;
    my $isHis = 0;
@@ -89,6 +91,47 @@
       warn "      -db file    uses het dict in file\n";
       warn "      -limit#     limits number of permutations reduce searches\n";
       die "command line parameter error, stopped";
+   }
+
+
+   # -----------------------------------------------------------
+
+   # detect Reduce, Probe, and Prekin executables
+   my $reduce_cmd;
+   my $probe_cmd;
+   my $prekin_cmd;
+
+   # Reduce
+   if (which("reduce")) {
+       $reduce_cmd = "reduce";
+   }
+   elsif (which("phenix.reduce")) {
+       $reduce_cmd = "phenix.reduce";
+   }
+   else {
+      die "No reduce executable was found in the PATH. Please install reduce.";
+   }
+
+   # Probe
+   if (which("probe")) {
+       $probe_cmd = "probe";
+   }
+   elsif (which("phenix.probe")) {
+       $probe_cmd = "phenix.probe";
+   }
+   else {
+       die "No probe executable was found in the PATH. Please install probe.";
+   }
+
+   # Prekin
+   if (which("prekin")) {
+       $prekin_cmd = "prekin";
+   }
+   elsif (which("phenix.prekin")) {
+       $prekin_cmd = "phenix.prekin";
+   }
+   else {
+       die "No prekin executable was found in the PATH. Please install prekin.";
    }
 
    # -----------------------------------------------------------
@@ -268,12 +311,12 @@
 
    my $runReduce;
    if ($nuclear) {
-     $runReduce = "phenix.reduce -quiet -trim $redpdb | " .
-                    "phenix.reduce $verb $limitFlag $dbFile -build -nuclear -fix $fixFile - > $flipdb";
+     $runReduce = "$reduce_cmd -quiet -trim $redpdb | " .
+                    "$reduce_cmd $verb $limitFlag $dbFile -build -nuclear -fix $fixFile - > $flipdb";
    }
    else {
-     $runReduce = "phenix.reduce -quiet -trim $redpdb | " .
-                    "phenix.reduce $verb $limitFlag $dbFile -build -fix $fixFile - > $flipdb";
+     $runReduce = "$reduce_cmd -quiet -trim $redpdb | " .
+                    "$reduce_cmd $verb $limitFlag $dbFile -build -fix $fixFile - > $flipdb";
    }
    my $rc = system($runReduce);
 
@@ -452,10 +495,10 @@
 
    unlink($kintmp);
    if ($segid) {
-     $pkin = "prekin -append -segid -in $redpdb -out $kintmp -scope -bval";
+     $pkin = "$prekin_cmd -append -segid -in $redpdb -out $kintmp -scope -bval";
    }
    else {
-     $pkin = "prekin -append -in $redpdb -out $kintmp -scope -bval";
+     $pkin = "$prekin_cmd -append -in $redpdb -out $kintmp -scope -bval";
    }
    system("$pkin -show \"mc(white),hy(gray)\"");
    system("$pkin -show \"sc(cyan),hy(gray)\" " .
@@ -477,10 +520,10 @@
    unlink($kintmp);
 
    if ($segid) {
-     $pkin = "prekin -append -segid -in $redpdb -out $kintmp -scope -bval";
+     $pkin = "$prekin_cmd -append -segid -in $redpdb -out $kintmp -scope -bval";
    }
    else {
-     $pkin = "prekin -append -in $redpdb -out $kintmp -scope -bval";
+     $pkin = "$prekin_cmd -append -in $redpdb -out $kintmp -scope -bval";
    }
    if ($nuclear) {
      $probeParams = "-dens12 -lens -nogroup -3 -q -wat -het -both -nuclear";
@@ -494,7 +537,7 @@
    system("echo \"\@group \{movable\}\" >> $kintmp");
    system("$pkin -show \"sc(cyan),hy(gray)\" -sc \"cys,ser,thr,${nselSC},lys,met,tyr\"");
    system("echo \"\@group \{contacts\}\" >> $kintmp");
-   system("phenix.probe $probeParams " .
+   system("$probe_cmd $probeParams " .
          "\"${prbSC} sc alta ogt1 not (beta,atom1HG_,atom2HG_,atom3HG_)\" " .
          "\"not water alta ogt1 | water alta blt40 ogt66\" $redpdb >> $kintmp");
 
@@ -514,10 +557,10 @@
    unlink($kintmp);
 
    if ($segid) {
-     $pkin = "prekin -append -segid -in $flipdb -out $kintmp -scope -bval -code \"$fileID\"";
+     $pkin = "$prekin_cmd -append -segid -in $flipdb -out $kintmp -scope -bval -code \"$fileID\"";
    }
    else {
-     $pkin = "prekin -append -in $flipdb -out $kintmp -scope -bval -code \"$fileID\"";
+     $pkin = "$prekin_cmd -append -in $flipdb -out $kintmp -scope -bval -code \"$fileID\"";
    }
    if ($nuclear) {
      $probeParams = "-dens12 -lens -nogroup -3 -q -wat -het -both -nuclear";
@@ -531,7 +574,7 @@
    system("echo \"\@group \{movable\}\" >> $kintmp");
    system("$pkin -show \"sc(cyan),hy(gray)\" -sc \"cys,ser,thr,${nselSC},lys,met,tyr\"");
    system("echo \"\@group \{contacts\}\" >> $kintmp");
-   system("phenix.probe $probeParams " .
+   system("$probe_cmd $probeParams " .
          "\"${prbSC} sc alta ogt1 not (beta,atom1HG_,atom2HG_,atom3HG_)\" " .
          "\"not water alta ogt1 | water alta blt40 ogt66\" $flipdb >> $kintmp");
 
